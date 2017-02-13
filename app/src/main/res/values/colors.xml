@@ -5,6 +5,8 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="grey">#a2a2a2</color>
 
     <color name="intro_dot_dark">#1c4897</color>
     <color name="intro_dot_light">#9dbffc</color>
