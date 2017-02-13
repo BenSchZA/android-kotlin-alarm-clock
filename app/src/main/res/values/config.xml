@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="preferences_key">rooster_preferences</string>
+    <string name="preferences_intro_viewed">intro_viewed</string>
+</resources>
