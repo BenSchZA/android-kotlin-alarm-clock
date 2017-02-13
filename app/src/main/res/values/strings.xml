@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Rooster Mornings</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="action_settings">Settings</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+    <string name="splash_greeting">Make your mornings epic!</string>
+
+
+    <string name="intro_screen1_blurb">Wake up to personal audio messages from your friends and loved ones.</string>
+    <string name="intro_screen2_blurb">Subscribe to content channels for daily inspiration, jokes and more!</string>
+    <string name="intro_get_started">Get started</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+
+</resources>

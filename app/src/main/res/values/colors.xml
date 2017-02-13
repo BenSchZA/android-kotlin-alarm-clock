@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#2C77FD</color>
+    <color name="themePrimary">#2C77FD</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="white">#FFFFFF</color>
+
+    <color name="intro_dot_dark">#1c4897</color>
+    <color name="intro_dot_light">#9dbffc</color>
+
+    <color name="black_overlay">#66000000</color>
+</resources>
