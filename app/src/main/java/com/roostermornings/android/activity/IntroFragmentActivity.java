@@ -13,13 +13,14 @@ import android.os.Bundle;
 import com.roostermornings.android.R;
 import com.roostermornings.android.fragment.IntroFragment1;
 import com.roostermornings.android.fragment.IntroFragment2;
+import com.roostermornings.android.fragment.IntroFragment3;
 import com.roostermornings.android.util.DepthPageTransformer;
 
 public class IntroFragmentActivity extends FragmentActivity {
     /**
      * The number of pages (wizard steps) to show in this demo.
      */
-    private static final int NUM_PAGES = 2;
+    private static final int NUM_PAGES = 3;
 
     /**
      * The pager widget, which handles animation and allows swiping horizontally to access previous
@@ -78,6 +79,9 @@ public class IntroFragmentActivity extends FragmentActivity {
                     break;
                 case 1:
                     fragment = new IntroFragment2();
+                    break;
+                case 2:
+                    fragment = new IntroFragment3();
                     break;
             }
 
