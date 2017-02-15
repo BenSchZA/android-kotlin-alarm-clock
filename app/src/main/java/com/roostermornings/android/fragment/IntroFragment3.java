@@ -1,8 +1,6 @@
 package com.roostermornings.android.fragment;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +11,7 @@ import android.widget.EditText;
 import com.mobsandgeeks.saripaar.Validator;
 import com.mobsandgeeks.saripaar.annotation.NotEmpty;
 import com.roostermornings.android.R;
+import com.roostermornings.android.fragment.base.BaseFragment;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -38,8 +37,7 @@ public class IntroFragment3 extends BaseFragment {
                              Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_intro_fragment3, container, false);
-        ButterKnife.bind(this, view);
+        View view = initiate(inflater, R.layout.fragment_intro_fragment3, container, false);
 
         //instantiate saripaar validator to validate fields with NotEmpty annotations
         validator = new Validator(this);

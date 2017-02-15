@@ -1,5 +1,6 @@
 package com.roostermornings.android.dagger;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 
 import javax.inject.Singleton;
@@ -44,7 +45,7 @@ public class RoosterApplicationModule {
     @Singleton
     public SharedPreferences provideSharedPreferences() {
         return baseApplication.getSharedPreferences(baseApplication.getString(R.string.preferences_key),
-                baseApplication.MODE_PRIVATE);
+                Context.MODE_PRIVATE);
     }
 }
 

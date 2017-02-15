@@ -17,6 +17,8 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.mobsandgeeks.saripaar.ValidationError;
 import com.mobsandgeeks.saripaar.Validator;
 
@@ -36,6 +38,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     protected FirebaseAuth mAuth;
     protected FirebaseAuth.AuthStateListener mAuthListener;
     private static final String TAG = BaseActivity.class.getSimpleName();
+    protected DatabaseReference mDatabase;
 
     @Inject
     protected SharedPreferences sharedPreferences;
@@ -48,6 +51,9 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
 
         //inject Dagger dependencies
         baseApplication.getRoosterApplicationComponent().inject(this);
+
+        //get reference to Firebase database
+        mDatabase = FirebaseDatabase.getInstance().getReference();
 
         // [START auth_state_listener]
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -77,7 +83,6 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         //Bind to butterknife delegate
         //Calls to ButterKnife.bind can be made anywhere you would otherwise put findViewById calls.
         ButterKnife.bind(this);
-
 
     }
 

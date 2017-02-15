@@ -2,14 +2,12 @@ package com.roostermornings.android.dagger;
 
 import android.content.SharedPreferences;
 
-import java.text.SimpleDateFormat;
-
 import javax.inject.Singleton;
 
 import dagger.Component;
 
 import com.roostermornings.android.activity.base.BaseActivity;
-import com.roostermornings.android.fragment.BaseFragment;
+import com.roostermornings.android.fragment.base.BaseFragment;
 
 /**
  * Annotates an interface or abstract class for which a fully-formed, dependency-injected implementation
