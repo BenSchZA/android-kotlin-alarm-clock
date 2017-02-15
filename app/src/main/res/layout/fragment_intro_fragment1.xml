@@ -18,14 +18,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
             android:gravity="center_horizontal"
+            android:layout_marginBottom="@dimen/spacing_large"
             android:orientation="vertical">
 
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/logo" />
+                android:layout_width="300dp"
+                android:layout_height="300dp"
+                android:src="@drawable/rooster_wakeup" />
 
         </LinearLayout>
 
@@ -40,7 +40,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:padding="@dimen/spacing_xxlarge"
+                android:padding="@dimen/spacing_large"
                 android:text="@string/intro_screen1_blurb"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/intro_slide_title"
