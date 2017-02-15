@@ -1,8 +1,12 @@
 package com.roostermornings.android;
 
 import android.app.Application;
+import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.roostermornings.android.dagger.RoosterApplicationModule;
 
 import io.fabric.sdk.android.Fabric;
@@ -14,6 +18,7 @@ import com.roostermornings.android.dagger.RoosterApplicationModule;
 public class BaseApplication extends android.app.Application {
 
     private static final String TAG = "BaseApplication";
+
 
     RoosterApplicationComponent roosterApplicationComponent;
 
@@ -34,7 +39,6 @@ public class BaseApplication extends android.app.Application {
                 .builder()
                 .roosterApplicationModule(new RoosterApplicationModule(this))
                 .build();
-
     }
 
     public RoosterApplicationComponent getRoosterApplicationComponent() {

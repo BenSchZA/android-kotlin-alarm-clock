@@ -78,7 +78,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         //Calls to ButterKnife.bind can be made anywhere you would otherwise put findViewById calls.
         ButterKnife.bind(this);
 
-        mAuth = FirebaseAuth.getInstance();
+
     }
 
     protected FirebaseUser getFirebaseUser() {
@@ -89,6 +89,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     @Override
     public void onStart() {
         super.onStart();
+        if (mAuth == null) mAuth = FirebaseAuth.getInstance();
         mAuth.addAuthStateListener(mAuthListener);
     }
 

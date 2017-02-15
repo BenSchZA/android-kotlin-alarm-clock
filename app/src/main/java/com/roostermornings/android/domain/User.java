@@ -23,7 +23,7 @@ public class User {
     public User() {
     }
 
-    User(ArrayList<Boolean> channels,
+    public User(ArrayList<Boolean> channels,
          String device_type,
          String device_token,
          String profile_pic,

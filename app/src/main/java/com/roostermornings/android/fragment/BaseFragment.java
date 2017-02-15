@@ -13,6 +13,8 @@ import javax.inject.Inject;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.activity.base.BaseActivity;
 
+import butterknife.ButterKnife;
+
 public class BaseFragment extends Fragment implements Validator.ValidationListener {
 
     @Override
@@ -20,6 +22,7 @@ public class BaseFragment extends Fragment implements Validator.ValidationListen
         super.onCreate(savedInstanceState);
 
         ((BaseApplication) getActivity().getApplication()).getRoosterApplicationComponent().inject(this);
+
     }
 
     @Override
