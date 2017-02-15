@@ -22,6 +22,8 @@
     <dimen name="spacing_small">4dp</dimen>
     <dimen name="spacing_xsmall">2dp</dimen>
 
+    <dimen name="input_width_large">260dp</dimen>
+
     <dimen name="intro_dots_height">30dp</dimen>
     <dimen name="intro_dots_margin_bottom">20dp</dimen>
     <dimen name="intro_slide_title">20dp</dimen>
