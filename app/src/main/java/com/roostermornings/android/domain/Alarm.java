@@ -9,7 +9,7 @@ import com.google.firebase.database.IgnoreExtraProperties;
 @IgnoreExtraProperties
 public class Alarm {
 
-    private String channel;
+    private AlarmChannel channel;
     private boolean monday;
     private boolean tuesday;
     private boolean wednesday;
@@ -26,7 +26,7 @@ public class Alarm {
     public Alarm() {
     }
 
-    public Alarm(String channel, boolean monday, boolean tuesday, boolean wednesday,
+    public Alarm(AlarmChannel channel, boolean monday, boolean tuesday, boolean wednesday,
                  boolean thursday, boolean friday, boolean saturday, boolean
                          sunday, int hour, int minute, boolean recurring) {
         this.channel = channel;
@@ -42,11 +42,11 @@ public class Alarm {
         this.recurring = recurring;
     }
 
-    public String getChannel() {
+    public AlarmChannel getChannel() {
         return channel;
     }
 
-    public void setChannel(String channel) {
+    public void setChannel(AlarmChannel channel) {
         this.channel = channel;
     }
 

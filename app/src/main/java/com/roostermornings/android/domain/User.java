@@ -8,7 +8,7 @@ import java.util.HashMap;
 @IgnoreExtraProperties
 public class User {
 
-    private ArrayList<Boolean> channels;
+    private HashMap<String, Boolean> channels;
     private String device_type;
     private String device_token;
     private String profile_pic;
@@ -23,7 +23,7 @@ public class User {
     public User() {
     }
 
-    public User(ArrayList<Boolean> channels,
+    public User(HashMap<String, Boolean> channels,
          String device_type,
          String device_token,
          String profile_pic,
@@ -43,11 +43,11 @@ public class User {
         this.friends = friends;
     }
 
-    public ArrayList<Boolean> getChannels() {
+    public HashMap<String, Boolean> getChannels() {
         return channels;
     }
 
-    public void setChannels(ArrayList<Boolean> channels) {
+    public void setChannels(HashMap<String, Boolean> channels) {
         this.channels = channels;
     }
 

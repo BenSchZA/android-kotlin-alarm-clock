@@ -89,9 +89,6 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
 
-                            // If sign in fails, display a message to the user. If sign in succeeds
-                            // the auth state listener will be notified and logic to handle the
-                            // signed in user can be handled in the listener.
                             if (!task.isSuccessful()) {
 
                                 Toast.makeText(SignupEmailActivity.this, R.string.signup_auth_failed,
@@ -103,10 +100,7 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
                                 database.getReference(String.format("users/%s/device_type", mAuth.getCurrentUser().getUid())).setValue("android");
                                 database.getReference(String.format("users/%s/device_token", mAuth.getCurrentUser().getUid())).setValue(deviceToken);
 
-                                Intent intent = new Intent(SignupEmailActivity.this, MainActivity.class);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                startActivity(intent);
-                                finish();
+                                proceedToMyAlarmsActivity();
                             }
                         }
                     });
@@ -140,10 +134,7 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
                                 database.getReference(String.format("users/%s",
                                         mAuth.getCurrentUser().getUid())).setValue(user);
 
-                                Intent intent = new Intent(SignupEmailActivity.this, MainActivity.class);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                startActivity(intent);
-                                finish();
+                                proceedToMyAlarmsActivity();
 
                             }
 
@@ -152,5 +143,12 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
         }
 
 
+    }
+
+    private void proceedToMyAlarmsActivity() {
+        Intent intent = new Intent(SignupEmailActivity.this, MyAlarmsActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 }

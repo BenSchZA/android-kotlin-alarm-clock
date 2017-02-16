@@ -1,0 +1,8 @@
+<layer-list
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+    <item
+        android:drawable="@drawable/main_background_top"
+        android:id="@+id/top_gradient"
+        />
+</layer-list>

@@ -69,7 +69,7 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
 
         holder.txtAlarmTime.setText(RoosterUtils.getAlarmTimeFromHourAndMinute(mDataset.get(position)));
         holder.txtAlarmDays.setText(RoosterUtils.getAlarmDays(mDataset.get(position)));
-        holder.txtAlarmChannel.setText(mDataset.get(position).getChannel());
+        holder.txtAlarmChannel.setText(mDataset.get(position).getChannel().getName());
     }
 
     // Return the size of your dataset (invoked by the layout manager)
