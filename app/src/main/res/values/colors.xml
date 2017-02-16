@@ -5,6 +5,7 @@
     <color name="accent">#cadcfd</color>
     <color name="normal">#90B7FD</color>
     <color name="white">#FFFFFF</color>
+    <color name="white_transparent">#99FFFFFF</color>
     <color name="black">#000000</color>
     <color name="grey">#a2a2a2</color>
 

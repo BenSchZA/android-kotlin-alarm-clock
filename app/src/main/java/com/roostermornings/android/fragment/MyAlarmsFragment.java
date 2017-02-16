@@ -93,7 +93,8 @@ public class MyAlarmsFragment extends BaseFragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    Alarm alarm = dataSnapshot.getValue(Alarm.class);
+                    Object test = postSnapshot.getValue();
+                    Alarm alarm = postSnapshot.getValue(Alarm.class);
                     alarms.add(alarm);
                     mAdapter.notifyDataSetChanged();
                 }
