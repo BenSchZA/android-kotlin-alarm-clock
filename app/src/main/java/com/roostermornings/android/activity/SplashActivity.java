@@ -45,7 +45,7 @@ public class SplashActivity extends BaseActivity {
 
                 } else {
 
-                    navigateToActivity(MainActivity.class);
+                    navigateToActivity(MyAlarmsActivity.class);
                 }
 
             }

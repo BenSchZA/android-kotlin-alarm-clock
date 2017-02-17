@@ -14,7 +14,6 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.fragment.base.BaseFragment;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 
@@ -29,7 +28,7 @@ public class IntroFragment3 extends BaseFragment {
 
     Validator validator;
 
-    OnMobileNumberSetListener mListener;
+    IMobileNumberSetListener mListener;
 
 
     @Override
@@ -50,8 +49,8 @@ public class IntroFragment3 extends BaseFragment {
     public void onAttach(Context context) {
 
         super.onAttach(context);
-        if (context instanceof OnMobileNumberSetListener) {
-            mListener = (OnMobileNumberSetListener) context;
+        if (context instanceof IMobileNumberSetListener) {
+            mListener = (IMobileNumberSetListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");

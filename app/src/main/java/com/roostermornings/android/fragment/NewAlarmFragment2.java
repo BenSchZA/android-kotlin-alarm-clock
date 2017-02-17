@@ -1,9 +1,7 @@
 package com.roostermornings.android.fragment;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -18,44 +16,39 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.roostermornings.android.R;
-import com.roostermornings.android.adapter.MyAlarmsListAdapter;
+import com.roostermornings.android.adapter.ChannelsListAdapter;
 import com.roostermornings.android.domain.Alarm;
+import com.roostermornings.android.domain.AlarmChannel;
+import com.roostermornings.android.domain.Channel;
 import com.roostermornings.android.fragment.base.BaseFragment;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import butterknife.BindView;
 
 
-public class MyAlarmsFragment extends BaseFragment {
+public class NewAlarmFragment2 extends BaseFragment {
 
     private static final String ARG_USER_UID_PARAM = "user_uid_param";
-    public static final String TAG = MyAlarmsFragment.class.getSimpleName();
+    public static final String TAG = NewAlarmFragment2.class.getSimpleName();
     private String mUserUidParam;
-    private OnMyAlarmsFragmentInteractionListener mListener;
-    private DatabaseReference mMyAlarmsReference;
-    private ArrayList<Alarm> alarms = new ArrayList<Alarm>();
+    private IAlarmSetListener mListener;
 
-    @BindView(R.id.alarmsListView)
+    private DatabaseReference mChannelsReference;
+    private ArrayList<Channel> channels = new ArrayList<Channel>();
+
+    @BindView(R.id.channelsListView)
     RecyclerView mRecyclerView;
 
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
-    public MyAlarmsFragment() {
+    public NewAlarmFragment2() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @return A new instance of fragment MyAlarmsFragment.
-     */
-    public static MyAlarmsFragment newInstance(String param1) {
-        MyAlarmsFragment fragment = new MyAlarmsFragment();
+    public static NewAlarmFragment2 newInstance(String param1) {
+        NewAlarmFragment2 fragment = new NewAlarmFragment2();
         Bundle args = new Bundle();
         args.putString(ARG_USER_UID_PARAM, param1);
         fragment.setArguments(args);
@@ -68,23 +61,24 @@ public class MyAlarmsFragment extends BaseFragment {
         if (getArguments() != null) {
             mUserUidParam = getArguments().getString(ARG_USER_UID_PARAM);
         }
-        mMyAlarmsReference = FirebaseDatabase.getInstance().getReference()
-                .child("alarms").child(mUserUidParam);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View view = initiate(inflater, R.layout.fragment_my_alarms, container, false);
+        View view = initiate(inflater, R.layout.fragment_new_alarm_fragment2, container, false);
+
+        mChannelsReference = FirebaseDatabase.getInstance().getReference()
+                .child("channels");
 
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
         mRecyclerView.setHasFixedSize(true);
-        mAdapter = new MyAlarmsListAdapter(alarms);
+        mAdapter = new ChannelsListAdapter(channels, NewAlarmFragment2.this);
 
         // use a linear layout manager
-        mLayoutManager = new LinearLayoutManager(getContext());
+        mLayoutManager = new LinearLayoutManager(this.getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mAdapter);
 
@@ -93,9 +87,9 @@ public class MyAlarmsFragment extends BaseFragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    Object test = postSnapshot.getValue();
-                    Alarm alarm = postSnapshot.getValue(Alarm.class);
-                    alarms.add(alarm);
+                    Channel channel = postSnapshot.getValue(Channel.class);
+                    channel.setSelected(false);
+                    channels.add(channel);
                     mAdapter.notifyDataSetChanged();
                 }
 
@@ -109,7 +103,7 @@ public class MyAlarmsFragment extends BaseFragment {
             }
         };
 
-        mMyAlarmsReference.addValueEventListener(alarmsListener);
+        mChannelsReference.addValueEventListener(alarmsListener);
 
         return view;
 
@@ -119,11 +113,11 @@ public class MyAlarmsFragment extends BaseFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnMyAlarmsFragmentInteractionListener) {
-            mListener = (OnMyAlarmsFragmentInteractionListener) context;
+        if (context instanceof IAlarmSetListener) {
+            mListener = (IAlarmSetListener) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement IAlarmSetListener");
         }
 
     }
@@ -134,7 +128,13 @@ public class MyAlarmsFragment extends BaseFragment {
         mListener = null;
     }
 
-    public interface OnMyAlarmsFragmentInteractionListener {
-        //void onFragmentInteraction(Uri uri);
+    public void setSelectedChannel(Channel channel) {
+
+        Alarm alarm = mListener.getAlarmDetails();
+        alarm.setChannel(new AlarmChannel(channel.getName(), channel.getId()));
+        mListener.setAlarmDetails(alarm);
+
     }
+
+
 }

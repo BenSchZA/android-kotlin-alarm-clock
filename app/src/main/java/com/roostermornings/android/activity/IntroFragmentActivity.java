@@ -1,11 +1,9 @@
 package com.roostermornings.android.activity;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -15,10 +13,10 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.fragment.IntroFragment1;
 import com.roostermornings.android.fragment.IntroFragment2;
 import com.roostermornings.android.fragment.IntroFragment3;
-import com.roostermornings.android.fragment.OnMobileNumberSetListener;
+import com.roostermornings.android.fragment.IMobileNumberSetListener;
 import com.roostermornings.android.util.DepthPageTransformer;
 
-public class IntroFragmentActivity extends FragmentActivity implements OnMobileNumberSetListener {
+public class IntroFragmentActivity extends FragmentActivity implements IMobileNumberSetListener {
     /**
      * The number of pages (wizard steps) to show in this demo.
      */
@@ -68,10 +66,6 @@ public class IntroFragmentActivity extends FragmentActivity implements OnMobileN
 
     }
 
-    /**
-     * A simple pager adapter that represents 5 ScreenSlidePageFragment objects, in
-     * sequence.
-     */
     private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
         public ScreenSlidePagerAdapter(FragmentManager fm) {
             super(fm);
