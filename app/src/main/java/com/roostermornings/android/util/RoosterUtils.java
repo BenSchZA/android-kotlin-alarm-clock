@@ -11,7 +11,7 @@ import java.util.List;
 
 public class RoosterUtils {
 
-    public static String getAlarmTimeFromHourAndMinute(Alarm alarm) {
+    public static String setAlarmTimeFromHourAndMinute(Alarm alarm) {
 
         String alarmHour = (alarm.getHour() < 10 ? "0" : "") + alarm.getHour();
         String alarmMinute = (alarm.getMinute() < 10 ? "0" : "") + alarm.getMinute();

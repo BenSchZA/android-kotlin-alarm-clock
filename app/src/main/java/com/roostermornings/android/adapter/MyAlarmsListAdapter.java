@@ -1,10 +1,10 @@
 package com.roostermornings.android.adapter;
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.roostermornings.android.R;
@@ -67,7 +67,7 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
         // - replace the contents of the view with that element
         final Alarm alarm = mDataset.get(position);
 
-        holder.txtAlarmTime.setText(RoosterUtils.getAlarmTimeFromHourAndMinute(mDataset.get(position)));
+        holder.txtAlarmTime.setText(RoosterUtils.setAlarmTimeFromHourAndMinute(mDataset.get(position)));
         holder.txtAlarmDays.setText(RoosterUtils.getAlarmDays(mDataset.get(position)));
         holder.txtAlarmChannel.setText(mDataset.get(position).getChannel().getName());
     }

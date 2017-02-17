@@ -37,4 +37,6 @@ public class AlarmChannel {
     public void setName(String name) {
         this.name = name;
     }
+
+
 }

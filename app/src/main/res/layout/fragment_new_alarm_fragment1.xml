@@ -1,0 +1,205 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:background="@drawable/main_background_layer_list"
+    android:orientation="vertical"
+    tools:context="com.roostermornings.android.fragment.NewAlarmFragment1">
+
+    <TextView
+        android:id="@+id/new_alarm_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_xxlarge"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_horizontal"
+        android:text="Create an alarm"
+        android:textColor="@drawable/rooster_link_white"
+        android:textSize="@dimen/text_xlarge" />
+
+
+    <TextView
+        android:id="@+id/new_alarm_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_xxlarge"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_horizontal"
+        android:text="08:00"
+        android:textColor="@drawable/rooster_link_white"
+        android:textSize="@dimen/text_huge" />
+
+    <View
+        android:layout_marginTop="@dimen/spacing_large"
+        android:layout_height="1dp"
+        android:background="@color/white"
+        android:layout_width="match_parent"></View>
+
+    <Switch
+        android:id="@+id/new_alarm_fragment1_switch_audio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:paddingLeft="@dimen/spacing_normal"
+        android:paddingRight="@dimen/spacing_large"
+        android:textColor="@drawable/rooster_link_white"
+        android:textSize="@dimen/text_large"
+        android:padding="@dimen/spacing_large"
+        android:text="Allow friends to send audio notes to this alarm." />
+
+    <View
+        android:layout_height="1dp"
+        android:background="@color/white"
+        android:layout_width="match_parent"></View>
+
+    <Switch
+        android:id="@+id/new_alarm_fragment1_switch_recurring"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:paddingLeft="@dimen/spacing_normal"
+        android:paddingRight="@dimen/spacing_large"
+        android:textColor="@drawable/rooster_link_white"
+        android:textSize="@dimen/text_large"
+        android:padding="@dimen/spacing_large"
+        android:text="Repeat alarm" />
+
+
+    <LinearLayout
+        android:visibility="gone"
+        android:id="@+id/days_parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="@dimen/spacing_xxlarge">
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:clickable="true">
+
+            <TextView
+                android:id="@+id/new_alarm_fragment1_alarm_day_mon"
+                style="@style/AlarmDayCircle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:clickable="true"
+                android:tag="1"
+                android:text="M" />
+
+
+        </FrameLayout>
+
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:clickable="true">
+
+            <TextView
+                android:id="@+id/new_alarm_fragment1_alarm_day_tue"
+                style="@style/AlarmDayCircle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:clickable="true"
+                android:tag="2"
+                android:text="T" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:clickable="true">
+
+            <TextView
+                android:id="@+id/new_alarm_fragment1_alarm_day_wed"
+                style="@style/AlarmDayCircle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:clickable="true"
+                android:tag="3"
+                android:text="W" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:clickable="true">
+
+            <TextView
+                android:id="@+id/new_alarm_fragment1_alarm_day_thu"
+                style="@style/AlarmDayCircle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:clickable="true"
+                android:tag="4"
+                android:text="T" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:clickable="true">
+
+            <TextView
+                android:id="@+id/new_alarm_fragment1_alarm_day_fri"
+                style="@style/AlarmDayCircle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:clickable="true"
+                android:tag="5"
+                android:text="F" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:clickable="true">
+
+            <TextView
+                android:id="@+id/new_alarm_fragment1_alarm_day_sat"
+                style="@style/AlarmDayCircle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:clickable="true"
+                android:tag="6"
+                android:text="S" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:clickable="true">
+
+            <TextView
+                android:id="@+id/new_alarm_fragment1_alarm_day_sun"
+                style="@style/AlarmDayCircle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:clickable="true"
+                android:tag="7"
+                android:text="S" />
+        </FrameLayout>
+
+
+    </LinearLayout>
+
+</LinearLayout>

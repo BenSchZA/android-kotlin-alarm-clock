@@ -31,25 +31,31 @@
             android:name=".activity.IntroFragmentActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme.NoActionBarIntro" />
         <activity
             android:name=".activity.SignInActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBarIntro" />
         <activity
             android:name=".activity.SignupEmailActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".activity.MainActivity"
-            android:label="@string/app_name" />
+            android:theme="@style/AppTheme.NoActionBarIntro" />
         <activity
             android:name=".activity.MyAlarmsActivity"
-            android:label=""
-            android:theme="@style/AppTheme"
-            ></activity>
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".activity.NewAlarmFragmentActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="Create Alarm"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".activity.NewAudioActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="Record Audio"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

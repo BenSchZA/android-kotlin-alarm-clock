@@ -2,6 +2,7 @@ package com.roostermornings.android.domain;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -10,7 +11,7 @@ import java.util.HashMap;
  */
 
 @IgnoreExtraProperties
-public class Channel {
+public class Channel implements Serializable {
 
     private int current_rooster_iteration_cycle;
     private String description;
@@ -19,6 +20,8 @@ public class Channel {
     private int rooster_count;
     private HashMap<String, Boolean> subscribers;
     private boolean active;
+    private boolean selected;
+    private String id;
 
     // Required default constructor for Firebase object mapping
     @SuppressWarnings("unused")
@@ -31,7 +34,9 @@ public class Channel {
                    String photo,
                    int rooster_count,
                    HashMap<String, Boolean> subscribers,
-                   boolean active) {
+                   boolean active,
+                   boolean selected,
+                   String id) {
 
         this.current_rooster_iteration_cycle = current_rooster_iteration_cycle;
         this.description = description;
@@ -40,8 +45,25 @@ public class Channel {
         this.rooster_count = rooster_count;
         this.subscribers = subscribers;
         this.active = active;
+        this.selected = selected;
+        this.id = id;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public boolean isSelected() {
+        return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
+    }
 
     public int getCurrent_rooster_iteration_cycle() {
         return current_rooster_iteration_cycle;

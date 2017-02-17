@@ -20,6 +20,7 @@ public class Alarm {
     private int hour;
     private int minute;
     private boolean recurring;
+    private boolean allow_friend_audio_files;
 
     // Required default constructor for Firebase object mapping
     @SuppressWarnings("unused")
@@ -28,7 +29,7 @@ public class Alarm {
 
     public Alarm(AlarmChannel channel, boolean monday, boolean tuesday, boolean wednesday,
                  boolean thursday, boolean friday, boolean saturday, boolean
-                         sunday, int hour, int minute, boolean recurring) {
+                         sunday, int hour, int minute, boolean recurring, boolean allow_friend_audio_files) {
         this.channel = channel;
         this.monday = monday;
         this.tuesday = tuesday;
@@ -40,6 +41,15 @@ public class Alarm {
         this.hour = hour;
         this.minute = minute;
         this.recurring = recurring;
+        this.allow_friend_audio_files = allow_friend_audio_files;
+    }
+
+    public boolean isAllow_friend_audio_files() {
+        return allow_friend_audio_files;
+    }
+
+    public void setAllow_friend_audio_files(boolean allow_friend_audio_files) {
+        this.allow_friend_audio_files = allow_friend_audio_files;
     }
 
     public AlarmChannel getChannel() {
