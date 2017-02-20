@@ -16,11 +16,15 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.Alarm;
-import com.roostermornings.android.fragment.NewAlarmFragment1;
 import com.roostermornings.android.fragment.IAlarmSetListener;
+import com.roostermornings.android.fragment.NewAlarmFragment1;
 import com.roostermornings.android.fragment.NewAlarmFragment2;
+import com.roostermornings.android.sqldata.DeviceAlarmTableManager;
+import com.roostermornings.android.sqlutil.DeviceAlarmController;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetListener {
 
@@ -28,6 +32,8 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
     private ViewPager mViewPager;
     Alarm mAlarm = new Alarm();
     Calendar mCalendar = Calendar.getInstance();
+    private DeviceAlarmController deviceAlarmController = new DeviceAlarmController(this);
+    private DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +96,20 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 String key = mDatabase.child("alarms").push().getKey();
                 database.getReference(String.format("alarms/%s/%s", mAuth.getCurrentUser().getUid(), key)).setValue(mAlarm);
+
+
+                List<Integer> alarmDays = new ArrayList<>();
+                if (mAlarm.isMonday())alarmDays.add(Calendar.MONDAY);
+                if (mAlarm.isTuesday())alarmDays.add(Calendar.TUESDAY);
+                if (mAlarm.isWednesday())alarmDays.add(Calendar.WEDNESDAY);
+                if (mAlarm.isThursday())alarmDays.add(Calendar.THURSDAY);
+                if (mAlarm.isFriday())alarmDays.add(Calendar.FRIDAY);
+                if (mAlarm.isSaturday())alarmDays.add(Calendar.SATURDAY);
+                if (mAlarm.isSunday())alarmDays.add(Calendar.SUNDAY);
+
+                deviceAlarmController.registerAlarmSet(mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring());
+
+
                 Toast.makeText(getBaseContext(), "Alarm created!", Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(getBaseContext(), MyAlarmsFragmentActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
