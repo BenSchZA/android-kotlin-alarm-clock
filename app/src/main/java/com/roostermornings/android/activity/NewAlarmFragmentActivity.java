@@ -91,7 +91,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 String key = mDatabase.child("alarms").push().getKey();
                 database.getReference(String.format("alarms/%s/%s", mAuth.getCurrentUser().getUid(), key)).setValue(mAlarm);
                 Toast.makeText(getBaseContext(), "Alarm created!", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(getBaseContext(), MyAlarmsActivity.class);
+                Intent intent = new Intent(getBaseContext(), MyAlarmsFragmentActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 finish();

@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/RoosterMornings.iml" filepath="$PROJECT_DIR$/RoosterMornings.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rooster-android.iml" filepath="$PROJECT_DIR$/rooster-android.iml" />
     </modules>
   </component>
 </project>
