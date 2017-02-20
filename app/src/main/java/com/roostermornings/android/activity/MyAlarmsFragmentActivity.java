@@ -25,14 +25,15 @@ import com.roostermornings.android.domain.Alarm;
 import java.util.ArrayList;
 
 import butterknife.BindView;
+import butterknife.OnClick;
 
-public class MyAlarmsActivity extends BaseActivity {
+public class MyAlarmsFragmentActivity extends BaseActivity {
 
-    public static final String TAG = MyAlarmsActivity.class.getSimpleName();
+    public static final String TAG = MyAlarmsFragmentActivity.class.getSimpleName();
     private DatabaseReference mMyAlarmsReference;
     private ArrayList<Alarm> alarms = new ArrayList<Alarm>();
 
-    @BindView(R.id.alarmsListView)
+    @BindView(R.id.home_alarmsListView)
     RecyclerView mRecyclerView;
 
     private RecyclerView.Adapter mAdapter;
@@ -51,7 +52,7 @@ public class MyAlarmsActivity extends BaseActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(MyAlarmsActivity.this, NewAlarmFragmentActivity.class));
+                startActivity(new Intent(MyAlarmsFragmentActivity.this, NewAlarmFragmentActivity.class));
             }
         });
 
@@ -84,7 +85,7 @@ public class MyAlarmsActivity extends BaseActivity {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                Toast.makeText(MyAlarmsActivity.this, "Failed to load alarms.",
+                Toast.makeText(MyAlarmsFragmentActivity.this, "Failed to load alarms.",
                         Toast.LENGTH_SHORT).show();
             }
         };
@@ -113,4 +114,10 @@ public class MyAlarmsActivity extends BaseActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    @OnClick(R.id.home_record_audio)
+    public void recordNewAudio() {
+        startActivity(new Intent(MyAlarmsFragmentActivity.this, NewAudioRecordActivity.class));
+    }
+
 }

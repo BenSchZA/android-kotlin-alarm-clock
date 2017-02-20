@@ -31,6 +31,8 @@
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="send">send</string>
+    <string name="my_alarms">My Alarms</string>
+    <string name="create_alarm">Create Alarm</string>
 
 
 </resources>

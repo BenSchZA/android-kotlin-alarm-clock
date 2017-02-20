@@ -1,43 +1,35 @@
 package com.roostermornings.android.activity;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
-import android.os.Environment;
-import android.os.StrictMode;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
-import android.support.v7.widget.Toolbar;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.database.FirebaseDatabase;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
-import com.roostermornings.android.domain.Alarm;
-import com.roostermornings.android.fragment.NewAlarmFragment1;
-import com.roostermornings.android.fragment.NewAlarmFragment2;
 
-import org.w3c.dom.Text;
-
+import java.io.File;
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.Random;
 
 import butterknife.BindView;
@@ -50,35 +42,47 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class NewAudioActivity extends BaseActivity {
+public class NewAudioRecordActivity extends BaseActivity {
 
     private long startTime;
     private long elapsedTime;
+    private long runningTime;
     private final int REFRESH_RATE = 100;
     private String hours, minutes, seconds, milliseconds;
     private long secs, mins, hrs;
     private Handler mHandler = new Handler();
     private boolean mRecording = false;
-    String AudioSavePathInDevice = null;
+    private boolean mListening = false;
+    private boolean mPaused = false;
+    String mAudioSavePathInDevice = null;
     MediaRecorder mediaRecorder;
-    Random random;
-    String RandomAudioFileName = "ABCDEFGHIJKLMNOP";
-    public static final int RequestPermissionCode = 1;
     MediaPlayer mediaPlayer;
+    Random random;
+    String mRandomAudioFileName = "ABCDEFGHIJKLMNOP";
+    public static final int RequestPermissionCode = 1;
     private StorageReference mStorageRef;
     private String randomAudioFileName = "";
-    final int sdk = android.os.Build.VERSION.SDK_INT;
 
     @BindView(R.id.new_audio_time)
     TextView txtAudioTime;
 
     @BindView(R.id.new_audio_start_stop)
-    TextView txtAudioStartStop;
+    ImageView imgAudioStartStop;
+
+    @BindView(R.id.new_audio_listen_parent)
+    LinearLayout layoutListenParent;
+
+    @BindView(R.id.new_audio_record_parent)
+    RelativeLayout layoutRecordParent;
+
+    @BindView(R.id.new_audio_listen)
+    ImageView imgNewAudioListen;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_new_audio);
+        initialize(R.layout.activity_new_audio);
+        mStorageRef = FirebaseStorage.getInstance().getReference();
     }
 
     @Override
@@ -103,25 +107,19 @@ public class NewAudioActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private Runnable startTimer = new Runnable() {
-        public void run() {
-            elapsedTime = System.currentTimeMillis() - startTime;
-            updateTimer(elapsedTime);
-            mHandler.postDelayed(this, REFRESH_RATE);
-        }
-    };
-
     @OnClick(R.id.new_audio_start_stop)
     public void startStopAudioRecording() {
+
 
         if (!mRecording) {
 
             random = new Random();
             randomAudioFileName = CreateRandomAudioFileName(5) + "RoosterRecording.3gp";
+            startTime = System.currentTimeMillis();
 
             if (checkPermission()) {
 
-                AudioSavePathInDevice =
+                mAudioSavePathInDevice =
                         Environment.getExternalStorageDirectory().getAbsolutePath() + "/" +
                                 randomAudioFileName;
 
@@ -138,11 +136,11 @@ public class NewAudioActivity extends BaseActivity {
                     e.printStackTrace();
                 }
 
-                startTime = System.currentTimeMillis();
+
                 mHandler.removeCallbacks(startTimer);
                 mHandler.postDelayed(startTimer, 0);
 
-                txtAudioStartStop.setBackgroundResource(R.drawable.rooster_record_audio_square_inner);
+                imgAudioStartStop.setBackgroundResource(R.drawable.rooster_record_audio_square_inner);
                 mRecording = true;
 
 
@@ -152,13 +150,141 @@ public class NewAudioActivity extends BaseActivity {
 
 
         } else {
+            mRecording = false;
             mediaRecorder.stop();
             mHandler.removeCallbacks(startTimer);
-            txtAudioStartStop.setBackgroundResource(R.drawable.rooster_record_audio_circle_inner_selectable);
+            imgAudioStartStop.setBackgroundResource(R.drawable.rooster_record_audio_circle_inner_selectable);
+            layoutListenParent.setVisibility(View.VISIBLE);
+            layoutRecordParent.setVisibility(View.INVISIBLE);
+
         }
 
 
     }
+
+    @OnClick(R.id.new_audio_delete)
+    public void onDeleteAudioClick() {
+
+        if (mediaPlayer.isPlaying()) {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+            MediaRecorderReady();
+        }
+        File file = new File(mAudioSavePathInDevice);
+        file.delete();
+        layoutListenParent.setVisibility(View.INVISIBLE);
+        layoutRecordParent.setVisibility(View.VISIBLE);
+        txtAudioTime.setText("00:00");
+        mHandler.removeCallbacks(startTimer);
+
+    }
+
+    @OnClick(R.id.new_audio_listen)
+    public void onAudioListenClick() {
+
+        try {
+
+            if (!mListening && !mPaused) { //playback initiated
+
+                startTime = System.currentTimeMillis();
+                mediaPlayer = new MediaPlayer();
+                try {
+                    mediaPlayer.setDataSource(mAudioSavePathInDevice);
+                    mediaPlayer.prepare();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                mListening = true;
+                mediaPlayer.start();
+
+                mHandler.removeCallbacks(startTimer);
+                mHandler.postDelayed(startTimer, 0);
+                mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    @Override
+                    public void onCompletion(MediaPlayer mediaPlayer) {
+
+                        try {
+
+                            mPaused = false;
+                            mListening = false;
+                            mHandler.removeCallbacks(startTimer);
+                            txtAudioTime.setText("00:00");
+                            mediaPlayer.stop();
+                            imgNewAudioListen.setImageResource(R.drawable.ic_play_arrow_white_24dp);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                });
+                imgNewAudioListen.setImageResource(R.drawable.ic_pause_white_24dp);
+
+
+            } else if (!mPaused) { //user paused playback
+
+                mPaused = true;
+                mediaPlayer.pause();
+                runningTime = System.currentTimeMillis();
+                mHandler.removeCallbacks(startTimer);
+                imgNewAudioListen.setImageResource(R.drawable.ic_play_arrow_white_24dp);
+
+            } else { //user resumed playback
+
+                mPaused = false;
+                mediaPlayer.start();
+                mHandler.postDelayed(startTimer, 0);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @OnClick(R.id.new_audio_save)
+    public void onSaveAudioFileClick() {
+
+        Uri file = Uri.fromFile(new File(mAudioSavePathInDevice));
+        StorageReference audioFileRef = mStorageRef.child("social_rooster_uploads/" + file.getLastPathSegment());
+
+        audioFileRef.putFile(file)
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        // Get a URL to the uploaded content
+                        Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                        Intent intent = new Intent(NewAudioRecordActivity.this, NewAudioFriendsActivity.class);
+
+                        Bundle bun = new Bundle();
+                        bun.putString("downloadUrl", downloadUrl.toString());
+                        intent.putExtras(bun);
+                        startActivity(intent);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Handle unsuccessful upload
+                        Toast.makeText(NewAudioRecordActivity.this, "ERROR UPLOADING!", Toast.LENGTH_LONG).show();
+                    }
+                });
+
+
+    }
+
+    private Runnable startTimer = new Runnable() {
+        public void run() {
+            if (mPaused) {
+                elapsedTime = runningTime - startTime;
+                mPaused = false;
+            } else {
+                elapsedTime = System.currentTimeMillis() - startTime;
+            }
+            updateTimer(elapsedTime);
+            mHandler.postDelayed(this, REFRESH_RATE);
+        }
+    };
 
     private void updateTimer(float time) {
         secs = (long) (time / 1000);
@@ -212,7 +338,7 @@ public class NewAudioActivity extends BaseActivity {
         milliseconds = milliseconds.substring(milliseconds.length() - 3, milliseconds.length() - 2);
 
 		/* Setting the timer text to the elapsed time */
-        txtAudioTime.setText(hours + ":" + minutes + ":" + seconds);
+        txtAudioTime.setText(minutes + ":" + seconds);
     }
 
     public void MediaRecorderReady() {
@@ -220,15 +346,15 @@ public class NewAudioActivity extends BaseActivity {
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         mediaRecorder.setAudioEncoder(MediaRecorder.OutputFormat.MPEG_4);
-        mediaRecorder.setOutputFile(AudioSavePathInDevice);
+        mediaRecorder.setOutputFile(mAudioSavePathInDevice);
     }
 
     public String CreateRandomAudioFileName(int string) {
         StringBuilder stringBuilder = new StringBuilder(string);
         int i = 0;
         while (i < string) {
-            stringBuilder.append(RandomAudioFileName.
-                    charAt(random.nextInt(RandomAudioFileName.length())));
+            stringBuilder.append(mRandomAudioFileName.
+                    charAt(random.nextInt(mRandomAudioFileName.length())));
 
             i++;
         }
@@ -236,7 +362,7 @@ public class NewAudioActivity extends BaseActivity {
     }
 
     private void requestPermission() {
-        ActivityCompat.requestPermissions(NewAudioActivity.this, new
+        ActivityCompat.requestPermissions(NewAudioRecordActivity.this, new
                 String[]{WRITE_EXTERNAL_STORAGE, RECORD_AUDIO}, RequestPermissionCode);
     }
 
@@ -253,7 +379,7 @@ public class NewAudioActivity extends BaseActivity {
 
                     if (StoragePermission && RecordPermission) {
                     } else {
-                        Toast.makeText(NewAudioActivity.this, "Permission Denied", Toast.LENGTH_LONG).show();
+                        Toast.makeText(NewAudioRecordActivity.this, "Permission Denied", Toast.LENGTH_LONG).show();
                     }
                 }
                 break;

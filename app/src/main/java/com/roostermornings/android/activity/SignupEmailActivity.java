@@ -11,7 +11,6 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.mobsandgeeks.saripaar.Validator;
@@ -22,7 +21,6 @@ import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.User;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class SignupEmailActivity extends BaseActivity implements Validator.ValidationListener {
@@ -146,7 +144,7 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
     }
 
     private void proceedToMyAlarmsActivity() {
-        Intent intent = new Intent(SignupEmailActivity.this, MyAlarmsActivity.class);
+        Intent intent = new Intent(SignupEmailActivity.this, MyAlarmsFragmentActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
