@@ -27,10 +27,10 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.util.RoosterUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -57,8 +57,6 @@ public class NewAudioRecordActivity extends BaseActivity {
     String mAudioSavePathInDevice = null;
     MediaRecorder mediaRecorder;
     MediaPlayer mediaPlayer;
-    Random random;
-    String mRandomAudioFileName = "ABCDEFGHIJKLMNOP";
     public static final int RequestPermissionCode = 1;
     private StorageReference mStorageRef;
     private String randomAudioFileName = "";
@@ -113,8 +111,7 @@ public class NewAudioRecordActivity extends BaseActivity {
 
         if (!mRecording) {
 
-            random = new Random();
-            randomAudioFileName = CreateRandomAudioFileName(5) + "RoosterRecording.3gp";
+            randomAudioFileName = RoosterUtils.createRandomFileName(5) + "RoosterRecording.3gp";
             startTime = System.currentTimeMillis();
 
             if (checkPermission()) {
@@ -349,17 +346,6 @@ public class NewAudioRecordActivity extends BaseActivity {
         mediaRecorder.setOutputFile(mAudioSavePathInDevice);
     }
 
-    public String CreateRandomAudioFileName(int string) {
-        StringBuilder stringBuilder = new StringBuilder(string);
-        int i = 0;
-        while (i < string) {
-            stringBuilder.append(mRandomAudioFileName.
-                    charAt(random.nextInt(mRandomAudioFileName.length())));
-
-            i++;
-        }
-        return stringBuilder.toString();
-    }
 
     private void requestPermission() {
         ActivityCompat.requestPermissions(NewAudioRecordActivity.this, new

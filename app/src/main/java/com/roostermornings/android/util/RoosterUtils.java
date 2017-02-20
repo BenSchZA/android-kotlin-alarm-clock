@@ -3,7 +3,7 @@ package com.roostermornings.android.util;
 import com.roostermornings.android.domain.Alarm;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Random;
 
 /**
  * Created by steven on 2017/02/15.
@@ -11,12 +11,28 @@ import java.util.List;
 
 public class RoosterUtils {
 
+    private static String mRandomAudioFileName = "ABCDEFGHIJKLMNOP";
+    static Random random;
+
     public static String setAlarmTimeFromHourAndMinute(Alarm alarm) {
 
         String alarmHour = (alarm.getHour() < 10 ? "0" : "") + alarm.getHour();
         String alarmMinute = (alarm.getMinute() < 10 ? "0" : "") + alarm.getMinute();
         return alarmHour + ":" + alarmMinute;
 
+    }
+
+    public static String createRandomFileName(int string) {
+        random = new Random();
+        StringBuilder stringBuilder = new StringBuilder(string);
+        int i = 0;
+        while (i < string) {
+            stringBuilder.append(mRandomAudioFileName.
+                    charAt(random.nextInt(mRandomAudioFileName.length())));
+
+            i++;
+        }
+        return stringBuilder.toString();
     }
 
     public static String getAlarmDays(Alarm alarm) {

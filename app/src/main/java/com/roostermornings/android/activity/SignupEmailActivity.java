@@ -1,8 +1,8 @@
 package com.roostermornings.android.activity;
 
 import android.content.Intent;
-import android.support.annotation.NonNull;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -18,6 +18,7 @@ import com.mobsandgeeks.saripaar.annotation.NotEmpty;
 import com.mobsandgeeks.saripaar.annotation.Password;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.backgound.BackgroundTaskReceiver;
 import com.roostermornings.android.domain.User;
 
 import butterknife.BindView;
@@ -144,6 +145,10 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
     }
 
     private void proceedToMyAlarmsActivity() {
+
+        BackgroundTaskReceiver backgroundTaskReceiver = new BackgroundTaskReceiver();
+        backgroundTaskReceiver.startBackgroundTask(SignupEmailActivity.this);
+
         Intent intent = new Intent(SignupEmailActivity.this, MyAlarmsFragmentActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
