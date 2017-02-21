@@ -1,25 +1,17 @@
 package com.roostermornings.android.fragment;
 
-import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.FragmentManager;
-import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.roostermornings.android.R;
 import com.roostermornings.android.domain.Alarm;
-import com.roostermornings.android.domain.AlarmChannel;
-import com.roostermornings.android.domain.User;
 import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.util.RoosterUtils;
 
@@ -48,8 +40,7 @@ public class NewAlarmFragment1 extends BaseFragment {
 
     int hour = cal.get(Calendar.HOUR_OF_DAY);
     int minute = cal.get(Calendar.MINUTE);
-
-
+    TimePickerDialog mTimePickerDialog;
 
 
     public NewAlarmFragment1() {
@@ -104,7 +95,7 @@ public class NewAlarmFragment1 extends BaseFragment {
         mListener = null;
     }
 
-    protected void setAlarmTime(int hour, int minute){
+    protected void setAlarmTime(int hour, int minute) {
         this.hour = hour;
         this.minute = minute;
         mAlarm.setHour(hour);
@@ -114,8 +105,6 @@ public class NewAlarmFragment1 extends BaseFragment {
 
     @OnClick(R.id.new_alarm_time)
     public void onTimeClick() {
-
-        TimePickerDialog mTimePickerDialog;
 
         mTimePickerDialog = new TimePickerDialog(getContext(), new TimePickerDialog.OnTimeSetListener() {
             @Override
