@@ -5,11 +5,12 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
+import com.facebook.stetho.Stetho;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.roostermornings.android.dagger.RoosterApplicationModule;
 
-import io.fabric.sdk.android.Fabric;
+import io.fabric.sdk.android.*;
 
 import com.roostermornings.android.dagger.DaggerRoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
@@ -27,6 +28,13 @@ public class BaseApplication extends android.app.Application {
         super.onCreate();
 
         Fabric.with(this, new Crashlytics());
+
+        if(BuildConfig.DEBUG){
+            //Remove in release version... don't want to leave stethoscopes lying around
+            //Stetho: http://facebook.github.io/stetho/ - debug bridge for Android (view SQL etc.)
+            //Go to chrome://inspect/ in Chrome to inspect
+            Stetho.initializeWithDefaults(this);
+        }
 
         /*Component implementations are primarily instantiated via a generated builder.
         An instance of the builder is obtained using the builder() method on the component implementation.
