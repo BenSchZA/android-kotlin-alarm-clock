@@ -19,6 +19,7 @@
     <dimen name="spacing_xlarge">18dp</dimen>
     <dimen name="spacing_xxlarge">25dp</dimen>
     <dimen name="spacing_xxxlarge">32dp</dimen>
+    <dimen name="spacing_huge">60dp</dimen>
     <dimen name="spacing_large">16dp</dimen>
     <dimen name="spacing_small">4dp</dimen>
     <dimen name="spacing_xsmall">2dp</dimen>

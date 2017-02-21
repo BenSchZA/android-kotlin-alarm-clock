@@ -45,6 +45,15 @@
         <item name="android:background">@drawable/rooster_button</item>
     </style>
 
+    <style name="RoosterButtonLightBlueStyle" parent="@style/Widget.AppCompat.Button.Borderless">
+        <item name="android:textAllCaps">false</item>
+        <item name="textAllCaps">false</item>
+        <item name="android:minHeight">30dp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:minWidth">105dp</item>
+        <item name="android:background">@drawable/rooster_button_light_blue</item>
+    </style>
+
     <style name="AlarmDayCircle">
         <item name="android:textColor">@color/white</item>
         <item name="android:textSize">@dimen/text_large</item>
