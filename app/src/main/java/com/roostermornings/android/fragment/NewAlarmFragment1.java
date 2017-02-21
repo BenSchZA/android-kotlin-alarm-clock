@@ -44,6 +44,12 @@ public class NewAlarmFragment1 extends BaseFragment {
     private IAlarmSetListener mListener;
     com.roostermornings.android.domain.Alarm mAlarm = new Alarm();
 
+    Calendar cal = Calendar.getInstance();
+
+    int hour = cal.get(Calendar.HOUR_OF_DAY);
+    int minute = cal.get(Calendar.MINUTE);
+
+
 
 
     public NewAlarmFragment1() {
@@ -66,7 +72,9 @@ public class NewAlarmFragment1 extends BaseFragment {
         }
 
         mAlarm = mListener.getAlarmDetails();
-
+        //Set current time
+        mAlarm.setHour(hour);
+        mAlarm.setMinute(minute);
     }
 
     @Override
@@ -96,11 +104,28 @@ public class NewAlarmFragment1 extends BaseFragment {
         mListener = null;
     }
 
+    protected void setAlarmTime(int hour, int minute){
+        this.hour = hour;
+        this.minute = minute;
+        mAlarm.setHour(hour);
+        mAlarm.setMinute(minute);
+        textViewAlarmTime.setText(RoosterUtils.setAlarmTimeFromHourAndMinute(mAlarm));
+    }
+
     @OnClick(R.id.new_alarm_time)
     public void onTimeClick() {
 
-        //DialogFragment newFragment = new TimePickerFragment(mAlarm);
-        //newFragment.show(getFragmentManager(), "timePicker");
+        TimePickerDialog mTimePickerDialog;
+
+        mTimePickerDialog = new TimePickerDialog(getContext(), new TimePickerDialog.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                setAlarmTime(hourOfDay, minute);
+            }
+        }, hour, minute, true); //24h time
+
+        mTimePickerDialog.setTitle(getString(R.string.new_alarm_set_time));
+        mTimePickerDialog.show();
 
     }
 

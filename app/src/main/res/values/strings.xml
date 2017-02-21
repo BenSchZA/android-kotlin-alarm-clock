@@ -33,6 +33,7 @@
     <string name="send">send</string>
     <string name="my_alarms">My Alarms</string>
     <string name="create_alarm">Create Alarm</string>
+    <string name="new_alarm_set_time">Please select alarm time!</string>
 
 
 </resources>
