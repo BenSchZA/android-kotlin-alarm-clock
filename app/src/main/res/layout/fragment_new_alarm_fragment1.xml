@@ -55,21 +55,7 @@
         android:background="@color/white"
         android:layout_width="match_parent"></View>
 
-    <Switch
-        android:id="@+id/new_alarm_fragment1_switch_recurring"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:checked="false"
-        android:paddingLeft="@dimen/spacing_normal"
-        android:paddingRight="@dimen/spacing_large"
-        android:textColor="@drawable/rooster_link_white"
-        android:textSize="@dimen/text_large"
-        android:padding="@dimen/spacing_large"
-        android:text="Repeat alarm" />
-
-
     <LinearLayout
-        android:visibility="gone"
         android:id="@+id/days_parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -201,5 +187,17 @@
 
 
     </LinearLayout>
+
+    <Switch
+        android:id="@+id/new_alarm_fragment1_switch_recurring"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:paddingLeft="@dimen/spacing_normal"
+        android:paddingRight="@dimen/spacing_large"
+        android:textColor="@drawable/rooster_link_white"
+        android:textSize="@dimen/text_large"
+        android:padding="@dimen/spacing_large"
+        android:text="Repeat alarm" />
 
 </LinearLayout>

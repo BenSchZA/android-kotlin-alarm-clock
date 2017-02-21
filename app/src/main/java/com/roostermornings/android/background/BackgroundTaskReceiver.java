@@ -1,4 +1,4 @@
-package com.roostermornings.android.backgound;
+package com.roostermornings.android.background;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -18,15 +18,13 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.roostermornings.android.domain.AlarmQueue;
 import com.roostermornings.android.sqldata.AudioTableManager;
 import com.roostermornings.android.util.RoosterUtils;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.FileOutputStream;
 
 public class BackgroundTaskReceiver extends BroadcastReceiver {
 
@@ -63,7 +61,8 @@ public class BackgroundTaskReceiver extends BroadcastReceiver {
         alarmMgrBackgroundTask = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(context, BackgroundTaskReceiver.class);
         PendingIntent backgroundIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
-        alarmMgrBackgroundTask.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 10 * 1000, 10 * 1000, backgroundIntent);
+        alarmMgrBackgroundTask.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 10 * 1000,
+                120 * 1000, backgroundIntent);
     }
 
 
@@ -95,7 +94,7 @@ public class BackgroundTaskReceiver extends BroadcastReceiver {
                     retrieveAudioFileFromFB(alarmQueue, context);
                 }
 
-                queueReference.removeValue();
+                //queueReference.removeValue();
             }
 
             @Override
@@ -113,42 +112,48 @@ public class BackgroundTaskReceiver extends BroadcastReceiver {
 
         try {
 
-            File localFile = null;
             StorageReference audioFileRef = mStorageRef.child(alarmQueue.getAudio_file_url());
-            String fileName = "audio" + RoosterUtils.createRandomFileName(5);
+            final String audioFileUniqueName = "audio" + RoosterUtils.createRandomFileName(5) + ".3gp";
+            final DatabaseReference queueRecordReference = FirebaseDatabase.getInstance().getReference()
+                    .child("social_rooster_queue").child(mAuth.getCurrentUser().getUid()).child(alarmQueue.getQueue_id());
 
-            try {
-                localFile = File.createTempFile(fileName, "3gp");
-            } catch (IOException e) {
-                e.printStackTrace();
-                Log.e(TAG, e.getMessage());
-                return;
-            }
+            final long ONE_MEGABYTE = 1024 * 1024;
+            audioFileRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                @Override
+                public void onSuccess(byte[] bytes) {
 
-            audioFileRef.getFile(localFile)
-                    .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                            // For our recurring task, we'll just display a message
-                            Toast.makeText(context, "successfully downloaded", Toast.LENGTH_SHORT).show();
+                    try {
+                        FileOutputStream outputStream;
+                        outputStream = context.openFileOutput(audioFileUniqueName, Context.MODE_PRIVATE);
+                        outputStream.write(bytes);
+                        outputStream.close();
 
-                            //store in local SQLLite database
-                            mAudioTableManager.insertAudioFile(alarmQueue);
+                        Toast.makeText(context, "successfully downloaded", Toast.LENGTH_SHORT).show();
 
-                            //remove record of queue from FB database
-                            DatabaseReference queueRecordReference = FirebaseDatabase.getInstance().getReference()
-                                    .child("social_rooster_queue").child(mAuth.getCurrentUser().getUid()).child(alarmQueue.getQueue_id());
-                            queueRecordReference.removeValue();
+                        alarmQueue.setAudio_file_url(audioFileUniqueName);
+
+                        //store in local SQLLite database
+                        mAudioTableManager.insertAudioFile(alarmQueue);
+
+                        //remove record of queue from FB database
+                        queueRecordReference.removeValue();
 
 
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+
+                }
+            }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception exception) {
-                    Toast.makeText(context, "download failed", Toast.LENGTH_SHORT).show();
-                    Log.e("BackgroundTask:", "Failed download!");
+                    // Handle any errors
                 }
-            });        // For our recurring task, we'll just display a message
+            });
+
+
+            // For our recurring task, we'll just display a message
             Toast.makeText(context, "I'm running", Toast.LENGTH_SHORT).show();
 
         } catch (Exception e) {

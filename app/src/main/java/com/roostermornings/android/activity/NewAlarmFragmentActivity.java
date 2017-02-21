@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -29,6 +30,7 @@ import java.util.List;
 public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetListener {
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
+    public final static String TAG = NewAlarmFragmentActivity.class.getSimpleName();
     private ViewPager mViewPager;
     Alarm mAlarm = new Alarm();
     Calendar mCalendar = Calendar.getInstance();
@@ -93,6 +95,36 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
             if (mViewPager.getCurrentItem() == 0) mViewPager.setCurrentItem(1);
             else {
                 //save alarm!
+
+                //if no day set, automatically set to correct day of week
+                if (!mAlarm.isMonday()
+                        && !mAlarm.isTuesday()
+                        && !mAlarm.isWednesday()
+                        && !mAlarm.isThursday()
+                        && !mAlarm.isFriday()
+                        && !mAlarm.isSaturday()
+                        && !mAlarm.isSunday()) {
+
+                    Calendar currentTime = Calendar.getInstance();
+                    Calendar alarmTime = Calendar.getInstance();
+
+                    alarmTime.clear(Calendar.HOUR);
+                    alarmTime.clear(Calendar.MINUTE);
+
+                    alarmTime.set(Calendar.HOUR_OF_DAY, mAlarm.getHour());
+                    alarmTime.set(Calendar.MINUTE, mAlarm.getMinute());
+
+                    Log.d(TAG, String.valueOf(currentTime.get(Calendar.DAY_OF_WEEK)));
+                    Log.d(TAG, String.valueOf(alarmTime.get(Calendar.DAY_OF_WEEK)));
+                    Log.d(TAG, String.valueOf(alarmTime.get(Calendar.HOUR_OF_DAY)));
+
+                    if (currentTime.compareTo(alarmTime) > 0) {
+                        alarmTime.add(Calendar.HOUR, 24);
+                    }
+
+                    setAlarmDay(alarmTime);
+                }
+
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 String key = mDatabase.child("alarms").push().getKey();
                 database.getReference(String.format("alarms/%s/%s", mAuth.getCurrentUser().getUid(), key)).setValue(mAlarm);
@@ -129,6 +161,34 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
     @Override
     public Alarm getAlarmDetails() {
         return mAlarm;
+    }
+
+    private void setAlarmDay(Calendar alarmTime) {
+
+        switch (alarmTime.get(Calendar.DAY_OF_WEEK)) {
+            case Calendar.SUNDAY:
+                mAlarm.setSunday(true);
+                break;
+            case Calendar.MONDAY:
+                mAlarm.setMonday(true);
+                break;
+            case Calendar.TUESDAY:
+                mAlarm.setTuesday(true);
+                break;
+            case Calendar.WEDNESDAY:
+                mAlarm.setWednesday(true);
+                break;
+            case Calendar.THURSDAY:
+                mAlarm.setThursday(true);
+                break;
+            case Calendar.FRIDAY:
+                mAlarm.setFriday(true);
+                break;
+            case Calendar.SATURDAY:
+                mAlarm.setSaturday(true);
+                break;
+        }
+
     }
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
