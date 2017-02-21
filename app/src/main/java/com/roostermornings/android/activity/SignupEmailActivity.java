@@ -18,8 +18,9 @@ import com.mobsandgeeks.saripaar.annotation.NotEmpty;
 import com.mobsandgeeks.saripaar.annotation.Password;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
-import com.roostermornings.android.backgound.BackgroundTaskReceiver;
+import com.roostermornings.android.background.BackgroundTaskReceiver;
 import com.roostermornings.android.domain.User;
+import com.roostermornings.android.sqldata.AudioTableHelper;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -148,6 +149,9 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
 
         BackgroundTaskReceiver backgroundTaskReceiver = new BackgroundTaskReceiver();
         backgroundTaskReceiver.startBackgroundTask(SignupEmailActivity.this);
+
+        AudioTableHelper helper = new AudioTableHelper(SignupEmailActivity.this);
+        helper.onUpgrade(helper.getWritableDatabase(), 0, 1);
 
         Intent intent = new Intent(SignupEmailActivity.this, MyAlarmsFragmentActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

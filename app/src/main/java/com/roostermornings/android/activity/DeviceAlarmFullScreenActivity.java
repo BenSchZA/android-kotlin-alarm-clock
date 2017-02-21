@@ -14,7 +14,6 @@ import com.roostermornings.android.sqldata.AudioTableManager;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,18 +36,21 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_device_alarm_full_screen);
+        initialize(R.layout.activity_device_alarm_full_screen);
+        retrieveMyAlarms();
     }
 
-    protected void retrieveMyAlarms(){
+    protected void retrieveMyAlarms() {
         audioItems = audioTableManager.extractAudioFiles();
+        if (audioItems == null || audioItems.size() == 0) return;
+        playNewAudioFile(audioItems.get(0));
     }
 
 
-    protected void playNewAudioFile(final DeviceAudioQueueItem audioItem){
+    protected void playNewAudioFile(final DeviceAudioQueueItem audioItem) {
         //TODO: default alarm tone
         mediaPlayer = new MediaPlayer();
-        final File file = new File(audioItem.getFilename());
+        final File file = new File(getFilesDir() + "/" + audioItem.getFilename());
         setProfilePic(audioItem.getSender_pic());
         txtSenderName.setText(audioItem.getSender_name());
 
@@ -64,7 +66,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
                     //delete record from arraylist
                     file.delete();
                     audioItems.remove(audioItem);
-                    if(!audioItems.isEmpty()){
+                    if (!audioItems.isEmpty()) {
                         playNewAudioFile(audioItems.get(0));
                     }
                 }
@@ -74,7 +76,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         }
     }
 
-    protected void setProfilePic(String url){
+    protected void setProfilePic(String url) {
         URL imageUrl = null;
         try {
             imageUrl = new URL(url);
