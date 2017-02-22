@@ -15,8 +15,12 @@ public class SocialRooster {
     private String profile_pic;
     private Long date_uploaded;
     private String uid;
+    private String queue_id;
+    private String sender_id;
 
-    public SocialRooster(String audio_file_url, String cell_number, String user_name, Boolean listened, String profile_pic, Long date_uploaded, String uid) {
+    public SocialRooster(String audio_file_url, String cell_number, String user_name,
+                         Boolean listened, String profile_pic, Long date_uploaded,
+                         String uid, String queue_id, String sender_id) {
         this.audio_file_url = audio_file_url;
         this.cell_number = cell_number;
         this.user_name = user_name;
@@ -24,11 +28,29 @@ public class SocialRooster {
         this.profile_pic = profile_pic;
         this.date_uploaded = date_uploaded;
         this.uid = uid;
+        this.queue_id = queue_id;
+        this.sender_id = sender_id;
     }
 
     // Required default constructor for Firebase object mapping
     @SuppressWarnings("unused")
     public SocialRooster() {
+    }
+
+    public String getQueue_id() {
+        return queue_id;
+    }
+
+    public void setQueue_id(String queue_id) {
+        this.queue_id = queue_id;
+    }
+
+    public String getSender_id() {
+        return sender_id;
+    }
+
+    public void setSender_id(String sender_id) {
+        this.sender_id = sender_id;
     }
 
     public String getAudio_file_url() {

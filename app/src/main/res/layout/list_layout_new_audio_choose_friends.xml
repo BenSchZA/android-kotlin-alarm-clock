@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="@dimen/spacing_normal">
+
+    <ImageView
+        android:id="@+id/new_audio_friend_profile_pic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/new_audio_friends_profile_pic_circle" />
+
+    <TextView
+        android:id="@+id/new_audio_friend_profile_name"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:text="Friend name"
+        android:layout_gravity="center_vertical"
+        android:paddingLeft="@dimen/spacing_large"
+        android:layout_toLeftOf="@id/new_audio_friend_profile_pic"
+        android:textColor="@color/white"
+        android:textSize="@dimen/text_xlarge" />
+
+    <Button
+        android:id="@+id/new_audio_friend_add"
+        style="@style/RoosterButtonSemiTransparentStyle"
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|center_vertical"
+        android:text="Add"></Button>
+
+
+
+</LinearLayout>

@@ -1,0 +1,41 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/activity_device_alarm_full_screen"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/main_background_layer_list"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.roostermornings.android.activity.NewAudioFriendsActivity"
+    tools:showIn="@layout/activity_new_audio_friends">
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/new_audio_friendsListView"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_xxlarge"
+        android:layout_weight="1"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:orientation="vertical">
+
+        <Button
+            android:visibility="gone"
+            android:id="@+id/new_audio_upload_button"
+            style="@style/RoosterButtonLightBlueStyle"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:layout_marginBottom="@dimen/spacing_xxxlarge"
+            android:text="Done"></Button>
+
+    </LinearLayout>
+
+</RelativeLayout>

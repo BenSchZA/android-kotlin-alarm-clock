@@ -4,4 +4,5 @@
     <string name="preferences_intro_viewed">intro_viewed</string>
     <string name="extras_mobile_number">mobile_number</string>
     <string name="extras_already_user">already_user</string>
+    <string name="node_api_url">http://rooster-node.appspot-preview.com/</string>
 </resources>

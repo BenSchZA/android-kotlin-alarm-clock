@@ -21,16 +21,15 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.mobsandgeeks.saripaar.ValidationError;
 import com.mobsandgeeks.saripaar.Validator;
+import com.roostermornings.android.BaseApplication;
+import com.roostermornings.android.activity.SplashActivity;
+import com.roostermornings.android.node_api.IHTTPClient;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
-
-import com.roostermornings.android.BaseApplication;
-import com.roostermornings.android.R;
-import com.roostermornings.android.activity.SplashActivity;
-
-import java.util.List;
 
 public class BaseActivity extends AppCompatActivity implements Validator.ValidationListener {
 
@@ -83,6 +82,14 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         //Bind to butterknife delegate
         //Calls to ButterKnife.bind can be made anywhere you would otherwise put findViewById calls.
         ButterKnife.bind(this);
+
+    }
+
+    protected IHTTPClient apiService() {
+
+        BaseApplication baseApplication = (BaseApplication) getApplication();
+
+        return baseApplication.getAPIService();
 
     }
 
