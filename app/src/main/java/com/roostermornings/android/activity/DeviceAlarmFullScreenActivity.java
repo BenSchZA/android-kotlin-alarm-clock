@@ -1,9 +1,12 @@
 package com.roostermornings.android.activity;
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -77,11 +80,16 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     }
 
     protected void setProfilePic(String url) {
-        URL imageUrl = null;
         try {
-            imageUrl = new URL(url);
+            URL imageUrl = new URL(url);
             Bitmap bitmap = BitmapFactory.decodeStream(imageUrl.openConnection().getInputStream());
-            imgSenderPic.setImageBitmap(bitmap);
+
+            Resources res = getResources();
+            RoundedBitmapDrawable dr =
+                    RoundedBitmapDrawableFactory.create(res, bitmap);
+            dr.setCornerRadius(Math.max(bitmap.getWidth(), bitmap.getHeight()) / 2.0f);
+            imgSenderPic.setImageDrawable(dr);
+
         } catch (IOException e) {
             e.printStackTrace();
             imgSenderPic.setImageBitmap(null);

@@ -2,7 +2,6 @@ package com.roostermornings.android.domain;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 @IgnoreExtraProperties
@@ -16,7 +15,7 @@ public class User {
     private String cell_number;
     private HashMap<String, Boolean> friends;
     private String uid;
-    private Boolean selected;
+    private Boolean selected; //this is important for list of friends that need to be selected eg for creating a new alarm
 
     // Required default constructor for Firebase object mapping
     @SuppressWarnings("unused")

@@ -1,27 +1,22 @@
 package com.roostermornings.android;
 
-import android.app.Application;
-import android.support.annotation.NonNull;
-import android.util.Log;
-
 import com.crashlytics.android.Crashlytics;
 import com.facebook.stetho.Stetho;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.roostermornings.android.dagger.RoosterApplicationModule;
-
-import io.fabric.sdk.android.*;
-
 import com.roostermornings.android.dagger.DaggerRoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationModule;
+import com.roostermornings.android.node_api.IHTTPClient;
+
+import io.fabric.sdk.android.Fabric;
+import retrofit.GsonConverterFactory;
+import retrofit.Retrofit;
 
 public class BaseApplication extends android.app.Application {
 
     private static final String TAG = "BaseApplication";
-
-
     RoosterApplicationComponent roosterApplicationComponent;
+    public Retrofit mRetrofit;
+    public IHTTPClient mAPIService;
 
     @Override
     public void onCreate() {
@@ -29,7 +24,7 @@ public class BaseApplication extends android.app.Application {
 
         Fabric.with(this, new Crashlytics());
 
-        if(BuildConfig.DEBUG){
+        if (BuildConfig.DEBUG) {
             //Remove in release version... don't want to leave stethoscopes lying around
             //Stetho: http://facebook.github.io/stetho/ - debug bridge for Android (view SQL etc.)
             //Go to chrome://inspect/ in Chrome to inspect
@@ -47,10 +42,22 @@ public class BaseApplication extends android.app.Application {
                 .builder()
                 .roosterApplicationModule(new RoosterApplicationModule(this))
                 .build();
+
+
+        mRetrofit = new Retrofit.Builder()
+                .baseUrl(getResources().getString(R.string.node_api_url))
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        mAPIService = mRetrofit.create(IHTTPClient.class);
     }
 
     public RoosterApplicationComponent getRoosterApplicationComponent() {
         return roosterApplicationComponent;
+    }
+
+    public IHTTPClient getAPIService(){
+        return mAPIService;
     }
 
 }
