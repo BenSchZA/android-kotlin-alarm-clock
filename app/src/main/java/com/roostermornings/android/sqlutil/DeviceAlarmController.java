@@ -49,7 +49,7 @@ public final class DeviceAlarmController {
             Calendar systemCalendar = Calendar.getInstance();
 
             Intent alarmIntent = new Intent(context, DeviceAlarmReceiver.class);
-            alarmIntent.setAction("alarms.android.ALARM_RECEIVER");
+            alarmIntent.setAction("receiver.ALARM_RECEIVER");
             alarmIntent.putExtra("requestCode", deviceAlarm.getPiId());
 
             if (deviceAlarm.getRecurring()) {
