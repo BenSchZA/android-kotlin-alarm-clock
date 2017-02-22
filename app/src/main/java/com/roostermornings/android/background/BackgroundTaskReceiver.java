@@ -30,14 +30,6 @@ public class BackgroundTaskReceiver extends BroadcastReceiver {
 
     // The app's AlarmManager, which provides access to the system alarm services.
     private AlarmManager alarmMgrBackgroundTask;
-    public static final String TAG = BackgroundTaskReceiver.class.getSimpleName();
-
-    //Firebase libraries
-    protected DatabaseReference mDatabase;
-    protected FirebaseAuth mAuth;
-    protected StorageReference mStorageRef;
-
-    private AudioTableManager mAudioTableManager;
 
     public BackgroundTaskReceiver() {
     }
@@ -49,7 +41,8 @@ public class BackgroundTaskReceiver extends BroadcastReceiver {
 
         Log.d("Background Message:", "BackgroundTaskReceiver");
         Toast.makeText(context, "BackgroundTaskReceiver!", Toast.LENGTH_LONG).show();
-        retrieveFirebaseData(context);
+        startBackgroundTaskIntentService(context);
+
 
     }
 
@@ -65,101 +58,9 @@ public class BackgroundTaskReceiver extends BroadcastReceiver {
                 120 * 1000, backgroundIntent);
     }
 
-
-    public void retrieveFirebaseData(final Context context) {
-
-        mAuth = FirebaseAuth.getInstance();
-        mStorageRef = FirebaseStorage.getInstance().getReference();
-        mDatabase = FirebaseDatabase.getInstance().getReference();
-        mAudioTableManager = new AudioTableManager(context);
-
-        if (mAuth.getCurrentUser() == null || mAuth.getCurrentUser() == null) {
-            Log.d(TAG, "User not authenticated on FB!");
-            return;
-        }
-
-        final DatabaseReference queueReference = FirebaseDatabase.getInstance().getReference()
-                .child("social_rooster_queue").child(mAuth.getCurrentUser().getUid());
-
-
-        ValueEventListener alarmQueueListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-
-                    //TODO: check created_on timestamp on queue record, if older than 2 weeks, DELETE from DB
-
-                    AlarmQueue alarmQueue = postSnapshot.getValue(AlarmQueue.class);
-                    retrieveAudioFileFromFB(alarmQueue, context);
-                }
-
-                //queueReference.removeValue();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-            }
-        };
-
-        queueReference.addListenerForSingleValueEvent(alarmQueueListener);
-
-    }
-
-
-    private void retrieveAudioFileFromFB(final AlarmQueue alarmQueue, final Context context) {
-
-        try {
-
-            StorageReference audioFileRef = mStorageRef.child(alarmQueue.getAudio_file_url());
-            final String audioFileUniqueName = "audio" + RoosterUtils.createRandomFileName(5) + ".3gp";
-            final DatabaseReference queueRecordReference = FirebaseDatabase.getInstance().getReference()
-                    .child("social_rooster_queue").child(mAuth.getCurrentUser().getUid()).child(alarmQueue.getQueue_id());
-
-            final long ONE_MEGABYTE = 1024 * 1024;
-            audioFileRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                @Override
-                public void onSuccess(byte[] bytes) {
-
-                    try {
-                        FileOutputStream outputStream;
-                        outputStream = context.openFileOutput(audioFileUniqueName, Context.MODE_PRIVATE);
-                        outputStream.write(bytes);
-                        outputStream.close();
-
-                        Toast.makeText(context, "successfully downloaded", Toast.LENGTH_SHORT).show();
-
-                        alarmQueue.setAudio_file_url(audioFileUniqueName);
-
-                        //store in local SQLLite database
-                        mAudioTableManager.insertAudioFile(alarmQueue);
-
-                        //remove record of queue from FB database
-                        queueRecordReference.removeValue();
-
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-                    // Handle any errors
-                }
-            });
-
-
-            // For our recurring task, we'll just display a message
-            Toast.makeText(context, "I'm running", Toast.LENGTH_SHORT).show();
-
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
-        }
-
-
+    public void startBackgroundTaskIntentService(Context context){
+        Intent BackgroundTaskIntent = new Intent(context, BackgroundTaskIntentService.class);
+        BackgroundTaskIntent.setAction("com.roostermornings.android.background.action.BACKGROUND_DOWNLOAD");
+        context.startService(BackgroundTaskIntent);
     }
 }

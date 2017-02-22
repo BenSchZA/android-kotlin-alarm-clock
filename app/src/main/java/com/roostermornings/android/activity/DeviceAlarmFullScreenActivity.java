@@ -56,6 +56,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
 
     protected void playNewAudioFile(final DeviceAudioQueueItem audioItem) {
+        //TODO: test corrupt audio
         //TODO: default alarm tone
         mediaPlayer = new MediaPlayer();
         final File file = new File(getFilesDir() + "/" + audioItem.getFilename());
@@ -71,8 +72,10 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
                     //delete file
-                    //delete record from arraylist
                     file.delete();
+                    //delete record from AudioTable SQL DB
+                    audioTableManager.removeAudioFile(audioItem.getId());
+                    //delete record from arraylist
                     audioItems.remove(audioItem);
                     if (!audioItems.isEmpty()) {
                         playNewAudioFile(audioItems.get(0));

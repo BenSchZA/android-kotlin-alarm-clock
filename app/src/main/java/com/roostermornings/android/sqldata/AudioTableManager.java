@@ -48,6 +48,24 @@ public class AudioTableManager {
         db.close();
     }
 
+    public void removeAudioFile(int ID){
+        SQLiteDatabase db = initDB();
+
+        String execSql = "DELETE FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_ID + " = " + ID + ";";
+
+        db.execSQL(execSql);
+        db.close();
+    }
+
+    public void clearAudioFiles(){
+        SQLiteDatabase db = initDB();
+
+        String execSql = "TRUNCATE TABLE " + AudioTableEntry.TABLE_NAME;
+
+        db.execSQL(execSql);
+        db.close();
+    }
+
     public List<DeviceAudioQueueItem> extractAudioFiles() {
 
         SQLiteDatabase db = initDB();
