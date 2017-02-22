@@ -11,10 +11,18 @@ public class DeviceAudioQueueItem {
     private String queue_id;
     private String filename;
     private long alarm_id;
-    private String date_created;
+    private long date_created;
     private String sender_id;
     private String sender_name;
     private String sender_pic;
+
+    public long getDate_created() {
+        return date_created;
+    }
+
+    public void setDate_created(long date_created) {
+        this.date_created = date_created;
+    }
 
     public DeviceAudioQueueItem(){};
 
@@ -48,14 +56,6 @@ public class DeviceAudioQueueItem {
 
     public void setAlarm_id(long alarm_id) {
         this.alarm_id = alarm_id;
-    }
-
-    public String getDate_created() {
-        return date_created;
-    }
-
-    public void setDate_created(String date_created) {
-        this.date_created = date_created;
     }
 
     public String getSender_id() {
