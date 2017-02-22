@@ -84,6 +84,13 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
             });
         } catch (IOException e) {
             e.printStackTrace();
+
+            //delete file
+            file.delete();
+            //delete record from AudioTable SQL DB
+            audioTableManager.removeAudioFile(audioItem.getId());
+            //delete record from arraylist
+            audioItems.remove(audioItem);
         }
     }
 
