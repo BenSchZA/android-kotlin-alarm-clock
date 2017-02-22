@@ -42,8 +42,6 @@ public class BackgroundTaskReceiver extends BroadcastReceiver {
         Log.d("Background Message:", "BackgroundTaskReceiver");
         Toast.makeText(context, "BackgroundTaskReceiver!", Toast.LENGTH_LONG).show();
         startBackgroundTaskIntentService(context);
-
-
     }
 
     public void startBackgroundTask(Context context) {
