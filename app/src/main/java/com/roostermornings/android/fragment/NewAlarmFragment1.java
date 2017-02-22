@@ -195,13 +195,13 @@ public class NewAlarmFragment1 extends BaseFragment {
     @OnCheckedChanged(R.id.new_alarm_fragment1_switch_recurring)
     public void recurringSwitchOnCheckedChanged(boolean isChecked) {
 
-//        if (isChecked) {
-//            mAlarm.setRecurring(true);
-//            daysParentLinearLayout.setVisibility(View.VISIBLE);
-//        } else {
-//            mAlarm.setRecurring(false);
-//            daysParentLinearLayout.setVisibility(View.INVISIBLE);
-//        }
+        if (isChecked) {
+            mAlarm.setRecurring(true);
+            //daysParentLinearLayout.setVisibility(View.VISIBLE);
+        } else {
+            mAlarm.setRecurring(false);
+            //daysParentLinearLayout.setVisibility(View.INVISIBLE);
+        }
         mListener.setAlarmDetails(mAlarm);
     }
 
