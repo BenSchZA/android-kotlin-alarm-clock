@@ -33,7 +33,7 @@
             android:name=".receiver.DeviceAlarmReceiver"
             android:enabled="true">
             <intent-filter>
-                <action android:name="alarms.android.ALARM_RECEIVER" />
+                <action android:name="receiver.ALARM_RECEIVER" />
             </intent-filter>
         </receiver>
 
