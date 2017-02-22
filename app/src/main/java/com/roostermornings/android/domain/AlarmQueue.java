@@ -16,13 +16,14 @@ public class AlarmQueue {
     private String profile_pic;
     private String user_name;
     private String sender_id;
+    private long date_uploaded;
 
     // Required default constructor for Firebase object mapping
     @SuppressWarnings("unused")
     public AlarmQueue() {
     }
 
-    public AlarmQueue(String alarm_id, String audio_file_url, String cell_number, String profile_pic, String user_name, String queue_id, String sender_id) {
+    public AlarmQueue(String alarm_id, String audio_file_url, String cell_number, String profile_pic, String user_name, String queue_id, String sender_id, long date_uploaded) {
         this.alarm_id = alarm_id;
         this.audio_file_url = audio_file_url;
         this.cell_number = cell_number;
@@ -30,6 +31,15 @@ public class AlarmQueue {
         this.user_name = user_name;
         this.queue_id = queue_id;
         this.sender_id = sender_id;
+        this.date_uploaded = date_uploaded;
+    }
+
+    public long getDate_uploaded() {
+        return date_uploaded;
+    }
+
+    public void setDate_uploaded(long date_created) {
+        this.date_uploaded = date_created;
     }
 
     public String getSender_id() {

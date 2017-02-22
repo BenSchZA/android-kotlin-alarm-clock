@@ -1,7 +1,6 @@
 package com.roostermornings.android.sqldata;
 
 import android.provider.BaseColumns;
-import android.provider.ContactsContract;
 
 /**
  * Created by bscholtz on 2/14/17.
@@ -23,7 +22,7 @@ public final class AudioTableContract {
         public static final String COLUMN_SENDER_NAME = "sender_name";
         public static final String COLUMN_SENDER_PIC = "sender_pic";
 
-        public static final String COLUMN_DATE_CREATED = "date_created";
+        public static final String COLUMN_DATE_UPLOADED = "date_created";
     }
 
     public static final String SQL_CREATE_ENTRIES =
@@ -38,7 +37,7 @@ public final class AudioTableContract {
                     + AudioTableEntry.COLUMN_SENDER_NAME + " STRING NULL, "
                     + AudioTableEntry.COLUMN_SENDER_PIC + " STRING NULL, "
 
-                    + AudioTableEntry.COLUMN_DATE_CREATED + " DATE DEFAULT (datetime('now','localtime')), "
+                    + AudioTableEntry.COLUMN_DATE_UPLOADED + " INTEGER NOT NULL, "
 
                     //Ensure combination of IDs is unique
                     + "CONSTRAINT unique_id UNIQUE (" + AudioTableEntry.COLUMN_ID + "," + AudioTableEntry.COLUMN_QUEUE_ID + ") );";

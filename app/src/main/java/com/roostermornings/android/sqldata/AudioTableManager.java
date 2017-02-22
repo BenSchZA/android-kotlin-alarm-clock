@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import static com.roostermornings.android.sqldata.AudioTableContract.AudioTableEntry;
+import static com.roostermornings.android.sqldata.AudioTableContract.SQL_CREATE_ENTRIES;
 
 import com.roostermornings.android.domain.AlarmQueue;
 import com.roostermornings.android.domain.DeviceAudioQueueItem;
@@ -42,9 +43,39 @@ public class AudioTableManager {
         values.put(AudioTableEntry.COLUMN_SENDER_ID, queue.getSender_id());
         values.put(AudioTableEntry.COLUMN_SENDER_NAME, queue.getUser_name());
         values.put(AudioTableEntry.COLUMN_SENDER_PIC, queue.getProfile_pic());
+        values.put(AudioTableEntry.COLUMN_DATE_UPLOADED, queue.getDate_uploaded());
 
         // Inserting Row
         db.insert(AudioTableEntry.TABLE_NAME, null, values);
+        db.close();
+    }
+
+    public void removeAudioFile(int ID){
+        SQLiteDatabase db = initDB();
+
+        String execSql = "DELETE FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_ID + " = " + ID + ";";
+
+        db.execSQL(execSql);
+        db.close();
+    }
+
+    public void purgeAudioFiles(){
+        //Purge audio files older than 2 weeks
+//        SQLiteDatabase db = initDB();
+//
+//        //TODO
+//        //String execSql = "DELETE FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_DATE_UPLOADED + " in (SELECT q." + AudioTableEntry.COLUMN_DATE_UPLOADED + " FROM " + AudioTableEntry.TABLE_NAME + " q " + ";";
+//
+//        db.execSQL(execSql);
+//        db.close();
+    }
+
+    public void clearAudioFiles(){
+        SQLiteDatabase db = initDB();
+
+        String execSql = "TRUNCATE TABLE " + AudioTableEntry.TABLE_NAME;
+
+        db.execSQL(execSql);
         db.close();
     }
 
@@ -62,7 +93,7 @@ public class AudioTableManager {
                 DeviceAudioQueueItem audioFile = new DeviceAudioQueueItem();
 
                 audioFile.setAlarm_id(cursor.getLong(cursor.getColumnIndex(AudioTableEntry.COLUMN_ALARM_ID)));
-                audioFile.setDate_created(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_DATE_CREATED)));
+                audioFile.setDate_created(cursor.getInt(cursor.getColumnIndex(AudioTableEntry.COLUMN_DATE_UPLOADED)));
                 audioFile.setFilename(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_FILENAME)));
                 audioFile.setId(cursor.getInt(cursor.getColumnIndex(AudioTableEntry.COLUMN_ID)));
                 audioFile.setQueue_id(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_QUEUE_ID)));

@@ -7,6 +7,7 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -40,6 +41,12 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_device_alarm_full_screen);
+        //Used to ensure alarm shows over lock-screen
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                + WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
+                + WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
+                + WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+
         retrieveMyAlarms();
     }
 
@@ -51,6 +58,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
 
     protected void playNewAudioFile(final DeviceAudioQueueItem audioItem) {
+        //TODO: test corrupt audio
         //TODO: default alarm tone
         mediaPlayer = new MediaPlayer();
         final File file = new File(getFilesDir() + "/" + audioItem.getFilename());
@@ -66,8 +74,10 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
                     //delete file
-                    //delete record from arraylist
                     file.delete();
+                    //delete record from AudioTable SQL DB
+                    audioTableManager.removeAudioFile(audioItem.getId());
+                    //delete record from arraylist
                     audioItems.remove(audioItem);
                     if (!audioItems.isEmpty()) {
                         playNewAudioFile(audioItems.get(0));
@@ -76,6 +86,13 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
             });
         } catch (IOException e) {
             e.printStackTrace();
+
+            //delete file
+            file.delete();
+            //delete record from AudioTable SQL DB
+            audioTableManager.removeAudioFile(audioItem.getId());
+            //delete record from arraylist
+            audioItems.remove(audioItem);
         }
     }
 
