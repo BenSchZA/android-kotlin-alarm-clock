@@ -96,9 +96,7 @@
             android:launchMode="singleTask"
             android:screenOrientation="sensorPortrait"
             android:showOnLockScreen="true"
-            android:theme="@style/AppTheme.NoActionBar"
-
-            />
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>

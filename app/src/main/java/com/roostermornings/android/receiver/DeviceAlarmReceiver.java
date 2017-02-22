@@ -21,7 +21,7 @@ public class DeviceAlarmReceiver extends WakefulBroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         this.context = context;
 
-        //instatiate new alarm controller
+        //instantiate new alarm controller
         //alarm controller provides interface for synchronising pending intents with SQLLite database on device
         alarmController = new DeviceAlarmController(context);
 
