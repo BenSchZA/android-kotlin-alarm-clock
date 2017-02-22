@@ -4,6 +4,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -37,6 +39,12 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_device_alarm_full_screen);
+        //Used to ensure alarm shows over lock-screen
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                + WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
+                + WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
+                + WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+
         retrieveMyAlarms();
     }
 
