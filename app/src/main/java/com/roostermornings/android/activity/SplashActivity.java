@@ -9,6 +9,7 @@ import android.os.CountDownTimer;
 import com.google.firebase.auth.FirebaseUser;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.background.BackgroundTaskReceiver;
 
 public class SplashActivity extends BaseActivity {
 
@@ -19,6 +20,9 @@ public class SplashActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_splash);
         mFBUser = getFirebaseUser();
+
+        BackgroundTaskReceiver backgroundTaskReceiver = new BackgroundTaskReceiver();
+        backgroundTaskReceiver.startBackgroundTask(getApplicationContext());
 
         CountDownTimer countDownTimer = new CountDownTimer(2000, 2000) {
             @Override

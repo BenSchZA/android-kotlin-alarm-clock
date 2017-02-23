@@ -36,9 +36,10 @@ public class BootReceiver extends BroadcastReceiver {
         alarmController.rebootAlarms();
         if (auth != null && auth.getCurrentUser().getUid() != null) {
             Toast.makeText(context, "Tasks started, valid user!", Toast.LENGTH_LONG).show();
-            alarmController.rebootAlarms();
-            backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(context);
-            backgroundTaskReceiver.scheduleBackgroundDailyTask(context);
+            //TODO:
+//            alarmController.rebootAlarms();
+//            backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(context);
+//            backgroundTaskReceiver.scheduleBackgroundDailyTask(context);
         } else {
             Toast.makeText(context, "Tasks not started, invalid user!", Toast.LENGTH_LONG).show();
         }
