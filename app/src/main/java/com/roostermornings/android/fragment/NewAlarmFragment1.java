@@ -66,13 +66,21 @@ public class NewAlarmFragment1 extends BaseFragment {
         //Set current time
         mAlarm.setHour(hour);
         mAlarm.setMinute(minute);
+
+        mTimePickerDialog = new TimePickerDialog(getContext(), new TimePickerDialog.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                setAlarmTime(hourOfDay, minute);
+            }
+        }, hour, minute, true); //24h time
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View view = initiate(inflater, R.layout.fragment_new_alarm_fragment1, container, false);
+        View view = initiate(inflater, R.layout.fragment_new_alarm_step1, container, false);
         textViewAlarmTime.setText(RoosterUtils.setAlarmTimeFromHourAndMinute(mAlarm));
         return view;
     }
@@ -106,15 +114,7 @@ public class NewAlarmFragment1 extends BaseFragment {
     @OnClick(R.id.new_alarm_time)
     public void onTimeClick() {
 
-        mTimePickerDialog = new TimePickerDialog(getContext(), new TimePickerDialog.OnTimeSetListener() {
-            @Override
-            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                setAlarmTime(hourOfDay, minute);
-            }
-        }, hour, minute, true); //24h time
-
-        mTimePickerDialog.setTitle(getString(R.string.new_alarm_set_time));
-        mTimePickerDialog.show();
+        openTimePicker();
 
     }
 
@@ -203,6 +203,13 @@ public class NewAlarmFragment1 extends BaseFragment {
             //daysParentLinearLayout.setVisibility(View.INVISIBLE);
         }
         mListener.setAlarmDetails(mAlarm);
+    }
+
+    private void openTimePicker() {
+
+        mTimePickerDialog.setTitle(getString(R.string.new_alarm_set_time));
+        mTimePickerDialog.show();
+
     }
 
 }

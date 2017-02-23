@@ -67,7 +67,7 @@ public class NewAlarmFragment2 extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View view = initiate(inflater, R.layout.fragment_new_alarm_fragment2, container, false);
+        View view = initiate(inflater, R.layout.fragment_new_alarm_step2, container, false);
 
         mChannelsReference = FirebaseDatabase.getInstance().getReference()
                 .child("channels");
