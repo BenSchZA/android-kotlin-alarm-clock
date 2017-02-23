@@ -59,6 +59,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
         mAlarm.setMinute(mMinute);
         mAlarm.setHour(mHour);
         mAlarm.setRecurring(false);
+        mAlarm.setVibrate(true);
         mAlarm.setAllow_friend_audio_files(true);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -148,7 +149,8 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 if (mAlarm.isSaturday()) alarmDays.add(Calendar.SATURDAY);
                 if (mAlarm.isSunday()) alarmDays.add(Calendar.SUNDAY);
 
-                deviceAlarmController.registerAlarmSet(mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring());
+                //Extract data from Alarm mAlarm and create new alarm set DeviceAlarm
+                deviceAlarmController.registerAlarmSet(mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring(), mAlarm.isVibrate());
 
                 Toast.makeText(getBaseContext(), "Alarm created!", Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(getBaseContext(), MyAlarmsFragmentActivity.class);

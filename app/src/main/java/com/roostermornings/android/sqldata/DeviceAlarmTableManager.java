@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 
 import java.util.ArrayList;
@@ -49,6 +50,7 @@ public class DeviceAlarmTableManager {
         values.put(AlarmTableEntry.COLUMN_MINUTE, alarm.getMinute());
         values.put(AlarmTableEntry.COLUMN_DAY, alarm.getDay());
         values.put(AlarmTableEntry.COLUMN_RECURRING, alarm.getRecurring());
+        values.put(AlarmTableEntry.COLUMN_VIBRATE, alarm.getVibrate());
         values.put(AlarmTableEntry.COLUMN_MILLIS, alarm.getMillis());
 
         values.put(AlarmTableEntry.COLUMN_CHANGED, alarm.getChanged());

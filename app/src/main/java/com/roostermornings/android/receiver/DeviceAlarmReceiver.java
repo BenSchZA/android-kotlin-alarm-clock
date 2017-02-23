@@ -2,6 +2,11 @@ package com.roostermornings.android.receiver;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
+import android.os.Vibrator;
+import android.provider.AlarmClock;
 import android.support.v4.content.WakefulBroadcastReceiver;
 
 import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
@@ -9,6 +14,7 @@ import com.roostermornings.android.sqldata.DeviceAlarmTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 
+import static android.content.Context.VIBRATOR_SERVICE;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 public class DeviceAlarmReceiver extends WakefulBroadcastReceiver {
@@ -41,6 +47,17 @@ public class DeviceAlarmReceiver extends WakefulBroadcastReceiver {
         } else {
             //Set alarm to disabled if fired and not recurring - once all alarms in set are disabled, then toggle enabled in GUI
             alarmTableManager.setAlarmEnabled(intent.getIntExtra("requestCode", 0), false);
+        }
+
+        if (intent.getBooleanExtra(DeviceAlarm.EXTRA_VIBRATE, false)) {
+            Vibrator vibrator = (Vibrator) context.getSystemService(VIBRATOR_SERVICE);
+            long[] vibratePattern = {0, 1000, 500, 1000, 500};
+            int vibrateRepeat = 2;
+            vibrator.vibrate(vibratePattern, vibrateRepeat);
+        }
+
+        if (intent.getBooleanExtra(DeviceAlarm.EXTRA_TONE, false)) {
+            intentAlarmFullscreen.putExtra(DeviceAlarm.EXTRA_TONE, true);
         }
 
         context.startActivity(intentAlarmFullscreen);
