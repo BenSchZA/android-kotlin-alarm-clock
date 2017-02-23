@@ -2,6 +2,9 @@ package com.roostermornings.android.receiver;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Vibrator;
 import android.provider.AlarmClock;
 import android.support.v4.content.WakefulBroadcastReceiver;
@@ -51,6 +54,10 @@ public class DeviceAlarmReceiver extends WakefulBroadcastReceiver {
             long[] vibratePattern = {0, 1000, 500, 1000, 500};
             int vibrateRepeat = 2;
             vibrator.vibrate(vibratePattern, vibrateRepeat);
+        }
+
+        if (intent.getBooleanExtra(DeviceAlarm.EXTRA_TONE, false)) {
+            intentAlarmFullscreen.putExtra(DeviceAlarm.EXTRA_TONE, true);
         }
 
         context.startActivity(intentAlarmFullscreen);

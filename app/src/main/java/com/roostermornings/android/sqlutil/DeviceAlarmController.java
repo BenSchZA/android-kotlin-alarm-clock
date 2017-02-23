@@ -60,6 +60,9 @@ public final class DeviceAlarmController {
                 alarmIntent.putExtra(DeviceAlarm.EXTRA_VIBRATE, true);
             }
 
+            //TODO: remove
+            alarmIntent.putExtra(DeviceAlarm.EXTRA_TONE, true);
+
             PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(context,
                     deviceAlarm.getPiId(), alarmIntent,
                     PendingIntent.FLAG_UPDATE_CURRENT);
@@ -100,6 +103,45 @@ public final class DeviceAlarmController {
                 alarmChanged.putExtra("alarmSet", true);
                 context.sendBroadcast(alarmChanged);
             }
+        }
+
+    }
+
+    public void snoozeAlarm(){
+        //Add new pending intent for 10 minutes time
+        alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        Calendar alarmCalendar = Calendar.getInstance();
+        alarmCalendar.setTimeInMillis(alarmCalendar.getTimeInMillis() + 10*60*1000);
+
+        Intent alarmIntent = new Intent(context, DeviceAlarmReceiver.class);
+        alarmIntent.setAction("receiver.ALARM_RECEIVER");
+        alarmIntent.putExtra("requestCode", 0);
+
+        alarmIntent.putExtra(DeviceAlarm.EXTRA_VIBRATE, true);
+        alarmIntent.putExtra(DeviceAlarm.EXTRA_TONE, true);
+
+        PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(context,
+                0, alarmIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        long alarmTime = alarmCalendar.getTimeInMillis();
+
+        //if newer version of Android, create info pending intent
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Intent alarmInfoIntent = new Intent(context, DeviceAlarmFullScreenActivity.class);
+            PendingIntent alarmInfoPendingIntent = PendingIntent.getActivity(context, 0, alarmInfoIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            //required for setting alarm clock
+            AlarmManager.AlarmClockInfo alarmInfo = new AlarmManager.AlarmClockInfo(alarmTime, alarmInfoPendingIntent);
+            alarmMgr.setAlarmClock(alarmInfo, alarmPendingIntent);
+
+        } else {
+            //if older of android, don't require info pending intent
+            alarmMgr.setExact(AlarmManager.RTC_WAKEUP, alarmTime, alarmPendingIntent);
+            // Show alarm in the status bar
+            Intent alarmChanged = new Intent("android.intent.action.ALARM_CHANGED");
+            alarmChanged.putExtra("alarmSet", true);
+            context.sendBroadcast(alarmChanged);
         }
 
     }
