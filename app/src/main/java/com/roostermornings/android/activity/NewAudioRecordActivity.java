@@ -242,7 +242,7 @@ public class NewAudioRecordActivity extends BaseActivity {
     @OnClick(R.id.new_audio_save)
     public void onSaveAudioFileClick() {
 
-        Uri file = Uri.fromFile(new File(mAudioSavePathInDevice));
+        final Uri file = Uri.fromFile(new File(mAudioSavePathInDevice));
         StorageReference audioFileRef = mStorageRef.child("social_rooster_uploads/" + file.getLastPathSegment());
 
         audioFileRef.putFile(file)
@@ -254,7 +254,7 @@ public class NewAudioRecordActivity extends BaseActivity {
                         Intent intent = new Intent(NewAudioRecordActivity.this, NewAudioFriendsActivity.class);
 
                         Bundle bun = new Bundle();
-                        bun.putString("downloadUrl", downloadUrl.toString());
+                        bun.putString("downloadUrl", file.getLastPathSegment());
                         intent.putExtras(bun);
                         startActivity(intent);
                     }
