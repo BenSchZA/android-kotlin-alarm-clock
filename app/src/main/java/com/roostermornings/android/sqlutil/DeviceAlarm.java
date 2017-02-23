@@ -31,6 +31,7 @@ public class DeviceAlarm {
 //##################################################################
 
     public static final String EXTRA_RECURRING = "extra_recurring";
+    public static final String EXTRA_VIBRATE = "extra_vibrate";
 
     private Calendar calendar = Calendar.getInstance();
 
@@ -48,11 +49,12 @@ public class DeviceAlarm {
     alarmList = alarmSet.getAlarmList();*/
 
 
-    public DeviceAlarm initAlarmSet(int hour, int minute, List<Integer> alarmDays, boolean repeatWeekly) {
+    public DeviceAlarm initAlarmSet(int hour, int minute, List<Integer> alarmDays, boolean repeatWeekly, boolean vibrate) {
         this.hour = hour;
         this.minute = minute;
         this.alarmDays = alarmDays;
         this.recurring = repeatWeekly;
+        this.vibrate = vibrate;
         return this;
     }
 
@@ -61,16 +63,17 @@ public class DeviceAlarm {
 
         while (dayIterator.hasNext()) {
             day = Integer.valueOf(dayIterator.next().toString());
-            deviceAlarmSet.add(new DeviceAlarm().setAlarm(this.hour, this.minute, day, this.recurring));
+            deviceAlarmSet.add(new DeviceAlarm().setAlarm(this.hour, this.minute, day, this.recurring, this.vibrate));
         }
         return deviceAlarmSet;
     }
 
-    private DeviceAlarm setAlarm(int hour, int minute, int day, boolean repeatWeekly) {
+    private DeviceAlarm setAlarm(int hour, int minute, int day, boolean repeatWeekly, boolean vibrate) {
         this.hour = hour;
         this.minute = minute;
         this.day = day;
         this.recurring = repeatWeekly;
+        this.vibrate = vibrate;
         this.alarmMillis = -1;
 
         return this;

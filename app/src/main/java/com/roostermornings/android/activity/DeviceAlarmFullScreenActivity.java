@@ -3,8 +3,10 @@ package com.roostermornings.android.activity;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.view.WindowManager;
@@ -50,6 +52,18 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         retrieveMyAlarms();
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        //If vibrating then cancel
+        Vibrator vibrator = (Vibrator) getApplicationContext().getSystemService(VIBRATOR_SERVICE);
+        if(vibrator.hasVibrator()) {
+            vibrator.cancel();
+        }
+    }
+
+
     protected void retrieveMyAlarms() {
         audioItems = audioTableManager.extractAudioFiles();
         if (audioItems == null || audioItems.size() == 0) return;
@@ -61,6 +75,8 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         //TODO: test corrupt audio
         //TODO: default alarm tone
         mediaPlayer = new MediaPlayer();
+        //Set media player to alarm volume
+        mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
         final File file = new File(getFilesDir() + "/" + audioItem.getFilename());
         setProfilePic(audioItem.getSender_pic());
         txtSenderName.setText(audioItem.getSender_name());

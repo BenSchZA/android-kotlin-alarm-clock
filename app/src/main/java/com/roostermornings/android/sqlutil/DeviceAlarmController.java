@@ -53,9 +53,11 @@ public final class DeviceAlarmController {
             alarmIntent.putExtra("requestCode", deviceAlarm.getPiId());
 
             if (deviceAlarm.getRecurring()) {
-                //TODO: Note that extras can also activate vibrate etc.
                 alarmIntent.putExtra(DeviceAlarm.EXTRA_RECURRING, true);
-                alarmIntent.putExtra(AlarmClock.EXTRA_VIBRATE, true);
+            }
+
+            if (deviceAlarm.getVibrate()){
+                alarmIntent.putExtra(DeviceAlarm.EXTRA_VIBRATE, true);
             }
 
             PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(context,
@@ -102,10 +104,10 @@ public final class DeviceAlarmController {
 
     }
 
-    public void registerAlarmSet(int alarmHour, int alarmMinute, List<Integer> alarmDays, boolean repeatWeekly) {
+    public void registerAlarmSet(int alarmHour, int alarmMinute, List<Integer> alarmDays, boolean repeatWeekly, boolean vibrate) {
         List<DeviceAlarm> deviceAlarmList;
         DeviceAlarm deviceAlarmSet = new DeviceAlarm()
-                .initAlarmSet(alarmHour, alarmMinute, alarmDays, repeatWeekly);
+                .initAlarmSet(alarmHour, alarmMinute, alarmDays, repeatWeekly, vibrate);
         deviceAlarmList = deviceAlarmSet.getAlarmList();
 
         //TODO: Temporary, replace with Firebase UID

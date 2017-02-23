@@ -34,7 +34,7 @@ public class NewAlarmFragment1 extends BaseFragment {
     public static final String TAG = NewAlarmFragment1.class.getSimpleName();
     private String mUserUidParam;
     private IAlarmSetListener mListener;
-    com.roostermornings.android.domain.Alarm mAlarm = new Alarm();
+    Alarm mAlarm = new Alarm();
 
     Calendar cal = Calendar.getInstance();
 
@@ -66,6 +66,8 @@ public class NewAlarmFragment1 extends BaseFragment {
         //Set current time
         mAlarm.setHour(hour);
         mAlarm.setMinute(minute);
+        //TODO: move to button
+        mAlarm.setVibrate(true);
     }
 
     @Override
