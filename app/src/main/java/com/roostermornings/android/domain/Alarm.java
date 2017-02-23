@@ -21,6 +21,7 @@ public class Alarm {
     private int minute;
     private boolean recurring;
     private boolean allow_friend_audio_files;
+    private String uid;
 
     private boolean vibrate;
 
@@ -31,7 +32,7 @@ public class Alarm {
 
     public Alarm(AlarmChannel channel, boolean monday, boolean tuesday, boolean wednesday,
                  boolean thursday, boolean friday, boolean saturday, boolean
-                         sunday, int hour, int minute, boolean recurring, boolean allow_friend_audio_files, boolean vibrate) {
+                         sunday, int hour, int minute, boolean recurring, boolean allow_friend_audio_files, boolean vibrate, String uid) {
         this.channel = channel;
         this.monday = monday;
         this.tuesday = tuesday;
@@ -46,6 +47,15 @@ public class Alarm {
         this.allow_friend_audio_files = allow_friend_audio_files;
 
         this.vibrate = vibrate;
+        this.uid = uid;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 
     public boolean isAllow_friend_audio_files() {

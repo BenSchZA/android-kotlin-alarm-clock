@@ -3,8 +3,8 @@ package com.roostermornings.android.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.CountDownTimer;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 
 import com.google.firebase.auth.FirebaseUser;
 import com.roostermornings.android.R;
@@ -12,8 +12,6 @@ import com.roostermornings.android.activity.base.BaseActivity;
 
 public class SplashActivity extends BaseActivity {
 
-    static final String TAG = "SplashActivity";
-    boolean mIntroViewed = false;//sharedPreferences.getBoolean(getString(R.string.preferences_intro_viewed), false);
     FirebaseUser mFBUser;
 
     @Override
@@ -31,7 +29,9 @@ public class SplashActivity extends BaseActivity {
             @Override
             public void onFinish() {
 
-                if (!mIntroViewed) {
+                boolean introViewed = sharedPreferences.getBoolean(getString(R.string.preferences_intro_viewed), false);
+
+                if (!introViewed) {
 
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putBoolean(getString(R.string.preferences_intro_viewed), true);
@@ -39,7 +39,7 @@ public class SplashActivity extends BaseActivity {
 
                     navigateToActivity(IntroFragmentActivity.class);
 
-                } else if (mFBUser == null) {
+                } else if (mFBUser == null || mFBUser.getUid() == null) {
 
                     navigateToActivity(SignInActivity.class);
 

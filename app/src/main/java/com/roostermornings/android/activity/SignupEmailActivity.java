@@ -1,6 +1,7 @@
 package com.roostermornings.android.activity;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -72,6 +73,13 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
 
         validator.validate();
 
+    }
+
+    @OnClick(R.id.terms_and_conditions_link)
+    protected void onTermsAndConditionsClicked() {
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setData(Uri.parse(getString(R.string.rooster_website_t_and_c_url)));
+        startActivity(i);
     }
 
     @Override

@@ -25,10 +25,11 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:layout_marginBottom="@dimen/spacing_xxlarge"
             android:layout_marginTop="10dp"
             android:paddingTop="20dp"
-            android:text="@string/splash_greeting"
+            android:text="@string/activity_signin_title"
             android:textColor="@color/white"
             android:textSize="@dimen/text_large" />
 
@@ -38,8 +39,8 @@
             android:layout_width="260dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/spacing_normal"
             android:layout_marginBottom="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_normal"
             android:text="@string/signup_facebook" />
 
         <Button
@@ -48,8 +49,8 @@
             android:layout_width="260dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/spacing_normal"
             android:layout_marginBottom="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_normal"
             android:text="@string/signup_google" />
 
         <Button
@@ -60,8 +61,9 @@
             android:layout_gravity="center_horizontal"
             android:layout_margin="@dimen/spacing_normal"
             android:text="@string/signup_email">
+
             <requestFocus />
-            </Button>
+        </Button>
 
     </LinearLayout>
 
@@ -73,6 +75,7 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/already_user_textview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/spacing_xlarge"
@@ -80,7 +83,6 @@
             android:focusable="true"
             android:gravity="right"
             android:text="Already a user? Sign in"
-            android:id="@+id/already_user_textview"
             android:textColor="@drawable/rooster_link_white" />
 
 
