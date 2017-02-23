@@ -25,6 +25,7 @@ import com.roostermornings.android.sqldata.AudioTableManager;
 import com.roostermornings.android.util.RoosterUtils;
 
 import java.io.FileOutputStream;
+import java.util.Calendar;
 
 public class BackgroundTaskReceiver extends BroadcastReceiver {
 
@@ -41,24 +42,31 @@ public class BackgroundTaskReceiver extends BroadcastReceiver {
 
         Log.d("Background Message:", "BackgroundTaskReceiver");
         Toast.makeText(context, "BackgroundTaskReceiver!", Toast.LENGTH_LONG).show();
-        startBackgroundTaskIntentService(context);
+
+        Intent intentService = new Intent(context, BackgroundTaskIntentService.class);
+        intentService.setAction(intent.getAction());
+        context.startService(intentService);
     }
 
-    public void startBackgroundTask(Context context) {
-
-        //starts a inexact repeating background task that runs every 10 seconds
-        //the task runs the 'retrieveFirebaseData' method
-
+    public void scheduleBackgroundCacheFirebaseData(Context context) {
         alarmMgrBackgroundTask = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(context, BackgroundTaskReceiver.class);
+        intent.setAction("com.roostermornings.android.background.action.BACKGROUND_DOWNLOAD");
+        //starts a inexact repeating background task that runs every 10 seconds
+        //the task runs the 'retrieveFirebaseData' method in BackgroundTaskIntentService
         PendingIntent backgroundIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
         alarmMgrBackgroundTask.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 10 * 1000,
                 120 * 1000, backgroundIntent);
     }
 
-    public void startBackgroundTaskIntentService(Context context){
-        Intent BackgroundTaskIntent = new Intent(context, BackgroundTaskIntentService.class);
-        BackgroundTaskIntent.setAction("com.roostermornings.android.background.action.BACKGROUND_DOWNLOAD");
-        context.startService(BackgroundTaskIntent);
+    public void scheduleBackgroundDailyTask(Context context) {
+        alarmMgrBackgroundTask = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(context, BackgroundTaskReceiver.class);
+        intent.setAction("com.roostermornings.android.background.action.DAILY_TASK");
+        //starts a inexact repeating background task that runs every day
+        //the task runs the 'dailyTasks' method in BackgroundTaskIntentService
+        PendingIntent backgroundIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+        alarmMgrBackgroundTask.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 86400 * 1000,
+                86400 * 1000, backgroundIntent);
     }
 }
