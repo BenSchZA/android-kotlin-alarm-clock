@@ -112,7 +112,7 @@ public class BackgroundTaskReceiver extends BroadcastReceiver {
 
         try {
 
-            StorageReference audioFileRef = mStorageRef.child(alarmQueue.getAudio_file_url());
+            StorageReference audioFileRef = mStorageRef.child("social_rooster_uploads/" + alarmQueue.getAudio_file_url());
             final String audioFileUniqueName = "audio" + RoosterUtils.createRandomFileName(5) + ".3gp";
             final DatabaseReference queueRecordReference = FirebaseDatabase.getInstance().getReference()
                     .child("social_rooster_queue").child(mAuth.getCurrentUser().getUid()).child(alarmQueue.getQueue_id());
