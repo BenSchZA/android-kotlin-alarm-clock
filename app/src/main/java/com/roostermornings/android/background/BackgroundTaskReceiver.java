@@ -31,7 +31,6 @@ public class BackgroundTaskReceiver extends BroadcastReceiver {
 
     // The app's AlarmManager, which provides access to the system alarm services.
     private AlarmManager alarmMgrBackgroundTask;
-    private BackgroundTaskIntentService backgroundTaskIntentService;
 
     public BackgroundTaskReceiver() {
     }
