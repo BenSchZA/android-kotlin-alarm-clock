@@ -148,7 +148,8 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
     private void proceedToMyAlarmsActivity() {
 
         BackgroundTaskReceiver backgroundTaskReceiver = new BackgroundTaskReceiver();
-        backgroundTaskReceiver.startBackgroundTask(SignupEmailActivity.this);
+        backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(SignupEmailActivity.this);
+        backgroundTaskReceiver.scheduleBackgroundDailyTask(SignupEmailActivity.this);
 
         AudioTableHelper helper = new AudioTableHelper(SignupEmailActivity.this);
         helper.onUpgrade(helper.getWritableDatabase(), 0, 1);

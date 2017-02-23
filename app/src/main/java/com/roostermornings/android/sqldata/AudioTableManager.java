@@ -11,6 +11,7 @@ import com.roostermornings.android.domain.AlarmQueue;
 import com.roostermornings.android.domain.DeviceAudioQueueItem;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -20,6 +21,7 @@ import java.util.List;
 public class AudioTableManager {
 
     private Context context;
+    private Calendar calendar = Calendar.getInstance();
 
     //SQL Arguments
     private final static String TRUE = "1";
@@ -61,13 +63,14 @@ public class AudioTableManager {
 
     public void purgeAudioFiles(){
         //Purge audio files older than 2 weeks
-//        SQLiteDatabase db = initDB();
-//
-//        //TODO
-//        //String execSql = "DELETE FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_DATE_UPLOADED + " in (SELECT q." + AudioTableEntry.COLUMN_DATE_UPLOADED + " FROM " + AudioTableEntry.TABLE_NAME + " q " + ";";
-//
-//        db.execSQL(execSql);
-//        db.close();
+        SQLiteDatabase db = initDB();
+
+        String execSql = "DELETE FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_DATE_UPLOADED +
+                " in (SELECT q." + AudioTableEntry.COLUMN_DATE_UPLOADED + " FROM " + AudioTableEntry.TABLE_NAME + " q WHERE " +
+                AudioTableEntry.COLUMN_DATE_UPLOADED + " < " + (calendar.getTimeInMillis() - 1209600000) + ";";
+
+        db.execSQL(execSql);
+        db.close();
     }
 
     public void clearAudioFiles(){
