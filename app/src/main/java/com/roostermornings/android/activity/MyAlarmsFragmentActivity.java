@@ -26,6 +26,8 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.MyAlarmsListAdapter;
 import com.roostermornings.android.domain.Alarm;
+import com.roostermornings.android.sqldata.DeviceAlarmTableManager;
+import com.roostermornings.android.sqlutil.DeviceAlarmController;
 
 import java.util.ArrayList;
 
@@ -37,6 +39,8 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     public static final String TAG = MyAlarmsFragmentActivity.class.getSimpleName();
     private DatabaseReference mMyAlarmsReference;
     private ArrayList<Alarm> mAlarms = new ArrayList<Alarm>();
+
+    private DeviceAlarmController deviceAlarmController;
 
     @BindView(R.id.home_alarmsListView)
     RecyclerView mRecyclerView;
@@ -147,7 +151,8 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                         DatabaseReference alarmReference = FirebaseDatabase.getInstance().getReference()
                                 .child("alarms").child(getFirebaseUser().getUid()).child(mAlarms.get(index).getUid());
                         alarmReference.removeValue();
-
+                        //TODO: Delete alarm set
+                        //deviceAlarmController.deleteAlarmSet();
                         mAlarms.remove(index);
                         mAdapter.notifyDataSetChanged();
 

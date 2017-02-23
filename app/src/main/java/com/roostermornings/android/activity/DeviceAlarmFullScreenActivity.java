@@ -61,19 +61,18 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    public void onDestroy() {
+        super.onDestroy();
+            //If vibrating then cancel
+            Vibrator vibrator = (Vibrator) getApplicationContext().getSystemService(VIBRATOR_SERVICE);
+            if (vibrator.hasVibrator()) {
+                vibrator.cancel();
+            }
 
-        //If vibrating then cancel
-        Vibrator vibrator = (Vibrator) getApplicationContext().getSystemService(VIBRATOR_SERVICE);
-        if(vibrator.hasVibrator()) {
-            vibrator.cancel();
-        }
-
-        //If default tone or media playing then stop
-        if(mediaPlayer.isPlaying()){
-            mediaPlayer.stop();
-        }
+            //If default tone or media playing then stop
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.stop();
+            }
     }
 
     protected void playAlarmTone() {
@@ -112,7 +111,8 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         //Set media player to alarm volume
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
         final File file = new File(getFilesDir() + "/" + audioItem.getFilename());
-        setProfilePic(audioItem.getSender_pic());
+        //TODO:
+        //setProfilePic(audioItem.getSender_pic());
         txtSenderName.setText(audioItem.getSender_name());
 
         try {
