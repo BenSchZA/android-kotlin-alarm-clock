@@ -61,6 +61,7 @@ public class AudioTableManager {
         db.close();
     }
 
+    //TODO: check that this works...
     public void purgeAudioFiles(){
         //Purge audio files older than 2 weeks
         SQLiteDatabase db = initDB();

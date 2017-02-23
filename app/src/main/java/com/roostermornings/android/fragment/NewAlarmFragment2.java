@@ -129,12 +129,8 @@ public class NewAlarmFragment2 extends BaseFragment {
     }
 
     public void setSelectedChannel(Channel channel) {
-
         Alarm alarm = mListener.getAlarmDetails();
         alarm.setChannel(new AlarmChannel(channel.getName(), channel.getId()));
         mListener.setAlarmDetails(alarm);
-
     }
-
-
 }

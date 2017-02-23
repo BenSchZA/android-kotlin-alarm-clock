@@ -3,8 +3,14 @@ package com.roostermornings.android.activity;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.media.ToneGenerator;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.view.WindowManager;
@@ -15,6 +21,7 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.DeviceAudioQueueItem;
 import com.roostermornings.android.sqldata.AudioTableManager;
+import com.roostermornings.android.sqlutil.DeviceAlarm;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,8 +54,51 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
                 + WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
                 + WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 
-        retrieveMyAlarms();
+        if(getIntent().getBooleanExtra(DeviceAlarm.EXTRA_TONE, false)){
+            playAlarmTone();
+        }
+        else {
+            retrieveMyAlarms();
+        }
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        //If vibrating then cancel
+        Vibrator vibrator = (Vibrator) getApplicationContext().getSystemService(VIBRATOR_SERVICE);
+        if(vibrator.hasVibrator()) {
+            vibrator.cancel();
+        }
+
+        //If default tone or media playing then stop
+        if(mediaPlayer.isPlaying()){
+            mediaPlayer.stop();
+        }
+    }
+
+    protected void playAlarmTone() {
+        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+        //In case no alarm tone previously set
+        if(notification == null){
+            notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            if(notification == null) {
+                notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+            }
+        }
+        try {
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
+            mediaPlayer.setDataSource(this, notification);
+            mediaPlayer.setLooping(true);
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     protected void retrieveMyAlarms() {
         audioItems = audioTableManager.extractAudioFiles();
@@ -61,6 +111,8 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         //TODO: test corrupt audio
         //TODO: default alarm tone
         mediaPlayer = new MediaPlayer();
+        //Set media player to alarm volume
+        mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
         final File file = new File(getFilesDir() + "/" + audioItem.getFilename());
         setProfilePic(audioItem.getSender_pic());
         txtSenderName.setText(audioItem.getSender_name());
