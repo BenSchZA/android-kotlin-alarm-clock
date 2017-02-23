@@ -127,6 +127,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
 
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 String key = mDatabase.child("alarms").push().getKey();
+                mAlarm.setUid(key);
                 database.getReference(String.format("alarms/%s/%s", mAuth.getCurrentUser().getUid(), key)).setValue(mAlarm);
 
                 List<Integer> alarmDays = new ArrayList<>();

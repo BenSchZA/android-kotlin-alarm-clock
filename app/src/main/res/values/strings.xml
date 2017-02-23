@@ -35,6 +35,8 @@
     <string name="get_started">Get started</string>
     <string name="activity_signin_title">Sign up to Rooster to make your mornings epic!</string>
     <string name="terms_and_conditions">Terms and conditions</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
 
 
 </resources>
