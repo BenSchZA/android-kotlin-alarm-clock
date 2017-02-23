@@ -1,13 +1,15 @@
 package com.roostermornings.android.adapter;
 
-import android.content.Context;
+import android.app.Activity;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.roostermornings.android.R;
+import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.util.RoosterUtils;
 
@@ -15,6 +17,7 @@ import java.util.ArrayList;
 
 public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapter.ViewHolder> {
     private ArrayList<Alarm> mDataset;
+    private Activity mActivity;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -24,12 +27,14 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
         public TextView txtAlarmTime;
         public TextView txtAlarmDays;
         public TextView txtAlarmChannel;
+        public ImageView imgDelete;
 
         public ViewHolder(View v) {
             super(v);
             txtAlarmTime = (TextView) v.findViewById(R.id.cardview_alarm_time_textview);
             txtAlarmDays = (TextView) v.findViewById(R.id.cardview_alarm_days_textview);
             txtAlarmChannel = (TextView) v.findViewById(R.id.cardview_alarm_channel_textview);
+            imgDelete = (ImageView) v.findViewById(R.id.cardview_alarm_delete);
         }
     }
 
@@ -45,8 +50,9 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public MyAlarmsListAdapter(ArrayList<Alarm> myDataset) {
+    public MyAlarmsListAdapter(ArrayList<Alarm> myDataset, Activity activity) {
         mDataset = myDataset;
+        mActivity = activity;
     }
 
     // Create new views (invoked by the layout manager)
@@ -62,7 +68,7 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(ViewHolder holder, final int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         final Alarm alarm = mDataset.get(position);
@@ -70,6 +76,16 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
         holder.txtAlarmTime.setText(RoosterUtils.setAlarmTimeFromHourAndMinute(mDataset.get(position)));
         holder.txtAlarmDays.setText(RoosterUtils.getAlarmDays(mDataset.get(position)));
         holder.txtAlarmChannel.setText(mDataset.get(position).getChannel().getName());
+
+        holder.imgDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mActivity instanceof MyAlarmsFragmentActivity) {
+                    ((MyAlarmsFragmentActivity) mActivity).deleteAlarm(position);
+                }
+            }
+        });
+
     }
 
     // Return the size of your dataset (invoked by the layout manager)
