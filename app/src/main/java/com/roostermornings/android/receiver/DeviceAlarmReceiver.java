@@ -34,13 +34,13 @@ public class DeviceAlarmReceiver extends WakefulBroadcastReceiver {
 
         //if this is a recurring alarm, set anoter pending intent for next week same time
         if (intent.getBooleanExtra(DeviceAlarm.EXTRA_RECURRING, false)) {
-
             //make record that this alarm has been changed, refresh as necessary
             alarmTableManager.setAlarmChanged(intent.getIntExtra("requestCode", 0));
             alarmController.refreshAlarms(alarmTableManager.selectChanged());
 
         } else {
-            //TODO: check the current alarm set; if all alarms have fired, set all alarms to disables
+            //Set alarm to disabled if fired and not recurring - once all alarms in set are disabled, then toggle enabled in GUI
+            alarmTableManager.setAlarmEnabled(intent.getIntExtra("requestCode", 0), false);
         }
 
         context.startActivity(intentAlarmFullscreen);

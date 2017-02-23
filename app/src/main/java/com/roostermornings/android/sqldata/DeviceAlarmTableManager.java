@@ -25,6 +25,7 @@ public class DeviceAlarmTableManager {
     private Calendar calendar = Calendar.getInstance();
 
     //SQL Arguments
+    private String TrueFalse = "0";
     private final static String TRUE = "1";
     private final static String FALSE = "0";
 
@@ -101,6 +102,19 @@ public class DeviceAlarmTableManager {
     public void setAlarmChanged(long piId) {
         SQLiteDatabase db = initDB();
         String updateQuery = "UPDATE " + AlarmTableEntry.TABLE_NAME + " SET " + AlarmTableEntry.COLUMN_CHANGED + " = " + TRUE + " WHERE " + AlarmTableEntry.COLUMN_PI_ID + " = " + piId + ";";
+        db.execSQL(updateQuery);
+        db.close();
+    }
+
+    public void setAlarmEnabled(long piId, boolean enabled) {
+        SQLiteDatabase db = initDB();
+        if(enabled){
+            TrueFalse = TRUE;
+        }
+        else{
+            TrueFalse = FALSE;
+        }
+        String updateQuery = "UPDATE " + AlarmTableEntry.TABLE_NAME + " SET " + AlarmTableEntry.COLUMN_ENABLED + " = " + TrueFalse + " WHERE " + AlarmTableEntry.COLUMN_PI_ID + " = " + piId + ";";
         db.execSQL(updateQuery);
         db.close();
     }
