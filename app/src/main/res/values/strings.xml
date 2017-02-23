@@ -24,9 +24,6 @@
     <string name="next">Next</string>
     <string name="submit">Submit</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-
     <string name="title_activity_new_audio">NewAudioActivity</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
@@ -35,6 +32,9 @@
     <string name="create_alarm">Create Alarm</string>
     <string name="new_alarm_set_time">Please select alarm time!</string>
     <string name="alarm_dismiss">Dismiss</string>
+    <string name="get_started">Get started</string>
+    <string name="activity_signin_title">Sign up to Rooster to make your mornings epic!</string>
+    <string name="terms_and_conditions">Terms and conditions</string>
 
 
 </resources>

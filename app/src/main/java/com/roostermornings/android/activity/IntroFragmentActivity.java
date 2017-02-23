@@ -13,10 +13,10 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.fragment.IntroFragment1;
 import com.roostermornings.android.fragment.IntroFragment2;
 import com.roostermornings.android.fragment.IntroFragment3;
-import com.roostermornings.android.fragment.IMobileNumberSetListener;
+import com.roostermornings.android.fragment.IIntroFragmentListener;
 import com.roostermornings.android.util.DepthPageTransformer;
 
-public class IntroFragmentActivity extends FragmentActivity implements IMobileNumberSetListener {
+public class IntroFragmentActivity extends FragmentActivity implements IIntroFragmentListener {
     /**
      * The number of pages (wizard steps) to show in this demo.
      */
@@ -62,8 +62,14 @@ public class IntroFragmentActivity extends FragmentActivity implements IMobileNu
 
         Intent intent = new Intent(IntroFragmentActivity.this, SignInActivity.class);
         intent.putExtra(getApplicationContext().getString(R.string.extras_mobile_number), mobileNumber);
+        finish();
         startActivity(intent);
 
+    }
+
+    @Override
+    public void onGetStartedClick() {
+        mPager.setCurrentItem(2);
     }
 
     private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {

@@ -28,7 +28,7 @@ public class IntroFragment3 extends BaseFragment {
 
     Validator validator;
 
-    IMobileNumberSetListener mListener;
+    IIntroFragmentListener mListener;
 
 
     @Override
@@ -49,8 +49,8 @@ public class IntroFragment3 extends BaseFragment {
     public void onAttach(Context context) {
 
         super.onAttach(context);
-        if (context instanceof IMobileNumberSetListener) {
-            mListener = (IMobileNumberSetListener) context;
+        if (context instanceof IIntroFragmentListener) {
+            mListener = (IIntroFragmentListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
