@@ -18,14 +18,35 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:gravity="center_horizontal"
             android:layout_marginBottom="@dimen/spacing_large"
+            android:layout_marginTop="@dimen/spacing_xxxlarge"
+            android:gravity="center_horizontal"
             android:orientation="vertical">
 
             <ImageView
-                android:layout_width="300dp"
-                android:layout_height="300dp"
+                android:layout_width="250dp"
+                android:layout_height="250dp"
                 android:src="@drawable/rooster_wakeup" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_marginTop="@dimen/spacing_xxlarge"
+                android:layout_marginBottom="@dimen/spacing_xxlarge"
+                android:text="@string/intro_screen1_blurb"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/intro_slide_title"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/intro_1_get_started_button"
+                style="@style/RoosterButtonLightBlueStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/spacing_normal_large"
+                android:text="@string/get_started" />
 
         </LinearLayout>
 
@@ -36,40 +57,31 @@
             android:layout_centerHorizontal="true"
             android:orientation="vertical">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:padding="@dimen/spacing_large"
-                android:text="@string/intro_screen1_blurb"
-                android:textColor="@android:color/white"
-                android:textSize="@dimen/intro_slide_title"
-                android:textStyle="bold" />
 
-            <!--<LinearLayout
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:orientation="horizontal">
 
-                <view
+                <FrameLayout
                     android:layout_width="15dp"
                     android:layout_height="15dp"
                     android:layout_marginRight="@dimen/spacing_small"
                     android:background="@drawable/small_circle_white" />
 
-                <view
+                <FrameLayout
                     android:layout_width="15dp"
                     android:layout_height="15dp"
                     android:layout_marginRight="@dimen/spacing_small"
                     android:background="@drawable/small_circle_blue" />
 
-                <view
+                <FrameLayout
                     android:layout_width="15dp"
                     android:layout_height="15dp"
                     android:background="@drawable/small_circle_blue" />
 
-            </LinearLayout>-->
+            </LinearLayout>
 
 
         </LinearLayout>
@@ -79,5 +91,11 @@
 
 
 </ScrollView>
+
+
+
+
+
+
 
 

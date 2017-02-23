@@ -28,8 +28,8 @@
             android:layout_marginTop="40dp"
             android:text="@string/splash_greeting"
             android:textColor="@color/white"
-            android:textSize="@dimen/text_large"
-            android:paddingTop="20dp" />
+            android:textSize="@dimen/text_xlarge"
+            android:paddingTop="@dimen/spacing_normal" />
 
     </LinearLayout>
 

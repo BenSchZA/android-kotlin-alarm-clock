@@ -24,36 +24,34 @@
 
         <EditText
             android:id="@+id/signup_username_edittext"
+            style="@style/RoosterEditText"
             android:layout_width="@dimen/input_width_large"
             android:layout_height="wrap_content"
-            style="@style/RoosterEditText"
-            android:hint="@string/name"
+            android:layout_marginTop="@dimen/spacing_xxlarge"
             android:gravity="center"
-            android:layout_marginBottom="@dimen/spacing_xlarge" />
+            android:hint="@string/name" />
 
         <EditText
             android:id="@+id/signup_email_address_edittext"
+            style="@style/RoosterEditText"
             android:layout_width="@dimen/input_width_large"
             android:layout_height="wrap_content"
-            android:inputType="textEmailAddress"
-            android:hint="@string/email_address"
-            style="@style/RoosterEditText"
+            android:layout_marginTop="@dimen/spacing_large"
             android:gravity="center"
-            android:text="steven@labs.ws"
-            android:layout_marginBottom="@dimen/spacing_xlarge"
-            android:layout_marginTop="@dimen/spacing_xlarge" />
+            android:hint="@string/email_address"
+            android:inputType="textEmailAddress"
+            android:text="steven@labs.ws" />
 
         <EditText
             android:id="@+id/signup_password_edittext"
+            style="@style/RoosterEditText"
             android:layout_width="@dimen/input_width_large"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_large"
+            android:gravity="center"
             android:hint="@string/password"
             android:inputType="textPassword"
-            android:gravity="center"
-            android:text="Lennon23!"
-            style="@style/RoosterEditText"
-            android:layout_marginBottom="@dimen/spacing_xlarge"
-            android:layout_marginTop="@dimen/spacing_xlarge" />
+            android:text="Lennon23!" />
 
         <Button
             android:id="@+id/signup_button_email"
@@ -68,16 +66,18 @@
             <requestFocus />
         </Button>
 
+        <TextView
+            android:id="@+id/terms_and_conditions_link"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/spacing_xlarge"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center|bottom"
+            android:text="@string/terms_and_conditions"
+            android:textColor="@drawable/rooster_link_white" />
+
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:orientation="vertical">
-
-
-    </LinearLayout>
 
 </RelativeLayout>
