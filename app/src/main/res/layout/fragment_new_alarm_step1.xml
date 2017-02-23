@@ -8,19 +8,6 @@
     tools:context="com.roostermornings.android.fragment.NewAlarmFragment1">
 
     <TextView
-        android:id="@+id/new_alarm_title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing_xxlarge"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center_horizontal"
-        android:text="Create an alarm"
-        android:textColor="@drawable/rooster_link_white"
-        android:textSize="@dimen/text_xlarge" />
-
-
-    <TextView
         android:id="@+id/new_alarm_time"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -38,13 +25,15 @@
         android:background="@color/white"
         android:layout_width="match_parent"></View>
 
-    <Switch
+    <android.support.v7.widget.SwitchCompat
         android:id="@+id/new_alarm_fragment1_switch_audio"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:checked="true"
         android:paddingLeft="@dimen/spacing_normal"
         android:paddingRight="@dimen/spacing_large"
+        android:thumb="@drawable/switch_thumb"
+        android:track="@drawable/switch_track"
         android:textColor="@drawable/rooster_link_white"
         android:textSize="@dimen/text_large"
         android:padding="@dimen/spacing_large"
@@ -188,7 +177,7 @@
 
     </LinearLayout>
 
-    <Switch
+    <android.support.v7.widget.SwitchCompat
         android:id="@+id/new_alarm_fragment1_switch_recurring"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -197,6 +186,8 @@
         android:paddingRight="@dimen/spacing_large"
         android:textColor="@drawable/rooster_link_white"
         android:textSize="@dimen/text_large"
+        android:thumb="@drawable/switch_thumb"
+        android:track="@drawable/switch_track"
         android:padding="@dimen/spacing_large"
         android:text="Repeat alarm" />
 

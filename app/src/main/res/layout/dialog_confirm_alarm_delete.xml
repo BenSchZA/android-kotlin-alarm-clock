@@ -10,7 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Are you sure you wish to delete this alarm?"
-        android:textColor="@color/black"
+        android:textColor="@color/primary_dark"
+        android:textSize="@dimen/text_xlarge"
         android:textStyle="bold" />
 
 </LinearLayout>

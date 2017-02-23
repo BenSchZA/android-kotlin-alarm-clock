@@ -16,6 +16,7 @@
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">true</item>
         <item name="windowNoTitle">true</item>
+        <item name="android:elevation">0dp</item>
     </style>
 
     <style name="AppTheme.NoActionBarIntro" parent="AppTheme.NoActionBar">

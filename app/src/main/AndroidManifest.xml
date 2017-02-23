@@ -74,7 +74,6 @@
         <activity
             android:name=".activity.NewAlarmFragmentActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/create_alarm"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".activity.NewAudioRecordActivity"

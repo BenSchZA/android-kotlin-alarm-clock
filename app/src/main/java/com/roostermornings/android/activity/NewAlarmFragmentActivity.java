@@ -11,6 +11,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.database.FirebaseDatabase;
@@ -27,6 +28,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import butterknife.BindView;
+
 public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetListener {
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
@@ -37,10 +40,13 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
     private DeviceAlarmController deviceAlarmController = new DeviceAlarmController(this);
     private DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(this);
 
+    @BindView(R.id.toolbar_title)
+    TextView toolbarTitle;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragmentactivity_new_alarm);
+        initialize(R.layout.activity_new_alarm);
 
         if (android.os.Build.VERSION.SDK_INT > 9) {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -57,8 +63,11 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
+
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        toolbarTitle.setText(getString(R.string.create_alarm));
+
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
