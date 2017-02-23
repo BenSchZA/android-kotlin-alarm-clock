@@ -22,7 +22,8 @@ public class SplashActivity extends BaseActivity {
         mFBUser = getFirebaseUser();
 
         BackgroundTaskReceiver backgroundTaskReceiver = new BackgroundTaskReceiver();
-        backgroundTaskReceiver.startBackgroundTask(getApplicationContext());
+        backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(getApplicationContext());
+        backgroundTaskReceiver.scheduleBackgroundDailyTask(getApplicationContext());
 
         CountDownTimer countDownTimer = new CountDownTimer(2000, 2000) {
             @Override
