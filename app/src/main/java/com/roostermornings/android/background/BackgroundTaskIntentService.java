@@ -26,6 +26,7 @@ import java.io.FileOutputStream;
 
 public class BackgroundTaskIntentService extends IntentService {
     private static final String ACTION_BACKGROUND_DOWNLOAD = "com.roostermornings.android.background.action.BACKGROUND_DOWNLOAD";
+    private static final String ACTION_DAILY_TASK = "com.roostermornings.android.background.action.DAILY_TASK";
 
     private static final String EXTRA_PARAM1 = "com.roostermornings.android.background.extra.PARAM1";
     private static final String EXTRA_PARAM2 = "com.roostermornings.android.background.extra.PARAM2";
@@ -51,6 +52,14 @@ public class BackgroundTaskIntentService extends IntentService {
         context.startService(intent);
     }
 
+    public static void startActionDailyTask(Context context, String param1, String param2) {
+        Intent intent = new Intent(context, BackgroundTaskIntentService.class);
+        intent.setAction(ACTION_DAILY_TASK);
+        intent.putExtra(EXTRA_PARAM1, param1);
+        intent.putExtra(EXTRA_PARAM2, param2);
+        context.startService(intent);
+    }
+
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
@@ -59,6 +68,8 @@ public class BackgroundTaskIntentService extends IntentService {
                 final String param1 = intent.getStringExtra(EXTRA_PARAM1);
                 final String param2 = intent.getStringExtra(EXTRA_PARAM2);
                 handleActionBackgroundDownload(param1, param2);
+            } else if(ACTION_DAILY_TASK.equals(action)){
+                handleActionDailyTask();
             }
         }
     }
@@ -67,8 +78,13 @@ public class BackgroundTaskIntentService extends IntentService {
         retrieveFirebaseData(getApplicationContext());
     }
 
-    public void retrieveFirebaseData(final Context context) {
+    private void handleActionDailyTask() {
+        //Purge audio files from SQL db that are older than two weeks
+        mAudioTableManager.purgeAudioFiles();
+    }
 
+    public void retrieveFirebaseData(final Context context) {
+        //Retrieve firebase audio files and cache to be played for next alarm
         mAuth = FirebaseAuth.getInstance();
         mStorageRef = FirebaseStorage.getInstance().getReference();
         mDatabase = FirebaseDatabase.getInstance().getReference();
@@ -81,7 +97,6 @@ public class BackgroundTaskIntentService extends IntentService {
 
         final DatabaseReference queueReference = FirebaseDatabase.getInstance().getReference()
                 .child("social_rooster_queue").child(mAuth.getCurrentUser().getUid());
-
 
         ValueEventListener alarmQueueListener = new ValueEventListener() {
             @Override
