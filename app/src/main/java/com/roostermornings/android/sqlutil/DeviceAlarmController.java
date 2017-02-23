@@ -60,9 +60,6 @@ public final class DeviceAlarmController {
                 alarmIntent.putExtra(DeviceAlarm.EXTRA_VIBRATE, true);
             }
 
-            //TODO: remove
-            alarmIntent.putExtra(DeviceAlarm.EXTRA_TONE, true);
-
             PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(context,
                     deviceAlarm.getPiId(), alarmIntent,
                     PendingIntent.FLAG_UPDATE_CURRENT);
