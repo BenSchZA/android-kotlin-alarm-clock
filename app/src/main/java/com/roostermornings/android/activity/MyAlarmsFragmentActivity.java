@@ -1,22 +1,18 @@
 package com.roostermornings.android.activity;
 
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.DialogAction;
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -73,9 +69,6 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         mMyAlarmsReference = FirebaseDatabase.getInstance().getReference()
                 .child("alarms").child(getFirebaseUser().getUid());
 
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
-        mRecyclerView.setHasFixedSize(true);
         mAdapter = new MyAlarmsListAdapter(mAlarms, MyAlarmsFragmentActivity.this);
 
         // use a linear layout manager
@@ -88,10 +81,9 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    Object test = postSnapshot.getValue();
                     Alarm alarm = postSnapshot.getValue(Alarm.class);
                     mAlarms.add(alarm);
-                    mAdapter.notifyDataSetChanged();
+                    mAdapter.notifyItemInserted(mAlarms.size() - 1);
                 }
 
             }
@@ -134,32 +126,21 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         startActivity(new Intent(MyAlarmsFragmentActivity.this, NewAudioRecordActivity.class));
     }
 
-    public void deleteAlarm(final int index) {
-        deviceAlarmController = new DeviceAlarmController(this);
+    public void deleteAlarm(final int index, String alarmId) {
+        //Remove alarm from firebase
+        DatabaseReference alarmReference = FirebaseDatabase.getInstance().getReference()
+                .child("alarms").child(getFirebaseUser().getUid()).child(alarmId);
+        alarmReference.removeValue();
 
-        View dialogMmpView = LayoutInflater.from(MyAlarmsFragmentActivity.this)
-                .inflate(R.layout.dialog_confirm_alarm_delete, null);
-        new MaterialDialog.Builder(MyAlarmsFragmentActivity.this)
-                .customView(dialogMmpView, false)
-                .positiveText(R.string.confirm)
-                .negativeText(R.string.cancel)
-                .negativeColorRes(R.color.grey)
-                .onPositive(new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+        //Remove alarm *set* from local SQL database using retreived setId from firebase
+        deviceAlarmController.deleteAlarmSet(Long.valueOf(mAlarms.get(index).getSetId()));
 
-                        //Remove alarm from firebase
-                        DatabaseReference alarmReference = FirebaseDatabase.getInstance().getReference()
-                                .child("alarms").child(getFirebaseUser().getUid()).child(mAlarms.get(index).getUid());
-                        alarmReference.removeValue();
-                        //Remove alarm *set* from local SQL database using retreived setId from firebase
-                        deviceAlarmController.deleteAlarmSet(Long.valueOf(mAlarms.get(index).getSetId()));
-                        //Remove alarm object from mAlarms ArrayList
-                        mAlarms.remove(index);
-                        //Notify adapter that there is changed data
-                        mAdapter.notifyDataSetChanged();
-                    }
-                })
-                .show();
+        //TODO: find out why alarm content being duplicated in recycler view on delete - do not refresh the activity like this
+        Intent intent = getIntent();
+        finish();
+        startActivity(intent);
+
+        //TODO: Delete alarm set
+
     }
 }
