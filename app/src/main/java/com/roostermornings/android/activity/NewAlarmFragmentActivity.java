@@ -135,11 +135,6 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                     setAlarmDay(alarmTime);
                 }
 
-                FirebaseDatabase database = FirebaseDatabase.getInstance();
-                String key = mDatabase.child("alarms").push().getKey();
-                mAlarm.setUid(key);
-                database.getReference(String.format("alarms/%s/%s", mAuth.getCurrentUser().getUid(), key)).setValue(mAlarm);
-
                 List<Integer> alarmDays = new ArrayList<>();
                 if (mAlarm.isMonday()) alarmDays.add(Calendar.MONDAY);
                 if (mAlarm.isTuesday()) alarmDays.add(Calendar.TUESDAY);
@@ -150,14 +145,19 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 if (mAlarm.isSunday()) alarmDays.add(Calendar.SUNDAY);
 
                 //Extract data from Alarm mAlarm and create new alarm set DeviceAlarm
-                deviceAlarmController.registerAlarmSet(mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring(), mAlarm.isVibrate());
+                long setId = deviceAlarmController.registerAlarmSet(mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring(), mAlarm.isVibrate());
+                mAlarm.setSetId(String.valueOf(setId));
+
+                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                String key = mDatabase.child("alarms").push().getKey();
+                mAlarm.setUid(key);
+                database.getReference(String.format("alarms/%s/%s", mAuth.getCurrentUser().getUid(), key)).setValue(mAlarm);
 
                 Toast.makeText(getBaseContext(), "Alarm created!", Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(getBaseContext(), MyAlarmsFragmentActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 finish();
-
             }
             return true;
         }

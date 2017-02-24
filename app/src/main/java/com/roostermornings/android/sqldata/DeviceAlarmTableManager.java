@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 
 import java.util.ArrayList;
@@ -169,7 +168,7 @@ public class DeviceAlarmTableManager {
         return db.rawQuery(selectQuery, null);
     }
 
-    public List<DeviceAlarm> getAlarmSet(long SetId) {
+    public List<DeviceAlarm> getAlarmSet(Long SetId) {
         SQLiteDatabase db = initDB();
 
         List<DeviceAlarm> alarmList;
@@ -183,7 +182,7 @@ public class DeviceAlarmTableManager {
         return alarmList;
     }
 
-    public void deleteAlarmSet(long setId) {
+    public void deleteAlarmSet(Long setId) {
         SQLiteDatabase db = initDB();
 
         String execSql = "DELETE FROM " + AlarmTableEntry.TABLE_NAME + " WHERE " + AlarmTableEntry.COLUMN_SET_ID + " = " + setId + ";";
