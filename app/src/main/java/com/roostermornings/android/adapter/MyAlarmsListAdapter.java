@@ -1,6 +1,7 @@
 package com.roostermornings.android.adapter;
 
 import android.app.Activity;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.domain.Alarm;
@@ -36,6 +39,12 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
             txtAlarmChannel = (TextView) v.findViewById(R.id.cardview_alarm_channel_textview);
             imgDelete = (ImageView) v.findViewById(R.id.cardview_alarm_delete);
         }
+
+    }
+
+    public void delete(int position) { //removes the row
+        mDataset.remove(position);
+        notifyItemRemoved(position);
     }
 
     public void add(int position, Alarm item) {
@@ -43,17 +52,13 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
         notifyItemInserted(position);
     }
 
-    public void remove(String item) {
-        int position = mDataset.indexOf(item);
-        mDataset.remove(position);
-        notifyItemRemoved(position);
-    }
-
     // Provide a suitable constructor (depends on the kind of dataset)
     public MyAlarmsListAdapter(ArrayList<Alarm> myDataset, Activity activity) {
         mDataset = myDataset;
         mActivity = activity;
+        setHasStableIds(true);
     }
+
 
     // Create new views (invoked by the layout manager)
     @Override
@@ -68,7 +73,7 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(ViewHolder holder, final int position) {
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         final Alarm alarm = mDataset.get(position);
@@ -81,7 +86,29 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
             @Override
             public void onClick(View view) {
                 if (mActivity instanceof MyAlarmsFragmentActivity) {
-                    ((MyAlarmsFragmentActivity) mActivity).deleteAlarm(position);
+
+                    View dialogMmpView = LayoutInflater.from(mActivity)
+                            .inflate(R.layout.dialog_confirm_alarm_delete, null);
+                    new MaterialDialog.Builder(mActivity)
+                            .customView(dialogMmpView, false)
+                            .positiveText(R.string.confirm)
+                            .negativeText(R.string.cancel)
+                            .negativeColorRes(R.color.grey)
+                            .onPositive(new MaterialDialog.SingleButtonCallback() {
+                                @Override
+                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+
+                                    mDataset.remove(position);
+                                    notifyItemRemoved(position);
+                                    notifyItemRangeChanged(position, mDataset.size());
+                                    ((MyAlarmsFragmentActivity) mActivity).deleteAlarm(alarm.getUid());
+                                    //TODO: Delete alarm set
+
+                                }
+                            })
+                            .show();
+
+
                 }
             }
         });
@@ -93,5 +120,16 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
     public int getItemCount() {
         return mDataset.size();
     }
+
+    @Override
+    public int getItemViewType(int position) {
+        return position;
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
 
 }
