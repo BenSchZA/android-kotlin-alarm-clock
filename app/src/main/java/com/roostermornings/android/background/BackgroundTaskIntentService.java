@@ -119,9 +119,7 @@ public class BackgroundTaskIntentService extends IntentService {
                 Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
             }
         };
-
         queueReference.addListenerForSingleValueEvent(alarmQueueListener);
-
     }
 
 
