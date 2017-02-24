@@ -33,7 +33,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
     public static final String TAG = MyAlarmsFragmentActivity.class.getSimpleName();
     private DatabaseReference mMyAlarmsReference;
-    private ArrayList<Alarm> mAlarms = new ArrayList<Alarm>();
+    private ArrayList<Alarm> mAlarms = new ArrayList<>();
 
     private DeviceAlarmController deviceAlarmController;
 
@@ -126,21 +126,20 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         startActivity(new Intent(MyAlarmsFragmentActivity.this, NewAudioRecordActivity.class));
     }
 
-    public void deleteAlarm(final int index, String alarmId) {
+    public void deleteAlarm(String setId, String alarmId) {
+        DeviceAlarmController deviceAlarmController = new DeviceAlarmController(this);
+
         //Remove alarm from firebase
         DatabaseReference alarmReference = FirebaseDatabase.getInstance().getReference()
                 .child("alarms").child(getFirebaseUser().getUid()).child(alarmId);
         alarmReference.removeValue();
 
         //Remove alarm *set* from local SQL database using retreived setId from firebase
-        deviceAlarmController.deleteAlarmSet(Long.valueOf(mAlarms.get(index).getSetId()));
+        deviceAlarmController.deleteAlarmSet(Long.valueOf(setId));
 
         //TODO: find out why alarm content being duplicated in recycler view on delete - do not refresh the activity like this
         Intent intent = getIntent();
         finish();
         startActivity(intent);
-
-        //TODO: Delete alarm set
-
     }
 }

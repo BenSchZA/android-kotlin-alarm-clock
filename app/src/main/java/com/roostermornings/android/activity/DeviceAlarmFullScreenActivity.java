@@ -43,6 +43,8 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     List<DeviceAudioQueueItem> audioItems = new ArrayList<>();
     AudioTableManager audioTableManager = new AudioTableManager(this);
 
+    private int playDuration;
+
     @BindView(R.id.alarm_sender_pic)
     ImageView imgSenderPic;
 
@@ -66,6 +68,8 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
                 + WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 
         deviceAlarmController = new DeviceAlarmController(this);
+
+        playDuration = 0;
 
         if(getIntent().getBooleanExtra(DeviceAlarm.EXTRA_TONE, false)){
             playAlarmTone();
@@ -123,17 +127,13 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         }
     }
 
-
     protected void retrieveMyAlarms() {
         audioItems = audioTableManager.extractAudioFiles();
         if (audioItems == null || audioItems.size() == 0) return;
         playNewAudioFile(audioItems.get(0));
     }
 
-
     protected void playNewAudioFile(final DeviceAudioQueueItem audioItem) {
-        //TODO: test corrupt audio
-        //TODO: default alarm tone
         mediaPlayer = new MediaPlayer();
         //Set media player to alarm volume
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
@@ -150,26 +150,38 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
+                    //TODO: should users rather just be forced to record longer file?
+                    //playDuration used to check that audio has played and for specified period, otherwise set default alarm
+                    playDuration += mediaPlayer.getDuration();
                     //delete file
                     file.delete();
                     //delete record from AudioTable SQL DB
                     audioTableManager.removeAudioFile(audioItem.getId());
                     //delete record from arraylist
                     audioItems.remove(audioItem);
+                    //Play next file if list not empty
                     if (!audioItems.isEmpty()) {
                         playNewAudioFile(audioItems.get(0));
+                    }
+                    //Check conditions for playing default tone: people must wake up!
+                    else if(playDuration < 5000){
+                        playAlarmTone();
                     }
                 }
             });
         } catch (IOException e) {
             e.printStackTrace();
-
             //delete file
             file.delete();
             //delete record from AudioTable SQL DB
             audioTableManager.removeAudioFile(audioItem.getId());
             //delete record from arraylist
             audioItems.remove(audioItem);
+        }
+
+        //Check conditions for playing default tone: people must wake up!
+        if (playDuration < 5000 && audioItems.isEmpty()){
+            playAlarmTone();
         }
     }
 
