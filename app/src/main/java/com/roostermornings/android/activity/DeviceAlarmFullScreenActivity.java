@@ -1,9 +1,7 @@
 package com.roostermornings.android.activity;
 
-import android.app.Activity;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
@@ -23,17 +21,16 @@ import com.roostermornings.android.domain.DeviceAudioQueueItem;
 import com.roostermornings.android.sqldata.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.OnClick;
-import butterknife.OnItemClick;
-import butterknife.OnTouch;
 
 public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
@@ -62,15 +59,14 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         //Used to ensure alarm shows over lock-screen
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                 + WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
-                + WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
-                + WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+                +WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
+                +WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 
         deviceAlarmController = new DeviceAlarmController(this);
 
-        if(getIntent().getBooleanExtra(DeviceAlarm.EXTRA_TONE, false)){
+        if (getIntent().getBooleanExtra(DeviceAlarm.EXTRA_TONE, false)) {
             playAlarmTone();
-        }
-        else {
+        } else {
             retrieveMyAlarms();
         }
     }
@@ -78,17 +74,17 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-            //If vibrating then cancel
-            Vibrator vibrator = (Vibrator) getApplicationContext().getSystemService(VIBRATOR_SERVICE);
-            if (vibrator.hasVibrator()) {
-                vibrator.cancel();
-            }
+        //If vibrating then cancel
+        Vibrator vibrator = (Vibrator) getApplicationContext().getSystemService(VIBRATOR_SERVICE);
+        if (vibrator.hasVibrator()) {
+            vibrator.cancel();
+        }
 
-            //If default tone or media playing then stop
-            if (mediaPlayer!=null && mediaPlayer.isPlaying()) {
-                mediaPlayer.stop();
-                mediaPlayer.release();
-            }
+        //If default tone or media playing then stop
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+        }
     }
 
     @OnClick(R.id.alarm_snooze_button)
@@ -105,9 +101,9 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     protected void playAlarmTone() {
         Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
         //In case no alarm tone previously set
-        if(notification == null){
+        if (notification == null) {
             notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-            if(notification == null) {
+            if (notification == null) {
                 notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
             }
         }
@@ -139,7 +135,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
         final File file = new File(getFilesDir() + "/" + audioItem.getFilename());
         //TODO:
-        //setProfilePic(audioItem.getSender_pic());
+        setProfilePic(audioItem.getSender_pic());
         txtSenderName.setText(audioItem.getSender_name());
 
         try {
@@ -174,19 +170,29 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     }
 
     protected void setProfilePic(String url) {
-        try {
-            URL imageUrl = new URL(url);
-            Bitmap bitmap = BitmapFactory.decodeStream(imageUrl.openConnection().getInputStream());
 
-            Resources res = getResources();
-            RoundedBitmapDrawable dr =
-                    RoundedBitmapDrawableFactory.create(res, bitmap);
-            dr.setCornerRadius(Math.max(bitmap.getWidth(), bitmap.getHeight()) / 2.0f);
-            imgSenderPic.setImageDrawable(dr);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            imgSenderPic.setImageBitmap(null);
+        if (url == null || url.length() == 0) {
+            imgSenderPic.setBackground(getResources().getDrawable(R.drawable.alarm_profile_pic_circle));
         }
+
+        Picasso.with(DeviceAlarmFullScreenActivity.this).load(url)
+                .resize(400, 400)
+                .into(imgSenderPic, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        Bitmap imageBitmap = ((BitmapDrawable) imgSenderPic.getDrawable()).getBitmap();
+                        RoundedBitmapDrawable imageDrawable = RoundedBitmapDrawableFactory.create(getResources(), imageBitmap);
+                        imageDrawable.setCircular(true);
+                        imageDrawable.setCornerRadius(Math.max(imageBitmap.getWidth(), imageBitmap.getHeight()) / 2.0f);
+                        imgSenderPic.setImageDrawable(imageDrawable);
+                    }
+
+                    @Override
+                    public void onError() {
+                        imgSenderPic.setBackground(getResources().getDrawable(R.drawable.alarm_profile_pic_circle));
+                    }
+                });
+
+
     }
 }
