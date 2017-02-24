@@ -72,6 +72,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
             //If default tone or media playing then stop
             if (mediaPlayer.isPlaying()) {
                 mediaPlayer.stop();
+                mediaPlayer.release();
             }
     }
 
