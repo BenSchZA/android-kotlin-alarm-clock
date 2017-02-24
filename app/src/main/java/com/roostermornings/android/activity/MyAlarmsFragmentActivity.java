@@ -26,7 +26,6 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.MyAlarmsListAdapter;
 import com.roostermornings.android.domain.Alarm;
-import com.roostermornings.android.sqldata.DeviceAlarmTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 
 import java.util.ArrayList;
@@ -136,6 +135,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     }
 
     public void deleteAlarm(final int index) {
+        deviceAlarmController = new DeviceAlarmController(this);
 
         View dialogMmpView = LayoutInflater.from(MyAlarmsFragmentActivity.this)
                 .inflate(R.layout.dialog_confirm_alarm_delete, null);
@@ -148,21 +148,18 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                     @Override
                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
 
+                        //Remove alarm from firebase
                         DatabaseReference alarmReference = FirebaseDatabase.getInstance().getReference()
                                 .child("alarms").child(getFirebaseUser().getUid()).child(mAlarms.get(index).getUid());
                         alarmReference.removeValue();
-                        //TODO: Delete alarm set
-                        //deviceAlarmController.deleteAlarmSet();
+                        //Remove alarm *set* from local SQL database using retreived setId from firebase
+                        deviceAlarmController.deleteAlarmSet(Long.valueOf(mAlarms.get(index).getSetId()));
+                        //Remove alarm object from mAlarms ArrayList
                         mAlarms.remove(index);
+                        //Notify adapter that there is changed data
                         mAdapter.notifyDataSetChanged();
-
-
                     }
                 })
                 .show();
-
-
     }
-
-
 }

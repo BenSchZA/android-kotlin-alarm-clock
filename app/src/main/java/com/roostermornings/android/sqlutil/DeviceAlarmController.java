@@ -5,7 +5,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-import android.provider.AlarmClock;
 
 import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
@@ -143,7 +142,7 @@ public final class DeviceAlarmController {
 
     }
 
-    public void registerAlarmSet(int alarmHour, int alarmMinute, List<Integer> alarmDays, boolean repeatWeekly, boolean vibrate) {
+    public long registerAlarmSet(int alarmHour, int alarmMinute, List<Integer> alarmDays, boolean repeatWeekly, boolean vibrate) {
         List<DeviceAlarm> deviceAlarmList;
         DeviceAlarm deviceAlarmSet = new DeviceAlarm()
                 .initAlarmSet(alarmHour, alarmMinute, alarmDays, repeatWeekly, vibrate);
@@ -158,9 +157,10 @@ public final class DeviceAlarmController {
             deviceAlarmTableManager.insertAlarm(deviceAlarm, setId);
         }
         refreshAlarms(deviceAlarmTableManager.selectChanged());
+        return setId;
     }
 
-    public void deleteAlarmSet(long setId) {
+    public void deleteAlarmSet(Long setId) {
         List<DeviceAlarm> deviceAlarmList = deviceAlarmTableManager.getAlarmSet(setId);
         for (DeviceAlarm deviceAlarm :
                 deviceAlarmList) {
