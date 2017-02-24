@@ -1,5 +1,6 @@
 package com.roostermornings.android.activity;
 
+import android.app.Activity;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,6 +13,7 @@ import android.os.Vibrator;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -20,6 +22,7 @@ import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.DeviceAudioQueueItem;
 import com.roostermornings.android.sqldata.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
+import com.roostermornings.android.sqlutil.DeviceAlarmController;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,10 +31,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
+import butterknife.OnClick;
+import butterknife.OnItemClick;
+import butterknife.OnTouch;
 
 public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
     MediaPlayer mediaPlayer;
+    DeviceAlarmController deviceAlarmController;
 
     List<DeviceAudioQueueItem> audioItems = new ArrayList<>();
     AudioTableManager audioTableManager = new AudioTableManager(this);
@@ -42,6 +49,12 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     @BindView(R.id.alarm_sender_name)
     TextView txtSenderName;
 
+    @BindView(R.id.alarm_snooze_button)
+    Button mButtonAlarmSnooze;
+
+    @BindView(R.id.alarm_dismiss)
+    TextView mButtonAlarmDismiss;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,6 +64,8 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
                 + WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
                 + WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
                 + WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+
+        deviceAlarmController = new DeviceAlarmController(this);
 
         if(getIntent().getBooleanExtra(DeviceAlarm.EXTRA_TONE, false)){
             playAlarmTone();
@@ -70,10 +85,21 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
             }
 
             //If default tone or media playing then stop
-            if (mediaPlayer.isPlaying()) {
+            if (mediaPlayer!=null && mediaPlayer.isPlaying()) {
                 mediaPlayer.stop();
                 mediaPlayer.release();
             }
+    }
+
+    @OnClick(R.id.alarm_snooze_button)
+    protected void onAlarmSnoozeButtonClicked() {
+        deviceAlarmController.snoozeAlarm();
+        finish();
+    }
+
+    @OnClick(R.id.alarm_dismiss)
+    protected void onAlarmDismissButtonClicked() {
+        finish();
     }
 
     protected void playAlarmTone() {

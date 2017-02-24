@@ -18,7 +18,7 @@ public class SignInActivity extends BaseActivity {
     String mMobileNumber = "";
 
     @BindView(R.id.already_user_textview)
-    TextView mTextViewLareadyUser;
+    TextView mTextViewAlreadyUser;
 
     @BindView(R.id.signin_button_email)
     Button mButtonSigninEmail;
