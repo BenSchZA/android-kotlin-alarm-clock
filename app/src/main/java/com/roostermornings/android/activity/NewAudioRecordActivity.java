@@ -73,6 +73,7 @@ public class NewAudioRecordActivity extends BaseActivity {
     @BindView(R.id.new_audio_record_parent)
     RelativeLayout layoutRecordParent;
 
+
     @BindView(R.id.new_audio_listen)
     ImageView imgNewAudioListen;
 
@@ -111,6 +112,7 @@ public class NewAudioRecordActivity extends BaseActivity {
 
         if (!mRecording) {
 
+
             randomAudioFileName = RoosterUtils.createRandomFileName(5) + "RoosterRecording.3gp";
             startTime = System.currentTimeMillis();
 
@@ -137,7 +139,8 @@ public class NewAudioRecordActivity extends BaseActivity {
                 mHandler.removeCallbacks(startTimer);
                 mHandler.postDelayed(startTimer, 0);
 
-                imgAudioStartStop.setBackgroundResource(R.drawable.rooster_record_audio_square_inner);
+                imgAudioStartStop.setBackgroundResource(R.drawable.rooster_record_audio_circle_inner_recording);
+                imgAudioStartStop.requestLayout();
                 mRecording = true;
 
 
@@ -162,7 +165,7 @@ public class NewAudioRecordActivity extends BaseActivity {
     @OnClick(R.id.new_audio_delete)
     public void onDeleteAudioClick() {
 
-        if (mediaPlayer.isPlaying()) {
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.stop();
             mediaPlayer.release();
             MediaRecorderReady();
