@@ -120,21 +120,14 @@ public class NewAudioFriendsActivity extends BaseActivity {
                     mRecyclerView.setAdapter(mAdapter);
                     mAdapter.notifyDataSetChanged();
                     btnNewAudioSave.setVisibility(View.VISIBLE);
-
                 }
-
             }
 
             @Override
             public void onFailure(Throwable t) {
-
                 Log.i(TAG, t.getLocalizedMessage());
-
-
             }
         });
-
-
     }
 
     @OnClick(R.id.new_audio_upload_button)

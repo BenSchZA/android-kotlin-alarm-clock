@@ -1,5 +1,7 @@
 package com.roostermornings.android.activity;
 
+import android.app.Activity;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
@@ -26,11 +28,14 @@ import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import butterknife.OnItemClick;
+import butterknife.OnTouch;
 
 public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
@@ -39,6 +44,8 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
     List<DeviceAudioQueueItem> audioItems = new ArrayList<>();
     AudioTableManager audioTableManager = new AudioTableManager(this);
+
+    private int playDuration;
 
     @BindView(R.id.alarm_sender_pic)
     ImageView imgSenderPic;
@@ -59,14 +66,17 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         //Used to ensure alarm shows over lock-screen
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                 + WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
-                +WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
-                +WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+                + WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
+                + WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 
         deviceAlarmController = new DeviceAlarmController(this);
 
-        if (getIntent().getBooleanExtra(DeviceAlarm.EXTRA_TONE, false)) {
+        playDuration = 0;
+
+        if(getIntent().getBooleanExtra(DeviceAlarm.EXTRA_TONE, false)){
             playAlarmTone();
-        } else {
+        }
+        else {
             retrieveMyAlarms();
         }
     }
@@ -74,17 +84,17 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        //If vibrating then cancel
-        Vibrator vibrator = (Vibrator) getApplicationContext().getSystemService(VIBRATOR_SERVICE);
-        if (vibrator.hasVibrator()) {
-            vibrator.cancel();
-        }
+            //If vibrating then cancel
+            Vibrator vibrator = (Vibrator) getApplicationContext().getSystemService(VIBRATOR_SERVICE);
+            if (vibrator.hasVibrator()) {
+                vibrator.cancel();
+            }
 
-        //If default tone or media playing then stop
-        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-            mediaPlayer.stop();
-            mediaPlayer.release();
-        }
+            //If default tone or media playing then stop
+            if (mediaPlayer!=null && mediaPlayer.isPlaying()) {
+                mediaPlayer.stop();
+                mediaPlayer.release();
+            }
     }
 
     @OnClick(R.id.alarm_snooze_button)
@@ -101,9 +111,9 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     protected void playAlarmTone() {
         Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
         //In case no alarm tone previously set
-        if (notification == null) {
+        if(notification == null){
             notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-            if (notification == null) {
+            if(notification == null) {
                 notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
             }
         }
@@ -126,10 +136,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         playNewAudioFile(audioItems.get(0));
     }
 
-
     protected void playNewAudioFile(final DeviceAudioQueueItem audioItem) {
-        //TODO: test corrupt audio
-        //TODO: default alarm tone
         mediaPlayer = new MediaPlayer();
         //Set media player to alarm volume
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
@@ -146,14 +153,22 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
+                    //TODO: should users rather just be forced to record longer file?
+                    //playDuration used to check that audio has played and for specified period, otherwise set default alarm
+                    playDuration += mediaPlayer.getDuration();
                     //delete file
                     file.delete();
                     //delete record from AudioTable SQL DB
                     audioTableManager.removeAudioFile(audioItem.getId());
                     //delete record from arraylist
                     audioItems.remove(audioItem);
+                    //Play next file if list not empty
                     if (!audioItems.isEmpty()) {
                         playNewAudioFile(audioItems.get(0));
+                    }
+                    //Check conditions for playing default tone: people must wake up!
+                    else if(playDuration < 5000){
+                        playAlarmTone();
                     }
                 }
             });
@@ -167,13 +182,14 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
             //delete record from arraylist
             audioItems.remove(audioItem);
         }
+
+        //Check conditions for playing default tone: people must wake up!
+        if (playDuration < 5000 && audioItems.isEmpty()){
+            playAlarmTone();
+        }
     }
 
     protected void setProfilePic(String url) {
-
-        if (url == null || url.length() == 0) {
-            imgSenderPic.setBackground(getResources().getDrawable(R.drawable.alarm_profile_pic_circle));
-        }
 
         Picasso.with(DeviceAlarmFullScreenActivity.this).load(url)
                 .resize(400, 400)
