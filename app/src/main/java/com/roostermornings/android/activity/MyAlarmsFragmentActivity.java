@@ -118,9 +118,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
             return true;
         }
         if (id == R.id.action_signout) {
-            mAuth.signOut(); //End user session
-            startActivity( new Intent(this, SignInActivity.class));
-            finish();
+            signOut();
         }
 
         return super.onOptionsItemSelected(item);

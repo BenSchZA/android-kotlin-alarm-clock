@@ -18,6 +18,8 @@
     <string name="signup_email">Signup via email</string>
     <string name="signup_auth_failed">Authentical failed. Please try again.</string>
 
+    <string name="facebook_app_id">190341188110134</string>
+
     <string name="email_address">Email address</string>
     <string name="phone_number">Phone number</string>
     <string name="name">Name</string>
@@ -34,7 +36,7 @@
     <string name="new_alarm_set_time">Please select alarm time!</string>
     <string name="alarm_dismiss">Dismiss</string>
     <string name="get_started">Get started</string>
-    <string name="activity_signin_title">Sign up to Rooster to make your mornings epic!</string>
+    <string name="activity_signin_title">Sign up to Rooster to make \n your mornings epic!</string>
     <string name="terms_and_conditions">Terms and conditions</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
