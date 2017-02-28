@@ -19,6 +19,9 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
+
         <receiver
             android:name=".receiver.BootReceiver"
             android:enabled="true"
@@ -27,6 +30,7 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+
         <receiver
             android:name=".receiver.DeviceAlarmReceiver"
             android:enabled="true">
@@ -34,6 +38,7 @@
                 <action android:name="receiver.ALARM_RECEIVER" />
             </intent-filter>
         </receiver>
+
         <receiver
             android:name=".background.BackgroundTaskReceiver"
             android:enabled="true"
@@ -46,6 +51,7 @@
             android:theme="@style/AppTheme.NoActionBarIntro">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -97,7 +103,8 @@
 
         <service
             android:name=".background.BackgroundTaskIntentService"
-            android:exported="false"></service>
+            android:exported="false" />
+
     </application>
 
 </manifest>
