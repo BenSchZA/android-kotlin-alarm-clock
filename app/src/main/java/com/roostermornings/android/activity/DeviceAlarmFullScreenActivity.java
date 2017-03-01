@@ -3,7 +3,9 @@ package com.roostermornings.android.activity;
 import android.app.Activity;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
@@ -46,12 +48,17 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     AudioTableManager audioTableManager = new AudioTableManager(this);
 
     private int playDuration;
+    private int alarmCount;
+    private int alarmPosition;
 
     @BindView(R.id.alarm_sender_pic)
     ImageView imgSenderPic;
 
     @BindView(R.id.alarm_sender_name)
     TextView txtSenderName;
+
+    @BindView(R.id.alarm_count)
+    TextView txtAlarmCount;
 
     @BindView(R.id.alarm_snooze_button)
     Button mButtonAlarmSnooze;
@@ -127,12 +134,21 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        //Replace image and name with message if no Roosters etc.
+        setDefaultDisplayProfile();
     }
-
 
     protected void retrieveMyAlarms() {
         audioItems = audioTableManager.extractAudioFiles();
-        if (audioItems == null || audioItems.size() == 0) return;
+        alarmCount = audioItems.size();
+        if (audioItems == null || audioItems.size() == 0) {
+            //Check conditions for playing default tone: people must wake up!
+            if (playDuration < 5000 && (audioItems == null || audioItems.size() == 0)){
+                playAlarmTone();
+            }
+            return;
+        };
+        alarmPosition = 0;
         playNewAudioFile(audioItems.get(0));
     }
 
@@ -141,14 +157,22 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         //Set media player to alarm volume
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
         final File file = new File(getFilesDir() + "/" + audioItem.getFilename());
-        //TODO:
-        setProfilePic(audioItem.getSender_pic());
+
+        if (audioItem.getSender_pic() != null && audioItem.getSender_pic().length() != 0) {
+            setProfilePic(audioItem.getSender_pic());
+        } else{
+            imgSenderPic.setBackground(getResources().getDrawable(R.drawable.alarm_profile_pic_circle));
+        }
         txtSenderName.setText(audioItem.getSender_name());
 
         try {
             mediaPlayer.setDataSource(file.getPath());
             mediaPlayer.prepare();
             mediaPlayer.start();
+
+            //Set alarm count display
+            alarmPosition++;
+            setAlarmCount(alarmPosition, alarmCount);
 
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
@@ -184,9 +208,13 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         }
 
         //Check conditions for playing default tone: people must wake up!
-        if (playDuration < 5000 && audioItems.isEmpty()){
+        if (playDuration < 5000 && (audioItems == null || audioItems.size() == 0)){
             playAlarmTone();
         }
+    }
+
+    protected void setAlarmCount(int count, int total) {
+        txtAlarmCount.setText(String.format("%s of %s", count, total));
     }
 
     protected void setProfilePic(String url) {
@@ -205,10 +233,16 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
                     @Override
                     public void onError() {
-                        imgSenderPic.setBackground(getResources().getDrawable(R.drawable.alarm_profile_pic_circle));
+                        //imgSenderPic.setBackground(getResources().getDrawable(R.drawable.alarm_profile_pic_circle));
+                        setDefaultDisplayProfile();
                     }
                 });
+    }
 
-
+    protected void setDefaultDisplayProfile() {
+        Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.logo);
+        Drawable d = new BitmapDrawable(getResources(), bm);
+        txtSenderName.setText(R.string.alarm_default_name);
+        imgSenderPic.setBackground(d);
     }
 }

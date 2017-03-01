@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Base64;
@@ -15,6 +16,10 @@ import com.google.firebase.auth.FirebaseUser;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.background.BackgroundTaskReceiver;
+import com.roostermornings.android.sqldata.AudioTableHelper;
+import com.roostermornings.android.sqldata.DeviceAlarmTableHelper;
+import com.roostermornings.android.sqldata.DeviceAlarmTableManager;
+import com.roostermornings.android.sqlutil.DeviceAlarm;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -44,6 +49,17 @@ public class SplashActivity extends BaseActivity {
         } catch (NoSuchAlgorithmException e) {
 
         }
+
+        //TODO: remove before release
+        AudioTableHelper dbAudioHelper = new AudioTableHelper(this);
+        SQLiteDatabase dbAudio = dbAudioHelper.getWritableDatabase();
+        DeviceAlarmTableHelper dbAlarmHelper = new DeviceAlarmTableHelper(this);
+        SQLiteDatabase dbAlarm = dbAlarmHelper.getWritableDatabase();
+
+        AudioTableHelper audioTableHelper = new AudioTableHelper(this);
+        DeviceAlarmTableHelper deviceAlarmTableHelper = new DeviceAlarmTableHelper(this);
+        audioTableHelper.onUpgrade(dbAudio, 1, 2);
+        deviceAlarmTableHelper.onUpgrade(dbAlarm, 1, 2);
 
         BackgroundTaskReceiver backgroundTaskReceiver = new BackgroundTaskReceiver();
         backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(getApplicationContext());

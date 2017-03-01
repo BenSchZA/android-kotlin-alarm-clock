@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/spacing_xlarge"
             android:gravity="center"
-            android:text="Name Surname"
+            android:text="@string/alarm_default_name"
             android:textColor="@color/white"
             android:textSize="@dimen/text_xxlarge" />
 
@@ -44,7 +44,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/spacing_xlarge"
             android:gravity="center"
-            android:text="1 of 6"
+            android:text="@string/alarm_count"
             android:textColor="@color/white"
             android:textSize="@dimen/text_xlarge" />
 
