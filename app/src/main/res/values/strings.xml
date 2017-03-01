@@ -31,10 +31,14 @@
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="send">send</string>
+
     <string name="my_alarms">My Alarms</string>
     <string name="create_alarm">Create Alarm</string>
     <string name="new_alarm_set_time">Please select alarm time!</string>
     <string name="alarm_dismiss">Dismiss</string>
+    <string name="alarm_default_name">Rise and Shine!</string>
+    <string name="alarm_count"></string>
+
     <string name="get_started">Get started</string>
     <string name="activity_signin_title">Sign up to Rooster to make \n your mornings epic!</string>
     <string name="terms_and_conditions">Terms and conditions</string>
