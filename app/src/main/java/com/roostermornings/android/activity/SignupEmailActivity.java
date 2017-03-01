@@ -12,6 +12,7 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.mobsandgeeks.saripaar.Validator;
@@ -124,7 +125,7 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
                             Log.d(TAG, "createUserWithEmail:onComplete:" + task.isSuccessful());
 
                             if (!task.isSuccessful()) {
-                                Toast.makeText(SignupEmailActivity.this, R.string.signup_auth_failed,
+                                Toast.makeText(SignupEmailActivity.this, task.getException().getMessage(),
                                         Toast.LENGTH_LONG).show();
                             } else {
 
@@ -154,10 +155,6 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
     }
 
     private void proceedToMyAlarmsActivity() {
-
-        AudioTableHelper helper = new AudioTableHelper(SignupEmailActivity.this);
-        helper.onUpgrade(helper.getWritableDatabase(), 0, 1);
-
         Intent intent = new Intent(SignupEmailActivity.this, MyAlarmsFragmentActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);

@@ -13,10 +13,10 @@
     <string name="intro_mobile_hint">Your mobile number</string>
 
 
-    <string name="signup_facebook">Signup via Facebook</string>
-    <string name="signup_google">Signup via Google</string>
-    <string name="signup_email">Signup via email</string>
-    <string name="signup_auth_failed">Authentical failed. Please try again.</string>
+    <string name="signup_facebook">Continue with Facebook</string>
+    <string name="signup_google">Continue with Google</string>
+    <string name="signup_email">Sign up with Email</string>
+    <string name="signup_auth_failed">Authentication failed. Please try again.</string>
 
     <string name="facebook_app_id">190341188110134</string>
 

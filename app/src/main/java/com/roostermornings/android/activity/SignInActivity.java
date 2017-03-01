@@ -15,6 +15,7 @@ import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
+import com.facebook.internal.CallbackManagerImpl;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
@@ -29,8 +30,13 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.domain.User;
 
 import java.util.Arrays;
 
@@ -42,7 +48,7 @@ public class SignInActivity extends BaseActivity {
 
     public static final String TAG = SignInActivity.class.getSimpleName();
 
-    private int RC_SIGN_IN = 1234;
+    private static final int RC_SIGN_IN = 007;
 
     String mMobileNumber = "";
 
@@ -100,6 +106,7 @@ public class SignInActivity extends BaseActivity {
         // Configure sign-in to request the user's ID, email address, and basic
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
 
@@ -133,21 +140,26 @@ public class SignInActivity extends BaseActivity {
     public void onFacebookSigninButtonClick(View v) {
         LoginManager.getInstance().logInWithReadPermissions(
                 this,
-                null
+                Arrays.asList("public_profile")
         );
         //Arrays.asList("user_photos", "email", "user_birthday", "public_profile")
     }
 
     @OnClick(R.id.signin_button_google)
     public void onGoogleSigninButtonClick(View v) {
-        signIn();
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
     //Receive auth activity result and start callback
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        facebookCallbackManager.onActivityResult(requestCode, resultCode, data);
+
+        //Result returned from launching Facebook authentication
+        if (requestCode == CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode()) {
+            facebookCallbackManager.onActivityResult(requestCode, resultCode, data);
+        }
 
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
@@ -160,7 +172,7 @@ public class SignInActivity extends BaseActivity {
     private void handleFacebookAccessToken(AccessToken token) {
         Log.d(TAG, "handleFacebookAccessToken:" + token);
 
-        AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
+        final AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -171,30 +183,85 @@ public class SignInActivity extends BaseActivity {
                         // the auth state listener will be notified and logic to handle the
                         // signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
-                            Log.w(TAG, "signInWithCredential", task.getException());
-                            Toast.makeText(SignInActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
+                            Log.w(TAG, "Facebook: signInWithCredential", task.getException());
+                            Toast.makeText(SignInActivity.this, task.getException().getMessage(),
+                                    Toast.LENGTH_LONG).show();
+                        } else{
+                            String deviceToken = FirebaseInstanceId.getInstance().getToken();
+                            FirebaseDatabase database = FirebaseDatabase.getInstance();
+
+                            User user = new User(null,
+                                    "android",
+                                    deviceToken,
+                                    "",
+                                    mAuth.getCurrentUser().getDisplayName(),
+                                    mMobileNumber,
+                                    mAuth.getCurrentUser().getUid(), null);
+
+                            database.getReference(String.format("users/%s",
+                                    mAuth.getCurrentUser().getUid())).setValue(user);
+
+                            proceedToMyAlarmsActivity();
                         }
                     }
                 });
     }
 
     //Google
-    private void signIn() {
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-        startActivityForResult(signInIntent, RC_SIGN_IN);
-    }
-
     private void handleSignInResult(GoogleSignInResult result) {
         Log.d(TAG, "handleSignInResult:" + result.isSuccess());
         if (result.isSuccess()) {
-            // Signed in successfully, show authenticated UI.
-//            GoogleSignInAccount acct = result.getSignInAccount();
-//            mStatusTextView.setText(getString(R.string.signed_in_fmt, acct.getDisplayName()));
-//            updateUI(true);
+            // Google Sign In was successful, authenticate with Firebase
+            firebaseAuthWithGoogle(result);
         } else {
             // Signed out, show unauthenticated UI.
 //            updateUI(false);
         }
+    }
+
+    private void firebaseAuthWithGoogle(GoogleSignInResult result) {
+        final GoogleSignInAccount account = result.getSignInAccount();
+        Log.d(TAG, "firebaseAuthWithGoogle:" + account.getId());
+
+        final AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
+
+                        // If sign in fails, display a message to the user. If sign in succeeds
+                        // the auth state listener will be notified and logic to handle the
+                        // signed in user can be handled in the listener.
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "Google: signInWithCredential", task.getException());
+                            Toast.makeText(SignInActivity.this, task.getException().getMessage(),
+                                    Toast.LENGTH_LONG).show();
+                        } else{
+                            String deviceToken = FirebaseInstanceId.getInstance().getToken();
+                            FirebaseDatabase database = FirebaseDatabase.getInstance();
+
+                            User user = new User(null,
+                                    "android",
+                                    deviceToken,
+                                    "",
+                                    account.getDisplayName(),
+                                    mMobileNumber,
+                                    mAuth.getCurrentUser().getUid(), null);
+
+                            database.getReference(String.format("users/%s",
+                                    mAuth.getCurrentUser().getUid())).setValue(user);
+
+                            proceedToMyAlarmsActivity();
+                        }
+                    }
+                });
+    }
+
+    private void proceedToMyAlarmsActivity() {
+        Intent intent = new Intent(SignInActivity.this, MyAlarmsFragmentActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 }

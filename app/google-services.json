@@ -15,7 +15,8 @@
       },
       "oauth_client": [
         {
-          "client_id": "653860500909-rjpquo0g7omvgf2947p88ud240drl1ba.apps.googleusercontent.com",
+          //"client_id": "653860500909-rjpquo0g7omvgf2947p88ud240drl1ba.apps.googleusercontent.com",
+          "client_id": "653860500909-mk72vn0st1aeipt9olp4tmknnh139dsh.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.roostermornings.roostermornings",
