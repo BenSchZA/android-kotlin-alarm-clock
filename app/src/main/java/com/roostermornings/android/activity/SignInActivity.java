@@ -193,7 +193,7 @@ public class SignInActivity extends BaseActivity {
                             User user = new User(null,
                                     "android",
                                     deviceToken,
-                                    "",
+                                    mAuth.getCurrentUser().getPhotoUrl().toString(),
                                     mAuth.getCurrentUser().getDisplayName(),
                                     mMobileNumber,
                                     mAuth.getCurrentUser().getUid(), null);
@@ -244,7 +244,7 @@ public class SignInActivity extends BaseActivity {
                             User user = new User(null,
                                     "android",
                                     deviceToken,
-                                    "",
+                                    mAuth.getCurrentUser().getPhotoUrl().toString(),
                                     account.getDisplayName(),
                                     mMobileNumber,
                                     mAuth.getCurrentUser().getUid(), null);

@@ -174,13 +174,25 @@ public final class DeviceAlarmController {
     }
 
     public void cancelAlarm(DeviceAlarm deviceAlarm) {
+        alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent alarmIntent = new Intent(context, DeviceAlarmReceiver.class);
-        alarmIntent.setAction("alarms.android.ALARM_RECEIVER");
+        alarmIntent.setAction("receiver.ALARM_RECEIVER");
         alarmIntent.putExtra("requestCode", deviceAlarm.getPiId());
-        PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(context, (int) deviceAlarm.getPiId(), alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        if (deviceAlarm.getRecurring()) {
+            alarmIntent.putExtra(DeviceAlarm.EXTRA_RECURRING, true);
+        }
+        if (deviceAlarm.getVibrate()){
+            alarmIntent.putExtra(DeviceAlarm.EXTRA_VIBRATE, true);
+        }
+
+        PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(context,
+                deviceAlarm.getPiId(), alarmIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
         // If the alarm has been set, cancel it
         if (alarmMgr != null) {
-            alarmMgr.cancel(alarmPendingIntent);
+             alarmMgr.cancel(alarmPendingIntent);
         }
     }
 }
