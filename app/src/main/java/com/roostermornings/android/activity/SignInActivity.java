@@ -258,6 +258,7 @@ public class SignInActivity extends BaseActivity {
                 });
     }
 
+    //On successful authentication, proceed to alarms activity
     private void proceedToMyAlarmsActivity() {
         Intent intent = new Intent(SignInActivity.this, MyAlarmsFragmentActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

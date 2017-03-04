@@ -1,0 +1,905 @@
+[
+  {
+    "kOneDigitCodes": {
+      "1": [
+        10,
+        "American Samoa",
+        "Anguilla",
+        "Antigua and Barbuda",
+        "Bahamas",
+        "Barbados",
+        "Bermuda",
+        "British Virgin Islands",
+        "Canada",
+        "Caymen Islands",
+        "Dominica",
+        "Dominican Republic",
+        "Grenada",
+        "Guam",
+        "Hawaii",
+        "Jamaica",
+        "Montserrat",
+        "Northern Mariana Islands",
+        "Puerto Rico",
+        "Saint Kitts and Nevis",
+        "Saint Lucia",
+        "Saint Vincent and the Grenadines",
+        "Sint Maarten",
+        "Trinidad and Tobago",
+        "Turks and Caicos Islands",
+        "United States",
+        "United States Virgin Islands",
+        "British Virgin Islands",
+        "U.S. Virgin Islands"
+      ],
+      "7": [
+        10,
+        "Abkhazia",
+        "Kazakhstan",
+        "Russia"
+      ]
+    },
+    "kTwoDigitCodes": {
+      "20": [
+        10,
+        "Egypt"
+      ],
+      "27": [
+        9,
+        "South Africa"
+      ],
+      "30": [
+        10,
+        "Greece"
+      ],
+      "31": [
+        9,
+        "Netherlands"
+      ],
+      "32": [
+        9,
+        "Belgium"
+      ],
+      "33": [
+        9,
+        "France"
+      ],
+      "34": [
+        9,
+        "Canary Islands",
+        "Ceuta",
+        "Melilla",
+        "Plazas de soberanía",
+        "Spain"
+      ],
+      "36": [
+        9,
+        "Hungry"
+      ],
+      "39": [
+        10,
+        "Italy",
+        "Vatican City"
+      ],
+      "40": [
+        0,
+        "Romania"
+      ],
+      "41": [
+        9,
+        "Switzerland"
+      ],
+      "43": [
+        10,
+        "Austria"
+      ],
+      "44": [
+        10,
+        "England",
+        "Guernsey",
+        "Isle of Man",
+        "Jersey",
+        "Northern Ireland",
+        "Scotland",
+        "United Kingdom",
+        "Wales"
+      ],
+      "45": [
+        8,
+        "Denmark"
+      ],
+      "46": [
+        7,
+        "Sweden"
+      ],
+      "47": [
+        8,
+        "Jan Mayen",
+        "Norway",
+        "Svalbard"
+      ],
+      "48": [
+        9,
+        "Poland"
+      ],
+      "49": [
+        10,
+        "Germany"
+      ],
+      "51": [
+        0,
+        "Peru"
+      ],
+      "52": [
+        10,
+        "Mexico"
+      ],
+      "53": [
+        "0",
+        "Cuba"
+      ],
+      "54": [
+        9,
+        "Argentina"
+      ],
+      "55": [
+        8,
+        "Brazil"
+      ],
+      "56": [
+        8,
+        "Chile",
+        "Eater Island"
+      ],
+      "57": [
+        10,
+        "Colombia"
+      ],
+      "58": [
+        0,
+        "Venezuela"
+      ],
+      "60": [
+        0,
+        "Malaysia"
+      ],
+      "61": [
+        9,
+        "Australia",
+        "Christmans Island",
+        "Cocos Island"
+      ],
+      "62": [
+        0,
+        "Indonesia"
+      ],
+      "63": [
+        10,
+        "Philippines"
+      ],
+      "64": [
+        0,
+        "New Zealand",
+        "Pitcairn Islands"
+      ],
+      "65": [
+        8,
+        "Singapore"
+      ],
+      "66": [
+        9,
+        "Thailand"
+      ],
+      "81": [
+        0,
+        "Japan"
+      ],
+      "82": [
+        0,
+        "South Korea"
+      ],
+      "84": [
+        0,
+        "Vietnam"
+      ],
+      "86": [
+        11,
+        "China"
+      ],
+      "90": [
+        11,
+        "Northern Cyprus",
+        "Turkey"
+      ],
+      "91": [
+        10,
+        "India"
+      ],
+      "92": [
+        10,
+        "Pakistan"
+      ],
+      "93": [
+        "10",
+        "Afghanistan"
+      ],
+      "94": [
+        7,
+        "Sri Lanka"
+      ],
+      "95": [
+        0,
+        "Burma",
+        "Myanmar"
+      ],
+      "98": [
+        10,
+        "Iran"
+      ]
+    },
+    "kThreeDigitCodes": {
+      "211": [
+        0,
+        "South Sudan"
+      ],
+      "212": [
+        0,
+        "Morocco",
+        "Sahrawi Arab Democratic Republic",
+        "Western Sahara"
+      ],
+      "213": [
+        9,
+        "Algeria"
+      ],
+      "216": [
+        0,
+        "Tunisia"
+      ],
+      "218": [
+        0,
+        "Libya"
+      ],
+      "220": [
+        0,
+        "Gambia"
+      ],
+      "221": [
+        0,
+        "Senegal"
+      ],
+      "222": [
+        0,
+        "Mauritania"
+      ],
+      "223": [
+        8,
+        "Mali"
+      ],
+      "224": [
+        0,
+        "Guinea"
+      ],
+      "225": [
+        0,
+        "Ivory Coast"
+      ],
+      "226": [
+        8,
+        "Burkina Faso"
+      ],
+      "227": [
+        8,
+        "Niger"
+      ],
+      "228": [
+        8,
+        "Togo"
+      ],
+      "229": [
+        9,
+        "Benin"
+      ],
+      "230": [
+        0,
+        "Mauritius"
+      ],
+      "231": [
+        7,
+        "Liberia"
+      ],
+      "232": [
+        0,
+        "Sierra Leone"
+      ],
+      "233": [
+        9,
+        "Ghana"
+      ],
+      "234": [
+        0,
+        "Nigeria"
+      ],
+      "235": [
+        6,
+        "Chad"
+      ],
+      "236": [
+        0,
+        "Central African Republic"
+      ],
+      "237": [
+        0,
+        "Cameroon"
+      ],
+      "238": [
+        0,
+        "Cape Verde"
+      ],
+      "239": [
+        0,
+        "Príncipe",
+        "São Tomé and Príncipe"
+      ],
+      "240": [
+        0,
+        "Equatorial Guinea"
+      ],
+      "241": [
+        7,
+        "Gabon"
+      ],
+      "242": [
+        0,
+        "Republic of Congo"
+      ],
+      "243": [
+        0,
+        "Democratic Republic of Congo"
+      ],
+      "244": [
+        "9",
+        "Angola"
+      ],
+      "245": [
+        0,
+        "Guinea-Bissau"
+      ],
+      "246": [
+        7,
+        "British Indian Ocean Territory",
+        "Chagos Islands",
+        "Diego Garcia"
+      ],
+      "247": [
+        "9",
+        "Ascension Island"
+      ],
+      "248": [
+        0,
+        "Seychelles"
+      ],
+      "249": [
+        0,
+        "Sudan"
+      ],
+      "250": [
+        0,
+        "Rwanda"
+      ],
+      "251": [
+        0,
+        "Ethiopia"
+      ],
+      "252": [
+        0,
+        "Somalia"
+      ],
+      "253": [
+        0,
+        "Djibouti"
+      ],
+      "254": [
+        0,
+        "Kenya"
+      ],
+      "255": [
+        0,
+        "Tanzania"
+      ],
+      "256": [
+        0,
+        "Uganda"
+      ],
+      "257": [
+        0,
+        "Burundi"
+      ],
+      "258": [
+        0,
+        "Mozambique"
+      ],
+      "260": [
+        0,
+        "Zambia"
+      ],
+      "261": [
+        0,
+        "Madagascar"
+      ],
+      "262": [
+        0,
+        "French Overseas Departments and Territories",
+        "Mayotte",
+        "Réunion"
+      ],
+      "263": [
+        0,
+        "Zimbabwe"
+      ],
+      "264": [
+        0,
+        "Namibia"
+      ],
+      "265": [
+        0,
+        "Malawi"
+      ],
+      "266": [
+        0,
+        "Lesotho"
+      ],
+      "267": [
+        "0",
+        "Botswana"
+      ],
+      "268": [
+        0,
+        "Swaziland"
+      ],
+      "269": [
+        0,
+        "Comoros"
+      ],
+      "290": [
+        4,
+        "Saint Helena and Tristan da Cunha",
+        "Tristan da Cunha"
+      ],
+      "291": [
+        0,
+        "Eritrea"
+      ],
+      "297": [
+        9,
+        "Aruba"
+      ],
+      "298": [
+        5,
+        "Faroe Islands"
+      ],
+      "299": [
+        6,
+        "Greenland"
+      ],
+      "350": [
+        0,
+        "Gibraltar"
+      ],
+      "351": [
+        9,
+        "Madeira",
+        "Portugal"
+      ],
+      "352": [
+        9,
+        "Luxembourg"
+      ],
+      "353": [
+        9,
+        "Ireland"
+      ],
+      "354": [
+        0,
+        "Iceland"
+      ],
+      "355": [
+        "7",
+        "Albania"
+      ],
+      "356": [
+        0,
+        "Malta"
+      ],
+      "357": [
+        6,
+        "Cyprus"
+      ],
+      "358": [
+        "10",
+        "Aland Islands",
+        "Finland"
+      ],
+      "359": [
+        9,
+        "Bulgeria"
+      ],
+      "370": [
+        0,
+        "Lithuania"
+      ],
+      "371": [
+        8,
+        "Latvia"
+      ],
+      "372": [
+        0,
+        "Estonia"
+      ],
+      "373": [
+        8,
+        "Moldova"
+      ],
+      "374": [
+        "9",
+        "Armenia",
+        "Nagorno-Karabakh Republic"
+      ],
+      "375": [
+        "9",
+        "Belarus"
+      ],
+      "376": [
+        9,
+        "Andorra"
+      ],
+      "377": [
+        0,
+        "Kosovo",
+        "Monaco"
+      ],
+      "378": [
+        0,
+        "San Marino"
+      ],
+      "380": [
+        9,
+        "Ukraine"
+      ],
+      "381": [
+        7,
+        "Kosovo",
+        "Serbia"
+      ],
+      "382": [
+        6,
+        "Montenegro"
+      ],
+      "385": [
+        "0",
+        "Croatia"
+      ],
+      "386": [
+        0,
+        "Kosovo",
+        "Slovenia"
+      ],
+      "387": [
+        0,
+        "Bosnia"
+      ],
+      "389": [
+        0,
+        "Macadonia"
+      ],
+      "420": [
+        9,
+        "Czech Republic"
+      ],
+      "421": [
+        9,
+        "Slovakia"
+      ],
+      "423": [
+        0,
+        "Liechtenstein"
+      ],
+      "500": [
+        "5",
+        "Falkland Islands",
+        "South Georgia and the South Sandwich Islands"
+      ],
+      "501": [
+        9,
+        "Belize"
+      ],
+      "502": [
+        0,
+        "Guatamala"
+      ],
+      "503": [
+        0,
+        "El Salvador"
+      ],
+      "504": [
+        [],
+        "Honduras"
+      ],
+      "505": [
+        0,
+        "Nicaragua"
+      ],
+      "506": [
+        0,
+        "Costa Rica"
+      ],
+      "507": [
+        8,
+        "Panama"
+      ],
+      "508": [
+        0,
+        "French Overseas Departments and Territories",
+        "Saint Pierre and Miquelon"
+      ],
+      "509": [
+        0,
+        "Haiti"
+      ],
+      "590": [
+        0,
+        "French Overseas Departments and Territories",
+        "Gadeloupe",
+        "Saint Barthélemy",
+        "Collectivity of Saint Martin"
+      ],
+      "591": [
+        0,
+        "Bolivia"
+      ],
+      "592": [
+        0,
+        "Guyana"
+      ],
+      "593": [
+        0,
+        "Ecuador"
+      ],
+      "594": [
+        0,
+        "French Overseas Departments and Territories"
+      ],
+      "595": [
+        0,
+        "Paraguay"
+      ],
+      "596": [
+        0,
+        "French Overseas Departments and Territories",
+        "Martinique"
+      ],
+      "597": [
+        0,
+        "Suriname"
+      ],
+      "598": [
+        0,
+        "Uruguay"
+      ],
+      "599": [
+        0,
+        "Bonaire",
+        "Curacao",
+        "Saba",
+        "Sint Eustatius"
+      ],
+      "670": [
+        8,
+        "East Timor"
+      ],
+      "672": [
+        9,
+        "Australian Antarctic Territory",
+        "Norfolk Island"
+      ],
+      "673": [
+        0,
+        "Brunei"
+      ],
+      "674": [
+        0,
+        "Nauru"
+      ],
+      "675": [
+        0,
+        "Papua New Guinea"
+      ],
+      "676": [
+        0,
+        "Tonga"
+      ],
+      "677": [
+        7,
+        "Solomon Islands"
+      ],
+      "678": [
+        0,
+        "Vanuatu"
+      ],
+      "679": [
+        0,
+        "Fiji"
+      ],
+      "680": [
+        7,
+        "Palau"
+      ],
+      "681": [
+        0,
+        "Wallis and Futuna"
+      ],
+      "682": [
+        5,
+        "Cook Islands"
+      ],
+      "683": [
+        4,
+        "Niue"
+      ],
+      "685": [
+        0,
+        "Samoa"
+      ],
+      "686": [
+        5,
+        "Kiribati"
+      ],
+      "687": [
+        6,
+        "New Caledonia"
+      ],
+      "688": [
+        0,
+        "Tuvalu"
+      ],
+      "689": [
+        6,
+        "French Polynesia"
+      ],
+      "690": [
+        0,
+        "Tokelau"
+      ],
+      "691": [
+        7,
+        "Federated States of Micronesia"
+      ],
+      "692": [
+        7,
+        "Marshall Island"
+      ],
+      "850": [
+        0,
+        "North Korea"
+      ],
+      "852": [
+        8,
+        "Hong Kong"
+      ],
+      "853": [
+        0,
+        "Macau"
+      ],
+      "855": [
+        0,
+        "Cambodia"
+      ],
+      "856": [
+        0,
+        "Laos"
+      ],
+      "880": [
+        10,
+        "Bangladesh"
+      ],
+      "886": [
+        9,
+        "Taiwan"
+      ],
+      "960": [
+        0,
+        "Maldives"
+      ],
+      "961": [
+        0,
+        "Lebanon"
+      ],
+      "962": [
+        0,
+        "Jordan"
+      ],
+      "963": [
+        0,
+        "Syria"
+      ],
+      "964": [
+        0,
+        "Iraq"
+      ],
+      "965": [
+        0,
+        "Kuwait"
+      ],
+      "966": [
+        9,
+        "Saudi Arabia"
+      ],
+      "967": [
+        9,
+        "Yemen"
+      ],
+      "968": [
+        0,
+        "Oman"
+      ],
+      "970": [
+        9,
+        "Palestine, State of"
+      ],
+      "971": [
+        9,
+        "United Arab Emirates"
+      ],
+      "972": [
+        9,
+        "Israel"
+      ],
+      "973": [
+        8,
+        "Bahrain"
+      ],
+      "974": [
+        8,
+        "Qatar"
+      ],
+      "975": [
+        0,
+        "Bhutan"
+      ],
+      "976": [
+        8,
+        "Mongolia"
+      ],
+      "977": [
+        0,
+        "Nepal"
+      ],
+      "992": [
+        0,
+        "Tajikistan"
+      ],
+      "993": [
+        0,
+        "Turkmenistan"
+      ],
+      "994": [
+        9,
+        "Azerbaijan"
+      ],
+      "995": [
+        9,
+        "Abkhazia",
+        "Georgia",
+        "South Ossetia"
+      ],
+      "996": [
+        0,
+        "Kyrgyzstan"
+      ],
+      "998": [
+        0,
+        "Uzbekistan"
+      ]
+    }
+  }
+]
