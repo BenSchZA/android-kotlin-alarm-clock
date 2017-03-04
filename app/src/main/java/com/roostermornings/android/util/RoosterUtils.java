@@ -1,5 +1,7 @@
 package com.roostermornings.android.util;
 
+import android.os.Build;
+
 import com.roostermornings.android.domain.Alarm;
 
 import java.util.ArrayList;
@@ -13,6 +15,14 @@ public class RoosterUtils {
 
     private static String mRandomAudioFileName = "ABCDEFGHIJKLMNOP";
     static Random random;
+
+    public static boolean hasLollipop() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
+    }
+
+    public static boolean hasGingerbread() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD;
+    }
 
     public static String setAlarmTimeFromHourAndMinute(Alarm alarm) {
 

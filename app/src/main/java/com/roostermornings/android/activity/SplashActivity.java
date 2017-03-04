@@ -13,9 +13,11 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.google.firebase.auth.FirebaseUser;
+import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.background.BackgroundTaskReceiver;
+import com.roostermornings.android.node_api.NodeMyContactsAPI;
 import com.roostermornings.android.sqldata.AudioTableHelper;
 import com.roostermornings.android.sqldata.DeviceAlarmTableHelper;
 import com.roostermornings.android.sqldata.DeviceAlarmTableManager;
@@ -50,20 +52,28 @@ public class SplashActivity extends BaseActivity {
 
         }
 
-        //TODO: remove before release
-        AudioTableHelper dbAudioHelper = new AudioTableHelper(this);
-        SQLiteDatabase dbAudio = dbAudioHelper.getWritableDatabase();
-        DeviceAlarmTableHelper dbAlarmHelper = new DeviceAlarmTableHelper(this);
-        SQLiteDatabase dbAlarm = dbAlarmHelper.getWritableDatabase();
+        //TODO: remove
+        if (BuildConfig.DEBUG) {
+            AudioTableHelper dbAudioHelper = new AudioTableHelper(this);
+            SQLiteDatabase dbAudio = dbAudioHelper.getWritableDatabase();
+            DeviceAlarmTableHelper dbAlarmHelper = new DeviceAlarmTableHelper(this);
+            SQLiteDatabase dbAlarm = dbAlarmHelper.getWritableDatabase();
 
-        AudioTableHelper audioTableHelper = new AudioTableHelper(this);
-        DeviceAlarmTableHelper deviceAlarmTableHelper = new DeviceAlarmTableHelper(this);
-        audioTableHelper.onUpgrade(dbAudio, 1, 2);
-        deviceAlarmTableHelper.onUpgrade(dbAlarm, 1, 2);
+            AudioTableHelper audioTableHelper = new AudioTableHelper(this);
+            DeviceAlarmTableHelper deviceAlarmTableHelper = new DeviceAlarmTableHelper(this);
+            audioTableHelper.onUpgrade(dbAudio, 1, 2);
+            deviceAlarmTableHelper.onUpgrade(dbAlarm, 1, 2);
 
-        BackgroundTaskReceiver backgroundTaskReceiver = new BackgroundTaskReceiver();
-        backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(getApplicationContext());
-        backgroundTaskReceiver.scheduleBackgroundDailyTask(getApplicationContext());
+            dbAudio.close();
+            dbAlarm.close();
+
+            NodeMyContactsAPI nodeMyContactsAPI = new NodeMyContactsAPI(this);
+            nodeMyContactsAPI.execute("");
+        }
+
+            BackgroundTaskReceiver backgroundTaskReceiver = new BackgroundTaskReceiver();
+            backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(getApplicationContext());
+            backgroundTaskReceiver.scheduleBackgroundDailyTask(getApplicationContext());
 
         CountDownTimer countDownTimer = new CountDownTimer(2000, 2000) {
             @Override

@@ -14,6 +14,8 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Random;
 
+import static com.roostermornings.android.util.RoosterUtils.hasLollipop;
+
 /**
  * Created by bscholtz on 2/16/17.
  */
@@ -83,7 +85,7 @@ public final class DeviceAlarmController {
             deviceAlarmTableManager.updateAlarmMillis(deviceAlarm.getPiId(), alarmTime);
 
             //if newer version of Android, create info pending intent
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (hasLollipop()) {
                 Intent alarmInfoIntent = new Intent(context, DeviceAlarmFullScreenActivity.class);
                 PendingIntent alarmInfoPendingIntent = PendingIntent.getActivity(context, 0, alarmInfoIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -123,7 +125,7 @@ public final class DeviceAlarmController {
         long alarmTime = alarmCalendar.getTimeInMillis();
 
         //if newer version of Android, create info pending intent
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (hasLollipop()) {
             Intent alarmInfoIntent = new Intent(context, DeviceAlarmFullScreenActivity.class);
             PendingIntent alarmInfoPendingIntent = PendingIntent.getActivity(context, 0, alarmInfoIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
