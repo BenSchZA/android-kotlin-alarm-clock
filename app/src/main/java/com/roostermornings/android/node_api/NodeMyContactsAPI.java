@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.provider.ContactsContract;
 import android.util.Log;
 
+import org.apache.http.params.HttpParams;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -25,6 +26,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
+
+import retrofit.http.HTTP;
 
 /**
  * Created by bscholtz on 04/03/17.
@@ -71,7 +74,7 @@ public class NodeMyContactsAPI extends AsyncTask<String, Void, String> {
         contactsMap = getContacts(context);
         JSONObject JSONContactsObject = new JSONObject(contactsMap);
         JSONObject JSONProcessedContactsObject = new JSONObject();
-        ArrayList<String> ProcessedContactsArray = new ArrayList<>();
+        JSONArray JSONProcessedContactsArray = new JSONArray();
         String NSNNumber;
         try {
             Iterator<String> JSONKeyIterator = JSONContactsObject.keys();
@@ -82,19 +85,23 @@ public class NodeMyContactsAPI extends AsyncTask<String, Void, String> {
                 JSONContactsObject.put(key, contactNumber);
                 NSNNumber = processContactCountry(contactNumber);
                 JSONProcessedContactsObject.put(key, NSNNumber);
-                ProcessedContactsArray.add(NSNNumber);
+                JSONProcessedContactsArray.put(NSNNumber);
             }
-            //JSONContactsArray = new JSONArray("[" + JSONContactsObject.toString() + "]");
         }
         catch (org.json.JSONException e){
             e.printStackTrace();
         }
 
-        HashMap<String, String> postDataParams = new HashMap<>();
-        postDataParams.put("user_contacts", ProcessedContactsArray.toString());
-        postDataParams.put("user_token_id", "F8dQ9n7JwRh2u9wKMyveNZ4BRyi2");
 
-        return performPostCall("https://rooster-node.appspot-preview.com/api/my_contacts", postDataParams);
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("user_contacts", JSONProcessedContactsArray);
+            jsonObject.put("user_token_id", "F8dQ9n7JwRh2u9wKMyveNZ4BRyi2");
+        }catch(org.json.JSONException e) {
+            e.printStackTrace();
+        }
+
+        return performPostCall("https://rooster-node.appspot-preview.com/api/my_contacts", jsonObject.toString());
     }
 
     private String processContactCountry(String contactNumber) {
@@ -165,7 +172,7 @@ public class NodeMyContactsAPI extends AsyncTask<String, Void, String> {
     }
 
     private String  performPostCall(String requestURL,
-                                   HashMap<String, String> postDataParams) {
+                                   String postDataParams) {
         //http://stackoverflow.com/questions/9767952/how-to-add-parameters-to-httpurlconnection-using-post
 
         URL url;
@@ -177,13 +184,14 @@ public class NodeMyContactsAPI extends AsyncTask<String, Void, String> {
             conn.setReadTimeout(15000);
             conn.setConnectTimeout(15000);
             conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type","application/json");
             conn.setDoInput(true);
             conn.setDoOutput(true);
 
             OutputStream os = conn.getOutputStream();
             BufferedWriter writer = new BufferedWriter(
                     new OutputStreamWriter(os, "UTF-8"));
-            writer.write(getPostDataString(postDataParams));
+            writer.write(postDataParams);
 
             writer.flush();
             writer.close();
