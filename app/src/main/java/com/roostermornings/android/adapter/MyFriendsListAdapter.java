@@ -10,7 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.roostermornings.android.R;
-import com.roostermornings.android.domain.User;
+import com.roostermornings.android.domain.NodeUser;
 
 import java.util.ArrayList;
 
@@ -19,7 +19,7 @@ import java.util.ArrayList;
  */
 
 public class MyFriendsListAdapter extends RecyclerView.Adapter<com.roostermornings.android.adapter.MyFriendsListAdapter.ViewHolder> {
-    private ArrayList<User> mDataset;
+    private ArrayList<NodeUser> mDataset;
     private Context mContext;
 
     // Provide a reference to the views for each data item
@@ -33,13 +33,13 @@ public class MyFriendsListAdapter extends RecyclerView.Adapter<com.roostermornin
 
         public ViewHolder(View v) {
             super(v);
-            imgProfilePic = (ImageView) itemView.findViewById(R.id.new_audio_friend_profile_pic);
-            txtName = (TextView) itemView.findViewById(R.id.new_audio_friend_profile_name);
-            btnAdd = (Button) itemView.findViewById(R.id.new_audio_friend_add);
+            imgProfilePic = (ImageView) itemView.findViewById(R.id.my_friends_profile_pic);
+            txtName = (TextView) itemView.findViewById(R.id.my_friends_profile_name);
+            btnAdd = (Button) itemView.findViewById(R.id.my_friends_add);
         }
     }
 
-    public void add(int position, User item) {
+    public void add(int position, NodeUser item) {
         mDataset.add(position, item);
         notifyItemInserted(position);
     }
@@ -52,7 +52,7 @@ public class MyFriendsListAdapter extends RecyclerView.Adapter<com.roostermornin
 
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public MyFriendsListAdapter(ArrayList<User> myDataset, Context context) {
+    public MyFriendsListAdapter(ArrayList<NodeUser> myDataset, Context context) {
         mDataset = myDataset;
         mContext = context;
     }
@@ -64,7 +64,7 @@ public class MyFriendsListAdapter extends RecyclerView.Adapter<com.roostermornin
     public com.roostermornings.android.adapter.MyFriendsListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                                                                         int viewType) {
         // create a new view
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_layout_new_audio_choose_friends, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_layout_my_friends, parent, false);
         // set the view's size, margins, paddings and layout parameters
         com.roostermornings.android.adapter.MyFriendsListAdapter.ViewHolder vh = new com.roostermornings.android.adapter.MyFriendsListAdapter.ViewHolder(v);
         return vh;
@@ -75,7 +75,7 @@ public class MyFriendsListAdapter extends RecyclerView.Adapter<com.roostermornin
     public void onBindViewHolder(final com.roostermornings.android.adapter.MyFriendsListAdapter.ViewHolder holder, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        final User user = mDataset.get(position);
+        final NodeUser user = mDataset.get(position);
         user.setSelected(false);
         holder.txtName.setText(mDataset.get(position).getUser_name());
         holder.btnAdd.setOnClickListener(new View.OnClickListener() {
