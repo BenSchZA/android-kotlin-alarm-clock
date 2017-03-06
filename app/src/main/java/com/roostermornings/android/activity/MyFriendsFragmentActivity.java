@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 
@@ -16,30 +17,42 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
-import com.roostermornings.android.adapter.NewAudioFriendsListAdapter;
+import com.roostermornings.android.adapter.MyFriendsListAdapter;
 import com.roostermornings.android.domain.LocalContacts;
+import com.roostermornings.android.domain.NodeUser;
 import com.roostermornings.android.domain.NodeUsers;
-import com.roostermornings.android.domain.Users;
 import com.roostermornings.android.util.MyContactsController;
-import com.squareup.okhttp.ResponseBody;
 
 import java.util.ArrayList;
 
+import butterknife.BindView;
 import butterknife.OnClick;
 import retrofit.Call;
 import retrofit.Callback;
 import retrofit.Response;
 import retrofit.Retrofit;
 
+//Responsible for managing friends: 1) my friends, 2) addable friends, 3) friend invites
 public class MyFriendsFragmentActivity extends BaseActivity {
 
     protected static final String TAG = MyFriendsFragmentActivity.class.getSimpleName();
     private MyContactsController myContactsController;
 
+    ArrayList<NodeUser> mFriends = new ArrayList<>();
+    private RecyclerView.Adapter mAdapter;
+
+    @BindView(R.id.home_myFriendsListView)
+    RecyclerView mRecyclerView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_my_friends_fragment);
+        initialize(R.layout.activity_my_friends);
+
+        mAdapter = new MyFriendsListAdapter(mFriends, MyFriendsFragmentActivity.this);
+
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(MyFriendsFragmentActivity.this));
+        mRecyclerView.setAdapter(mAdapter);
 
         myContactsController = new MyContactsController(this);
     }
@@ -117,6 +130,15 @@ public class MyFriendsFragmentActivity extends BaseActivity {
                 NodeUsers apiResponse = response.body();
 
                 if (statusCode == 200) {
+
+                    mFriends = new ArrayList<>();
+                    mFriends.addAll(apiResponse.users.get(0));
+                    mAdapter = new MyFriendsListAdapter(mFriends, MyFriendsFragmentActivity.this);
+
+                    mRecyclerView.setLayoutManager(new LinearLayoutManager(MyFriendsFragmentActivity.this));
+                    mRecyclerView.setAdapter(mAdapter);
+                    mAdapter.notifyDataSetChanged();
+
                     Log.d("apiResponse", apiResponse.toString());
                 }
             }

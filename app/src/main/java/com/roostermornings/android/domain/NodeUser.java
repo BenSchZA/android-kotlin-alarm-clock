@@ -6,6 +6,7 @@ import com.google.gson.annotations.Expose;
  * Created by bscholtz on 06/03/17.
  */
 
+//This class maps the JSON data received from Node to a user object
 public class NodeUser {
 
     @Expose
@@ -17,6 +18,8 @@ public class NodeUser {
     @Expose
     private String cell_number;
 
+    private Boolean selected; //this is important for list of friends that need to be selected
+
     // Required default constructor for Firebase object mapping
     @SuppressWarnings("unused")
     public NodeUser() {
@@ -27,6 +30,14 @@ public class NodeUser {
         this.user_name = user_name;
         this.profile_pic = profile_pic;
         this.cell_number = cell_number;
+    }
+
+    public Boolean getSelected() {
+        return selected;
+    }
+
+    public void setSelected(Boolean selected) {
+        this.selected = selected;
     }
 
     public String getId() {
