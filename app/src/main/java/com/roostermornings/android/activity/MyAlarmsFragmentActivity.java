@@ -51,7 +51,6 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_my_alarms);
 
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -127,6 +126,11 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     @OnClick(R.id.home_record_audio)
     public void recordNewAudio() {
         startActivity(new Intent(MyAlarmsFragmentActivity.this, NewAudioRecordActivity.class));
+    }
+
+    @OnClick(R.id.home_friends)
+    public void manageFriends() {
+        startActivity(new Intent(MyAlarmsFragmentActivity.this, MyFriendsFragmentActivity.class));
     }
 
     public void deleteAlarm(String setId, String alarmId) {

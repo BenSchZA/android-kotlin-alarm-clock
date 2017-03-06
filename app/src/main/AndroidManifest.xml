@@ -105,7 +105,8 @@
             android:name=".background.BackgroundTaskIntentService"
             android:exported="false" />
 
-        <activity android:name=".activity.SignupGoogleActivity"></activity>
+        <activity android:name=".activity.SignupGoogleActivity" />
+        <activity android:name=".activity.MyFriendsFragmentActivity"></activity>
     </application>
 
 </manifest>

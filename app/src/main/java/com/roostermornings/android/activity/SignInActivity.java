@@ -190,10 +190,18 @@ public class SignInActivity extends BaseActivity {
                             String deviceToken = FirebaseInstanceId.getInstance().getToken();
                             FirebaseDatabase database = FirebaseDatabase.getInstance();
 
+                            String photoURLString;
+                            try {
+                                photoURLString = mAuth.getCurrentUser().getPhotoUrl().toString();
+                            }catch (java.lang.NullPointerException e){
+                                e.printStackTrace();
+                                photoURLString = null;
+                            }
+
                             User user = new User(null,
                                     "android",
                                     deviceToken,
-                                    mAuth.getCurrentUser().getPhotoUrl().toString(),
+                                    photoURLString,
                                     mAuth.getCurrentUser().getDisplayName(),
                                     mMobileNumber,
                                     mAuth.getCurrentUser().getUid(), null);
@@ -241,10 +249,18 @@ public class SignInActivity extends BaseActivity {
                             String deviceToken = FirebaseInstanceId.getInstance().getToken();
                             FirebaseDatabase database = FirebaseDatabase.getInstance();
 
+                            String photoURLString;
+                            try {
+                                photoURLString = mAuth.getCurrentUser().getPhotoUrl().toString();
+                            }catch (java.lang.NullPointerException e){
+                                e.printStackTrace();
+                                photoURLString = null;
+                            }
+
                             User user = new User(null,
                                     "android",
                                     deviceToken,
-                                    mAuth.getCurrentUser().getPhotoUrl().toString(),
+                                    photoURLString,
                                     account.getDisplayName(),
                                     mMobileNumber,
                                     mAuth.getCurrentUser().getUid(), null);

@@ -10,6 +10,7 @@ import com.roostermornings.android.node_api.IHTTPClient;
 import io.fabric.sdk.android.Fabric;
 import retrofit.GsonConverterFactory;
 import retrofit.Retrofit;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class BaseApplication extends android.app.Application {
 
