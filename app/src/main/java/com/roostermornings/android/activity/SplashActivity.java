@@ -2,7 +2,6 @@ package com.roostermornings.android.activity;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
@@ -17,11 +16,8 @@ import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.background.BackgroundTaskReceiver;
-import com.roostermornings.android.node_api.NodeMyContactsAPI;
 import com.roostermornings.android.sqldata.AudioTableHelper;
 import com.roostermornings.android.sqldata.DeviceAlarmTableHelper;
-import com.roostermornings.android.sqldata.DeviceAlarmTableManager;
-import com.roostermornings.android.sqlutil.DeviceAlarm;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -66,9 +62,6 @@ public class SplashActivity extends BaseActivity {
 
             dbAudio.close();
             dbAlarm.close();
-
-            NodeMyContactsAPI nodeMyContactsAPI = new NodeMyContactsAPI(this);
-            nodeMyContactsAPI.execute("");
         }
 
             BackgroundTaskReceiver backgroundTaskReceiver = new BackgroundTaskReceiver();

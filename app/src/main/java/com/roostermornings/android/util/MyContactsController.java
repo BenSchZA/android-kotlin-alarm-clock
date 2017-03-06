@@ -1,4 +1,4 @@
-package com.roostermornings.android.node_api;
+package com.roostermornings.android.util;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -6,7 +6,6 @@ import android.os.AsyncTask;
 import android.provider.ContactsContract;
 import android.util.Log;
 
-import org.apache.http.params.HttpParams;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -27,15 +26,13 @@ import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import retrofit.http.HTTP;
-
 /**
  * Created by bscholtz on 04/03/17.
  */
 
-public class NodeMyContactsAPI extends AsyncTask<String, Void, String> {
+public class MyContactsController {
 
-    String TAG = NodeMyContactsAPI.class.getSimpleName();
+    String TAG = MyContactsController.class.getSimpleName();
 
     private Context context;
 
@@ -43,39 +40,17 @@ public class NodeMyContactsAPI extends AsyncTask<String, Void, String> {
     private JSONObject CountryCodes;
     private JSONArray CountryCodesArray;
 
-    public NodeMyContactsAPI(Context c) {
+    public MyContactsController(Context c) {
         this.context = c;
     }
 
-    @Override
-    protected String doInBackground(String... params) {
-        if(android.os.Debug.isDebuggerConnected())
-            android.os.Debug.waitForDebugger();
-
-        String response;
-        response = processContacts();
-        Log.d(TAG, response);
-        publishProgress();
-
-        return response;
-    }
-
-    @Override
-    protected void onPreExecute() {
-        Log.i(TAG, "onPreExecute");
-    }
-
-    @Override
-    protected void onProgressUpdate(Void... values) {
-        Log.i(TAG, "onProgressUpdate");
-    }
-
-    private String processContacts() {
+    public ArrayList<String> processContacts() {
         contactsMap = getContacts(context);
         JSONObject JSONContactsObject = new JSONObject(contactsMap);
         JSONObject JSONProcessedContactsObject = new JSONObject();
-        JSONArray JSONProcessedContactsArray = new JSONArray();
+        ArrayList<String> ProcessedContactsArray = new ArrayList<>();
         String NSNNumber;
+
         try {
             Iterator<String> JSONKeyIterator = JSONContactsObject.keys();
             while (JSONKeyIterator.hasNext()) {
@@ -85,23 +60,14 @@ public class NodeMyContactsAPI extends AsyncTask<String, Void, String> {
                 JSONContactsObject.put(key, contactNumber);
                 NSNNumber = processContactCountry(contactNumber);
                 JSONProcessedContactsObject.put(key, NSNNumber);
-                JSONProcessedContactsArray.put(NSNNumber);
+                ProcessedContactsArray.add(NSNNumber);
             }
         }
         catch (org.json.JSONException e){
             e.printStackTrace();
         }
 
-
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("user_contacts", JSONProcessedContactsArray);
-            jsonObject.put("user_token_id", "F8dQ9n7JwRh2u9wKMyveNZ4BRyi2");
-        }catch(org.json.JSONException e) {
-            e.printStackTrace();
-        }
-
-        return performPostCall("https://rooster-node.appspot-preview.com/api/my_contacts", jsonObject.toString());
+        return ProcessedContactsArray;
     }
 
     private String processContactCountry(String contactNumber) {
@@ -171,69 +137,9 @@ public class NodeMyContactsAPI extends AsyncTask<String, Void, String> {
         return JSONString;
     }
 
-    private String  performPostCall(String requestURL,
-                                   String postDataParams) {
-        //http://stackoverflow.com/questions/9767952/how-to-add-parameters-to-httpurlconnection-using-post
-
-        URL url;
-        String response = "";
-        try {
-            url = new URL(requestURL);
-
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setReadTimeout(15000);
-            conn.setConnectTimeout(15000);
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type","application/json");
-            conn.setDoInput(true);
-            conn.setDoOutput(true);
-
-            OutputStream os = conn.getOutputStream();
-            BufferedWriter writer = new BufferedWriter(
-                    new OutputStreamWriter(os, "UTF-8"));
-            writer.write(postDataParams);
-
-            writer.flush();
-            writer.close();
-            os.flush();
-            os.close();
-            int responseCode = conn.getResponseCode();
-
-            if (responseCode == HttpsURLConnection.HTTP_OK) {
-                String line;
-                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                while ((line=br.readLine()) != null) {
-                    response+=line;
-                }
-            }else{
-                response = "";
-            }
-            conn.disconnect();
-        }catch (Exception e) {
-            e.printStackTrace();
-        }
-        return response;
-    }
-
-    private String getPostDataString(HashMap<String, String> params) throws UnsupportedEncodingException {
-        StringBuilder result = new StringBuilder();
-        boolean first = true;
-        for(Map.Entry<String, String> entry : params.entrySet()){
-            if (first)
-                first = false;
-            else
-                result.append("&");
-
-            result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
-            result.append("=");
-            result.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
-        }
-        return result.toString();
-    }
-
     private static Map<String, String> getContacts(Context context)
     {
-        Map<String, String> result = new HashMap<String, String>();
+        Map<String, String> result = new HashMap<>();
         Cursor cursor = context.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
         while(cursor.moveToNext())
         {
