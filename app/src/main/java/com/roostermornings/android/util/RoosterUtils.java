@@ -1,6 +1,9 @@
 package com.roostermornings.android.util;
 
+import android.content.pm.PackageManager;
 import android.os.Build;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 
 import com.roostermornings.android.domain.Alarm;
 
@@ -68,5 +71,4 @@ public class RoosterUtils {
         return returnString;
 
     }
-
 }

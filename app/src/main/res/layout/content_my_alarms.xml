@@ -29,7 +29,8 @@
         android:layout_gravity="center"
         android:background="@color/grey_transparent"
         android:orientation="horizontal"
-        android:padding="@dimen/spacing_normal">
+        android:padding="@dimen/spacing_normal"
+        android:gravity="center_vertical">
 
         <FrameLayout
             android:layout_width="wrap_content"
