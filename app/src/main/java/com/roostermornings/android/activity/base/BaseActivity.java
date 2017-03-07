@@ -94,7 +94,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
 
     }
 
-    protected IHTTPClient apiService() {
+    public IHTTPClient apiService() {
 
         BaseApplication baseApplication = (BaseApplication) getApplication();
 
@@ -180,7 +180,6 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     }
 
     final public int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 10;
-
     public void requestPermissionReadContacts() {
         // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(this,

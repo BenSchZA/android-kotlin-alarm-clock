@@ -1,110 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_my_alarms"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/main_background_layer_list"
-    android:orientation="vertical"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    android:id="@+id/activity_my_friends"
     tools:context="com.roostermornings.android.activity.MyFriendsFragmentActivity"
-    tools:showIn="@layout/activity_my_friends">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom"
+    android:background="@color/grey_transparent"
+    android:orientation="horizontal"
+    android:padding="@dimen/spacing_normal"
+    android:gravity="center_vertical"
+    android:layout_alignParentBottom="true"
+    android:layout_centerHorizontal="true">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/home_myFriendsListView"
-        android:layout_width="fill_parent"
+    <FrameLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing_normal_large"
         android:layout_weight="1"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin" />
+        android:clickable="true">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+
+        <ImageButton
+            android:id="@+id/home_my_alarms"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_gravity="center"
+            android:layout_margin="@dimen/spacing_small"
+            android:background="@drawable/md_transparent"
+            android:clickable="true"
+            android:src="@drawable/ic_add_alarm_white_24dp" />
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_gravity="center"
-        android:background="@color/grey_transparent"
-        android:orientation="horizontal"
-        android:padding="@dimen/spacing_normal">
+        android:layout_weight="1"
+        android:clickable="true">
 
-        <FrameLayout
+        <ImageButton
+            android:id="@+id/home_my_uploads"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:clickable="true">
+            android:layout_gravity="center"
+            android:layout_margin="@dimen/spacing_normal"
+            android:background="@drawable/md_transparent"
+            android:clickable="true"
+            android:src="@drawable/ic_chat_bubble_outline_white_24dp" />
 
+    </FrameLayout>
 
-            <ImageButton
-                android:id="@+id/home_my_alarms"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_gravity="center"
-                android:layout_margin="@dimen/spacing_small"
-                android:background="@drawable/md_transparent"
-                android:clickable="true"
-                android:src="@drawable/ic_add_alarm_white_24dp" />
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:clickable="true">
 
-        </FrameLayout>
+        <ImageButton
+            android:id="@+id/home_record_audio"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_gravity="center"
+            android:layout_margin="@dimen/spacing_small"
+            android:background="@drawable/md_transparent"
+            android:clickable="true"
+            android:src="@drawable/ic_mic_white_24dp" />
 
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:clickable="true">
+    </FrameLayout>
 
-            <ImageButton
-                android:id="@+id/home_my_uploads"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_margin="@dimen/spacing_normal"
-                android:background="@drawable/md_transparent"
-                android:clickable="true"
-                android:src="@drawable/ic_chat_bubble_outline_white_24dp" />
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:clickable="true">
 
-        </FrameLayout>
+        <ImageButton
+            android:id="@+id/home_friends"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_gravity="center"
+            android:layout_margin="@dimen/spacing_small"
+            android:background="@drawable/md_transparent"
+            android:clickable="true"
+            android:src="@drawable/ic_group_white_24dp" />
 
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:clickable="true">
+    </FrameLayout>
 
-            <ImageButton
-                android:id="@+id/home_record_audio"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_gravity="center"
-                android:layout_margin="@dimen/spacing_small"
-                android:background="@drawable/md_transparent"
-                android:clickable="true"
-                android:src="@drawable/ic_mic_white_24dp" />
-
-        </FrameLayout>
-
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:clickable="true">
-
-            <ImageButton
-                android:id="@+id/home_friends"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_gravity="center"
-                android:layout_margin="@dimen/spacing_small"
-                android:background="@drawable/md_transparent"
-                android:clickable="true"
-                android:src="@drawable/ic_group_white_24dp" />
-
-        </FrameLayout>
-
-
-    </LinearLayout>
 
 </LinearLayout>
