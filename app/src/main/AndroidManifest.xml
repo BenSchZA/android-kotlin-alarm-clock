@@ -107,7 +107,7 @@
 
         <activity android:name=".activity.MyFriendsFragmentActivity"
             android:theme="@style/AppTheme.NoActionBar"
-            android:label="Friends"/>
+            android:label="Friends" />
     </application>
 
 </manifest>

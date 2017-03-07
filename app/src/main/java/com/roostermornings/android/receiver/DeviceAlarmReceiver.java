@@ -62,6 +62,5 @@ public class DeviceAlarmReceiver extends WakefulBroadcastReceiver {
 
         context.startActivity(intentAlarmFullscreen);
         DeviceAlarmReceiver.completeWakefulIntent(intent);
-
     }
 }
