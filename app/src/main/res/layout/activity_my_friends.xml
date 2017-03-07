@@ -28,9 +28,8 @@
             android:layout_height="?attr/actionBarSize"
             android:layout_gravity="center"
             android:background="?attr/colorPrimary"
-            app:layout_scrollFlags="scroll|enterAlways"
             app:popupTheme="@style/AppTheme.PopupOverlay">
-
+            <!--app:layout_scrollFlags="scroll|enterAlways"-->
 
             <FrameLayout
                 android:layout_width="match_parent"
