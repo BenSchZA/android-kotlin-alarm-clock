@@ -41,12 +41,12 @@ import retrofit.Retrofit;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link MyFriendsFragment3.OnFragmentInteractionListener} interface
+ * {@link FriendsInviteFragment3.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link MyFriendsFragment3#newInstance} factory method to
+ * Use the {@link FriendsInviteFragment3#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class MyFriendsFragment3 extends BaseFragment {
+public class FriendsInviteFragment3 extends BaseFragment {
 
     protected static final String TAG = FriendsFragmentActivity.class.getSimpleName();
 
@@ -62,17 +62,17 @@ public class MyFriendsFragment3 extends BaseFragment {
 
     private OnFragmentInteractionListener mListener;
 
-    public MyFriendsFragment3() {
+    public FriendsInviteFragment3() {
         // Required empty public constructor
     }
 
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
-     * @return A new instance of fragment MyFriendsFragment3.
+     * @return A new instance of fragment FriendsInviteFragment3.
      */
-    public static MyFriendsFragment3 newInstance(String param1, String param2) {
-        MyFriendsFragment3 fragment = new MyFriendsFragment3();
+    public static FriendsInviteFragment3 newInstance(String param1, String param2) {
+        FriendsInviteFragment3 fragment = new FriendsInviteFragment3();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -81,7 +81,7 @@ public class MyFriendsFragment3 extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //initialize(R.layout.fragment_my_friends_fragment3);
+        //initialize(R.layout.fragment_friends_fragment3);
 
         if (getArguments() != null) {
         }
@@ -93,7 +93,7 @@ public class MyFriendsFragment3 extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_my_friends_fragment3, container, false);
+        View view = inflater.inflate(R.layout.fragment_friends_fragment3, container, false);
         ButterKnife.bind(this, view);
         return view;
     }
