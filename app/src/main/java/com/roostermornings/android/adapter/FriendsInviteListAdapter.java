@@ -1,6 +1,7 @@
 package com.roostermornings.android.adapter;
 
 import android.content.Context;
+import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.roostermornings.android.R;
+import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.domain.NodeUser;
 
 import java.util.ArrayList;
@@ -18,7 +20,7 @@ import java.util.ArrayList;
  * Created by bscholtz on 06/03/17.
  */
 
-public class MyFriendsListAdapter extends RecyclerView.Adapter<com.roostermornings.android.adapter.MyFriendsListAdapter.ViewHolder> {
+public class FriendsInviteListAdapter extends RecyclerView.Adapter<FriendsInviteListAdapter.ViewHolder> {
     private ArrayList<NodeUser> mDataset;
     private Context mContext;
 
@@ -44,7 +46,7 @@ public class MyFriendsListAdapter extends RecyclerView.Adapter<com.roostermornin
         notifyItemInserted(position);
     }
 
-    public void remove(String item) {
+    public void remove(NodeUser item) {
         int position = mDataset.indexOf(item);
         mDataset.remove(position);
         notifyItemRemoved(position);
@@ -52,7 +54,7 @@ public class MyFriendsListAdapter extends RecyclerView.Adapter<com.roostermornin
 
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public MyFriendsListAdapter(ArrayList<NodeUser> myDataset, Context context) {
+    public FriendsInviteListAdapter(ArrayList<NodeUser> myDataset, Context context) {
         mDataset = myDataset;
         mContext = context;
     }
@@ -61,18 +63,18 @@ public class MyFriendsListAdapter extends RecyclerView.Adapter<com.roostermornin
 
     // Create new views (invoked by the layout manager)
     @Override
-    public com.roostermornings.android.adapter.MyFriendsListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
-                                                                                                        int viewType) {
+    public FriendsInviteListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
+                                                                  int viewType) {
         // create a new view
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_layout_my_friends, parent, false);
         // set the view's size, margins, paddings and layout parameters
-        com.roostermornings.android.adapter.MyFriendsListAdapter.ViewHolder vh = new com.roostermornings.android.adapter.MyFriendsListAdapter.ViewHolder(v);
+        FriendsInviteListAdapter.ViewHolder vh = new FriendsInviteListAdapter.ViewHolder(v);
         return vh;
     }
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(final com.roostermornings.android.adapter.MyFriendsListAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(final FriendsInviteListAdapter.ViewHolder holder, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         final NodeUser user = mDataset.get(position);
@@ -83,6 +85,17 @@ public class MyFriendsListAdapter extends RecyclerView.Adapter<com.roostermornin
             public void onClick(View v) {
                 user.setSelected(!user.getSelected());
                 setButtonBackground(holder.btnAdd, user.getSelected());
+
+                ((FriendsFragmentActivity)mContext).inviteUser(user);
+
+                final Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        //Do something after 200ms
+                        remove(user);
+                    }
+                }, 200);
             }
         });
     }

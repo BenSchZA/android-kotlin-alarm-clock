@@ -12,9 +12,12 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseUser;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.domain.NodeUser;
 import com.roostermornings.android.fragment.MyFriendsFragment1;
 import com.roostermornings.android.fragment.MyFriendsFragment2;
 import com.roostermornings.android.fragment.MyFriendsFragment3;
@@ -23,10 +26,12 @@ import butterknife.BindView;
 import butterknife.OnClick;
 
 //Responsible for managing friends: 1) my friends, 2) addable friends, 3) friend invites
-public class MyFriendsFragmentActivity extends BaseActivity implements
+public class FriendsFragmentActivity extends BaseActivity implements
         MyFriendsFragment1.OnFragmentInteractionListener,
         MyFriendsFragment2.OnFragmentInteractionListener,
         MyFriendsFragment3.OnFragmentInteractionListener {
+
+    public static final String TAG = FriendsFragmentActivity.class.getSimpleName();
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -68,12 +73,12 @@ public class MyFriendsFragmentActivity extends BaseActivity implements
 
     @OnClick(R.id.home_record_audio)
     public void recordNewAudio() {
-        startActivity(new Intent(MyFriendsFragmentActivity.this, NewAudioRecordActivity.class));
+        startActivity(new Intent(FriendsFragmentActivity.this, NewAudioRecordActivity.class));
     }
 
     @OnClick(R.id.home_my_alarms)
     public void manageAlarms() {
-        startActivity(new Intent(MyFriendsFragmentActivity.this, MyAlarmsFragmentActivity.class));
+        startActivity(new Intent(FriendsFragmentActivity.this, MyAlarmsFragmentActivity.class));
     }
 
     @Override
@@ -173,6 +178,23 @@ public class MyFriendsFragmentActivity extends BaseActivity implements
 
             // other 'case' lines to check for other
             // permissions this app might request
+        }
+    }
+
+    public void inviteUser(NodeUser nodeUser) {
+
+        FirebaseUser currentUser = getFirebaseUser();
+
+        if (nodeUser.getSelected()) {
+
+            String inviteUrl = String.format("friend_requests_received/%s/%s", nodeUser.getId(), mAuth.getCurrentUser().getUid());
+            String currentUserUrl = String.format("friend_requests_sent/%s/%s", currentUser.getUid(), nodeUser.getId());
+
+            NodeUser currentNodeUser = new NodeUser("", mCurrentUser.getUser_name(), mCurrentUser.getProfile_pic(), mCurrentUser.getCell_number());
+
+            mDatabase.getDatabase().getReference(inviteUrl).setValue(currentNodeUser);
+            mDatabase.getDatabase().getReference(currentUserUrl).setValue(nodeUser);
+            Toast.makeText(this, nodeUser.getUser_name() + " invited!", Toast.LENGTH_LONG).show();
         }
     }
 }

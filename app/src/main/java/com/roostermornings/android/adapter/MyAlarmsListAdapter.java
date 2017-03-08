@@ -78,9 +78,13 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
         // - replace the contents of the view with that element
         final Alarm alarm = mDataset.get(position);
 
-        holder.txtAlarmTime.setText(RoosterUtils.setAlarmTimeFromHourAndMinute(mDataset.get(position)));
-        holder.txtAlarmDays.setText(RoosterUtils.getAlarmDays(mDataset.get(position)));
-        holder.txtAlarmChannel.setText(mDataset.get(position).getChannel().getName());
+        try {
+            holder.txtAlarmTime.setText(RoosterUtils.setAlarmTimeFromHourAndMinute(mDataset.get(position)));
+            holder.txtAlarmDays.setText(RoosterUtils.getAlarmDays(mDataset.get(position)));
+            holder.txtAlarmChannel.setText(mDataset.get(position).getChannel().getName());
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
 
         holder.imgDelete.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -129,6 +133,5 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
     public long getItemId(int position) {
         return position;
     }
-
 
 }

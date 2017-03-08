@@ -1,6 +1,8 @@
 package com.roostermornings.android.activity.base;
 
+import android.app.Activity;
 import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -20,25 +22,27 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.mobsandgeeks.saripaar.ValidationError;
 import com.mobsandgeeks.saripaar.Validator;
 import com.roostermornings.android.BaseApplication;
-import com.roostermornings.android.Manifest;
-import com.roostermornings.android.R;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
-import com.roostermornings.android.activity.MyFriendsFragmentActivity;
-import com.roostermornings.android.activity.NewAudioRecordActivity;
+import com.roostermornings.android.domain.Channel;
+import com.roostermornings.android.domain.User;
+import com.roostermornings.android.util.ExceptionHandler;
 import com.roostermornings.android.activity.SplashActivity;
 import com.roostermornings.android.node_api.IHTTPClient;
+import com.roostermornings.android.util.MyContactsController;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 public class BaseActivity extends AppCompatActivity implements Validator.ValidationListener {
 
@@ -47,6 +51,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     protected FirebaseAuth.AuthStateListener mAuthListener;
     private static final String TAG = BaseActivity.class.getSimpleName();
     protected DatabaseReference mDatabase;
+    public static User mCurrentUser;
 
     @Inject
     protected SharedPreferences sharedPreferences;
@@ -55,6 +60,11 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //If activity is not MyAlarms page, set default uncaught exception handler - this is to ensure loop does not occur
+//        if(!this.getClass().getSimpleName().equals(MyAlarmsFragmentActivity.class.getSimpleName())) {
+//            Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
+//        }
+
         BaseApplication baseApplication = (BaseApplication) getApplication();
 
         //inject Dagger dependencies
@@ -62,6 +72,9 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
 
         //get reference to Firebase database
         mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        //retrieve static User for current user
+        retrieveMyUserDetails();
 
         // [START auth_state_listener]
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -105,6 +118,26 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     protected FirebaseUser getFirebaseUser() {
         if (mAuth == null) mAuth = FirebaseAuth.getInstance();
         return mAuth.getCurrentUser();
+    }
+
+    protected void retrieveMyUserDetails() {
+        ValueEventListener userListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                mCurrentUser = dataSnapshot.getValue(User.class);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+                Toast.makeText(getApplicationContext(), "Failed to load user.",
+                        Toast.LENGTH_SHORT).show();
+            }
+        };
+
+        DatabaseReference thisUserReference = mDatabase
+                .child("users").child(getFirebaseUser().getUid());
+        thisUserReference.addValueEventListener(userListener);
     }
 
     @Override

@@ -130,7 +130,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
     @OnClick(R.id.home_friends)
     public void manageFriends() {
-        startActivity(new Intent(MyAlarmsFragmentActivity.this, MyFriendsFragmentActivity.class));
+        startActivity(new Intent(MyAlarmsFragmentActivity.this, FriendsFragmentActivity.class));
     }
 
     public void deleteAlarm(String setId, String alarmId) {

@@ -39,7 +39,6 @@ public class NewAudioFriendsActivity extends BaseActivity {
     ArrayList<User> mFriends = new ArrayList<>();
     private RecyclerView.Adapter mAdapter;
     private String mAudioFileUrl = "";
-    private User mCurrentUser;
 
     @BindView(R.id.new_audio_upload_button)
     Button btnNewAudioSave;
@@ -60,35 +59,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
         Bundle extras = getIntent().getExtras();
         mAudioFileUrl = extras.getString("downloadUrl");
 
-        retrieveMyUserDetails();
-
-    }
-
-    private void retrieveMyUserDetails() {
-
-        ValueEventListener userListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                User user = dataSnapshot.getValue(User.class);
-                mCurrentUser = user;
-                retrieveMyFriends();
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                Toast.makeText(NewAudioFriendsActivity.this, "Failed to load user.",
-                        Toast.LENGTH_SHORT).show();
-            }
-        };
-
-        DatabaseReference thisUserReference = FirebaseDatabase.getInstance().getReference()
-                .child("users").child(getFirebaseUser().getUid());
-
-        thisUserReference.addListenerForSingleValueEvent(userListener);
-
-
+        retrieveMyFriends();
     }
 
     private void retrieveMyFriends() {
@@ -185,6 +156,5 @@ public class NewAudioFriendsActivity extends BaseActivity {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
     }
-
 
 }
