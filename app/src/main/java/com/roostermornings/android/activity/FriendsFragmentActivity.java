@@ -18,18 +18,18 @@ import com.google.firebase.auth.FirebaseUser;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.NodeUser;
-import com.roostermornings.android.fragment.MyFriendsFragment1;
-import com.roostermornings.android.fragment.MyFriendsFragment2;
-import com.roostermornings.android.fragment.MyFriendsFragment3;
+import com.roostermornings.android.fragment.FriendsInviteFragment3;
+import com.roostermornings.android.fragment.FriendsMyFragment1;
+import com.roostermornings.android.fragment.FriendsRequestFragment2;
 
 import butterknife.BindView;
 import butterknife.OnClick;
 
 //Responsible for managing friends: 1) my friends, 2) addable friends, 3) friend invites
 public class FriendsFragmentActivity extends BaseActivity implements
-        MyFriendsFragment1.OnFragmentInteractionListener,
-        MyFriendsFragment2.OnFragmentInteractionListener,
-        MyFriendsFragment3.OnFragmentInteractionListener {
+        FriendsMyFragment1.OnFragmentInteractionListener,
+        FriendsRequestFragment2.OnFragmentInteractionListener,
+        FriendsInviteFragment3.OnFragmentInteractionListener {
 
     public static final String TAG = FriendsFragmentActivity.class.getSimpleName();
 
@@ -118,13 +118,13 @@ public class FriendsFragmentActivity extends BaseActivity implements
             Fragment fragment =null;
             switch (position) {
                 case 0:
-                    fragment = Fragment.instantiate(getApplicationContext(), MyFriendsFragment1.class.getName());
+                    fragment = Fragment.instantiate(getApplicationContext(), FriendsMyFragment1.class.getName());
                     break;
                 case 1:
-                    fragment = Fragment.instantiate(getApplicationContext(), MyFriendsFragment2.class.getName());
+                    fragment = Fragment.instantiate(getApplicationContext(), FriendsRequestFragment2.class.getName());
                     break;
                 case 2:
-                    fragment = Fragment.instantiate(getApplicationContext(), MyFriendsFragment3.class.getName());
+                    fragment = Fragment.instantiate(getApplicationContext(), FriendsInviteFragment3.class.getName());
                     break;
                 default:
                     break;

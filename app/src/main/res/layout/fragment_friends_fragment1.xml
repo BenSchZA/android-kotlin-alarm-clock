@@ -8,7 +8,7 @@
     android:background="@drawable/main_background_layer_list"
     android:orientation="vertical"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.roostermornings.android.fragment.MyFriendsFragment1">
+    tools:context="com.roostermornings.android.fragment.FriendsMyFragment1">
 
     <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
 

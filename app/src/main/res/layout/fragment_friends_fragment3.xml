@@ -8,12 +8,12 @@
     android:background="@drawable/main_background_layer_list"
     android:orientation="vertical"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.roostermornings.android.fragment.MyFriendsFragment2">
+    tools:context="com.roostermornings.android.fragment.FriendsInviteFragment3">
 
     <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/friendsRequestListView"
+        android:id="@+id/friendsInviteListView"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/spacing_normal_large"
@@ -22,3 +22,5 @@
         android:paddingRight="@dimen/activity_horizontal_margin" />
 
 </LinearLayout>
+
+
