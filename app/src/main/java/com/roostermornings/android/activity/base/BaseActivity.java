@@ -6,6 +6,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -36,6 +37,7 @@ import com.roostermornings.android.domain.User;
 import com.roostermornings.android.util.ExceptionHandler;
 import com.roostermornings.android.activity.SplashActivity;
 import com.roostermornings.android.node_api.IHTTPClient;
+import com.roostermornings.android.util.FontsOverride;
 import com.roostermornings.android.util.MyContactsController;
 
 import java.util.List;
@@ -66,6 +68,10 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
 //        }
 
         BaseApplication baseApplication = (BaseApplication) getApplication();
+
+        //TODO: run once
+        //Set custom font using custom FontsOverride class
+        FontsOverride.setDefaultFont(this, "MONOSPACE", "fonts/Nunito/Nunito-Bold.ttf");
 
         //inject Dagger dependencies
         baseApplication.getRoosterApplicationComponent().inject(this);

@@ -2,6 +2,7 @@ package com.roostermornings.android.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -27,7 +28,7 @@ import java.util.ArrayList;
 import butterknife.BindView;
 
 
-public class NewAlarmFragment2 extends BaseFragment {
+public class NewAlarmFragment2 extends BaseFragment  {
 
     private static final String ARG_USER_UID_PARAM = "user_uid_param";
     public static final String TAG = NewAlarmFragment2.class.getSimpleName();
@@ -40,8 +41,12 @@ public class NewAlarmFragment2 extends BaseFragment {
     @BindView(R.id.channelsListView)
     RecyclerView mRecyclerView;
 
+    @BindView(R.id.swipeContainer)
+    SwipeRefreshLayout swipeContainer;
+
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    private ChannelsListAdapter channelsListAdapter;
 
     public NewAlarmFragment2() {
         // Required empty public constructor
@@ -103,8 +108,21 @@ public class NewAlarmFragment2 extends BaseFragment {
                         Toast.LENGTH_SHORT).show();
             }
         };
-
         mChannelsReference.addValueEventListener(alarmsListener);
+
+        channelsListAdapter = new ChannelsListAdapter();
+        // Setup refresh listener which triggers new data loading
+        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                // Your code to refresh the list here.
+                // Make sure you call swipeContainer.setRefreshing(false)
+                // once the network request has completed successfully.
+                channelsListAdapter.clear();
+                channelsListAdapter.addAll(channels);
+                swipeContainer.setRefreshing(false);
+            }
+        });
 
         return view;
     }

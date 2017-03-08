@@ -31,12 +31,14 @@ public class FriendsInviteListAdapter extends RecyclerView.Adapter<FriendsInvite
         // each data item is just a string in this case
         public ImageView imgProfilePic;
         public TextView txtName;
+        public TextView txtInitials;
         public Button btnAdd;
 
         public ViewHolder(View v) {
             super(v);
             imgProfilePic = (ImageView) itemView.findViewById(R.id.my_friends_profile_pic);
             txtName = (TextView) itemView.findViewById(R.id.my_friends_profile_name);
+            txtInitials = (TextView) itemView.findViewById(R.id.txtInitials);
             btnAdd = (Button) itemView.findViewById(R.id.my_friends_add);
         }
     }
@@ -80,6 +82,7 @@ public class FriendsInviteListAdapter extends RecyclerView.Adapter<FriendsInvite
         final NodeUser user = mDataset.get(position);
         user.setSelected(false);
         holder.txtName.setText(mDataset.get(position).getUser_name());
+        holder.txtInitials.setText(getInitials(mDataset.get(position).getUser_name()));
         holder.btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -98,6 +101,19 @@ public class FriendsInviteListAdapter extends RecyclerView.Adapter<FriendsInvite
                 }, 200);
             }
         });
+    }
+
+    private String getInitials(String displayName) {
+        String initials = "";
+        String tempStringArray[];
+
+        tempStringArray = displayName.split(" ", 2);
+
+        for (String s:tempStringArray) {
+            initials = initials.concat(String.valueOf(s.charAt(0)));
+        }
+
+        return initials;
     }
 
     private void setButtonBackground(Button addButton, Boolean focused) {
