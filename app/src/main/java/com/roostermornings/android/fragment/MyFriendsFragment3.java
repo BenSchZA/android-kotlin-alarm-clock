@@ -20,9 +20,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
 import com.roostermornings.android.R;
-import com.roostermornings.android.activity.MyFriendsFragmentActivity;
+import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.activity.base.BaseActivity;
-import com.roostermornings.android.adapter.MyFriendsListAdapter;
+import com.roostermornings.android.adapter.FriendsInviteListAdapter;
 import com.roostermornings.android.domain.LocalContacts;
 import com.roostermornings.android.domain.NodeUser;
 import com.roostermornings.android.domain.NodeUsers;
@@ -48,16 +48,16 @@ import retrofit.Retrofit;
  */
 public class MyFriendsFragment3 extends BaseFragment {
 
-    protected static final String TAG = MyFriendsFragmentActivity.class.getSimpleName();
+    protected static final String TAG = FriendsFragmentActivity.class.getSimpleName();
 
     private MyContactsController myContactsController;
 
     private BaseActivity baseActivity;
 
-    ArrayList<NodeUser> mFriends = new ArrayList<>();
+    ArrayList<NodeUser> mUsers = new ArrayList<>();
     private RecyclerView.Adapter mAdapter;
 
-    @BindView(R.id.home_myFriendsListView)
+    @BindView(R.id.friendsInviteListView)
     RecyclerView mRecyclerView;
 
     private OnFragmentInteractionListener mListener;
@@ -87,7 +87,6 @@ public class MyFriendsFragment3 extends BaseFragment {
         }
 
         myContactsController = new MyContactsController(getContext());
-        baseActivity = (BaseActivity) getActivity();
     }
 
     @Override
@@ -104,7 +103,7 @@ public class MyFriendsFragment3 extends BaseFragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mAdapter = new MyFriendsListAdapter(mFriends, getContext());
+        mAdapter = new FriendsInviteListAdapter(mUsers, getContext());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mRecyclerView.setAdapter(mAdapter);
     }
@@ -120,6 +119,7 @@ public class MyFriendsFragment3 extends BaseFragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
+        baseActivity = (BaseActivity) getActivity();
         if (ContextCompat.checkSelfPermission(getContext(),
                 android.Manifest.permission.READ_CONTACTS)
                 == PackageManager.PERMISSION_GRANTED) executeNodeMyContactsTask();
@@ -138,6 +138,8 @@ public class MyFriendsFragment3 extends BaseFragment {
         super.onDetach();
         mListener = null;
     }
+
+    //mListener.onFragmentInteraction(uri);
 
     /**
      * This interface must be implemented by activities that contain this
@@ -187,9 +189,9 @@ public class MyFriendsFragment3 extends BaseFragment {
 
                 if (statusCode == 200) {
 
-                    mFriends = new ArrayList<>();
-                    mFriends.addAll(apiResponse.users.get(0));
-                    mAdapter = new MyFriendsListAdapter(mFriends, getContext());
+                    mUsers = new ArrayList<>();
+                    mUsers.addAll(apiResponse.users.get(0));
+                    mAdapter = new FriendsInviteListAdapter(mUsers, getContext());
 
                     mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
                     mRecyclerView.setAdapter(mAdapter);

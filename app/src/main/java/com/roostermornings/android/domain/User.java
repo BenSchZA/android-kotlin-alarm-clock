@@ -13,7 +13,7 @@ public class User {
     private String profile_pic;
     private String user_name;
     private String cell_number;
-    private HashMap<String, Boolean> friends;
+    private HashMap<String, Friend> friends;
     private String uid;
     private Boolean selected; //this is important for list of friends that need to be selected eg for creating a new alarm
 
@@ -29,7 +29,7 @@ public class User {
          String user_name,
          String cell_number,
          String uid,
-         HashMap<String, Boolean> friends) {
+         HashMap<String, Friend> friends) {
 
         this.channels = channels;
         this.cell_number = cell_number;
@@ -90,11 +90,11 @@ public class User {
         this.cell_number = cell_number;
     }
 
-    public HashMap<String, Boolean> getFriends() {
+    public HashMap<String, Friend> getFriends() {
         return friends;
     }
 
-    public void setFriends(HashMap<String, Boolean> friends) {
+    public void setFriends(HashMap<String, Friend> friends) {
         this.friends = friends;
     }
 
