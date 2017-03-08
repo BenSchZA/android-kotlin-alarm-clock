@@ -10,6 +10,14 @@
         <item name="colorControlNormal">@color/normal</item>
         <item name="colorControlActivated">@color/accent</item>
         <item name="colorControlHighlight">@color/accent</item>
+
+        <!--Actually overridden to Nunito-Bold-->
+        <item name="android:typeface">monospace</item>
+    </style>
+
+    <!--Override action bar titles set in activity-->
+    <style name="TextAppearance.AppCompat.Widget.ActionBar.Title" parent="Base.TextAppearance.AppCompat.Title">
+        <item name="android:typeface" tools:override="true">monospace</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -23,9 +31,9 @@
         <item name="android:windowTranslucentStatus">true</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
 
 
     <style name="RoosterEditText" parent="android:Widget.EditText">

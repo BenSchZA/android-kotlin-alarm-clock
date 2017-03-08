@@ -41,6 +41,18 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
         }
     }
 
+    // Clean all elements of the recycler
+    public void clear() {
+        mDataset.clear();
+        notifyDataSetChanged();
+    }
+
+    // Add a list of items
+    public void addAll(ArrayList<Channel> data) {
+        mDataset.addAll(data);
+        notifyDataSetChanged();
+    }
+
     public void add(int position, Channel item) {
         mDataset.add(position, item);
         notifyItemInserted(position);
@@ -56,6 +68,10 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
     public ChannelsListAdapter(ArrayList<Channel> myDataset, Fragment fragment) {
         mDataset = myDataset;
         mFragment = fragment;
+    }
+
+    public ChannelsListAdapter() {
+
     }
 
     // Create new views (invoked by the layout manager)

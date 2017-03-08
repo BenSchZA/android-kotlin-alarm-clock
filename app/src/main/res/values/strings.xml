@@ -39,6 +39,9 @@
     <string name="alarm_default_name">Rise and Shine!</string>
     <string name="alarm_count"></string>
 
+    <string name="text_name_initials"></string>
+    <string name="text_friends_button">Add</string>
+
     <string name="get_started">Get started</string>
     <string name="activity_signin_title">Sign up to Rooster to make \n your mornings epic!</string>
     <string name="terms_and_conditions">Terms and conditions</string>

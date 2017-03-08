@@ -58,7 +58,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        initialize(R.layout.activity_my_friends);
+        initialize(R.layout.activity_friends);
 
         setSupportActionBar(toolbar);
         // Create the adapter that will return a fragment for each of the three
