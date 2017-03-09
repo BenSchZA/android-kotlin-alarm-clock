@@ -3,6 +3,6 @@
     >
     <item
         android:drawable="@drawable/main_background_gradient"
-        android:id="@+id/top_gradient"
+        android:id="@+id/top_gradient1"
         />
 </layer-list>

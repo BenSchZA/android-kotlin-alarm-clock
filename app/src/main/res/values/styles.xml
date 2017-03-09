@@ -4,7 +4,7 @@
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/primary</item>
-        <item name="colorPrimaryDark">@color/primary</item>
+        <item name="colorPrimaryDark">@color/status_bar</item>
         <item name="colorAccent">@color/accent</item>
 
         <item name="colorControlNormal">@color/normal</item>
@@ -16,9 +16,6 @@
     </style>
 
     <!--Override action bar titles set in activity-->
-    <style name="TextAppearance.AppCompat.Widget.ActionBar.Title" parent="Base.TextAppearance.AppCompat.Title">
-        <item name="android:typeface" tools:override="true">monospace</item>
-    </style>
 
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">true</item>

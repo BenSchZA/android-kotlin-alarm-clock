@@ -21,7 +21,7 @@ import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.fragment.IAlarmSetListener;
 import com.roostermornings.android.fragment.NewAlarmFragment1;
 import com.roostermornings.android.fragment.NewAlarmFragment2;
-import com.roostermornings.android.sqldata.DeviceAlarmTableManager;
+import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 
 import java.util.ArrayList;
@@ -40,7 +40,6 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
     Alarm mAlarm = new Alarm();
     Calendar mCalendar = Calendar.getInstance();
     private DeviceAlarmController deviceAlarmController = new DeviceAlarmController(this);
-    private DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(this);
 
     @BindView(R.id.toolbar_title)
     TextView toolbarTitle;
@@ -156,9 +155,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 database.getReference(String.format("alarms/%s/%s", mAuth.getCurrentUser().getUid(), key)).setValue(mAlarm);
 
                 Toast.makeText(getBaseContext(), "Alarm created!", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(getBaseContext(), MyAlarmsFragmentActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
+                startHomeActivity();
                 finish();
             }
             return true;

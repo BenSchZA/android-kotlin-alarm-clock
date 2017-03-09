@@ -1,4 +1,4 @@
-package com.roostermornings.android.sqldata;
+package com.roostermornings.android.sqlutil;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -9,6 +9,7 @@ import static com.roostermornings.android.sqldata.AudioTableContract.SQL_CREATE_
 
 import com.roostermornings.android.domain.AlarmQueue;
 import com.roostermornings.android.domain.DeviceAudioQueueItem;
+import com.roostermornings.android.sqldata.AudioTableHelper;
 
 import java.util.ArrayList;
 import java.util.Calendar;

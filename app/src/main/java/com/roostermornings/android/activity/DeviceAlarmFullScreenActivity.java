@@ -1,7 +1,5 @@
 package com.roostermornings.android.activity;
 
-import android.app.Activity;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -22,7 +20,7 @@ import android.widget.TextView;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.DeviceAudioQueueItem;
-import com.roostermornings.android.sqldata.AudioTableManager;
+import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.squareup.picasso.Callback;
@@ -30,14 +28,11 @@ import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.OnClick;
-import butterknife.OnItemClick;
-import butterknife.OnTouch;
 
 public class DeviceAlarmFullScreenActivity extends BaseActivity {
 

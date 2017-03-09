@@ -4,11 +4,9 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 
 import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
-import com.roostermornings.android.sqldata.DeviceAlarmTableManager;
 
 import java.util.Calendar;
 import java.util.List;
