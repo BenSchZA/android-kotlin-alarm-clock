@@ -1,6 +1,8 @@
 package com.roostermornings.android.fragment;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -13,6 +15,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -33,6 +36,7 @@ import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import retrofit.Call;
 import retrofit.Callback;
 import retrofit.Response;
@@ -59,6 +63,9 @@ public class FriendsInviteFragment3 extends BaseFragment {
 
     @BindView(R.id.friendsInviteListView)
     RecyclerView mRecyclerView;
+
+    @BindView(R.id.share_button)
+    Button shareButton;
 
     private OnFragmentInteractionListener mListener;
 
@@ -137,6 +144,19 @@ public class FriendsInviteFragment3 extends BaseFragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @OnClick(R.id.share_button)
+    public void onShareButtonClicked() {
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, "How cool would it be if you could wake up " +
+                "to epic surprise voice notes from me and other friends? " +
+                "Download Rooster for awesome mornings: http://onelink.to/rooster");
+        sendIntent.setType("text/plain");
+
+        sendIntent = Intent.createChooser(sendIntent, "Share Rooster");
+        startActivity(sendIntent);
     }
 
     //mListener.onFragmentInteraction(uri);

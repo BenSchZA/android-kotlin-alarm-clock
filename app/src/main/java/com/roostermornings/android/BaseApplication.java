@@ -6,6 +6,7 @@ import com.roostermornings.android.dagger.DaggerRoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationModule;
 import com.roostermornings.android.node_api.IHTTPClient;
+import com.roostermornings.android.util.FontsOverride;
 
 import io.fabric.sdk.android.Fabric;
 import retrofit.GsonConverterFactory;
@@ -24,6 +25,9 @@ public class BaseApplication extends android.app.Application {
         super.onCreate();
 
         Fabric.with(this, new Crashlytics());
+
+        //Over ride monospace font, everything here runs once on start up
+        FontsOverride.setDefaultFont(this, "MONOSPACE", "fonts/Nunito/Nunito-Bold.ttf");
 
         if (BuildConfig.DEBUG) {
             //Remove in release version... don't want to leave stethoscopes lying around

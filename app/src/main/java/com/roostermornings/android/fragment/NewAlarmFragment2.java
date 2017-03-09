@@ -41,12 +41,8 @@ public class NewAlarmFragment2 extends BaseFragment  {
     @BindView(R.id.channelsListView)
     RecyclerView mRecyclerView;
 
-    @BindView(R.id.swipeContainer)
-    SwipeRefreshLayout swipeContainer;
-
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
-    private ChannelsListAdapter channelsListAdapter;
 
     public NewAlarmFragment2() {
         // Required empty public constructor
@@ -97,7 +93,6 @@ public class NewAlarmFragment2 extends BaseFragment  {
                     channels.add(channel);
                     mAdapter.notifyDataSetChanged();
                 }
-
             }
 
             @Override
@@ -109,20 +104,6 @@ public class NewAlarmFragment2 extends BaseFragment  {
             }
         };
         mChannelsReference.addValueEventListener(alarmsListener);
-
-        channelsListAdapter = new ChannelsListAdapter();
-        // Setup refresh listener which triggers new data loading
-        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                // Your code to refresh the list here.
-                // Make sure you call swipeContainer.setRefreshing(false)
-                // once the network request has completed successfully.
-                channelsListAdapter.clear();
-                channelsListAdapter.addAll(channels);
-                swipeContainer.setRefreshing(false);
-            }
-        });
 
         return view;
     }
@@ -136,7 +117,6 @@ public class NewAlarmFragment2 extends BaseFragment  {
             throw new RuntimeException(context.toString()
                     + " must implement IAlarmSetListener");
         }
-
     }
 
     @Override

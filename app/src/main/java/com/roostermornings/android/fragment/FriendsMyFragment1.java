@@ -13,23 +13,35 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.adapter.ChannelsListAdapter;
 import com.roostermornings.android.adapter.FriendsInviteListAdapter;
+import com.roostermornings.android.adapter.FriendsMyListAdapter;
+import com.roostermornings.android.domain.Channel;
 import com.roostermornings.android.domain.LocalContacts;
 import com.roostermornings.android.domain.NodeUser;
 import com.roostermornings.android.domain.NodeUsers;
+import com.roostermornings.android.domain.User;
+import com.roostermornings.android.domain.Users;
 import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.util.MyContactsController;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -54,7 +66,10 @@ public class FriendsMyFragment1 extends BaseFragment {
 
     private BaseActivity baseActivity;
 
-    ArrayList<NodeUser> mUsers = new ArrayList<>();
+    ArrayList<User> mUsers = new ArrayList<>();
+    private DatabaseReference mFriendsReference;
+    private DatabaseReference mUserReference;
+
     private RecyclerView.Adapter mAdapter;
 
     @BindView(R.id.friendsMyListView)
@@ -95,6 +110,7 @@ public class FriendsMyFragment1 extends BaseFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_friends_fragment1, container, false);
         ButterKnife.bind(this, view);
+
         return view;
     }
 
@@ -103,9 +119,54 @@ public class FriendsMyFragment1 extends BaseFragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mAdapter = new FriendsInviteListAdapter(mUsers, getContext());
+        mAdapter = new FriendsMyListAdapter(mUsers, getContext());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mRecyclerView.setAdapter(mAdapter);
+
+        getFriends();
+    }
+
+    private void getFriends() {
+        mFriendsReference = mDatabase
+                .child("users").child(getFirebaseUser().getUid()).child("friends");
+
+        final HashMap<String, Boolean> friendMap = new HashMap<>();
+
+        ValueEventListener friendsListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                    friendMap.put(postSnapshot.getKey(), Boolean.valueOf(postSnapshot.getValue().toString()));
+                }
+
+                for (HashMap.Entry<String, Boolean> entry: friendMap.entrySet()) {
+                    mUserReference = mDatabase.child("users").child(entry.getKey());
+                    ValueEventListener userListener = new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            mUsers.add(dataSnapshot.getValue(User.class));
+                            mAdapter.notifyDataSetChanged();
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    };
+                    mUserReference.addValueEventListener(userListener);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+                //TODO: Attempt to invoke virtual method 'android.content.res.Resources android.content.Context.getResources()' on a null object reference
+                Toast.makeText(getContext(), "Failed to load user.",
+                        Toast.LENGTH_SHORT).show();
+            }
+        };
+        mFriendsReference.addValueEventListener(friendsListener);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -118,12 +179,6 @@ public class FriendsMyFragment1 extends BaseFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-
-        baseActivity = (BaseActivity) getActivity();
-        if (ContextCompat.checkSelfPermission(getContext(),
-                android.Manifest.permission.READ_CONTACTS)
-                == PackageManager.PERMISSION_GRANTED) executeNodeMyContactsTask();
-        else  baseActivity.requestPermissionReadContacts();
 
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
@@ -159,52 +214,5 @@ public class FriendsMyFragment1 extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
-    }
-
-    private void executeNodeMyContactsTask() {
-        FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
-        mUser.getToken(true)
-                .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
-                    public void onComplete(@NonNull Task<GetTokenResult> task) {
-                        if (task.isSuccessful()) {
-                            String idToken = task.getResult().getToken();
-                            checkLocalContactsNode(idToken);
-                        } else {
-                            // Handle error -> task.getException();
-                        }
-                    }
-                });
-    }
-
-    private void checkLocalContactsNode(String idToken) {
-        Call<NodeUsers> call = baseActivity.apiService().checkLocalContacts(new LocalContacts(myContactsController.processContacts(), idToken));
-
-        call.enqueue(new Callback<NodeUsers>() {
-            @Override
-            public void onResponse(Response<NodeUsers> response,
-                                   Retrofit retrofit) {
-
-                int statusCode = response.code();
-                NodeUsers apiResponse = response.body();
-
-                if (statusCode == 200) {
-
-                    mUsers = new ArrayList<>();
-                    mUsers.addAll(apiResponse.users.get(0));
-                    mAdapter = new FriendsInviteListAdapter(mUsers, getContext());
-
-                    mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-                    mRecyclerView.setAdapter(mAdapter);
-                    mAdapter.notifyDataSetChanged();
-
-                    Log.d("apiResponse", apiResponse.toString());
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                Log.i(TAG, t.getLocalizedMessage());
-            }
-        });
     }
 }

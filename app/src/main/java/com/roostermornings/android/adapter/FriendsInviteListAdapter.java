@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.domain.NodeUser;
+import com.roostermornings.android.util.RoosterUtils;
 
 import java.util.ArrayList;
 
@@ -82,7 +83,7 @@ public class FriendsInviteListAdapter extends RecyclerView.Adapter<FriendsInvite
         final NodeUser user = mDataset.get(position);
         user.setSelected(false);
         holder.txtName.setText(mDataset.get(position).getUser_name());
-        holder.txtInitials.setText(getInitials(mDataset.get(position).getUser_name()));
+        holder.txtInitials.setText(RoosterUtils.getInitials(mDataset.get(position).getUser_name()));
         holder.btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -101,19 +102,6 @@ public class FriendsInviteListAdapter extends RecyclerView.Adapter<FriendsInvite
                 }, 200);
             }
         });
-    }
-
-    private String getInitials(String displayName) {
-        String initials = "";
-        String tempStringArray[];
-
-        tempStringArray = displayName.split(" ", 2);
-
-        for (String s:tempStringArray) {
-            initials = initials.concat(String.valueOf(s.charAt(0)));
-        }
-
-        return initials;
     }
 
     private void setButtonBackground(Button addButton, Boolean focused) {

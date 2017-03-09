@@ -3,7 +3,6 @@ package com.roostermornings.android.background;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
@@ -19,7 +18,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.roostermornings.android.domain.AlarmQueue;
-import com.roostermornings.android.sqldata.AudioTableManager;
+import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.util.RoosterUtils;
 
 import java.io.FileOutputStream;

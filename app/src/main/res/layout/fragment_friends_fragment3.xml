@@ -5,12 +5,35 @@
     android:id="@+id/activity_my_friends"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/main_background_layer_list"
     android:orientation="vertical"
-    android:paddingTop="@dimen/activity_vertical_margin"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.roostermornings.android.fragment.FriendsInviteFragment3">
 
-    <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
+    <Button
+        android:id="@+id/share_button"
+        android:background="@drawable/rooster_share_button"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/spacing_large"
+        android:paddingBottom="@dimen/spacing_large"
+        android:paddingLeft="@dimen/spacing_large"
+        android:paddingRight="@dimen/spacing_large"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:text="@string/share_button"
+        android:drawableLeft="@drawable/ic_share_white_24dp"
+        android:textSize="@dimen/text_xlarge"
+        android:textColor="@color/white"
+        android:textAllCaps="false"
+        android:minHeight="0dp"
+        android:layout_gravity="center_vertical" />
+
+    <View
+        android:layout_height="1dp"
+        android:background="@color/white_semi_transparent"
+        android:layout_width="match_parent"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/friendsInviteListView"

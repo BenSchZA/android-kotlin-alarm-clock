@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
@@ -69,10 +70,6 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
 
         BaseApplication baseApplication = (BaseApplication) getApplication();
 
-        //TODO: run once
-        //Set custom font using custom FontsOverride class
-        FontsOverride.setDefaultFont(this, "MONOSPACE", "fonts/Nunito/Nunito-Bold.ttf");
-
         //inject Dagger dependencies
         baseApplication.getRoosterApplicationComponent().inject(this);
 
@@ -103,6 +100,13 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
 
     }
 
+    protected void startHomeActivity() {
+        //This clears the back stack when starting home activity, to stop back stack loop
+        Intent homeIntent = new Intent(this, MyAlarmsFragmentActivity.class);
+        homeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(homeIntent);
+    }
+
     protected void initialize(int layoutId) {
 
         setContentView(layoutId);
@@ -121,7 +125,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
 
     }
 
-    protected FirebaseUser getFirebaseUser() {
+    public FirebaseUser getFirebaseUser() {
         if (mAuth == null) mAuth = FirebaseAuth.getInstance();
         return mAuth.getCurrentUser();
     }

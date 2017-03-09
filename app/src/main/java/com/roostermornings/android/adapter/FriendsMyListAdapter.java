@@ -12,7 +12,8 @@ import android.widget.TextView;
 
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
-import com.roostermornings.android.domain.NodeUser;
+import com.roostermornings.android.domain.User;
+import com.roostermornings.android.util.RoosterUtils;
 
 import java.util.ArrayList;
 
@@ -21,7 +22,7 @@ import java.util.ArrayList;
  */
 
 public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdapter.ViewHolder> {
-    private ArrayList<NodeUser> mDataset;
+    private ArrayList<User> mDataset;
     private Context mContext;
 
     // Provide a reference to the views for each data item
@@ -31,35 +32,34 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
         // each data item is just a string in this case
         public ImageView imgProfilePic;
         public TextView txtName;
+        public TextView txtInitials;
         public Button btnAdd;
 
         public ViewHolder(View v) {
             super(v);
             imgProfilePic = (ImageView) itemView.findViewById(R.id.my_friends_profile_pic);
             txtName = (TextView) itemView.findViewById(R.id.my_friends_profile_name);
+            txtInitials = (TextView) itemView.findViewById(R.id.txtInitials);
             btnAdd = (Button) itemView.findViewById(R.id.my_friends_add);
         }
     }
 
-    public void add(int position, NodeUser item) {
+    public void add(int position, User item) {
         mDataset.add(position, item);
         notifyItemInserted(position);
     }
 
-    public void remove(NodeUser item) {
+    public void remove(User item) {
         int position = mDataset.indexOf(item);
         mDataset.remove(position);
         notifyItemRemoved(position);
     }
 
-
     // Provide a suitable constructor (depends on the kind of dataset)
-    public FriendsMyListAdapter(ArrayList<NodeUser> myDataset, Context context) {
+    public FriendsMyListAdapter(ArrayList<User> myDataset, Context context) {
         mDataset = myDataset;
         mContext = context;
     }
-
-
 
     // Create new views (invoked by the layout manager)
     @Override
@@ -77,27 +77,28 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
     public void onBindViewHolder(final FriendsMyListAdapter.ViewHolder holder, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        final NodeUser user = mDataset.get(position);
+        final User user = mDataset.get(position);
         user.setSelected(false);
         holder.txtName.setText(mDataset.get(position).getUser_name());
-        holder.btnAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                user.setSelected(!user.getSelected());
-                setButtonBackground(holder.btnAdd, user.getSelected());
-
-                ((FriendsFragmentActivity)mContext).inviteUser(user);
-
-                final Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        //Do something after 200ms
-                        remove(user);
-                    }
-                }, 200);
-            }
-        });
+        holder.txtInitials.setText(RoosterUtils.getInitials(mDataset.get(position).getUser_name()));
+//        holder.btnAdd.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                user.setSelected(!user.getSelected());
+//                setButtonBackground(holder.btnAdd, user.getSelected());
+//
+//                ((FriendsFragmentActivity)mContext).inviteUser(user);
+//
+//                final Handler handler = new Handler();
+//                handler.postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        //Do something after 200ms
+//                        remove(user);
+//                    }
+//                }, 200);
+//            }
+//        });
     }
 
     private void setButtonBackground(Button addButton, Boolean focused) {

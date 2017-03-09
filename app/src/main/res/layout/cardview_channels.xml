@@ -28,7 +28,7 @@
         <TextView
             android:text="channel name"
             android:id="@+id/cardview_channel_name"
-            android:textSize="@dimen/text_xxlarge"
+            android:textAppearance="?android:attr/textAppearanceMedium"
             android:textStyle="bold"
             android:padding="@dimen/spacing_large"
             android:textColor="@color/white"
@@ -56,12 +56,6 @@
             android:visibility="gone"
             android:src="@drawable/ic_done_white_48dp"/>
 
-
-
-
-
-
     </android.support.v7.widget.CardView>
-
 
 </LinearLayout>

@@ -27,6 +27,19 @@ public class RoosterUtils {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD;
     }
 
+    public static String getInitials(String displayName) {
+        String initials = "";
+        String tempStringArray[];
+
+        tempStringArray = displayName.split(" ", 2);
+
+        for (String s:tempStringArray) {
+            initials = initials.concat(String.valueOf(s.charAt(0)));
+        }
+
+        return initials;
+    }
+
     public static String setAlarmTimeFromHourAndMinute(Alarm alarm) {
 
         String alarmHour = (alarm.getHour() < 10 ? "0" : "") + alarm.getHour();

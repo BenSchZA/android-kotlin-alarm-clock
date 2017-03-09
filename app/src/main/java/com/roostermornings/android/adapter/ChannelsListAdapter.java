@@ -41,18 +41,6 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
         }
     }
 
-    // Clean all elements of the recycler
-    public void clear() {
-        mDataset.clear();
-        notifyDataSetChanged();
-    }
-
-    // Add a list of items
-    public void addAll(ArrayList<Channel> data) {
-        mDataset.addAll(data);
-        notifyDataSetChanged();
-    }
-
     public void add(int position, Channel item) {
         mDataset.add(position, item);
         notifyItemInserted(position);
@@ -93,12 +81,9 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
         holder.cardViewChannel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                for (Channel channel : mDataset) {
-                    channel.setSelected(false);
-                }
-                mDataset.get(position).setSelected(true);
+                toggleChannelSelection(mDataset.get(position));
 
-                if (mFragment instanceof NewAlarmFragment2) {
+                if (mFragment instanceof NewAlarmFragment2 && mDataset.get(position).isSelected()) {
                     ((NewAlarmFragment2) mFragment).setSelectedChannel(mDataset.get(position));
                 }
 
@@ -117,6 +102,19 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
         Picasso.with(mFragment.getContext()).load(mDataset.get(position).getPhoto()).
                 fit().into(holder.imgChannelImage);
 
+    }
+
+    private void toggleChannelSelection(Channel channelSelection) {
+        //Clear all channels except selected
+        for (Channel channel : mDataset) {
+            if(!(channel == channelSelection)) channel.setSelected(false);
+        }
+        //Toggle selected channel
+        if (channelSelection.isSelected()){
+            channelSelection.setSelected(false);
+        }else {
+            channelSelection.setSelected(true);
+        }
     }
 
     // Return the size of your dataset (invoked by the layout manager)

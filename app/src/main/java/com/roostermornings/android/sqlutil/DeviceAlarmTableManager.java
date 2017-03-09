@@ -1,4 +1,4 @@
-package com.roostermornings.android.sqldata;
+package com.roostermornings.android.sqlutil;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import com.roostermornings.android.sqldata.DeviceAlarmTableHelper;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 
 import java.util.ArrayList;

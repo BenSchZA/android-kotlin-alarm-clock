@@ -13,6 +13,9 @@
         <!--android:elevation="0dp"-->
         <!--android:theme="@style/AppTheme.AppBarOverlay"-->
         <!--app:elevation="0dp">-->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appbar"
@@ -54,12 +57,26 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <android.support.v4.view.ViewPager
-        android:id="@+id/container"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        android:layout_height="wrap_content"
+        android:background="@drawable/main_background_layer_list"
+        android:layout_below="@+id/appbar">
 
-    <include layout="@layout/content_my_friends" />
+        <android.support.v4.view.ViewPager
+            android:id="@+id/container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            android:layout_above="@+id/button_bar" />
+
+        <include
+            android:id="@+id/button_bar"
+            layout="@layout/content_friends" />
+
+    </RelativeLayout>
+
+    </RelativeLayout>
+
 
 </android.support.design.widget.CoordinatorLayout>
