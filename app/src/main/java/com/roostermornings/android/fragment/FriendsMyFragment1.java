@@ -122,8 +122,6 @@ public class FriendsMyFragment1 extends BaseFragment {
         mAdapter = new FriendsMyListAdapter(mUsers, getContext());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mRecyclerView.setAdapter(mAdapter);
-
-        getFriends();
     }
 
     private void getFriends() {
@@ -179,6 +177,9 @@ public class FriendsMyFragment1 extends BaseFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+
+        getDatabaseReference();
+        getFriends();
 
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;

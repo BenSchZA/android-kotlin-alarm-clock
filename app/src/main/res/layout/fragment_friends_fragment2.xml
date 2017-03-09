@@ -5,7 +5,6 @@
     android:id="@+id/activity_my_friends"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/main_background_layer_list"
     android:orientation="vertical"
     tools:context="com.roostermornings.android.fragment.FriendsRequestFragment2">
 
@@ -16,6 +15,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/spacing_normal_large"
+        android:layout_marginBottom="@dimen/spacing_normal_large"
         android:layout_weight="1"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin" />

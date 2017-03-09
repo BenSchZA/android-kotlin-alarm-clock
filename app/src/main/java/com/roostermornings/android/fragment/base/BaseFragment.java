@@ -30,7 +30,7 @@ public class BaseFragment extends Fragment implements Validator.ValidationListen
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mDatabase = FirebaseDatabase.getInstance().getReference();
+        getDatabaseReference();
 
         ((BaseApplication) getActivity().getApplication()).getRoosterApplicationComponent().inject(this);
 
@@ -42,6 +42,11 @@ public class BaseFragment extends Fragment implements Validator.ValidationListen
         ButterKnife.bind(this, view);
         return view;
 
+    }
+
+    protected DatabaseReference getDatabaseReference() {
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        return mDatabase;
     }
 
     @Override

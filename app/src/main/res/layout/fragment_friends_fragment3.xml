@@ -40,6 +40,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/spacing_normal_large"
+        android:layout_marginBottom="@dimen/spacing_normal_large"
         android:layout_weight="1"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin" />
