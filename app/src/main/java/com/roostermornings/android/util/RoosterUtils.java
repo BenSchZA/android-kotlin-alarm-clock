@@ -30,13 +30,12 @@ public class RoosterUtils {
     public static String getInitials(String displayName) {
         String initials = "";
         String tempStringArray[];
-
-        tempStringArray = displayName.split(" ", 2);
-
-        for (String s:tempStringArray) {
-            initials = initials.concat(String.valueOf(s.charAt(0)));
+        if(displayName!=null) {
+            tempStringArray = displayName.split(" ", 2);
+            for (String s : tempStringArray) {
+                initials = initials.concat(String.valueOf(s.charAt(0)));
+            }
         }
-
         return initials;
     }
 

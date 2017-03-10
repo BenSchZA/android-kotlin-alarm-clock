@@ -19,23 +19,29 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:layout_gravity="center"
-            android:background="@color/action_bar_blue"
-            app:popupTheme="@style/AppTheme.PopupOverlay">
+            android:background="@color/rooster_blue"
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            android:weightSum="1"
+            app:contentInsetLeft="0dp"
+            app:contentInsetStart="0dp">
 
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginRight="@dimen/spacing_small"
-                android:paddingRight="@dimen/spacing_small">
+            <!--TODO: center horizontally-->
 
                 <TextView
                     android:id="@+id/toolbar_title"
-                    style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
-                    android:layout_width="wrap_content"
+                    android:textSize="@dimen/text_large"
+                    android:textColor="@color/white"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center" />
-            </FrameLayout>
+                    android:gravity="center" />
+
+                <!--<ImageView-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:paddingRight="@dimen/spacing_large"-->
+                    <!--android:layout_gravity="right"-->
+                    <!--android:gravity="center_vertical"-->
+                    <!--android:background="@drawable/ic_add_white_24dp"/>-->
 
         </android.support.v7.widget.Toolbar>
 
@@ -44,7 +50,7 @@
         <include layout="@layout/content_my_alarms"/>
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
+        android:id="@+id/add_alarm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"

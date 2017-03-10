@@ -3,7 +3,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="@dimen/spacing_normal">
+    android:paddingTop="@dimen/spacing_normal"
+    android:paddingBottom="@dimen/spacing_normal"
+    android:layout_marginLeft="@dimen/spacing_large"
+    android:layout_marginRight="@dimen/spacing_large">
 
     <RelativeLayout
         android:layout_height="wrap_content"
@@ -37,10 +40,10 @@
         android:paddingLeft="@dimen/spacing_large"
         android:layout_toLeftOf="@id/my_friends_profile_pic"
         android:textColor="@color/white"
-        android:textSize="@dimen/text_xlarge" />
+        android:textSize="@dimen/text_normal_large" />
 
     <Button
-        android:id="@+id/my_friends_add"
+        android:id="@+id/friends_button"
         style="@style/RoosterButtonSemiTransparentStyle"
         android:layout_width="60dp"
         android:layout_height="wrap_content"

@@ -32,24 +32,25 @@ public class SplashActivity extends BaseActivity {
         initialize(R.layout.activity_splash);
         mFBUser = getFirebaseUser();
 
-        //TODO: remove on release, used for Facebook app auth during debug stage
-        try {
-            PackageInfo info = getPackageManager().getPackageInfo(
-                    "com.roostermornings.android",
-                    PackageManager.GET_SIGNATURES);
-            for (Signature signature : info.signatures) {
-                MessageDigest md = MessageDigest.getInstance("SHA");
-                md.update(signature.toByteArray());
-                Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-
-        } catch (NoSuchAlgorithmException e) {
-
-        }
-
-        //TODO: remove
         if (BuildConfig.DEBUG) {
+            //TODO: remove on release, used for Facebook app auth during debug stage
+            try {
+                PackageInfo info = getPackageManager().getPackageInfo(
+                        "com.roostermornings.android",
+                        PackageManager.GET_SIGNATURES);
+                for (Signature signature : info.signatures) {
+                    MessageDigest md = MessageDigest.getInstance("SHA");
+                    md.update(signature.toByteArray());
+                    Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
+
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+
+            }
+
             AudioTableHelper dbAudioHelper = new AudioTableHelper(this);
             SQLiteDatabase dbAudio = dbAudioHelper.getWritableDatabase();
             DeviceAlarmTableHelper dbAlarmHelper = new DeviceAlarmTableHelper(this);
@@ -68,6 +69,7 @@ public class SplashActivity extends BaseActivity {
             backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(getApplicationContext());
             backgroundTaskReceiver.scheduleBackgroundDailyTask(getApplicationContext());
 
+        //TODO: why display for set period? check for process complete?
         CountDownTimer countDownTimer = new CountDownTimer(2000, 2000) {
             @Override
             public void onTick(long millisUntilFinished) {
@@ -81,6 +83,7 @@ public class SplashActivity extends BaseActivity {
                if (mFBUser == null || mFBUser.getUid() == null) {
                    navigateToActivity(IntroFragmentActivity.class);
                 } else {
+                   //TODO: go to alarm creation for new user?
                     navigateToActivity(MyAlarmsFragmentActivity.class);
                 }
 
