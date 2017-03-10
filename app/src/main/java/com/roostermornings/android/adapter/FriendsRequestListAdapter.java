@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.domain.NodeUser;
+import com.roostermornings.android.util.RoosterUtils;
 
 import java.util.ArrayList;
 
@@ -31,13 +32,15 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
         // each data item is just a string in this case
         public ImageView imgProfilePic;
         public TextView txtName;
+        public TextView txtInitials;
         public Button btnAdd;
 
         public ViewHolder(View v) {
             super(v);
             imgProfilePic = (ImageView) itemView.findViewById(R.id.my_friends_profile_pic);
             txtName = (TextView) itemView.findViewById(R.id.my_friends_profile_name);
-            btnAdd = (Button) itemView.findViewById(R.id.my_friends_add);
+            txtInitials = (TextView) itemView.findViewById(R.id.txtInitials);
+            btnAdd = (Button) itemView.findViewById(R.id.friends_button);
         }
     }
 
@@ -66,7 +69,7 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
     public FriendsRequestListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                                   int viewType) {
         // create a new view
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_layout_my_friends, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_layout_friends, parent, false);
         // set the view's size, margins, paddings and layout parameters
         FriendsRequestListAdapter.ViewHolder vh = new FriendsRequestListAdapter.ViewHolder(v);
         return vh;
@@ -80,13 +83,14 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
         final NodeUser user = mDataset.get(position);
         user.setSelected(false);
         holder.txtName.setText(mDataset.get(position).getUser_name());
+        holder.txtInitials.setText(RoosterUtils.getInitials(mDataset.get(position).getUser_name()));
         holder.btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 user.setSelected(!user.getSelected());
                 setButtonBackground(holder.btnAdd, user.getSelected());
 
-                ((FriendsFragmentActivity)mContext).inviteUser(user);
+                ((FriendsFragmentActivity)mContext).requestUser(user);
 
                 final Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {

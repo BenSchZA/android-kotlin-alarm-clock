@@ -40,7 +40,7 @@ public class FriendsInviteListAdapter extends RecyclerView.Adapter<FriendsInvite
             imgProfilePic = (ImageView) itemView.findViewById(R.id.my_friends_profile_pic);
             txtName = (TextView) itemView.findViewById(R.id.my_friends_profile_name);
             txtInitials = (TextView) itemView.findViewById(R.id.txtInitials);
-            btnAdd = (Button) itemView.findViewById(R.id.my_friends_add);
+            btnAdd = (Button) itemView.findViewById(R.id.friends_button);
         }
     }
 
@@ -69,7 +69,7 @@ public class FriendsInviteListAdapter extends RecyclerView.Adapter<FriendsInvite
     public FriendsInviteListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                                   int viewType) {
         // create a new view
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_layout_my_friends, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_layout_friends, parent, false);
         // set the view's size, margins, paddings and layout parameters
         FriendsInviteListAdapter.ViewHolder vh = new FriendsInviteListAdapter.ViewHolder(v);
         return vh;

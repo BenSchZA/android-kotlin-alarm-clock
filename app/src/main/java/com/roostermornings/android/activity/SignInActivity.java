@@ -182,11 +182,7 @@ public class SignInActivity extends BaseActivity {
                         // If sign in fails, display a message to the user. If sign in succeeds
                         // the auth state listener will be notified and logic to handle the
                         // signed in user can be handled in the listener.
-                        if (!task.isSuccessful()) {
-                            Log.w(TAG, "Facebook: signInWithCredential", task.getException());
-                            Toast.makeText(SignInActivity.this, task.getException().getMessage(),
-                                    Toast.LENGTH_LONG).show();
-                        } else{
+                        if (task.isSuccessful()) {
                             String deviceToken = FirebaseInstanceId.getInstance().getToken();
                             FirebaseDatabase database = FirebaseDatabase.getInstance();
 
@@ -210,6 +206,11 @@ public class SignInActivity extends BaseActivity {
                                     mAuth.getCurrentUser().getUid())).setValue(user);
 
                             proceedToMyAlarmsActivity();
+
+                        } else{
+                            Log.w(TAG, "Facebook: signInWithCredential", task.getException());
+                            Toast.makeText(SignInActivity.this, task.getException().getMessage(),
+                                    Toast.LENGTH_LONG).show();
                         }
                     }
                 });
@@ -276,6 +277,7 @@ public class SignInActivity extends BaseActivity {
 
     //On successful authentication, proceed to alarms activity
     private void proceedToMyAlarmsActivity() {
+        //TODO: go to alarm creation for new user?
         Intent intent = new Intent(SignInActivity.this, MyAlarmsFragmentActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);

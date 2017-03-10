@@ -20,6 +20,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -62,10 +63,6 @@ public class FriendsMyFragment1 extends BaseFragment {
 
     protected static final String TAG = FriendsFragmentActivity.class.getSimpleName();
 
-    private MyContactsController myContactsController;
-
-    private BaseActivity baseActivity;
-
     ArrayList<User> mUsers = new ArrayList<>();
     private DatabaseReference mFriendsReference;
     private DatabaseReference mUserReference;
@@ -100,8 +97,6 @@ public class FriendsMyFragment1 extends BaseFragment {
 
         if (getArguments() != null) {
         }
-
-        myContactsController = new MyContactsController(getContext());
     }
 
     @Override
@@ -128,32 +123,34 @@ public class FriendsMyFragment1 extends BaseFragment {
         mFriendsReference = mDatabase
                 .child("users").child(getFirebaseUser().getUid()).child("friends");
 
-        final HashMap<String, Boolean> friendMap = new HashMap<>();
-
-        ValueEventListener friendsListener = new ValueEventListener() {
+        ChildEventListener friendsListener = new ChildEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                mUsers.add(dataSnapshot.getValue(User.class));
+                mAdapter.notifyDataSetChanged();
+            }
 
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    friendMap.put(postSnapshot.getKey(), Boolean.valueOf(postSnapshot.getValue().toString()));
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                User user = dataSnapshot.getValue(User.class);
+                for (User oldUser:mUsers) {
+                    if(oldUser.getUid().equals(user.getUid())){
+                        mUsers.remove(oldUser);
+                        mUsers.add(user);
+                        mAdapter.notifyDataSetChanged();
+                    }
                 }
+            }
 
-                for (HashMap.Entry<String, Boolean> entry: friendMap.entrySet()) {
-                    mUserReference = mDatabase.child("users").child(entry.getKey());
-                    ValueEventListener userListener = new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            mUsers.add(dataSnapshot.getValue(User.class));
-                            mAdapter.notifyDataSetChanged();
-                        }
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                mUsers.remove(dataSnapshot.getValue(User.class));
+                mAdapter.notifyDataSetChanged();
+            }
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
 
-                        }
-                    };
-                    mUserReference.addValueEventListener(userListener);
-                }
             }
 
             @Override
@@ -164,7 +161,7 @@ public class FriendsMyFragment1 extends BaseFragment {
                         Toast.LENGTH_SHORT).show();
             }
         };
-        mFriendsReference.addValueEventListener(friendsListener);
+        mFriendsReference.addChildEventListener(friendsListener);
     }
 
     // TODO: Rename method, update argument and hook method into UI event

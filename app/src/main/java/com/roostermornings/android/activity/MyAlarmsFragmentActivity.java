@@ -54,10 +54,9 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-
         toolbarTitle.setText(getString(R.string.my_alarms));
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.add_alarm);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

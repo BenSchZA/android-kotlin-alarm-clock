@@ -1,5 +1,6 @@
 package com.roostermornings.android.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -12,6 +13,9 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseUser;
@@ -21,6 +25,8 @@ import com.roostermornings.android.domain.NodeUser;
 import com.roostermornings.android.fragment.FriendsInviteFragment3;
 import com.roostermornings.android.fragment.FriendsMyFragment1;
 import com.roostermornings.android.fragment.FriendsRequestFragment2;
+import com.roostermornings.android.util.FontsOverride;
+import com.roostermornings.android.util.RoosterUtils;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -69,6 +75,8 @@ public class FriendsFragmentActivity extends BaseActivity implements
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
         tabLayout.setupWithViewPager(mViewPager);
+
+        FontsOverride.changeTabsFont(getApplicationContext(), tabLayout, "fonts/Nunito/Nunito-Bold.ttf");
     }
 
     @OnClick(R.id.home_record_audio)
@@ -165,14 +173,38 @@ public class FriendsFragmentActivity extends BaseActivity implements
 
         if (nodeUser.getSelected()) {
 
-            String inviteUrl = String.format("friend_requests_received/%s/%s", nodeUser.getId(), mAuth.getCurrentUser().getUid());
+            String inviteUrl = String.format("friend_requests_received/%s/%s", nodeUser.getId(), getFirebaseUser().getUid());
             String currentUserUrl = String.format("friend_requests_sent/%s/%s", currentUser.getUid(), nodeUser.getId());
 
-            NodeUser currentNodeUser = new NodeUser("", mCurrentUser.getUser_name(), mCurrentUser.getProfile_pic(), mCurrentUser.getCell_number());
+            NodeUser currentNodeUser = new NodeUser(mCurrentUser.getUid(), mCurrentUser.getUser_name(), mCurrentUser.getProfile_pic(), mCurrentUser.getCell_number());
 
             mDatabase.getDatabase().getReference(inviteUrl).setValue(currentNodeUser);
             mDatabase.getDatabase().getReference(currentUserUrl).setValue(nodeUser);
             Toast.makeText(this, nodeUser.getUser_name() + " invited!", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public void requestUser(NodeUser nodeUser) {
+
+        FirebaseUser currentUser = getFirebaseUser();
+
+        if (nodeUser.getSelected()) {
+
+            String currentUserUrl = String.format("users/%s/friends/%s", currentUser.getUid(), nodeUser.getId());
+            String friendUserUrl = String.format("users/%s/friends/%s", nodeUser.getId(), currentUser.getUid());
+
+            NodeUser currentNodeUser = new NodeUser(mCurrentUser.getUid(), mCurrentUser.getUser_name(), mCurrentUser.getProfile_pic(), mCurrentUser.getCell_number());
+
+            mDatabase.getDatabase().getReference(currentUserUrl).setValue(nodeUser);
+            mDatabase.getDatabase().getReference(friendUserUrl).setValue(currentNodeUser);
+
+            String receivedUrl = String.format("friend_requests_received/%s/%s", nodeUser.getId(), getFirebaseUser().getUid());
+            String sentUrl = String.format("friend_requests_sent/%s/%s", currentUser.getUid(), nodeUser.getId());
+
+            mDatabase.getDatabase().getReference(receivedUrl).setValue(null);
+            mDatabase.getDatabase().getReference(sentUrl).setValue(null);
+
+            Toast.makeText(this, nodeUser.getUser_name() + "'s friend request accepted!", Toast.LENGTH_LONG).show();
         }
     }
 }

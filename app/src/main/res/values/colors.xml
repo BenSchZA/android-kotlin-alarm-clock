@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#2C77FD</color>
-    <color name="primary_dark">#2874ff</color>
     <color name="accent">#cadcfd</color>
     <color name="normal">#90B7FD</color>
-    <color name="white">#FFFFFF</color>
-    <color name="white_transparent">#33FFFFFF</color>
     <color name="grey_transparent">#66a2a2a2</color>
     <color name="black">#000000</color>
     <color name="grey">#a2a2a2</color>
-    <color name="action_bar_blue">#26000000</color>
+
     <color name="intro_dot_dark">#1c4897</color>
     <color name="intro_dot_light">#9dbffc</color>
 
+    <color name="white">#FFFFFF</color>
+    <color name="white_transparent">#33FFFFFF</color>
     <color name="white_semi_transparent">#4DFFFFFF</color>
     <color name="card_white_transparent">#33FFFFFF</color>
-    <color name="status_bar">#2874ff</color>
+
+    <color name="rooster_blue">#276AD6</color>
+    <color name="rooster_light_blue">#2874ff</color>
 
     <color name="gradient_start">#50aced</color>
     <color name="gradient_center">#8bb0cc</color>

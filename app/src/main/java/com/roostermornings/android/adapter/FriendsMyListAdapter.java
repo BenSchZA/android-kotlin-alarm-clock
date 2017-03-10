@@ -1,7 +1,6 @@
 package com.roostermornings.android.adapter;
 
 import android.content.Context;
-import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +10,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.roostermornings.android.R;
-import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.util.RoosterUtils;
 
@@ -40,7 +38,7 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
             imgProfilePic = (ImageView) itemView.findViewById(R.id.my_friends_profile_pic);
             txtName = (TextView) itemView.findViewById(R.id.my_friends_profile_name);
             txtInitials = (TextView) itemView.findViewById(R.id.txtInitials);
-            btnAdd = (Button) itemView.findViewById(R.id.my_friends_add);
+            btnAdd = (Button) itemView.findViewById(R.id.friends_button);
         }
     }
 
@@ -66,7 +64,7 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
     public FriendsMyListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                                   int viewType) {
         // create a new view
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_layout_my_friends, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_layout_friends, parent, false);
         // set the view's size, margins, paddings and layout parameters
         FriendsMyListAdapter.ViewHolder vh = new FriendsMyListAdapter.ViewHolder(v);
         return vh;

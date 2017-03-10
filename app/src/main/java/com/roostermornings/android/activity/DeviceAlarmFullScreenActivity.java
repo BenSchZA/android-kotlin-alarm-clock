@@ -68,17 +68,16 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         //Used to ensure alarm shows over lock-screen
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                 + WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
-                + WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
-                + WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+                +WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
+                +WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 
         deviceAlarmController = new DeviceAlarmController(this);
 
         playDuration = 0;
 
-        if(getIntent().getBooleanExtra(DeviceAlarm.EXTRA_TONE, false)){
+        if (getIntent().getBooleanExtra(DeviceAlarm.EXTRA_TONE, false)) {
             playAlarmTone();
-        }
-        else {
+        } else {
             retrieveMyAlarms();
         }
     }
@@ -86,17 +85,19 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-            //If vibrating then cancel
-            Vibrator vibrator = (Vibrator) getApplicationContext().getSystemService(VIBRATOR_SERVICE);
-            if (vibrator.hasVibrator()) {
-                vibrator.cancel();
-            }
+        //If vibrating then cancel
+        Vibrator vibrator = (Vibrator) getApplicationContext().getSystemService(VIBRATOR_SERVICE);
+        if (vibrator.hasVibrator()) {
+            vibrator.cancel();
+        }
 
-            //If default tone or media playing then stop
-            if (mediaPlayer!=null && mediaPlayer.isPlaying()) {
-                mediaPlayer.stop();
-                mediaPlayer.release();
-            }
+        //If default tone or media playing then stop
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+        }
+
+        finish();
     }
 
     @OnClick(R.id.alarm_snooze_button)
@@ -113,9 +114,9 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     protected void playAlarmTone() {
         Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
         //In case no alarm tone previously set
-        if(notification == null){
+        if (notification == null) {
             notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-            if(notification == null) {
+            if (notification == null) {
                 notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
             }
         }
@@ -138,11 +139,12 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         alarmCount = audioItems.size();
         if (audioItems == null || audioItems.size() == 0) {
             //Check conditions for playing default tone: people must wake up!
-            if (playDuration < 5000 && (audioItems == null || audioItems.size() == 0)){
+            if (playDuration < 5000 && (audioItems == null || audioItems.size() == 0)) {
                 playAlarmTone();
             }
             return;
-        };
+        }
+        ;
         alarmPosition = 0;
         playNewAudioFile(audioItems.get(0));
     }
@@ -155,7 +157,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
         if (audioItem.getSender_pic() != null && audioItem.getSender_pic().length() != 0) {
             setProfilePic(audioItem.getSender_pic());
-        } else{
+        } else {
             imgSenderPic.setBackground(getResources().getDrawable(R.drawable.alarm_profile_pic_circle));
         }
         txtSenderName.setText(audioItem.getSender_name());
@@ -186,7 +188,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
                         playNewAudioFile(audioItems.get(0));
                     }
                     //Check conditions for playing default tone: people must wake up!
-                    else if(playDuration < 5000){
+                    else if (playDuration < 5000) {
                         playAlarmTone();
                     }
                 }
@@ -203,7 +205,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         }
 
         //Check conditions for playing default tone: people must wake up!
-        if (playDuration < 5000 && (audioItems == null || audioItems.size() == 0)){
+        if (playDuration < 5000 && (audioItems == null || audioItems.size() == 0)) {
             playAlarmTone();
         }
     }
