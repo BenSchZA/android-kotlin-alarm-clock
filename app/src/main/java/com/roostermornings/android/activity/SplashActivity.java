@@ -7,14 +7,9 @@ package com.roostermornings.android.activity;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.Signature;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.util.Base64;
-import android.util.Log;
 
 import com.google.firebase.auth.FirebaseUser;
 import com.roostermornings.android.BuildConfig;
@@ -23,9 +18,6 @@ import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.background.BackgroundTaskReceiver;
 import com.roostermornings.android.sqldata.AudioTableHelper;
 import com.roostermornings.android.sqldata.DeviceAlarmTableHelper;
-
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 public class SplashActivity extends BaseActivity {
 
@@ -38,23 +30,6 @@ public class SplashActivity extends BaseActivity {
         mFBUser = getFirebaseUser();
 
         if (BuildConfig.DEBUG) {
-            //TODO: remove on release, used for Facebook app auth during debug stage
-            try {
-                PackageInfo info = getPackageManager().getPackageInfo(
-                        "com.roostermornings.android",
-                        PackageManager.GET_SIGNATURES);
-                for (Signature signature : info.signatures) {
-                    MessageDigest md = MessageDigest.getInstance("SHA");
-                    md.update(signature.toByteArray());
-                    Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
-                }
-            } catch (PackageManager.NameNotFoundException e) {
-                e.printStackTrace();
-
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
-
-            }
 
             AudioTableHelper dbAudioHelper = new AudioTableHelper(this);
             SQLiteDatabase dbAudio = dbAudioHelper.getWritableDatabase();
@@ -70,11 +45,10 @@ public class SplashActivity extends BaseActivity {
             dbAlarm.close();
         }
 
-            BackgroundTaskReceiver backgroundTaskReceiver = new BackgroundTaskReceiver();
-            backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(getApplicationContext());
-            backgroundTaskReceiver.scheduleBackgroundDailyTask(getApplicationContext());
+        BackgroundTaskReceiver backgroundTaskReceiver = new BackgroundTaskReceiver();
+        backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(getApplicationContext());
+        backgroundTaskReceiver.scheduleBackgroundDailyTask(getApplicationContext());
 
-        //TODO: why display for set period? check for process complete?
         CountDownTimer countDownTimer = new CountDownTimer(2000, 2000) {
             @Override
             public void onTick(long millisUntilFinished) {
@@ -84,32 +58,14 @@ public class SplashActivity extends BaseActivity {
             @Override
             public void onFinish() {
 
-                //All users go through intro activity upon sign out - this ensures cell number is entered and if old user they are on-boarded, no harm done
-               if (mFBUser == null || mFBUser.getUid() == null) {
-                   navigateToActivity(IntroFragmentActivity.class);
+                //All users go through intro activity upon sign out -
+                // this ensures cell number is entered and if old user they are on-boarded, no harm done
+                if (mFBUser == null || mFBUser.getUid() == null) {
+                    navigateToActivity(IntroFragmentActivity.class);
                 } else {
-                   //TODO: go to alarm creation for new user?
+                    //TODO: go to alarm creation for new user?
                     navigateToActivity(MyAlarmsFragmentActivity.class);
                 }
-
-//                boolean introViewed = sharedPreferences.getBoolean(getString(R.string.preferences_intro_viewed), false);
-//
-//                if (!introViewed) {
-//
-//                    SharedPreferences.Editor editor = sharedPreferences.edit();
-//                    editor.putBoolean(getString(R.string.preferences_intro_viewed), true);
-//                    editor.commit();
-//
-//                    navigateToActivity(IntroFragmentActivity.class);
-//
-//                } else if (mFBUser == null || mFBUser.getUid() == null) {
-//
-//                    navigateToActivity(SignInActivity.class);
-//
-//                } else {
-//
-//                    navigateToActivity(MyAlarmsFragmentActivity.class);
-//                }
 
             }
         };

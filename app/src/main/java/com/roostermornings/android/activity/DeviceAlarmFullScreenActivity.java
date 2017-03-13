@@ -174,7 +174,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
             //Set alarm count display
             alarmPosition++;
-            setAlarmCount(alarmPosition, alarmCount);
+            txtAlarmCount.setText(String.format("%s of %s", alarmPosition, alarmCount));
 
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
@@ -213,10 +213,6 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         if (playDuration < 5000 && (audioItems == null || audioItems.size() == 0)) {
             playAlarmTone();
         }
-    }
-
-    protected void setAlarmCount(int count, int total) {
-        txtAlarmCount.setText(String.format("%s of %s", count, total));
     }
 
     protected void setProfilePic(String url) {
