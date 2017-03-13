@@ -205,7 +205,8 @@ public class SignInActivity extends BaseActivity {
                                     photoURLString,
                                     mAuth.getCurrentUser().getDisplayName(),
                                     mMobileNumber,
-                                    mAuth.getCurrentUser().getUid());
+                                    mAuth.getCurrentUser().getUid(),
+                                    null);
 
                             database.getReference(String.format("users/%s",
                                     mAuth.getCurrentUser().getUid())).setValue(user);
@@ -269,7 +270,8 @@ public class SignInActivity extends BaseActivity {
                                     photoURLString,
                                     account.getDisplayName(),
                                     mMobileNumber,
-                                    mAuth.getCurrentUser().getUid());
+                                    mAuth.getCurrentUser().getUid(),
+                                    null);
 
                             database.getReference(String.format("users/%s",
                                     mAuth.getCurrentUser().getUid())).setValue(user);

@@ -7,7 +7,6 @@ package com.roostermornings.android.fragment;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -31,8 +30,8 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.FriendsInviteListAdapter;
+import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.LocalContacts;
-import com.roostermornings.android.domain.NodeUser;
 import com.roostermornings.android.domain.NodeUsers;
 import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.util.MyContactsController;
@@ -40,7 +39,6 @@ import com.roostermornings.android.util.MyContactsController;
 import java.util.ArrayList;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 import butterknife.OnClick;
 import retrofit.Call;
 import retrofit.Callback;
@@ -63,7 +61,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
 
     private BaseActivity baseActivity;
 
-    ArrayList<NodeUser> mUsers = new ArrayList<>();
+    ArrayList<Friend> mUsers = new ArrayList<>();
     private RecyclerView.Adapter mAdapter;
 
     @BindView(R.id.friendsInviteListView)
@@ -105,9 +103,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_friends_fragment3, container, false);
-        ButterKnife.bind(this, view);
-        return view;
+        return initiate(inflater, R.layout.fragment_friends_fragment3, container, false);
     }
 
     //NB: bind ButterKnife to view and then initialise UI elements
@@ -118,13 +114,6 @@ public class FriendsInviteFragment3 extends BaseFragment {
         mAdapter = new FriendsInviteListAdapter(mUsers, getContext());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mRecyclerView.setAdapter(mAdapter);
-    }
-
-        // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
     }
 
     @Override

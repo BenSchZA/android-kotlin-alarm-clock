@@ -5,6 +5,7 @@
 
 package com.roostermornings.android.domain;
 
+import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 
 import java.util.HashMap;
@@ -18,9 +19,10 @@ public class User {
     private String profile_pic;
     private String user_name;
     private String cell_number;
-    //TODO:iOS and Android have different conventions...
-    //private HashMap<String, User> friends;
+    private HashMap<String, User> friends;
     private String uid;
+
+    @Exclude
     private Boolean selected; //this is important for list of friends that need to be selected eg for creating a new alarm
 
     // Required default constructor for Firebase object mapping
@@ -29,12 +31,13 @@ public class User {
     }
 
     public User(HashMap<String, Boolean> channels,
-         String device_type,
-         String device_token,
-         String profile_pic,
-         String user_name,
-         String cell_number,
-         String uid) {
+                String device_type,
+                String device_token,
+                String profile_pic,
+                String user_name,
+                String cell_number,
+                String uid,
+                HashMap<String, User> friends) {
 
         this.channels = channels;
         this.cell_number = cell_number;
@@ -43,6 +46,14 @@ public class User {
         this.profile_pic = profile_pic;
         this.user_name = user_name;
         this.uid = uid;
+    }
+
+    public HashMap<String, User> getFriends() {
+        return friends;
+    }
+
+    public void setFriends(HashMap<String, User> friends) {
+        this.friends = friends;
     }
 
     public HashMap<String, Boolean> getChannels() {
@@ -93,10 +104,12 @@ public class User {
         this.cell_number = cell_number;
     }
 
+    @Exclude
     public Boolean getSelected() {
         return this.selected;
     }
 
+    @Exclude
     public void setSelected(Boolean selected) {
         this.selected = selected;
     }

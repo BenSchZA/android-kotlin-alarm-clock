@@ -9,14 +9,22 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.widget.Toast;
 
 import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
+import java.util.StringTokenizer;
 
+import static android.support.v7.appcompat.R.id.time;
 import static com.roostermornings.android.util.RoosterUtils.hasLollipop;
 
 /**
@@ -153,9 +161,10 @@ public final class DeviceAlarmController {
                 .initAlarmSet(alarmHour, alarmMinute, alarmDays, repeatWeekly, vibrate);
         deviceAlarmList = deviceAlarmSet.getAlarmList();
 
-        //TODO: Temporary, replace with Firebase UID
         final Random rand = new Random();
         long setId = rand.nextLong();
+
+        //notifyUserAlarmTime(deviceAlarmList);
 
         for (DeviceAlarm deviceAlarm :
                 deviceAlarmList) {
@@ -164,6 +173,38 @@ public final class DeviceAlarmController {
         refreshAlarms(deviceAlarmTableManager.selectChanged());
         return setId;
     }
+
+//    private void notifyUserAlarmTime(List<DeviceAlarm> deviceAlarmList) {
+//        Calendar alarmCalendar = Calendar.getInstance();
+//        Calendar systemCalendar = Calendar.getInstance();
+//
+//        Long nextAlarmMillis;
+//        Long timeUntilNextAlarm;
+//        nextAlarmMillis = Long.MAX_VALUE;
+//        String nextAlarmTimeString;
+//
+//        for (DeviceAlarm deviceAlarm :
+//                deviceAlarmList) {
+//            if(deviceAlarm.getMillis() < nextAlarmMillis) nextAlarmMillis = deviceAlarm.getMillis();
+//        }
+//
+//        alarmCalendar.setTimeInMillis(nextAlarmMillis);
+//        timeUntilNextAlarm = alarmCalendar.getTimeInMillis() - systemCalendar.getTimeInMillis();
+//
+//        int seconds = (int) (milliseconds / 1000) % 60 ;
+//        int minutes = (int) ((milliseconds / (1000*60)) % 60);
+//        int hours   = (int) ((milliseconds / (1000*60*60)) % 24);
+//        int days =
+//
+//        //Notify user of time until next alarm
+//        if(alarmCalendar.get(Calendar.HOUR) > 24){
+//            nextAlarmTimeString = (new SimpleDateFormat("dd days hh hours mm minutes", Locale.US).format(new Date(timeUntilNextAlarm)));
+//        } else{
+//            nextAlarmTimeString = String.format("%s hours %s minutes", alarmCalendar.get(Calendar.HOUR), alarmCalendar.get(Calendar.MINUTE));
+//        }
+//
+//        Toast.makeText(context, "Alarm set for " + nextAlarmTimeString + " from now.", Toast.LENGTH_LONG).show();
+//    }
 
     public void deleteAlarmSet(Long setId) {
         List<DeviceAlarm> deviceAlarmList = deviceAlarmTableManager.getAlarmSet(setId);

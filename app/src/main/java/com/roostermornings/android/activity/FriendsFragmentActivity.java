@@ -5,7 +5,6 @@
 
 package com.roostermornings.android.activity;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -16,23 +15,15 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseUser;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.Friend;
-import com.roostermornings.android.domain.NodeUser;
 import com.roostermornings.android.fragment.FriendsInviteFragment3;
 import com.roostermornings.android.fragment.FriendsMyFragment1;
 import com.roostermornings.android.fragment.FriendsRequestFragment2;
 import com.roostermornings.android.util.FontsOverride;
-import com.roostermornings.android.util.RoosterUtils;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -174,50 +165,65 @@ public class FriendsFragmentActivity extends BaseActivity implements
     }
 
     //Send invite to Rooster user from contact list
-    public void inviteUser(NodeUser nodeUser) {
+    public void inviteUser(Friend inviteFriend) {
 
-        //TODO: consolidate nodeUser and friend class
-        if (nodeUser.getSelected()) {
+        String inviteUrl = String.format("friend_requests_received/%s/%s", inviteFriend.getUid(), mCurrentUser.getUid());
+        String currentUserUrl = String.format("friend_requests_sent/%s/%s", mCurrentUser.getUid(), inviteFriend.getUid());
 
-            String inviteUrl = String.format("friend_requests_received/%s/%s", nodeUser.getId(), mCurrentUser.getUid());
-            String currentUserUrl = String.format("friend_requests_sent/%s/%s", mCurrentUser.getUid(), nodeUser.getId());
+        //Create friend object from current signed in user
+        Friend currentUserFriend = new Friend(mCurrentUser.getUid(), mCurrentUser.getUser_name(), mCurrentUser.getProfile_pic(), mCurrentUser.getCell_number());
 
-            //Create friend object from current signed in user
-            Friend currentUserFriend = new Friend(mCurrentUser.getUid(), mCurrentUser.getUser_name(), mCurrentUser.getProfile_pic(), mCurrentUser.getCell_number());
-            //Create friend object from Rooster user in contact list
-            Friend inviteFriend = new Friend(nodeUser.getId(), nodeUser.getUser_name(), nodeUser.getProfile_pic(), nodeUser.getCell_number());
+        //Append to received and sent request list
+        mDatabase.getDatabase().getReference(inviteUrl).setValue(currentUserFriend);
+        mDatabase.getDatabase().getReference(currentUserUrl).setValue(inviteFriend);
 
-            //Append to received and sent request list
-            mDatabase.getDatabase().getReference(inviteUrl).setValue(currentUserFriend);
-            mDatabase.getDatabase().getReference(currentUserUrl).setValue(inviteFriend);
+        Toast.makeText(this, inviteFriend.getUser_name() + " invited!", Toast.LENGTH_LONG).show();
+    }
 
-            Toast.makeText(this, nodeUser.getUser_name() + " invited!", Toast.LENGTH_LONG).show();
-        }
+    //Delete friend from Firebase user friend list
+    public void deleteFriend(Friend deleteFriend) {
+
+        String currentUserUrl = String.format("users/%s/friends/%s", mCurrentUser.getUid(), deleteFriend.getUid());
+        String friendUserUrl = String.format("users/%s/friends/%s", deleteFriend.getUid(), mCurrentUser.getUid());
+
+        //Clear current user's and friend's friend list
+        mDatabase.getDatabase().getReference(currentUserUrl).setValue(null);
+        mDatabase.getDatabase().getReference(friendUserUrl).setValue(null);
     }
 
     //Accept friend request and update Firebase DB
-    public void acceptFriendRequest(Friend friend) {
+    public void acceptFriendRequest(Friend acceptFriend) {
 
-        if (friend.getSelected()) {
+        String currentUserUrl = String.format("users/%s/friends/%s", mCurrentUser.getUid(), acceptFriend.getUid());
+        String friendUserUrl = String.format("users/%s/friends/%s", acceptFriend.getUid(), mCurrentUser.getUid());
 
-            String currentUserUrl = String.format("users/%s/friends/%s", mCurrentUser.getUid(), friend.getUid());
-            String friendUserUrl = String.format("users/%s/friends/%s", friend.getUid(), mCurrentUser.getUid());
+        //Create friend object from current signed in user
+        Friend currentUserFriend = new Friend(mCurrentUser.getUid(), mCurrentUser.getUser_name(), mCurrentUser.getProfile_pic(), mCurrentUser.getCell_number());
 
-            //Create friend object from current signed in user
-            Friend currentUserFriend = new Friend(mCurrentUser.getUid(), mCurrentUser.getUser_name(), mCurrentUser.getProfile_pic(), mCurrentUser.getCell_number());
+        mDatabase.getDatabase().getReference(currentUserUrl).setValue(acceptFriend);
+        mDatabase.getDatabase().getReference(friendUserUrl).setValue(currentUserFriend);
 
-            mDatabase.getDatabase().getReference(currentUserUrl).setValue(friend);
-            mDatabase.getDatabase().getReference(friendUserUrl).setValue(currentUserFriend);
+        String receivedUrl = String.format("friend_requests_received/%s/%s", mCurrentUser.getUid(), acceptFriend.getUid());
+        String sentUrl = String.format("friend_requests_sent/%s/%s", acceptFriend.getUid(), mCurrentUser.getUid());
 
-            String receivedUrl = String.format("friend_requests_received/%s/%s", friend.getUid(), getFirebaseUser().getUid());
-            String sentUrl = String.format("friend_requests_sent/%s/%s", mCurrentUser.getUid(), friend.getUid());
+        //Clear received and sent request list
+        mDatabase.getDatabase().getReference(receivedUrl).setValue(null);
+        mDatabase.getDatabase().getReference(sentUrl).setValue(null);
 
-            //Clear received and sent request list
-            mDatabase.getDatabase().getReference(receivedUrl).setValue(null);
-            mDatabase.getDatabase().getReference(sentUrl).setValue(null);
+        //Notify user that friend request accepted
+        Toast.makeText(this, acceptFriend.getUser_name() + "'s friend request accepted!", Toast.LENGTH_LONG).show();
+    }
 
-            //Notify user that friend request accepted
-            Toast.makeText(this, friend.getUser_name() + "'s friend request accepted!", Toast.LENGTH_LONG).show();
-        }
+    public void rejectFriendRequest(Friend rejectFriend) {
+
+        String receivedUrl = String.format("friend_requests_received/%s/%s", mCurrentUser.getUid(), rejectFriend.getUid());
+        String sentUrl = String.format("friend_requests_sent/%s/%s", rejectFriend.getUid(), mCurrentUser.getUid());
+
+        //Clear received and sent request list
+        mDatabase.getDatabase().getReference(receivedUrl).setValue(null);
+        mDatabase.getDatabase().getReference(sentUrl).setValue(null);
+
+        //Notify user that friend request accepted
+        Toast.makeText(this, rejectFriend.getUser_name() + "'s friend request rejected!", Toast.LENGTH_LONG).show();
     }
 }
