@@ -96,7 +96,7 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
                 user.setSelected(!user.getSelected());
                 setButtonBackground(holder.btnAdd, user.getSelected());
 
-                ((FriendsFragmentActivity)mContext).requestUser(user);
+                ((FriendsFragmentActivity)mContext).acceptFriendRequest(user);
 
                 final Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {

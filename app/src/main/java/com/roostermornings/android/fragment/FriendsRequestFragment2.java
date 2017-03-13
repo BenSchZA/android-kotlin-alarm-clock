@@ -155,8 +155,6 @@ public class FriendsRequestFragment2 extends BaseFragment {
         mListener = null;
     }
 
-    //mListener.onFragmentInteraction(uri);
-
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
