@@ -23,6 +23,9 @@ import com.roostermornings.android.util.RoosterUtils;
 
 import java.util.ArrayList;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapter.ViewHolder> {
     private ArrayList<Alarm> mDataset;
     private Activity mActivity;
@@ -32,17 +35,18 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
     // you provide access to all the views for a data item in a view holder
     public class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
-        public TextView txtAlarmTime;
-        public TextView txtAlarmDays;
-        public TextView txtAlarmChannel;
-        public ImageView imgDelete;
+        @BindView(R.id.cardview_alarm_time_textview)
+        TextView txtAlarmTime;
+        @BindView(R.id.cardview_alarm_days_textview)
+        TextView txtAlarmDays;
+        @BindView(R.id.cardview_alarm_channel_textview)
+        TextView txtAlarmChannel;
+        @BindView(R.id.cardview_alarm_delete)
+        ImageView imgDelete;
 
         public ViewHolder(View v) {
             super(v);
-            txtAlarmTime = (TextView) v.findViewById(R.id.cardview_alarm_time_textview);
-            txtAlarmDays = (TextView) v.findViewById(R.id.cardview_alarm_days_textview);
-            txtAlarmChannel = (TextView) v.findViewById(R.id.cardview_alarm_channel_textview);
-            imgDelete = (ImageView) v.findViewById(R.id.cardview_alarm_delete);
+            ButterKnife.bind(this, v);
         }
 
     }
@@ -82,14 +86,36 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         final Alarm alarm = mDataset.get(position);
-
         try {
             holder.txtAlarmTime.setText(RoosterUtils.setAlarmTimeFromHourAndMinute(mDataset.get(position)));
             holder.txtAlarmDays.setText(RoosterUtils.getAlarmDays(mDataset.get(position)));
             holder.txtAlarmChannel.setText(mDataset.get(position).getChannel().getName());
-        }catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
+
+
+        holder.txtAlarmTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ((MyAlarmsFragmentActivity) mActivity).editAlarm(alarm.getUid());
+            }
+        });
+
+        holder.txtAlarmDays.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ((MyAlarmsFragmentActivity) mActivity).editAlarm(alarm.getUid());
+            }
+        });
+
+        holder.txtAlarmChannel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ((MyAlarmsFragmentActivity) mActivity).editAlarm(alarm.getUid());
+            }
+        });
+
 
         holder.imgDelete.setOnClickListener(new View.OnClickListener() {
             @Override

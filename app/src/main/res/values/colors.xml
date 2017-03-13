@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Rooster Mornings Android.
   ~ Copyright (c)  2017 Roosta Media. All rights reserved.
   -->
@@ -9,7 +8,8 @@
     <color name="normal">#90B7FD</color>
     <color name="grey_transparent">#66a2a2a2</color>
     <color name="black">#000000</color>
-    <color name="grey">#a2a2a2</color>
+    <color name="grey">#d1d1d1</color>
+    <color name="grey_semi">#7aeaeaea</color>
 
     <color name="intro_dot_dark">#1c4897</color>
     <color name="intro_dot_light">#9dbffc</color>

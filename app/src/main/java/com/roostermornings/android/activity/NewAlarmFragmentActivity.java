@@ -5,7 +5,6 @@
 
 package com.roostermornings.android.activity;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.v4.app.Fragment;
@@ -19,14 +18,17 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.fragment.IAlarmSetListener;
 import com.roostermornings.android.fragment.NewAlarmFragment1;
 import com.roostermornings.android.fragment.NewAlarmFragment2;
-import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 
 import java.util.ArrayList;
@@ -43,8 +45,12 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
     public final static String TAG = NewAlarmFragmentActivity.class.getSimpleName();
     private ViewPager mViewPager;
     Alarm mAlarm = new Alarm();
+    private String mEditAlarmId = "";
     Calendar mCalendar = Calendar.getInstance();
+    private Fragment mFragment1;
+    private Fragment mFragment2;
     private DeviceAlarmController deviceAlarmController = new DeviceAlarmController(this);
+
 
     @BindView(R.id.toolbar_title)
     TextView toolbarTitle;
@@ -80,6 +86,11 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
+
+        Bundle extras = getIntent().getExtras();
+        if (extras != null && extras.containsKey("alarmId")) {
+            mEditAlarmId = extras.getString("alarmId", "");
+        }
 
     }
 
@@ -150,16 +161,30 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 if (mAlarm.isSaturday()) alarmDays.add(Calendar.SATURDAY);
                 if (mAlarm.isSunday()) alarmDays.add(Calendar.SUNDAY);
 
+                //if this is an existing alarm, delete from locao storage before inserting another record
+                if (mEditAlarmId.length() != 0
+                        && mAlarm.getSetId().length() > 0) {
+                    deviceAlarmController.deleteAlarmSet(Long.valueOf(mAlarm.getSetId()));
+                }
+
                 //Extract data from Alarm mAlarm and create new alarm set DeviceAlarm
                 long setId = deviceAlarmController.registerAlarmSet(mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring(), mAlarm.isVibrate());
                 mAlarm.setSetId(String.valueOf(setId));
 
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
-                String key = mDatabase.child("alarms").push().getKey();
-                mAlarm.setUid(key);
-                database.getReference(String.format("alarms/%s/%s", mAuth.getCurrentUser().getUid(), key)).setValue(mAlarm);
 
-                Toast.makeText(getBaseContext(), "Alarm created!", Toast.LENGTH_LONG).show();
+                //only do the push to create the new alarm if this is NOT an existing alarm
+                String alarmKey = "";
+                if (mEditAlarmId.length() == 0) {
+                    alarmKey = mDatabase.child("alarms").push().getKey();
+                    mAlarm.setUid(alarmKey);
+                } else {
+                    alarmKey = mEditAlarmId;
+                }
+                database.getReference(String.format("alarms/%s/%s", mAuth.getCurrentUser().getUid(), alarmKey)).setValue(mAlarm);
+
+                Toast.makeText(getBaseContext(), (mEditAlarmId.length() == 0) ? "Alarm created!" : "Alarm edited!",
+                        Toast.LENGTH_LONG).show();
                 startHomeActivity();
                 finish();
             }
@@ -220,9 +245,11 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
 
             switch (position) {
                 case 0:
-                    return NewAlarmFragment1.newInstance(getFirebaseUser().getUid());
+                    mFragment1 = NewAlarmFragment1.newInstance(getFirebaseUser().getUid());
+                    return mFragment1;
                 case 1:
-                    return NewAlarmFragment2.newInstance(getFirebaseUser().getUid());
+                    mFragment2 = NewAlarmFragment2.newInstance(getFirebaseUser().getUid());
+                    return mFragment2;
             }
 
             return fragment;
@@ -243,5 +270,42 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
             }
             return null;
         }
+
+
+    }
+
+    @Override
+    public void retrieveAlarmDetailsFromFirebase() {
+
+        if (mEditAlarmId.length() == 0) return;
+
+        DatabaseReference alarmReference = FirebaseDatabase.getInstance().getReference()
+                .child("alarms").child(getFirebaseUser().getUid()).child(mEditAlarmId);
+
+        ValueEventListener alarmListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                mAlarm = dataSnapshot.getValue(Alarm.class);
+                mAlarm.setUid(mEditAlarmId);
+
+                if (mFragment1 instanceof NewAlarmFragment1) {
+                    ((NewAlarmFragment1) mFragment1).setEditedAlarmSettings();
+                }
+                if (mFragment2 instanceof NewAlarmFragment2) {
+                    ((NewAlarmFragment2) mFragment2).selectEditedAlarmChannel();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+                Toast.makeText(NewAlarmFragmentActivity.this, "Failed to load mAlarms.",
+                        Toast.LENGTH_SHORT).show();
+            }
+        };
+
+        alarmReference.addListenerForSingleValueEvent(alarmListener);
+
+
     }
 }
