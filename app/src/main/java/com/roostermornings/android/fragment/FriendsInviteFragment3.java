@@ -15,12 +15,16 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 
+import com.facebook.CustomTabMainActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -70,6 +74,9 @@ public class FriendsInviteFragment3 extends BaseFragment {
     @BindView(R.id.share_button)
     Button shareButton;
 
+    @BindView(R.id.rooster_contact_search)
+    EditText roosterContactSearch;
+
     private OnFragmentInteractionListener mListener;
 
     public FriendsInviteFragment3() {
@@ -114,6 +121,27 @@ public class FriendsInviteFragment3 extends BaseFragment {
         mAdapter = new FriendsInviteListAdapter(mUsers, getContext());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mRecyclerView.setAdapter(mAdapter);
+
+        //Set listener for search text change
+        roosterContactSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
+                //Filter contacts by CharSequence
+                //Get reference to list adapter to access getFilter method
+                ((FriendsInviteListAdapter)mAdapter).refreshAll(mUsers);
+                ((FriendsInviteListAdapter)mAdapter).getFilter().filter(cs);
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable arg0) {
+
+            }
+        });
     }
 
     @Override

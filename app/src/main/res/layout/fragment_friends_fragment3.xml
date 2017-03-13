@@ -49,6 +49,11 @@
         android:textColor="@color/white"
         android:textSize="@dimen/text_normal_large"/>
 
+    <EditText
+        android:id="@+id/rooster_contact_search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/friendsInviteListView"
         android:layout_width="fill_parent"
