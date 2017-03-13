@@ -37,6 +37,7 @@ import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.activity.SplashActivity;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.node_api.IHTTPClient;
+import com.roostermornings.android.util.InternetHelper;
 
 import java.util.List;
 
@@ -95,6 +96,46 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
             }
         };
 
+    }
+
+    public boolean checkInternetConnection() {
+        if (this.noInternetConnection()) {
+            Toast.makeText(getApplicationContext(), "No internet connection was found found, please " +
+                    "connect and try again.", Toast.LENGTH_LONG).show();
+            return false;
+        }
+
+        checkFirebaseConnection();
+        return true;
+    }
+
+    protected void checkFirebaseConnection() {
+
+        FirebaseDatabase.getInstance().getReference(".info/connected")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot snapshot) {
+                        if (snapshot.getValue(Boolean.class)) {
+                            Log.i(TAG, "Firebase CONNECTED");
+                        } else {
+                            Log.i(TAG, "Firebase NOT CONNECTED");
+                            Toast.makeText(getApplicationContext(), "The application could not connect to the " +
+                                    "Rooster backend, please check your internet connection and try again.",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError error) {
+                        Log.e(TAG, "onCancelled: ", error.toException());
+                    }
+                });
+
+
+    }
+
+    protected boolean noInternetConnection() {
+        return InternetHelper.noInternetConnection(this);
     }
 
     protected void startHomeActivity() {
@@ -222,6 +263,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     }
 
     final public int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 10;
+
     public void requestPermissionReadContacts() {
         // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(this,

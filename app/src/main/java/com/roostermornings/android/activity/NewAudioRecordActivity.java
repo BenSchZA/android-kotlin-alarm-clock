@@ -250,6 +250,8 @@ public class NewAudioRecordActivity extends BaseActivity {
     @OnClick(R.id.new_audio_save)
     public void onSaveAudioFileClick() {
 
+        if (!checkInternetConnection()) return;
+
         final Uri file = Uri.fromFile(new File(mAudioSavePathInDevice));
         StorageReference audioFileRef = mStorageRef.child("social_rooster_uploads/" + file.getLastPathSegment());
 

@@ -167,6 +167,8 @@ public class FriendsFragmentActivity extends BaseActivity implements
     //Send invite to Rooster user from contact list
     public void inviteUser(Friend inviteFriend) {
 
+        if (!checkInternetConnection()) return;
+
         String inviteUrl = String.format("friend_requests_received/%s/%s", inviteFriend.getUid(), mCurrentUser.getUid());
         String currentUserUrl = String.format("friend_requests_sent/%s/%s", mCurrentUser.getUid(), inviteFriend.getUid());
 
@@ -183,6 +185,8 @@ public class FriendsFragmentActivity extends BaseActivity implements
     //Delete friend from Firebase user friend list
     public void deleteFriend(Friend deleteFriend) {
 
+        if (!checkInternetConnection()) return;
+
         String currentUserUrl = String.format("users/%s/friends/%s", mCurrentUser.getUid(), deleteFriend.getUid());
         String friendUserUrl = String.format("users/%s/friends/%s", deleteFriend.getUid(), mCurrentUser.getUid());
 
@@ -193,6 +197,8 @@ public class FriendsFragmentActivity extends BaseActivity implements
 
     //Accept friend request and update Firebase DB
     public void acceptFriendRequest(Friend acceptFriend) {
+
+        if (!checkInternetConnection()) return;
 
         String currentUserUrl = String.format("users/%s/friends/%s", mCurrentUser.getUid(), acceptFriend.getUid());
         String friendUserUrl = String.format("users/%s/friends/%s", acceptFriend.getUid(), mCurrentUser.getUid());
@@ -215,6 +221,8 @@ public class FriendsFragmentActivity extends BaseActivity implements
     }
 
     public void rejectFriendRequest(Friend rejectFriend) {
+
+        if (!checkInternetConnection()) return;
 
         String receivedUrl = String.format("friend_requests_received/%s/%s", mCurrentUser.getUid(), rejectFriend.getUid());
         String sentUrl = String.format("friend_requests_sent/%s/%s", rejectFriend.getUid(), mCurrentUser.getUid());
