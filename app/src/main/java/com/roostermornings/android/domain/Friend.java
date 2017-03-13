@@ -5,6 +5,7 @@
 
 package com.roostermornings.android.domain;
 
+import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 
 @IgnoreExtraProperties
@@ -14,6 +15,8 @@ public class Friend {
     private String profile_pic;
     private String cell_number;
 
+    //Using Firebase @Exclude annotation ensures that property is not UPLOADED to db - include above getter/setter for proper operation
+    @Exclude
     private Boolean selected; //this is important for list of friends that need to be selected eg for creating a new alarm
 
     public Friend(){}
@@ -25,10 +28,12 @@ public class Friend {
         this.cell_number = cell_number;
     }
 
+    @Exclude
     public Boolean getSelected() {
         return selected;
     }
 
+    @Exclude
     public void setSelected(Boolean selected) {
         this.selected = selected;
     }
