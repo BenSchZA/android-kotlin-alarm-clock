@@ -8,6 +8,7 @@ package com.roostermornings.android.fragment;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +35,34 @@ public class NewAlarmFragment1 extends BaseFragment {
 
     @BindView(R.id.days_parent)
     LinearLayout daysParentLinearLayout;
+
+    @BindView(R.id.new_alarm_fragment1_alarm_day_mon)
+    TextView textViewMonday;
+
+    @BindView(R.id.new_alarm_fragment1_alarm_day_tue)
+    TextView textViewTuesday;
+
+    @BindView(R.id.new_alarm_fragment1_alarm_day_wed)
+    TextView textViewWednesday;
+
+    @BindView(R.id.new_alarm_fragment1_alarm_day_thu)
+    TextView textViewThursday;
+
+    @BindView(R.id.new_alarm_fragment1_alarm_day_fri)
+    TextView textViewFriday;
+
+    @BindView(R.id.new_alarm_fragment1_alarm_day_sat)
+    TextView textViewSaturday;
+
+    @BindView(R.id.new_alarm_fragment1_alarm_day_sun)
+    TextView textViewSunday;
+
+    @BindView(R.id.new_alarm_fragment1_switch_audio)
+    SwitchCompat switchAudio;
+
+    @BindView(R.id.new_alarm_fragment1_switch_recurring)
+    SwitchCompat switchRecurring;
+
 
     private static final String ARG_USER_UID_PARAM = "user_uid_param";
     public static final String TAG = NewAlarmFragment1.class.getSimpleName();
@@ -81,6 +110,7 @@ public class NewAlarmFragment1 extends BaseFragment {
 
         //TODO: move to button
         mAlarm.setVibrate(true);
+
     }
 
     @Override
@@ -216,6 +246,52 @@ public class NewAlarmFragment1 extends BaseFragment {
 
         mTimePickerDialog.setTitle(getString(R.string.new_alarm_set_time));
         mTimePickerDialog.show();
+
+    }
+
+
+    public void setEditedAlarmSettings() {
+
+        mAlarm = mListener.getAlarmDetails();
+
+        textViewMonday.setBackgroundResource(R.drawable.selectable_circle_background);
+        textViewTuesday.setBackgroundResource(R.drawable.selectable_circle_background);
+        textViewWednesday.setBackgroundResource(R.drawable.selectable_circle_background);
+        textViewThursday.setBackgroundResource(R.drawable.selectable_circle_background);
+        textViewFriday.setBackgroundResource(R.drawable.selectable_circle_background);
+        textViewSaturday.setBackgroundResource(R.drawable.selectable_circle_background);
+        textViewSunday.setBackgroundResource(R.drawable.selectable_circle_background);
+
+        if (mAlarm.isMonday()) {
+            textViewMonday.setBackgroundResource(R.drawable.selected_circle_background);
+        }
+        if (mAlarm.isTuesday()) {
+            textViewTuesday.setBackgroundResource(R.drawable.selected_circle_background);
+        }
+        if (mAlarm.isWednesday()) {
+            textViewWednesday.setBackgroundResource(R.drawable.selected_circle_background);
+        }
+        if (mAlarm.isThursday()) {
+            textViewThursday.setBackgroundResource(R.drawable.selected_circle_background);
+        }
+        if (mAlarm.isFriday()) {
+            textViewFriday.setBackgroundResource(R.drawable.selected_circle_background);
+        }
+        if (mAlarm.isSaturday()) {
+            textViewSaturday.setBackgroundResource(R.drawable.selected_circle_background);
+        }
+        if (mAlarm.isSunday()) {
+            textViewSunday.setBackgroundResource(R.drawable.selected_circle_background);
+        }
+
+        this.hour = mAlarm.getHour();
+        this.minute = mAlarm.getMinute();
+        textViewAlarmTime.setText(RoosterUtils.setAlarmTimeFromHourAndMinute(mAlarm));
+        mTimePickerDialog.updateTime(this.hour, this.minute);
+
+        switchAudio.setChecked(mAlarm.isAllow_friend_audio_files());
+        switchRecurring.setChecked(mAlarm.isRecurring());
+
 
     }
 

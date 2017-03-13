@@ -7,7 +7,6 @@ package com.roostermornings.android.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -33,7 +32,7 @@ import java.util.ArrayList;
 import butterknife.BindView;
 
 
-public class NewAlarmFragment2 extends BaseFragment  {
+public class NewAlarmFragment2 extends BaseFragment {
 
     private static final String ARG_USER_UID_PARAM = "user_uid_param";
     public static final String TAG = NewAlarmFragment2.class.getSimpleName();
@@ -94,10 +93,13 @@ public class NewAlarmFragment2 extends BaseFragment  {
 
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     Channel channel = postSnapshot.getValue(Channel.class);
+
                     channel.setSelected(false);
                     channels.add(channel);
                     mAdapter.notifyDataSetChanged();
                 }
+
+                mListener.retrieveAlarmDetailsFromFirebase(); //this is only relevant for alarms being edited
             }
 
             @Override
@@ -132,7 +134,23 @@ public class NewAlarmFragment2 extends BaseFragment  {
 
     public void setSelectedChannel(Channel channel) {
         Alarm alarm = mListener.getAlarmDetails();
-        alarm.setChannel(new AlarmChannel(channel.getName(), channel.getId()));
+        alarm.setChannel(new AlarmChannel(channel.getName(), channel.getUid()));
         mListener.setAlarmDetails(alarm);
+    }
+
+    public void selectEditedAlarmChannel() {
+
+
+        final Alarm alarm = (mListener == null) ? new Alarm() : mListener.getAlarmDetails();
+        AlarmChannel alarmChannel = alarm.getChannel();
+
+        for (Channel channel : channels) {
+            if (alarmChannel.getId().equals(channel.getUid())) {
+                channel.setSelected(true);
+                mAdapter.notifyDataSetChanged();
+            }
+        }
+
+
     }
 }

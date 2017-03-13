@@ -153,4 +153,11 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         finish();
         startActivity(intent);
     }
+
+    public void editAlarm(String alarmId){
+
+        Intent intent = new Intent(MyAlarmsFragmentActivity.this, NewAlarmFragmentActivity.class);
+        intent.putExtra("alarmId", alarmId);
+        startActivity(intent);
+    }
 }

@@ -16,8 +16,11 @@
         android:id="@+id/card_view_alarms"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardBackgroundColor="@color/card_white_transparent"
         app:cardCornerRadius="6dp"
+        android:clickable="true"
+        android:foreground="@drawable/selectable_item_background"
+        app:cardBackgroundColor="@color/card_white_transparent"
+        app:cardUseCompatPadding="true"
         app:cardElevation="0dp">
 
         <LinearLayout
