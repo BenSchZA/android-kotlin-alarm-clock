@@ -65,6 +65,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (!checkInternetConnection()) return;
                 startActivity(new Intent(MyAlarmsFragmentActivity.this, NewAlarmFragmentActivity.class));
             }
         });
@@ -129,15 +130,18 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
     @OnClick(R.id.home_record_audio)
     public void recordNewAudio() {
+        if (!checkInternetConnection()) return;
         startActivity(new Intent(MyAlarmsFragmentActivity.this, NewAudioRecordActivity.class));
     }
 
     @OnClick(R.id.home_friends)
     public void manageFriends() {
+        if (!checkInternetConnection()) return;
         startActivity(new Intent(MyAlarmsFragmentActivity.this, FriendsFragmentActivity.class));
     }
 
     public void deleteAlarm(String setId, String alarmId) {
+        if (!checkInternetConnection()) return;
         DeviceAlarmController deviceAlarmController = new DeviceAlarmController(this);
 
         //Remove alarm from firebase
@@ -156,6 +160,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
     public void editAlarm(String alarmId){
 
+        if (!checkInternetConnection()) return;
         Intent intent = new Intent(MyAlarmsFragmentActivity.this, NewAlarmFragmentActivity.class);
         intent.putExtra("alarmId", alarmId);
         startActivity(intent);
