@@ -1,14 +1,20 @@
-package com.roostermornings.android.domain;
-
-/**
- * Created by bscholtz on 08/03/17.
+/*
+ * Rooster Mornings Android.
+ * Copyright (c)  2017 Roosta Media. All rights reserved.
  */
 
+package com.roostermornings.android.domain;
+
+import com.google.firebase.database.IgnoreExtraProperties;
+
+@IgnoreExtraProperties
 public class Friend {
     private String uid;
     private String user_name;
     private String profile_pic;
     private String cell_number;
+
+    private Boolean selected; //this is important for list of friends that need to be selected eg for creating a new alarm
 
     public Friend(){}
 
@@ -17,6 +23,14 @@ public class Friend {
         this.user_name = user_name;
         this.profile_pic = profile_pic;
         this.cell_number = cell_number;
+    }
+
+    public Boolean getSelected() {
+        return selected;
+    }
+
+    public void setSelected(Boolean selected) {
+        this.selected = selected;
     }
 
     public String getUid() {

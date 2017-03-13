@@ -1,3 +1,8 @@
+/*
+ * Rooster Mornings Android.
+ * Copyright (c)  2017 Roosta Media. All rights reserved.
+ */
+
 package com.roostermornings.android.activity;
 
 import android.content.Context;
@@ -21,6 +26,7 @@ import android.widget.Toast;
 import com.google.firebase.auth.FirebaseUser;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.NodeUser;
 import com.roostermornings.android.fragment.FriendsInviteFragment3;
 import com.roostermornings.android.fragment.FriendsMyFragment1;
@@ -184,27 +190,27 @@ public class FriendsFragmentActivity extends BaseActivity implements
         }
     }
 
-    public void requestUser(NodeUser nodeUser) {
+    public void requestUser(Friend user) {
 
         FirebaseUser currentUser = getFirebaseUser();
 
-        if (nodeUser.getSelected()) {
+        if (user.getSelected()) {
 
-            String currentUserUrl = String.format("users/%s/friends/%s", currentUser.getUid(), nodeUser.getId());
-            String friendUserUrl = String.format("users/%s/friends/%s", nodeUser.getId(), currentUser.getUid());
+            String currentUserUrl = String.format("users/%s/friends/%s", currentUser.getUid(), user.getUid());
+            String friendUserUrl = String.format("users/%s/friends/%s", user.getUid(), currentUser.getUid());
 
             NodeUser currentNodeUser = new NodeUser(mCurrentUser.getUid(), mCurrentUser.getUser_name(), mCurrentUser.getProfile_pic(), mCurrentUser.getCell_number());
 
-            mDatabase.getDatabase().getReference(currentUserUrl).setValue(nodeUser);
+            mDatabase.getDatabase().getReference(currentUserUrl).setValue(user);
             mDatabase.getDatabase().getReference(friendUserUrl).setValue(currentNodeUser);
 
-            String receivedUrl = String.format("friend_requests_received/%s/%s", nodeUser.getId(), getFirebaseUser().getUid());
-            String sentUrl = String.format("friend_requests_sent/%s/%s", currentUser.getUid(), nodeUser.getId());
+            String receivedUrl = String.format("friend_requests_received/%s/%s", user.getUid(), getFirebaseUser().getUid());
+            String sentUrl = String.format("friend_requests_sent/%s/%s", currentUser.getUid(), user.getUid());
 
             mDatabase.getDatabase().getReference(receivedUrl).setValue(null);
             mDatabase.getDatabase().getReference(sentUrl).setValue(null);
 
-            Toast.makeText(this, nodeUser.getUser_name() + "'s friend request accepted!", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, user.getUser_name() + "'s friend request accepted!", Toast.LENGTH_LONG).show();
         }
     }
 }

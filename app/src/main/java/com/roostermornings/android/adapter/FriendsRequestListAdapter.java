@@ -1,3 +1,8 @@
+/*
+ * Rooster Mornings Android.
+ * Copyright (c)  2017 Roosta Media. All rights reserved.
+ */
+
 package com.roostermornings.android.adapter;
 
 import android.content.Context;
@@ -12,6 +17,7 @@ import android.widget.TextView;
 
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
+import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.NodeUser;
 import com.roostermornings.android.util.RoosterUtils;
 
@@ -22,7 +28,7 @@ import java.util.ArrayList;
  */
 
 public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsRequestListAdapter.ViewHolder> {
-    private ArrayList<NodeUser> mDataset;
+    private ArrayList<Friend> mDataset;
     private Context mContext;
 
     // Provide a reference to the views for each data item
@@ -44,12 +50,12 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
         }
     }
 
-    public void add(int position, NodeUser item) {
+    public void add(int position, Friend item) {
         mDataset.add(position, item);
         notifyItemInserted(position);
     }
 
-    public void remove(NodeUser item) {
+    public void remove(Friend item) {
         int position = mDataset.indexOf(item);
         mDataset.remove(position);
         notifyItemRemoved(position);
@@ -57,7 +63,7 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
 
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public FriendsRequestListAdapter(ArrayList<NodeUser> myDataset, Context context) {
+    public FriendsRequestListAdapter(ArrayList<Friend> myDataset, Context context) {
         mDataset = myDataset;
         mContext = context;
     }
@@ -80,7 +86,7 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
     public void onBindViewHolder(final FriendsRequestListAdapter.ViewHolder holder, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        final NodeUser user = mDataset.get(position);
+        final Friend user = mDataset.get(position);
         user.setSelected(false);
         holder.txtName.setText(mDataset.get(position).getUser_name());
         holder.txtInitials.setText(RoosterUtils.getInitials(mDataset.get(position).getUser_name()));

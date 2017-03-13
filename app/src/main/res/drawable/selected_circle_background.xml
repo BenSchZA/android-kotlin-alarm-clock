@@ -1,4 +1,9 @@
-        <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
+        <!--
+  ~ Rooster Mornings Android.
+  ~ Copyright (c)  2017 Roosta Media. All rights reserved.
+  -->
+
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
 
             <solid android:color="@color/white_transparent" />
 

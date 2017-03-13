@@ -1,3 +1,8 @@
+/*
+ * Rooster Mornings Android.
+ * Copyright (c)  2017 Roosta Media. All rights reserved.
+ */
+
 package com.roostermornings.android.util;
 
 import android.content.pm.PackageManager;
