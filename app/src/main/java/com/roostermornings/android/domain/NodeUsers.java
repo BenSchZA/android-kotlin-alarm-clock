@@ -16,6 +16,6 @@ import java.util.ArrayList;
 public class NodeUsers {
 
     @Expose
-    public ArrayList<ArrayList<NodeUser>> users;
+    public ArrayList<ArrayList<Friend>> users;
 
 }

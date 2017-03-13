@@ -143,7 +143,8 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
                                         "",
                                         name,
                                         mMobileNumber,
-                                        mAuth.getCurrentUser().getUid());
+                                        mAuth.getCurrentUser().getUid(),
+                                        null);
 
                                 database.getReference(String.format("users/%s",
                                         mAuth.getCurrentUser().getUid())).setValue(user);
