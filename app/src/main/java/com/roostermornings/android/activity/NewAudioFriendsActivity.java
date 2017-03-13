@@ -15,11 +15,6 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.NewAudioFriendsListAdapter;
@@ -69,6 +64,8 @@ public class NewAudioFriendsActivity extends BaseActivity {
 
     private void retrieveMyFriends() {
 
+        if (!checkInternetConnection()) return;
+
         FirebaseUser firebaseUser = getFirebaseUser();
 
         if (firebaseUser == null) {
@@ -109,13 +106,15 @@ public class NewAudioFriendsActivity extends BaseActivity {
     @OnClick(R.id.new_audio_upload_button)
     protected void onSaveButtonClick() {
 
+        if (!checkInternetConnection()) return;
+
         for (User friend : mFriends) {
             if (friend.getSelected()) {
                 inviteUsers();
                 return;
             }
         }
-        Toast.makeText(NewAudioFriendsActivity.this, "Please select at least 1 friend", Toast.LENGTH_LONG);
+        Toast.makeText(NewAudioFriendsActivity.this, R.string.new_audio_at_least_one_friend, Toast.LENGTH_LONG);
 
     }
 

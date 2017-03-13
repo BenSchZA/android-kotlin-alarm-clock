@@ -17,7 +17,6 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.mobsandgeeks.saripaar.Validator;
@@ -25,9 +24,7 @@ import com.mobsandgeeks.saripaar.annotation.NotEmpty;
 import com.mobsandgeeks.saripaar.annotation.Password;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
-import com.roostermornings.android.background.BackgroundTaskReceiver;
 import com.roostermornings.android.domain.User;
-import com.roostermornings.android.sqldata.AudioTableHelper;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -90,6 +87,8 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
 
     @Override
     public void onValidationSucceeded() {
+
+        if (!checkInternetConnection()) return;
 
         final String email = mEmailAddress.getText().toString().trim();
         final String password = mPassword.getText().toString().trim();
@@ -161,6 +160,9 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
     }
 
     private void proceedToMyAlarmsActivity() {
+
+        if (!checkInternetConnection()) return;
+
         Intent intent = new Intent(SignupEmailActivity.this, MyAlarmsFragmentActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
