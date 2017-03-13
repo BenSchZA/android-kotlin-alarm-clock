@@ -6,12 +6,9 @@
 package com.roostermornings.android.fragment;
 
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -20,41 +17,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
-import com.roostermornings.android.activity.base.BaseActivity;
-import com.roostermornings.android.adapter.ChannelsListAdapter;
-import com.roostermornings.android.adapter.FriendsInviteListAdapter;
 import com.roostermornings.android.adapter.FriendsMyListAdapter;
-import com.roostermornings.android.domain.Channel;
-import com.roostermornings.android.domain.LocalContacts;
-import com.roostermornings.android.domain.NodeUser;
-import com.roostermornings.android.domain.NodeUsers;
+import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.User;
-import com.roostermornings.android.domain.Users;
 import com.roostermornings.android.fragment.base.BaseFragment;
-import com.roostermornings.android.util.MyContactsController;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
-import retrofit.Call;
-import retrofit.Callback;
-import retrofit.Response;
-import retrofit.Retrofit;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -68,7 +44,7 @@ public class FriendsMyFragment1 extends BaseFragment {
 
     protected static final String TAG = FriendsFragmentActivity.class.getSimpleName();
 
-    ArrayList<User> mUsers = new ArrayList<>();
+    ArrayList<Friend> mUsers = new ArrayList<>();
     private DatabaseReference mFriendsReference;
     private DatabaseReference mUserReference;
 
@@ -107,11 +83,9 @@ public class FriendsMyFragment1 extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_friends_fragment1, container, false);
-        ButterKnife.bind(this, view);
 
-        return view;
+        // Inflate the layout for this fragment
+        return initiate(inflater, R.layout.fragment_friends_fragment1, container, false);
     }
 
     //NB: bind ButterKnife to view and then initialise UI elements
@@ -124,6 +98,7 @@ public class FriendsMyFragment1 extends BaseFragment {
         mRecyclerView.setAdapter(mAdapter);
     }
 
+    //Retrieve list of friends from Firebase for current user
     private void getFriends() {
         mFriendsReference = mDatabase
                 .child("users").child(getFirebaseUser().getUid()).child("friends");
@@ -131,25 +106,29 @@ public class FriendsMyFragment1 extends BaseFragment {
         ChildEventListener friendsListener = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                mUsers.add(dataSnapshot.getValue(User.class));
+                mUsers.add(dataSnapshot.getValue(Friend.class));
                 mAdapter.notifyDataSetChanged();
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                User user = dataSnapshot.getValue(User.class);
-                for (User oldUser:mUsers) {
-                    if(oldUser.getUid().equals(user.getUid())){
-                        mUsers.remove(oldUser);
-                        mUsers.add(user);
-                        mAdapter.notifyDataSetChanged();
+                Friend friend = dataSnapshot.getValue(Friend.class);
+                Friend friendRemove = null;
+                for (Friend oldUser:mUsers) {
+                    if(oldUser.getUid().equals(friend.getUid())){
+                        friendRemove = oldUser;
                     }
+                }
+                if(friendRemove != null) {
+                    mUsers.remove(friendRemove);
+                    mUsers.add(friend);
+                    mAdapter.notifyDataSetChanged();
                 }
             }
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
-                mUsers.remove(dataSnapshot.getValue(User.class));
+                mUsers.remove(dataSnapshot.getValue(Friend.class));
                 mAdapter.notifyDataSetChanged();
             }
 
@@ -167,13 +146,6 @@ public class FriendsMyFragment1 extends BaseFragment {
             }
         };
         mFriendsReference.addChildEventListener(friendsListener);
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
     }
 
     @Override

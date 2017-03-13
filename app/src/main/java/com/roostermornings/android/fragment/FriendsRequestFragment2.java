@@ -23,16 +23,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
-import com.roostermornings.android.adapter.FriendsMyListAdapter;
 import com.roostermornings.android.adapter.FriendsRequestListAdapter;
 import com.roostermornings.android.domain.Friend;
-import com.roostermornings.android.domain.NodeUser;
 import com.roostermornings.android.fragment.base.BaseFragment;
 
 import java.util.ArrayList;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -52,7 +49,7 @@ public class FriendsRequestFragment2 extends BaseFragment {
 
     private RecyclerView.Adapter mAdapter;
 
-    @BindView(R.id.friendsMyListView)
+    @BindView(R.id.friendsRequestListView)
     RecyclerView mRecyclerView;
 
     private OnFragmentInteractionListener mListener;
@@ -85,11 +82,9 @@ public class FriendsRequestFragment2 extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_friends_fragment1, container, false);
-        ButterKnife.bind(this, view);
 
-        return view;
+        // Inflate the layout for this fragment
+        return initiate(inflater, R.layout.fragment_friends_fragment2, container, false);
     }
 
     //NB: bind ButterKnife to view and then initialise UI elements
