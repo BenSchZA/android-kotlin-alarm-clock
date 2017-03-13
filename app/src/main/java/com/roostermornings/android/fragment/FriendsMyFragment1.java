@@ -107,11 +107,9 @@ public class FriendsMyFragment1 extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_friends_fragment1, container, false);
-        ButterKnife.bind(this, view);
 
-        return view;
+        // Inflate the layout for this fragment
+        return initiate(inflater, R.layout.fragment_friends_fragment1, container, false);
     }
 
     //NB: bind ButterKnife to view and then initialise UI elements
@@ -167,13 +165,6 @@ public class FriendsMyFragment1 extends BaseFragment {
             }
         };
         mFriendsReference.addChildEventListener(friendsListener);
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
     }
 
     @Override

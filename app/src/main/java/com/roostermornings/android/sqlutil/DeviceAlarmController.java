@@ -9,11 +9,14 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.widget.Toast;
 
 import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -153,9 +156,10 @@ public final class DeviceAlarmController {
                 .initAlarmSet(alarmHour, alarmMinute, alarmDays, repeatWeekly, vibrate);
         deviceAlarmList = deviceAlarmSet.getAlarmList();
 
-        //TODO: Temporary, replace with Firebase UID
         final Random rand = new Random();
         long setId = rand.nextLong();
+
+        notifyUserAlarmTime(deviceAlarmList);
 
         for (DeviceAlarm deviceAlarm :
                 deviceAlarmList) {
@@ -163,6 +167,22 @@ public final class DeviceAlarmController {
         }
         refreshAlarms(deviceAlarmTableManager.selectChanged());
         return setId;
+    }
+
+    private void notifyUserAlarmTime(List<DeviceAlarm> deviceAlarmList) {
+        Long nextAlarmMillis;
+        nextAlarmMillis = Long.MAX_VALUE;
+        
+        for (DeviceAlarm deviceAlarm :
+                deviceAlarmList) {
+            if(deviceAlarm.getMillis() < nextAlarmMillis) nextAlarmMillis = deviceAlarm.getMillis();
+        }
+
+        Calendar alarmCalendar = Calendar.getInstance();
+        alarmCalendar.setTimeInMillis(nextAlarmMillis);
+
+        //Notify user of time until next alarm
+        Toast.makeText(context, "Alarm set for " + alarmCalendar.get(Calendar.HOUR) + " hours and " + alarmCalendar.get(Calendar.MINUTE) + " minutes from now.", Toast.LENGTH_LONG).show();
     }
 
     public void deleteAlarmSet(Long setId) {
