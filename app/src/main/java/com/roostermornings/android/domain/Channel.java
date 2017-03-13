@@ -8,7 +8,6 @@ package com.roostermornings.android.domain;
 import com.google.firebase.database.IgnoreExtraProperties;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -26,7 +25,7 @@ public class Channel implements Serializable {
     private HashMap<String, Boolean> subscribers;
     private boolean active;
     private boolean selected;
-    private String id;
+    private String uid;
 
     // Required default constructor for Firebase object mapping
     @SuppressWarnings("unused")
@@ -41,7 +40,7 @@ public class Channel implements Serializable {
                    HashMap<String, Boolean> subscribers,
                    boolean active,
                    boolean selected,
-                   String id) {
+                   String uid) {
 
         this.current_rooster_iteration_cycle = current_rooster_iteration_cycle;
         this.description = description;
@@ -51,15 +50,15 @@ public class Channel implements Serializable {
         this.subscribers = subscribers;
         this.active = active;
         this.selected = selected;
-        this.id = id;
+        this.uid = uid;
     }
 
-    public String getId() {
-        return id;
+    public String getUid() {
+        return uid;
     }
 
     public void setId(String id) {
-        this.id = id;
+        this.uid = id;
     }
 
     public boolean isSelected() {
