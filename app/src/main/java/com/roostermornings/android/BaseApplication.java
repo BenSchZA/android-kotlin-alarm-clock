@@ -31,11 +31,10 @@ public class BaseApplication extends android.app.Application {
 
         Fabric.with(this, new Crashlytics());
 
-        //Over ride monospace font, everything here runs once on start up
+        //Override monospace font with custom font
         FontsOverride.setDefaultFont(this, "MONOSPACE", "fonts/Nunito/Nunito-Bold.ttf");
 
         if (BuildConfig.DEBUG) {
-            //Remove in release version... don't want to leave stethoscopes lying around
             //Stetho: http://facebook.github.io/stetho/ - debug bridge for Android (view SQL etc.)
             //Go to chrome://inspect/ in Chrome to inspect
             Stetho.initializeWithDefaults(this);
@@ -53,7 +52,7 @@ public class BaseApplication extends android.app.Application {
                 .roosterApplicationModule(new RoosterApplicationModule(this))
                 .build();
 
-
+        //Create Retrofit API class for managing Node API
         mRetrofit = new Retrofit.Builder()
                 .baseUrl(getResources().getString(R.string.node_api_url))
                 .addConverterFactory(GsonConverterFactory.create())

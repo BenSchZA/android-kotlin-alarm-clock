@@ -173,44 +173,51 @@ public class FriendsFragmentActivity extends BaseActivity implements
         }
     }
 
+    //Send invite to Rooster user from contact list
     public void inviteUser(NodeUser nodeUser) {
 
-        FirebaseUser currentUser = getFirebaseUser();
-
+        //TODO: consolidate nodeUser and friend class
         if (nodeUser.getSelected()) {
 
-            String inviteUrl = String.format("friend_requests_received/%s/%s", nodeUser.getId(), getFirebaseUser().getUid());
-            String currentUserUrl = String.format("friend_requests_sent/%s/%s", currentUser.getUid(), nodeUser.getId());
+            String inviteUrl = String.format("friend_requests_received/%s/%s", nodeUser.getId(), mCurrentUser.getUid());
+            String currentUserUrl = String.format("friend_requests_sent/%s/%s", mCurrentUser.getUid(), nodeUser.getId());
 
-            NodeUser currentNodeUser = new NodeUser(mCurrentUser.getUid(), mCurrentUser.getUser_name(), mCurrentUser.getProfile_pic(), mCurrentUser.getCell_number());
+            //Create friend object from current signed in user
+            Friend currentUserFriend = new Friend(mCurrentUser.getUid(), mCurrentUser.getUser_name(), mCurrentUser.getProfile_pic(), mCurrentUser.getCell_number());
+            //Create friend object from Rooster user in contact list
+            Friend inviteFriend = new Friend(nodeUser.getId(), nodeUser.getUser_name(), nodeUser.getProfile_pic(), nodeUser.getCell_number());
 
-            mDatabase.getDatabase().getReference(inviteUrl).setValue(currentNodeUser);
-            mDatabase.getDatabase().getReference(currentUserUrl).setValue(nodeUser);
+            //Append to received and sent request list
+            mDatabase.getDatabase().getReference(inviteUrl).setValue(currentUserFriend);
+            mDatabase.getDatabase().getReference(currentUserUrl).setValue(inviteFriend);
+
             Toast.makeText(this, nodeUser.getUser_name() + " invited!", Toast.LENGTH_LONG).show();
         }
     }
 
-    public void requestUser(Friend user) {
+    //Accept friend request and update Firebase DB
+    public void acceptFriendRequest(Friend friend) {
 
-        FirebaseUser currentUser = getFirebaseUser();
+        if (friend.getSelected()) {
 
-        if (user.getSelected()) {
+            String currentUserUrl = String.format("users/%s/friends/%s", mCurrentUser.getUid(), friend.getUid());
+            String friendUserUrl = String.format("users/%s/friends/%s", friend.getUid(), mCurrentUser.getUid());
 
-            String currentUserUrl = String.format("users/%s/friends/%s", currentUser.getUid(), user.getUid());
-            String friendUserUrl = String.format("users/%s/friends/%s", user.getUid(), currentUser.getUid());
+            //Create friend object from current signed in user
+            Friend currentUserFriend = new Friend(mCurrentUser.getUid(), mCurrentUser.getUser_name(), mCurrentUser.getProfile_pic(), mCurrentUser.getCell_number());
 
-            NodeUser currentNodeUser = new NodeUser(mCurrentUser.getUid(), mCurrentUser.getUser_name(), mCurrentUser.getProfile_pic(), mCurrentUser.getCell_number());
+            mDatabase.getDatabase().getReference(currentUserUrl).setValue(friend);
+            mDatabase.getDatabase().getReference(friendUserUrl).setValue(currentUserFriend);
 
-            mDatabase.getDatabase().getReference(currentUserUrl).setValue(user);
-            mDatabase.getDatabase().getReference(friendUserUrl).setValue(currentNodeUser);
+            String receivedUrl = String.format("friend_requests_received/%s/%s", friend.getUid(), getFirebaseUser().getUid());
+            String sentUrl = String.format("friend_requests_sent/%s/%s", mCurrentUser.getUid(), friend.getUid());
 
-            String receivedUrl = String.format("friend_requests_received/%s/%s", user.getUid(), getFirebaseUser().getUid());
-            String sentUrl = String.format("friend_requests_sent/%s/%s", currentUser.getUid(), user.getUid());
-
+            //Clear received and sent request list
             mDatabase.getDatabase().getReference(receivedUrl).setValue(null);
             mDatabase.getDatabase().getReference(sentUrl).setValue(null);
 
-            Toast.makeText(this, user.getUser_name() + "'s friend request accepted!", Toast.LENGTH_LONG).show();
+            //Notify user that friend request accepted
+            Toast.makeText(this, friend.getUser_name() + "'s friend request accepted!", Toast.LENGTH_LONG).show();
         }
     }
 }
