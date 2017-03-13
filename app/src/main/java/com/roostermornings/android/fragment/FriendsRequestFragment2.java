@@ -1,3 +1,8 @@
+/*
+ * Rooster Mornings Android.
+ * Copyright (c)  2017 Roosta Media. All rights reserved.
+ */
+
 package com.roostermornings.android.fragment;
 
 import android.content.Context;
@@ -20,6 +25,7 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.adapter.FriendsMyListAdapter;
 import com.roostermornings.android.adapter.FriendsRequestListAdapter;
+import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.NodeUser;
 import com.roostermornings.android.fragment.base.BaseFragment;
 
@@ -40,7 +46,7 @@ public class FriendsRequestFragment2 extends BaseFragment {
 
     protected static final String TAG = FriendsFragmentActivity.class.getSimpleName();
 
-    ArrayList<NodeUser> mUsers = new ArrayList<>();
+    ArrayList<Friend> mUsers = new ArrayList<>();
     private DatabaseReference mRequestsReference;
     private DatabaseReference mUserReference;
 
@@ -104,7 +110,7 @@ public class FriendsRequestFragment2 extends BaseFragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    mUsers.add(postSnapshot.getValue(NodeUser.class));
+                    mUsers.add(postSnapshot.getValue(Friend.class));
                     mAdapter.notifyDataSetChanged();
                 }
             }
