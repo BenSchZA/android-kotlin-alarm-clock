@@ -16,6 +16,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,8 +27,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.activity.base.WatchObserver;
 import com.roostermornings.android.adapter.MyAlarmsListAdapter;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
@@ -51,6 +56,9 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
     @BindView(R.id.home_my_alarms)
     ImageButton buttonAddAlarm;
+
+    @BindView(R.id.button_bar)
+    LinearLayout buttonBarLayout;
 
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
@@ -78,6 +86,9 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
         mMyAlarmsReference = FirebaseDatabase.getInstance().getReference()
                 .child("alarms").child(getFirebaseUser().getUid());
+
+        //Display notification for new friend request
+        if(((BaseApplication)getApplication()).getNotificationFlag() > 0) setButtonBarNotification(true);
 
         mAdapter = new MyAlarmsListAdapter(mAlarms, MyAlarmsFragmentActivity.this);
 
@@ -170,5 +181,11 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         Intent intent = new Intent(MyAlarmsFragmentActivity.this, NewAlarmFragmentActivity.class);
         intent.putExtra("alarmId", alarmId);
         startActivity(intent);
+    }
+
+    public void setButtonBarNotification(boolean notification) {
+        ImageView buttonBarNotification = (ImageView) buttonBarLayout.findViewById(R.id.notification);
+        if(notification) buttonBarNotification.setVisibility(View.VISIBLE);
+        else buttonBarNotification.setVisibility(View.GONE);
     }
 }

@@ -105,9 +105,6 @@ public class FriendsRequestFragment2 extends BaseFragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    //Set notification icon for new request
-                    ((FriendsFragmentActivity)getActivity()).setTabNotification(1, true);
-
                     mUsers.add(postSnapshot.getValue(Friend.class));
                     mAdapter.notifyDataSetChanged();
                 }

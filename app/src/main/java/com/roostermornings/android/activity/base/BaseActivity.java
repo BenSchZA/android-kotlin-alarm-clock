@@ -33,6 +33,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.mobsandgeeks.saripaar.ValidationError;
 import com.mobsandgeeks.saripaar.Validator;
 import com.roostermornings.android.BaseApplication;
+import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.activity.SplashActivity;
 import com.roostermornings.android.domain.User;
@@ -52,6 +53,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     protected FirebaseAuth.AuthStateListener mAuthListener;
     private static final String TAG = BaseActivity.class.getSimpleName();
     protected DatabaseReference mDatabase;
+
     public static User mCurrentUser;
 
     @Inject
@@ -60,11 +62,6 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        //If activity is not MyAlarms page, set default uncaught exception handler - this is to ensure loop does not occur
-//        if(!this.getClass().getSimpleName().equals(MyAlarmsFragmentActivity.class.getSimpleName())) {
-//            Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
-//        }
 
         BaseApplication baseApplication = (BaseApplication) getApplication();
 
