@@ -5,10 +5,7 @@
 
 package com.roostermornings.android.util;
 
-import android.content.pm.PackageManager;
 import android.os.Build;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 
 import com.roostermornings.android.domain.Alarm;
 
@@ -35,7 +32,7 @@ public class RoosterUtils {
     public static String getInitials(String displayName) {
         String initials = "";
         String tempStringArray[];
-        if(displayName!=null) {
+        if (displayName != null) {
             tempStringArray = displayName.split(" ", 2);
             for (String s : tempStringArray) {
                 initials = initials.concat(String.valueOf(s.charAt(0)));

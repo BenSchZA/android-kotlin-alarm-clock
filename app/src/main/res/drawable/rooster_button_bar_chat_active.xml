@@ -1,0 +1,8 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <bitmap android:src="@drawable/ic_chat_bubble_outline_white_24dp" android:tint="@color/grey" />
+    </item>
+    <item>
+        <bitmap android:src="@drawable/ic_chat_bubble_outline_white_24dp" android:tint="@color/white" />
+    </item>
+</selector>
