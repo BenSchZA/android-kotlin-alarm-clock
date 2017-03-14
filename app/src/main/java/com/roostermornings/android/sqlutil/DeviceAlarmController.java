@@ -46,7 +46,7 @@ public final class DeviceAlarmController {
         deviceAlarmTableManager = new DeviceAlarmTableManager(context);
     }
 
-    //
+    //Take a set of alarms and recreate intents, overwriting if already existing, and clearing changed flag if set
     public void refreshAlarms(List<DeviceAlarm> deviceAlarmList) {
         for (DeviceAlarm deviceAlarm : deviceAlarmList) {
             setAlarm(deviceAlarm);
@@ -54,6 +54,7 @@ public final class DeviceAlarmController {
         deviceAlarmTableManager.clearChanged(deviceAlarmList);
     }
 
+    //Create pending intent for individual alarm (done once for each alarm in set)
     private void setAlarm(DeviceAlarm deviceAlarm) {
         if (deviceAlarm.getEnabled()) {
             alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -105,7 +106,7 @@ public final class DeviceAlarmController {
                 alarmMgr.setAlarmClock(alarmInfo, alarmPendingIntent);
 
             } else {
-                //if older of android, don't require info pending intent
+                //if older version of android, don't require info pending intent
                 alarmMgr.setExact(AlarmManager.RTC_WAKEUP, alarmTime, alarmPendingIntent);
                 // Show alarm in the status bar
                 Intent alarmChanged = new Intent("android.intent.action.ALARM_CHANGED");
@@ -186,11 +187,13 @@ public final class DeviceAlarmController {
         nextAlarmMillis = Long.MAX_VALUE;
         String nextAlarmTimeString;
 
+        //Iterate over all alarms in SQL db for specific set, find next alarm time
         for (DeviceAlarm deviceAlarm :
                 deviceAlarmList) {
             if(deviceAlarm.getMillis() < nextAlarmMillis) nextAlarmMillis = deviceAlarm.getMillis();
         }
 
+        //Time until next alarm is the time of alarm, minus the current time in millis - alarm always set for future date
         alarmCalendar.setTimeInMillis(nextAlarmMillis);
         timeUntilNextAlarm = alarmCalendar.getTimeInMillis() - systemCalendar.getTimeInMillis();
 
@@ -204,6 +207,7 @@ public final class DeviceAlarmController {
         Toast.makeText(context, "Alarm set for " + nextAlarmTimeString + " from now.", Toast.LENGTH_LONG).show();
     }
 
+    //Remove entire set of alarms, first recreate intent EXACTLY as before, then call alarmMgr.cancel(intent)
     public void deleteAlarmSet(Long setId) {
         List<DeviceAlarm> deviceAlarmList = deviceAlarmTableManager.getAlarmSet(setId);
         for (DeviceAlarm deviceAlarm :
@@ -213,11 +217,7 @@ public final class DeviceAlarmController {
         deviceAlarmTableManager.deleteAlarmSet(setId);
     }
 
-    public void rebootAlarms() {
-        refreshAlarms(deviceAlarmTableManager.selectEnabled());
-    }
-
-    public void cancelAlarm(DeviceAlarm deviceAlarm) {
+    private void cancelAlarm(DeviceAlarm deviceAlarm) {
         alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent alarmIntent = new Intent(context, DeviceAlarmReceiver.class);
         alarmIntent.setAction("receiver.ALARM_RECEIVER");
@@ -238,5 +238,10 @@ public final class DeviceAlarmController {
         if (alarmMgr != null) {
              alarmMgr.cancel(alarmPendingIntent);
         }
+    }
+
+    //Used to recreate alarm intents after reboot. All ENABLED alarms recreated.
+    public void rebootAlarms() {
+        refreshAlarms(deviceAlarmTableManager.selectEnabled());
     }
 }
