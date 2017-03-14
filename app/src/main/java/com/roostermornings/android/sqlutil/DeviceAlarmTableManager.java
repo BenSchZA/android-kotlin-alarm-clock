@@ -274,7 +274,7 @@ public class DeviceAlarmTableManager {
                 alarm.setMinute(cursor.getInt(cursor.getColumnIndex(AlarmTableEntry.COLUMN_MINUTE)));
                 alarm.setDay(cursor.getInt(cursor.getColumnIndex(AlarmTableEntry.COLUMN_DAY)));
                 alarm.setRecurring(cursor.getInt(cursor.getColumnIndex(AlarmTableEntry.COLUMN_RECURRING)) > 0);
-                alarm.setMillis(cursor.getInt(cursor.getColumnIndex(AlarmTableEntry.COLUMN_MILLIS)));
+                alarm.setMillis(cursor.getLong(cursor.getColumnIndex(AlarmTableEntry.COLUMN_MILLIS)));
 
                 alarm.setLabel(cursor.getString(cursor.getColumnIndex(AlarmTableEntry.COLUMN_LABEL)));
                 alarm.setRingtone(cursor.getInt(cursor.getColumnIndex(AlarmTableEntry.COLUMN_RINGTONE)));

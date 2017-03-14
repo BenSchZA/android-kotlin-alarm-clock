@@ -23,8 +23,6 @@
     <string name="signup_email">Sign up with Email</string>
     <string name="signup_auth_failed">Authentication failed. Please try again.</string>
 
-    <string name="facebook_app_id">190341188110134</string>
-
     <string name="email_address">Email address</string>
     <string name="phone_number">Phone number</string>
     <string name="name">Name</string>

@@ -27,7 +27,7 @@
         android:theme="@style/AppTheme">
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
-            android:value="@string/facebook_app_id" />
+            android:value="getResources().getString(R.string.facebook_app_id)" />
 
         <receiver
             android:name=".receiver.BootReceiver"
@@ -124,7 +124,8 @@
             android:theme="@style/AppTheme.NoActionBar"
             android:label="Friends"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan"/>
     </application>
 
 </manifest>

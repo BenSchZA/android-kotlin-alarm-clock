@@ -80,10 +80,6 @@ public class FriendsInviteListAdapter extends RecyclerView.Adapter<FriendsInvite
         mContext = context;
     }
 
-    public FriendsInviteListAdapter() {
-
-    }
-
     // Create new views (invoked by the layout manager)
     @Override
     public FriendsInviteListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,

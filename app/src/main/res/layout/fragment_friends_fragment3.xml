@@ -51,8 +51,14 @@
 
     <EditText
         android:id="@+id/rooster_contact_search"
+        android:background="@drawable/rooster_search_bar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:hint="Search"
+        android:textColorHint="@color/white_semi_transparent"
+        android:drawableRight="@drawable/ic_search_white_24dp"
+        android:padding="@dimen/spacing_normal"
+        android:layout_margin="@dimen/spacing_large"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/friendsInviteListView"
