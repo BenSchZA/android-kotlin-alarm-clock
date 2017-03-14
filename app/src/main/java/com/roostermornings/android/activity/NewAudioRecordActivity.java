@@ -216,14 +216,14 @@ public class NewAudioRecordActivity extends BaseActivity {
                             mHandler.removeCallbacks(startTimer);
                             txtAudioTime.setText("00:00");
                             mediaPlayer.stop();
-                            imgNewAudioListen.setImageResource(R.drawable.ic_play_arrow_white_24dp);
+                            imgNewAudioListen.setBackgroundResource(R.drawable.rooster_new_audio_play_button);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
 
                     }
                 });
-                imgNewAudioListen.setImageResource(R.drawable.ic_pause_white_24dp);
+                imgNewAudioListen.setBackgroundResource(R.drawable.rooster_new_audio_pause_button);
 
 
             } else if (!mPaused) { //user paused playback
@@ -232,7 +232,7 @@ public class NewAudioRecordActivity extends BaseActivity {
                 mediaPlayer.pause();
                 runningTime = System.currentTimeMillis();
                 mHandler.removeCallbacks(startTimer);
-                imgNewAudioListen.setImageResource(R.drawable.ic_play_arrow_white_24dp);
+                imgNewAudioListen.setBackgroundResource(R.drawable.rooster_new_audio_play_button);
 
             } else { //user resumed playback
 

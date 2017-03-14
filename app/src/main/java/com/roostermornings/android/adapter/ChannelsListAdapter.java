@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.roostermornings.android.R;
 import com.roostermornings.android.domain.Channel;
 import com.roostermornings.android.fragment.NewAlarmFragment2;
@@ -104,6 +105,21 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
             holder.imgChannelSelected.setVisibility(View.INVISIBLE);
         }
 
+        holder.imgInfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                new MaterialDialog.Builder(mFragment.getContext())
+                        .title(mDataset.get(position).getName())
+                        .content(mDataset.get(position).getDescription())
+                        .positiveText(R.string.ok)
+                        .negativeText("")
+                        .show();
+                
+
+            }
+        });
+
         Picasso.with(mFragment.getContext()).load(mDataset.get(position).getPhoto()).
                 fit().into(holder.imgChannelImage);
 
@@ -112,12 +128,12 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
     private void toggleChannelSelection(Channel channelSelection) {
         //Clear all channels except selected
         for (Channel channel : mDataset) {
-            if(!(channel == channelSelection)) channel.setSelected(false);
+            if (!(channel == channelSelection)) channel.setSelected(false);
         }
         //Toggle selected channel
-        if (channelSelection.isSelected()){
+        if (channelSelection.isSelected()) {
             channelSelection.setSelected(false);
-        }else {
+        } else {
             channelSelection.setSelected(true);
         }
     }
