@@ -10,6 +10,11 @@
         <item name="windowNoTitle">true</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
+
+        <!--Actually overridden to Nunito-Bold-->
+        <item name="android:typeface">monospace</item>
+        <item name="android:windowActivityTransitions">true</item>
+
     </style>
 
 </resources>

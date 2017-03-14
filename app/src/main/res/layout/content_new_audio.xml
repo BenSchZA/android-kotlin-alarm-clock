@@ -1,123 +1,137 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Rooster Mornings Android.
   ~ Copyright (c)  2017 Roosta Media. All rights reserved.
   -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_alignParentStart="true"
-    android:layout_alignParentTop="true"
     android:background="@drawable/main_background_layer_list"
-    android:gravity="bottom|center_horizontal"
-    android:paddingBottom="@dimen/spacing_xxxlarge"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.roostermornings.android.activity.MyAlarmsFragmentActivity"
-    tools:showIn="@layout/activity_new_audio">
+    android:orientation="vertical">
 
     <TextView
-        android:id="@+id/new_audio_time"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginBottom="@dimen/spacing_xxxlarge"
+        android:layout_marginLeft="@dimen/spacing_xlarge"
+        android:layout_marginRight="@dimen/spacing_xlarge"
+        android:layout_marginTop="@dimen/spacing_huge"
+        android:background="@drawable/rooster_new_audio_instructions_background"
         android:gravity="center"
-        android:text="00:00"
+        android:text="@string/new_audio_instructions"
         android:textColor="@color/white"
-        android:textSize="@dimen/text_huge" />
+        android:textSize="@dimen/text_large" />
+
 
     <RelativeLayout
-        android:id="@+id/new_audio_record_parent"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/new_audio_time"
-        android:layout_centerHorizontal="true"
-        android:visibility="visible"
-        android:gravity="center_horizontal">
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
 
+        android:gravity="bottom|center_horizontal"
+        android:paddingBottom="@dimen/spacing_xxxlarge"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:context="com.roostermornings.android.activity.MyAlarmsFragmentActivity"
+        tools:showIn="@layout/activity_new_audio">
 
-        <FrameLayout
-            android:id="@+id/new_audio_circle_outer"
-            android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/new_audio_time"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/rooster_record_audio_circle_outer">
+            android:layout_alignParentTop="true"
+            android:layout_marginBottom="@dimen/spacing_xxxlarge"
+            android:gravity="center"
+            android:text="00:00"
+            android:textColor="@color/white"
+            android:textSize="@dimen/text_huge" />
 
-            <ImageView
-                android:id="@+id/new_audio_start_stop"
+        <RelativeLayout
+            android:id="@+id/new_audio_record_parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/new_audio_time"
+            android:layout_centerHorizontal="true"
+            android:gravity="center_horizontal"
+            android:visibility="visible">
+
+
+            <FrameLayout
+                android:id="@+id/new_audio_circle_outer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:background="@drawable/rooster_record_audio_circle_inner_selectable"
-                android:clickable="true"
-                android:focusable="true" />
+                android:background="@drawable/rooster_record_audio_circle_outer">
 
-        </FrameLayout>
+                <ImageView
+                    android:id="@+id/new_audio_start_stop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/rooster_record_audio_circle_inner_selectable"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+            </FrameLayout>
+
+
+        </RelativeLayout>
+
+
+        <LinearLayout
+            android:id="@+id/new_audio_listen_parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/new_audio_time"
+            android:gravity="center_horizontal|center_vertical"
+            android:orientation="horizontal"
+            android:padding="@dimen/spacing_large"
+            android:visibility="gone">
+
+            <ImageButton
+                android:id="@+id/new_audio_delete"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginRight="@dimen/spacing_xxlarge"
+                android:background="@drawable/rooster_new_audio_delete_button"
+                android:clickable="true" />
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_gravity="center_horizontal|center_vertical"
+                android:gravity="center_horizontal|center_vertical">
+
+                <FrameLayout
+                    android:id="@+id/new_audio_listen_circle_outer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/rooster_listen_audio_circle">
+
+                    <ImageButton
+                        android:id="@+id/new_audio_listen"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_margin="15dp"
+                        android:clickable="true"
+                        android:background="@drawable/rooster_new_audio_play_button" />
+
+                </FrameLayout>
+
+            </RelativeLayout>
+
+            <ImageButton
+                android:id="@+id/new_audio_save"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginLeft="@dimen/spacing_xxlarge"
+                android:background="@drawable/rooster_new_audio_upload_button" />
+
+        </LinearLayout>
 
 
     </RelativeLayout>
 
-
-    <LinearLayout
-        android:id="@+id/new_audio_listen_parent"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/new_audio_time"
-        android:gravity="center_horizontal|center_vertical"
-        android:orientation="horizontal"
-        android:padding="@dimen/spacing_large"
-        android:visibility="gone">
-
-
-        <ImageView
-            android:id="@+id/new_audio_delete"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginRight="@dimen/spacing_xxlarge"
-            android:background="@drawable/selectable_icon"
-            android:clickable="true"
-            android:src="@drawable/ic_delete_white_24dp" />
-
-
-        <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_gravity="center_horizontal|center_vertical"
-            android:gravity="center_horizontal|center_vertical">
-
-            <FrameLayout
-                android:id="@+id/new_audio_listen_circle_outer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/rooster_listen_audio_circle">
-
-
-            <ImageView
-                android:id="@+id/new_audio_listen"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:layout_margin="10dp"
-                android:clickable="true"
-                android:src="@drawable/ic_play_arrow_white_24dp" />
-
-            </FrameLayout>
-
-        </RelativeLayout>
-
-        <ImageView
-            android:id="@+id/new_audio_save"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginLeft="@dimen/spacing_xxlarge"
-            android:background="@drawable/selectable_icon"
-            android:src="@drawable/ic_check_circle_white_24dp" />
-
-
-    </LinearLayout>
-
-
-</RelativeLayout>
+</LinearLayout>

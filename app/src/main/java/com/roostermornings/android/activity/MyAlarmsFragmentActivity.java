@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,6 +49,9 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     @BindView(R.id.toolbar_title)
     TextView toolbarTitle;
 
+    @BindView(R.id.home_my_alarms)
+    ImageButton buttonAddAlarm;
+
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
@@ -69,6 +73,8 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                 startActivity(new Intent(MyAlarmsFragmentActivity.this, NewAlarmFragmentActivity.class));
             }
         });
+
+        buttonAddAlarm.setBackgroundResource(R.drawable.rooster_button_bar_add_alarm_active);
 
         mMyAlarmsReference = FirebaseDatabase.getInstance().getReference()
                 .child("alarms").child(getFirebaseUser().getUid());

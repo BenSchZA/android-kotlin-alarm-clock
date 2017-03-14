@@ -105,7 +105,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
             return false;
         }
 
-        checkFirebaseConnection();
+        //checkFirebaseConnection(); #TODO - check why this is randomly failing
         return true;
     }
 
@@ -141,7 +141,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     protected void startHomeActivity() {
         //This clears the back stack when starting home activity, to stop back stack loop
         Intent homeIntent = new Intent(this, MyAlarmsFragmentActivity.class);
-        homeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(homeIntent);
     }
 
