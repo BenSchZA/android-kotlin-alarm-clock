@@ -164,47 +164,45 @@ public final class DeviceAlarmController {
         final Random rand = new Random();
         long setId = rand.nextLong();
 
-        //notifyUserAlarmTime(deviceAlarmList);
-
         for (DeviceAlarm deviceAlarm :
                 deviceAlarmList) {
             deviceAlarmTableManager.insertAlarm(deviceAlarm, setId);
         }
+
+        //Update alarm millis and setAlarm
         refreshAlarms(deviceAlarmTableManager.selectChanged());
+        //Notify user of time until next alarm, once alarm millis has been updated in db
+        notifyUserAlarmTime(deviceAlarmTableManager.getAlarmSet(setId));
+
         return setId;
     }
 
-//    private void notifyUserAlarmTime(List<DeviceAlarm> deviceAlarmList) {
-//        Calendar alarmCalendar = Calendar.getInstance();
-//        Calendar systemCalendar = Calendar.getInstance();
-//
-//        Long nextAlarmMillis;
-//        Long timeUntilNextAlarm;
-//        nextAlarmMillis = Long.MAX_VALUE;
-//        String nextAlarmTimeString;
-//
-//        for (DeviceAlarm deviceAlarm :
-//                deviceAlarmList) {
-//            if(deviceAlarm.getMillis() < nextAlarmMillis) nextAlarmMillis = deviceAlarm.getMillis();
-//        }
-//
-//        alarmCalendar.setTimeInMillis(nextAlarmMillis);
-//        timeUntilNextAlarm = alarmCalendar.getTimeInMillis() - systemCalendar.getTimeInMillis();
-//
-//        int seconds = (int) (milliseconds / 1000) % 60 ;
-//        int minutes = (int) ((milliseconds / (1000*60)) % 60);
-//        int hours   = (int) ((milliseconds / (1000*60*60)) % 24);
-//        int days =
-//
-//        //Notify user of time until next alarm
-//        if(alarmCalendar.get(Calendar.HOUR) > 24){
-//            nextAlarmTimeString = (new SimpleDateFormat("dd days hh hours mm minutes", Locale.US).format(new Date(timeUntilNextAlarm)));
-//        } else{
-//            nextAlarmTimeString = String.format("%s hours %s minutes", alarmCalendar.get(Calendar.HOUR), alarmCalendar.get(Calendar.MINUTE));
-//        }
-//
-//        Toast.makeText(context, "Alarm set for " + nextAlarmTimeString + " from now.", Toast.LENGTH_LONG).show();
-//    }
+    private void notifyUserAlarmTime(List<DeviceAlarm> deviceAlarmList) {
+        Calendar alarmCalendar = Calendar.getInstance();
+        Calendar systemCalendar = Calendar.getInstance();
+
+        Long nextAlarmMillis;
+        Long timeUntilNextAlarm;
+        nextAlarmMillis = Long.MAX_VALUE;
+        String nextAlarmTimeString;
+
+        for (DeviceAlarm deviceAlarm :
+                deviceAlarmList) {
+            if(deviceAlarm.getMillis() < nextAlarmMillis) nextAlarmMillis = deviceAlarm.getMillis();
+        }
+
+        alarmCalendar.setTimeInMillis(nextAlarmMillis);
+        timeUntilNextAlarm = alarmCalendar.getTimeInMillis() - systemCalendar.getTimeInMillis();
+
+        //Convert millis value to days,hours,mins until next alarm
+        int minutes = (int) ((timeUntilNextAlarm / (1000*60)) % 60);
+        int hours   = (int) ((timeUntilNextAlarm / (1000*60*60)) % 24);
+        int days = (int) (timeUntilNextAlarm / (1000*60*60*24));
+
+        //Notify user of time until next alarm
+        nextAlarmTimeString = String.format("%s days %s hours %s minutes", days, hours, minutes);
+        Toast.makeText(context, "Alarm set for " + nextAlarmTimeString + " from now.", Toast.LENGTH_LONG).show();
+    }
 
     public void deleteAlarmSet(Long setId) {
         List<DeviceAlarm> deviceAlarmList = deviceAlarmTableManager.getAlarmSet(setId);

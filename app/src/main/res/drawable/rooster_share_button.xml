@@ -9,19 +9,19 @@
         android:state_pressed="false"
         android:state_focused="false">
         <shape android:shape="rectangle">
-            <corners android:radius="20dip" />
+            <corners android:radius="24dip" />
             <solid android:color="@color/white_transparent" />
         </shape>
     </item>
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
-            <corners android:radius="20dip" />
+            <corners android:radius="24dip" />
             <solid android:color="@color/white_semi_transparent" />
         </shape>
     </item>
     <item android:state_focused="true">
         <shape android:shape="rectangle">
-            <corners android:radius="20dip" />
+            <corners android:radius="24dip" />
             <solid android:color="@color/white" />
         </shape>
     </item>
