@@ -8,6 +8,7 @@ package com.roostermornings.android.activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.support.annotation.LayoutRes;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -15,6 +16,12 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.roostermornings.android.R;
@@ -24,6 +31,9 @@ import com.roostermornings.android.fragment.FriendsInviteFragment3;
 import com.roostermornings.android.fragment.FriendsMyFragment1;
 import com.roostermornings.android.fragment.FriendsRequestFragment2;
 import com.roostermornings.android.util.FontsOverride;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -58,20 +68,38 @@ public class FriendsFragmentActivity extends BaseActivity implements
     @BindView(R.id.container)
     ViewPager mViewPager;
 
+    public FriendsFragmentActivity() {
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_friends);
 
         setSupportActionBar(toolbar);
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
-        // Set up the ViewPager with the sections adapter.
-        mViewPager.setAdapter(mSectionsPagerAdapter);
-
+        //Create a viewpager with fragments controlled by SectionsPagerAdapter
+        createViewPager(mViewPager);
         tabLayout.setupWithViewPager(mViewPager);
+        //Generate custom tab for tab layout
+        createTabIcons();
+
+        //Listen for change to mViewPager page display - used for toggling notifications
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                if(position == 1 && getTabNotification(position) == View.VISIBLE) setTabNotification(position, false);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+            }
+        });
 
         FontsOverride.changeTabsFont(getApplicationContext(), tabLayout, "fonts/Nunito/Nunito-Bold.ttf");
     }
@@ -92,47 +120,79 @@ public class FriendsFragmentActivity extends BaseActivity implements
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
+        private final List<Fragment> mFragmentList = new ArrayList<>();
+        private final List<String> mFragmentTitleList = new ArrayList<>();
+
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
         @Override
         public Fragment getItem(int position) {
-            Fragment fragment =null;
-            switch (position) {
-                case 0:
-                    fragment = Fragment.instantiate(getApplicationContext(), FriendsMyFragment1.class.getName());
-                    break;
-                case 1:
-                    fragment = Fragment.instantiate(getApplicationContext(), FriendsRequestFragment2.class.getName());
-                    break;
-                case 2:
-                    fragment = Fragment.instantiate(getApplicationContext(), FriendsInviteFragment3.class.getName());
-                    break;
-                default:
-                    break;
-            }
-            return fragment;
+            return mFragmentList.get(position);
         }
 
         @Override
         public int getCount() {
-            // Show 3 total pages.
-            return 3;
+            return mFragmentList.size();
+        }
+
+        public void addFrag(Fragment fragment, String title) {
+            mFragmentList.add(fragment);
+            mFragmentTitleList.add(title);
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case 0:
-                    return "FRIENDS";
-                case 1:
-                    return "REQUESTS";
-                case 2:
-                    return "INVITE";
-            }
-            return null;
+            return mFragmentTitleList.get(position);
         }
+    }
+
+    private void createViewPager(ViewPager mViewPager) {
+
+        // Create the adapter that will return a fragment for each of the three
+        // primary sections of the activity.
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+
+        mSectionsPagerAdapter.addFrag(Fragment.instantiate(getApplicationContext(), FriendsMyFragment1.class.getName()), "FRIENDS");
+        mSectionsPagerAdapter.addFrag(Fragment.instantiate(getApplicationContext(), FriendsRequestFragment2.class.getName()), "REQUESTS");
+        mSectionsPagerAdapter.addFrag(Fragment.instantiate(getApplicationContext(), FriendsInviteFragment3.class.getName()), "INVITE");
+
+        // Set up the ViewPager with the sections adapter.
+        mViewPager.setAdapter(mSectionsPagerAdapter);
+    }
+
+    private void createTabIcons() {
+
+        setTabLayout(0, "FRIENDS", false);
+        setTabLayout(1, "REQUESTS", false);
+        setTabLayout(2, "INVITE", false);
+    }
+
+    //Create custom tab layout
+    public void setTabLayout(int position, String title, boolean notification) {
+        RelativeLayout relativeLayout = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.custom_friends_tab, null);
+        TextView tabText = (TextView) relativeLayout.getChildAt(0);
+        tabText.setText(title);
+        tabLayout.getTabAt(position).setCustomView(relativeLayout);
+        setTabNotification(position, false);
+    }
+
+    //Set current tab notification
+    public void setTabNotification(int position, boolean notification) {
+        TabLayout.Tab tab = tabLayout.getTabAt(position);
+        RelativeLayout relativeLayout = (RelativeLayout) tab.getCustomView();
+        ImageView imageNotification = (ImageView) tab.getCustomView().findViewById(R.id.tab_notification);
+        if(notification) imageNotification.setVisibility(View.VISIBLE);
+        else imageNotification.setVisibility(View.GONE);
+        tab.setCustomView(relativeLayout);
+    }
+
+    public int getTabNotification(int position) {
+        TabLayout.Tab tab = tabLayout.getTabAt(position);
+        RelativeLayout relativeLayout = (RelativeLayout) tab.getCustomView();
+        ImageView imageNotification = (ImageView) tab.getCustomView().findViewById(R.id.tab_notification);
+        return imageNotification.getVisibility();
     }
 
     public void onFragmentInteraction(Uri uri){
