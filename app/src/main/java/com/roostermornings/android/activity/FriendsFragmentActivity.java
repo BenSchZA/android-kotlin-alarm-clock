@@ -21,10 +21,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.Friend;
@@ -66,6 +68,8 @@ public class FriendsFragmentActivity extends BaseActivity implements
     @BindView(R.id.home_friends)
     ImageButton buttonMyFriends;
 
+    @BindView(R.id.button_bar)
+    LinearLayout buttonBarLayout;
 
     /**
      * The {@link ViewPager} that will host the section contents.
@@ -90,6 +94,12 @@ public class FriendsFragmentActivity extends BaseActivity implements
         //Generate custom tab for tab layout
         createTabIcons();
 
+        //If notifications waiting, display new friend request notification
+        if(((BaseApplication)getApplication()).getNotificationFlag() > 0) {
+            setTabNotification(1, true);
+            setButtonBarNotification(true);
+        }
+
         //Listen for change to mViewPager page display - used for toggling notifications
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -98,7 +108,11 @@ public class FriendsFragmentActivity extends BaseActivity implements
 
             @Override
             public void onPageSelected(int position) {
-                if(position == 1 && getTabNotification(position) == View.VISIBLE) setTabNotification(position, false);
+                if(position == 1) {
+                    setTabNotification(position, false);
+                    setButtonBarNotification(false);
+                    ((BaseApplication)getApplication()).setNotificationFlag(0);
+                }
             }
 
             @Override
@@ -171,34 +185,38 @@ public class FriendsFragmentActivity extends BaseActivity implements
 
     private void createTabIcons() {
 
-        setTabLayout(0, "FRIENDS", false);
-        setTabLayout(1, "REQUESTS", false);
-        setTabLayout(2, "INVITE", false);
+        setTabLayout(0, "FRIENDS");
+        setTabLayout(1, "REQUESTS");
+        setTabLayout(2, "INVITE");
     }
 
     //Create custom tab layout
-    public void setTabLayout(int position, String title, boolean notification) {
+    public void setTabLayout(int position, String title) {
         RelativeLayout relativeLayout = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.custom_friends_tab, null);
         TextView tabText = (TextView) relativeLayout.getChildAt(0);
         tabText.setText(title);
         tabLayout.getTabAt(position).setCustomView(relativeLayout);
-        setTabNotification(position, false);
     }
 
     //Set current tab notification
     public void setTabNotification(int position, boolean notification) {
         TabLayout.Tab tab = tabLayout.getTabAt(position);
         RelativeLayout relativeLayout = (RelativeLayout) tab.getCustomView();
-        ImageView imageNotification = (ImageView) tab.getCustomView().findViewById(R.id.tab_notification);
-        if(notification) imageNotification.setVisibility(View.VISIBLE);
-        else imageNotification.setVisibility(View.GONE);
+        ImageView tabNotification = (ImageView) tab.getCustomView().findViewById(R.id.notification);
+        if(notification) tabNotification.setVisibility(View.VISIBLE);
+        else tabNotification.setVisibility(View.GONE);
         tab.setCustomView(relativeLayout);
+    }
+
+    public void setButtonBarNotification(boolean notification) {
+        ImageView buttonBarNotification = (ImageView) buttonBarLayout.findViewById(R.id.notification);
+        if(notification) buttonBarNotification.setVisibility(View.VISIBLE);
+        else buttonBarNotification.setVisibility(View.GONE);
     }
 
     public int getTabNotification(int position) {
         TabLayout.Tab tab = tabLayout.getTabAt(position);
-        RelativeLayout relativeLayout = (RelativeLayout) tab.getCustomView();
-        ImageView imageNotification = (ImageView) tab.getCustomView().findViewById(R.id.tab_notification);
+        ImageView imageNotification = (ImageView) tab.getCustomView().findViewById(R.id.notification);
         return imageNotification.getVisibility();
     }
 

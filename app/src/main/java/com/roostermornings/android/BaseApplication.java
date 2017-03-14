@@ -5,11 +5,24 @@
 
 package com.roostermornings.android;
 
+import android.util.Log;
+import android.widget.Toast;
+
 import com.crashlytics.android.Crashlytics;
 import com.facebook.stetho.Stetho;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.roostermornings.android.activity.FriendsFragmentActivity;
+import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.dagger.DaggerRoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationModule;
+import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.node_api.IHTTPClient;
 import com.roostermornings.android.util.FontsOverride;
 
@@ -24,6 +37,10 @@ public class BaseApplication extends android.app.Application {
     RoosterApplicationComponent roosterApplicationComponent;
     public Retrofit mRetrofit;
     public IHTTPClient mAPIService;
+    protected FirebaseAuth mAuth;
+    protected DatabaseReference mDatabase;
+
+    private int notificationFlag;
 
     @Override
     public void onCreate() {
@@ -59,14 +76,55 @@ public class BaseApplication extends android.app.Application {
                 .build();
 
         mAPIService = mRetrofit.create(IHTTPClient.class);
+
+        //Start Firebase listeners applicable to all activities - primarily to update notifications
+        startGlobalFirebaseListeners();
     }
 
     public RoosterApplicationComponent getRoosterApplicationComponent() {
         return roosterApplicationComponent;
     }
 
-    public IHTTPClient getAPIService(){
+    public IHTTPClient getAPIService() {
         return mAPIService;
     }
 
+    public int getNotificationFlag() {
+        return notificationFlag;
+    }
+
+    public void setNotificationFlag(int notificationFlag) {
+        this.notificationFlag = notificationFlag;
+    }
+
+    private void startGlobalFirebaseListeners() {
+
+        //***************************************************************************************************
+        //Listen for changes to Firebase user friend requests, display notification
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        DatabaseReference mRequestsReference = mDatabase
+                .child("friend_requests_received").child(getFirebaseUser().getUid());
+
+        ValueEventListener friendsListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                    //Set notification flag
+                    setNotificationFlag(notificationFlag + 1);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        };
+        mRequestsReference.addValueEventListener(friendsListener);
+        //***************************************************************************************************
+    }
+
+    public FirebaseUser getFirebaseUser() {
+        if (mAuth == null) mAuth = FirebaseAuth.getInstance();
+        return mAuth.getCurrentUser();
+    }
 }
