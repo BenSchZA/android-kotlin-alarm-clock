@@ -75,7 +75,8 @@ public class SplashActivity extends BaseActivity {
     private void navigateToActivity(Class<? extends Activity> activityClass) {
         Intent i = new Intent(SplashActivity.this, activityClass);
         finish();
-        startActivity(i);
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);startActivity(i);
+
     }
 
 }

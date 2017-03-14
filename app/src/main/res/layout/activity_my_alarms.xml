@@ -19,36 +19,7 @@
         android:theme="@style/AppTheme.AppBarOverlay"
         app:elevation="0dp">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:layout_gravity="center"
-            android:background="@color/rooster_blue"
-            app:popupTheme="@style/AppTheme.PopupOverlay"
-            android:weightSum="1"
-            app:contentInsetLeft="0dp"
-            app:contentInsetStart="0dp">
-
-            <!--TODO: center horizontally-->
-
-                <TextView
-                    android:id="@+id/toolbar_title"
-                    android:textSize="@dimen/text_large"
-                    android:textColor="@color/white"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center" />
-
-                <!--<ImageView-->
-                    <!--android:layout_width="wrap_content"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:paddingRight="@dimen/spacing_large"-->
-                    <!--android:layout_gravity="right"-->
-                    <!--android:gravity="center_vertical"-->
-                    <!--android:background="@drawable/ic_add_white_24dp"/>-->
-
-        </android.support.v7.widget.Toolbar>
+        <include layout="@layout/partial_toolbar"/>
 
     </android.support.design.widget.AppBarLayout>
 
@@ -62,6 +33,7 @@
         android:layout_marginBottom="70dp"
         android:layout_marginRight="@dimen/fab_margin"
         android:src="@drawable/ic_add_white_24dp"
+        android:backgroundTint="@color/grey"
         app:borderWidth="0dp" />
 
 </android.support.design.widget.CoordinatorLayout>

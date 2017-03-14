@@ -132,6 +132,14 @@ public class NewAlarmFragment2 extends BaseFragment {
         mListener = null;
     }
 
+    @Override
+    public void setMenuVisibility(final boolean visible) {
+        super.setMenuVisibility(visible);
+        if (visible) {
+            if (mListener != null) mListener.setNextButtonCaption(getString(R.string.save));
+        }
+    }
+
     public void setSelectedChannel(Channel channel) {
         Alarm alarm = mListener.getAlarmDetails();
         alarm.setChannel(new AlarmChannel(channel.getName(), channel.getUid()));

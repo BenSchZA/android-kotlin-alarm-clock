@@ -49,6 +49,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
     Calendar mCalendar = Calendar.getInstance();
     private Fragment mFragment1;
     private Fragment mFragment2;
+    private Menu menu;
     private DeviceAlarmController deviceAlarmController = new DeviceAlarmController(this);
 
 
@@ -79,8 +80,6 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
 
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        toolbarTitle.setText(getString(R.string.create_alarm));
-
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
@@ -90,6 +89,11 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
         Bundle extras = getIntent().getExtras();
         if (extras != null && extras.containsKey("alarmId")) {
             mEditAlarmId = extras.getString("alarmId", "");
+        }
+        if (mEditAlarmId.length() == 0) {
+            toolbarTitle.setText(getString(R.string.create_alarm));
+        } else {
+            toolbarTitle.setText(getString(R.string.edit_alarm));
         }
 
     }
@@ -107,6 +111,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_new_alarm, menu);
+        this.menu = menu;
         return true;
     }
 
@@ -307,5 +312,11 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
         alarmReference.addListenerForSingleValueEvent(alarmListener);
 
 
+    }
+
+    @Override
+    public void setNextButtonCaption(String text) {
+        MenuItem itemNext = menu.findItem(R.id.action_next);
+        itemNext.setTitle(text);
     }
 }

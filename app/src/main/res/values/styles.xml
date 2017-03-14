@@ -18,6 +18,8 @@
 
         <!--Actually overridden to Nunito-Bold-->
         <item name="android:typeface">monospace</item>
+
+        <item name="android:windowActivityTransitions">true</item>
     </style>
 
     <!--Override action bar titles set in activity-->
@@ -101,6 +103,11 @@
 
     <style name="FullscreenActionBarStyle" parent="Widget.AppCompat.ActionBar">
         <item name="android:background">@color/black_overlay</item>
+    </style>
+
+    <style name="Fade">
+        <item name="android:windowEnterAnimation">@anim/fade_in</item>
+        <item name="android:windowExitAnimation">@anim/fade_out</item>
     </style>
 
 </resources>

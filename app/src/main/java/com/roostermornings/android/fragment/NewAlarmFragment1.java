@@ -28,7 +28,7 @@ import butterknife.OnCheckedChanged;
 import butterknife.OnClick;
 
 
-public class NewAlarmFragment1 extends BaseFragment {
+public class NewAlarmFragment1 extends BaseFragment{
 
     @BindView(R.id.new_alarm_time)
     TextView textViewAlarmTime;
@@ -138,6 +138,14 @@ public class NewAlarmFragment1 extends BaseFragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void setMenuVisibility(final boolean visible) {
+        super.setMenuVisibility(visible);
+        if (visible) {
+            if (mListener != null) mListener.setNextButtonCaption(getString(R.string.next));
+        }
     }
 
     protected void setAlarmTime(int hour, int minute) {

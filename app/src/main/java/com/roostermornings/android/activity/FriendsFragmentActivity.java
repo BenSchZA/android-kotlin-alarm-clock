@@ -8,14 +8,15 @@ package com.roostermornings.android.activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.annotation.LayoutRes;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
+import android.widget.ImageButton;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -62,6 +63,10 @@ public class FriendsFragmentActivity extends BaseActivity implements
     @BindView(R.id.tabs)
     TabLayout tabLayout;
 
+    @BindView(R.id.home_friends)
+    ImageButton buttonMyFriends;
+
+
     /**
      * The {@link ViewPager} that will host the section contents.
      */
@@ -102,6 +107,8 @@ public class FriendsFragmentActivity extends BaseActivity implements
         });
 
         FontsOverride.changeTabsFont(getApplicationContext(), tabLayout, "fonts/Nunito/Nunito-Bold.ttf");
+
+        buttonMyFriends.setBackgroundResource(R.drawable.rooster_button_bar_friends_active);
     }
 
     @OnClick(R.id.home_record_audio)
