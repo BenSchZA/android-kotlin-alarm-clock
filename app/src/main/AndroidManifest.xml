@@ -66,9 +66,11 @@
             android:name="io.fabric.ApiKey"
             android:value="207f8c17b3eb2499afa66f49b1502cae676c5ca2" />
 
+        <!--windowSoftInputMode ensures that text entry for mobile number is always visible-->
         <activity
             android:name=".activity.IntroFragmentActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
+            android:windowSoftInputMode="adjustPan"
             android:theme="@style/AppTheme.NoActionBarIntro"
             android:screenOrientation="portrait"/>
         <activity
