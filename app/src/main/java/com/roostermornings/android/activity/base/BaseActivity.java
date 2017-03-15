@@ -55,6 +55,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     protected DatabaseReference mDatabase;
 
     public static User mCurrentUser;
+    private int notificationFlag;
 
     @Inject
     protected SharedPreferences sharedPreferences;
@@ -81,6 +82,8 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     // User is signed in
+                    //Start Firebase listeners applicable to all activities - primarily to update notifications
+                    startGlobalFirebaseListeners();
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                 } else {
                     // User is signed out
@@ -288,5 +291,39 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
                 // result of the request.
             }
         }
+    }
+
+    public int getNotificationFlag() {
+        return notificationFlag;
+    }
+
+    public void setNotificationFlag(int notificationFlag) {
+        this.notificationFlag = notificationFlag;
+    }
+
+    private void startGlobalFirebaseListeners() {
+
+        //***************************************************************************************************
+        //Listen for changes to Firebase user friend requests, display notification
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        DatabaseReference mRequestsReference = mDatabase
+                .child("friend_requests_received").child(getFirebaseUser().getUid());
+
+        ValueEventListener friendsListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                    //Set notification flag
+                    setNotificationFlag(notificationFlag + 1);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        };
+        mRequestsReference.addValueEventListener(friendsListener);
+        //***************************************************************************************************
     }
 }

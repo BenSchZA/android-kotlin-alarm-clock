@@ -90,7 +90,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         mMyAlarmsReference.keepSynced(true);
 
         //Display notification for new friend request
-        if(((BaseApplication)getApplication()).getNotificationFlag() > 0) setButtonBarNotification(true);
+        if(getNotificationFlag() > 0) setButtonBarNotification(true);
 
         mAdapter = new MyAlarmsListAdapter(mAlarms, MyAlarmsFragmentActivity.this);
 

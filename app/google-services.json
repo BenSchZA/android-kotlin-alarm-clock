@@ -15,12 +15,11 @@
       },
       "oauth_client": [
         {
-          //"client_id": "653860500909-rjpquo0g7omvgf2947p88ud240drl1ba.apps.googleusercontent.com",
-          "client_id": "653860500909-mk72vn0st1aeipt9olp4tmknnh139dsh.apps.googleusercontent.com",
+          "client_id": "653860500909-rjpquo0g7omvgf2947p88ud240drl1ba.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.roostermornings.roostermornings",
-            "certificate_hash": "6EC4C2419EB4A6AE9D3268DF17A6E9F7B5E829C2"
+            "certificate_hash": "6ec4c2419eb4a6ae9d3268df17a6e9f7b5e829c2"
           }
         },
         {
@@ -72,7 +71,7 @@
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.steven.audiorecordtest",
-            "certificate_hash": "ECC68771B312441A0E9C0280445BD322BB8F55F9"
+            "certificate_hash": "ecc68771b312441a0e9c0280445bd322bb8f55f9"
           }
         },
         {
@@ -155,7 +154,7 @@
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.steven.alarmtest",
-            "certificate_hash": "ECC68771B312441A0E9C0280445BD322BB8F55F9"
+            "certificate_hash": "ecc68771b312441a0e9c0280445bd322bb8f55f9"
           }
         },
         {
@@ -203,11 +202,19 @@
       },
       "oauth_client": [
         {
+          "client_id": "653860500909-j2ogs5ivvjvqkaumbhcobmjvpu0nas7h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.roostermornings.android",
+            "certificate_hash": "aced97d933eeaeb83eae28b6894b59616a8e0da3"
+          }
+        },
+        {
           "client_id": "653860500909-9etljcn5sathf39dg2bom89v44c7n3qm.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.roostermornings.android",
-            "certificate_hash": "ECC68771B312441A0E9C0280445BD322BB8F55F9"
+            "certificate_hash": "ecc68771b312441a0e9c0280445bd322bb8f55f9"
           }
         },
         {

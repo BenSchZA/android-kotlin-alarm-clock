@@ -40,8 +40,6 @@ public class BaseApplication extends android.app.Application {
     protected FirebaseAuth mAuth;
     protected DatabaseReference mDatabase;
 
-    private int notificationFlag;
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -79,9 +77,6 @@ public class BaseApplication extends android.app.Application {
 
         //set database persistence to keep offline alarm edits synced
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-
-        //Start Firebase listeners applicable to all activities - primarily to update notifications
-        startGlobalFirebaseListeners();
     }
 
     public RoosterApplicationComponent getRoosterApplicationComponent() {
@@ -90,40 +85,6 @@ public class BaseApplication extends android.app.Application {
 
     public IHTTPClient getAPIService() {
         return mAPIService;
-    }
-
-    public int getNotificationFlag() {
-        return notificationFlag;
-    }
-
-    public void setNotificationFlag(int notificationFlag) {
-        this.notificationFlag = notificationFlag;
-    }
-
-    private void startGlobalFirebaseListeners() {
-
-        //***************************************************************************************************
-        //Listen for changes to Firebase user friend requests, display notification
-        mDatabase = FirebaseDatabase.getInstance().getReference();
-
-        DatabaseReference mRequestsReference = mDatabase
-                .child("friend_requests_received").child(getFirebaseUser().getUid());
-
-        ValueEventListener friendsListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    //Set notification flag
-                    setNotificationFlag(notificationFlag + 1);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
-        };
-        mRequestsReference.addValueEventListener(friendsListener);
-        //***************************************************************************************************
     }
 
     public FirebaseUser getFirebaseUser() {
