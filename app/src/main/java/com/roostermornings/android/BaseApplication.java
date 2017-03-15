@@ -77,6 +77,9 @@ public class BaseApplication extends android.app.Application {
 
         mAPIService = mRetrofit.create(IHTTPClient.class);
 
+        //set database persistence to keep offline alarm edits synced
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+
         //Start Firebase listeners applicable to all activities - primarily to update notifications
         startGlobalFirebaseListeners();
     }

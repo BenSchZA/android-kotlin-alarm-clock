@@ -26,6 +26,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
@@ -59,6 +61,11 @@ public class FriendsFragmentActivity extends BaseActivity implements
      */
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
+    private DatabaseReference mFriendRequestsReceivedReference;
+    private DatabaseReference mFriendRequestsSentReference;
+    private DatabaseReference mCurrentUserReference;
+
+
     @BindView(R.id.toolbar)
     Toolbar toolbar;
 
@@ -85,6 +92,20 @@ public class FriendsFragmentActivity extends BaseActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_friends);
+
+        //Keep local and Firebase alarm dbs synced, and enable offline persistence
+        mFriendRequestsReceivedReference = FirebaseDatabase.getInstance().getReference()
+                .child("friend_requests_received").child(getFirebaseUser().getUid());
+
+        mFriendRequestsSentReference = FirebaseDatabase.getInstance().getReference()
+                .child("friend_requests_sent").child(getFirebaseUser().getUid());
+
+        mCurrentUserReference = FirebaseDatabase.getInstance().getReference()
+                .child("users").child(getFirebaseUser().getUid());
+
+        mFriendRequestsReceivedReference.keepSynced(true);
+        mFriendRequestsSentReference.keepSynced(true);
+        mCurrentUserReference.keepSynced(true);
 
         setSupportActionBar(toolbar);
 
@@ -252,8 +273,6 @@ public class FriendsFragmentActivity extends BaseActivity implements
     //Send invite to Rooster user from contact list
     public void inviteUser(Friend inviteFriend) {
 
-        if (!checkInternetConnection()) return;
-
         String inviteUrl = String.format("friend_requests_received/%s/%s", inviteFriend.getUid(), mCurrentUser.getUid());
         String currentUserUrl = String.format("friend_requests_sent/%s/%s", mCurrentUser.getUid(), inviteFriend.getUid());
 
@@ -270,8 +289,6 @@ public class FriendsFragmentActivity extends BaseActivity implements
     //Delete friend from Firebase user friend list
     public void deleteFriend(Friend deleteFriend) {
 
-        if (!checkInternetConnection()) return;
-
         String currentUserUrl = String.format("users/%s/friends/%s", mCurrentUser.getUid(), deleteFriend.getUid());
         String friendUserUrl = String.format("users/%s/friends/%s", deleteFriend.getUid(), mCurrentUser.getUid());
 
@@ -282,8 +299,6 @@ public class FriendsFragmentActivity extends BaseActivity implements
 
     //Accept friend request and update Firebase DB
     public void acceptFriendRequest(Friend acceptFriend) {
-
-        if (!checkInternetConnection()) return;
 
         String currentUserUrl = String.format("users/%s/friends/%s", mCurrentUser.getUid(), acceptFriend.getUid());
         String friendUserUrl = String.format("users/%s/friends/%s", acceptFriend.getUid(), mCurrentUser.getUid());
@@ -306,8 +321,6 @@ public class FriendsFragmentActivity extends BaseActivity implements
     }
 
     public void rejectFriendRequest(Friend rejectFriend) {
-
-        if (!checkInternetConnection()) return;
 
         String receivedUrl = String.format("friend_requests_received/%s/%s", mCurrentUser.getUid(), rejectFriend.getUid());
         String sentUrl = String.format("friend_requests_sent/%s/%s", rejectFriend.getUid(), mCurrentUser.getUid());
