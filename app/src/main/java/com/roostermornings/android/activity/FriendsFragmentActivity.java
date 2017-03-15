@@ -116,7 +116,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
         createTabIcons();
 
         //If notifications waiting, display new friend request notification
-        if(((BaseApplication)getApplication()).getNotificationFlag() > 0) {
+        if(getNotificationFlag() > 0) {
             setTabNotification(1, true);
             setButtonBarNotification(true);
         }
@@ -132,7 +132,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
                 if(position == 1) {
                     setTabNotification(position, false);
                     setButtonBarNotification(false);
-                    ((BaseApplication)getApplication()).setNotificationFlag(0);
+                    setNotificationFlag(0);
                 }
             }
 
