@@ -64,7 +64,7 @@
             android:name="io.fabric.ApiKey"
             android:value="207f8c17b3eb2499afa66f49b1502cae676c5ca2" />
 
-        <!-- windowSoftInputMode ensures that text entry for mobile number is always visible -->
+        <!--windowSoftInputMode ensures that text entry for mobile number is always visible-->
         <activity
             android:name=".activity.IntroFragmentActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -88,7 +88,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/my_alarms"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".activity.NewAlarmFragmentActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -119,6 +119,18 @@
         <service
             android:name=".background.BackgroundTaskIntentService"
             android:exported="false" />
+
+        <service android:name=".util.RoosterFirebaseMessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <service android:name=".util.RoosterFirebaseInstanceIdService">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+            </intent-filter>
+        </service>
 
         <activity
             android:name=".activity.FriendsFragmentActivity"
