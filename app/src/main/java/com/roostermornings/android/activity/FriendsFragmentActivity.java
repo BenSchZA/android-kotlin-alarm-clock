@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.LayoutRes;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -16,8 +17,18 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.widget.ImageButton;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.Friend;
@@ -25,6 +36,9 @@ import com.roostermornings.android.fragment.FriendsInviteFragment3;
 import com.roostermornings.android.fragment.FriendsMyFragment1;
 import com.roostermornings.android.fragment.FriendsRequestFragment2;
 import com.roostermornings.android.util.FontsOverride;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -47,6 +61,11 @@ public class FriendsFragmentActivity extends BaseActivity implements
      */
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
+    private DatabaseReference mFriendRequestsReceivedReference;
+    private DatabaseReference mFriendRequestsSentReference;
+    private DatabaseReference mCurrentUserReference;
+
+
     @BindView(R.id.toolbar)
     Toolbar toolbar;
 
@@ -56,6 +75,8 @@ public class FriendsFragmentActivity extends BaseActivity implements
     @BindView(R.id.home_friends)
     ImageButton buttonMyFriends;
 
+    @BindView(R.id.button_bar)
+    LinearLayout buttonBarLayout;
 
     /**
      * The {@link ViewPager} that will host the section contents.
@@ -63,20 +84,62 @@ public class FriendsFragmentActivity extends BaseActivity implements
     @BindView(R.id.container)
     ViewPager mViewPager;
 
+    public FriendsFragmentActivity() {
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_friends);
 
+        //Keep local and Firebase alarm dbs synced, and enable offline persistence
+        mFriendRequestsReceivedReference = FirebaseDatabase.getInstance().getReference()
+                .child("friend_requests_received").child(getFirebaseUser().getUid());
+
+        mFriendRequestsSentReference = FirebaseDatabase.getInstance().getReference()
+                .child("friend_requests_sent").child(getFirebaseUser().getUid());
+
+        mCurrentUserReference = FirebaseDatabase.getInstance().getReference()
+                .child("users").child(getFirebaseUser().getUid());
+
+        mFriendRequestsReceivedReference.keepSynced(true);
+        mFriendRequestsSentReference.keepSynced(true);
+        mCurrentUserReference.keepSynced(true);
+
         setSupportActionBar(toolbar);
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
-        // Set up the ViewPager with the sections adapter.
-        mViewPager.setAdapter(mSectionsPagerAdapter);
-
+        //Create a viewpager with fragments controlled by SectionsPagerAdapter
+        createViewPager(mViewPager);
         tabLayout.setupWithViewPager(mViewPager);
+        //Generate custom tab for tab layout
+        createTabIcons();
+
+        //If notifications waiting, display new friend request notification
+        if(getNotificationFlag() > 0) {
+            setTabNotification(1, true);
+            setButtonBarNotification(true);
+        }
+
+        //Listen for change to mViewPager page display - used for toggling notifications
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                if(position == 1) {
+                    setTabNotification(position, false);
+                    setButtonBarNotification(false);
+                    setNotificationFlag(0);
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+            }
+        });
 
         FontsOverride.changeTabsFont(getApplicationContext(), tabLayout, "fonts/Nunito/Nunito-Bold.ttf");
 
@@ -99,47 +162,83 @@ public class FriendsFragmentActivity extends BaseActivity implements
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
+        private final List<Fragment> mFragmentList = new ArrayList<>();
+        private final List<String> mFragmentTitleList = new ArrayList<>();
+
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
         @Override
         public Fragment getItem(int position) {
-            Fragment fragment =null;
-            switch (position) {
-                case 0:
-                    fragment = Fragment.instantiate(getApplicationContext(), FriendsMyFragment1.class.getName());
-                    break;
-                case 1:
-                    fragment = Fragment.instantiate(getApplicationContext(), FriendsRequestFragment2.class.getName());
-                    break;
-                case 2:
-                    fragment = Fragment.instantiate(getApplicationContext(), FriendsInviteFragment3.class.getName());
-                    break;
-                default:
-                    break;
-            }
-            return fragment;
+            return mFragmentList.get(position);
         }
 
         @Override
         public int getCount() {
-            // Show 3 total pages.
-            return 3;
+            return mFragmentList.size();
+        }
+
+        public void addFrag(Fragment fragment, String title) {
+            mFragmentList.add(fragment);
+            mFragmentTitleList.add(title);
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case 0:
-                    return "FRIENDS";
-                case 1:
-                    return "REQUESTS";
-                case 2:
-                    return "INVITE";
-            }
-            return null;
+            return mFragmentTitleList.get(position);
         }
+    }
+
+    private void createViewPager(ViewPager mViewPager) {
+
+        // Create the adapter that will return a fragment for each of the three
+        // primary sections of the activity.
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+
+        mSectionsPagerAdapter.addFrag(Fragment.instantiate(getApplicationContext(), FriendsMyFragment1.class.getName()), "FRIENDS");
+        mSectionsPagerAdapter.addFrag(Fragment.instantiate(getApplicationContext(), FriendsRequestFragment2.class.getName()), "REQUESTS");
+        mSectionsPagerAdapter.addFrag(Fragment.instantiate(getApplicationContext(), FriendsInviteFragment3.class.getName()), "INVITE");
+
+        // Set up the ViewPager with the sections adapter.
+        mViewPager.setAdapter(mSectionsPagerAdapter);
+    }
+
+    private void createTabIcons() {
+
+        setTabLayout(0, "FRIENDS");
+        setTabLayout(1, "REQUESTS");
+        setTabLayout(2, "INVITE");
+    }
+
+    //Create custom tab layout
+    public void setTabLayout(int position, String title) {
+        RelativeLayout relativeLayout = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.custom_friends_tab, null);
+        TextView tabText = (TextView) relativeLayout.getChildAt(0);
+        tabText.setText(title);
+        tabLayout.getTabAt(position).setCustomView(relativeLayout);
+    }
+
+    //Set current tab notification
+    public void setTabNotification(int position, boolean notification) {
+        TabLayout.Tab tab = tabLayout.getTabAt(position);
+        RelativeLayout relativeLayout = (RelativeLayout) tab.getCustomView();
+        ImageView tabNotification = (ImageView) tab.getCustomView().findViewById(R.id.notification);
+        if(notification) tabNotification.setVisibility(View.VISIBLE);
+        else tabNotification.setVisibility(View.GONE);
+        tab.setCustomView(relativeLayout);
+    }
+
+    public void setButtonBarNotification(boolean notification) {
+        ImageView buttonBarNotification = (ImageView) buttonBarLayout.findViewById(R.id.notification);
+        if(notification) buttonBarNotification.setVisibility(View.VISIBLE);
+        else buttonBarNotification.setVisibility(View.GONE);
+    }
+
+    public int getTabNotification(int position) {
+        TabLayout.Tab tab = tabLayout.getTabAt(position);
+        ImageView imageNotification = (ImageView) tab.getCustomView().findViewById(R.id.notification);
+        return imageNotification.getVisibility();
     }
 
     public void onFragmentInteraction(Uri uri){
@@ -174,8 +273,6 @@ public class FriendsFragmentActivity extends BaseActivity implements
     //Send invite to Rooster user from contact list
     public void inviteUser(Friend inviteFriend) {
 
-        if (!checkInternetConnection()) return;
-
         String inviteUrl = String.format("friend_requests_received/%s/%s", inviteFriend.getUid(), mCurrentUser.getUid());
         String currentUserUrl = String.format("friend_requests_sent/%s/%s", mCurrentUser.getUid(), inviteFriend.getUid());
 
@@ -192,8 +289,6 @@ public class FriendsFragmentActivity extends BaseActivity implements
     //Delete friend from Firebase user friend list
     public void deleteFriend(Friend deleteFriend) {
 
-        if (!checkInternetConnection()) return;
-
         String currentUserUrl = String.format("users/%s/friends/%s", mCurrentUser.getUid(), deleteFriend.getUid());
         String friendUserUrl = String.format("users/%s/friends/%s", deleteFriend.getUid(), mCurrentUser.getUid());
 
@@ -204,8 +299,6 @@ public class FriendsFragmentActivity extends BaseActivity implements
 
     //Accept friend request and update Firebase DB
     public void acceptFriendRequest(Friend acceptFriend) {
-
-        if (!checkInternetConnection()) return;
 
         String currentUserUrl = String.format("users/%s/friends/%s", mCurrentUser.getUid(), acceptFriend.getUid());
         String friendUserUrl = String.format("users/%s/friends/%s", acceptFriend.getUid(), mCurrentUser.getUid());
@@ -228,8 +321,6 @@ public class FriendsFragmentActivity extends BaseActivity implements
     }
 
     public void rejectFriendRequest(Friend rejectFriend) {
-
-        if (!checkInternetConnection()) return;
 
         String receivedUrl = String.format("friend_requests_received/%s/%s", mCurrentUser.getUid(), rejectFriend.getUid());
         String sentUrl = String.format("friend_requests_sent/%s/%s", rejectFriend.getUid(), mCurrentUser.getUid());
