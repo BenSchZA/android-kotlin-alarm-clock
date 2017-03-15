@@ -77,7 +77,6 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!checkInternetConnection()) return;
                 startActivity(new Intent(MyAlarmsFragmentActivity.this, NewAlarmFragmentActivity.class));
             }
         });
@@ -86,6 +85,9 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
         mMyAlarmsReference = FirebaseDatabase.getInstance().getReference()
                 .child("alarms").child(getFirebaseUser().getUid());
+
+        //Keep local and Firebase alarm dbs synced, and enable offline persistence
+        mMyAlarmsReference.keepSynced(true);
 
         //Display notification for new friend request
         if(((BaseApplication)getApplication()).getNotificationFlag() > 0) setButtonBarNotification(true);
@@ -153,12 +155,10 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
     @OnClick(R.id.home_friends)
     public void manageFriends() {
-        if (!checkInternetConnection()) return;
         startActivity(new Intent(MyAlarmsFragmentActivity.this, FriendsFragmentActivity.class));
     }
 
     public void deleteAlarm(String setId, String alarmId) {
-        if (!checkInternetConnection()) return;
         DeviceAlarmController deviceAlarmController = new DeviceAlarmController(this);
 
         //Remove alarm from firebase
@@ -176,8 +176,6 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     }
 
     public void editAlarm(String alarmId){
-
-        if (!checkInternetConnection()) return;
         Intent intent = new Intent(MyAlarmsFragmentActivity.this, NewAlarmFragmentActivity.class);
         intent.putExtra("alarmId", alarmId);
         startActivity(intent);
