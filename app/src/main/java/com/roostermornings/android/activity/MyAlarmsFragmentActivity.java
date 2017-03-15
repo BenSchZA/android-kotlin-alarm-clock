@@ -5,7 +5,10 @@
 
 package com.roostermornings.android.activity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,7 +21,6 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,7 +32,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
-import com.roostermornings.android.activity.base.WatchObserver;
 import com.roostermornings.android.adapter.MyAlarmsListAdapter;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
@@ -63,6 +64,8 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
+    private BroadcastReceiver receiver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,6 +75,9 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         toolbarTitle.setText(getString(R.string.my_alarms));
+
+        //Check for new Firebase datachange notifications and register broadcast receiver
+        updateNotifications();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.add_alarm);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -88,9 +94,6 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
         //Keep local and Firebase alarm dbs synced, and enable offline persistence
         mMyAlarmsReference.keepSynced(true);
-
-        //Display notification for new friend request
-        if(getNotificationFlag() > 0) setButtonBarNotification(true);
 
         mAdapter = new MyAlarmsListAdapter(mAlarms, MyAlarmsFragmentActivity.this);
 
@@ -120,6 +123,34 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         };
 
         mMyAlarmsReference.addValueEventListener(alarmsListener);
+    }
+
+    private void updateNotifications() {
+        //Flag check for UI changes on load, broadcastreceiver for changes while activity running
+        //If notifications waiting, display new friend request notification
+        if(((BaseApplication)getApplication()).getNotificationFlag() > 0) setButtonBarNotification(true);
+
+        //Broadcast receiver filter to receive UI updates
+        IntentFilter firebaseListenerServiceFilter = new IntentFilter();
+        firebaseListenerServiceFilter.addAction("rooster.update.NOTIFICATION");
+
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                //do something based on the intent's action
+                setButtonBarNotification(true);
+            }
+        };
+        registerReceiver(receiver, firebaseListenerServiceFilter);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (receiver != null) {
+            unregisterReceiver(receiver);
+            receiver = null;
+        }
+        super.onDestroy();
     }
 
     @Override
