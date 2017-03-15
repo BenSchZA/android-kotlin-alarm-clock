@@ -6,6 +6,7 @@
 package com.roostermornings.android.activity;
 
 import android.content.Intent;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -37,6 +38,7 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.roostermornings.android.R;
@@ -44,6 +46,8 @@ import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.User;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -208,8 +212,22 @@ public class SignInActivity extends BaseActivity {
                                     mAuth.getCurrentUser().getUid(),
                                     null);
 
-                            database.getReference(String.format("users/%s",
-                                    mAuth.getCurrentUser().getUid())).setValue(user);
+                            //Note: "friends" node not changed TODO: should profile pic be kept?
+                            Map<String, Object> childUpdates = new HashMap<>();
+                            childUpdates.put(String.format("users/%s/%s",
+                                    mAuth.getCurrentUser().getUid(), "cell_number"), user.getCell_number());
+                            childUpdates.put(String.format("users/%s/%s",
+                                    mAuth.getCurrentUser().getUid(), "device_token"), user.getDevice_token());
+                            childUpdates.put(String.format("users/%s/%s",
+                                    mAuth.getCurrentUser().getUid(), "device_type"), user.getDevice_type());
+                            childUpdates.put(String.format("users/%s/%s",
+                                    mAuth.getCurrentUser().getUid(), "profile_pic"), user.getProfile_pic());
+                            childUpdates.put(String.format("users/%s/%s",
+                                    mAuth.getCurrentUser().getUid(), "uid"), user.getUid());
+                            childUpdates.put(String.format("users/%s/%s",
+                                    mAuth.getCurrentUser().getUid(), "user_name"), user.getUser_name());
+
+                            mDatabase.updateChildren(childUpdates);
 
                             proceedToMyAlarmsActivity();
 
@@ -268,13 +286,27 @@ public class SignInActivity extends BaseActivity {
                                     "android",
                                     deviceToken,
                                     photoURLString,
-                                    account.getDisplayName(),
+                                    mAuth.getCurrentUser().getDisplayName(),
                                     mMobileNumber,
                                     mAuth.getCurrentUser().getUid(),
                                     null);
 
-                            database.getReference(String.format("users/%s",
-                                    mAuth.getCurrentUser().getUid())).setValue(user);
+                            //Note: "friends" node not changed TODO: should profile pic be kept?
+                            Map<String, Object> childUpdates = new HashMap<>();
+                            childUpdates.put(String.format("users/%s/%s",
+                                    mAuth.getCurrentUser().getUid(), "cell_number"), user.getCell_number());
+                            childUpdates.put(String.format("users/%s/%s",
+                                    mAuth.getCurrentUser().getUid(), "device_token"), user.getDevice_token());
+                            childUpdates.put(String.format("users/%s/%s",
+                                    mAuth.getCurrentUser().getUid(), "device_type"), user.getDevice_type());
+                            childUpdates.put(String.format("users/%s/%s",
+                                    mAuth.getCurrentUser().getUid(), "profile_pic"), user.getProfile_pic());
+                            childUpdates.put(String.format("users/%s/%s",
+                                    mAuth.getCurrentUser().getUid(), "uid"), user.getUid());
+                            childUpdates.put(String.format("users/%s/%s",
+                                    mAuth.getCurrentUser().getUid(), "user_name"), user.getUser_name());
+
+                            mDatabase.updateChildren(childUpdates);
 
                             proceedToMyAlarmsActivity();
                         }
