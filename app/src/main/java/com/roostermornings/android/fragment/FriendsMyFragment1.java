@@ -140,9 +140,7 @@ public class FriendsMyFragment1 extends BaseFragment {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                //TODO: Attempt to invoke virtual method 'android.content.res.Resources android.content.Context.getResources()' on a null object reference
-                Toast.makeText(getContext(), "Failed to load user.",
-                        Toast.LENGTH_SHORT).show();
+                showToast(getContext(), "Failed to load user.", Toast.LENGTH_SHORT);
             }
         };
         mFriendsReference.addChildEventListener(friendsListener);

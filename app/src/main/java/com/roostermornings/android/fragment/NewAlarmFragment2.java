@@ -105,9 +105,7 @@ public class NewAlarmFragment2 extends BaseFragment {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                //TODO: Attempt to invoke virtual method 'android.content.res.Resources android.content.Context.getResources()' on a null object reference
-                Toast.makeText(getContext(), "Failed to load alarms.",
-                        Toast.LENGTH_SHORT).show();
+                showToast(getContext(), "Failed to load alarms.", Toast.LENGTH_SHORT);
             }
         };
         mChannelsReference.addValueEventListener(alarmsListener);

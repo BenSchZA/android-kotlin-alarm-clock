@@ -5,7 +5,10 @@
 
 package com.roostermornings.android.activity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -65,6 +68,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
     private DatabaseReference mFriendRequestsSentReference;
     private DatabaseReference mCurrentUserReference;
 
+    private BroadcastReceiver receiver;
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -115,11 +119,8 @@ public class FriendsFragmentActivity extends BaseActivity implements
         //Generate custom tab for tab layout
         createTabIcons();
 
-        //If notifications waiting, display new friend request notification
-        if(getNotificationFlag() > 0) {
-            setTabNotification(1, true);
-            setButtonBarNotification(true);
-        }
+        //Check for new Firebase datachange notifications and register broadcast receiver
+        updateNotifications();
 
         //Listen for change to mViewPager page display - used for toggling notifications
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -132,7 +133,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
                 if(position == 1) {
                     setTabNotification(position, false);
                     setButtonBarNotification(false);
-                    setNotificationFlag(0);
+                    ((BaseApplication)getApplication()).setNotificationFlag(0);
                 }
             }
 
@@ -233,6 +234,38 @@ public class FriendsFragmentActivity extends BaseActivity implements
         ImageView buttonBarNotification = (ImageView) buttonBarLayout.findViewById(R.id.notification);
         if(notification) buttonBarNotification.setVisibility(View.VISIBLE);
         else buttonBarNotification.setVisibility(View.GONE);
+    }
+
+    private void updateNotifications() {
+        //Flag check for UI changes on load, broadcastreceiver for changes while activity running
+        //If notifications waiting, display new friend request notification
+        if(((BaseApplication)getApplication()).getNotificationFlag() > 0) {
+            setButtonBarNotification(true);
+            setTabNotification(1, true);
+        }
+
+        //Broadcast receiver filter to receive UI updates
+        IntentFilter firebaseListenerServiceFilter = new IntentFilter();
+        firebaseListenerServiceFilter.addAction("rooster.update.NOTIFICATION");
+
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                //do something based on the intent's action
+                setButtonBarNotification(true);
+                setTabNotification(1, true);
+            }
+        };
+        registerReceiver(receiver, firebaseListenerServiceFilter);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (receiver != null) {
+            unregisterReceiver(receiver);
+            receiver = null;
+        }
+        super.onDestroy();
     }
 
     public int getTabNotification(int position) {
