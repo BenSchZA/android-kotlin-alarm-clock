@@ -91,6 +91,8 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
         user.setSelected(false);
         holder.txtName.setText(mDataset.get(position).getUser_name());
         holder.txtInitials.setText(RoosterUtils.getInitials(mDataset.get(position).getUser_name()));
+
+        //Add button listener to accept request
         holder.btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -109,6 +111,8 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
                 }, 200);
             }
         });
+
+        //Add button listener to reject request
         holder.btnDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

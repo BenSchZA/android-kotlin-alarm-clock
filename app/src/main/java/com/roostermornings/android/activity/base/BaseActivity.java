@@ -33,6 +33,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.mobsandgeeks.saripaar.ValidationError;
 import com.mobsandgeeks.saripaar.Validator;
 import com.roostermornings.android.BaseApplication;
+import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.activity.SplashActivity;
 import com.roostermornings.android.domain.User;
@@ -52,7 +53,9 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     protected FirebaseAuth.AuthStateListener mAuthListener;
     private static final String TAG = BaseActivity.class.getSimpleName();
     protected DatabaseReference mDatabase;
+
     public static User mCurrentUser;
+    private int notificationFlag;
 
     @Inject
     protected SharedPreferences sharedPreferences;
@@ -60,11 +63,6 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        //If activity is not MyAlarms page, set default uncaught exception handler - this is to ensure loop does not occur
-//        if(!this.getClass().getSimpleName().equals(MyAlarmsFragmentActivity.class.getSimpleName())) {
-//            Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
-//        }
 
         BaseApplication baseApplication = (BaseApplication) getApplication();
 
@@ -84,6 +82,8 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     // User is signed in
+                    //Start Firebase listeners applicable to all activities - primarily to update notifications
+                    startGlobalFirebaseListeners();
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                 } else {
                     // User is signed out
@@ -291,5 +291,39 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
                 // result of the request.
             }
         }
+    }
+
+    public int getNotificationFlag() {
+        return notificationFlag;
+    }
+
+    public void setNotificationFlag(int notificationFlag) {
+        this.notificationFlag = notificationFlag;
+    }
+
+    private void startGlobalFirebaseListeners() {
+
+        //***************************************************************************************************
+        //Listen for changes to Firebase user friend requests, display notification
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        DatabaseReference mRequestsReference = mDatabase
+                .child("friend_requests_received").child(getFirebaseUser().getUid());
+
+        ValueEventListener friendsListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                    //Set notification flag
+                    setNotificationFlag(notificationFlag + 1);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        };
+        mRequestsReference.addValueEventListener(friendsListener);
+        //***************************************************************************************************
     }
 }

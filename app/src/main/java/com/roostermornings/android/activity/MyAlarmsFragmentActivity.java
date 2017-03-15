@@ -16,6 +16,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,8 +28,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.activity.base.WatchObserver;
 import com.roostermornings.android.adapter.MyAlarmsListAdapter;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
@@ -53,6 +58,9 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     @BindView(R.id.home_my_alarms)
     ImageButton buttonAddAlarm;
 
+    @BindView(R.id.button_bar)
+    LinearLayout buttonBarLayout;
+
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
@@ -70,7 +78,6 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!checkInternetConnection()) return;
                 startActivity(new Intent(MyAlarmsFragmentActivity.this, NewAlarmFragmentActivity.class));
             }
         });
@@ -79,6 +86,12 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
         mMyAlarmsReference = FirebaseDatabase.getInstance().getReference()
                 .child("alarms").child(getFirebaseUser().getUid());
+
+        //Keep local and Firebase alarm dbs synced, and enable offline persistence
+        mMyAlarmsReference.keepSynced(true);
+
+        //Display notification for new friend request
+        if(getNotificationFlag() > 0) setButtonBarNotification(true);
 
         mAdapter = new MyAlarmsListAdapter(mAlarms, MyAlarmsFragmentActivity.this);
 
@@ -159,12 +172,10 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
     @OnClick(R.id.home_friends)
     public void manageFriends() {
-        if (!checkInternetConnection()) return;
         startActivity(new Intent(MyAlarmsFragmentActivity.this, FriendsFragmentActivity.class));
     }
 
     public void deleteAlarm(String setId, String alarmId) {
-        if (!checkInternetConnection()) return;
         DeviceAlarmController deviceAlarmController = new DeviceAlarmController(this);
 
         //Remove alarm from firebase
@@ -181,11 +192,15 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         startActivity(intent);
     }
 
-    public void editAlarm(String alarmId) {
-
-        if (!checkInternetConnection()) return;
+    public void editAlarm(String alarmId){
         Intent intent = new Intent(MyAlarmsFragmentActivity.this, NewAlarmFragmentActivity.class);
         intent.putExtra("alarmId", alarmId);
         startActivity(intent);
+    }
+
+    public void setButtonBarNotification(boolean notification) {
+        ImageView buttonBarNotification = (ImageView) buttonBarLayout.findViewById(R.id.notification);
+        if(notification) buttonBarNotification.setVisibility(View.VISIBLE);
+        else buttonBarNotification.setVisibility(View.GONE);
     }
 }
