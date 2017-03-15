@@ -24,12 +24,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.MyAlarmsListAdapter;
@@ -101,6 +101,22 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mAdapter);
+
+        Bundle extras = getIntent().getExtras();
+        if (extras != null && extras.containsKey("message")) {
+            String fcm_message = extras.getString("message", "");
+            if (fcm_message.length() > 0) {
+
+                new MaterialDialog.Builder(getApplicationContext())
+                        .title("Hey, we thought you should know!")
+                        .content(fcm_message)
+                        .positiveText(R.string.ok)
+                        .negativeText("")
+                        .show();
+
+
+            }
+        }
 
         ValueEventListener alarmsListener = new ValueEventListener() {
             @Override

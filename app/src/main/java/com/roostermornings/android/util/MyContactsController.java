@@ -7,29 +7,16 @@ package com.roostermornings.android.util;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.os.AsyncTask;
 import android.provider.ContactsContract;
-import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
-import javax.net.ssl.HttpsURLConnection;
 
 /**
  * Created by bscholtz on 04/03/17.
@@ -42,8 +29,8 @@ public class MyContactsController {
     private Context context;
 
     private Map<String, String> contactsMap;
-    private JSONObject CountryCodes;
-    private JSONArray CountryCodesArray;
+    private JSONObject countryCodes;
+    private JSONArray countryCodesArray;
 
     public MyContactsController(Context c) {
         this.context = c;
@@ -57,6 +44,13 @@ public class MyContactsController {
         String NSNNumber;
 
         try {
+            countryCodesArray = new JSONArray(loadJSONFromAsset("CountryCodes.json"));
+            countryCodes = countryCodesArray.getJSONObject(0);
+        } catch (org.json.JSONException e) {
+            e.printStackTrace();
+        }
+
+        try {
             Iterator<String> JSONKeyIterator = JSONContactsObject.keys();
             while (JSONKeyIterator.hasNext()) {
                 String key = JSONKeyIterator.next();
@@ -65,11 +59,12 @@ public class MyContactsController {
                 JSONContactsObject.put(key, contactNumber);
                 NSNNumber = processContactCountry(contactNumber);
                 JSONProcessedContactsObject.put(key, NSNNumber);
-                ProcessedContactsArray.add(NSNNumber);
+                if (NSNNumber.length() > 0) ProcessedContactsArray.add(NSNNumber);
             }
-        }
-        catch (org.json.JSONException e){
+        } catch (org.json.JSONException e) {
             e.printStackTrace();
+        } catch (java.lang.StringIndexOutOfBoundsException e2) {
+            e2.printStackTrace();
         }
 
         return ProcessedContactsArray;
@@ -79,30 +74,26 @@ public class MyContactsController {
         String NSNNumber;
         NSNNumber = null;
 
-        try {
-            CountryCodesArray = new JSONArray(loadJSONFromAsset("CountryCodes.json"));
-            CountryCodes = CountryCodesArray.getJSONObject(0);
-        } catch(org.json.JSONException e){
-            e.printStackTrace();
-        }
+        if (contactNumber == null) return "";
 
-        if(contactNumber.charAt(0) == '+'){
-            if(inJSONNode(CountryCodes, "kThreeDigitCodes", contactNumber.substring(1,4))){
-                if(contactNumber.charAt(4) == 0) NSNNumber = contactNumber.substring(5);
+        if (countryCodesArray != null
+                && countryCodes != null
+                && contactNumber.charAt(0) == '+') {
+
+            if (inJSONNode(countryCodes, "kThreeDigitCodes", contactNumber.substring(1, 4))) {
+                if (contactNumber.charAt(4) == 0) NSNNumber = contactNumber.substring(5);
                 else NSNNumber = contactNumber.substring(4);
-            }
-            else if(inJSONNode(CountryCodes, "kTwoDigitCodes", contactNumber.substring(1,3))){
-                if(contactNumber.charAt(3) == 0) NSNNumber = contactNumber.substring(4);
+            } else if (inJSONNode(countryCodes, "kTwoDigitCodes", contactNumber.substring(1, 3))) {
+                if (contactNumber.charAt(3) == 0) NSNNumber = contactNumber.substring(4);
                 else NSNNumber = contactNumber.substring(3);
-            }
-            else if(inJSONNode(CountryCodes, "kOneDigitCodes", contactNumber.substring(1,2))){
-                if(contactNumber.charAt(2) == 0) NSNNumber = contactNumber.substring(3);
+            } else if (inJSONNode(countryCodes, "kOneDigitCodes", contactNumber.substring(1, 2))) {
+                if (contactNumber.charAt(2) == 0) NSNNumber = contactNumber.substring(3);
                 else NSNNumber = contactNumber.substring(2);
             }
-        } else{
-            if(contactNumber.charAt(0) == '0'){
+        } else {
+            if (contactNumber.charAt(0) == '0') {
                 NSNNumber = contactNumber.substring(1);
-            }else{
+            } else {
                 NSNNumber = contactNumber;
             }
         }
@@ -114,13 +105,13 @@ public class MyContactsController {
         inJSONNode = false;
         try {
             Iterator<String> JSONKeyIterator = json_o.getJSONObject(node).keys();
-            while(JSONKeyIterator.hasNext()){
-                if(JSONKeyIterator.next().contentEquals(find)) {
+            while (JSONKeyIterator.hasNext()) {
+                if (JSONKeyIterator.next().contentEquals(find)) {
                     inJSONNode = true;
                     break;
                 }
             }
-        }catch(org.json.JSONException e) {
+        } catch (org.json.JSONException e) {
             e.printStackTrace();
         }
         return inJSONNode;
@@ -142,12 +133,10 @@ public class MyContactsController {
         return JSONString;
     }
 
-    private static Map<String, String> getContacts(Context context)
-    {
+    private static Map<String, String> getContacts(Context context) {
         Map<String, String> result = new HashMap<>();
         Cursor cursor = context.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
-        while(cursor.moveToNext())
-        {
+        while (cursor.moveToNext()) {
             int phone_idx = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
             int name_idx = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
             String phone = cursor.getString(phone_idx);
