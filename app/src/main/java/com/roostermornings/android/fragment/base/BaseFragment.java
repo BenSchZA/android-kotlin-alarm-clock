@@ -5,11 +5,13 @@
 
 package com.roostermornings.android.fragment.base;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -74,4 +76,12 @@ public class BaseFragment extends Fragment implements Validator.ValidationListen
         return ((BaseActivity) getActivity()).getFirebaseUser();
     }
 
+    public void showToast(Context c, String message, int toastLength) {
+        try{
+            Toast.makeText(c, message,
+                    toastLength).show();
+        }catch(NullPointerException e){
+            e.printStackTrace();
+        }
+    }
 }
