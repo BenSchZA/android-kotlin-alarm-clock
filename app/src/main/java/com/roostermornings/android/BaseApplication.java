@@ -5,6 +5,10 @@
 
 package com.roostermornings.android;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -19,6 +23,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.background.FirebaseListenerService;
 import com.roostermornings.android.dagger.DaggerRoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationModule;
@@ -39,6 +44,10 @@ public class BaseApplication extends android.app.Application {
     public IHTTPClient mAPIService;
     protected FirebaseAuth mAuth;
     protected DatabaseReference mDatabase;
+
+    //Global flag set from FirebaseListenerService to indicate new notification
+    private int notificationFlag;
+    private BroadcastReceiver receiver;
 
     @Override
     public void onCreate() {
@@ -77,6 +86,34 @@ public class BaseApplication extends android.app.Application {
 
         //set database persistence to keep offline alarm edits synced
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+
+        //Start Firebase listeners applicable to all activities - primarily to update notifications
+        startService(new Intent(getApplicationContext(), FirebaseListenerService.class));
+
+        updateNotifications();
+    }
+
+    private void updateNotifications() {
+        //Flag check for UI changes on load, broadcastreceiver for changes while activity running
+        //Broadcast receiver filter to receive UI updates
+        IntentFilter firebaseListenerServiceFilter = new IntentFilter();
+        firebaseListenerServiceFilter.addAction("rooster.update.NOTIFICATION");
+
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                //do something based on the intent's action
+                switch(intent.getAction()){
+                    case "rooster.update.NOTIFICATION":
+                        setNotificationFlag(getNotificationFlag() + 1);
+                        break;
+                    default:
+                        break;
+
+                }
+            }
+        };
+        registerReceiver(receiver, firebaseListenerServiceFilter);
     }
 
     public RoosterApplicationComponent getRoosterApplicationComponent() {
@@ -87,8 +124,11 @@ public class BaseApplication extends android.app.Application {
         return mAPIService;
     }
 
-    public FirebaseUser getFirebaseUser() {
-        if (mAuth == null) mAuth = FirebaseAuth.getInstance();
-        return mAuth.getCurrentUser();
+    public int getNotificationFlag() {
+        return notificationFlag;
+    }
+
+    public void setNotificationFlag(int notificationFlag) {
+        this.notificationFlag = notificationFlag;
     }
 }
