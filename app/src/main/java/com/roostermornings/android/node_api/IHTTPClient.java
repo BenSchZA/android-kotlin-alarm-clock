@@ -5,10 +5,11 @@
 
 package com.roostermornings.android.node_api;
 
+import com.roostermornings.android.domain.FCMPayloadSocialRooster;
 import com.roostermornings.android.domain.LocalContacts;
+import com.roostermornings.android.domain.NodeAPIResult;
 import com.roostermornings.android.domain.NodeUsers;
 import com.roostermornings.android.domain.Users;
-import com.squareup.okhttp.ResponseBody;
 
 import retrofit.Call;
 import retrofit.http.Body;
@@ -23,5 +24,8 @@ public interface IHTTPClient {
 
     @POST("api/my_contacts")
     Call<NodeUsers> checkLocalContacts(@Body LocalContacts body);
+
+    @POST("api/social_upload_notification")
+    Call<NodeAPIResult> notifySocialUploadRecipient(@Body FCMPayloadSocialRooster body);
 
 }
