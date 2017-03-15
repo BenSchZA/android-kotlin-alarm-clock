@@ -19,6 +19,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -85,6 +86,22 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mAdapter);
+
+        Bundle extras = getIntent().getExtras();
+        if (extras != null && extras.containsKey("message")) {
+            String fcm_message = extras.getString("message", "");
+            if (fcm_message.length() > 0) {
+
+                new MaterialDialog.Builder(getApplicationContext())
+                        .title("Hey, we thought you should know!")
+                        .content(fcm_message)
+                        .positiveText(R.string.ok)
+                        .negativeText("")
+                        .show();
+
+
+            }
+        }
 
         ValueEventListener alarmsListener = new ValueEventListener() {
             @Override
@@ -164,7 +181,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         startActivity(intent);
     }
 
-    public void editAlarm(String alarmId){
+    public void editAlarm(String alarmId) {
 
         if (!checkInternetConnection()) return;
         Intent intent = new Intent(MyAlarmsFragmentActivity.this, NewAlarmFragmentActivity.class);
