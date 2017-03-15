@@ -75,16 +75,32 @@
         android:layout_weight="1"
         android:clickable="true">
 
-        <ImageButton
-            android:id="@+id/home_friends"
+        <RelativeLayout
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_gravity="center"
-            android:layout_margin="@dimen/spacing_small"
-            android:background="@drawable/rooster_button_bar_friends"
-            android:clickable="true" />
+            android:clipChildren="false">
+
+            <ImageButton
+                android:id="@+id/home_friends"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_margin="@dimen/spacing_small"
+                android:background="@drawable/rooster_button_bar_friends"
+                android:clickable="true"/>
+
+            <ImageView
+                android:id="@+id/notification"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/counter_circle_yellow"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:visibility="gone"/>
+
+        </RelativeLayout>
 
     </FrameLayout>
-
 
 </LinearLayout>

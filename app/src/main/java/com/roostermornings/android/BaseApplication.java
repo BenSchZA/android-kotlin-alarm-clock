@@ -5,11 +5,24 @@
 
 package com.roostermornings.android;
 
+import android.util.Log;
+import android.widget.Toast;
+
 import com.crashlytics.android.Crashlytics;
 import com.facebook.stetho.Stetho;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.roostermornings.android.activity.FriendsFragmentActivity;
+import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.dagger.DaggerRoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationModule;
+import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.node_api.IHTTPClient;
 import com.roostermornings.android.util.FontsOverride;
 
@@ -24,6 +37,8 @@ public class BaseApplication extends android.app.Application {
     RoosterApplicationComponent roosterApplicationComponent;
     public Retrofit mRetrofit;
     public IHTTPClient mAPIService;
+    protected FirebaseAuth mAuth;
+    protected DatabaseReference mDatabase;
 
     @Override
     public void onCreate() {
@@ -59,14 +74,21 @@ public class BaseApplication extends android.app.Application {
                 .build();
 
         mAPIService = mRetrofit.create(IHTTPClient.class);
+
+        //set database persistence to keep offline alarm edits synced
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
     }
 
     public RoosterApplicationComponent getRoosterApplicationComponent() {
         return roosterApplicationComponent;
     }
 
-    public IHTTPClient getAPIService(){
+    public IHTTPClient getAPIService() {
         return mAPIService;
     }
 
+    public FirebaseUser getFirebaseUser() {
+        if (mAuth == null) mAuth = FirebaseAuth.getInstance();
+        return mAuth.getCurrentUser();
+    }
 }

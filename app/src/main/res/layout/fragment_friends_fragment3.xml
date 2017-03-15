@@ -32,7 +32,7 @@
         android:textSize="@dimen/text_normal"
         android:textColor="@color/white"
         android:textAllCaps="false"
-        android:minHeight="0dp"
+        android:minHeight="48dp"
         android:layout_gravity="center_vertical" />
 
     <View
