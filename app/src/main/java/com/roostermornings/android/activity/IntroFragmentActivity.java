@@ -20,6 +20,7 @@ import com.roostermornings.android.fragment.IntroFragment2;
 import com.roostermornings.android.fragment.IntroFragment3;
 import com.roostermornings.android.fragment.IIntroFragmentListener;
 import com.roostermornings.android.util.DepthPageTransformer;
+import com.roostermornings.android.util.MyContactsController;
 
 public class IntroFragmentActivity extends FragmentActivity implements IIntroFragmentListener {
     /**
@@ -64,12 +65,13 @@ public class IntroFragmentActivity extends FragmentActivity implements IIntroFra
 
     @Override
     public void onMobileNumberSet(String mobileNumber) {
+        MyContactsController myContactsController = new MyContactsController(this);
+        String NSNNumber = myContactsController.processContactCountry(mobileNumber);
 
         Intent intent = new Intent(IntroFragmentActivity.this, SignInActivity.class);
-        intent.putExtra(getApplicationContext().getString(R.string.extras_mobile_number), mobileNumber);
+        intent.putExtra(getApplicationContext().getString(R.string.extras_mobile_number), NSNNumber);
         finish();
         startActivity(intent);
-
     }
 
     @Override

@@ -6,7 +6,10 @@
 package com.roostermornings.android.activity.base;
 
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -36,6 +39,7 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.activity.SplashActivity;
+import com.roostermornings.android.background.FirebaseListenerService;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.node_api.IHTTPClient;
 import com.roostermornings.android.util.InternetHelper;
@@ -55,7 +59,6 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     protected DatabaseReference mDatabase;
 
     public static User mCurrentUser;
-    private int notificationFlag;
 
     @Inject
     protected SharedPreferences sharedPreferences;
@@ -64,7 +67,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        BaseApplication baseApplication = (BaseApplication) getApplication();
+        final BaseApplication baseApplication = (BaseApplication) getApplication();
 
         //inject Dagger dependencies
         baseApplication.getRoosterApplicationComponent().inject(this);
@@ -83,7 +86,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
                 if (user != null) {
                     // User is signed in
                     //Start Firebase listeners applicable to all activities - primarily to update notifications
-                    startGlobalFirebaseListeners();
+                    startService(new Intent(getApplicationContext(), FirebaseListenerService.class));
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                 } else {
                     // User is signed out
@@ -291,39 +294,5 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
                 // result of the request.
             }
         }
-    }
-
-    public int getNotificationFlag() {
-        return notificationFlag;
-    }
-
-    public void setNotificationFlag(int notificationFlag) {
-        this.notificationFlag = notificationFlag;
-    }
-
-    private void startGlobalFirebaseListeners() {
-
-        //***************************************************************************************************
-        //Listen for changes to Firebase user friend requests, display notification
-        mDatabase = FirebaseDatabase.getInstance().getReference();
-
-        DatabaseReference mRequestsReference = mDatabase
-                .child("friend_requests_received").child(getFirebaseUser().getUid());
-
-        ValueEventListener friendsListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    //Set notification flag
-                    setNotificationFlag(notificationFlag + 1);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
-        };
-        mRequestsReference.addValueEventListener(friendsListener);
-        //***************************************************************************************************
     }
 }

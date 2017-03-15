@@ -70,7 +70,7 @@ public class MyContactsController {
         return ProcessedContactsArray;
     }
 
-    private String processContactCountry(String contactNumber) {
+    public String processContactCountry(String contactNumber) {
         String NSNNumber;
         NSNNumber = null;
 
