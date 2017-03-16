@@ -123,7 +123,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
                 if (position == 1) {
                     setTabNotification(position, false);
                     setButtonBarNotification(false);
-                    ((BaseApplication) getApplication()).setNotificationFlag(0);
+                    ((BaseApplication) getApplication()).setNotificationFlag(0, "friendRequests");
                 }
             }
 
@@ -195,14 +195,14 @@ public class FriendsFragmentActivity extends BaseActivity implements
     private void updateNotifications() {
         //Flag check for UI changes on load, broadcastreceiver for changes while activity running
         //If notifications waiting, display new friend request notification
-        if (((BaseApplication) getApplication()).getNotificationFlag() > 0) {
+        if (((BaseApplication) getApplication()).getNotificationFlag("friendRequests") > 0) {
             setButtonBarNotification(true);
             setTabNotification(1, true);
         }
 
         //Broadcast receiver filter to receive UI updates
         IntentFilter firebaseListenerServiceFilter = new IntentFilter();
-        firebaseListenerServiceFilter.addAction("rooster.update.NOTIFICATION");
+        firebaseListenerServiceFilter.addAction("rooster.update.REQUEST_NOTIFICATION");
 
         receiver = new BroadcastReceiver() {
             @Override

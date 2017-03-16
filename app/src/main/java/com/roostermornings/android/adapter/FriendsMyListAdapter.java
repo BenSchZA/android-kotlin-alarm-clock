@@ -116,24 +116,29 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
 
     private void setProfilePic(String url, final FriendsMyListAdapter.ViewHolder holder, final int position) {
 
-        Picasso.with(mContext).load(url)
-                .resize(50, 50)
-                .into(holder.imgProfilePic, new Callback() {
-                    @Override
-                    public void onSuccess() {
-                        Bitmap imageBitmap = ((BitmapDrawable) holder.imgProfilePic.getDrawable()).getBitmap();
-                        RoundedBitmapDrawable imageDrawable = RoundedBitmapDrawableFactory.create(mContext.getResources(), imageBitmap);
-                        imageDrawable.setCircular(true);
-                        imageDrawable.setCornerRadius(Math.max(imageBitmap.getWidth(), imageBitmap.getHeight()) / 2.0f);
-                        //holder.imgProfilePic.setImageAlpha(0);
-                        holder.imgProfilePic.setImageDrawable(imageDrawable);
-                    }
+        try{
+            Picasso.with(mContext).load(url)
+                    .resize(50, 50)
+                    .into(holder.imgProfilePic, new Callback() {
+                        @Override
+                        public void onSuccess() {
+                            Bitmap imageBitmap = ((BitmapDrawable) holder.imgProfilePic.getDrawable()).getBitmap();
+                            RoundedBitmapDrawable imageDrawable = RoundedBitmapDrawableFactory.create(mContext.getResources(), imageBitmap);
+                            imageDrawable.setCircular(true);
+                            imageDrawable.setCornerRadius(Math.max(imageBitmap.getWidth(), imageBitmap.getHeight()) / 2.0f);
+                            //holder.imgProfilePic.setImageAlpha(0);
+                            holder.imgProfilePic.setImageDrawable(imageDrawable);
+                        }
 
-                    @Override
-                    public void onError() {
-                        holder.txtInitials.setText(RoosterUtils.getInitials(mDataset.get(position).getUser_name()));
-                    }
-                });
+                        @Override
+                        public void onError() {
+                            holder.txtInitials.setText(RoosterUtils.getInitials(mDataset.get(position).getUser_name()));
+                        }
+                    });
+        } catch(IllegalArgumentException e){
+            e.printStackTrace();
+            holder.txtInitials.setText(RoosterUtils.getInitials(mDataset.get(position).getUser_name()));
+        }
     }
 
     private void setButtonBackground(Button addButton, Boolean focused) {

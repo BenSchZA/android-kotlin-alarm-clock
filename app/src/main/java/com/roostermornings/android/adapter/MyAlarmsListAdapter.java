@@ -6,6 +6,11 @@
 package com.roostermornings.android.adapter;
 
 import android.app.Activity;
+import android.app.Application;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -16,6 +21,7 @@ import android.widget.TextView;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.domain.Alarm;
@@ -29,6 +35,8 @@ import butterknife.ButterKnife;
 public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapter.ViewHolder> {
     private ArrayList<Alarm> mDataset;
     private Activity mActivity;
+    private Application mApplication;
+    private BroadcastReceiver receiver;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -43,6 +51,8 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
         TextView txtAlarmChannel;
         @BindView(R.id.cardview_alarm_delete)
         ImageView imgDelete;
+        @BindView(R.id.rooster_notification)
+        ImageView roosterNotification;
 
         public ViewHolder(View v) {
             super(v);
@@ -62,9 +72,10 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public MyAlarmsListAdapter(ArrayList<Alarm> myDataset, Activity activity) {
+    public MyAlarmsListAdapter(ArrayList<Alarm> myDataset, Activity activity, Application application) {
         mDataset = myDataset;
         mActivity = activity;
+        mApplication = application;
         setHasStableIds(true);
     }
 
@@ -93,7 +104,8 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        
+        updateRoosterNotification(holder);
 
         holder.txtAlarmTime.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -147,6 +159,33 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
             }
         });
 
+    }
+
+    private void updateRoosterNotification(final ViewHolder holder) {
+        //Flag check for UI changes on load, broadcastreceiver for changes while activity running
+        //If notifications waiting, display new Rooster notification
+        if (((BaseApplication) mApplication).getNotificationFlag("roosterCount") > 0) {
+            setRoosterNotification(holder, true);
+        }
+
+        //Broadcast receiver filter to receive UI updates
+        IntentFilter firebaseListenerServiceFilter = new IntentFilter();
+        firebaseListenerServiceFilter.addAction("rooster.update.ROOSTER_NOTIFICATION");
+
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                //do something based on the intent's action
+                if(((BaseApplication) mApplication).getNotificationFlag("roosterCount") > 0){
+                    setRoosterNotification(holder, true);
+                }
+            }
+        };
+        mActivity.registerReceiver(receiver, firebaseListenerServiceFilter);
+    }
+
+    private void setRoosterNotification(final ViewHolder holder, boolean notification) {
+        holder.roosterNotification.setVisibility(View.VISIBLE);
     }
 
     // Return the size of your dataset (invoked by the layout manager)
