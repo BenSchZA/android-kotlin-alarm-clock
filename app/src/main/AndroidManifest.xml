@@ -27,6 +27,13 @@
             android:name="com.facebook.sdk.ApplicationId"
             android:value="getResources().getString(R.string.facebook_app_id)" />
 
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_stat_ic_notification" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/rooster_blue" />
+
         <receiver
             android:name=".receiver.BootReceiver"
             android:enabled="true"
