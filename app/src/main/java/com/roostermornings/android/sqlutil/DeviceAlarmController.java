@@ -121,14 +121,14 @@ public final class DeviceAlarmController {
         //Add new pending intent for 10 minutes time
         alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Calendar alarmCalendar = Calendar.getInstance();
-        alarmCalendar.setTimeInMillis(alarmCalendar.getTimeInMillis() + 10*60*1000);
+        alarmCalendar.setTimeInMillis(alarmCalendar.getTimeInMillis() + 1*60*1000);
 
         Intent alarmIntent = new Intent(context, DeviceAlarmReceiver.class);
         alarmIntent.setAction("receiver.ALARM_RECEIVER");
         alarmIntent.putExtra("requestCode", 0);
 
         alarmIntent.putExtra(DeviceAlarm.EXTRA_VIBRATE, true);
-        alarmIntent.putExtra(DeviceAlarm.EXTRA_TONE, true);
+        alarmIntent.putExtra(DeviceAlarm.EXTRA_TONE, false);
 
         PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(context,
                 0, alarmIntent,
@@ -203,7 +203,7 @@ public final class DeviceAlarmController {
         int days = (int) (timeUntilNextAlarm / (1000*60*60*24));
 
         //Notify user of time until next alarm
-        nextAlarmTimeString = String.format("%s days %s hours %s minutes", days, hours, minutes);
+        nextAlarmTimeString = String.format("%s days, %s hours, and %s minutes", days, hours, minutes);
         Toast.makeText(context, "Alarm set for " + nextAlarmTimeString + " from now.", Toast.LENGTH_LONG).show();
     }
 

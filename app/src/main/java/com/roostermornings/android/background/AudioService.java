@@ -96,7 +96,7 @@ public class AudioService extends Service {
         audioItems = audioTableManager.extractAudioFiles();
         alarmCount = audioItems.size();
 
-        if(currentPositionRooster < 0){
+        if(currentPositionRooster < 1){
             if (audioItems == null || audioItems.size() == 0) {
                 //Check conditions for playing default tone: people must wake up!
                 if (playDuration < 5000 && (audioItems == null || audioItems.size() == 0)) {
@@ -107,16 +107,22 @@ public class AudioService extends Service {
             alarmPosition = 0;
             playSocialRooster(audioItems.get(0));
         } else{
-            mediaPlayerRooster.seekTo(currentPositionRooster);
-            mediaPlayerRooster.start();
+            try {
+                mediaPlayerRooster.seekTo(currentPositionRooster);
+                mediaPlayerRooster.start();
+                this.audioItem = audioItems.get(0);
+                //Send broadcast to DeviceAlarmFullScreenActivity with UI data
+                updateAlarmUI();
+            } catch(NullPointerException e){
+                e.printStackTrace();
+            }
         }
     }
 
     public void playSocialRooster(final DeviceAudioQueueItem audioItem) {
         audioServiceForegroundNotification("Social Roosters playing");
 
-        //Send broadcast to DeviceAlarmFullScreenActivity with UI data
-        updateAlarmUI();
+        this.audioItem = audioItem;
 
         mediaPlayerRooster = new MediaPlayer();
         //Set media player to alarm volume
@@ -126,32 +132,40 @@ public class AudioService extends Service {
 
         try {
             mediaPlayerRooster.setDataSource(file.getPath());
-            mediaPlayerRooster.prepare();
-            mediaPlayerRooster.start();
 
-            //Set alarm count display
-            alarmPosition++;
-
-            mediaPlayerRooster.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            mediaPlayerRooster.prepareAsync();
+            mediaPlayerRooster.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
-                public void onCompletion(MediaPlayer mp) {
-                    //TODO: should users rather just be forced to record longer file?
-                    //playDuration used to check that audio has played and for specified period, otherwise set default alarm
-                    playDuration += mediaPlayerRooster.getDuration();
-                    //delete file
-                    file.delete();
-                    //delete record from AudioTable SQL DB
-                    audioTableManager.removeAudioFile(audioItem.getId());
-                    //delete record from arraylist
-                    audioItems.remove(audioItem);
-                    //Play next file if list not empty
-                    if (!audioItems.isEmpty()) {
-                        playSocialRooster(audioItems.get(0));
-                    }
-                    //Check conditions for playing default tone: people must wake up!
-                    else if (playDuration < 5000) {
-                        startDefaultAlarmTone();
-                    }
+                public void onPrepared(MediaPlayer mediaPlayer) {
+                    mediaPlayerRooster.start();
+
+                    //Set alarm count display
+                    alarmPosition++;
+                    //Send broadcast to DeviceAlarmFullScreenActivity with UI data
+                    updateAlarmUI();
+
+                    mediaPlayerRooster.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        @Override
+                        public void onCompletion(MediaPlayer mp) {
+                            //TODO: should users rather just be forced to record longer file?
+                            //playDuration used to check that audio has played and for specified period, otherwise set default alarm
+                            playDuration += mediaPlayerRooster.getDuration();
+                            //delete file
+                            file.delete();
+                            //delete record from AudioTable SQL DB
+                            audioTableManager.removeAudioFile(audioItem.getId());
+                            //delete record from arraylist
+                            audioItems.remove(audioItem);
+                            //Play next file if list not empty
+                            if (!audioItems.isEmpty()) {
+                                playSocialRooster(audioItems.get(0));
+                            }
+                            //Check conditions for playing default tone: people must wake up!
+                            else if (playDuration < 5000) {
+                                startDefaultAlarmTone();
+                            }
+                        }
+                    });
                 }
             });
         } catch (IOException e) {
@@ -169,7 +183,6 @@ public class AudioService extends Service {
         if (playDuration < 5000 && (audioItems == null || audioItems.size() == 0)) {
             startDefaultAlarmTone();
         }
-        stopAlarmAudio();
     }
 
     public void pauseSocialRooster() {
@@ -185,6 +198,15 @@ public class AudioService extends Service {
 
     public void stopVibrate() {
         stopForeground(true);
+        //If vibrating then cancel
+        Vibrator vibrator = (Vibrator) getApplicationContext().getSystemService(VIBRATOR_SERVICE);
+        if (vibrator.hasVibrator()) {
+            vibrator.cancel();
+        }
+    }
+
+    public void snoozeAudioState(){
+        pauseSocialRooster();
         //If vibrating then cancel
         Vibrator vibrator = (Vibrator) getApplicationContext().getSystemService(VIBRATOR_SERVICE);
         if (vibrator.hasVibrator()) {
@@ -227,7 +249,7 @@ public class AudioService extends Service {
         if (mediaPlayerRooster != null && mediaPlayerRooster.isPlaying()) {
             mediaPlayerRooster.stop();
             mediaPlayerRooster.release();
-            currentPositionRooster = -1;
+            currentPositionRooster = 0;
         }
     }
 
@@ -239,7 +261,7 @@ public class AudioService extends Service {
 
         Notification notification=new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.logo)
-                .setContentText("Rooster Mornings:" + state)
+                .setContentText("Rooster Mornings: " + state)
                 .setContentIntent(pendingIntent).build();
 
         startForeground(NOTIFICATION_ID, notification);
