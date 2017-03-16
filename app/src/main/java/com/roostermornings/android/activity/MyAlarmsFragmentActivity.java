@@ -71,9 +71,6 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         toolbarTitle.setText(getString(R.string.my_alarms));
 
-        //Check for new Firebase datachange notifications and register broadcast receiver
-        updateNotifications();
-
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.add_alarm);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,12 +87,15 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         //Keep local and Firebase alarm dbs synced, and enable offline persistence
         mMyAlarmsReference.keepSynced(true);
 
-        mAdapter = new MyAlarmsListAdapter(mAlarms, MyAlarmsFragmentActivity.this);
+        mAdapter = new MyAlarmsListAdapter(mAlarms, MyAlarmsFragmentActivity.this, getApplication());
 
         // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mAdapter);
+
+        //Check for new Firebase datachange notifications and register broadcast receiver
+        updateRequestNotification();
 
         Bundle extras = getIntent().getExtras();
         if (extras != null && extras.containsKey("message")) {
@@ -136,15 +136,15 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         mMyAlarmsReference.addValueEventListener(alarmsListener);
     }
 
-    private void updateNotifications() {
+    private void updateRequestNotification() {
         //Flag check for UI changes on load, broadcastreceiver for changes while activity running
         //If notifications waiting, display new friend request notification
-        if (((BaseApplication) getApplication()).getNotificationFlag() > 0)
+        if (((BaseApplication) getApplication()).getNotificationFlag("friendRequests") > 0)
             setButtonBarNotification(true);
 
         //Broadcast receiver filter to receive UI updates
         IntentFilter firebaseListenerServiceFilter = new IntentFilter();
-        firebaseListenerServiceFilter.addAction("rooster.update.NOTIFICATION");
+        firebaseListenerServiceFilter.addAction("rooster.update.REQUEST_NOTIFICATION");
 
         receiver = new BroadcastReceiver() {
             @Override
