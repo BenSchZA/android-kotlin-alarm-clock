@@ -50,7 +50,6 @@ import butterknife.OnClick;
 
 public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
-    MediaPlayer mediaPlayer;
     DeviceAlarmController deviceAlarmController;
 
     public static final String TAG = DeviceAlarmFullScreenActivity.class.getSimpleName();
