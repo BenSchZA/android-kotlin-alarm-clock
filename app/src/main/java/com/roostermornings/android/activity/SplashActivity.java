@@ -29,21 +29,21 @@ public class SplashActivity extends BaseActivity {
         initialize(R.layout.activity_splash);
         mFBUser = getFirebaseUser();
 
-        if (BuildConfig.DEBUG) {
-
-            AudioTableHelper dbAudioHelper = new AudioTableHelper(this);
-            SQLiteDatabase dbAudio = dbAudioHelper.getWritableDatabase();
-            DeviceAlarmTableHelper dbAlarmHelper = new DeviceAlarmTableHelper(this);
-            SQLiteDatabase dbAlarm = dbAlarmHelper.getWritableDatabase();
-
-            AudioTableHelper audioTableHelper = new AudioTableHelper(this);
-            DeviceAlarmTableHelper deviceAlarmTableHelper = new DeviceAlarmTableHelper(this);
-            audioTableHelper.onUpgrade(dbAudio, 1, 2);
-            deviceAlarmTableHelper.onUpgrade(dbAlarm, 1, 2);
-
-            dbAudio.close();
-            dbAlarm.close();
-        }
+//        if (BuildConfig.DEBUG) {
+//
+//            AudioTableHelper dbAudioHelper = new AudioTableHelper(this);
+//            SQLiteDatabase dbAudio = dbAudioHelper.getWritableDatabase();
+//            DeviceAlarmTableHelper dbAlarmHelper = new DeviceAlarmTableHelper(this);
+//            SQLiteDatabase dbAlarm = dbAlarmHelper.getWritableDatabase();
+//
+//            AudioTableHelper audioTableHelper = new AudioTableHelper(this);
+//            DeviceAlarmTableHelper deviceAlarmTableHelper = new DeviceAlarmTableHelper(this);
+//            audioTableHelper.onUpgrade(dbAudio, 1, 2);
+//            deviceAlarmTableHelper.onUpgrade(dbAlarm, 1, 2);
+//
+//            dbAudio.close();
+//            dbAlarm.close();
+//        }
 
         BackgroundTaskReceiver backgroundTaskReceiver = new BackgroundTaskReceiver();
         backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(getApplicationContext());
