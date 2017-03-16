@@ -93,15 +93,15 @@ public class BaseApplication extends android.app.Application {
         //Start Firebase listeners applicable to all activities - primarily to update notifications
         startService(new Intent(getApplicationContext(), FirebaseListenerService.class));
 
-        updateRequestNotification();
-        updateRoosterNotification();
+        updateNotification();
     }
 
-    private void updateRequestNotification() {
+    private void updateNotification() {
         //Flag check for UI changes on load, broadcastreceiver for changes while activity running
         //Broadcast receiver filter to receive UI updates
         IntentFilter firebaseListenerServiceFilter = new IntentFilter();
         firebaseListenerServiceFilter.addAction("rooster.update.REQUEST_NOTIFICATION");
+        firebaseListenerServiceFilter.addAction("rooster.update.ROOSTER_NOTIFICATION");
 
         receiver = new BroadcastReceiver() {
             @Override
@@ -111,26 +111,6 @@ public class BaseApplication extends android.app.Application {
                     case "rooster.update.REQUEST_NOTIFICATION":
                         setNotificationFlag(getNotificationFlag("friendRequests") + 1, "friendRequests");
                         break;
-                    default:
-                        break;
-
-                }
-            }
-        };
-        registerReceiver(receiver, firebaseListenerServiceFilter);
-    }
-
-    private void updateRoosterNotification() {
-        //Flag check for UI changes on load, broadcastreceiver for changes while activity running
-        //Broadcast receiver filter to receive UI updates
-        IntentFilter firebaseListenerServiceFilter = new IntentFilter();
-        firebaseListenerServiceFilter.addAction("rooster.update.ROOSTER_NOTIFICATION");
-
-        receiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                //do something based on the intent's action
-                switch(intent.getAction()){
                     case "rooster.update.ROOSTER_NOTIFICATION":
                         setNotificationFlag(getNotificationFlag("roosterCount") + 1, "roosterCount");
                         break;
