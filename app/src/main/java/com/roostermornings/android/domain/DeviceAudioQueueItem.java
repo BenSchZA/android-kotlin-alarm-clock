@@ -5,13 +5,15 @@
 
 package com.roostermornings.android.domain;
 
+import java.io.Serializable;
+
 /**
  * Created by bscholtz on 2/21/17.
  */
 
 
 
-public class DeviceAudioQueueItem {
+public class DeviceAudioQueueItem implements Serializable {
     private int id;
     private String queue_id;
     private String filename;
