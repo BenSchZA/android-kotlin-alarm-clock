@@ -73,22 +73,23 @@
             <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:gravity="center">
+                android:gravity="center"
+                android:layout_marginLeft="@dimen/spacing_small">
 
                 <ImageView
                     android:id="@+id/cardview_alarm_person"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/spacing_large"
-                    android:layout_toLeftOf="@+id/social_rooster_counter"
                     android:background="@drawable/md_transparent"
                     android:src="@drawable/ic_person_white_24dp" />
 
                 <ImageView
-                    android:id="@+id/social_rooster_counter"
+                    android:id="@+id/rooster_notification"
+                    android:layout_toRightOf="@+id/cardview_alarm_person"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/counter_circle_yellow" />
+                    android:background="@drawable/counter_circle_yellow"
+                    android:visibility="invisible"/>
 
             </RelativeLayout>
 
@@ -97,7 +98,10 @@
                 android:id="@+id/cardview_alarm_delete"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_margin="@dimen/spacing_large"
+                android:layout_marginLeft="@dimen/spacing_small"
+                android:layout_marginRight="@dimen/spacing_large"
+                android:layout_marginTop="@dimen/spacing_large"
+                android:layout_marginBottom="@dimen/spacing_large"
                 android:background="@drawable/md_transparent"
                 android:clickable="true"
                 android:src="@drawable/selectable_delete_icon" />

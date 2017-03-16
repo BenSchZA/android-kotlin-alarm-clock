@@ -49,6 +49,9 @@ public class BaseApplication extends android.app.Application {
     private int notificationFlag;
     private BroadcastReceiver receiver;
 
+    private int roosterCount;
+    private int friendRequests;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -90,22 +93,46 @@ public class BaseApplication extends android.app.Application {
         //Start Firebase listeners applicable to all activities - primarily to update notifications
         startService(new Intent(getApplicationContext(), FirebaseListenerService.class));
 
-        updateNotifications();
+        updateRequestNotification();
+        updateRoosterNotification();
     }
 
-    private void updateNotifications() {
+    private void updateRequestNotification() {
         //Flag check for UI changes on load, broadcastreceiver for changes while activity running
         //Broadcast receiver filter to receive UI updates
         IntentFilter firebaseListenerServiceFilter = new IntentFilter();
-        firebaseListenerServiceFilter.addAction("rooster.update.NOTIFICATION");
+        firebaseListenerServiceFilter.addAction("rooster.update.REQUEST_NOTIFICATION");
 
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 //do something based on the intent's action
                 switch(intent.getAction()){
-                    case "rooster.update.NOTIFICATION":
-                        setNotificationFlag(getNotificationFlag() + 1);
+                    case "rooster.update.REQUEST_NOTIFICATION":
+                        setNotificationFlag(getNotificationFlag("friendRequests") + 1, "friendRequests");
+                        break;
+                    default:
+                        break;
+
+                }
+            }
+        };
+        registerReceiver(receiver, firebaseListenerServiceFilter);
+    }
+
+    private void updateRoosterNotification() {
+        //Flag check for UI changes on load, broadcastreceiver for changes while activity running
+        //Broadcast receiver filter to receive UI updates
+        IntentFilter firebaseListenerServiceFilter = new IntentFilter();
+        firebaseListenerServiceFilter.addAction("rooster.update.ROOSTER_NOTIFICATION");
+
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                //do something based on the intent's action
+                switch(intent.getAction()){
+                    case "rooster.update.ROOSTER_NOTIFICATION":
+                        setNotificationFlag(getNotificationFlag("roosterCount") + 1, "roosterCount");
                         break;
                     default:
                         break;
@@ -124,11 +151,23 @@ public class BaseApplication extends android.app.Application {
         return mAPIService;
     }
 
-    public int getNotificationFlag() {
+    public int getNotificationFlag(String flag) {
+        if(flag.contentEquals("roosterCount")){
+            notificationFlag = this.roosterCount;
+        }
+        if(flag.contentEquals("friendRequests")){
+            notificationFlag = this.friendRequests;
+        }
         return notificationFlag;
     }
 
-    public void setNotificationFlag(int notificationFlag) {
+    public void setNotificationFlag(int notificationFlag, String flag) {
+        if(flag.contentEquals("roosterCount")){
+            this.roosterCount = notificationFlag;
+        }
+        if(flag.contentEquals("friendRequests")){
+            this.friendRequests = notificationFlag;
+        }
         this.notificationFlag = notificationFlag;
     }
 }
