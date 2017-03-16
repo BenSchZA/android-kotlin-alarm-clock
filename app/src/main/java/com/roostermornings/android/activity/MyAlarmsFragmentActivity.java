@@ -45,23 +45,17 @@ import butterknife.OnClick;
 public class MyAlarmsFragmentActivity extends BaseActivity {
 
     public static final String TAG = MyAlarmsFragmentActivity.class.getSimpleName();
-    private DatabaseReference mMyAlarmsReference;
-    private ArrayList<Alarm> mAlarms = new ArrayList<>();
-
-    private DeviceAlarmController deviceAlarmController;
-
     @BindView(R.id.home_alarmsListView)
     RecyclerView mRecyclerView;
-
     @BindView(R.id.toolbar_title)
     TextView toolbarTitle;
-
     @BindView(R.id.home_my_alarms)
     ImageButton buttonAddAlarm;
-
     @BindView(R.id.button_bar)
     LinearLayout buttonBarLayout;
-
+    private DatabaseReference mMyAlarmsReference;
+    private ArrayList<Alarm> mAlarms = new ArrayList<>();
+    private DeviceAlarmController deviceAlarmController;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
@@ -145,7 +139,8 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     private void updateNotifications() {
         //Flag check for UI changes on load, broadcastreceiver for changes while activity running
         //If notifications waiting, display new friend request notification
-        if(((BaseApplication)getApplication()).getNotificationFlag() > 0) setButtonBarNotification(true);
+        if (((BaseApplication) getApplication()).getNotificationFlag() > 0)
+            setButtonBarNotification(true);
 
         //Broadcast receiver filter to receive UI updates
         IntentFilter firebaseListenerServiceFilter = new IntentFilter();
@@ -223,7 +218,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         startActivity(intent);
     }
 
-    public void editAlarm(String alarmId){
+    public void editAlarm(String alarmId) {
         Intent intent = new Intent(MyAlarmsFragmentActivity.this, NewAlarmFragmentActivity.class);
         intent.putExtra("alarmId", alarmId);
         startActivity(intent);
@@ -231,7 +226,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
     public void setButtonBarNotification(boolean notification) {
         ImageView buttonBarNotification = (ImageView) buttonBarLayout.findViewById(R.id.notification);
-        if(notification) buttonBarNotification.setVisibility(View.VISIBLE);
+        if (notification) buttonBarNotification.setVisibility(View.VISIBLE);
         else buttonBarNotification.setVisibility(View.GONE);
     }
 }

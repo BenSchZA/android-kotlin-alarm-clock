@@ -74,7 +74,7 @@ public class AudioTableManager {
 
         String execSql = "DELETE FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_DATE_UPLOADED +
                 " in (SELECT q." + AudioTableEntry.COLUMN_DATE_UPLOADED + " FROM " + AudioTableEntry.TABLE_NAME + " q WHERE " +
-                AudioTableEntry.COLUMN_DATE_UPLOADED + " < " + (calendar.getTimeInMillis() - 1209600000) + ";";
+                AudioTableEntry.COLUMN_DATE_UPLOADED + " < " + (calendar.getTimeInMillis() - 1209600000) + ");";
 
         db.execSQL(execSql);
         db.close();

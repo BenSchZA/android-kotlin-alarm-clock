@@ -84,6 +84,7 @@ public class BackgroundTaskIntentService extends IntentService {
 
     private void handleActionDailyTask() {
         //Purge audio files from SQL db that are older than two weeks
+        mAudioTableManager = new AudioTableManager(getApplicationContext());
         mAudioTableManager.purgeAudioFiles();
     }
 
