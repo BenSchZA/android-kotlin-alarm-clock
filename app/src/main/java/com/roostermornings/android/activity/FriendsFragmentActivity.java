@@ -12,17 +12,15 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.LayoutRes;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
-import android.widget.ImageButton;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -53,7 +51,19 @@ public class FriendsFragmentActivity extends BaseActivity implements
         FriendsInviteFragment3.OnFragmentInteractionListener {
 
     public static final String TAG = FriendsFragmentActivity.class.getSimpleName();
-
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+    @BindView(R.id.tabs)
+    TabLayout tabLayout;
+    @BindView(R.id.home_friends)
+    ImageButton buttonMyFriends;
+    @BindView(R.id.button_bar)
+    LinearLayout buttonBarLayout;
+    /**
+     * The {@link ViewPager} that will host the section contents.
+     */
+    @BindView(R.id.container)
+    ViewPager mViewPager;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -63,30 +73,10 @@ public class FriendsFragmentActivity extends BaseActivity implements
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
     private SectionsPagerAdapter mSectionsPagerAdapter;
-
     private DatabaseReference mFriendRequestsReceivedReference;
     private DatabaseReference mFriendRequestsSentReference;
     private DatabaseReference mCurrentUserReference;
-
     private BroadcastReceiver receiver;
-
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
-
-    @BindView(R.id.tabs)
-    TabLayout tabLayout;
-
-    @BindView(R.id.home_friends)
-    ImageButton buttonMyFriends;
-
-    @BindView(R.id.button_bar)
-    LinearLayout buttonBarLayout;
-
-    /**
-     * The {@link ViewPager} that will host the section contents.
-     */
-    @BindView(R.id.container)
-    ViewPager mViewPager;
 
     public FriendsFragmentActivity() {
 
@@ -130,10 +120,10 @@ public class FriendsFragmentActivity extends BaseActivity implements
 
             @Override
             public void onPageSelected(int position) {
-                if(position == 1) {
+                if (position == 1) {
                     setTabNotification(position, false);
                     setButtonBarNotification(false);
-                    ((BaseApplication)getApplication()).setNotificationFlag(0);
+                    ((BaseApplication) getApplication()).setNotificationFlag(0);
                 }
             }
 
@@ -155,40 +145,6 @@ public class FriendsFragmentActivity extends BaseActivity implements
     @OnClick(R.id.home_my_alarms)
     public void manageAlarms() {
         startHomeActivity();
-    }
-
-    /**
-     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
-     * one of the sections/tabs/pages.
-     */
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
-
-        private final List<Fragment> mFragmentList = new ArrayList<>();
-        private final List<String> mFragmentTitleList = new ArrayList<>();
-
-        public SectionsPagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            return mFragmentList.get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return mFragmentList.size();
-        }
-
-        public void addFrag(Fragment fragment, String title) {
-            mFragmentList.add(fragment);
-            mFragmentTitleList.add(title);
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return mFragmentTitleList.get(position);
-        }
     }
 
     private void createViewPager(ViewPager mViewPager) {
@@ -225,21 +181,21 @@ public class FriendsFragmentActivity extends BaseActivity implements
         TabLayout.Tab tab = tabLayout.getTabAt(position);
         RelativeLayout relativeLayout = (RelativeLayout) tab.getCustomView();
         ImageView tabNotification = (ImageView) tab.getCustomView().findViewById(R.id.notification);
-        if(notification) tabNotification.setVisibility(View.VISIBLE);
+        if (notification) tabNotification.setVisibility(View.VISIBLE);
         else tabNotification.setVisibility(View.GONE);
         tab.setCustomView(relativeLayout);
     }
 
     public void setButtonBarNotification(boolean notification) {
         ImageView buttonBarNotification = (ImageView) buttonBarLayout.findViewById(R.id.notification);
-        if(notification) buttonBarNotification.setVisibility(View.VISIBLE);
+        if (notification) buttonBarNotification.setVisibility(View.VISIBLE);
         else buttonBarNotification.setVisibility(View.GONE);
     }
 
     private void updateNotifications() {
         //Flag check for UI changes on load, broadcastreceiver for changes while activity running
         //If notifications waiting, display new friend request notification
-        if(((BaseApplication)getApplication()).getNotificationFlag() > 0) {
+        if (((BaseApplication) getApplication()).getNotificationFlag() > 0) {
             setButtonBarNotification(true);
             setTabNotification(1, true);
         }
@@ -274,7 +230,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
         return imageNotification.getVisibility();
     }
 
-    public void onFragmentInteraction(Uri uri){
+    public void onFragmentInteraction(Uri uri) {
         //you can leave it empty
     }
 
@@ -364,5 +320,39 @@ public class FriendsFragmentActivity extends BaseActivity implements
 
         //Notify user that friend request accepted
         Toast.makeText(this, rejectFriend.getUser_name() + "'s friend request rejected!", Toast.LENGTH_LONG).show();
+    }
+
+    /**
+     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
+     * one of the sections/tabs/pages.
+     */
+    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+
+        private final List<Fragment> mFragmentList = new ArrayList<>();
+        private final List<String> mFragmentTitleList = new ArrayList<>();
+
+        public SectionsPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            return mFragmentList.get(position);
+        }
+
+        @Override
+        public int getCount() {
+            return mFragmentList.size();
+        }
+
+        public void addFrag(Fragment fragment, String title) {
+            mFragmentList.add(fragment);
+            mFragmentTitleList.add(title);
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return mFragmentTitleList.get(position);
+        }
     }
 }
