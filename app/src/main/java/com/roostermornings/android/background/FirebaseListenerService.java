@@ -48,7 +48,7 @@ public class FirebaseListenerService extends Service {
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                     //Send broadcast message to notify all receivers of new notification
-                    Intent intent = new Intent("rooster.update.NOTIFICATION");
+                    Intent intent = new Intent("rooster.update.REQUEST_NOTIFICATION");
                     sendBroadcast(intent);
                 }
 
@@ -73,6 +73,39 @@ public class FirebaseListenerService extends Service {
                 }
             };
             mRequestsReference.addChildEventListener(friendRequestListener);
+
+            DatabaseReference mRoosterReference = mDatabase
+                    .child("social_rooster_queue").child(getFirebaseUser().getUid());
+
+            ChildEventListener roosterListener = new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    //Send broadcast message to notify all receivers of new notification
+                    Intent intent = new Intent("rooster.update.ROOSTER_NOTIFICATION");
+                    sendBroadcast(intent);
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            };
+            mRoosterReference.addChildEventListener(roosterListener);
         }
 
         return START_STICKY;
