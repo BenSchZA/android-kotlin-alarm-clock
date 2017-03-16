@@ -43,7 +43,7 @@ public class BackgroundTaskReceiver extends BroadcastReceiver {
         //the task runs the 'retrieveFirebaseData' method in BackgroundTaskIntentService
         PendingIntent backgroundIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
         alarmMgrBackgroundTask.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 10 * 1000,
-                120 * 1000, backgroundIntent);
+                5 * 60 * 1000, backgroundIntent);
     }
 
     public void scheduleBackgroundDailyTask(Context context) {
@@ -53,7 +53,7 @@ public class BackgroundTaskReceiver extends BroadcastReceiver {
         //starts a inexact repeating background task that runs every day
         //the task runs the 'dailyTasks' method in BackgroundTaskIntentService
         PendingIntent backgroundIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
-        alarmMgrBackgroundTask.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 86400 * 1000,
+        alarmMgrBackgroundTask.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 10 * 1000,
                 86400 * 1000, backgroundIntent);
     }
 }

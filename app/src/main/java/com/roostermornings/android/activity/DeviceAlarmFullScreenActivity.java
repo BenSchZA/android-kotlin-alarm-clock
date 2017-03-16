@@ -5,6 +5,12 @@
 
 package com.roostermornings.android.activity;
 
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -14,9 +20,11 @@ import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Vibrator;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
+import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -24,6 +32,7 @@ import android.widget.TextView;
 
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.background.AudioService;
 import com.roostermornings.android.domain.DeviceAudioQueueItem;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
@@ -44,10 +53,13 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     MediaPlayer mediaPlayer;
     DeviceAlarmController deviceAlarmController;
 
-    List<DeviceAudioQueueItem> audioItems = new ArrayList<>();
-    AudioTableManager audioTableManager = new AudioTableManager(this);
+    public static final String TAG = DeviceAlarmFullScreenActivity.class.getSimpleName();
 
-    private int playDuration;
+    AudioService mAudioService;
+    private boolean mBound;
+    private BroadcastReceiver receiver;
+    DeviceAudioQueueItem audioItem;
+
     private int alarmCount;
     private int alarmPosition;
 
@@ -76,38 +88,33 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
                 +WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
                 +WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 
+        //Bind to audio service to allow playback and pausing of alarms in background
+        Intent intent = new Intent(this, AudioService.class);
+        bindService(intent, mAudioServiceConnection, Context.BIND_AUTO_CREATE);
+        //Attach broadcast receiver which updates alarm display UI using serializable extra
+        attachAudioServiceBroadCastReceiver();
+
         deviceAlarmController = new DeviceAlarmController(this);
 
-        playDuration = 0;
-
         if (getIntent().getBooleanExtra(DeviceAlarm.EXTRA_TONE, false)) {
-            playAlarmTone();
+            mAudioService.startDefaultAlarmTone();
+            //Replace image and name with message if no Roosters etc.
+            setDefaultDisplayProfile();
         } else {
-            retrieveMyAlarms();
+            mAudioService.startAlarmSocialRoosters();
         }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        //If vibrating then cancel
-        Vibrator vibrator = (Vibrator) getApplicationContext().getSystemService(VIBRATOR_SERVICE);
-        if (vibrator.hasVibrator()) {
-            vibrator.cancel();
-        }
-
-        //If default tone or media playing then stop
-        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-            mediaPlayer.stop();
-            mediaPlayer.release();
-        }
-
         finish();
     }
 
     @OnClick(R.id.alarm_snooze_button)
     protected void onAlarmSnoozeButtonClicked() {
         deviceAlarmController.snoozeAlarm();
+        mAudioService.pauseSocialRooster();
         finish();
     }
 
@@ -116,49 +123,51 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         finish();
     }
 
-    protected void playAlarmTone() {
-        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-        //In case no alarm tone previously set
-        if (notification == null) {
-            notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-            if (notification == null) {
-                notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+    private ServiceConnection mAudioServiceConnection = new ServiceConnection() {
+        // Called when the connection with the service is established
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            // Because we have bound to an explicit
+            // service that is running in our own process, we can
+            // cast its IBinder to a concrete class and directly access it.
+            AudioService.LocalBinder binder = (AudioService.LocalBinder) service;
+            mAudioService = binder.getService();
+            mBound = true;
+        }
+
+        // Called when the connection with the service disconnects unexpectedly
+        public void onServiceDisconnected(ComponentName className) {
+            Log.e(TAG, "onServiceDisconnected");
+            mBound = false;
+        }
+    };
+
+    private void attachAudioServiceBroadCastReceiver() {
+        //Flag check for UI changes on load, broadcastreceiver for changes while activity running
+        //Broadcast receiver filter to receive UI updates
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("rooster.update.ALARMDISPLAY");
+
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                //do something based on the intent's action
+                switch(intent.getAction()){
+                    case "rooster.update.ALARMDISPLAY":
+                        audioItem = (DeviceAudioQueueItem) intent.getExtras().getSerializable("audioItem");
+                        alarmPosition = intent.getIntExtra("alarmPosition", alarmPosition);
+                        alarmCount = intent.getIntExtra("alarmCount", alarmCount);
+                        setAlarmUI();
+                        break;
+                    default:
+                        break;
+
+                }
             }
-        }
-        try {
-            mediaPlayer = new MediaPlayer();
-            mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
-            mediaPlayer.setDataSource(this, notification);
-            mediaPlayer.setLooping(true);
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        //Replace image and name with message if no Roosters etc.
-        setDefaultDisplayProfile();
+        };
+        registerReceiver(receiver, intentFilter);
     }
 
-    protected void retrieveMyAlarms() {
-        audioItems = audioTableManager.extractAudioFiles();
-        alarmCount = audioItems.size();
-        if (audioItems == null || audioItems.size() == 0) {
-            //Check conditions for playing default tone: people must wake up!
-            if (playDuration < 5000 && (audioItems == null || audioItems.size() == 0)) {
-                playAlarmTone();
-            }
-            return;
-        }
-        ;
-        alarmPosition = 0;
-        playNewAudioFile(audioItems.get(0));
-    }
-
-    protected void playNewAudioFile(final DeviceAudioQueueItem audioItem) {
-        mediaPlayer = new MediaPlayer();
-        //Set media player to alarm volume
-        mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
-        final File file = new File(getFilesDir() + "/" + audioItem.getFilename());
+    protected void setAlarmUI() {
 
         if (audioItem.getSender_pic() != null && audioItem.getSender_pic().length() != 0) {
             setProfilePic(audioItem.getSender_pic());
@@ -166,53 +175,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
             imgSenderPic.setBackground(getResources().getDrawable(R.drawable.alarm_profile_pic_circle));
         }
         txtSenderName.setText(audioItem.getSender_name());
-
-        try {
-            mediaPlayer.setDataSource(file.getPath());
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-
-            //Set alarm count display
-            alarmPosition++;
-            txtAlarmCount.setText(String.format("%s of %s", alarmPosition, alarmCount));
-
-            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mp) {
-                    //TODO: should users rather just be forced to record longer file?
-                    //playDuration used to check that audio has played and for specified period, otherwise set default alarm
-                    playDuration += mediaPlayer.getDuration();
-                    //delete file
-                    file.delete();
-                    //delete record from AudioTable SQL DB
-                    audioTableManager.removeAudioFile(audioItem.getId());
-                    //delete record from arraylist
-                    audioItems.remove(audioItem);
-                    //Play next file if list not empty
-                    if (!audioItems.isEmpty()) {
-                        playNewAudioFile(audioItems.get(0));
-                    }
-                    //Check conditions for playing default tone: people must wake up!
-                    else if (playDuration < 5000) {
-                        playAlarmTone();
-                    }
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-
-            //delete file
-            file.delete();
-            //delete record from AudioTable SQL DB
-            audioTableManager.removeAudioFile(audioItem.getId());
-            //delete record from arraylist
-            audioItems.remove(audioItem);
-        }
-
-        //Check conditions for playing default tone: people must wake up!
-        if (playDuration < 5000 && (audioItems == null || audioItems.size() == 0)) {
-            playAlarmTone();
-        }
+        txtAlarmCount.setText(String.format("%s of %s", alarmPosition, alarmCount));
     }
 
     protected void setProfilePic(String url) {
