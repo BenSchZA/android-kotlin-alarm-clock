@@ -90,19 +90,11 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
         //Bind to audio service to allow playback and pausing of alarms in background
         Intent intent = new Intent(this, AudioService.class);
-        bindService(intent, mAudioServiceConnection, Context.BIND_AUTO_CREATE);
+        startService(intent);
+        //0 indicates that service should not be restarted
+        bindService(intent, mAudioServiceConnection, 0);
         //Attach broadcast receiver which updates alarm display UI using serializable extra
         attachAudioServiceBroadCastReceiver();
-
-        deviceAlarmController = new DeviceAlarmController(this);
-
-        if (getIntent().getBooleanExtra(DeviceAlarm.EXTRA_TONE, false)) {
-            mAudioService.startDefaultAlarmTone();
-            //Replace image and name with message if no Roosters etc.
-            setDefaultDisplayProfile();
-        } else {
-            mAudioService.startAlarmSocialRoosters();
-        }
     }
 
     @Override
@@ -111,15 +103,25 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         finish();
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        deviceAlarmController.snoozeAlarm();
+        mAudioService.snoozeAudioState();
+        finish();
+    }
+
     @OnClick(R.id.alarm_snooze_button)
     protected void onAlarmSnoozeButtonClicked() {
         deviceAlarmController.snoozeAlarm();
-        mAudioService.pauseSocialRooster();
+        mAudioService.snoozeAudioState();
         finish();
     }
 
     @OnClick(R.id.alarm_dismiss)
     protected void onAlarmDismissButtonClicked() {
+        mAudioService.stopVibrate();
+        mAudioService.stopAlarmAudio();
         finish();
     }
 
@@ -132,6 +134,16 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
             AudioService.LocalBinder binder = (AudioService.LocalBinder) service;
             mAudioService = binder.getService();
             mBound = true;
+
+            deviceAlarmController = new DeviceAlarmController(getApplicationContext());
+
+            if (getIntent().getBooleanExtra(DeviceAlarm.EXTRA_TONE, false)) {
+                mAudioService.startDefaultAlarmTone();
+                //Replace image and name with message if no Roosters etc.
+                setDefaultDisplayProfile();
+            } else {
+                mAudioService.startAlarmSocialRoosters();
+            }
         }
 
         // Called when the connection with the service disconnects unexpectedly
@@ -160,7 +172,6 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
                         break;
                     default:
                         break;
-
                 }
             }
         };
