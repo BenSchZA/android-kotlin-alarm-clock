@@ -6,19 +6,19 @@
 package com.roostermornings.android.activity;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.os.Bundle;
 
 import com.roostermornings.android.R;
+import com.roostermornings.android.fragment.IIntroFragmentListener;
 import com.roostermornings.android.fragment.IntroFragment1;
 import com.roostermornings.android.fragment.IntroFragment2;
 import com.roostermornings.android.fragment.IntroFragment3;
-import com.roostermornings.android.fragment.IIntroFragmentListener;
 import com.roostermornings.android.util.DepthPageTransformer;
 import com.roostermornings.android.util.MyContactsController;
 
