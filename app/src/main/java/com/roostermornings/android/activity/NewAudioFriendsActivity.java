@@ -5,8 +5,14 @@
 
 package com.roostermornings.android.activity;
 
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -22,11 +28,16 @@ import com.google.firebase.auth.GetTokenResult;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.NewAudioFriendsListAdapter;
+import com.roostermornings.android.background.AudioService;
+import com.roostermornings.android.background.UploadService;
+import com.roostermornings.android.domain.DeviceAudioQueueItem;
 import com.roostermornings.android.domain.FCMPayloadSocialRooster;
 import com.roostermornings.android.domain.NodeAPIResult;
 import com.roostermornings.android.domain.SocialRooster;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.domain.Users;
+import com.roostermornings.android.sqlutil.DeviceAlarm;
+import com.roostermornings.android.sqlutil.DeviceAlarmController;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -44,8 +55,11 @@ public class NewAudioFriendsActivity extends BaseActivity {
     private NewAudioFriendsActivity mActivity = this;
     ArrayList<User> mFriends = new ArrayList<>();
     private RecyclerView.Adapter mAdapter;
-    private String mAudioFileUrl = "";
+    private String localFileString = "";
     private String firebaseIdToken = "";
+
+    UploadService mUploadService;
+    private boolean mBound;
 
     @BindView(R.id.new_audio_upload_button)
     Button btnNewAudioSave;
@@ -64,7 +78,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
         mRecyclerView.setAdapter(mAdapter);
 
         Bundle extras = getIntent().getExtras();
-        mAudioFileUrl = extras.getString("downloadUrl");
+        localFileString = extras.getString("localFileString");
 
         getFirebaseUser().getToken(true)
                 .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
@@ -79,7 +93,37 @@ public class NewAudioFriendsActivity extends BaseActivity {
 
 
         retrieveMyFriends();
+
+        //Bind to upload service to allow asynchronous management of Rooster upload
+        Intent intent = new Intent(this, UploadService.class);
+        startService(intent);
+        //0 indicates that service should not be restarted
+        bindService(intent, mUploadServiceConnection, 0);
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unbindService(mUploadServiceConnection);
+    }
+
+    private ServiceConnection mUploadServiceConnection = new ServiceConnection() {
+        // Called when the connection with the service is established
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            // Because we have bound to an explicit
+            // service that is running in our own process, we can
+            // cast its IBinder to a concrete class and directly access it.
+            UploadService.LocalBinder binder = (UploadService.LocalBinder) service;
+            mUploadService = binder.getService();
+            mBound = true;
+        }
+
+        // Called when the connection with the service disconnects unexpectedly
+        public void onServiceDisconnected(ComponentName className) {
+            Log.e(TAG, "onServiceDisconnected");
+            mBound = false;
+        }
+    };
 
     private void retrieveMyFriends() {
 
@@ -127,83 +171,11 @@ public class NewAudioFriendsActivity extends BaseActivity {
 
         if (!checkInternetConnection()) return;
 
-        for (User friend : mFriends) {
-            if (friend.getSelected()) {
-                inviteUsers();
-                return;
-            }
+        if(mFriends.isEmpty()) {
+            Toast.makeText(NewAudioFriendsActivity.this, R.string.new_audio_at_least_one_friend, Toast.LENGTH_LONG);
+            return;
         }
-        Toast.makeText(NewAudioFriendsActivity.this, R.string.new_audio_at_least_one_friend, Toast.LENGTH_LONG);
-
+        mUploadService.processAudioFile(firebaseIdToken, localFileString, mFriends);
+        startHomeActivity();
     }
-
-    private void inviteUsers() {
-
-        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-        FirebaseUser currentUser = getFirebaseUser();
-
-        for (User friend : mFriends) {
-            if (friend.getSelected()) {
-
-                String uploadUrl = String.format("social_rooster_uploads/%s", mAuth.getCurrentUser().getUid());
-                String queueUrl = String.format("social_rooster_queue/%s", friend.getUid());
-
-                String uploadKey = mDatabase.child(uploadUrl).push().getKey();
-                String queueKey = mDatabase.child(String.format("social_rooster_queue/%s", friend.getUid())).push().getKey();
-
-                SocialRooster socialRoosterUploaded = new SocialRooster(mAudioFileUrl,
-                        friend.getCell_number(),
-                        friend.getUser_name(),
-                        false,
-                        friend.getProfile_pic(),
-                        timestamp.getTime(),
-                        friend.getUid(), uploadKey, currentUser.getUid());
-
-                SocialRooster socialRoosterQueue = new SocialRooster(mAudioFileUrl,
-                        mCurrentUser.getCell_number(),
-                        mCurrentUser.getUser_name(),
-                        false,
-                        mCurrentUser.getProfile_pic(),
-                        timestamp.getTime(),
-                        friend.getUid(), queueKey, mCurrentUser.getUid());
-
-
-                mDatabase.getDatabase().getReference(uploadUrl + "/" + uploadKey).setValue(socialRoosterUploaded);
-                mDatabase.getDatabase().getReference(queueUrl + "/" + queueKey).setValue(socialRoosterQueue);
-                sendInvitedFriendFCMMessage(friend.getUid());
-                Toast.makeText(NewAudioFriendsActivity.this, friend.getUser_name() + " invited!", Toast.LENGTH_LONG).show();
-
-            }
-        }
-
-        Intent intent = new Intent(NewAudioFriendsActivity.this, MyAlarmsFragmentActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-    }
-
-    private void sendInvitedFriendFCMMessage(String recipientUserId) {
-        Call<NodeAPIResult> call = apiService().notifySocialUploadRecipient(
-                new FCMPayloadSocialRooster(firebaseIdToken, recipientUserId));
-
-        call.enqueue(new Callback<NodeAPIResult>() {
-            @Override
-            public void onResponse(Response<NodeAPIResult> response,
-                                   Retrofit retrofit) {
-
-                int statusCode = response.code();
-                NodeAPIResult apiResponse = response.body();
-
-                if (statusCode == 200) {
-
-                    Log.d("apiResponse", apiResponse.toString());
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                Log.i(TAG, t.getLocalizedMessage());
-            }
-        });
-    }
-
 }
