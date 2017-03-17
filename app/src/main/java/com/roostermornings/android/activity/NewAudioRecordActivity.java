@@ -65,7 +65,6 @@ public class NewAudioRecordActivity extends BaseActivity {
     MediaRecorder mediaRecorder;
     MediaPlayer mediaPlayer;
     public static final int RequestPermissionCode = 1;
-    private StorageReference mStorageRef;
     private String randomAudioFileName = "";
 
     @BindView(R.id.new_audio_time)
@@ -88,7 +87,6 @@ public class NewAudioRecordActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_new_audio);
-        mStorageRef = FirebaseStorage.getInstance().getReference();
     }
 
     @Override
@@ -257,35 +255,11 @@ public class NewAudioRecordActivity extends BaseActivity {
 
         if (!checkInternetConnection()) return;
 
-        final File localFile = new File(mAudioSavePathInDevice);
-        final Uri file = Uri.fromFile(localFile);
-        StorageReference audioFileRef = mStorageRef.child("social_rooster_uploads/" + file.getLastPathSegment());
-
-        audioFileRef.putFile(file)
-                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        //Delete local temp file
-                        localFile.delete();
-                        // Get a URL to the uploaded content
-                        //TODO: throwing error/red underline
-                        Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                        Intent intent = new Intent(NewAudioRecordActivity.this, NewAudioFriendsActivity.class);
-                        Bundle bun = new Bundle();
-                        bun.putString("downloadUrl", file.getLastPathSegment());
-                        intent.putExtras(bun);
-                        startActivity(intent);
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        // Handle unsuccessful upload
-                        Toast.makeText(NewAudioRecordActivity.this, "ERROR UPLOADING!", Toast.LENGTH_LONG).show();
-                    }
-                });
-
-
+        Intent intent = new Intent(NewAudioRecordActivity.this, NewAudioFriendsActivity.class);
+        Bundle bun = new Bundle();
+        bun.putString("localFileString", mAudioSavePathInDevice);
+        intent.putExtras(bun);
+        startActivity(intent);
     }
 
     private Runnable startTimer = new Runnable() {
