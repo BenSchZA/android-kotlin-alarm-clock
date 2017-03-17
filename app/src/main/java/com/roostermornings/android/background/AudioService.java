@@ -194,6 +194,7 @@ public class AudioService extends Service {
     }
 
     public void endService(ServiceConnection conn) {
+        if(mediaPlayerRooster != null && mediaPlayerRooster.isPlaying()) return;
         try {
             file.delete();
         } catch(NullPointerException e){
