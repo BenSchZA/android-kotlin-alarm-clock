@@ -108,11 +108,15 @@ public class AudioService extends Service {
             playSocialRooster(audioItems.get(0));
         } else{
             try {
-                mediaPlayerRooster.seekTo(currentPositionRooster);
-                mediaPlayerRooster.start();
-                this.audioItem = audioItems.get(0);
-                //Send broadcast to DeviceAlarmFullScreenActivity with UI data
-                updateAlarmUI();
+                if(audioItems.isEmpty()) {
+                    startDefaultAlarmTone();
+                } else{
+                    mediaPlayerRooster.seekTo(currentPositionRooster);
+                    mediaPlayerRooster.start();
+                    this.audioItem = audioItems.get(0);
+                    //Send broadcast to DeviceAlarmFullScreenActivity with UI data
+                    updateAlarmUI();
+                }
             } catch(NullPointerException e){
                 e.printStackTrace();
             }
@@ -192,6 +196,12 @@ public class AudioService extends Service {
         currentPositionRooster = mediaPlayerRooster.getCurrentPosition();
     }
 
+    public void pauseDefaultAlarmTone() {
+        audioServiceForegroundNotification("Alarm tone paused");
+
+        mediaPlayerDefault.stop();
+    }
+
     public void startVibrate() {
         audioServiceForegroundNotification("Alarm vibrate active");
     }
@@ -206,7 +216,13 @@ public class AudioService extends Service {
     }
 
     public void snoozeAudioState(){
-        pauseSocialRooster();
+        try {
+            if (mediaPlayerRooster.isPlaying()) pauseSocialRooster();
+            if (mediaPlayerDefault.isPlaying()) pauseDefaultAlarmTone();
+        } catch(NullPointerException e){
+            e.printStackTrace();
+            stopAlarmAudio();
+        }
         //If vibrating then cancel
         Vibrator vibrator = (Vibrator) getApplicationContext().getSystemService(VIBRATOR_SERVICE);
         if (vibrator.hasVibrator()) {
