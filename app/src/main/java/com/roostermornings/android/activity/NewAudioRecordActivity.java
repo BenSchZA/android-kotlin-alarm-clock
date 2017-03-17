@@ -257,18 +257,20 @@ public class NewAudioRecordActivity extends BaseActivity {
 
         if (!checkInternetConnection()) return;
 
-        final Uri file = Uri.fromFile(new File(mAudioSavePathInDevice));
+        final File localFile = new File(mAudioSavePathInDevice);
+        final Uri file = Uri.fromFile(localFile);
         StorageReference audioFileRef = mStorageRef.child("social_rooster_uploads/" + file.getLastPathSegment());
 
         audioFileRef.putFile(file)
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        //Delete local temp file
+                        localFile.delete();
                         // Get a URL to the uploaded content
                         //TODO: throwing error/red underline
                         Uri downloadUrl = taskSnapshot.getDownloadUrl();
                         Intent intent = new Intent(NewAudioRecordActivity.this, NewAudioFriendsActivity.class);
-
                         Bundle bun = new Bundle();
                         bun.putString("downloadUrl", file.getLastPathSegment());
                         intent.putExtras(bun);

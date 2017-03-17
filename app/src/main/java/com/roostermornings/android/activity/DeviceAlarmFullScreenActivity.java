@@ -99,11 +99,12 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        unbindService(mAudioServiceConnection);
+        unregisterReceiver(receiver);
     }
 
     @Override
     public void onBackPressed() {
-        //TODO: logic here? if dismissed not pressed?
         deviceAlarmController.snoozeAlarm();
         mAudioService.snoozeAudioState();
         finish();
@@ -118,8 +119,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
     @OnClick(R.id.alarm_dismiss)
     protected void onAlarmDismissButtonClicked() {
-        mAudioService.stopVibrate();
-        mAudioService.stopAlarmAudio();
+        mAudioService.endService(mAudioServiceConnection);
         finish();
     }
 
@@ -135,7 +135,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
             deviceAlarmController = new DeviceAlarmController(getApplicationContext());
 
-            //This intent extra is not currently implemented
+            //TODO: This intent extra is not currently implemented
             if (getIntent().getBooleanExtra(DeviceAlarm.EXTRA_TONE, false)) {
                 mAudioService.startDefaultAlarmTone();
                 //Replace image and name with message if no Roosters etc.

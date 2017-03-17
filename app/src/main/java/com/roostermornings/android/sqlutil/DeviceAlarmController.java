@@ -122,6 +122,7 @@ public final class DeviceAlarmController {
         alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Calendar alarmCalendar = Calendar.getInstance();
         alarmCalendar.setTimeInMillis(alarmCalendar.getTimeInMillis() + 1*60*1000);
+        //TODO: change to 10 min
 
         Intent alarmIntent = new Intent(context, DeviceAlarmReceiver.class);
         alarmIntent.setAction("receiver.ALARM_RECEIVER");
