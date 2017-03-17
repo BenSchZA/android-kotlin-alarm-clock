@@ -182,7 +182,7 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
                 }
             }
         };
-        mActivity.registerReceiver(receiver, firebaseListenerServiceFilter);
+        mActivity.registerReceiver(receiver, firebaseListenerServiceFilter);//TODO release
     }
 
     private void setRoosterNotification(final ViewHolder holder, boolean notification) {

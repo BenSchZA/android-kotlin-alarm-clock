@@ -9,6 +9,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
@@ -45,12 +46,15 @@ public class AudioService extends Service {
 
     private DeviceAudioQueueItem audioItem;
 
-    List<DeviceAudioQueueItem> audioItems = new ArrayList<>();
+    protected AudioService mThis = this;
+
+    ArrayList<DeviceAudioQueueItem> audioItems = new ArrayList<>();
     AudioTableManager audioTableManager = new AudioTableManager(this);
 
     private int playDuration;
     private int alarmCount;
     private int alarmPosition;
+    private File file;
 
     private int currentPositionRooster;
 
@@ -126,13 +130,13 @@ public class AudioService extends Service {
     public void playSocialRooster(final DeviceAudioQueueItem audioItem) {
         audioServiceForegroundNotification("Social Roosters playing");
 
-        this.audioItem = audioItem;
+        mThis.audioItem = audioItem;
 
         mediaPlayerRooster = new MediaPlayer();
         //Set media player to alarm volume
         mediaPlayerRooster.setAudioStreamType(AudioManager.STREAM_ALARM);
 
-        final File file = new File(getFilesDir() + "/" + audioItem.getFilename());
+        file = new File(getFilesDir() + "/" + audioItem.getFilename());
 
         try {
             mediaPlayerRooster.setDataSource(file.getPath());
@@ -153,16 +157,16 @@ public class AudioService extends Service {
                         public void onCompletion(MediaPlayer mp) {
                             //TODO: should users rather just be forced to record longer file?
                             //playDuration used to check that audio has played and for specified period, otherwise set default alarm
-                            playDuration += mediaPlayerRooster.getDuration();
+                            mThis.playDuration += mediaPlayerRooster.getDuration();
                             //delete file
-                            file.delete();
+                            mThis.file.delete();
                             //delete record from AudioTable SQL DB
-                            audioTableManager.removeAudioFile(audioItem.getId());
+                            audioTableManager.removeAudioFile(mThis.audioItem.getId());
                             //delete record from arraylist
-                            audioItems.remove(audioItem);
+                            mThis.audioItems.remove(mThis.audioItem);
                             //Play next file if list not empty
-                            if (!audioItems.isEmpty()) {
-                                playSocialRooster(audioItems.get(0));
+                            if (!mThis.audioItems.isEmpty()) {
+                                playSocialRooster(mThis.audioItems.get(0));
                             }
                             //Check conditions for playing default tone: people must wake up!
                             else if (playDuration < 5000) {
@@ -187,6 +191,34 @@ public class AudioService extends Service {
         if (playDuration < 5000 && (audioItems == null || audioItems.size() == 0)) {
             startDefaultAlarmTone();
         }
+    }
+
+    public void endService(ServiceConnection conn) {
+        try {
+            file.delete();
+        } catch(NullPointerException e){
+            e.printStackTrace();
+        }
+        //delete record of last alarm from AudioTable SQL DB
+        audioTableManager.removeAudioFile(audioItem.getId());
+        //delete record from arraylist
+        audioItems.clear();
+        //clear variables
+        playDuration = 0;
+        alarmCount = 0;
+        alarmPosition = 0;
+        currentPositionRooster = 0;
+        //ensure no alarms still playing...
+        stopVibrate();
+        stopAlarmAudio();
+        //unbind from and kill service
+        stopForeground(true);
+        try {
+            unbindService(conn);
+        } catch(IllegalArgumentException e){
+            e.printStackTrace();
+        }
+        this.stopSelf();
     }
 
     public void pauseSocialRooster() {

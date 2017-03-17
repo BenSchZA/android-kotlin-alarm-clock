@@ -89,7 +89,7 @@ public class AudioTableManager {
         db.close();
     }
 
-    public List<DeviceAudioQueueItem> extractAudioFiles() {
+    public ArrayList<DeviceAudioQueueItem> extractAudioFiles() {
 
         SQLiteDatabase db = initDB();
 
@@ -97,7 +97,7 @@ public class AudioTableManager {
 
         Cursor cursor = db.rawQuery(selectQuery, null);
 
-        List<DeviceAudioQueueItem> audioList = new ArrayList<>();
+        ArrayList<DeviceAudioQueueItem> audioList = new ArrayList<>();
         if (cursor.moveToFirst()) {
             do {
                 DeviceAudioQueueItem audioFile = new DeviceAudioQueueItem();
