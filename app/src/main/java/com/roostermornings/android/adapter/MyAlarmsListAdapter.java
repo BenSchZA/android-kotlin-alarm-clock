@@ -144,13 +144,12 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
                             .onPositive(new MaterialDialog.SingleButtonCallback() {
                                 @Override
                                 public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-
+                                    mActivity.unregisterReceiver(receiver);
                                     mDataset.remove(position);
                                     notifyItemRemoved(position);
                                     notifyItemRangeChanged(position, mDataset.size());
                                     ((MyAlarmsFragmentActivity) mActivity).deleteAlarm(alarm.getSetId(), alarm.getUid());
                                     //TODO: Delete alarm set
-                                    mActivity.unregisterReceiver(receiver);
                                 }
                             })
                             .show();
@@ -182,7 +181,7 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
                 }
             }
         };
-        mActivity.registerReceiver(receiver, firebaseListenerServiceFilter);//TODO release
+        mActivity.registerReceiver(receiver, firebaseListenerServiceFilter);
     }
 
     private void setRoosterNotification(final ViewHolder holder, boolean notification) {
