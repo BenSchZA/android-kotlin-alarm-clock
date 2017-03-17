@@ -8,10 +8,11 @@ package com.roostermornings.android.domain;
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
 @IgnoreExtraProperties
-public class User {
+public class User implements Serializable {
 
     private HashMap<String, Boolean> channels;
     private String device_type;
