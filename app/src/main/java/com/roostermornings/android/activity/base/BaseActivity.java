@@ -53,10 +53,10 @@ import butterknife.ButterKnife;
 public class BaseActivity extends AppCompatActivity implements Validator.ValidationListener {
 
     private Dialog progressDialog;
-    protected FirebaseAuth mAuth;
+    public FirebaseAuth mAuth;
     protected FirebaseAuth.AuthStateListener mAuthListener;
     private static final String TAG = BaseActivity.class.getSimpleName();
-    protected DatabaseReference mDatabase;
+    public DatabaseReference mDatabase;
 
     public static User mCurrentUser;
 
@@ -100,6 +100,8 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         };
 
     }
+
+    public BaseActivity(){}
 
     public boolean checkInternetConnection() {
         if (this.noInternetConnection()) {

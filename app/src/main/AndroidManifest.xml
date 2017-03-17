@@ -26,7 +26,6 @@
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="getResources().getString(R.string.facebook_app_id)" />
-
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_stat_ic_notification" />
@@ -151,6 +150,10 @@
             android:exported="true" />
         <service
             android:name=".background.AudioService"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".background.UploadService"
             android:enabled="true"
             android:exported="true"></service>
     </application>

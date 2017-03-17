@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+//Service to manage playing and pausing audio during Rooster alarm
 public class AudioService extends Service {
 
     // Binder given to clients
@@ -128,7 +129,7 @@ public class AudioService extends Service {
     }
 
     public void playSocialRooster(final DeviceAudioQueueItem audioItem) {
-        audioServiceForegroundNotification("Social Roosters playing");
+        foregroundNotification("Social Roosters playing");
 
         mThis.audioItem = audioItem;
 
@@ -223,20 +224,20 @@ public class AudioService extends Service {
     }
 
     public void pauseSocialRooster() {
-        audioServiceForegroundNotification("Social Rooster paused");
+        foregroundNotification("Social Rooster paused");
 
         mediaPlayerRooster.pause();
         currentPositionRooster = mediaPlayerRooster.getCurrentPosition();
     }
 
     public void pauseDefaultAlarmTone() {
-        audioServiceForegroundNotification("Alarm tone paused");
+        foregroundNotification("Alarm tone paused");
 
         mediaPlayerDefault.stop();
     }
 
     public void startVibrate() {
-        audioServiceForegroundNotification("Alarm vibrate active");
+        foregroundNotification("Alarm vibrate active");
     }
 
     public void stopVibrate() {
@@ -264,7 +265,7 @@ public class AudioService extends Service {
     }
 
     public void startDefaultAlarmTone() {
-        audioServiceForegroundNotification("Alarm ringtone playing");
+        foregroundNotification("Alarm ringtone playing");
 
         mediaPlayerDefault = new MediaPlayer();
 
@@ -302,7 +303,7 @@ public class AudioService extends Service {
         }
     }
 
-    private void audioServiceForegroundNotification(String state) {
+    private void foregroundNotification(String state) {
 
         Intent notificationIntent = new Intent(this, AudioService.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
