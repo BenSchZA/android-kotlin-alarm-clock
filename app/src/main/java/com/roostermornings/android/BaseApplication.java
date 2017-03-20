@@ -46,11 +46,11 @@ public class BaseApplication extends android.app.Application {
     protected DatabaseReference mDatabase;
 
     //Global flag set from FirebaseListenerService to indicate new notification
-    private int notificationFlag;
+    private static int notificationFlag;
     private BroadcastReceiver receiver;
 
-    private int roosterCount;
-    private int friendRequests;
+    private static int roosterCount;
+    private static int friendRequests;
 
     @Override
     public void onCreate() {
@@ -89,9 +89,6 @@ public class BaseApplication extends android.app.Application {
 
         //set database persistence to keep offline alarm edits synced
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-
-        //Start Firebase listeners applicable to all activities - primarily to update notifications
-        startService(new Intent(getApplicationContext(), FirebaseListenerService.class));
 
         updateNotification();
     }
@@ -133,21 +130,20 @@ public class BaseApplication extends android.app.Application {
 
     public int getNotificationFlag(String flag) {
         if(flag.contentEquals("roosterCount")){
-            notificationFlag = this.roosterCount;
+            notificationFlag = roosterCount;
         }
         if(flag.contentEquals("friendRequests")){
-            notificationFlag = this.friendRequests;
+            notificationFlag = friendRequests;
         }
         return notificationFlag;
     }
 
-    public void setNotificationFlag(int notificationFlag, String flag) {
+    public void setNotificationFlag(int value, String flag) {
         if(flag.contentEquals("roosterCount")){
-            this.roosterCount = notificationFlag;
+            roosterCount = value;
         }
         if(flag.contentEquals("friendRequests")){
-            this.friendRequests = notificationFlag;
+            friendRequests = value;
         }
-        this.notificationFlag = notificationFlag;
     }
 }

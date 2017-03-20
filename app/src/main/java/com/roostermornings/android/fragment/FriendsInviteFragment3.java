@@ -5,6 +5,7 @@
 
 package com.roostermornings.android.fragment;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -98,7 +99,6 @@ public class FriendsInviteFragment3 extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //initialize(R.layout.fragment_friends_fragment3);
 
         if (getArguments() != null) {
         }
@@ -148,11 +148,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        baseActivity = (BaseActivity) getActivity();
-        if (ContextCompat.checkSelfPermission(getContext(),
-                android.Manifest.permission.READ_CONTACTS)
-                == PackageManager.PERMISSION_GRANTED) executeNodeMyContactsTask();
-        else  baseActivity.requestPermissionReadContacts();
+        requestGetContacts();
 
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
@@ -203,6 +199,14 @@ public class FriendsInviteFragment3 extends BaseFragment {
         super.onResume();
     }
 
+    public void requestGetContacts() {
+        baseActivity = (BaseActivity) getActivity();
+        if (ContextCompat.checkSelfPermission(getContext(),
+                android.Manifest.permission.READ_CONTACTS)
+                == PackageManager.PERMISSION_GRANTED) executeNodeMyContactsTask();
+        else  baseActivity.requestPermissionReadContacts();
+    }
+
     private void executeNodeMyContactsTask() {
         FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
         mUser.getToken(true)
@@ -233,6 +237,8 @@ public class FriendsInviteFragment3 extends BaseFragment {
 
                     mUsers = new ArrayList<>();
                     mUsers.addAll(apiResponse.users.get(0));
+                    //Sort names alphabetically before notifying adapter
+                    sortNames(mUsers);
                     mAdapter = new FriendsInviteListAdapter(mUsers, getContext());
 
                     mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));

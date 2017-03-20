@@ -53,6 +53,8 @@ public class FriendsFragmentActivity extends BaseActivity implements
     public static final String TAG = FriendsFragmentActivity.class.getSimpleName();
     @BindView(R.id.toolbar)
     Toolbar toolbar;
+    @BindView(R.id.toolbar_title)
+    TextView toolbarTitle;
     @BindView(R.id.tabs)
     TabLayout tabLayout;
     @BindView(R.id.home_friends)
@@ -87,6 +89,12 @@ public class FriendsFragmentActivity extends BaseActivity implements
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_friends);
 
+        //Set toolbar title
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        toolbarTitle.setText(getString(R.string.friends));
+
         //Keep local and Firebase alarm dbs synced, and enable offline persistence
         mFriendRequestsReceivedReference = FirebaseDatabase.getInstance().getReference()
                 .child("friend_requests_received").child(getFirebaseUser().getUid());
@@ -100,8 +108,6 @@ public class FriendsFragmentActivity extends BaseActivity implements
         mFriendRequestsReceivedReference.keepSynced(true);
         mFriendRequestsSentReference.keepSynced(true);
         mCurrentUserReference.keepSynced(true);
-
-        setSupportActionBar(toolbar);
 
         //Create a viewpager with fragments controlled by SectionsPagerAdapter
         createViewPager(mViewPager);

@@ -5,6 +5,7 @@
 
 package com.roostermornings.android.activity.base;
 
+import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -40,10 +41,14 @@ import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.activity.SplashActivity;
 import com.roostermornings.android.background.FirebaseListenerService;
+import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.node_api.IHTTPClient;
 import com.roostermornings.android.util.InternetHelper;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -86,7 +91,8 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
                 if (user != null) {
                     // User is signed in
                     //Start Firebase listeners applicable to all activities - primarily to update notifications
-                    startService(new Intent(getApplicationContext(), FirebaseListenerService.class));
+                    if(!isServiceRunning(FirebaseListenerService.class))
+                        startService(new Intent(getApplicationContext(), FirebaseListenerService.class));
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                 } else {
                     // User is signed out
@@ -265,6 +271,16 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
+    }
+
+    private boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     final public int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 10;
