@@ -25,16 +25,5 @@
 
         <include layout="@layout/content_my_alarms"/>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/add_alarm"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginBottom="70dp"
-        android:layout_marginRight="@dimen/fab_margin"
-        android:src="@drawable/ic_add_white_24dp"
-        android:backgroundTint="@color/grey"
-        app:borderWidth="0dp" />
-
 </android.support.design.widget.CoordinatorLayout>
 
