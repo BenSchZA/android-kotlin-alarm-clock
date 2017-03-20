@@ -25,6 +25,7 @@
         android:background="@drawable/counter_circle_yellow"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
+        android:layout_margin="-20dp"
         android:visibility="gone"/>
 
 </RelativeLayout>

@@ -99,7 +99,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        unbindService(mAudioServiceConnection);
+        if(mBound) unbindService(mAudioServiceConnection);
         unregisterReceiver(receiver);
     }
 
@@ -107,6 +107,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     public void onBackPressed() {
         deviceAlarmController.snoozeAlarm();
         mAudioService.snoozeAudioState();
+        if(mBound) unbindService(mAudioServiceConnection);
         finish();
     }
 
@@ -114,12 +115,14 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     protected void onAlarmSnoozeButtonClicked() {
         deviceAlarmController.snoozeAlarm();
         mAudioService.snoozeAudioState();
+        if(mBound) unbindService(mAudioServiceConnection);
         finish();
     }
 
     @OnClick(R.id.alarm_dismiss)
     protected void onAlarmDismissButtonClicked() {
         mAudioService.endService(mAudioServiceConnection);
+        if(mBound) unbindService(mAudioServiceConnection);
         finish();
     }
 
@@ -153,7 +156,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     };
 
     private void attachAudioServiceBroadCastReceiver() {
-        //Flag check for UI changes on load, broadcastreceiver for changes while activity running
+        //Flag check for UI changes on load, broadcast receiver for changes while activity running
         //Broadcast receiver filter to receive UI updates
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("rooster.update.ALARMDISPLAY");
