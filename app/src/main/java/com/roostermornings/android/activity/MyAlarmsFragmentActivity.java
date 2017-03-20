@@ -72,14 +72,6 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         toolbarTitle.setText(getString(R.string.my_alarms));
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.add_alarm);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(MyAlarmsFragmentActivity.this, NewAlarmFragmentActivity.class));
-            }
-        });
-
         buttonAddAlarm.setBackgroundResource(R.drawable.rooster_button_bar_add_alarm_active);
 
         mMyAlarmsReference = FirebaseDatabase.getInstance().getReference()
@@ -179,6 +171,10 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+
+        if(id == R.id.action_add_alarm) {
+            startActivity(new Intent(MyAlarmsFragmentActivity.this, NewAlarmFragmentActivity.class));
+        }
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
