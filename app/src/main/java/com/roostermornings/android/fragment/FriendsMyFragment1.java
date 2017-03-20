@@ -29,6 +29,8 @@ import com.roostermornings.android.domain.User;
 import com.roostermornings.android.fragment.base.BaseFragment;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import butterknife.BindView;
 
@@ -74,7 +76,6 @@ public class FriendsMyFragment1 extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //initialize(R.layout.fragment_friends_fragment3);
 
         if (getArguments() != null) {
         }
@@ -92,7 +93,8 @@ public class FriendsMyFragment1 extends BaseFragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
+        //Sort names alphabetically before notifying adapter
+        sortNames(mUsers);
         mAdapter = new FriendsMyListAdapter(mUsers, getContext());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mRecyclerView.setAdapter(mAdapter);
@@ -107,6 +109,8 @@ public class FriendsMyFragment1 extends BaseFragment {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 mUsers.add(dataSnapshot.getValue(Friend.class));
+                //Sort names alphabetically before notifying adapter
+                sortNames(mUsers);
                 mAdapter.notifyDataSetChanged();
             }
 
@@ -122,6 +126,8 @@ public class FriendsMyFragment1 extends BaseFragment {
                 if(friendRemove != null) {
                     mUsers.remove(friendRemove);
                     mUsers.add(friend);
+                    //Sort names alphabetically before notifying adapter
+                    sortNames(mUsers);
                     mAdapter.notifyDataSetChanged();
                 }
             }
@@ -129,6 +135,8 @@ public class FriendsMyFragment1 extends BaseFragment {
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
                 mUsers.remove(dataSnapshot.getValue(Friend.class));
+                //Sort names alphabetically before notifying adapter
+                sortNames(mUsers);
                 mAdapter.notifyDataSetChanged();
             }
 

@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
@@ -32,6 +33,7 @@ import com.roostermornings.android.background.AudioService;
 import com.roostermornings.android.background.UploadService;
 import com.roostermornings.android.domain.DeviceAudioQueueItem;
 import com.roostermornings.android.domain.FCMPayloadSocialRooster;
+import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.NodeAPIResult;
 import com.roostermornings.android.domain.SocialRooster;
 import com.roostermornings.android.domain.User;
@@ -41,6 +43,8 @@ import com.roostermornings.android.sqlutil.DeviceAlarmController;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -93,18 +97,12 @@ public class NewAudioFriendsActivity extends BaseActivity {
 
 
         retrieveMyFriends();
-
-        //Bind to upload service to allow asynchronous management of Rooster upload
-        Intent intent = new Intent(this, UploadService.class);
-        startService(intent);
-        //0 indicates that service should not be restarted
-        bindService(intent, mUploadServiceConnection, 0);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        unbindService(mUploadServiceConnection);
+        if(mBound) unbindService(mUploadServiceConnection);
     }
 
     private ServiceConnection mUploadServiceConnection = new ServiceConnection() {
@@ -116,6 +114,9 @@ public class NewAudioFriendsActivity extends BaseActivity {
             UploadService.LocalBinder binder = (UploadService.LocalBinder) service;
             mUploadService = binder.getService();
             mBound = true;
+
+            //Start upload service thread task
+            mUploadService.processAudioFile(firebaseIdToken, localFileString, mFriends);
         }
 
         // Called when the connection with the service disconnects unexpectedly
@@ -150,6 +151,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
 
                     mFriends = new ArrayList<>();
                     mFriends.addAll(apiResponse.users);
+                    sortNames(mFriends);
                     mAdapter = new NewAudioFriendsListAdapter(mFriends, NewAudioFriendsActivity.this);
 
                     mRecyclerView.setLayoutManager(new LinearLayoutManager(NewAudioFriendsActivity.this));
@@ -166,6 +168,16 @@ public class NewAudioFriendsActivity extends BaseActivity {
         });
     }
 
+    public void sortNames(ArrayList<User> mUsers){
+        //Take arraylist and sort alphabetically
+        Collections.sort(mUsers, new Comparator<User>() {
+            @Override
+            public int compare(User lhs, User rhs) {
+                return lhs.getUser_name().compareTo(rhs.getUser_name());
+            }
+        });
+    }
+
     @OnClick(R.id.new_audio_upload_button)
     protected void onSaveButtonClick() {
 
@@ -175,7 +187,14 @@ public class NewAudioFriendsActivity extends BaseActivity {
             Toast.makeText(NewAudioFriendsActivity.this, R.string.new_audio_at_least_one_friend, Toast.LENGTH_LONG);
             return;
         }
-        mUploadService.processAudioFile(firebaseIdToken, localFileString, mFriends);
+
+        //Bind to upload service to allow asynchronous management of Rooster upload
+        Intent intent = new Intent(this, UploadService.class);
+        startService(intent);
+        //0 indicates that service should not be restarted
+        bindService(intent, mUploadServiceConnection, 0);
+
+        //Switch to home activity - alarms
         startHomeActivity();
     }
 }

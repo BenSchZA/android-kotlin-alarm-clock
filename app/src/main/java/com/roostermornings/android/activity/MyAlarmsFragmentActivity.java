@@ -66,6 +66,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_my_alarms);
 
+        //Set toolbar title
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);

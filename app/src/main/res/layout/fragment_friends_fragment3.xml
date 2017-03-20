@@ -44,7 +44,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="left"
-        android:padding="@dimen/spacing_large"
+        android:paddingTop="@dimen/spacing_large"
         android:text="Contacts"
         android:textColor="@color/white"
         android:textSize="@dimen/text_normal_large"/>

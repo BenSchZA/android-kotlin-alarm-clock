@@ -64,7 +64,7 @@
                     android:paddingBottom="@dimen/spacing_normal"
                     android:paddingTop="@dimen/spacing_xsmall"
                     android:text="Channel"
-                    android:textColor="@drawable/rooster_link_white"
+                    android:textColor="@drawable/rooster_link_white_semi_transparent"
                     android:textSize="@dimen/text_large"
                     android:textStyle="normal" />
 

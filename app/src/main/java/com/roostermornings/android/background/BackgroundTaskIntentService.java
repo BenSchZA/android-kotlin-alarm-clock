@@ -137,8 +137,8 @@ public class BackgroundTaskIntentService extends IntentService {
             final DatabaseReference queueRecordReference = FirebaseDatabase.getInstance().getReference()
                     .child("social_rooster_queue").child(mAuth.getCurrentUser().getUid()).child(alarmQueue.getQueue_id());
 
-            final long ONE_MEGABYTE = 1024 * 1024;
-            audioFileRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            final long FIVE_MEGABYTE = 5 * 1024 * 1024;
+            audioFileRef.getBytes(FIVE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                 @Override
                 public void onSuccess(byte[] bytes) {
 

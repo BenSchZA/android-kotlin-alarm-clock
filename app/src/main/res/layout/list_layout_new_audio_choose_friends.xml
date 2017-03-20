@@ -36,6 +36,11 @@
         android:layout_gravity="right|center_vertical"
         android:text="Add"></Button>
 
-
+    <!--<Button-->
+        <!--android:id="@+id/new_audio_friend_add"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_gravity="right|center_vertical"-->
+        <!--android:background="@drawable/rooster_radio_button"/>-->
 
 </LinearLayout>
