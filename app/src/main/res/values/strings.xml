@@ -43,6 +43,7 @@
     <string name="alarm_default_name">Rise and Shine!</string>
     <string name="alarm_count"></string>
 
+    <string name="friends">Friends</string>
     <string name="text_name_initials"></string>
     <string name="text_friends_button_add">Add</string>
     <string name="share_button">Invite friends</string>

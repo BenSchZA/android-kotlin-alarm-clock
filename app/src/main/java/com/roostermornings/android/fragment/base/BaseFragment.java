@@ -19,6 +19,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.mobsandgeeks.saripaar.ValidationError;
 import com.mobsandgeeks.saripaar.Validator;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -26,6 +29,7 @@ import javax.inject.Inject;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.domain.Friend;
 
 import butterknife.ButterKnife;
 
@@ -83,5 +87,15 @@ public class BaseFragment extends Fragment implements Validator.ValidationListen
         }catch(NullPointerException e){
             e.printStackTrace();
         }
+    }
+
+    public void sortNames(ArrayList<Friend> mUsers){
+        //Take arraylist and sort alphabetically
+        Collections.sort(mUsers, new Comparator<Friend>() {
+            @Override
+            public int compare(Friend lhs, Friend rhs) {
+                return lhs.getUser_name().compareTo(rhs.getUser_name());
+            }
+        });
     }
 }

@@ -73,7 +73,6 @@ public class FriendsRequestFragment2 extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //initialize(R.layout.fragment_friends_fragment3);
 
         if (getArguments() != null) {
         }
@@ -92,6 +91,7 @@ public class FriendsRequestFragment2 extends BaseFragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        sortNames(mUsers);
         mAdapter = new FriendsRequestListAdapter(mUsers, getContext());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mRecyclerView.setAdapter(mAdapter);
@@ -106,6 +106,8 @@ public class FriendsRequestFragment2 extends BaseFragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     mUsers.add(postSnapshot.getValue(Friend.class));
+                    //Sort names alphabetically before notifying adapter
+                    sortNames(mUsers);
                     mAdapter.notifyDataSetChanged();
                 }
             }

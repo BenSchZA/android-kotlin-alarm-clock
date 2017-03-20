@@ -113,6 +113,7 @@ public class FriendsInviteListAdapter extends RecyclerView.Adapter<FriendsInvite
                     public void run() {
                         //Do something after 200ms
                         remove(user);
+                        notifyDataSetChanged();
                     }
                 }, 200);
             }
