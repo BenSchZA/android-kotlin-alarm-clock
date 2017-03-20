@@ -104,7 +104,7 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
         updateRoosterNotification(holder);
 
         holder.txtAlarmTime.setOnClickListener(new View.OnClickListener() {
