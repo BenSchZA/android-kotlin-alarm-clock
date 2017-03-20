@@ -49,8 +49,6 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     RecyclerView mRecyclerView;
     @BindView(R.id.toolbar_title)
     TextView toolbarTitle;
-    @BindView(R.id.home_my_alarms)
-    ImageButton buttonAddAlarm;
     @BindView(R.id.button_bar)
     LinearLayout buttonBarLayout;
     private DatabaseReference mMyAlarmsReference;
@@ -71,8 +69,6 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         toolbarTitle.setText(getString(R.string.my_alarms));
-
-        buttonAddAlarm.setBackgroundResource(R.drawable.rooster_button_bar_add_alarm_active);
 
         mMyAlarmsReference = FirebaseDatabase.getInstance().getReference()
                 .child("alarms").child(getFirebaseUser().getUid());
