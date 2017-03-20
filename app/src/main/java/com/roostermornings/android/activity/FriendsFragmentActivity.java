@@ -20,6 +20,8 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -176,20 +178,29 @@ public class FriendsFragmentActivity extends BaseActivity implements
 
     //Create custom tab layout
     public void setTabLayout(int position, String title) {
-        RelativeLayout relativeLayout = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.custom_friends_tab, null);
-        TextView tabText = (TextView) relativeLayout.getChildAt(0);
+        FrameLayout frameLayout = (FrameLayout) LayoutInflater.from(this).inflate(R.layout.custom_friends_tab, null);
+        TextView tabText = (TextView) frameLayout.getChildAt(0);
         tabText.setText(title);
-        tabLayout.getTabAt(position).setCustomView(relativeLayout);
+        //Disable clipping to ensure notification is shown properly
+        ViewGroup tabs = ((ViewGroup)tabLayout.getChildAt(0));
+        tabs.setClipToPadding(false);
+        tabs.setClipChildren(false);
+        if(tabs.getChildAt(position) instanceof ViewGroup) {
+            ((ViewGroup) tabs.getChildAt(position)).setClipToPadding(false);
+            ((ViewGroup) tabs.getChildAt(position)).setClipChildren(false);
+        }
+
+        tabLayout.getTabAt(position).setCustomView(frameLayout);
     }
 
     //Set current tab notification
     public void setTabNotification(int position, boolean notification) {
         TabLayout.Tab tab = tabLayout.getTabAt(position);
-        RelativeLayout relativeLayout = (RelativeLayout) tab.getCustomView();
+        FrameLayout frameLayout = (FrameLayout) tab.getCustomView();
         ImageView tabNotification = (ImageView) tab.getCustomView().findViewById(R.id.notification);
         if (notification) tabNotification.setVisibility(View.VISIBLE);
         else tabNotification.setVisibility(View.GONE);
-        tab.setCustomView(relativeLayout);
+        tab.setCustomView(frameLayout);
     }
 
     public void setButtonBarNotification(boolean notification) {
