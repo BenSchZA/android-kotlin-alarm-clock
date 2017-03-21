@@ -10,11 +10,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import static com.roostermornings.android.sqldata.AudioTableContract.AudioTableEntry;
-import static com.roostermornings.android.sqldata.AudioTableContract.SQL_CREATE_ENTRIES;
 
-import com.roostermornings.android.domain.AlarmQueue;
 import com.roostermornings.android.domain.DeviceAudioQueueItem;
+import com.roostermornings.android.sqldata.AudioTableContract;
 import com.roostermornings.android.sqldata.AudioTableHelper;
+import com.roostermornings.android.sqldata.DeviceAlarmTableContract;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -38,20 +38,25 @@ public class AudioTableManager {
     }
 
 
-    public void insertAudioFile(AlarmQueue queue) {
+    public void insertAudioFile(DeviceAudioQueueItem queue, Boolean type) {
 
         SQLiteDatabase db = initDB();
 
         ContentValues values = new ContentValues();
 
-        values.put(AudioTableEntry.COLUMN_FILENAME, queue.getAudio_file_url());
+        //Type defines whether the audio file is a channel or social Rooster
+        values.put(AudioTableEntry.COLUMN_TYPE, type);
+        values.put(AudioTableEntry.COLUMN_FILENAME, queue.getFilename());
         values.put(AudioTableEntry.COLUMN_QUEUE_ID, queue.getQueue_id());
-        values.put(AudioTableEntry.COLUMN_ALARM_ID, queue.getAlarm_id());
+
+        if(queue.getListened() == "TRUE") {
+            values.put(AudioTableEntry.COLUMN_LISTENED, TRUE);
+        }
 
         values.put(AudioTableEntry.COLUMN_SENDER_ID, queue.getSender_id());
-        values.put(AudioTableEntry.COLUMN_SENDER_NAME, queue.getUser_name());
-        values.put(AudioTableEntry.COLUMN_SENDER_PIC, queue.getProfile_pic());
-        values.put(AudioTableEntry.COLUMN_DATE_UPLOADED, queue.getDate_uploaded());
+        values.put(AudioTableEntry.COLUMN_NAME, queue.getName());
+        values.put(AudioTableEntry.COLUMN_PICTURE, queue.getPicture());
+        values.put(AudioTableEntry.COLUMN_DATE_UPLOADED, queue.getDate_created());
 
         // Inserting Row
         db.insert(AudioTableEntry.TABLE_NAME, null, values);
@@ -70,6 +75,7 @@ public class AudioTableManager {
     //TODO: check that this works...
     public void purgeAudioFiles(){
         //Purge audio files older than 2 weeks
+        //TODO: purge channel audio
         SQLiteDatabase db = initDB();
 
         String execSql = "DELETE FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_DATE_UPLOADED +
@@ -89,34 +95,78 @@ public class AudioTableManager {
         db.close();
     }
 
-    public ArrayList<DeviceAudioQueueItem> extractAudioFiles() {
+    public ArrayList<DeviceAudioQueueItem> extractSocialAudioFiles() {
 
         SQLiteDatabase db = initDB();
 
-        String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + ";";
+        String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_TYPE + " = " + FALSE + ";";
 
         Cursor cursor = db.rawQuery(selectQuery, null);
 
+        return extractAudioFiles(cursor);
+    }
+
+    public ArrayList<DeviceAudioQueueItem> extractAlarmChannelAudioFiles(String alarmUid) {
+
+        SQLiteDatabase db = initDB();
+
+        String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_TYPE + " = " + TRUE + " AND " + AudioTableEntry.COLUMN_QUEUE_ID + " = " + "'" + alarmUid + "'" + ";";
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        return extractAudioFiles(cursor);
+    }
+
+    public ArrayList<DeviceAudioQueueItem> extractAllChannelAudioFiles() {
+        SQLiteDatabase db = initDB();
+
+        String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_TYPE + " = " + TRUE + ";";
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        return extractAudioFiles(cursor);
+    }
+
+    public void setListened(int ID) {
+        SQLiteDatabase db = initDB();
+
+        String updateQuery = "UPDATE " + AudioTableEntry.TABLE_NAME + " SET " + AudioTableEntry.COLUMN_LISTENED + " = " + TRUE + " WHERE " + AudioTableEntry.COLUMN_ID + " = " + ID + ";";
+
+        db.execSQL(updateQuery);
+        db.close();
+    }
+
+    public ArrayList<DeviceAudioQueueItem> selectListened() {
+        SQLiteDatabase db = initDB();
+
+        String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_LISTENED + " = " + TRUE + ";";
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        return extractAudioFiles(cursor);
+    }
+
+    private ArrayList<DeviceAudioQueueItem> extractAudioFiles(Cursor cursor) {
         ArrayList<DeviceAudioQueueItem> audioList = new ArrayList<>();
         if (cursor.moveToFirst()) {
             do {
                 DeviceAudioQueueItem audioFile = new DeviceAudioQueueItem();
 
-                audioFile.setAlarm_id(cursor.getLong(cursor.getColumnIndex(AudioTableEntry.COLUMN_ALARM_ID)));
                 audioFile.setDate_created(cursor.getInt(cursor.getColumnIndex(AudioTableEntry.COLUMN_DATE_UPLOADED)));
                 audioFile.setFilename(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_FILENAME)));
                 audioFile.setId(cursor.getInt(cursor.getColumnIndex(AudioTableEntry.COLUMN_ID)));
                 audioFile.setQueue_id(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_QUEUE_ID)));
+                audioFile.setListened(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_LISTENED)));
                 audioFile.setSender_id(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_SENDER_ID)));
-                audioFile.setSender_name(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_SENDER_NAME)));
-                audioFile.setSender_pic(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_SENDER_PIC)));
+                audioFile.setName(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_NAME)));
+                audioFile.setPicture(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_PICTURE)));
 
                 audioList.add(audioFile);
 
             } while (cursor.moveToNext());
         }
         cursor.close();
-        db.close();
+
         return audioList;
     }
 

@@ -11,17 +11,42 @@ import java.io.Serializable;
  * Created by bscholtz on 2/21/17.
  */
 
-
-
 public class DeviceAudioQueueItem implements Serializable {
     private int id;
+    //Queue id also acts as alarm id
     private String queue_id;
     private String filename;
-    private long alarm_id;
     private long date_created;
     private String sender_id;
-    private String sender_name;
-    private String sender_pic;
+    private String name;
+    private String picture;
+    private String listened;
+
+    public void fromSocialRooster(SocialRooster socialRooster, String audioFileUrl) {
+        this.queue_id = socialRooster.getQueue_id();
+        this.filename = audioFileUrl;
+        this.date_created = socialRooster.getDate_uploaded();
+        this.sender_id = socialRooster.getSender_id();
+        this.name = socialRooster.getUser_name();
+        this.picture = socialRooster.getProfile_pic();
+        this.listened = String.valueOf(socialRooster.getListened());
+    }
+
+    public void fromChannelRooster(ChannelRooster channelRooster, String audioFileUrl) {
+        this.queue_id = channelRooster.getAlarm_uid();
+        this.filename = audioFileUrl;
+        // Channel doesn't send channel ID this.sender_id = ;
+        this.name = channelRooster.getName();
+        this.picture = channelRooster.getPhoto();
+    }
+
+    public String getListened() {
+        return listened;
+    }
+
+    public void setListened(String listened) {
+        this.listened = listened;
+    }
 
     public long getDate_created() {
         return date_created;
@@ -57,14 +82,6 @@ public class DeviceAudioQueueItem implements Serializable {
         this.filename = filename;
     }
 
-    public long getAlarm_id() {
-        return alarm_id;
-    }
-
-    public void setAlarm_id(long alarm_id) {
-        this.alarm_id = alarm_id;
-    }
-
     public String getSender_id() {
         return sender_id;
     }
@@ -73,19 +90,19 @@ public class DeviceAudioQueueItem implements Serializable {
         this.sender_id = sender_id;
     }
 
-    public String getSender_name() {
-        return sender_name;
+    public String getName() {
+        return name;
     }
 
-    public void setSender_name(String sender_name) {
-        this.sender_name = sender_name;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getSender_pic() {
-        return sender_pic;
+    public String getPicture() {
+        return picture;
     }
 
-    public void setSender_pic(String sender_pic) {
-        this.sender_pic = sender_pic;
+    public void setPicture(String picture) {
+        this.picture = picture;
     }
 }

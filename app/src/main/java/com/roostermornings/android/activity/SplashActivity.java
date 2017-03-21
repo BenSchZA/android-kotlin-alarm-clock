@@ -29,6 +29,7 @@ public class SplashActivity extends BaseActivity {
         initialize(R.layout.activity_splash);
         mFBUser = getFirebaseUser();
 
+//        //TODO: remove
 //        if (BuildConfig.DEBUG) {
 //
 //            AudioTableHelper dbAudioHelper = new AudioTableHelper(this);

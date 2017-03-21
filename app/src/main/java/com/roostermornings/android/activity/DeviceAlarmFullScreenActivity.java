@@ -15,13 +15,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Vibrator;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.util.Log;
@@ -34,16 +29,10 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.background.AudioService;
 import com.roostermornings.android.domain.DeviceAudioQueueItem;
-import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -61,6 +50,8 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
     private int alarmCount;
     private int alarmPosition;
+
+    private String alarmUid;
 
     @BindView(R.id.alarm_sender_pic)
     ImageView imgSenderPic;
@@ -87,6 +78,10 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
                 +WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
                 +WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 
+
+        //Get alarm UID for relating current alarm to channel content
+        alarmUid = getIntent().getStringExtra(DeviceAlarm.EXTRA_UID);
+
         //Bind to audio service to allow playback and pausing of alarms in background
         Intent intent = new Intent(this, AudioService.class);
         startService(intent);
@@ -105,17 +100,19 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
-        deviceAlarmController.snoozeAlarm();
+        deviceAlarmController.snoozeAlarm(alarmUid);
         mAudioService.snoozeAudioState();
         if(mBound) unbindService(mAudioServiceConnection);
+        mBound = false;
         finish();
     }
 
     @OnClick(R.id.alarm_snooze_button)
     protected void onAlarmSnoozeButtonClicked() {
-        deviceAlarmController.snoozeAlarm();
+        deviceAlarmController.snoozeAlarm(alarmUid);
         mAudioService.snoozeAudioState();
         if(mBound) unbindService(mAudioServiceConnection);
+        mBound = false;
         finish();
     }
 
@@ -123,6 +120,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     protected void onAlarmDismissButtonClicked() {
         mAudioService.endService(mAudioServiceConnection);
         if(mBound) unbindService(mAudioServiceConnection);
+        mBound = false;
         finish();
     }
 
@@ -144,7 +142,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
                 //Replace image and name with message if no Roosters etc.
                 setDefaultDisplayProfile();
             } else {
-                mAudioService.startAlarmSocialRoosters();
+                mAudioService.startAlarmRoosters(alarmUid);
             }
         }
 
@@ -182,12 +180,12 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
     protected void setAlarmUI() {
 
-        if (audioItem.getSender_pic() != null && audioItem.getSender_pic().length() != 0) {
-            setProfilePic(audioItem.getSender_pic());
+        if (audioItem.getPicture() != null && audioItem.getPicture().length() != 0) {
+            setProfilePic(audioItem.getPicture());
         } else {
             imgSenderPic.setBackground(getResources().getDrawable(R.drawable.alarm_profile_pic_circle));
         }
-        txtSenderName.setText(audioItem.getSender_name());
+        txtSenderName.setText(audioItem.getName());
         txtAlarmCount.setText(String.format("%s of %s", alarmPosition, alarmCount));
     }
 
