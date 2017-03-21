@@ -40,7 +40,7 @@ public final class DeviceAlarmTableContract {
             "CREATE TABLE " + AlarmTableEntry.TABLE_NAME + " ("
 
                     + AlarmTableEntry.COLUMN_PI_ID + " INTEGER PRIMARY KEY, "
-                    + AlarmTableEntry.COLUMN_SET_ID + " INTEGER NOT NULL, "
+                    + AlarmTableEntry.COLUMN_SET_ID + " TEXT NOT NULL, "
 
                     + AlarmTableEntry.COLUMN_HOUR + " INTEGER NOT NULL, "
                     + AlarmTableEntry.COLUMN_MINUTE + " INTEGER NOT NULL, "

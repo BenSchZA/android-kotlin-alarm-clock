@@ -40,7 +40,7 @@ public class DeviceAlarmTableManager {
         alarm = new DeviceAlarm();
     }
 
-    public void insertAlarm(DeviceAlarm alarm, long setId) {
+    public void insertAlarm(DeviceAlarm alarm, String setId) {
 
         SQLiteDatabase db = initDB();
 
@@ -174,13 +174,13 @@ public class DeviceAlarmTableManager {
         return db.rawQuery(selectQuery, null);
     }
 
-    public List<DeviceAlarm> getAlarmSet(Long SetId) {
+    public List<DeviceAlarm> getAlarmSet(String setId) {
         SQLiteDatabase db = initDB();
 
         List<DeviceAlarm> alarmList;
 
         String selectQuery = "SELECT * FROM " + AlarmTableEntry.TABLE_NAME +
-                " WHERE " + AlarmTableEntry.COLUMN_SET_ID + " = " + SetId;
+                " WHERE " + AlarmTableEntry.COLUMN_SET_ID + " LIKE \"%" + setId + "%\";";
 
         Cursor cursor = db.rawQuery(selectQuery, null);
         alarmList = extractAlarms(cursor);
@@ -188,10 +188,10 @@ public class DeviceAlarmTableManager {
         return alarmList;
     }
 
-    public void deleteAlarmSet(Long setId) {
+    public void deleteAlarmSet(String setId) {
         SQLiteDatabase db = initDB();
 
-        String execSql = "DELETE FROM " + AlarmTableEntry.TABLE_NAME + " WHERE " + AlarmTableEntry.COLUMN_SET_ID + " = " + setId + ";";
+        String execSql = "DELETE FROM " + AlarmTableEntry.TABLE_NAME + " WHERE " + AlarmTableEntry.COLUMN_SET_ID + " LIKE \"%" + setId + "%\";";
 
         db.execSQL(execSql);
         db.close();
@@ -212,7 +212,7 @@ public class DeviceAlarmTableManager {
         return count;
     }
 
-    public Long returnFirstAlarmSetId() {
+    public String returnFirstAlarmSetId() {
         SQLiteDatabase db = initDB();
 
         String selectQuery = "SELECT " + AlarmTableEntry.COLUMN_SET_ID + " FROM " + AlarmTableEntry.TABLE_NAME;
@@ -220,10 +220,10 @@ public class DeviceAlarmTableManager {
         Cursor cursor = db.rawQuery(selectQuery, null);
 
         cursor.moveToFirst();
-        long setId;
+        String setId;
 
         try {
-            setId = cursor.getLong(cursor.getColumnIndex("set_id"));
+            setId = cursor.getString(cursor.getColumnIndex("set_id"));
 
             db.close();
             cursor.close();
@@ -267,7 +267,7 @@ public class DeviceAlarmTableManager {
             do {
                 alarm = new DeviceAlarm();
 
-                alarm.setSetId(cursor.getLong(cursor.getColumnIndex(AlarmTableEntry.COLUMN_SET_ID)));
+                alarm.setSetId(cursor.getString(cursor.getColumnIndex(AlarmTableEntry.COLUMN_SET_ID)));
                 alarm.setPiId(cursor.getInt(cursor.getColumnIndex(AlarmTableEntry.COLUMN_PI_ID)));
 
                 alarm.setHour(cursor.getInt(cursor.getColumnIndex(AlarmTableEntry.COLUMN_HOUR)));

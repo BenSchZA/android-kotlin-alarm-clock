@@ -157,14 +157,11 @@ public final class DeviceAlarmController {
 
     }
 
-    public long registerAlarmSet(int alarmHour, int alarmMinute, List<Integer> alarmDays, boolean repeatWeekly, boolean vibrate) {
+    public void registerAlarmSet(String setId, int alarmHour, int alarmMinute, List<Integer> alarmDays, boolean repeatWeekly, boolean vibrate) {
         List<DeviceAlarm> deviceAlarmList;
         DeviceAlarm deviceAlarmSet = new DeviceAlarm()
                 .initAlarmSet(alarmHour, alarmMinute, alarmDays, repeatWeekly, vibrate);
         deviceAlarmList = deviceAlarmSet.getAlarmList();
-
-        final Random rand = new Random();
-        long setId = rand.nextLong();
 
         for (DeviceAlarm deviceAlarm :
                 deviceAlarmList) {
@@ -175,8 +172,6 @@ public final class DeviceAlarmController {
         refreshAlarms(deviceAlarmTableManager.selectChanged());
         //Notify user of time until next alarm, once alarm millis has been updated in db
         notifyUserAlarmTime(deviceAlarmTableManager.getAlarmSet(setId));
-
-        return setId;
     }
 
     private void notifyUserAlarmTime(List<DeviceAlarm> deviceAlarmList) {
@@ -209,7 +204,7 @@ public final class DeviceAlarmController {
     }
 
     //Remove entire set of alarms, first recreate intent EXACTLY as before, then call alarmMgr.cancel(intent)
-    public void deleteAlarmSet(Long setId) {
+    public void deleteAlarmSet(String setId) {
         List<DeviceAlarm> deviceAlarmList = deviceAlarmTableManager.getAlarmSet(setId);
         for (DeviceAlarm deviceAlarm :
                 deviceAlarmList) {
