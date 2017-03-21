@@ -83,9 +83,7 @@ public class DeviceAlarmTableManager {
 
         alarmList = extractAlarms(cursor);
 
-        cursor.close();
         db.close();
-
         return alarmList;
     }
 
@@ -100,9 +98,7 @@ public class DeviceAlarmTableManager {
 
         alarmList = extractAlarms(cursor);
 
-        cursor.close();
         db.close();
-
         return alarmList;
     }
 
@@ -287,6 +283,9 @@ public class DeviceAlarmTableManager {
 
             } while (cursor.moveToNext());
         }
+
+        cursor.close();
+
         return alarmList;
     }
 

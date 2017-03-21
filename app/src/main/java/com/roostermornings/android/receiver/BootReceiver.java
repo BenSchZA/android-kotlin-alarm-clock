@@ -17,12 +17,8 @@ import com.roostermornings.android.sqlutil.DeviceAlarmController;
 
 /**
  * This BroadcastReceiver automatically (re)starts the alarm when the device is
- * rebooted. This receiver is set to be disabled (android:enabled="false") in the
- * application's manifest file. When the user sets the alarm, the receiver is enabled.
- * When the user cancels the alarm, the receiver is disabled, so that rebooting the
- * device will not trigger this receiver.
+ * rebooted.
  */
-// BEGIN_INCLUDE(autostart)
 public class BootReceiver extends BroadcastReceiver {
 
     private Context context;
@@ -41,7 +37,7 @@ public class BootReceiver extends BroadcastReceiver {
         alarmController.rebootAlarms();
         if (auth != null && auth.getCurrentUser().getUid() != null) {
             Toast.makeText(context, "Tasks started, valid user!", Toast.LENGTH_LONG).show();
-            //TODO:
+            //TODO: check for authentication
 //            alarmController.rebootAlarms();
 //            backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(context);
 //            backgroundTaskReceiver.scheduleBackgroundDailyTask(context);

@@ -38,6 +38,7 @@ public class DeviceAlarm {
     public static final String EXTRA_RECURRING = "extra_recurring";
     public static final String EXTRA_VIBRATE = "extra_vibrate";
     public static final String EXTRA_TONE = "extra_tone";
+    public static final String EXTRA_UID = "extra_uid";
 
     private Calendar calendar = Calendar.getInstance();
 

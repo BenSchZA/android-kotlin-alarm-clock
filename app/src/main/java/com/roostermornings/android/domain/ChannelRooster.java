@@ -8,7 +8,7 @@ package com.roostermornings.android.domain;
 import com.google.firebase.database.IgnoreExtraProperties;
 
 @IgnoreExtraProperties
-public class ChannelQueue {
+public class ChannelRooster {
     private String alarm_uid;
     private String audio_file_url;
     private String description;
@@ -17,10 +17,10 @@ public class ChannelQueue {
 
     // Required default constructor for Firebase object mapping
     @SuppressWarnings("unused")
-    public ChannelQueue() {
+    public ChannelRooster() {
     }
 
-    public ChannelQueue(String alarm_uid, String audio_file_url, String description, String name, String photo) {
+    public ChannelRooster(String alarm_uid, String audio_file_url, String description, String name, String photo) {
         this.alarm_uid = alarm_uid;
         this.audio_file_url = audio_file_url;
         this.description = description;
