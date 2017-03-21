@@ -27,7 +27,6 @@ public class Alarm {
     private boolean recurring;
     private boolean allow_friend_audio_files;
     private String uid;
-    private String setId;
 
     private boolean vibrate;
 
@@ -38,7 +37,7 @@ public class Alarm {
 
     public Alarm(AlarmChannel channel, boolean monday, boolean tuesday, boolean wednesday,
                  boolean thursday, boolean friday, boolean saturday, boolean
-                         sunday, int hour, int minute, boolean recurring, boolean allow_friend_audio_files, boolean vibrate, String uid, String setId) {
+                         sunday, int hour, int minute, boolean recurring, boolean allow_friend_audio_files, boolean vibrate, String uid) {
         this.channel = channel;
         this.monday = monday;
         this.tuesday = tuesday;
@@ -54,15 +53,6 @@ public class Alarm {
 
         this.vibrate = vibrate;
         this.uid = uid;
-        this.setId = setId;
-    }
-
-    public String getSetId() {
-        return setId;
-    }
-
-    public void setSetId(String setId) {
-        this.setId = setId;
     }
 
     public String getUid() {

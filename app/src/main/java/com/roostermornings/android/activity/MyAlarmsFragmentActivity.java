@@ -173,6 +173,9 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         }
 
         //noinspection SimplifiableIfStatement
+        if (id == R.id.action_profile) {
+            return true;
+        }
         if (id == R.id.action_settings) {
             return true;
         }
@@ -194,7 +197,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         startActivity(new Intent(MyAlarmsFragmentActivity.this, FriendsFragmentActivity.class));
     }
 
-    public void deleteAlarm(String setId, String alarmId) {
+    public void deleteAlarm(String alarmId) {
         DeviceAlarmController deviceAlarmController = new DeviceAlarmController(this);
 
         //Remove alarm from firebase
@@ -202,8 +205,8 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                 .child("alarms").child(getFirebaseUser().getUid()).child(alarmId);
         alarmReference.removeValue();
 
-        //Remove alarm *set* from local SQL database using retreived setId from firebase
-        deviceAlarmController.deleteAlarmSet(Long.valueOf(setId));
+        //Remove alarm *set* from local SQL database using retrieved Uid from firebase
+        deviceAlarmController.deleteAlarmSet(alarmId);
 
         //TODO: find out why alarm content being duplicated in recycler view on delete - do not refresh the activity like this
         Intent intent = getIntent();
