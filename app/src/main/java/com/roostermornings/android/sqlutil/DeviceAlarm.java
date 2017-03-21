@@ -17,7 +17,7 @@ import java.util.List;
 public class DeviceAlarm {
 
     //##################################################################
-    private long setId;
+    private String setId;
     private int piId;
 
     private int hour;
@@ -85,11 +85,11 @@ public class DeviceAlarm {
         return this;
     }
 
-    public long getSetId() {
+    public String getSetId() {
         return setId;
     }
 
-    public void setSetId(long id) {
+    public void setSetId(String id) {
         this.setId = id;
     }
 
