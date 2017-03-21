@@ -172,7 +172,6 @@ public class UploadService extends Service {
         String queueKey = mDatabase.child(String.format("social_rooster_queue/%s", friend.getUid())).push().getKey();
 
         SocialRooster socialRoosterUploaded = new SocialRooster(firebaseStorageURL,
-                friend.getCell_number(),
                 friend.getUser_name(),
                 false,
                 friend.getProfile_pic(),
@@ -180,7 +179,6 @@ public class UploadService extends Service {
                 friend.getUid(), uploadKey, currentUser.getUid());
 
         SocialRooster socialRoosterQueue = new SocialRooster(firebaseStorageURL,
-                baseActivity.mCurrentUser.getCell_number(),
                 baseActivity.mCurrentUser.getUser_name(),
                 false,
                 baseActivity.mCurrentUser.getProfile_pic(),

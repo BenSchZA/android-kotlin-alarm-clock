@@ -22,12 +22,14 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.roostermornings.android.domain.AlarmQueue;
-import com.roostermornings.android.domain.ChannelQueue;
+import com.roostermornings.android.domain.ChannelRooster;
+import com.roostermornings.android.domain.DeviceAudioQueueItem;
+import com.roostermornings.android.domain.SocialRooster;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.util.RoosterUtils;
 
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 
 public class BackgroundTaskIntentService extends IntentService {
     private static final String ACTION_BACKGROUND_DOWNLOAD = "com.roostermornings.android.background.action.BACKGROUND_DOWNLOAD";
@@ -80,6 +82,7 @@ public class BackgroundTaskIntentService extends IntentService {
     }
 
     private void handleActionBackgroundDownload(String param1, String param2) {
+        retrieveChannelContentData(getApplicationContext());
         retrieveSocialRoosterData(getApplicationContext());
     }
 
@@ -89,39 +92,46 @@ public class BackgroundTaskIntentService extends IntentService {
         mAudioTableManager.purgeAudioFiles();
     }
 
-//    public void retrieveChannelContentData(final Context context) {
-//        //Retrieve firebase audio files and cache to be played for next alarm
-//        mAuth = FirebaseAuth.getInstance();
-//        mStorageRef = FirebaseStorage.getInstance().getReference();
-//        mDatabase = FirebaseDatabase.getInstance().getReference();
-//        mAudioTableManager = new AudioTableManager(context);
-//
-//        if (mAuth.getCurrentUser() == null || mAuth.getCurrentUser() == null) {
-//            Log.d(TAG, "User not authenticated on FB!");
-//            return;
-//        }
-//
-//        final DatabaseReference queueReference = FirebaseDatabase.getInstance().getReference()
-//                .child("channel_rooster_queue").child(mAuth.getCurrentUser().getUid());
-//
-//        ValueEventListener channelQueueListener = new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//
-//                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-//                    ChannelQueue channelQueue = postSnapshot.getValue(ChannelQueue.class);
-//
-//                    retrieveChannelContentAudio(channelQueue, context);
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-//            }
-//        };
-//        queueReference.addListenerForSingleValueEvent(channelQueueListener);
-//    }
+    public void retrieveChannelContentData(final Context context) {
+        //Retrieve firebase audio files and cache to be played for next alarm
+        mAuth = FirebaseAuth.getInstance();
+        mStorageRef = FirebaseStorage.getInstance().getReference();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        mAudioTableManager = new AudioTableManager(context);
+
+        if (mAuth.getCurrentUser() == null || mAuth.getCurrentUser() == null) {
+            Log.d(TAG, "User not authenticated on FB!");
+            return;
+        }
+
+        final DatabaseReference queueReference = FirebaseDatabase.getInstance().getReference()
+                .child("channel_rooster_queue").child(mAuth.getCurrentUser().getUid());
+
+        ValueEventListener channelQueueListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                    ChannelRooster channelRooster = postSnapshot.getValue(ChannelRooster.class);
+
+                    ArrayList<String> existingChannelQueueIDs = new ArrayList<>();
+                    for (DeviceAudioQueueItem audioItem:
+                        mAudioTableManager.extractAllChannelAudioFiles()) {
+                        existingChannelQueueIDs.add(audioItem.getQueue_id());
+                    }
+                    //If the current ChannelRooster is not in SQL db, then download
+                    if(!existingChannelQueueIDs.contains(channelRooster.getAlarm_uid()))
+                        retrieveChannelContentAudio(channelRooster, context);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+            }
+        };
+        queueReference.addListenerForSingleValueEvent(channelQueueListener);
+    }
 
     public void retrieveSocialRoosterData(final Context context) {
         //Retrieve firebase audio files and cache to be played for next alarm
@@ -138,20 +148,19 @@ public class BackgroundTaskIntentService extends IntentService {
         final DatabaseReference queueReference = FirebaseDatabase.getInstance().getReference()
                 .child("social_rooster_queue").child(mAuth.getCurrentUser().getUid());
 
-        ValueEventListener alarmQueueListener = new ValueEventListener() {
+        ValueEventListener socialQueueListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    AlarmQueue alarmQueue = postSnapshot.getValue(AlarmQueue.class);
+                    SocialRooster socialRooster = postSnapshot.getValue(SocialRooster.class);
                     //If firebase queue entry is older than two weeks then delete from db and don't process
-                    if(System.currentTimeMillis() - alarmQueue.getDate_uploaded() >= 1209600000){
+                    if(System.currentTimeMillis() - socialRooster.getDate_uploaded() >= 1209600000){
                         queueReference.child(postSnapshot.getKey()).removeValue();
                     } else{
-                        retrieveSocialRoosterAudio(alarmQueue, context);
+                        retrieveSocialRoosterAudio(socialRooster, context);
                     }
                 }
-                //queueReference.removeValue();
             }
 
             @Override
@@ -159,69 +168,17 @@ public class BackgroundTaskIntentService extends IntentService {
                 Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
             }
         };
-        queueReference.addListenerForSingleValueEvent(alarmQueueListener);
+        queueReference.addListenerForSingleValueEvent(socialQueueListener);
     }
 
-//    private void retrieveChannelContentAudio(final ChannelQueue channelQueue, final Context context) {
-//        try {
-//
-//            StorageReference audioFileRef = mStorageRef.child("" + channelQueue.getAudio_file_url());
-//            final String audioFileUniqueName = "audio" + RoosterUtils.createRandomFileName(5) + ".3gp";
-//            final DatabaseReference queueRecordReference = FirebaseDatabase.getInstance().getReference()
-//                    .child("social_rooster_queue").child(mAuth.getCurrentUser().getUid()).child(channelQueue.ge);
-//
-//            final long FIVE_MEGABYTE = 5 * 1024 * 1024;
-//            audioFileRef.getBytes(FIVE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-//                @Override
-//                public void onSuccess(byte[] bytes) {
-//
-//                    try {
-//                        FileOutputStream outputStream;
-//                        outputStream = context.openFileOutput(audioFileUniqueName, Context.MODE_PRIVATE);
-//                        outputStream.write(bytes);
-//                        outputStream.close();
-//
-//                        Toast.makeText(context, "successfully downloaded", Toast.LENGTH_SHORT).show();
-//
-//                        alarmQueue.setAudio_file_url(audioFileUniqueName);
-//
-//                        //store in local SQLLite database
-//                        mAudioTableManager.insertAudioFile(alarmQueue);
-//
-//                        //remove record of queue from FB database
-//                        queueRecordReference.removeValue();
-//
-//
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-//
-//
-//                }
-//            }).addOnFailureListener(new OnFailureListener() {
-//                @Override
-//                public void onFailure(@NonNull Exception exception) {
-//                    // Handle any errors
-//                }
-//            });
-//
-//
-//            // For our recurring task, we'll just display a message
-//            Toast.makeText(context, "I'm running", Toast.LENGTH_SHORT).show();
-//
-//        } catch (Exception e) {
-//            Log.e(TAG, e.getMessage());
-//        }
-//    }
-
-    private void retrieveSocialRoosterAudio(final AlarmQueue alarmQueue, final Context context) {
+    private void retrieveChannelContentAudio(final ChannelRooster channelRooster, final Context context) {
 
         try {
 
-            StorageReference audioFileRef = mStorageRef.child("social_rooster_uploads/" + alarmQueue.getAudio_file_url());
+            StorageReference audioFileRef = mStorageRef.child("" + channelRooster.getAudio_file_url());
             final String audioFileUniqueName = "audio" + RoosterUtils.createRandomFileName(5) + ".3gp";
             final DatabaseReference queueRecordReference = FirebaseDatabase.getInstance().getReference()
-                    .child("social_rooster_queue").child(mAuth.getCurrentUser().getUid()).child(alarmQueue.getQueue_id());
+                    .child("channel_rooster_queue").child(mAuth.getCurrentUser().getUid()).child(channelRooster.getAlarm_uid());
 
             final long FIVE_MEGABYTE = 5 * 1024 * 1024;
             audioFileRef.getBytes(FIVE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
@@ -236,14 +193,70 @@ public class BackgroundTaskIntentService extends IntentService {
 
                         Toast.makeText(context, "successfully downloaded", Toast.LENGTH_SHORT).show();
 
-                        alarmQueue.setAudio_file_url(audioFileUniqueName);
+                        //Create new object for storing in SQL db
+                        DeviceAudioQueueItem deviceAudioQueueItem = new DeviceAudioQueueItem();
+                        deviceAudioQueueItem.fromChannelRooster(channelRooster, audioFileUniqueName);
 
                         //store in local SQLLite database
-                        mAudioTableManager.insertAudioFile(alarmQueue);
+                        mAudioTableManager.insertAudioFile(deviceAudioQueueItem, true);
+
+                        //TODO: uncomment and remove record
+                        //remove record of queue from FB database
+                        //queueRecordReference.removeValue();
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    // Handle any errors
+                }
+            });
+
+
+            // For our recurring task, we'll just display a message
+            Toast.makeText(context, "I'm running", Toast.LENGTH_SHORT).show();
+
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
+    }
+
+    private void retrieveSocialRoosterAudio(final SocialRooster socialRooster, final Context context) {
+
+        try {
+
+            StorageReference audioFileRef = mStorageRef.child("social_rooster_uploads/" + socialRooster.getAudio_file_url());
+            final String audioFileUniqueName = "audio" + RoosterUtils.createRandomFileName(5) + ".3gp";
+            final DatabaseReference queueRecordReference = FirebaseDatabase.getInstance().getReference()
+                    .child("social_rooster_queue").child(mAuth.getCurrentUser().getUid()).child(socialRooster.getQueue_id());
+
+            final long FIVE_MEGABYTE = 5 * 1024 * 1024;
+            audioFileRef.getBytes(FIVE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                @Override
+                public void onSuccess(byte[] bytes) {
+
+                    try {
+                        FileOutputStream outputStream;
+                        outputStream = context.openFileOutput(audioFileUniqueName, Context.MODE_PRIVATE);
+                        outputStream.write(bytes);
+                        outputStream.close();
+
+                        Toast.makeText(context, "successfully downloaded", Toast.LENGTH_SHORT).show();
+
+                        //Create new object for storing in SQL db
+                        DeviceAudioQueueItem deviceAudioQueueItem = new DeviceAudioQueueItem();
+                        deviceAudioQueueItem.fromSocialRooster(socialRooster, audioFileUniqueName);
+
+                        //store in local SQLLite database
+                        mAudioTableManager.insertAudioFile(deviceAudioQueueItem, false);
 
                         //remove record of queue from FB database
                         queueRecordReference.removeValue();
-
 
                     } catch (Exception e) {
                         e.printStackTrace();

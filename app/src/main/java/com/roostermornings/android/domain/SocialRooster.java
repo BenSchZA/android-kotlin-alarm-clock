@@ -14,25 +14,23 @@ import com.google.firebase.database.IgnoreExtraProperties;
 public class SocialRooster {
 
     private String audio_file_url;
-    private String cell_number;
     private String user_name;
     private Boolean listened;
     private String profile_pic;
     private Long date_uploaded;
-    private String uid;
+    private String receiver_id;
     private String queue_id;
     private String sender_id;
 
-    public SocialRooster(String audio_file_url, String cell_number, String user_name,
+    public SocialRooster(String audio_file_url, String user_name,
                          Boolean listened, String profile_pic, Long date_uploaded,
-                         String uid, String queue_id, String sender_id) {
+                         String receiver_id, String queue_id, String sender_id) {
         this.audio_file_url = audio_file_url;
-        this.cell_number = cell_number;
         this.user_name = user_name;
         this.listened = listened;
         this.profile_pic = profile_pic;
         this.date_uploaded = date_uploaded;
-        this.uid = uid;
+        this.receiver_id = receiver_id;
         this.queue_id = queue_id;
         this.sender_id = sender_id;
     }
@@ -64,14 +62,6 @@ public class SocialRooster {
 
     public void setAudio_file_url(String audio_file_url) {
         this.audio_file_url = audio_file_url;
-    }
-
-    public String getCell_number() {
-        return cell_number;
-    }
-
-    public void setCell_number(String cell_number) {
-        this.cell_number = cell_number;
     }
 
     public String getUser_name() {
@@ -106,11 +96,11 @@ public class SocialRooster {
         this.date_uploaded = date_uploaded;
     }
 
-    public String getUid() {
-        return uid;
+    public String getReceiver_id() {
+        return receiver_id;
     }
 
-    public void setUid(String uid) {
-        this.uid = uid;
+    public void setReceiver_id(String receiver_id) {
+        this.receiver_id = receiver_id;
     }
 }
