@@ -39,7 +39,10 @@ public class DeviceAlarmReceiver extends WakefulBroadcastReceiver {
         Intent intentAlarmFullscreen = new Intent(context, DeviceAlarmFullScreenActivity.class);
         intentAlarmFullscreen.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
-        //if this is a recurring alarm, set anoter pending intent for next week same time
+        //Append alarm UID to intent for alarm activation
+        intentAlarmFullscreen.putExtra(DeviceAlarm.EXTRA_UID, intent.getStringExtra(DeviceAlarm.EXTRA_UID));
+
+        //if this is a recurring alarm, set another pending intent for next week same time
         if (intent.getBooleanExtra(DeviceAlarm.EXTRA_RECURRING, false)) {
             //make record that this alarm has been changed, refresh as necessary
             alarmTableManager.setAlarmChanged(intent.getIntExtra("requestCode", 0));

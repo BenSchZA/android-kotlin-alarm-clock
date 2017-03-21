@@ -64,6 +64,7 @@ public final class DeviceAlarmController {
             Intent alarmIntent = new Intent(context, DeviceAlarmReceiver.class);
             alarmIntent.setAction("receiver.ALARM_RECEIVER");
             alarmIntent.putExtra("requestCode", deviceAlarm.getPiId());
+            alarmIntent.putExtra(DeviceAlarm.EXTRA_UID, deviceAlarm.getSetId());
 
             if (deviceAlarm.getRecurring()) {
                 alarmIntent.putExtra(DeviceAlarm.EXTRA_RECURRING, true);
@@ -117,7 +118,7 @@ public final class DeviceAlarmController {
 
     }
 
-    public void snoozeAlarm(){
+    public void snoozeAlarm(String setId){
         //Add new pending intent for 10 minutes time
         alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Calendar alarmCalendar = Calendar.getInstance();
@@ -130,6 +131,7 @@ public final class DeviceAlarmController {
 
         alarmIntent.putExtra(DeviceAlarm.EXTRA_VIBRATE, true);
         alarmIntent.putExtra(DeviceAlarm.EXTRA_TONE, false);
+        alarmIntent.putExtra(DeviceAlarm.EXTRA_UID, setId);
 
         PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(context,
                 0, alarmIntent,
@@ -218,6 +220,7 @@ public final class DeviceAlarmController {
         Intent alarmIntent = new Intent(context, DeviceAlarmReceiver.class);
         alarmIntent.setAction("receiver.ALARM_RECEIVER");
         alarmIntent.putExtra("requestCode", deviceAlarm.getPiId());
+        alarmIntent.putExtra(DeviceAlarm.EXTRA_UID, deviceAlarm.getSetId());
 
         if (deviceAlarm.getRecurring()) {
             alarmIntent.putExtra(DeviceAlarm.EXTRA_RECURRING, true);
