@@ -166,16 +166,6 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 if (mAlarm.isSaturday()) alarmDays.add(Calendar.SATURDAY);
                 if (mAlarm.isSunday()) alarmDays.add(Calendar.SUNDAY);
 
-                //if this is an existing alarm, delete from locao storage before inserting another record
-                if (mEditAlarmId.length() != 0
-                        && mAlarm.getSetId().length() > 0) {
-                    deviceAlarmController.deleteAlarmSet(Long.valueOf(mAlarm.getSetId()));
-                }
-
-                //Extract data from Alarm mAlarm and create new alarm set DeviceAlarm
-                long setId = deviceAlarmController.registerAlarmSet(mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring(), mAlarm.isVibrate());
-                mAlarm.setSetId(String.valueOf(setId));
-
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
 
                 //only do the push to create the new alarm if this is NOT an existing alarm
@@ -186,6 +176,16 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 } else {
                     alarmKey = mEditAlarmId;
                 }
+
+                //if this is an existing alarm, delete from local storage before inserting another record
+                if (mEditAlarmId.length() != 0
+                        && mAlarm.getUid().length() > 0) {
+                    deviceAlarmController.deleteAlarmSet(mAlarm.getUid());
+                }
+
+                //Extract data from Alarm mAlarm and create new alarm set DeviceAlarm
+                deviceAlarmController.registerAlarmSet(alarmKey, mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring(), mAlarm.isVibrate());
+
                 database.getReference(String.format("alarms/%s/%s", mAuth.getCurrentUser().getUid(), alarmKey)).setValue(mAlarm);
 
                 Toast.makeText(getBaseContext(), (mEditAlarmId.length() == 0) ? "Alarm created!" : "Alarm edited!",
