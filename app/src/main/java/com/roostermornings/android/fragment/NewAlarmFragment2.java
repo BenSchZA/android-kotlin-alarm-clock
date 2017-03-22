@@ -98,8 +98,8 @@ public class NewAlarmFragment2 extends BaseFragment {
                     channels.add(channel);
                     mAdapter.notifyDataSetChanged();
                 }
-
-                mListener.retrieveAlarmDetailsFromFirebase(); //this is only relevant for alarms being edited
+                //TODO: check this solves bug
+                if (mListener != null) mListener.retrieveAlarmDetailsFromFirebase(); //this is only relevant for alarms being edited
             }
 
             @Override
@@ -146,9 +146,9 @@ public class NewAlarmFragment2 extends BaseFragment {
 
     public void selectEditedAlarmChannel() {
 
-
         final Alarm alarm = (mListener == null) ? new Alarm() : mListener.getAlarmDetails();
         AlarmChannel alarmChannel = alarm.getChannel();
+        if(alarmChannel == null) return;
 
         for (Channel channel : channels) {
             if (alarmChannel.getId().equals(channel.getUid())) {
@@ -156,7 +156,5 @@ public class NewAlarmFragment2 extends BaseFragment {
                 mAdapter.notifyDataSetChanged();
             }
         }
-
-
     }
 }

@@ -25,6 +25,7 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.domain.Alarm;
+import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
 
 import java.util.ArrayList;
@@ -164,19 +165,20 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
     private void updateRoosterNotification(final ViewHolder holder) {
         //Flag check for UI changes on load, broadcastreceiver for changes while activity running
         //If notifications waiting, display new Rooster notification
-        if (((BaseApplication) mApplication).getNotificationFlag("roosterCount") > 0) {
+        if (((BaseApplication) mApplication).getNotificationFlag(Constants.FLAG_ROOSTERCOUNT) > 0) {
+
             setRoosterNotification(holder, true);
         }
 
         //Broadcast receiver filter to receive UI updates
         IntentFilter firebaseListenerServiceFilter = new IntentFilter();
-        firebaseListenerServiceFilter.addAction("rooster.update.ROOSTER_NOTIFICATION");
+        firebaseListenerServiceFilter.addAction(Constants.ACTION_ROOSTERNOTIFICATION);
 
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 //do something based on the intent's action
-                if(((BaseApplication) mApplication).getNotificationFlag("roosterCount") > 0){
+                if(((BaseApplication) mApplication).getNotificationFlag(Constants.FLAG_ROOSTERCOUNT) > 0){
                     setRoosterNotification(holder, true);
                 }
             }

@@ -14,6 +14,7 @@ import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
+import com.roostermornings.android.util.Constants;
 
 import static android.content.Context.VIBRATOR_SERVICE;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -40,31 +41,33 @@ public class DeviceAlarmReceiver extends WakefulBroadcastReceiver {
         intentAlarmFullscreen.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
         //Append alarm UID to intent for alarm activation
-        intentAlarmFullscreen.putExtra(DeviceAlarm.EXTRA_UID, intent.getStringExtra(DeviceAlarm.EXTRA_UID));
+        intentAlarmFullscreen.putExtra(Constants.EXTRA_UID, intent.getStringExtra(Constants.EXTRA_UID));
 
         //if this is a recurring alarm, set another pending intent for next week same time
-        if (intent.getBooleanExtra(DeviceAlarm.EXTRA_RECURRING, false)) {
+        if (intent.getBooleanExtra(Constants.EXTRA_RECURRING, false)) {
             //make record that this alarm has been changed, refresh as necessary
-            alarmTableManager.setAlarmChanged(intent.getIntExtra("requestCode", 0));
+            alarmTableManager.setAlarmChanged(intent.getIntExtra(Constants.EXTRA_REQUESTCODE, 0));
             alarmController.refreshAlarms(alarmTableManager.selectChanged());
 
         } else {
             //Set alarm to disabled if fired and not recurring - once all alarms in set are disabled, then toggle enabled in GUI
-            alarmTableManager.setAlarmEnabled(intent.getIntExtra("requestCode", 0), false);
+            alarmTableManager.setAlarmEnabled(intent.getIntExtra(Constants.EXTRA_REQUESTCODE, 0), false);
         }
 
-        if (intent.getBooleanExtra(DeviceAlarm.EXTRA_VIBRATE, false)) {
+        if (intent.getBooleanExtra(Constants.EXTRA_VIBRATE, false)) {
             Vibrator vibrator = (Vibrator) context.getSystemService(VIBRATOR_SERVICE);
             long[] vibratePattern = {0, 1000, 500, 1000, 500};
             int vibrateRepeat = 2;
             vibrator.vibrate(vibratePattern, vibrateRepeat);
         }
 
-        if (intent.getBooleanExtra(DeviceAlarm.EXTRA_TONE, false)) {
-            intentAlarmFullscreen.putExtra(DeviceAlarm.EXTRA_TONE, true);
+        if (intent.getBooleanExtra(Constants.EXTRA_TONE, false)) {
+            intentAlarmFullscreen.putExtra(Constants.EXTRA_TONE, true);
         }
 
+        //Include intent to allow completeWakefulIntent from activity
+        intentAlarmFullscreen.putExtra(Constants.DEVICE_ALARM_RECEIVER_WAKEFUL_INTENT, new Intent(context, DeviceAlarmReceiver.class));
+
         context.startActivity(intentAlarmFullscreen);
-        DeviceAlarmReceiver.completeWakefulIntent(intent);
     }
 }

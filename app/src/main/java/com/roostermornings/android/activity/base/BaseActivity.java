@@ -40,6 +40,7 @@ import com.roostermornings.android.activity.SplashActivity;
 import com.roostermornings.android.service.FirebaseListenerService;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.node_api.IHTTPClient;
+import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.InternetHelper;
 
 import java.util.List;
