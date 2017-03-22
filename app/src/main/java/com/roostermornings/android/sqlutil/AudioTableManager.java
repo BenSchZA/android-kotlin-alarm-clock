@@ -75,7 +75,6 @@ public class AudioTableManager {
     //TODO: check that this works...
     public void purgeAudioFiles(){
         //Purge audio files older than 2 weeks
-        //TODO: purge channel audio
         SQLiteDatabase db = initDB();
 
         String execSql = "DELETE FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_DATE_UPLOADED +

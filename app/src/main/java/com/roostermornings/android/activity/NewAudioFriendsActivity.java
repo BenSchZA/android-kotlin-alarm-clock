@@ -5,14 +5,10 @@
 
 package com.roostermornings.android.activity;
 
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
@@ -29,19 +25,10 @@ import com.google.firebase.auth.GetTokenResult;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.NewAudioFriendsListAdapter;
-import com.roostermornings.android.background.AudioService;
-import com.roostermornings.android.background.UploadService;
-import com.roostermornings.android.domain.DeviceAudioQueueItem;
-import com.roostermornings.android.domain.FCMPayloadSocialRooster;
-import com.roostermornings.android.domain.Friend;
-import com.roostermornings.android.domain.NodeAPIResult;
-import com.roostermornings.android.domain.SocialRooster;
+import com.roostermornings.android.service.UploadService;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.domain.Users;
-import com.roostermornings.android.sqlutil.DeviceAlarm;
-import com.roostermornings.android.sqlutil.DeviceAlarmController;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;

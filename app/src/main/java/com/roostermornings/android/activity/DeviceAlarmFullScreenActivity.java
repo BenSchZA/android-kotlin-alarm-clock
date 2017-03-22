@@ -27,7 +27,7 @@ import android.widget.TextView;
 
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
-import com.roostermornings.android.background.AudioService;
+import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.domain.DeviceAudioQueueItem;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;

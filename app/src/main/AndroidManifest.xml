@@ -49,7 +49,7 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".background.BackgroundTaskReceiver"
+            android:name=".receiver.BackgroundTaskReceiver"
             android:enabled="true"
             android:exported="true" />
 
@@ -123,7 +123,7 @@
             android:theme="@style/AppTheme.NoActionBar" />
 
         <service
-            android:name=".background.BackgroundTaskIntentService"
+            android:name=".service.BackgroundTaskIntentService"
             android:exported="false" />
         <service android:name=".util.RoosterFirebaseMessagingService">
             <intent-filter>
@@ -145,15 +145,15 @@
             android:windowSoftInputMode="adjustPan" />
 
         <service
-            android:name=".background.FirebaseListenerService"
+            android:name=".service.FirebaseListenerService"
             android:enabled="true"
             android:exported="true" />
         <service
-            android:name=".background.AudioService"
+            android:name=".service.AudioService"
             android:enabled="true"
             android:exported="true" />
         <service
-            android:name=".background.UploadService"
+            android:name=".service.UploadService"
             android:enabled="true"
             android:exported="true"></service>
     </application>
