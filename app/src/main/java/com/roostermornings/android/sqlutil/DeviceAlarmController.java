@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
+import com.roostermornings.android.util.Constants;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -62,16 +63,16 @@ public final class DeviceAlarmController {
             Calendar systemCalendar = Calendar.getInstance();
 
             Intent alarmIntent = new Intent(context, DeviceAlarmReceiver.class);
-            alarmIntent.setAction("receiver.ALARM_RECEIVER");
-            alarmIntent.putExtra("requestCode", deviceAlarm.getPiId());
-            alarmIntent.putExtra(DeviceAlarm.EXTRA_UID, deviceAlarm.getSetId());
+            alarmIntent.setAction(Constants.ACTTION_ALARMRECEIVER);
+            alarmIntent.putExtra(Constants.EXTRA_REQUESTCODE, deviceAlarm.getPiId());
+            alarmIntent.putExtra(Constants.EXTRA_UID, deviceAlarm.getSetId());
 
             if (deviceAlarm.getRecurring()) {
-                alarmIntent.putExtra(DeviceAlarm.EXTRA_RECURRING, true);
+                alarmIntent.putExtra(Constants.EXTRA_RECURRING, true);
             }
 
             if (deviceAlarm.getVibrate()){
-                alarmIntent.putExtra(DeviceAlarm.EXTRA_VIBRATE, true);
+                alarmIntent.putExtra(Constants.EXTRA_VIBRATE, true);
             }
 
             PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(context,
@@ -110,8 +111,8 @@ public final class DeviceAlarmController {
                 //if older version of android, don't require info pending intent
                 alarmMgr.setExact(AlarmManager.RTC_WAKEUP, alarmTime, alarmPendingIntent);
                 // Show alarm in the status bar
-                Intent alarmChanged = new Intent("android.intent.action.ALARM_CHANGED");
-                alarmChanged.putExtra("alarmSet", true);
+                Intent alarmChanged = new Intent(Constants.ACTION_ALARMCHANGED);
+                alarmChanged.putExtra(Constants.EXTRA_ALARMSET, true);
                 context.sendBroadcast(alarmChanged);
             }
         }
@@ -122,16 +123,15 @@ public final class DeviceAlarmController {
         //Add new pending intent for 10 minutes time
         alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Calendar alarmCalendar = Calendar.getInstance();
-        alarmCalendar.setTimeInMillis(alarmCalendar.getTimeInMillis() + 1*60*1000);
-        //TODO: change to 10 min
+        alarmCalendar.setTimeInMillis(alarmCalendar.getTimeInMillis() + Constants.ALARM_SNOOZETIME);
 
         Intent alarmIntent = new Intent(context, DeviceAlarmReceiver.class);
-        alarmIntent.setAction("receiver.ALARM_RECEIVER");
-        alarmIntent.putExtra("requestCode", 0);
+        alarmIntent.setAction(Constants.ACTTION_ALARMRECEIVER);
+        alarmIntent.putExtra(Constants.EXTRA_REQUESTCODE, 0);
 
-        alarmIntent.putExtra(DeviceAlarm.EXTRA_VIBRATE, true);
-        alarmIntent.putExtra(DeviceAlarm.EXTRA_TONE, false);
-        alarmIntent.putExtra(DeviceAlarm.EXTRA_UID, setId);
+        alarmIntent.putExtra(Constants.EXTRA_VIBRATE, true);
+        alarmIntent.putExtra(Constants.EXTRA_TONE, false);
+        alarmIntent.putExtra(Constants.EXTRA_UID, setId);
 
         PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(context,
                 0, alarmIntent,
@@ -152,8 +152,8 @@ public final class DeviceAlarmController {
             //if older of android, don't require info pending intent
             alarmMgr.setExact(AlarmManager.RTC_WAKEUP, alarmTime, alarmPendingIntent);
             // Show alarm in the status bar
-            Intent alarmChanged = new Intent("android.intent.action.ALARM_CHANGED");
-            alarmChanged.putExtra("alarmSet", true);
+            Intent alarmChanged = new Intent(Constants.ACTION_ALARMCHANGED);
+            alarmChanged.putExtra(Constants.EXTRA_ALARMSET, true);
             context.sendBroadcast(alarmChanged);
         }
 
@@ -218,15 +218,15 @@ public final class DeviceAlarmController {
     private void cancelAlarm(DeviceAlarm deviceAlarm) {
         alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent alarmIntent = new Intent(context, DeviceAlarmReceiver.class);
-        alarmIntent.setAction("receiver.ALARM_RECEIVER");
-        alarmIntent.putExtra("requestCode", deviceAlarm.getPiId());
-        alarmIntent.putExtra(DeviceAlarm.EXTRA_UID, deviceAlarm.getSetId());
+        alarmIntent.setAction(Constants.ACTTION_ALARMRECEIVER);
+        alarmIntent.putExtra(Constants.EXTRA_REQUESTCODE, deviceAlarm.getPiId());
+        alarmIntent.putExtra(Constants.EXTRA_UID, deviceAlarm.getSetId());
 
         if (deviceAlarm.getRecurring()) {
-            alarmIntent.putExtra(DeviceAlarm.EXTRA_RECURRING, true);
+            alarmIntent.putExtra(Constants.EXTRA_RECURRING, true);
         }
         if (deviceAlarm.getVibrate()){
-            alarmIntent.putExtra(DeviceAlarm.EXTRA_VIBRATE, true);
+            alarmIntent.putExtra(Constants.EXTRA_VIBRATE, true);
         }
 
         PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(context,

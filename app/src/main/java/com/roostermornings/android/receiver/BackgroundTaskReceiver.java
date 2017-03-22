@@ -15,6 +15,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.roostermornings.android.service.BackgroundTaskIntentService;
+import com.roostermornings.android.util.Constants;
 
 public class BackgroundTaskReceiver extends BroadcastReceiver {
 
@@ -40,7 +41,7 @@ public class BackgroundTaskReceiver extends BroadcastReceiver {
     public void scheduleBackgroundCacheFirebaseData(Context context) {
         alarmMgrBackgroundTask = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(context, BackgroundTaskReceiver.class);
-        intent.setAction("com.roostermornings.android.background.action.BACKGROUND_DOWNLOAD");
+        intent.setAction(Constants.ACTION_BACKGROUNDDOWNLOAD);
         //starts a inexact repeating background task that runs every 10 seconds
         //the task runs the 'retrieveFirebaseData' method in BackgroundTaskIntentService
         PendingIntent backgroundIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
@@ -51,7 +52,7 @@ public class BackgroundTaskReceiver extends BroadcastReceiver {
     public void scheduleBackgroundDailyTask(Context context) {
         alarmMgrBackgroundTask = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(context, BackgroundTaskReceiver.class);
-        intent.setAction("com.roostermornings.android.background.action.DAILY_TASK");
+        intent.setAction(Constants.ACTION_DAILYTASK);
         //starts a inexact repeating background task that runs every day
         //the task runs the 'dailyTasks' method in BackgroundTaskIntentService
         PendingIntent backgroundIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
