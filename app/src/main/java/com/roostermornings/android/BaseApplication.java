@@ -19,11 +19,14 @@ import com.roostermornings.android.dagger.DaggerRoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationModule;
 import com.roostermornings.android.node_api.IHTTPClient;
+import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.FontsOverride;
 
 import io.fabric.sdk.android.Fabric;
 import retrofit.GsonConverterFactory;
 import retrofit.Retrofit;
+
+import static com.roostermornings.android.util.Constants.FLAG_FRIENDREQUESTS;
 
 public class BaseApplication extends android.app.Application {
 
@@ -48,7 +51,7 @@ public class BaseApplication extends android.app.Application {
         Fabric.with(this, new Crashlytics());
 
         //Override monospace font with custom font
-        FontsOverride.setDefaultFont(this, "MONOSPACE", "fonts/Nunito/Nunito-Bold.ttf");
+        FontsOverride.setDefaultFont(this, "MONOSPACE", Constants.APP_FONT);
 
         if (BuildConfig.DEBUG) {
             //Stetho: http://facebook.github.io/stetho/ - debug bridge for Android (view SQL etc.)
@@ -86,19 +89,19 @@ public class BaseApplication extends android.app.Application {
         //Flag check for UI changes on load, broadcastreceiver for changes while activity running
         //Broadcast receiver filter to receive UI updates
         IntentFilter firebaseListenerServiceFilter = new IntentFilter();
-        firebaseListenerServiceFilter.addAction("rooster.update.REQUEST_NOTIFICATION");
-        firebaseListenerServiceFilter.addAction("rooster.update.ROOSTER_NOTIFICATION");
+        firebaseListenerServiceFilter.addAction(Constants.ACTION_REQUESTNOTIFICATION);
+        firebaseListenerServiceFilter.addAction(Constants.ACTION_ROOSTERNOTIFICATION);
 
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 //do something based on the intent's action
                 switch(intent.getAction()){
-                    case "rooster.update.REQUEST_NOTIFICATION":
-                        setNotificationFlag(getNotificationFlag("friendRequests") + 1, "friendRequests");
+                    case Constants.ACTION_REQUESTNOTIFICATION:
+                        setNotificationFlag(getNotificationFlag(Constants.FLAG_FRIENDREQUESTS) + 1, Constants.FLAG_FRIENDREQUESTS);
                         break;
-                    case "rooster.update.ROOSTER_NOTIFICATION":
-                        setNotificationFlag(getNotificationFlag("roosterCount") + 1, "roosterCount");
+                    case Constants.ACTION_ROOSTERNOTIFICATION:
+                        setNotificationFlag(getNotificationFlag(Constants.FLAG_ROOSTERCOUNT) + 1, Constants.FLAG_ROOSTERCOUNT);
                         break;
                     default:
                         break;
@@ -118,20 +121,20 @@ public class BaseApplication extends android.app.Application {
     }
 
     public int getNotificationFlag(String flag) {
-        if(flag.contentEquals("roosterCount")){
+        if(flag.contentEquals(Constants.FLAG_ROOSTERCOUNT)){
             notificationFlag = roosterCount;
         }
-        if(flag.contentEquals("friendRequests")){
+        if(flag.contentEquals(Constants.FLAG_FRIENDREQUESTS)){
             notificationFlag = friendRequests;
         }
         return notificationFlag;
     }
 
     public void setNotificationFlag(int value, String flag) {
-        if(flag.contentEquals("roosterCount")){
+        if(flag.contentEquals(Constants.FLAG_ROOSTERCOUNT)){
             roosterCount = value;
         }
-        if(flag.contentEquals("friendRequests")){
+        if(flag.contentEquals(Constants.FLAG_FRIENDREQUESTS)){
             friendRequests = value;
         }
     }

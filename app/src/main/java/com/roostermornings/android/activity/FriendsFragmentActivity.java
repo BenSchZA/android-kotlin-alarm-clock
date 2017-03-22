@@ -38,6 +38,7 @@ import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.fragment.FriendsInviteFragment3;
 import com.roostermornings.android.fragment.FriendsMyFragment1;
 import com.roostermornings.android.fragment.FriendsRequestFragment2;
+import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.FontsOverride;
 
 import java.util.ArrayList;
@@ -131,7 +132,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
                 if (position == 1) {
                     setTabNotification(position, false);
                     setButtonBarNotification(false);
-                    ((BaseApplication) getApplication()).setNotificationFlag(0, "friendRequests");
+                    ((BaseApplication) getApplication()).setNotificationFlag(0, Constants.FLAG_FRIENDREQUESTS);
                 }
             }
 
@@ -140,7 +141,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
             }
         });
 
-        FontsOverride.changeTabsFont(getApplicationContext(), tabLayout, "fonts/Nunito/Nunito-Bold.ttf");
+        FontsOverride.changeTabsFont(getApplicationContext(), tabLayout, Constants.APP_FONT);
 
         buttonMyFriends.setBackgroundResource(R.drawable.rooster_button_bar_friends_active);
     }
@@ -212,14 +213,14 @@ public class FriendsFragmentActivity extends BaseActivity implements
     private void updateNotifications() {
         //Flag check for UI changes on load, broadcastreceiver for changes while activity running
         //If notifications waiting, display new friend request notification
-        if (((BaseApplication) getApplication()).getNotificationFlag("friendRequests") > 0) {
+        if (((BaseApplication) getApplication()).getNotificationFlag(Constants.FLAG_FRIENDREQUESTS) > 0) {
             setButtonBarNotification(true);
             setTabNotification(1, true);
         }
 
         //Broadcast receiver filter to receive UI updates
         IntentFilter firebaseListenerServiceFilter = new IntentFilter();
-        firebaseListenerServiceFilter.addAction("rooster.update.REQUEST_NOTIFICATION");
+        firebaseListenerServiceFilter.addAction(Constants.ACTION_REQUESTNOTIFICATION);
 
         receiver = new BroadcastReceiver() {
             @Override

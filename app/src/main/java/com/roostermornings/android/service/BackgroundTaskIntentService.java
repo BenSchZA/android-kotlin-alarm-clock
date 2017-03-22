@@ -23,18 +23,16 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.roostermornings.android.domain.ChannelRooster;
-import com.roostermornings.android.domain.DeviceAudioQueueItem;
+import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.domain.SocialRooster;
 import com.roostermornings.android.sqlutil.AudioTableManager;
+import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
 
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 
 public class BackgroundTaskIntentService extends IntentService {
-    private static final String ACTION_BACKGROUND_DOWNLOAD = "com.roostermornings.android.background.action.BACKGROUND_DOWNLOAD";
-    private static final String ACTION_DAILY_TASK = "com.roostermornings.android.background.action.DAILY_TASK";
-
     private static final String EXTRA_PARAM1 = "com.roostermornings.android.background.extra.PARAM1";
     private static final String EXTRA_PARAM2 = "com.roostermornings.android.background.extra.PARAM2";
 
@@ -53,7 +51,7 @@ public class BackgroundTaskIntentService extends IntentService {
 
     public static void startActionBackgroundDownload(Context context, String param1, String param2) {
         Intent intent = new Intent(context, BackgroundTaskIntentService.class);
-        intent.setAction(ACTION_BACKGROUND_DOWNLOAD);
+        intent.setAction(Constants.ACTION_BACKGROUNDDOWNLOAD);
         intent.putExtra(EXTRA_PARAM1, param1);
         intent.putExtra(EXTRA_PARAM2, param2);
         context.startService(intent);
@@ -61,7 +59,7 @@ public class BackgroundTaskIntentService extends IntentService {
 
     public static void startActionDailyTask(Context context, String param1, String param2) {
         Intent intent = new Intent(context, BackgroundTaskIntentService.class);
-        intent.setAction(ACTION_DAILY_TASK);
+        intent.setAction(Constants.ACTION_DAILYTASK);
         intent.putExtra(EXTRA_PARAM1, param1);
         intent.putExtra(EXTRA_PARAM2, param2);
         context.startService(intent);
@@ -71,11 +69,11 @@ public class BackgroundTaskIntentService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();
-            if (ACTION_BACKGROUND_DOWNLOAD.equals(action)) {
+            if (Constants.ACTION_BACKGROUNDDOWNLOAD.equals(action)) {
                 final String param1 = intent.getStringExtra(EXTRA_PARAM1);
                 final String param2 = intent.getStringExtra(EXTRA_PARAM2);
                 handleActionBackgroundDownload(param1, param2);
-            } else if(ACTION_DAILY_TASK.equals(action)){
+            } else if(Constants.ACTION_DAILYTASK.equals(action)){
                 handleActionDailyTask();
             }
         }

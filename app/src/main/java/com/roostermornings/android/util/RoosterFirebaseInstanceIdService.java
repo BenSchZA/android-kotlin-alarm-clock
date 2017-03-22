@@ -38,10 +38,13 @@ public class RoosterFirebaseInstanceIdService extends FirebaseInstanceIdService 
 
         FirebaseUser user = auth.getCurrentUser();
 
-        String deviceToken = FirebaseInstanceId.getInstance().getToken();
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        database.getReference(String.format("users/%s/device_type", user.getUid())).setValue("android");
-        database.getReference(String.format("users/%s/device_token", user.getUid())).setValue(deviceToken);
-
+        try {
+            String deviceToken = FirebaseInstanceId.getInstance().getToken();
+            FirebaseDatabase database = FirebaseDatabase.getInstance();
+            database.getReference(String.format("users/%s/device_type", user.getUid())).setValue("android");
+            database.getReference(String.format("users/%s/device_token", user.getUid())).setValue(deviceToken);
+        } catch(NullPointerException e) {
+            e.printStackTrace();
+        }
     }
 }
