@@ -7,17 +7,13 @@ package com.roostermornings.android.activity;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 
 import com.google.firebase.auth.FirebaseUser;
-import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
-import com.roostermornings.android.background.BackgroundTaskReceiver;
-import com.roostermornings.android.sqldata.AudioTableHelper;
-import com.roostermornings.android.sqldata.DeviceAlarmTableHelper;
+import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 
 public class SplashActivity extends BaseActivity {
 

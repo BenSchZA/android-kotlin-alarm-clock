@@ -3,7 +3,7 @@
  * Copyright (c)  2017 Roosta Media. All rights reserved.
  */
 
-package com.roostermornings.android.background;
+package com.roostermornings.android.service;
 
 import android.app.IntentService;
 import android.content.Intent;
@@ -196,6 +196,7 @@ public class BackgroundTaskIntentService extends IntentService {
                         //Create new object for storing in SQL db
                         DeviceAudioQueueItem deviceAudioQueueItem = new DeviceAudioQueueItem();
                         deviceAudioQueueItem.fromChannelRooster(channelRooster, audioFileUniqueName);
+                        deviceAudioQueueItem.setDate_created(System.currentTimeMillis());
 
                         //store in local SQLLite database
                         mAudioTableManager.insertAudioFile(deviceAudioQueueItem, true);

@@ -9,32 +9,21 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.facebook.stetho.Stetho;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.roostermornings.android.activity.FriendsFragmentActivity;
-import com.roostermornings.android.activity.base.BaseActivity;
-import com.roostermornings.android.background.FirebaseListenerService;
 import com.roostermornings.android.dagger.DaggerRoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationModule;
-import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.node_api.IHTTPClient;
 import com.roostermornings.android.util.FontsOverride;
 
 import io.fabric.sdk.android.Fabric;
 import retrofit.GsonConverterFactory;
 import retrofit.Retrofit;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class BaseApplication extends android.app.Application {
 

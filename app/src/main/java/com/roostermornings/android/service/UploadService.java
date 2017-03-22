@@ -3,7 +3,7 @@
  * Copyright (c)  2017 Roosta Media. All rights reserved.
  */
 
-package com.roostermornings.android.background;
+package com.roostermornings.android.service;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -31,19 +31,14 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
-import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
-import com.roostermornings.android.activity.NewAudioFriendsActivity;
-import com.roostermornings.android.activity.NewAudioRecordActivity;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.FCMPayloadSocialRooster;
-import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.NodeAPIResult;
 import com.roostermornings.android.domain.SocialRooster;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.node_api.IHTTPClient;
 
 import java.io.File;
-import java.sql.Array;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 

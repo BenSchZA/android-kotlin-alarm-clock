@@ -3,13 +3,11 @@
  * Copyright (c)  2017 Roosta Media. All rights reserved.
  */
 
-package com.roostermornings.android.background;
+package com.roostermornings.android.service;
 
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -18,9 +16,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.roostermornings.android.activity.base.BaseActivity;
-import com.roostermornings.android.domain.Friend;
 
 public class FirebaseListenerService extends Service {
     protected DatabaseReference mDatabase;
