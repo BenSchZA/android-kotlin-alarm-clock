@@ -3,7 +3,10 @@
  * Copyright (c)  2017 Roosta Media. All rights reserved.
  */
 
-package com.roostermornings.android.domain;
+package com.roostermornings.android.sqlutil;
+
+import com.roostermornings.android.domain.ChannelRooster;
+import com.roostermornings.android.domain.SocialRooster;
 
 import java.io.Serializable;
 

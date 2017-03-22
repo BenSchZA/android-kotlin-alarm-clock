@@ -17,9 +17,11 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.util.Log;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -27,10 +29,12 @@ import android.widget.TextView;
 
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 import com.roostermornings.android.service.AudioService;
-import com.roostermornings.android.domain.DeviceAudioQueueItem;
+import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
+import com.roostermornings.android.util.Constants;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -42,6 +46,8 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     DeviceAlarmController deviceAlarmController;
 
     public static final String TAG = DeviceAlarmFullScreenActivity.class.getSimpleName();
+
+    PowerManager.WakeLock wakeLock;
 
     AudioService mAudioService;
     private boolean mBound;
@@ -74,13 +80,12 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         initialize(R.layout.activity_device_alarm_full_screen);
         //Used to ensure alarm shows over lock-screen
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                + WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
+                +WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
                 +WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
                 +WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 
-
         //Get alarm UID for relating current alarm to channel content
-        alarmUid = getIntent().getStringExtra(DeviceAlarm.EXTRA_UID);
+        alarmUid = getIntent().getStringExtra(Constants.EXTRA_UID);
 
         //Bind to audio service to allow playback and pausing of alarms in background
         Intent intent = new Intent(this, AudioService.class);
@@ -137,7 +142,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
             deviceAlarmController = new DeviceAlarmController(getApplicationContext());
 
             //TODO: This intent extra is not currently implemented
-            if (getIntent().getBooleanExtra(DeviceAlarm.EXTRA_TONE, false)) {
+            if (getIntent().getBooleanExtra(Constants.EXTRA_TONE, false)) {
                 mAudioService.startDefaultAlarmTone();
                 //Replace image and name with message if no Roosters etc.
                 setDefaultDisplayProfile();
@@ -157,18 +162,29 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         //Flag check for UI changes on load, broadcast receiver for changes while activity running
         //Broadcast receiver filter to receive UI updates
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction("rooster.update.ALARMDISPLAY");
+        intentFilter.addAction(Constants.ACTION_ALARMDISPLAY);
+        intentFilter.addAction(Constants.ACTION_ALARMTIMESUP);
 
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 //do something based on the intent's action
                 switch(intent.getAction()){
-                    case "rooster.update.ALARMDISPLAY":
+                    case Constants.ACTION_ALARMDISPLAY:
                         audioItem = (DeviceAudioQueueItem) intent.getExtras().getSerializable("audioItem");
                         alarmPosition = intent.getIntExtra("alarmPosition", alarmPosition);
                         alarmCount = intent.getIntExtra("alarmCount", alarmCount);
                         setAlarmUI();
+                        break;
+                    case Constants.ACTION_ALARMTIMESUP:
+                        Intent wakefulIntent = getIntent().getParcelableExtra(Constants.DEVICE_ALARM_RECEIVER_WAKEFUL_INTENT);
+                        DeviceAlarmReceiver.completeWakefulIntent(wakefulIntent);
+
+                        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                                +WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
+                                +WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+
+                        mAudioService.endService(mAudioServiceConnection);
                         break;
                     default:
                         break;

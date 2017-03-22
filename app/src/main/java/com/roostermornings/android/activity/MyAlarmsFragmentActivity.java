@@ -36,6 +36,7 @@ import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.MyAlarmsListAdapter;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
+import com.roostermornings.android.util.Constants;
 
 import java.util.ArrayList;
 
@@ -128,12 +129,12 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     private void updateRequestNotification() {
         //Flag check for UI changes on load, broadcastreceiver for changes while activity running
         //If notifications waiting, display new friend request notification
-        if (((BaseApplication) getApplication()).getNotificationFlag("friendRequests") > 0)
+        if (((BaseApplication) getApplication()).getNotificationFlag(Constants.FLAG_FRIENDREQUESTS) > 0)
             setButtonBarNotification(true);
 
         //Broadcast receiver filter to receive UI updates
         IntentFilter firebaseListenerServiceFilter = new IntentFilter();
-        firebaseListenerServiceFilter.addAction("rooster.update.REQUEST_NOTIFICATION");
+        firebaseListenerServiceFilter.addAction(Constants.ACTION_REQUESTNOTIFICATION);
 
         receiver = new BroadcastReceiver() {
             @Override
@@ -216,7 +217,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
     public void editAlarm(String alarmId) {
         Intent intent = new Intent(MyAlarmsFragmentActivity.this, NewAlarmFragmentActivity.class);
-        intent.putExtra("alarmId", alarmId);
+        intent.putExtra(Constants.EXTRA_ALARMID, alarmId);
         startActivity(intent);
     }
 

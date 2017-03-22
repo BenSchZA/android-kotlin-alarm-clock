@@ -11,14 +11,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import static com.roostermornings.android.sqldata.AudioTableContract.AudioTableEntry;
 
-import com.roostermornings.android.domain.DeviceAudioQueueItem;
-import com.roostermornings.android.sqldata.AudioTableContract;
 import com.roostermornings.android.sqldata.AudioTableHelper;
-import com.roostermornings.android.sqldata.DeviceAlarmTableContract;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 /**
  * Created by bscholtz on 2/14/17.
