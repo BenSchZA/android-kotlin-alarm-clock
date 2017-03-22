@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.roostermornings.android.background.BackgroundTaskReceiver;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 
 

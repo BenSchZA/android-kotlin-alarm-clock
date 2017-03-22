@@ -3,7 +3,7 @@
  * Copyright (c)  2017 Roosta Media. All rights reserved.
  */
 
-package com.roostermornings.android.background;
+package com.roostermornings.android.receiver;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -13,6 +13,8 @@ import android.content.Intent;
 import android.os.SystemClock;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.roostermornings.android.service.BackgroundTaskIntentService;
 
 public class BackgroundTaskReceiver extends BroadcastReceiver {
 

@@ -3,7 +3,7 @@
  * Copyright (c)  2017 Roosta Media. All rights reserved.
  */
 
-package com.roostermornings.android.background;
+package com.roostermornings.android.service;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -93,7 +93,112 @@ public class AudioService extends Service {
 
     public void startAlarmRoosters(String alarmUid) {
         this.alarmUid = alarmUid;
-        startAlarmSocialRoosters();
+
+        //Check if Social and Channel alarm content exists, else startDefaultAlarmTone
+        ArrayList<DeviceAudioQueueItem> channelAudioItems;
+        channelAudioItems = audioTableManager.extractAlarmChannelAudioFiles(mThis.alarmUid);
+        ArrayList<DeviceAudioQueueItem> socialAudioItems;
+        socialAudioItems = audioTableManager.extractSocialAudioFiles();
+
+        if(!socialAudioItems.isEmpty() || !channelAudioItems.isEmpty()) {
+            startAlarmSocialRoosters();
+        } else {
+            startDefaultAlarmTone();
+        }
+
+        //        //TODO: maybe check audio volume levels?
+        //        //TODO: Check conditions for playing default tone: people must wake up!
+        //        if (mThis.playDuration < 5000) {
+        //            startDefaultAlarmTone();
+        //        }
+    }
+
+    private void startAlarmSocialRoosters() {
+
+        this.audioItems = audioTableManager.extractSocialAudioFiles();
+        alarmCount = audioItems.size();
+
+        //Check conditions for playing default tone: people must wake up!
+        if (this.audioItems == null || this.audioItems.isEmpty()) {
+            mThis.audioItems = audioTableManager.extractAlarmChannelAudioFiles(mThis.alarmUid);
+            if(!mThis.audioItems.isEmpty()) playChannelRooster(mThis.audioItems.get(0));
+            else startDefaultAlarmTone();
+            return;
+        }
+
+        if(currentPositionRooster < 1){
+            alarmPosition = 0;
+            playSocialRooster(audioItems.get(0));
+        } else{
+            try {
+                mediaPlayerRooster.seekTo(currentPositionRooster);
+                mediaPlayerRooster.start();
+                this.audioItem = audioItems.get(0);
+                //Send broadcast to DeviceAlarmFullScreenActivity with UI data
+                updateAlarmUI();
+            } catch(NullPointerException e){
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void playSocialRooster(final DeviceAudioQueueItem audioItem) {
+        foregroundNotification("Social Rooster playing");
+
+        mThis.audioItem = audioItem;
+
+        mediaPlayerRooster = new MediaPlayer();
+        //Set media player to alarm volume
+        mediaPlayerRooster.setAudioStreamType(AudioManager.STREAM_ALARM);
+
+        file = new File(getFilesDir() + "/" + audioItem.getFilename());
+
+        try {
+            mediaPlayerRooster.setDataSource(file.getPath());
+
+            mediaPlayerRooster.prepareAsync();
+            mediaPlayerRooster.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mediaPlayer) {
+                    mediaPlayerRooster.start();
+
+                    //Set alarm count display
+                    alarmPosition++;
+                    //Send broadcast to DeviceAlarmFullScreenActivity with UI data
+                    updateAlarmUI();
+
+                    mediaPlayerRooster.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        @Override
+                        public void onCompletion(MediaPlayer mp) {
+                            //TODO: this isn't used anymore, due to looping - maybe check volume?
+                            //playDuration used to check that audio has played and for specified period, otherwise set default alarm
+                            mThis.playDuration += mediaPlayerRooster.getDuration();
+                            //delete record from arraylist
+                            mThis.audioItems.remove(mThis.audioItem);
+                            //set audio file entry in SQL db as listened; to be removed when AudioService ends
+                            audioTableManager.setListened(audioItem.getId());
+                            //Play channel rooster if social rooster list is empty, else play next file
+                            if (mThis.audioItems.isEmpty()) {
+                                mThis.audioItems = audioTableManager.extractAlarmChannelAudioFiles(mThis.alarmUid);
+                                if(!mThis.audioItems.isEmpty()) playChannelRooster(mThis.audioItems.get(0));
+                                else startAlarmSocialRoosters();
+                            } else{
+                                playSocialRooster(mThis.audioItems.get(0));
+                            }
+                        }
+                    });
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+            //Social rooster will never play... let's not go here
+            //delete file
+            file.delete();
+            //delete record from AudioTable SQL DB
+            audioTableManager.removeAudioFile(audioItem.getId());
+            //delete record from arraylist
+            mThis.audioItems.remove(audioItem);
+        }
     }
 
     private void playChannelRooster(final DeviceAudioQueueItem audioItem) {
@@ -150,111 +255,17 @@ public class AudioService extends Service {
             //delete record from arraylist
             mThis.audioItems.remove(audioItem);
         }
-
-//        //TODO: Check conditions for playing default tone: people must wake up!
-//        if (mThis.playDuration < 5000) {
-//            startDefaultAlarmTone();
-//        }
-    }
-
-    private void startAlarmSocialRoosters() {
-
-        audioItems = audioTableManager.extractSocialAudioFiles();
-        alarmCount = audioItems.size();
-
-        //Check conditions for playing default tone: people must wake up!
-        if (audioItems == null || audioItems.isEmpty()) {
-            mThis.audioItems = audioTableManager.extractAlarmChannelAudioFiles(mThis.alarmUid);
-            if(!mThis.audioItems.isEmpty()) playChannelRooster(mThis.audioItems.get(0));
-            else startDefaultAlarmTone();
-            return;
-        }
-
-        if(currentPositionRooster < 1){
-            alarmPosition = 0;
-            playSocialRooster(audioItems.get(0));
-        } else{
-            try {
-                mediaPlayerRooster.seekTo(currentPositionRooster);
-                mediaPlayerRooster.start();
-                this.audioItem = audioItems.get(0);
-                //Send broadcast to DeviceAlarmFullScreenActivity with UI data
-                updateAlarmUI();
-            } catch(NullPointerException e){
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void playSocialRooster(final DeviceAudioQueueItem audioItem) {
-        foregroundNotification("Social Roosters playing");
-
-        mThis.audioItem = audioItem;
-
-        mediaPlayerRooster = new MediaPlayer();
-        //Set media player to alarm volume
-        mediaPlayerRooster.setAudioStreamType(AudioManager.STREAM_ALARM);
-
-        file = new File(getFilesDir() + "/" + audioItem.getFilename());
-
-        try {
-            mediaPlayerRooster.setDataSource(file.getPath());
-
-            mediaPlayerRooster.prepareAsync();
-            mediaPlayerRooster.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mediaPlayer) {
-                    mediaPlayerRooster.start();
-
-                    //Set alarm count display
-                    alarmPosition++;
-                    //Send broadcast to DeviceAlarmFullScreenActivity with UI data
-                    updateAlarmUI();
-
-                    mediaPlayerRooster.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                        @Override
-                        public void onCompletion(MediaPlayer mp) {
-                            //TODO: should users rather just be forced to record longer file?
-                            //playDuration used to check that audio has played and for specified period, otherwise set default alarm
-                            mThis.playDuration += mediaPlayerRooster.getDuration();
-                            //delete record from arraylist
-                            mThis.audioItems.remove(mThis.audioItem);
-                            //set audio file entry in SQL db as listened; to be removed when AudioService ends
-                            audioTableManager.setListened(audioItem.getId());
-                            //Play channel rooster if social rooster list is empty, else play next file
-                            if (mThis.audioItems.isEmpty()) {
-                                mThis.audioItems = audioTableManager.extractAlarmChannelAudioFiles(mThis.alarmUid);
-                                if(!mThis.audioItems.isEmpty()) playChannelRooster(mThis.audioItems.get(0));
-                                else startAlarmSocialRoosters();
-                            } else{
-                                playSocialRooster(mThis.audioItems.get(0));
-                            }
-                        }
-                    });
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-            //Social rooster will never play... let's not go here
-            //delete file
-            file.delete();
-            //delete record from AudioTable SQL DB
-            audioTableManager.removeAudioFile(audioItem.getId());
-            //delete record from arraylist
-            mThis.audioItems.remove(audioItem);
-        }
     }
 
     public void endService(ServiceConnection conn) {
-        //TODO: uncomment
         //delete record and file of all listened audio files
-//        for (DeviceAudioQueueItem audioItem :
-//             audioTableManager.selectListened()) {
-//            file = new File(getFilesDir() + "/" + audioItem.getFilename());
-//            if(file.delete()){
-//                audioTableManager.removeAudioFile(audioItem.getId());
-//            }
-//        }
+        for (DeviceAudioQueueItem audioItem :
+             audioTableManager.selectListened()) {
+            file = new File(getFilesDir() + "/" + audioItem.getFilename());
+            if(file.delete()){
+                audioTableManager.removeAudioFile(audioItem.getId());
+            }
+        }
         //delete record from arraylist
         audioItems.clear();
         //clear variables
