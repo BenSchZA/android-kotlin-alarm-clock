@@ -159,10 +159,10 @@ public final class DeviceAlarmController {
 
     }
 
-    public void registerAlarmSet(String setId, int alarmHour, int alarmMinute, List<Integer> alarmDays, boolean repeatWeekly, boolean vibrate) {
+    public void registerAlarmSet(String setId, int alarmHour, int alarmMinute, List<Integer> alarmDays, boolean repeatWeekly, boolean vibrate, String channel) {
         List<DeviceAlarm> deviceAlarmList;
         DeviceAlarm deviceAlarmSet = new DeviceAlarm()
-                .initAlarmSet(alarmHour, alarmMinute, alarmDays, repeatWeekly, vibrate);
+                .initAlarmSet(alarmHour, alarmMinute, alarmDays, repeatWeekly, vibrate, channel);
         deviceAlarmList = deviceAlarmSet.getAlarmList();
 
         for (DeviceAlarm deviceAlarm :

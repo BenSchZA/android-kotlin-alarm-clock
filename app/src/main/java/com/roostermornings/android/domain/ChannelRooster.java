@@ -9,31 +9,55 @@ import com.google.firebase.database.IgnoreExtraProperties;
 
 @IgnoreExtraProperties
 public class ChannelRooster {
-    private String alarm_uid;
+    private String channel_name;
+    private boolean active;
+    private String audio_file_name;
     private String audio_file_url;
+    private String channel_uid;
     private String description;
-    private String name;
     private String photo;
+    private int rooster_cycle_iteration;
+    private long upload_date;
 
     // Required default constructor for Firebase object mapping
     @SuppressWarnings("unused")
     public ChannelRooster() {
     }
 
-    public ChannelRooster(String alarm_uid, String audio_file_url, String description, String name, String photo) {
-        this.alarm_uid = alarm_uid;
+    public ChannelRooster(String channel_name, boolean active, String audio_file_name, String audio_file_url, String channel_uid, String description, String photo, int rooster_cycle_iteration, long upload_date) {
+        this.channel_name = channel_name;
+        this.active = active;
+        this.audio_file_name = audio_file_name;
         this.audio_file_url = audio_file_url;
+        this.channel_uid = channel_uid;
         this.description = description;
-        this.name = name;
         this.photo = photo;
+        this.rooster_cycle_iteration = rooster_cycle_iteration;
+        this.upload_date = upload_date;
     }
 
-    public String getAlarm_uid() {
-        return alarm_uid;
+    public String getChannel_name() {
+        return channel_name;
     }
 
-    public void setAlarm_uid(String alarm_uid) {
-        this.alarm_uid = alarm_uid;
+    public void setChannel_name(String channel_name) {
+        this.channel_name = channel_name;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public String getAudio_file_name() {
+        return audio_file_name;
+    }
+
+    public void setAudio_file_name(String audio_file_name) {
+        this.audio_file_name = audio_file_name;
     }
 
     public String getAudio_file_url() {
@@ -44,6 +68,14 @@ public class ChannelRooster {
         this.audio_file_url = audio_file_url;
     }
 
+    public String getChannel_uid() {
+        return channel_uid;
+    }
+
+    public void setChannel_uid(String channel_uid) {
+        this.channel_uid = channel_uid;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -52,19 +84,27 @@ public class ChannelRooster {
         this.description = description;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getPhoto() {
         return photo;
     }
 
     public void setPhoto(String photo) {
         this.photo = photo;
+    }
+
+    public int getRooster_cycle_iteration() {
+        return rooster_cycle_iteration;
+    }
+
+    public void setRooster_cycle_iteration(int rooster_cycle_iteration) {
+        this.rooster_cycle_iteration = rooster_cycle_iteration;
+    }
+
+    public long getUpload_date() {
+        return upload_date;
+    }
+
+    public void setUpload_date(long upload_date) {
+        this.upload_date = upload_date;
     }
 }

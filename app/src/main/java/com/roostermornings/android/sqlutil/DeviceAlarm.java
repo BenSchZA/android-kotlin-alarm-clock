@@ -26,6 +26,7 @@ public class DeviceAlarm {
     private boolean recurring;
     private long alarmMillis;
 
+    private String channel;
     private String label;
     private int ringtone;
     private boolean vibrate;
@@ -51,12 +52,13 @@ public class DeviceAlarm {
     alarmList = alarmSet.getAlarmList();*/
 
 
-    public DeviceAlarm initAlarmSet(int hour, int minute, List<Integer> alarmDays, boolean repeatWeekly, boolean vibrate) {
+    public DeviceAlarm initAlarmSet(int hour, int minute, List<Integer> alarmDays, boolean repeatWeekly, boolean vibrate, String channel) {
         this.hour = hour;
         this.minute = minute;
         this.alarmDays = alarmDays;
         this.recurring = repeatWeekly;
         this.vibrate = vibrate;
+        this.channel = channel;
         return this;
     }
 
@@ -65,20 +67,29 @@ public class DeviceAlarm {
 
         while (dayIterator.hasNext()) {
             day = Integer.valueOf(dayIterator.next().toString());
-            deviceAlarmSet.add(new DeviceAlarm().setAlarm(this.hour, this.minute, day, this.recurring, this.vibrate));
+            deviceAlarmSet.add(new DeviceAlarm().setAlarm(this.hour, this.minute, day, this.recurring, this.vibrate, this.channel));
         }
         return deviceAlarmSet;
     }
 
-    private DeviceAlarm setAlarm(int hour, int minute, int day, boolean repeatWeekly, boolean vibrate) {
+    private DeviceAlarm setAlarm(int hour, int minute, int day, boolean repeatWeekly, boolean vibrate, String channel) {
         this.hour = hour;
         this.minute = minute;
         this.day = day;
         this.recurring = repeatWeekly;
         this.vibrate = vibrate;
         this.alarmMillis = -1;
+        this.channel = channel;
 
         return this;
+    }
+
+    public String getChannel() {
+        return channel;
+    }
+
+    public void setChannel(String channel) {
+        this.channel = channel;
     }
 
     public String getSetId() {
