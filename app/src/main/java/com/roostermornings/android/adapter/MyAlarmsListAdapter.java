@@ -150,7 +150,6 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
                                     notifyItemRemoved(position);
                                     notifyItemRangeChanged(position, mDataset.size());
                                     ((MyAlarmsFragmentActivity) mActivity).deleteAlarm(alarm.getUid());
-                                    //TODO: Delete alarm set
                                 }
                             })
                             .show();
