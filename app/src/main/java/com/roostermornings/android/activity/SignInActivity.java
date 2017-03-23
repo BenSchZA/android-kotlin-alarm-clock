@@ -210,7 +210,8 @@ public class SignInActivity extends BaseActivity {
                                     mAuth.getCurrentUser().getDisplayName(),
                                     mMobileNumber,
                                     mAuth.getCurrentUser().getUid(),
-                                    null);
+                                    null,
+                                    0);
 
                             //Note: "friends" node not changed TODO: should profile pic be kept?
                             Map<String, Object> childUpdates = new HashMap<>();
@@ -226,6 +227,8 @@ public class SignInActivity extends BaseActivity {
                                     mAuth.getCurrentUser().getUid(), "uid"), user.getUid());
                             childUpdates.put(String.format("users/%s/%s",
                                     mAuth.getCurrentUser().getUid(), "user_name"), user.getUser_name());
+                            childUpdates.put(String.format("users/%s/%s",
+                                    mAuth.getCurrentUser().getUid(), "unseen_roosters"), user.getUnseen_roosters());
 
                             mDatabase.updateChildren(childUpdates);
 
@@ -289,7 +292,8 @@ public class SignInActivity extends BaseActivity {
                                     mAuth.getCurrentUser().getDisplayName(),
                                     mMobileNumber,
                                     mAuth.getCurrentUser().getUid(),
-                                    null);
+                                    null,
+                                    0);
 
                             //Note: "friends" node not changed TODO: should profile pic be kept?
                             Map<String, Object> childUpdates = new HashMap<>();
@@ -305,6 +309,8 @@ public class SignInActivity extends BaseActivity {
                                     mAuth.getCurrentUser().getUid(), "uid"), user.getUid());
                             childUpdates.put(String.format("users/%s/%s",
                                     mAuth.getCurrentUser().getUid(), "user_name"), user.getUser_name());
+                            childUpdates.put(String.format("users/%s/%s",
+                                    mAuth.getCurrentUser().getUid(), "unseen_roosters"), user.getUnseen_roosters());
 
                             mDatabase.updateChildren(childUpdates);
 
