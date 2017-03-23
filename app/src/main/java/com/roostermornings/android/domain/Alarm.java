@@ -5,6 +5,7 @@
 
 package com.roostermornings.android.domain;
 
+import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 
 /**
@@ -28,7 +29,10 @@ public class Alarm {
     private boolean allow_friend_audio_files;
     private String uid;
 
+    @Exclude
     private boolean vibrate;
+    @Exclude
+    private Integer unseen_roosters;
 
     // Required default constructor for Firebase object mapping
     @SuppressWarnings("unused")
@@ -53,6 +57,16 @@ public class Alarm {
 
         this.vibrate = vibrate;
         this.uid = uid;
+
+        this.unseen_roosters = 0;
+    }
+
+    public Integer getUnseen_roosters() {
+        return unseen_roosters;
+    }
+
+    public void setUnseen_roosters(Integer unseen_roosters) {
+        this.unseen_roosters = unseen_roosters;
     }
 
     public String getUid() {
