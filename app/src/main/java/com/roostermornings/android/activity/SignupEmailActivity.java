@@ -116,6 +116,7 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
                                 database.getReference(String.format("users/%s/device_type", mAuth.getCurrentUser().getUid())).setValue("android");
                                 database.getReference(String.format("users/%s/device_token", mAuth.getCurrentUser().getUid())).setValue(deviceToken);
                                 database.getReference(String.format("users/%s/cell_number", mAuth.getCurrentUser().getUid())).setValue(mMobileNumber);
+                                database.getReference(String.format("users/%s/unseen_roosters", mAuth.getCurrentUser().getUid())).setValue(0);
 
                                 proceedToMyAlarmsActivity();
                             }
@@ -147,7 +148,8 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
                                         name,
                                         mMobileNumber,
                                         mAuth.getCurrentUser().getUid(),
-                                        null);
+                                        null,
+                                        0);
 
                                 //Note: "friends" node not changed TODO: should profile pic be kept?
                                 Map<String, Object> childUpdates = new HashMap<>();
@@ -163,6 +165,8 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
                                         mAuth.getCurrentUser().getUid(), "uid"), user.getUid());
                                 childUpdates.put(String.format("users/%s/%s",
                                         mAuth.getCurrentUser().getUid(), "user_name"), user.getUser_name());
+                                childUpdates.put(String.format("users/%s/%s",
+                                        mAuth.getCurrentUser().getUid(), "unseen_roosters"), user.getUnseen_roosters());
 
                                 mDatabase.updateChildren(childUpdates);
 
