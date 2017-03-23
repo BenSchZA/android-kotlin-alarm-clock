@@ -22,6 +22,7 @@ public class User implements Serializable {
     private String cell_number;
     private HashMap<String, User> friends;
     private String uid;
+    private Integer unseen_roosters;
 
     @Exclude
     private Boolean selected; //this is important for list of friends that need to be selected eg for creating a new alarm
@@ -38,7 +39,8 @@ public class User implements Serializable {
                 String user_name,
                 String cell_number,
                 String uid,
-                HashMap<String, User> friends) {
+                HashMap<String, User> friends,
+                Integer unseen_roosters) {
 
         this.channels = channels;
         this.cell_number = cell_number;
@@ -47,6 +49,15 @@ public class User implements Serializable {
         this.profile_pic = profile_pic;
         this.user_name = user_name;
         this.uid = uid;
+        this.unseen_roosters = unseen_roosters;
+    }
+
+    public Integer getUnseen_roosters() {
+        return unseen_roosters;
+    }
+
+    public void setUnseen_roosters(Integer unseen_roosters) {
+        this.unseen_roosters = unseen_roosters;
     }
 
     public HashMap<String, User> getFriends() {
