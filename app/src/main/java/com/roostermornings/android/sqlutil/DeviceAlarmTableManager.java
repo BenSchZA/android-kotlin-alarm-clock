@@ -57,6 +57,7 @@ public class DeviceAlarmTableManager {
         values.put(AlarmTableEntry.COLUMN_RECURRING, alarm.getRecurring());
         values.put(AlarmTableEntry.COLUMN_VIBRATE, alarm.getVibrate());
         values.put(AlarmTableEntry.COLUMN_MILLIS, alarm.getMillis());
+        values.put(AlarmTableEntry.COLUMN_CHANNEL, alarm.getChannel());
 
         values.put(AlarmTableEntry.COLUMN_CHANGED, alarm.getChanged());
 
@@ -153,9 +154,10 @@ public class DeviceAlarmTableManager {
     public DeviceAlarm getNextPendingAlarm() {
         SQLiteDatabase db = initDB();
 
-        String selectQuery = "SELECT MIN(" + AlarmTableEntry.COLUMN_MILLIS + ") FROM " + AlarmTableEntry.TABLE_NAME + " WHERE " + AlarmTableEntry.COLUMN_ENABLED + " = TRUE;";
-
+        //String selectQuery = "SELECT MIN(" + AlarmTableEntry.COLUMN_MILLIS + ") FROM " + AlarmTableEntry.TABLE_NAME + " WHERE " + AlarmTableEntry.COLUMN_ENABLED + " = " + TRUE + ";";
+        String selectQuery = "SELECT * FROM " + AlarmTableEntry.TABLE_NAME + " WHERE " + AlarmTableEntry.COLUMN_ENABLED + " = " + TRUE + " ORDER BY " + AlarmTableEntry.COLUMN_MILLIS + " ASC LIMIT 1;";
         Cursor cursor = db.rawQuery(selectQuery, null);
+        if(!checkValidCursor(cursor)) return null;
         List<DeviceAlarm> alarmList = extractAlarms(cursor);
 
         return alarmList.get(0);
@@ -257,6 +259,11 @@ public class DeviceAlarmTableManager {
         return dbHelper.getWritableDatabase();
     }
 
+    private Boolean checkValidCursor(Cursor cursor) {
+        if((cursor != null) && (cursor.getCount() > 0)) return true;
+        else return false;
+    }
+
     public List<DeviceAlarm> extractAlarms(Cursor cursor) {
         List<DeviceAlarm> alarmList = new ArrayList<>();
         if (cursor.moveToFirst()) {
@@ -272,6 +279,7 @@ public class DeviceAlarmTableManager {
                 alarm.setRecurring(cursor.getInt(cursor.getColumnIndex(AlarmTableEntry.COLUMN_RECURRING)) > 0);
                 alarm.setMillis(cursor.getLong(cursor.getColumnIndex(AlarmTableEntry.COLUMN_MILLIS)));
 
+                alarm.setChannel(cursor.getString(cursor.getColumnIndex(AlarmTableEntry.COLUMN_CHANNEL)));
                 alarm.setLabel(cursor.getString(cursor.getColumnIndex(AlarmTableEntry.COLUMN_LABEL)));
                 alarm.setRingtone(cursor.getInt(cursor.getColumnIndex(AlarmTableEntry.COLUMN_RINGTONE)));
                 alarm.setVibrate(cursor.getInt(cursor.getColumnIndex(AlarmTableEntry.COLUMN_VIBRATE)) > 0);

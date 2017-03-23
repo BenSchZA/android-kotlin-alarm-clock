@@ -184,7 +184,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 }
 
                 //Extract data from Alarm mAlarm and create new alarm set DeviceAlarm
-                deviceAlarmController.registerAlarmSet(alarmKey, mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring(), mAlarm.isVibrate());
+                deviceAlarmController.registerAlarmSet(alarmKey, mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring(), mAlarm.isVibrate(), mAlarm.getChannel().getId());
 
                 database.getReference(String.format("alarms/%s/%s", mAuth.getCurrentUser().getUid(), alarmKey)).setValue(mAlarm);
 
