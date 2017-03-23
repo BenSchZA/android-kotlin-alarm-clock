@@ -9,6 +9,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.service.notification.NotificationListenerService;
 
 import com.crashlytics.android.Crashlytics;
 import com.facebook.stetho.Stetho;
@@ -19,6 +20,7 @@ import com.roostermornings.android.dagger.DaggerRoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationModule;
 import com.roostermornings.android.node_api.IHTTPClient;
+import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.FontsOverride;
 
@@ -83,6 +85,30 @@ public class BaseApplication extends android.app.Application {
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
         updateNotification();
+
+        //TODO: remove
+        if (BuildConfig.DEBUG) {
+
+//            AudioTableHelper dbAudioHelper = new AudioTableHelper(this);
+//            SQLiteDatabase dbAudio = dbAudioHelper.getWritableDatabase();
+//            DeviceAlarmTableHelper dbAlarmHelper = new DeviceAlarmTableHelper(this);
+//            SQLiteDatabase dbAlarm = dbAlarmHelper.getWritableDatabase();
+//
+//            AudioTableHelper audioTableHelper = new AudioTableHelper(this);
+//            DeviceAlarmTableHelper deviceAlarmTableHelper = new DeviceAlarmTableHelper(this);
+//            audioTableHelper.onUpgrade(dbAudio, 1, 2);
+//            deviceAlarmTableHelper.onUpgrade(dbAlarm, 1, 2);
+//
+//            dbAudio.close();
+//            dbAlarm.close();
+        }
+
+        BackgroundTaskReceiver backgroundTaskReceiver = new BackgroundTaskReceiver();
+        backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(getApplicationContext());
+        backgroundTaskReceiver.scheduleBackgroundDailyTask(getApplicationContext());
+        //Start listener service to download Roosters on notification
+        Intent notificationListenerIntent = new Intent(this, NotificationListenerService.class);
+        startService(notificationListenerIntent);
     }
 
     private void updateNotification() {

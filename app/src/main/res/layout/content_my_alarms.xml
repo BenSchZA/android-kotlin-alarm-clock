@@ -20,7 +20,9 @@
         android:id="@+id/home_alarmsListView"
         android:layout_width="fill_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:padding="@dimen/spacing_normal_large"
+        android:clipToPadding="false" />
 
     <include
         android:id="@+id/button_bar"

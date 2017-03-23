@@ -26,6 +26,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.Alarm;
+import com.roostermornings.android.domain.AlarmChannel;
 import com.roostermornings.android.fragment.IAlarmSetListener;
 import com.roostermornings.android.fragment.NewAlarmFragment1;
 import com.roostermornings.android.fragment.NewAlarmFragment2;
@@ -184,7 +185,11 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 }
 
                 //Extract data from Alarm mAlarm and create new alarm set DeviceAlarm
-                deviceAlarmController.registerAlarmSet(alarmKey, mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring(), mAlarm.isVibrate(), mAlarm.getChannel().getId());
+                AlarmChannel alarmChannel = mAlarm.getChannel();
+                String alarmChannelUID = "";
+                if(alarmChannel != null) alarmChannelUID = alarmChannel.getId();
+
+                deviceAlarmController.registerAlarmSet(alarmKey, mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring(), mAlarm.isVibrate(), alarmChannelUID);
 
                 database.getReference(String.format("alarms/%s/%s", mAuth.getCurrentUser().getUid(), alarmKey)).setValue(mAlarm);
 
