@@ -27,6 +27,7 @@ public final class DeviceAlarmTableContract {
         public static final String COLUMN_RECURRING = "recurring";
         public static final String COLUMN_MILLIS = "millis";
 
+        public static final String COLUMN_CHANNEL = "channel";
         public static final String COLUMN_LABEL = "label";
         public static final String COLUMN_RINGTONE = "ringtone";
         public static final String COLUMN_VIBRATE = "vibrate";
@@ -48,6 +49,7 @@ public final class DeviceAlarmTableContract {
                     + AlarmTableEntry.COLUMN_RECURRING + " INTEGER NOT NULL, "
                     + AlarmTableEntry.COLUMN_MILLIS + " INTEGER, "
 
+                    + AlarmTableEntry.COLUMN_CHANNEL + " TEXT, "
                     + AlarmTableEntry.COLUMN_LABEL + " TEXT, "
 
                     + AlarmTableEntry.COLUMN_RINGTONE + " INTEGER DEFAULT 0, "

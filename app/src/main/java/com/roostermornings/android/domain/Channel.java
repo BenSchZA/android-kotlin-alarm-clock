@@ -5,6 +5,7 @@
 
 package com.roostermornings.android.domain;
 
+import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 
 import java.io.Serializable;
@@ -17,64 +18,49 @@ import java.util.HashMap;
 @IgnoreExtraProperties
 public class Channel implements Serializable {
 
-    private int current_rooster_iteration_cycle;
+    private Integer current_rooster_cycle_iteration;
+    private Boolean new_alarms_start_at_first_iteration;
     private String description;
     private String name;
     private String photo;
-    private int rooster_count;
-    private HashMap<String, Boolean> subscribers;
-    private boolean active;
-    private boolean selected;
+    private Integer rooster_count;
+    private Boolean active;
     private String uid;
+
+    @Exclude
+    private boolean selected;
 
     // Required default constructor for Firebase object mapping
     @SuppressWarnings("unused")
     public Channel() {
     }
 
-    public Channel(int current_rooster_iteration_cycle,
-                   String description,
-                   String name,
-                   String photo,
-                   int rooster_count,
-                   HashMap<String, Boolean> subscribers,
-                   boolean active,
-                   boolean selected,
-                   String uid) {
-
-        this.current_rooster_iteration_cycle = current_rooster_iteration_cycle;
+    public Channel(int current_rooster_cycle_iteration, boolean new_alarms_start_at_first_iteration, String description, String name, String photo, int rooster_count, boolean active, boolean selected, String uid) {
+        this.current_rooster_cycle_iteration = current_rooster_cycle_iteration;
+        this.new_alarms_start_at_first_iteration = new_alarms_start_at_first_iteration;
         this.description = description;
         this.name = name;
         this.photo = photo;
         this.rooster_count = rooster_count;
-        this.subscribers = subscribers;
         this.active = active;
         this.selected = selected;
         this.uid = uid;
     }
 
-    public String getUid() {
-        return uid;
+    public int getCurrent_rooster_cycle_iteration() {
+        return current_rooster_cycle_iteration;
     }
 
-    public void setId(String id) {
-        this.uid = id;
+    public void setCurrent_rooster_cycle_iteration(int current_rooster_cycle_iteration) {
+        this.current_rooster_cycle_iteration = current_rooster_cycle_iteration;
     }
 
-    public boolean isSelected() {
-        return selected;
+    public boolean isNew_alarms_start_at_first_iteration() {
+        return new_alarms_start_at_first_iteration;
     }
 
-    public void setSelected(boolean selected) {
-        this.selected = selected;
-    }
-
-    public int getCurrent_rooster_iteration_cycle() {
-        return current_rooster_iteration_cycle;
-    }
-
-    public void setCurrent_rooster_iteration_cycle(int current_rooster_iteration_cycle) {
-        this.current_rooster_iteration_cycle = current_rooster_iteration_cycle;
+    public void setNew_alarms_start_at_first_iteration(boolean new_alarms_start_at_first_iteration) {
+        this.new_alarms_start_at_first_iteration = new_alarms_start_at_first_iteration;
     }
 
     public String getDescription() {
@@ -109,19 +95,27 @@ public class Channel implements Serializable {
         this.rooster_count = rooster_count;
     }
 
-    public HashMap<String, Boolean> getSubscribers() {
-        return subscribers;
-    }
-
-    public void setSubscribers(HashMap<String, Boolean> subscribers) {
-        this.subscribers = subscribers;
-    }
-
     public boolean isActive() {
         return active;
     }
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public boolean isSelected() {
+        return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 }

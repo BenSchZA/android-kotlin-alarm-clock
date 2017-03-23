@@ -21,6 +21,7 @@ import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
 
 import com.roostermornings.android.R;
+import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.util.Constants;
@@ -48,8 +49,10 @@ public class AudioService extends Service {
 
     ArrayList<DeviceAudioQueueItem> audioItems = new ArrayList<>();
     AudioTableManager audioTableManager = new AudioTableManager(this);
+    DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(this);
 
     private int alarmCycle;
+    private String alarmChannelUid;
     private String alarmUid;
     private int playDuration;
     private int alarmCount;
@@ -96,11 +99,11 @@ public class AudioService extends Service {
     }
 
     public void startAlarmRoosters(String alarmUid) {
-        this.alarmUid = alarmUid;
+        this.alarmChannelUid = deviceAlarmTableManager.getAlarmSet(alarmUid).get(0).getChannel();
 
         //Check if Social and Channel alarm content exists, else startDefaultAlarmTone
         ArrayList<DeviceAudioQueueItem> channelAudioItems;
-        channelAudioItems = audioTableManager.extractAlarmChannelAudioFiles(mThis.alarmUid);
+        channelAudioItems = audioTableManager.extractAlarmChannelAudioFiles(mThis.alarmChannelUid);
         ArrayList<DeviceAudioQueueItem> socialAudioItems;
         socialAudioItems = audioTableManager.extractSocialAudioFiles();
 
@@ -127,7 +130,8 @@ public class AudioService extends Service {
 
         //Check conditions for playing default tone: people must wake up!
         if (this.audioItems == null || this.audioItems.isEmpty()) {
-            mThis.audioItems = audioTableManager.extractAlarmChannelAudioFiles(mThis.alarmUid);
+            mThis.audioItems = audioTableManager.extractAlarmChannelAudioFiles(mThis.alarmChannelUid);
+            alarmCount = audioItems.size();
             if(!mThis.audioItems.isEmpty()) playChannelRooster(mThis.audioItems.get(0));
             else startDefaultAlarmTone();
             return;
@@ -186,7 +190,7 @@ public class AudioService extends Service {
                             audioTableManager.setListened(audioItem.getId());
                             //Play channel rooster if social rooster list is empty, else play next file
                             if (mThis.audioItems.isEmpty()) {
-                                mThis.audioItems = audioTableManager.extractAlarmChannelAudioFiles(mThis.alarmUid);
+                                mThis.audioItems = audioTableManager.extractAlarmChannelAudioFiles(mThis.alarmChannelUid);
                                 if(!mThis.audioItems.isEmpty()) playChannelRooster(mThis.audioItems.get(0));
                                 else startAlarmSocialRoosters();
                             } else{
