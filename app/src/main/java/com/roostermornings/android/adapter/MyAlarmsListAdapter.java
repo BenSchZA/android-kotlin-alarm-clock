@@ -52,6 +52,8 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
         TextView txtAlarmChannel;
         @BindView(R.id.cardview_alarm_delete)
         ImageView imgDelete;
+        @BindView(R.id.cardview_alarm_person)
+        ImageView roosterNotificationPerson;
         @BindView(R.id.rooster_notification)
         ImageView roosterNotification;
 
@@ -106,7 +108,13 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
             e.printStackTrace();
         }
 
-        updateRoosterNotification(holder);
+        if(alarm.isAllow_friend_audio_files()) {
+            holder.roosterNotificationPerson.setVisibility(View.VISIBLE);
+            //TODO: show count number
+            //Show notification of number of waiting Roosters for next pending alarm
+            if(alarm.getUnseen_roosters() != null && alarm.getUnseen_roosters() > 0)
+                holder.roosterNotification.setVisibility(View.VISIBLE);
+        }
 
         holder.txtAlarmTime.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -145,7 +153,6 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
                             .onPositive(new MaterialDialog.SingleButtonCallback() {
                                 @Override
                                 public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                    mActivity.unregisterReceiver(receiver);
                                     mDataset.remove(position);
                                     notifyItemRemoved(position);
                                     notifyItemRangeChanged(position, mDataset.size());
@@ -159,34 +166,6 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
             }
         });
 
-    }
-
-    private void updateRoosterNotification(final ViewHolder holder) {
-        //Flag check for UI changes on load, broadcastreceiver for changes while activity running
-        //If notifications waiting, display new Rooster notification
-        if (((BaseApplication) mApplication).getNotificationFlag(Constants.FLAG_ROOSTERCOUNT) > 0) {
-
-            setRoosterNotification(holder, true);
-        }
-
-        //Broadcast receiver filter to receive UI updates
-        IntentFilter firebaseListenerServiceFilter = new IntentFilter();
-        firebaseListenerServiceFilter.addAction(Constants.ACTION_ROOSTERNOTIFICATION);
-
-        receiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                //do something based on the intent's action
-                if(((BaseApplication) mApplication).getNotificationFlag(Constants.FLAG_ROOSTERCOUNT) > 0){
-                    setRoosterNotification(holder, true);
-                }
-            }
-        };
-        mActivity.registerReceiver(receiver, firebaseListenerServiceFilter);
-    }
-
-    private void setRoosterNotification(final ViewHolder holder, boolean notification) {
-        holder.roosterNotification.setVisibility(View.VISIBLE);
     }
 
     // Return the size of your dataset (invoked by the layout manager)
