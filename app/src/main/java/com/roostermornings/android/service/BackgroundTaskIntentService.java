@@ -6,8 +6,8 @@
 package com.roostermornings.android.service;
 
 import android.app.IntentService;
-import android.content.Intent;
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
@@ -22,14 +22,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.Channel;
 import com.roostermornings.android.domain.ChannelRooster;
+import com.roostermornings.android.domain.SocialRooster;
+import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
-import com.roostermornings.android.domain.SocialRooster;
-import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
 
@@ -37,11 +36,9 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 
 public class BackgroundTaskIntentService extends IntentService {
+    public static final String TAG = BackgroundTaskIntentService.class.getSimpleName();
     private static final String EXTRA_PARAM1 = "com.roostermornings.android.background.extra.PARAM1";
     private static final String EXTRA_PARAM2 = "com.roostermornings.android.background.extra.PARAM2";
-
-    public static final String TAG = BackgroundTaskIntentService.class.getSimpleName();
-
     //Firebase libraries
     protected DatabaseReference mDatabase;
     protected FirebaseAuth mAuth;
@@ -77,7 +74,7 @@ public class BackgroundTaskIntentService extends IntentService {
                 final String param1 = intent.getStringExtra(EXTRA_PARAM1);
                 final String param2 = intent.getStringExtra(EXTRA_PARAM2);
                 handleActionBackgroundDownload(param1, param2);
-            } else if(Constants.ACTION_DAILYTASK.equals(action)){
+            } else if (Constants.ACTION_DAILYTASK.equals(action)) {
                 handleActionDailyTask();
             }
         }
@@ -104,9 +101,10 @@ public class BackgroundTaskIntentService extends IntentService {
         DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(this);
         DeviceAlarm deviceAlarm = deviceAlarmTableManager.getNextPendingAlarm();
         //If there is no pending alarm, don't retrieve channel content
-        if(deviceAlarm == null) return;
-        final String channelId =  deviceAlarm.getChannel();
-        if(channelId == null || channelId.equals("")) return;
+        if (deviceAlarm == null) return;
+        //Check if channel has a valid ID, else next pending alarm has no channel
+        final String channelId = deviceAlarm.getChannel();
+        if (channelId == null || channelId.equals("")) return;
 
         if (mAuth.getCurrentUser() == null || mAuth.getCurrentUser() == null) {
             Log.d(TAG, "User not authenticated on FB!");
@@ -120,40 +118,45 @@ public class BackgroundTaskIntentService extends IntentService {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                    Channel channel = dataSnapshot.getValue(Channel.class);
-                    if(channel.isActive()){
-                        final DatabaseReference channelRoosterUploadsReference = FirebaseDatabase.getInstance().getReference()
-                                .child("channel_rooster_uploads").child(channelId).child(String.valueOf(channel.getCurrent_rooster_cycle_iteration()));
+                Channel channel = dataSnapshot.getValue(Channel.class);
+                //Check if channel is active
+                if (channel.isActive()) {
+                    //Check if channel has content
+                    if (channel.getCurrent_rooster_cycle_iteration() < 0) return;
+                    final DatabaseReference channelRoosterUploadsReference = FirebaseDatabase.getInstance().getReference()
+                            .child("channel_rooster_uploads").child(channelId).child(String.valueOf(channel.getCurrent_rooster_cycle_iteration()));
 
-                        ValueEventListener channelRoosterUploadsListener = new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                    ChannelRooster channelRooster = dataSnapshot.getValue(ChannelRooster.class);
+                    ValueEventListener channelRoosterUploadsListener = new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            ChannelRooster channelRooster = dataSnapshot.getValue(ChannelRooster.class);
 
-                                    ArrayList<String> existingChannelQueueIDs = new ArrayList<>();
-                                    for (DeviceAudioQueueItem audioItem:
-                                            mAudioTableManager.extractAllChannelAudioFiles()) {
-                                        existingChannelQueueIDs.add(audioItem.getQueue_id());
-                                    }
-                                    //If the current ChannelRooster is not in SQL db, then download
-                                    if(!existingChannelQueueIDs.contains(channelRooster.getChannel_uid()))
-                                        retrieveChannelContentAudio(channelRooster, context);
-
+                            ArrayList<String> existingChannelQueueIDs = new ArrayList<>();
+                            //If the current ChannelRooster is not in SQL db, then download
+                            for (DeviceAudioQueueItem audioItem :
+                                    mAudioTableManager.extractAllChannelAudioFiles()) {
+                                existingChannelQueueIDs.add(audioItem.getQueue_id());
                             }
+                            if (!existingChannelQueueIDs.contains(channelRooster.getChannel_uid()))
+                                retrieveChannelContentAudio(channelRooster, context);
 
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
+                        }
 
-                            }
-                        }; channelRoosterUploadsReference.addListenerForSingleValueEvent(channelRoosterUploadsListener);
-                    }
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    };
+                    channelRoosterUploadsReference.addListenerForSingleValueEvent(channelRoosterUploadsListener);
+                }
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
             }
-        }; channelReference.addListenerForSingleValueEvent(channelListener);
+        };
+        channelReference.addListenerForSingleValueEvent(channelListener);
     }
 
     public void retrieveSocialRoosterData(final Context context) {
@@ -178,9 +181,9 @@ public class BackgroundTaskIntentService extends IntentService {
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     SocialRooster socialRooster = postSnapshot.getValue(SocialRooster.class);
                     //If firebase queue entry is older than two weeks then delete from db and don't process
-                    if(System.currentTimeMillis() - socialRooster.getDate_uploaded() >= 1209600000){
+                    if (System.currentTimeMillis() - socialRooster.getDate_uploaded() >= 1209600000) {
                         queueReference.child(postSnapshot.getKey()).removeValue();
-                    } else{
+                    } else {
                         retrieveSocialRoosterAudio(socialRooster, context);
                     }
                 }
