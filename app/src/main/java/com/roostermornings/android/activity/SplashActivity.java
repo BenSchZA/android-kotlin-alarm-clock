@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.service.notification.NotificationListenerService;
 
 import com.google.firebase.auth.FirebaseUser;
 import com.roostermornings.android.BuildConfig;
@@ -28,27 +29,6 @@ public class SplashActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_splash);
         mFBUser = getFirebaseUser();
-
-        //TODO: remove
-        if (BuildConfig.DEBUG) {
-
-//            AudioTableHelper dbAudioHelper = new AudioTableHelper(this);
-//            SQLiteDatabase dbAudio = dbAudioHelper.getWritableDatabase();
-//            DeviceAlarmTableHelper dbAlarmHelper = new DeviceAlarmTableHelper(this);
-//            SQLiteDatabase dbAlarm = dbAlarmHelper.getWritableDatabase();
-//
-//            AudioTableHelper audioTableHelper = new AudioTableHelper(this);
-//            DeviceAlarmTableHelper deviceAlarmTableHelper = new DeviceAlarmTableHelper(this);
-//            audioTableHelper.onUpgrade(dbAudio, 1, 2);
-//            deviceAlarmTableHelper.onUpgrade(dbAlarm, 1, 2);
-//
-//            dbAudio.close();
-//            dbAlarm.close();
-        }
-
-        BackgroundTaskReceiver backgroundTaskReceiver = new BackgroundTaskReceiver();
-        backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(getApplicationContext());
-        backgroundTaskReceiver.scheduleBackgroundDailyTask(getApplicationContext());
 
         CountDownTimer countDownTimer = new CountDownTimer(2000, 2000) {
             @Override

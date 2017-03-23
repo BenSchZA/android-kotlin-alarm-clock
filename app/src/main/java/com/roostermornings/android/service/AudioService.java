@@ -126,13 +126,13 @@ public class AudioService extends Service {
         this.alarmCycle++;
 
         this.audioItems = audioTableManager.extractSocialAudioFiles();
-        alarmCount = audioItems.size();
+        this.alarmCount = this.audioItems.size();
 
         //Check conditions for playing default tone: people must wake up!
         if (this.audioItems == null || this.audioItems.isEmpty()) {
-            mThis.audioItems = audioTableManager.extractAlarmChannelAudioFiles(mThis.alarmChannelUid);
-            alarmCount = audioItems.size();
-            if(!mThis.audioItems.isEmpty()) playChannelRooster(mThis.audioItems.get(0));
+            this.audioItems = audioTableManager.extractAlarmChannelAudioFiles(this.alarmChannelUid);
+            this.alarmCount = this.audioItems.size();
+            if(!mThis.audioItems.isEmpty()) playChannelRooster(this.audioItems.get(0));
             else startDefaultAlarmTone();
             return;
         }
@@ -191,6 +191,7 @@ public class AudioService extends Service {
                             //Play channel rooster if social rooster list is empty, else play next file
                             if (mThis.audioItems.isEmpty()) {
                                 mThis.audioItems = audioTableManager.extractAlarmChannelAudioFiles(mThis.alarmChannelUid);
+                                mThis.alarmCount = mThis.audioItems.size();
                                 if(!mThis.audioItems.isEmpty()) playChannelRooster(mThis.audioItems.get(0));
                                 else startAlarmSocialRoosters();
                             } else{

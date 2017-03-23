@@ -201,7 +201,9 @@ public final class DeviceAlarmController {
         int days = (int) (timeUntilNextAlarm / (1000*60*60*24));
 
         //Notify user of time until next alarm
-        nextAlarmTimeString = String.format("%s days, %s hours, and %s minutes", days, hours, minutes);
+        if(days == 0) nextAlarmTimeString = String.format("%s hours, and %s minutes", hours, minutes);
+        else if(days == 0 && hours == 0) nextAlarmTimeString = String.format("%s minutes", minutes);
+        else nextAlarmTimeString = String.format("%s days, %s hours, and %s minutes", days, hours, minutes);
         Toast.makeText(context, "Alarm set for " + nextAlarmTimeString + " from now.", Toast.LENGTH_LONG).show();
     }
 

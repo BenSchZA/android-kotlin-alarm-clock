@@ -35,7 +35,9 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.MyAlarmsListAdapter;
 import com.roostermornings.android.domain.Alarm;
+import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
+import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.util.Constants;
 
 import java.util.ArrayList;
@@ -111,6 +113,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                     Alarm alarm = postSnapshot.getValue(Alarm.class);
                     mAlarms.add(alarm);
                     mAdapter.notifyItemInserted(mAlarms.size() - 1);
+                    updateRoosterNotification();
                 }
 
             }
@@ -121,9 +124,53 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                 Toast.makeText(MyAlarmsFragmentActivity.this, "Failed to load mAlarms.",
                         Toast.LENGTH_SHORT).show();
             }
-        };
+        }; mMyAlarmsReference.addValueEventListener(alarmsListener);
+    }
 
-        mMyAlarmsReference.addValueEventListener(alarmsListener);
+    private void updateRoosterNotification() {
+        //Flag check for UI changes on load, broadcastreceiver for changes while activity running
+        //If notifications waiting, display new Rooster notification
+        Integer roosterCount = ((BaseApplication) getApplication()).getNotificationFlag(Constants.FLAG_ROOSTERCOUNT);
+        if (roosterCount > 0) {
+            DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(getApplicationContext());
+            DeviceAlarm deviceAlarm  = deviceAlarmTableManager.getNextPendingAlarm();
+            if(deviceAlarm == null) return;
+            for (Alarm alarm:
+                    mAlarms) {
+                alarm.setUnseen_roosters(0);
+                if(alarm.getUid().equals(deviceAlarm.getSetId())) {
+                    alarm.setUnseen_roosters(roosterCount);
+                    mAdapter.notifyDataSetChanged();
+                    return;
+                }
+            }
+        }
+
+        //Broadcast receiver filter to receive UI updates
+        IntentFilter firebaseListenerServiceFilter = new IntentFilter();
+        firebaseListenerServiceFilter.addAction(Constants.ACTION_ROOSTERNOTIFICATION);
+
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                //do something based on the intent's action
+                Integer roosterCount = ((BaseApplication) getApplication()).getNotificationFlag(Constants.FLAG_ROOSTERCOUNT);
+                if(roosterCount > 0){
+                    DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(getApplicationContext());
+                    DeviceAlarm deviceAlarm  = deviceAlarmTableManager.getNextPendingAlarm();
+                    if(deviceAlarm == null) return;
+                    for (Alarm alarm:
+                         mAlarms) {
+                        alarm.setUnseen_roosters(0);
+                        if(alarm.getUid().equals(deviceAlarm.getSetId())) {
+                            alarm.setUnseen_roosters(roosterCount);
+                            mAdapter.notifyDataSetChanged();
+                            return;
+                        }
+                    }
+                }
+            }
+        }; registerReceiver(receiver, firebaseListenerServiceFilter);
     }
 
     private void updateRequestNotification() {

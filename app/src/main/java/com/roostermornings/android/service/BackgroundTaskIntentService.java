@@ -106,6 +106,7 @@ public class BackgroundTaskIntentService extends IntentService {
         //If there is no pending alarm, don't retrieve channel content
         if(deviceAlarm == null) return;
         final String channelId =  deviceAlarm.getChannel();
+        if(channelId == null || channelId.equals("")) return;
 
         if (mAuth.getCurrentUser() == null || mAuth.getCurrentUser() == null) {
             Log.d(TAG, "User not authenticated on FB!");
