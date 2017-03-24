@@ -122,17 +122,20 @@ public class AudioService extends Service {
         if(alarmCycle == 5) {
             notifyActivityTimesUp();
             return;
-        }
-        this.alarmCycle++;
+        } this.alarmCycle++;
 
         this.audioItems = audioTableManager.extractSocialAudioFiles();
         this.alarmCount = this.audioItems.size();
+
+        //TODO: !!!
+        //If this alarm does not allow social roosters, clear queue and move on to channel content
+        //if(deviceAlarmTableManager.getAlarmSet(alarmUid).get(0).isSocial()) this.audioItems = null;
 
         //Check conditions for playing default tone: people must wake up!
         if (this.audioItems == null || this.audioItems.isEmpty()) {
             this.audioItems = audioTableManager.extractAlarmChannelAudioFiles(this.alarmChannelUid);
             this.alarmCount = this.audioItems.size();
-            if(!mThis.audioItems.isEmpty()) playChannelRooster(this.audioItems.get(0));
+            if(!this.audioItems.isEmpty()) playChannelRooster(this.audioItems.get(0));
             else startDefaultAlarmTone();
             return;
         }
@@ -205,9 +208,9 @@ public class AudioService extends Service {
             e.printStackTrace();
             //Social rooster will never play... let's not go here
             //delete file
-            file.delete();
             //delete record from AudioTable SQL DB
-            audioTableManager.removeAudioFile(audioItem.getId());
+            audioTableManager.removeAudioEntry(audioItem);
+
             //delete record from arraylist
             mThis.audioItems.remove(audioItem);
         }
@@ -261,22 +264,37 @@ public class AudioService extends Service {
             e.printStackTrace();
 
             //delete file
-            file.delete();
             //delete record from AudioTable SQL DB
-            audioTableManager.removeAudioFile(audioItem.getId());
+            audioTableManager.removeAudioEntry(audioItem);
+
             //delete record from arraylist
             mThis.audioItems.remove(audioItem);
         }
     }
 
+    public void processListenedChannels() {
+        //For all listened channels
+        for (DeviceAudioQueueItem audioItem :
+                audioTableManager.selectListened()) {
+            try {
+                if (audioItem.getType() == 1) {
+                    //increment the current story iteration if it is a story
+                    Integer currentStoryIteration = deviceAlarmTableManager.getChannelStoryIteration(audioItem.getQueue_id());
+                    if (currentStoryIteration != null && currentStoryIteration > 0)
+                        deviceAlarmTableManager.setChannelStoryIteration(audioItem.getQueue_id(), currentStoryIteration + 1);
+                }
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public void endService(ServiceConnection conn) {
+        processListenedChannels();
         //delete record and file of all listened audio files
         for (DeviceAudioQueueItem audioItem :
              audioTableManager.selectListened()) {
-            file = new File(getFilesDir() + "/" + audioItem.getFilename());
-            if(file.delete()){
-                audioTableManager.removeAudioFile(audioItem.getId());
-            }
+            audioTableManager.removeAudioEntry(audioItem);
         }
         //delete record from arraylist
         audioItems.clear();

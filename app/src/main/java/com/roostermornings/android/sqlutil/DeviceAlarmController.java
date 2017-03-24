@@ -12,20 +12,13 @@ import android.content.Intent;
 import android.widget.Toast;
 
 import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
+import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 import com.roostermornings.android.util.Constants;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.Random;
-import java.util.StringTokenizer;
 
-import static android.support.v7.appcompat.R.id.time;
 import static com.roostermornings.android.util.RoosterUtils.hasLollipop;
 
 /**
@@ -159,10 +152,10 @@ public final class DeviceAlarmController {
 
     }
 
-    public void registerAlarmSet(String setId, int alarmHour, int alarmMinute, List<Integer> alarmDays, boolean repeatWeekly, boolean vibrate, String channel) {
+    public void registerAlarmSet(String setId, int alarmHour, int alarmMinute, List<Integer> alarmDays, boolean repeatWeekly, boolean vibrate, String channel, boolean social) {
         List<DeviceAlarm> deviceAlarmList;
         DeviceAlarm deviceAlarmSet = new DeviceAlarm()
-                .initAlarmSet(alarmHour, alarmMinute, alarmDays, repeatWeekly, vibrate, channel);
+                .initAlarmSet(alarmHour, alarmMinute, alarmDays, repeatWeekly, vibrate, channel, social);
         deviceAlarmList = deviceAlarmSet.getAlarmList();
 
         for (DeviceAlarm deviceAlarm :
@@ -207,14 +200,26 @@ public final class DeviceAlarmController {
         Toast.makeText(context, "Alarm set for " + nextAlarmTimeString + " from now.", Toast.LENGTH_LONG).show();
     }
 
+    public void deleteAllAlarms() {
+        List<DeviceAlarm> deviceAlarmList = deviceAlarmTableManager.getAlarmSets();
+        if(deviceAlarmList == null) return;
+        for (DeviceAlarm deviceAlarm:
+             deviceAlarmList) {
+            deleteAlarmSet(deviceAlarm.getSetId());
+        }
+    }
+
     //Remove entire set of alarms, first recreate intent EXACTLY as before, then call alarmMgr.cancel(intent)
     public void deleteAlarmSet(String setId) {
         List<DeviceAlarm> deviceAlarmList = deviceAlarmTableManager.getAlarmSet(setId);
+        AudioTableManager audioTableManager = new AudioTableManager(context);
         for (DeviceAlarm deviceAlarm :
                 deviceAlarmList) {
             cancelAlarm(deviceAlarm);
         }
         deviceAlarmTableManager.deleteAlarmSet(setId);
+        String channelId = deviceAlarmList.get(0).getChannel();
+        if(channelId != null) audioTableManager.removeChannelAudioEntry(channelId);
     }
 
     private void cancelAlarm(DeviceAlarm deviceAlarm) {

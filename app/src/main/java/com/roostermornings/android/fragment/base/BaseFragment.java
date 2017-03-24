@@ -67,7 +67,7 @@ public class BaseFragment extends Fragment implements Validator.ValidationListen
 
     @Override
     public void onValidationFailed(List<ValidationError> errors) {
-
+        //TODO: fix crash here
         ((BaseActivity) getActivity()).onValidationFailed(errors);
 
     }
