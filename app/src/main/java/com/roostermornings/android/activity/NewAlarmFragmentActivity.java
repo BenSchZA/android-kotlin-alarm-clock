@@ -31,6 +31,7 @@ import com.roostermornings.android.fragment.IAlarmSetListener;
 import com.roostermornings.android.fragment.NewAlarmFragment1;
 import com.roostermornings.android.fragment.NewAlarmFragment2;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
+import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -159,13 +160,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 }
 
                 List<Integer> alarmDays = new ArrayList<>();
-                if (mAlarm.isMonday()) alarmDays.add(Calendar.MONDAY);
-                if (mAlarm.isTuesday()) alarmDays.add(Calendar.TUESDAY);
-                if (mAlarm.isWednesday()) alarmDays.add(Calendar.WEDNESDAY);
-                if (mAlarm.isThursday()) alarmDays.add(Calendar.THURSDAY);
-                if (mAlarm.isFriday()) alarmDays.add(Calendar.FRIDAY);
-                if (mAlarm.isSaturday()) alarmDays.add(Calendar.SATURDAY);
-                if (mAlarm.isSunday()) alarmDays.add(Calendar.SUNDAY);
+                alarmDays = mAlarm.getDays();
 
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
 
@@ -178,18 +173,21 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                     alarmKey = mEditAlarmId;
                 }
 
+                //Extract data from Alarm mAlarm and create new alarm set DeviceAlarm
+                AlarmChannel alarmChannel = mAlarm.getChannel();
+                String alarmChannelUID = "";
+                if(alarmChannel != null) alarmChannelUID = alarmChannel.getId();
+
+                DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(this);
+                Integer iteration = deviceAlarmTableManager.getChannelStoryIteration(alarmChannelUID);
                 //if this is an existing alarm, delete from local storage before inserting another record
                 if (mEditAlarmId.length() != 0
                         && mAlarm.getUid().length() > 0) {
                     deviceAlarmController.deleteAlarmSet(mAlarm.getUid());
                 }
 
-                //Extract data from Alarm mAlarm and create new alarm set DeviceAlarm
-                AlarmChannel alarmChannel = mAlarm.getChannel();
-                String alarmChannelUID = "";
-                if(alarmChannel != null) alarmChannelUID = alarmChannel.getId();
-
-                deviceAlarmController.registerAlarmSet(alarmKey, mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring(), mAlarm.isVibrate(), alarmChannelUID);
+                deviceAlarmController.registerAlarmSet(alarmKey, mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring(), mAlarm.isVibrate(), alarmChannelUID, mAlarm.isAllow_friend_audio_files());
+                if(iteration != null) deviceAlarmTableManager.setChannelStoryIteration(alarmChannelUID, iteration);
 
                 database.getReference(String.format("alarms/%s/%s", mAuth.getCurrentUser().getUid(), alarmKey)).setValue(mAlarm);
 

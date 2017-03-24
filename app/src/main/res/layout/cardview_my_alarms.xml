@@ -18,7 +18,8 @@
         android:foreground="@drawable/selectable_item_background"
         app:cardBackgroundColor="@color/card_white_transparent"
         app:cardCornerRadius="6dp"
-        app:cardElevation="0dp">
+        app:cardElevation="0dp"
+        android:clickable="true">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -50,7 +51,7 @@
                     android:layout_height="wrap_content"
                     android:paddingBottom="@dimen/spacing_xsmall"
                     android:paddingTop="@dimen/spacing_normal"
-                    android:text="Weekdays"
+                    android:text=""
                     android:textColor="@drawable/rooster_link_white"
                     android:textSize="@dimen/text_large"
                     android:textStyle="bold" />
@@ -61,7 +62,7 @@
                     android:layout_height="wrap_content"
                     android:paddingBottom="@dimen/spacing_normal"
                     android:paddingTop="@dimen/spacing_xsmall"
-                    android:text="Channel"
+                    android:text=""
                     android:textColor="@drawable/rooster_link_white_semi_transparent"
                     android:textSize="@dimen/text_large"
                     android:textStyle="normal" />
@@ -88,13 +89,16 @@
                     android:src="@drawable/ic_person_white_24dp"
                     android:visibility="invisible"/>
 
-                <ImageView
+                <TextView
                     android:id="@+id/rooster_notification"
                     android:layout_gravity="top|right"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@drawable/counter_circle_yellow"
-                    android:visibility="invisible"/>
+                    android:visibility="invisible"
+                    android:textAlignment="center"
+                    android:textSize="@dimen/text_xsmall"
+                    android:padding="@dimen/spacing_xsmall"/>
 
             </FrameLayout>
 

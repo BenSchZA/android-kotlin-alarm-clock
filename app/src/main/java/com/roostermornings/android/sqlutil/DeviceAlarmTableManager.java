@@ -8,6 +8,7 @@ package com.roostermornings.android.sqlutil;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
@@ -57,20 +58,38 @@ public class DeviceAlarmTableManager {
         values.put(AlarmTableEntry.COLUMN_RECURRING, alarm.getRecurring());
         values.put(AlarmTableEntry.COLUMN_VIBRATE, alarm.getVibrate());
         values.put(AlarmTableEntry.COLUMN_MILLIS, alarm.getMillis());
+        values.put(AlarmTableEntry.COLUMN_ITERATION, 1);
         values.put(AlarmTableEntry.COLUMN_CHANNEL, alarm.getChannel());
+        values.put(AlarmTableEntry.COLUMN_SOCIAL, alarm.isSocial());
 
         values.put(AlarmTableEntry.COLUMN_CHANGED, alarm.getChanged());
 
-        // Inserting Row
-        db.insert(AlarmTableEntry.TABLE_NAME, null, values);
+        try {
+            // Inserting Row
+            db.insertOrThrow(AlarmTableEntry.TABLE_NAME, null, values);
+        } catch (SQLiteConstraintException e) {
+            e.printStackTrace();
+        }
         db.close();
     }
 
     public void updateAlarmMillis(int piId, long Millis) {
         SQLiteDatabase db = initDB();
         String updateQuery = "UPDATE " + AlarmTableEntry.TABLE_NAME + " SET " + AlarmTableEntry.COLUMN_MILLIS + " = " + Millis + " WHERE " + AlarmTableEntry.COLUMN_PI_ID + " = " + piId + ";";
+
         db.execSQL(updateQuery);
+
         db.close();
+    }
+
+    public Boolean isSetInDB(String setId) {
+        SQLiteDatabase db = initDB();
+
+        String selectQuery = "SELECT * FROM " + AlarmTableEntry.TABLE_NAME + " WHERE " + AlarmTableEntry.COLUMN_SET_ID + " = '" + setId + "';";
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        return (cursor.getCount() > 0);
     }
 
     public List<DeviceAlarm> selectChanged() {
@@ -123,6 +142,27 @@ public class DeviceAlarmTableManager {
         db.close();
     }
 
+    public void setChannelStoryIteration(String channelId, Integer iteration) {
+        SQLiteDatabase db = initDB();
+
+        String updateQuery = "UPDATE " + AlarmTableEntry.TABLE_NAME + " SET " + AlarmTableEntry.COLUMN_ITERATION + " = " + String.valueOf(iteration) + " WHERE " + AlarmTableEntry.COLUMN_CHANNEL + " = '" + channelId + "';";
+
+        db.execSQL(updateQuery);
+        db.close();
+    }
+
+    public Integer getChannelStoryIteration(String channelId) {
+        SQLiteDatabase db = initDB();
+
+        String selectQuery = "SELECT * FROM " + AlarmTableEntry.TABLE_NAME + " WHERE " + AlarmTableEntry.COLUMN_CHANNEL + " = '" + channelId + "';";
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        if(!checkValidCursor(cursor)) return null;
+        cursor.moveToFirst();
+
+        return cursor.getInt(cursor.getColumnIndex(AlarmTableEntry.COLUMN_ITERATION));
+    }
+
     public void clearChanged(List<DeviceAlarm> alarmList) {
         SQLiteDatabase db = initDB();
 
@@ -163,13 +203,15 @@ public class DeviceAlarmTableManager {
         return alarmList.get(0);
     }
 
-    public Cursor getAlarmSets() {
+    public List<DeviceAlarm> getAlarmSets() {
         SQLiteDatabase db = initDB();
 
-        String selectQuery = "SELECT DISTINCT " + AlarmTableEntry.COLUMN_SET_ID + " AS _id," + AlarmTableEntry.COLUMN_SET_ID + "," + AlarmTableEntry.COLUMN_HOUR + "," + AlarmTableEntry.COLUMN_MINUTE + "," + AlarmTableEntry.COLUMN_ENABLED + " FROM " + AlarmTableEntry.TABLE_NAME +
-                " ORDER BY " + AlarmTableEntry.COLUMN_SET_ID + " ASC ";
+        String selectQuery = "SELECT * FROM " + AlarmTableEntry.TABLE_NAME + " WHERE " + AlarmTableEntry.COLUMN_SET_ID + " IN (SELECT DISTINCT " + AlarmTableEntry.COLUMN_SET_ID + " AS id FROM " + AlarmTableEntry.TABLE_NAME + " ORDER BY " + AlarmTableEntry.COLUMN_SET_ID + " ASC);";
 
-        return db.rawQuery(selectQuery, null);
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        if(!checkValidCursor(cursor)) return null;
+
+        return extractAlarms(cursor);
     }
 
     public List<DeviceAlarm> getAlarmSet(String setId) {
@@ -279,6 +321,7 @@ public class DeviceAlarmTableManager {
                 alarm.setRecurring(cursor.getInt(cursor.getColumnIndex(AlarmTableEntry.COLUMN_RECURRING)) > 0);
                 alarm.setMillis(cursor.getLong(cursor.getColumnIndex(AlarmTableEntry.COLUMN_MILLIS)));
 
+                alarm.setSocial(cursor.getInt(cursor.getColumnIndex(AlarmTableEntry.COLUMN_SOCIAL)) > 0);
                 alarm.setChannel(cursor.getString(cursor.getColumnIndex(AlarmTableEntry.COLUMN_CHANNEL)));
                 alarm.setLabel(cursor.getString(cursor.getColumnIndex(AlarmTableEntry.COLUMN_LABEL)));
                 alarm.setRingtone(cursor.getInt(cursor.getColumnIndex(AlarmTableEntry.COLUMN_RINGTONE)));

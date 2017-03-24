@@ -9,6 +9,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.sqlite.SQLiteDatabase;
 import android.service.notification.NotificationListenerService;
 
 import com.crashlytics.android.Crashlytics;
@@ -21,6 +22,8 @@ import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationModule;
 import com.roostermornings.android.node_api.IHTTPClient;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
+import com.roostermornings.android.sqldata.AudioTableHelper;
+import com.roostermornings.android.sqldata.DeviceAlarmTableHelper;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.FontsOverride;
 
@@ -127,7 +130,7 @@ public class BaseApplication extends android.app.Application {
                         setNotificationFlag(getNotificationFlag(Constants.FLAG_FRIENDREQUESTS) + 1, Constants.FLAG_FRIENDREQUESTS);
                         break;
                     case Constants.ACTION_ROOSTERNOTIFICATION:
-                        setNotificationFlag(getNotificationFlag(Constants.FLAG_ROOSTERCOUNT) + 1, Constants.FLAG_ROOSTERCOUNT);
+                        setNotificationFlag(intent.getIntExtra(Constants.EXTRA_SOCIAL_ROOSTERS, 0), Constants.FLAG_ROOSTERCOUNT);
                         break;
                     default:
                         break;
