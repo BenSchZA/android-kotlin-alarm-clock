@@ -8,6 +8,10 @@ package com.roostermornings.android.domain;
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+
 /**
  * Created by steven on 2017/02/15.
  */
@@ -59,6 +63,18 @@ public class Alarm {
         this.uid = uid;
 
         this.unseen_roosters = 0;
+    }
+
+    public List<Integer> getDays() {
+        List<Integer> alarmDays = new ArrayList<>();
+        if (isMonday()) alarmDays.add(Calendar.MONDAY);
+        if (isTuesday()) alarmDays.add(Calendar.TUESDAY);
+        if (isWednesday()) alarmDays.add(Calendar.WEDNESDAY);
+        if (isThursday()) alarmDays.add(Calendar.THURSDAY);
+        if (isFriday()) alarmDays.add(Calendar.FRIDAY);
+        if (isSaturday()) alarmDays.add(Calendar.SATURDAY);
+        if (isSunday()) alarmDays.add(Calendar.SUNDAY);
+        return alarmDays;
     }
 
     public Integer getUnseen_roosters() {

@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,6 +45,8 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
     // you provide access to all the views for a data item in a view holder
     public class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
+        @BindView(R.id.card_view_alarms)
+        CardView cardView;
         @BindView(R.id.cardview_alarm_time_textview)
         TextView txtAlarmTime;
         @BindView(R.id.cardview_alarm_days_textview)
@@ -55,7 +58,7 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
         @BindView(R.id.cardview_alarm_person)
         ImageView roosterNotificationPerson;
         @BindView(R.id.rooster_notification)
-        ImageView roosterNotification;
+        TextView roosterNotification;
 
         public ViewHolder(View v) {
             super(v);
@@ -112,9 +115,18 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
             holder.roosterNotificationPerson.setVisibility(View.VISIBLE);
             //TODO: show count number
             //Show notification of number of waiting Roosters for next pending alarm
-            if(alarm.getUnseen_roosters() != null && alarm.getUnseen_roosters() > 0)
+            if(alarm.getUnseen_roosters() != null && alarm.getUnseen_roosters() > 0) {
                 holder.roosterNotification.setVisibility(View.VISIBLE);
+                holder.roosterNotification.setText(String.valueOf(alarm.getUnseen_roosters()));
+            }
         }
+
+        holder.cardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ((MyAlarmsFragmentActivity) mActivity).editAlarm(alarm.getUid());
+            }
+        });
 
         holder.txtAlarmTime.setOnClickListener(new View.OnClickListener() {
             @Override

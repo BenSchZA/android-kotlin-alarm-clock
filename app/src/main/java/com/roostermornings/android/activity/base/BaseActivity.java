@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
@@ -40,6 +41,9 @@ import com.roostermornings.android.activity.SplashActivity;
 import com.roostermornings.android.service.FirebaseListenerService;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.node_api.IHTTPClient;
+import com.roostermornings.android.sqlutil.AudioTableManager;
+import com.roostermornings.android.sqlutil.DeviceAlarmController;
+import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.InternetHelper;
 
@@ -260,7 +264,14 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     }
 
     public void signOut() {
-        mAuth.signOut(); //End user session
+        //Ensure no audio remaining from old user
+        AudioTableManager audioTableManager = new AudioTableManager(this);
+        audioTableManager.clearAudioFiles();
+        //Ensure no alarms left from old user
+        DeviceAlarmController deviceAlarmController = new DeviceAlarmController(this);
+        deviceAlarmController.deleteAllAlarms();
+        //End user session
+        mAuth.signOut();
         Intent intent = new Intent(this, SplashActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
