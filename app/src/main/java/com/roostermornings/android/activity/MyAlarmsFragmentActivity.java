@@ -35,6 +35,8 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.MyAlarmsListAdapter;
 import com.roostermornings.android.domain.Alarm;
+import com.roostermornings.android.domain.AlarmChannel;
+import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
@@ -57,6 +59,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     private DatabaseReference mMyAlarmsReference;
     private ArrayList<Alarm> mAlarms = new ArrayList<>();
     private DeviceAlarmController deviceAlarmController;
+    private DeviceAlarmTableManager deviceAlarmTableManager;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
@@ -89,6 +92,9 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         //Check for new Firebase datachange notifications and register broadcast receiver
         updateRequestNotification();
 
+        deviceAlarmController = new DeviceAlarmController(this);
+        deviceAlarmTableManager = new DeviceAlarmTableManager(this);
+
         Bundle extras = getIntent().getExtras();
         if (extras != null && extras.containsKey("message")) {
             String fcm_message = extras.getString("message", "");
@@ -112,6 +118,17 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     Alarm alarm = postSnapshot.getValue(Alarm.class);
                     mAlarms.add(alarm);
+
+                    //Register alarm sets on login
+                    //Extract data from Alarm "alarm" and create new alarm set DeviceAlarm
+                    AlarmChannel alarmChannel = alarm.getChannel();
+                    String alarmChannelUID = "";
+                    if(alarmChannel != null) alarmChannelUID = alarmChannel.getId();
+                    if(!deviceAlarmTableManager.isSetInDB(alarm.getUid())) {
+                        deviceAlarmController.registerAlarmSet(alarm.getUid(), alarm.getHour(), alarm.getMinute(),
+                                alarm.getDays(), alarm.isRecurring(), alarm.isVibrate(), alarmChannelUID, alarm.isAllow_friend_audio_files());
+                    }
+
                     mAdapter.notifyItemInserted(mAlarms.size() - 1);
                     updateRoosterNotification();
                 }
@@ -128,9 +145,8 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     }
 
     private void updateRoosterNotification() {
-        //Flag check for UI changes on load, broadcastreceiver for changes while activity running
-        //If notifications waiting, display new Rooster notification
-        Integer roosterCount = ((BaseApplication) getApplication()).getNotificationFlag(Constants.FLAG_ROOSTERCOUNT);
+        AudioTableManager audioTableManager = new AudioTableManager(this);
+        Integer roosterCount = audioTableManager.countSocialAudioFiles();
         if (roosterCount > 0) {
             DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(getApplicationContext());
             DeviceAlarm deviceAlarm  = deviceAlarmTableManager.getNextPendingAlarm();

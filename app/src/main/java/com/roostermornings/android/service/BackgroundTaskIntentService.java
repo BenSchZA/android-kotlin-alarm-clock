@@ -88,7 +88,7 @@ public class BackgroundTaskIntentService extends IntentService {
     private void handleActionDailyTask() {
         //Purge audio files from SQL db that are older than two weeks
         mAudioTableManager = new AudioTableManager(getApplicationContext());
-        mAudioTableManager.purgeAudioFiles();
+        mAudioTableManager.purgeSocialAudioFiles();
     }
 
     public void retrieveChannelContentData(final Context context) {
@@ -98,13 +98,23 @@ public class BackgroundTaskIntentService extends IntentService {
         mDatabase = FirebaseDatabase.getInstance().getReference();
         mAudioTableManager = new AudioTableManager(context);
 
-        DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(this);
-        DeviceAlarm deviceAlarm = deviceAlarmTableManager.getNextPendingAlarm();
+        //Get next pending alarm
+        final DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(this);
+        final DeviceAlarm deviceAlarm = deviceAlarmTableManager.getNextPendingAlarm();
+
         //If there is no pending alarm, don't retrieve channel content
         if (deviceAlarm == null) return;
         //Check if channel has a valid ID, else next pending alarm has no channel
         final String channelId = deviceAlarm.getChannel();
         if (channelId == null || channelId.equals("")) return;
+
+        //If the current ChannelRooster is in SQL db, then don't download
+        ArrayList<String> existingChannelQueueIDs = new ArrayList<>();
+        for (DeviceAudioQueueItem audioItem :
+                mAudioTableManager.extractAllChannelAudioFiles()) {
+            existingChannelQueueIDs.add(audioItem.getQueue_id());
+        }
+        if (existingChannelQueueIDs.contains(channelId)) return;
 
         if (mAuth.getCurrentUser() == null || mAuth.getCurrentUser() == null) {
             Log.d(TAG, "User not authenticated on FB!");
@@ -119,36 +129,38 @@ public class BackgroundTaskIntentService extends IntentService {
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 Channel channel = dataSnapshot.getValue(Channel.class);
+
+                //Check if channel exists
+                if(channel == null) return;
                 //Check if channel is active
-                if (channel.isActive()) {
-                    //Check if channel has content
-                    if (channel.getCurrent_rooster_cycle_iteration() < 0) return;
-                    final DatabaseReference channelRoosterUploadsReference = FirebaseDatabase.getInstance().getReference()
-                            .child("channel_rooster_uploads").child(channelId).child(String.valueOf(channel.getCurrent_rooster_cycle_iteration()));
+                if(!channel.isActive()) return;
 
-                    ValueEventListener channelRoosterUploadsListener = new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            ChannelRooster channelRooster = dataSnapshot.getValue(ChannelRooster.class);
+                //Check if channel has content and whether a story or not
+                Integer iteration;
+                if(channel.isNew_alarms_start_at_first_iteration()) iteration = deviceAlarmTableManager.getChannelStoryIteration(channelId);
+                else if (channel.getCurrent_rooster_cycle_iteration() < 1) return;
+                else iteration = channel.getCurrent_rooster_cycle_iteration();
 
-                            ArrayList<String> existingChannelQueueIDs = new ArrayList<>();
-                            //If the current ChannelRooster is not in SQL db, then download
-                            for (DeviceAudioQueueItem audioItem :
-                                    mAudioTableManager.extractAllChannelAudioFiles()) {
-                                existingChannelQueueIDs.add(audioItem.getQueue_id());
-                            }
-                            if (!existingChannelQueueIDs.contains(channelRooster.getChannel_uid()))
-                                retrieveChannelContentAudio(channelRooster, context);
+                //TODO: Ping Node for next valid entry - Check that new story iteration is not larger than the number of audio files
 
-                        }
+                final DatabaseReference channelRoosterUploadsReference = FirebaseDatabase.getInstance().getReference()
+                        .child("channel_rooster_uploads").child(channelId).child(String.valueOf(iteration));
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
+                ValueEventListener channelRoosterUploadsListener = new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        ChannelRooster channelRooster = dataSnapshot.getValue(ChannelRooster.class);
 
-                        }
-                    };
-                    channelRoosterUploadsReference.addListenerForSingleValueEvent(channelRoosterUploadsListener);
-                }
+                        if(channelRooster == null) return;
+                        retrieveChannelContentAudio(channelRooster, context);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                };
+                channelRoosterUploadsReference.addListenerForSingleValueEvent(channelRoosterUploadsListener);
             }
 
             @Override
@@ -224,7 +236,7 @@ public class BackgroundTaskIntentService extends IntentService {
                         deviceAudioQueueItem.setDate_created(System.currentTimeMillis());
 
                         //store in local SQLLite database
-                        mAudioTableManager.insertAudioFile(deviceAudioQueueItem, true);
+                        mAudioTableManager.insertChannelAudioFile(deviceAudioQueueItem);
 
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -275,7 +287,7 @@ public class BackgroundTaskIntentService extends IntentService {
                         deviceAudioQueueItem.fromSocialRooster(socialRooster, audioFileUniqueName);
 
                         //store in local SQLLite database
-                        mAudioTableManager.insertAudioFile(deviceAudioQueueItem, false);
+                        mAudioTableManager.insertSocialAudioFile(deviceAudioQueueItem);
 
                         //remove record of queue from FB database
                         queueRecordReference.removeValue();

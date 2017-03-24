@@ -24,7 +24,7 @@ public class IntroFragment2 extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_intro_fragment2, container, false);
+        return initiate(inflater, R.layout.fragment_intro_fragment2, container, false);
     }
 
     @Override

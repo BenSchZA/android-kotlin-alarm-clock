@@ -46,6 +46,8 @@ public class Constants {
     public final static String ACTION_REQUESTNOTIFICATION = "rooster.update.REQUEST_NOTIFICATION";
     public final static String ACTION_ROOSTERNOTIFICATION = "rooster.update.ROOSTER_NOTIFICATION";
 
+    public final static String EXTRA_SOCIAL_ROOSTERS = "socialRoosterCount";
+
     //BaseApplication flags
     public final static String FLAG_FRIENDREQUESTS = "friendRequests";
     public final static String FLAG_ROOSTERCOUNT = "roosterCount";

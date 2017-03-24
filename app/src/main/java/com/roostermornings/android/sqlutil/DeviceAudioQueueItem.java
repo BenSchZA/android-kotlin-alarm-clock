@@ -24,6 +24,7 @@ public class DeviceAudioQueueItem implements Serializable {
     private String name;
     private String picture;
     private String listened;
+    private int type;
 
     public void fromSocialRooster(SocialRooster socialRooster, String audioFileUrl) {
         this.queue_id = socialRooster.getQueue_id();
@@ -33,6 +34,7 @@ public class DeviceAudioQueueItem implements Serializable {
         this.name = socialRooster.getUser_name();
         this.picture = socialRooster.getProfile_pic();
         this.listened = String.valueOf(socialRooster.getListened());
+        this.type = 0;
     }
 
     public void fromChannelRooster(ChannelRooster channelRooster, String audioFileUrl) {
@@ -41,6 +43,15 @@ public class DeviceAudioQueueItem implements Serializable {
         // Channel doesn't send channel ID this.sender_id = ;
         this.name = channelRooster.getChannel_name();
         this.picture = channelRooster.getPhoto();
+        this.type = 1;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 
     public String getListened() {
