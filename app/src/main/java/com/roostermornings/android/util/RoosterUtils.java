@@ -21,6 +21,10 @@ public class RoosterUtils {
     private static String mRandomAudioFileName = "ABCDEFGHIJKLMNOP";
     static Random random;
 
+    public static boolean hasM() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
+    }
+
     public static boolean hasLollipop() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
     }

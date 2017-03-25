@@ -68,6 +68,9 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
             StrictMode.setThreadPolicy(policy);
         }
 
+        //Only performed for android M version, with Doze mode
+        requestPermissionIgnoreBatteryOptimization();
+
         int mHour = mCalendar.get(Calendar.HOUR_OF_DAY);
         int mMinute = mCalendar.get(Calendar.MINUTE);
 
@@ -187,6 +190,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 }
 
                 deviceAlarmController.registerAlarmSet(alarmKey, mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring(), mAlarm.isVibrate(), alarmChannelUID, mAlarm.isAllow_friend_audio_files());
+                //Ensure iteration is not overwritten TODO: maybe don't set in SQL db initialisation and set defaults SQL entry value
                 if(iteration != null) deviceAlarmTableManager.setChannelStoryIteration(alarmChannelUID, iteration);
 
                 database.getReference(String.format("alarms/%s/%s", mAuth.getCurrentUser().getUid(), alarmKey)).setValue(mAlarm);
