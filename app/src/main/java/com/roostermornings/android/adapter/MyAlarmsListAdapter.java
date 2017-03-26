@@ -113,7 +113,6 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
 
         if(alarm.isAllow_friend_audio_files()) {
             holder.roosterNotificationPerson.setVisibility(View.VISIBLE);
-            //TODO: show count number
             //Show notification of number of waiting Roosters for next pending alarm
             if(alarm.getUnseen_roosters() != null && alarm.getUnseen_roosters() > 0) {
                 holder.roosterNotification.setVisibility(View.VISIBLE);

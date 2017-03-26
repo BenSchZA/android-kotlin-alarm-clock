@@ -22,6 +22,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.roostermornings.android.BaseApplication;
+import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.adapter.MyAlarmsListAdapter;
 import com.roostermornings.android.domain.Channel;
 import com.roostermornings.android.domain.ChannelRooster;
 import com.roostermornings.android.domain.SocialRooster;
@@ -66,6 +69,14 @@ public class BackgroundTaskIntentService extends IntentService {
         context.startService(intent);
     }
 
+    public static void startActionMinuteTask(Context context, String param1, String param2) {
+        Intent intent = new Intent(context, BackgroundTaskIntentService.class);
+        intent.setAction(Constants.ACTION_MINUTETASK);
+        intent.putExtra(EXTRA_PARAM1, param1);
+        intent.putExtra(EXTRA_PARAM2, param2);
+        context.startService(intent);
+    }
+
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
@@ -76,6 +87,8 @@ public class BackgroundTaskIntentService extends IntentService {
                 handleActionBackgroundDownload(param1, param2);
             } else if (Constants.ACTION_DAILYTASK.equals(action)) {
                 handleActionDailyTask();
+            } else if (Constants.ACTION_MINUTETASK.equals(action)) {
+                handleActionMinuteTask();
             }
         }
     }
@@ -89,6 +102,15 @@ public class BackgroundTaskIntentService extends IntentService {
         //Purge audio files from SQL db that are older than two weeks
         mAudioTableManager = new AudioTableManager(getApplicationContext());
         mAudioTableManager.purgeSocialAudioFiles();
+        //TODO: update list adaptor
+    }
+
+    private void handleActionMinuteTask() {
+        BaseActivity.setBadge(getApplicationContext(), ((BaseApplication)getApplication()).getNotificationFlag(Constants.FLAG_ROOSTERCOUNT));
+        AudioTableManager audioTableManager = new AudioTableManager(getApplicationContext());
+        audioTableManager.updateRoosterCount();
+        Intent intent = new Intent(this, FirebaseListenerService.class);
+        startService(intent);
     }
 
     public void retrieveChannelContentData(final Context context) {
