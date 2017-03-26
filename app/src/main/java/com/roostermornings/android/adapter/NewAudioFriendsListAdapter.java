@@ -6,6 +6,10 @@
 package com.roostermornings.android.adapter;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +20,9 @@ import android.widget.TextView;
 
 import com.roostermornings.android.R;
 import com.roostermornings.android.domain.User;
+import com.roostermornings.android.util.RoosterUtils;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -34,12 +41,14 @@ public class NewAudioFriendsListAdapter extends RecyclerView.Adapter<NewAudioFri
         // each data item is just a string in this case
         public ImageView imgProfilePic;
         public TextView txtName;
+        public TextView txtInitials;
         public Button btnAdd;
 
         public ViewHolder(View v) {
             super(v);
             imgProfilePic = (ImageView) itemView.findViewById(R.id.new_audio_friend_profile_pic);
             txtName = (TextView) itemView.findViewById(R.id.new_audio_friend_profile_name);
+            txtInitials = (TextView) itemView.findViewById(R.id.txtInitials);
             btnAdd = (Button) itemView.findViewById(R.id.new_audio_friend_add);
         }
     }
@@ -82,7 +91,12 @@ public class NewAudioFriendsListAdapter extends RecyclerView.Adapter<NewAudioFri
         // - replace the contents of the view with that element
         final User user = mDataset.get(position);
         user.setSelected(false);
+
         holder.txtName.setText(mDataset.get(position).getUser_name());
+        holder.txtInitials.setText(RoosterUtils.getInitials(mDataset.get(position).getUser_name()));
+
+        setProfilePic(user.getProfile_pic(), holder, position);
+
         holder.btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -91,6 +105,34 @@ public class NewAudioFriendsListAdapter extends RecyclerView.Adapter<NewAudioFri
             }
         });
     }
+
+    private void setProfilePic(String url, final NewAudioFriendsListAdapter.ViewHolder holder, final int position) {
+
+        try{
+            Picasso.with(mContext).load(url)
+                    .resize(50, 50)
+                    .into(holder.imgProfilePic, new Callback() {
+                        @Override
+                        public void onSuccess() {
+                            Bitmap imageBitmap = ((BitmapDrawable) holder.imgProfilePic.getDrawable()).getBitmap();
+                            RoundedBitmapDrawable imageDrawable = RoundedBitmapDrawableFactory.create(mContext.getResources(), imageBitmap);
+                            imageDrawable.setCircular(true);
+                            imageDrawable.setCornerRadius(Math.max(imageBitmap.getWidth(), imageBitmap.getHeight()) / 2.0f);
+                            //holder.imgProfilePic.setImageAlpha(0);
+                            holder.imgProfilePic.setImageDrawable(imageDrawable);
+                        }
+
+                        @Override
+                        public void onError() {
+                            holder.txtInitials.setText(RoosterUtils.getInitials(mDataset.get(position).getUser_name()));
+                        }
+                    });
+        } catch(IllegalArgumentException e){
+            e.printStackTrace();
+            holder.txtInitials.setText(RoosterUtils.getInitials(mDataset.get(position).getUser_name()));
+        }
+    }
+
 
     private void setButtonBackground(Button addButton, Boolean focused) {
         if (focused) addButton.setBackground(mContext.getResources().getDrawable(R.drawable.rooster_button_light_blue));

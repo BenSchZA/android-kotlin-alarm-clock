@@ -9,6 +9,9 @@ public class Constants {
 
     public final static String APP_FONT = "fonts/Nunito/Nunito-Bold.ttf";
 
+    //BaseActivity
+    public final static int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 10;
+
     //DeviceAlarmController intent actions
     public final static String ACTTION_ALARMRECEIVER = "receiver.ALARM_RECEIVER";
     // > display alarm icon
@@ -34,6 +37,7 @@ public class Constants {
     //Background task service intent actions
     public static final String ACTION_BACKGROUNDDOWNLOAD = "service.action.BACKGROUND_DOWNLOAD";
     public static final String ACTION_DAILYTASK = "service.action.DAILY_TASK";
+    public static final String ACTION_MINUTETASK = "service.action.MINUTETASK";
 
     //AudioService intent actions
     public final static String ACTION_ALARMDISPLAY = "rooster.update.ALARMDISPLAY";
