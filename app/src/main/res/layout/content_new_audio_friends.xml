@@ -18,10 +18,9 @@
         android:id="@+id/new_audio_friendsListView"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing_xxlarge"
         android:layout_weight="1"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin" />
+        android:padding="@dimen/spacing_normal"
+        android:clipToPadding="false" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -39,7 +38,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="@dimen/spacing_normal"
             android:layout_marginBottom="@dimen/spacing_xxxlarge"
-            android:text="Done"></Button>
+            android:text="Done"/>
 
     </LinearLayout>
 

@@ -15,6 +15,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.roostermornings.android.service.BackgroundTaskIntentService;
+import com.roostermornings.android.service.FirebaseListenerService;
 import com.roostermornings.android.util.Constants;
 
 public class BackgroundTaskReceiver extends BroadcastReceiver {
@@ -58,5 +59,16 @@ public class BackgroundTaskReceiver extends BroadcastReceiver {
         PendingIntent backgroundIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
         alarmMgrBackgroundTask.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 10 * 1000,
                 86400 * 1000, backgroundIntent);
+    }
+
+    public void scheduleBackgroundUpdateNotificationsTask(Context context) {
+        alarmMgrBackgroundTask = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(context, BackgroundTaskReceiver.class);
+        intent.setAction(Constants.ACTION_MINUTETASK);
+        //starts a inexact repeating background task that runs every day
+        //the task runs the 'dailyTasks' method in BackgroundTaskIntentService
+        PendingIntent backgroundIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+        alarmMgrBackgroundTask.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 2 * 1000,
+                60*1000, backgroundIntent);
     }
 }

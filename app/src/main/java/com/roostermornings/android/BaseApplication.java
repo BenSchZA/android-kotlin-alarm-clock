@@ -109,6 +109,7 @@ public class BaseApplication extends android.app.Application {
         BackgroundTaskReceiver backgroundTaskReceiver = new BackgroundTaskReceiver();
         backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(getApplicationContext());
         backgroundTaskReceiver.scheduleBackgroundDailyTask(getApplicationContext());
+        backgroundTaskReceiver.scheduleBackgroundUpdateNotificationsTask(getApplicationContext());
         //Start listener service to download Roosters on notification
         Intent notificationListenerIntent = new Intent(this, NotificationListenerService.class);
         startService(notificationListenerIntent);

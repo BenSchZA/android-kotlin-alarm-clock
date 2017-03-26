@@ -5,12 +5,15 @@
 
 package com.roostermornings.android.activity.base;
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerManager;
@@ -292,7 +295,35 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         return false;
     }
 
-    final public int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 10;
+    public static void setBadge(Context context, int count) {
+        String launcherClassName = getLauncherClassName(context);
+        if (launcherClassName == null) {
+            return;
+        }
+        Intent intent = new Intent("android.intent.action.BADGE_COUNT_UPDATE");
+        intent.putExtra("badge_count", count);
+        intent.putExtra("badge_count_package_name", context.getPackageName());
+        intent.putExtra("badge_count_class_name", launcherClassName);
+        context.sendBroadcast(intent);
+    }
+
+    public static String getLauncherClassName(Context context) {
+
+        PackageManager pm = context.getPackageManager();
+
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+
+        List<ResolveInfo> resolveInfos = pm.queryIntentActivities(intent, 0);
+        for (ResolveInfo resolveInfo : resolveInfos) {
+            String pkgName = resolveInfo.activityInfo.applicationInfo.packageName;
+            if (pkgName.equalsIgnoreCase(context.getPackageName())) {
+                String className = resolveInfo.activityInfo.name;
+                return className;
+            }
+        }
+        return null;
+    }
 
     public void requestPermissionReadContacts() {
         // Here, thisActivity is the current activity
@@ -314,7 +345,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
 
                 ActivityCompat.requestPermissions(this,
                         new String[]{android.Manifest.permission.READ_CONTACTS},
-                        MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+                        Constants.MY_PERMISSIONS_REQUEST_READ_CONTACTS);
 
                 // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
                 // app-defined int constant. The callback method gets the
@@ -324,7 +355,9 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     }
 
     public void requestPermissionIgnoreBatteryOptimization() {
-        if(RoosterUtils.hasM()) {
+        if(RoosterUtils.hasM() && (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                != PackageManager.PERMISSION_GRANTED)) {
             Intent intent = new Intent();
             String packageName = getPackageName();
             PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -336,5 +369,12 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
             }
             startActivity(intent);
         }
+    }
+
+    //TODO: notify user to add protected app if exists - this add not working
+    public void requestPermissionProtectActivity() {
+        Intent intent = new Intent();
+        intent.setComponent(new ComponentName("com.huawei.systemmanager", "com.huawei.systemmanger.optimize.process.ProtectActivity"));
+        startActivity(intent);
     }
 }
