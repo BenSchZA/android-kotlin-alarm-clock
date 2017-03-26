@@ -173,7 +173,7 @@ public class AudioTableManager {
     public Integer countSocialAudioFiles() {
         SQLiteDatabase db = initDB();
 
-        String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_TYPE + " = " + FALSE + ";";
+        String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_TYPE + " = " + FALSE + " OR " + AudioTableEntry.COLUMN_TYPE + " IS NULL;";
 
         Cursor cursor = db.rawQuery(selectQuery, null);
 
@@ -227,7 +227,7 @@ public class AudioTableManager {
                 DeviceAudioQueueItem audioFile = new DeviceAudioQueueItem();
 
                 audioFile.setType(cursor.getInt(cursor.getColumnIndex(AudioTableEntry.COLUMN_TYPE)));
-                audioFile.setDate_created(cursor.getInt(cursor.getColumnIndex(AudioTableEntry.COLUMN_DATE_UPLOADED)));
+                audioFile.setDate_created(cursor.getLong(cursor.getColumnIndex(AudioTableEntry.COLUMN_DATE_UPLOADED)));
                 audioFile.setFilename(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_FILENAME)));
                 audioFile.setId(cursor.getInt(cursor.getColumnIndex(AudioTableEntry.COLUMN_ID)));
                 audioFile.setQueue_id(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_QUEUE_ID)));
