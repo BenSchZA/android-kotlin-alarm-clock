@@ -74,6 +74,12 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     @BindView(R.id.alarm_dismiss)
     TextView mButtonAlarmDismiss;
 
+    @BindView(R.id.skip_next)
+    Button skipNext;
+
+    @BindView(R.id.skip_previous)
+    Button skipPrevious;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -128,6 +134,17 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         if(mBound) unbindService(mAudioServiceConnection);
         mBound = false;
         finish();
+    }
+
+    //TODO:
+//    @OnClick(R.id.skip_previous)
+//    protected void onSkipPreviousButtonClicked() {
+//        mAudioService.skipPrevious();
+//    }
+
+    @OnClick(R.id.skip_next)
+    protected void onSkipNextButtonClicked() {
+        mAudioService.skipNext();
     }
 
     private ServiceConnection mAudioServiceConnection = new ServiceConnection() {
