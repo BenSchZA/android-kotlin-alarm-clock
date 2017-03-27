@@ -55,43 +55,6 @@
 
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:orientation="vertical">
-
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:orientation="horizontal">
-
-                <FrameLayout
-                    android:layout_width="15dp"
-                    android:layout_height="15dp"
-                    android:layout_marginRight="@dimen/spacing_small"
-                    android:background="@drawable/small_circle_white" />
-
-                <FrameLayout
-                    android:layout_width="15dp"
-                    android:layout_height="15dp"
-                    android:layout_marginRight="@dimen/spacing_small"
-                    android:background="@drawable/small_circle_blue" />
-
-                <FrameLayout
-                    android:layout_width="15dp"
-                    android:layout_height="15dp"
-                    android:background="@drawable/small_circle_blue" />
-
-            </LinearLayout>
-
-
-        </LinearLayout>
-
-
     </RelativeLayout>
 
 
