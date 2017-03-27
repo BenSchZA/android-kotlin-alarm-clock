@@ -19,6 +19,7 @@ import java.util.List;
 @IgnoreExtraProperties
 public class Alarm {
 
+    private boolean enabled;
     private AlarmChannel channel;
     private boolean monday;
     private boolean tuesday;
@@ -63,6 +64,15 @@ public class Alarm {
         this.uid = uid;
 
         this.unseen_roosters = 0;
+        this.enabled = true;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     public List<Integer> getDays() {

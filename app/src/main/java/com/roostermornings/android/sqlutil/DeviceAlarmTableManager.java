@@ -17,7 +17,10 @@ import com.roostermornings.android.sqlutil.DeviceAlarm;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.roostermornings.android.sqldata.DeviceAlarmTableContract.AlarmTableEntry;
 
@@ -138,6 +141,56 @@ public class DeviceAlarmTableManager {
             TrueFalse = FALSE;
         }
         String updateQuery = "UPDATE " + AlarmTableEntry.TABLE_NAME + " SET " + AlarmTableEntry.COLUMN_ENABLED + " = " + TrueFalse + " WHERE " + AlarmTableEntry.COLUMN_PI_ID + " = " + piId + ";";
+        db.execSQL(updateQuery);
+        db.close();
+    }
+
+    public List<DeviceAlarm> selectSetEnabled(String setId) {
+        SQLiteDatabase db = initDB();
+
+        List<DeviceAlarm> alarmList;
+
+        String selectQuery = "SELECT * FROM " + AlarmTableEntry.TABLE_NAME + " WHERE " + AlarmTableEntry.COLUMN_ENABLED + " = " + TRUE + " AND " + AlarmTableEntry.COLUMN_SET_ID + " LIKE \"%" + setId + "%\";";
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        alarmList = extractAlarms(cursor);
+
+        db.close();
+        return alarmList;
+    }
+
+    public boolean isSetEnabled(String setId) {
+        try{
+            return getAlarmSet(setId).size() == selectSetEnabled(setId).size();
+        } catch(NullPointerException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public void setSetEnabled(String setId, boolean enabled) {
+        SQLiteDatabase db = initDB();
+        if(enabled){
+            TrueFalse = TRUE;
+        }
+        else{
+            TrueFalse = FALSE;
+        }
+        String updateQuery = "UPDATE " + AlarmTableEntry.TABLE_NAME + " SET " + AlarmTableEntry.COLUMN_ENABLED + " = " + TrueFalse + " WHERE " + AlarmTableEntry.COLUMN_SET_ID + " LIKE \"%" + setId + "%\";";
+        db.execSQL(updateQuery);
+        db.close();
+    }
+
+    public void setSetChanged(String setId, boolean enabled) {
+        if(enabled){
+            TrueFalse = TRUE;
+        }
+        else{
+            TrueFalse = FALSE;
+        }
+        SQLiteDatabase db = initDB();
+        String updateQuery = "UPDATE " + AlarmTableEntry.TABLE_NAME + " SET " + AlarmTableEntry.COLUMN_CHANGED + " = " + TrueFalse + " WHERE " + AlarmTableEntry.COLUMN_SET_ID + " LIKE \"%" + setId + "%\";";
         db.execSQL(updateQuery);
         db.close();
     }

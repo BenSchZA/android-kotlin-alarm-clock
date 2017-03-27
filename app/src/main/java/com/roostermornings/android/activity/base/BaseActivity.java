@@ -17,7 +17,6 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerManager;
-import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -49,7 +48,6 @@ import com.roostermornings.android.domain.User;
 import com.roostermornings.android.node_api.IHTTPClient;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
-import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.InternetHelper;
 import com.roostermornings.android.util.RoosterUtils;
@@ -276,7 +274,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         audioTableManager.clearAudioFiles();
         //Ensure no alarms left from old user
         DeviceAlarmController deviceAlarmController = new DeviceAlarmController(this);
-        deviceAlarmController.deleteAllAlarms();
+        deviceAlarmController.deleteAlarmsLocal();
         //End user session
         mAuth.signOut();
         Intent intent = new Intent(this, SplashActivity.class);

@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.DialogAction;
@@ -26,6 +27,8 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.domain.Alarm;
+import com.roostermornings.android.sqlutil.DeviceAlarmController;
+import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
 
@@ -39,6 +42,7 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
     private Activity mActivity;
     private Application mApplication;
     private BroadcastReceiver receiver;
+    private DeviceAlarmTableManager deviceAlarmTableManager;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -59,6 +63,8 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
         ImageView roosterNotificationPerson;
         @BindView(R.id.rooster_notification)
         TextView roosterNotification;
+        @BindView(R.id.switch_enable)
+        Switch switchEnable;
 
         public ViewHolder(View v) {
             super(v);
@@ -111,6 +117,9 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
             e.printStackTrace();
         }
 
+        holder.switchEnable.setEnabled(true);
+        holder.switchEnable.setChecked(alarm.isEnabled());
+
         if(alarm.isAllow_friend_audio_files()) {
             holder.roosterNotificationPerson.setVisibility(View.VISIBLE);
             //Show notification of number of waiting Roosters for next pending alarm
@@ -119,6 +128,15 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
                 holder.roosterNotification.setText(String.valueOf(alarm.getUnseen_roosters()));
             }
         }
+
+        holder.switchEnable.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                alarm.setEnabled(!alarm.isEnabled());
+                holder.switchEnable.setChecked(alarm.isEnabled());
+                ((MyAlarmsFragmentActivity) mActivity).toggleAlarmSetEnable(alarm.getUid(), alarm.isEnabled());
+            }
+        });
 
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
