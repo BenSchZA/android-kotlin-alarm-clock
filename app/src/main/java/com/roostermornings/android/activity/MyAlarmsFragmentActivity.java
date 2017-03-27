@@ -10,7 +10,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -18,7 +17,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -56,6 +54,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     TextView toolbarTitle;
     @BindView(R.id.button_bar)
     LinearLayout buttonBarLayout;
+
     private DatabaseReference mMyAlarmsReference;
     private ArrayList<Alarm> mAlarms = new ArrayList<>();
     private DeviceAlarmController deviceAlarmController;
@@ -106,8 +105,6 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                         .positiveText(R.string.ok)
                         .negativeText("")
                         .show();
-
-
             }
         }
 
@@ -124,11 +121,14 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                     AlarmChannel alarmChannel = alarm.getChannel();
                     String alarmChannelUID = "";
                     if(alarmChannel != null) alarmChannelUID = alarmChannel.getId();
-                    if(!deviceAlarmTableManager.isSetInDB(alarm.getUid())) {
+                    //Check SQL db to see if all alarms in set have fired
+                    alarm.setEnabled(deviceAlarmTableManager.isSetEnabled(alarm.getUid()));
+                    //Recreate all enabled alarms
+                    deviceAlarmController.rebootAlarms();
+                    if(!deviceAlarmTableManager.isSetInDB(alarm.getUid()) && alarm.isEnabled()) {
                         deviceAlarmController.registerAlarmSet(alarm.getUid(), alarm.getHour(), alarm.getMinute(),
                                 alarm.getDays(), alarm.isRecurring(), alarm.isVibrate(), alarmChannelUID, alarm.isAllow_friend_audio_files());
                     }
-
                     mAdapter.notifyItemInserted(mAlarms.size() - 1);
                     updateRoosterNotification();
                 }
@@ -141,7 +141,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                 Toast.makeText(MyAlarmsFragmentActivity.this, "Failed to load mAlarms.",
                         Toast.LENGTH_SHORT).show();
             }
-        }; mMyAlarmsReference.addValueEventListener(alarmsListener);
+        }; mMyAlarmsReference.addListenerForSingleValueEvent(alarmsListener);
     }
 
     private void updateRoosterNotification() {
@@ -250,6 +250,10 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void toggleAlarmSetEnable(String alarmId, boolean enabled) {
+        deviceAlarmController.setSetEnabled(alarmId, enabled);
+    }
+
     @OnClick(R.id.home_record_audio)
     public void recordNewAudio() {
         if (!checkInternetConnection()) return;
@@ -262,15 +266,14 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     }
 
     public void deleteAlarm(String alarmId) {
-        DeviceAlarmController deviceAlarmController = new DeviceAlarmController(this);
+        try {
+            DeviceAlarmController deviceAlarmController = new DeviceAlarmController(this);
 
-        //Remove alarm from firebase
-        DatabaseReference alarmReference = FirebaseDatabase.getInstance().getReference()
-                .child("alarms").child(getFirebaseUser().getUid()).child(alarmId);
-        alarmReference.removeValue();
-
-        //Remove alarm *set* from local SQL database using retrieved Uid from firebase
-        deviceAlarmController.deleteAlarmSet(alarmId);
+            //Remove alarm *set* from local SQL database using retrieved Uid from firebase && Remove alarm from firebase
+            deviceAlarmController.deleteAlarmSetGlobal(alarmId);
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
 
         //TODO: find out why alarm content being duplicated in recycler view on delete - do not refresh the activity like this
         Intent intent = getIntent();

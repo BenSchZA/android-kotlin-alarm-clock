@@ -78,8 +78,10 @@ public class RoosterUtils {
         if (alarm.isSunday()) days.add("Sun");
 
         if (days.size() == 7) return "Every day";
-        if (days.size() == 5 && days.indexOf("Sun") == -1 && days.indexOf("Sat") == -1)
+        else if (days.size() == 5 && days.indexOf("Sun") == -1 && days.indexOf("Sat") == -1)
             return "Weekdays";
+        else if (days.size() == 2 && days.indexOf("Sat") != -1 && days.indexOf("Sun") != -1)
+            return "Weekend";
         String returnString = "";
 
         for (String day : days) {

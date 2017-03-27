@@ -186,8 +186,11 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 //if this is an existing alarm, delete from local storage before inserting another record
                 if (mEditAlarmId.length() != 0
                         && mAlarm.getUid().length() > 0) {
-                    deviceAlarmController.deleteAlarmSet(mAlarm.getUid());
+                    deviceAlarmController.deleteAlarmSetGlobal(mAlarm.getUid());
                 }
+
+                //Set enabled flag to true on new or edited alarm
+                mAlarm.setEnabled(true);
 
                 deviceAlarmController.registerAlarmSet(alarmKey, mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring(), mAlarm.isVibrate(), alarmChannelUID, mAlarm.isAllow_friend_audio_files());
                 //Ensure iteration is not overwritten TODO: maybe don't set in SQL db initialisation and set defaults SQL entry value
