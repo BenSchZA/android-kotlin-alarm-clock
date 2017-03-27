@@ -318,6 +318,14 @@ public class AudioService extends Service {
     }
 
     public void processListenedChannels() {
+        //Ensure partially listened channels are removed and incremented
+        try {
+            if (mThis.audioItem.getType() == 1) {
+                audioTableManager.setListened(mThis.audioItem.getId());
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
         //For all listened channels
         for (DeviceAudioQueueItem audioItem :
                 audioTableManager.selectListened()) {
