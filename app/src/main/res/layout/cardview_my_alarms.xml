@@ -109,13 +109,20 @@
                 android:id="@+id/cardview_alarm_delete"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="@dimen/spacing_small"
-                android:layout_marginRight="@dimen/spacing_large"
                 android:layout_marginTop="@dimen/spacing_large"
                 android:layout_marginBottom="@dimen/spacing_large"
                 android:background="@drawable/md_transparent"
                 android:clickable="true"
                 android:src="@drawable/selectable_delete_icon" />
+
+            <Switch
+                android:id="@+id/switch_enable"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="@dimen/spacing_small"
+                android:layout_marginRight="@dimen/spacing_large"
+                android:layout_gravity="center"
+                android:checked="true" />
 
         </LinearLayout>
 

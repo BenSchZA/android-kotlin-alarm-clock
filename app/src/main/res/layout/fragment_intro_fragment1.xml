@@ -46,7 +46,7 @@
 
             <Button
                 android:id="@+id/intro_1_get_started_button"
-                style="@style/RoosterButtonLightBlueStyle"
+                style="@style/RoosterButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
