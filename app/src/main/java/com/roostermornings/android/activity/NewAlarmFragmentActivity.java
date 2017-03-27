@@ -39,6 +39,7 @@ import java.util.List;
 
 import butterknife.BindView;
 
+import static com.roostermornings.android.service.BackgroundTaskIntentService.startActionBackgroundDownload;
 import static com.roostermornings.android.util.RoosterUtils.hasGingerbread;
 
 public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetListener {
@@ -197,6 +198,9 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 if(iteration != null) deviceAlarmTableManager.setChannelStoryIteration(alarmChannelUID, iteration);
 
                 database.getReference(String.format("alarms/%s/%s", mAuth.getCurrentUser().getUid(), alarmKey)).setValue(mAlarm);
+
+                //Download any social or channel audio files
+                startActionBackgroundDownload(this, "", "");
 
                 Toast.makeText(getBaseContext(), (mEditAlarmId.length() == 0) ? "Alarm created!" : "Alarm edited!",
                         Toast.LENGTH_LONG).show();
