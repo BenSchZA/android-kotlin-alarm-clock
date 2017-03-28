@@ -107,7 +107,7 @@ public class NewAlarmFragment2 extends BaseFragment {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                showToast(getContext(), "Failed to load alarms.", Toast.LENGTH_SHORT);
+                showToast(getContext(), "Failed to load channels.", Toast.LENGTH_SHORT);
             }
         };
         mChannelsReference.addValueEventListener(alarmsListener);

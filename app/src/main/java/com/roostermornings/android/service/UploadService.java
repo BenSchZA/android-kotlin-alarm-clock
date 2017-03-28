@@ -141,7 +141,7 @@ public class UploadService extends Service {
                     @Override
                     public void onFailure(@NonNull Exception exception) {
                         // Handle unsuccessful upload
-                        Toast.makeText(getApplicationContext(), "ERROR UPLOADING!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), "Error uploading!", Toast.LENGTH_LONG).show();
                         endService();
                     }
                 });

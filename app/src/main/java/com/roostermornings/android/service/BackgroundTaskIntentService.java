@@ -23,6 +23,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.roostermornings.android.BaseApplication;
+import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.MyAlarmsListAdapter;
 import com.roostermornings.android.domain.Channel;
@@ -247,7 +248,7 @@ public class BackgroundTaskIntentService extends IntentService {
                         outputStream.write(bytes);
                         outputStream.close();
 
-                        Toast.makeText(context, "successfully downloaded", Toast.LENGTH_SHORT).show();
+                        if(BuildConfig.DEBUG) Toast.makeText(context, "successfully downloaded", Toast.LENGTH_SHORT).show();
 
                         //Create new object for storing in SQL db
                         DeviceAudioQueueItem deviceAudioQueueItem = new DeviceAudioQueueItem();
@@ -273,7 +274,7 @@ public class BackgroundTaskIntentService extends IntentService {
 
 
             // For our recurring task, we'll just display a message
-            Toast.makeText(context, "I'm running", Toast.LENGTH_SHORT).show();
+            if(BuildConfig.DEBUG) Toast.makeText(context, "I'm running", Toast.LENGTH_SHORT).show();
 
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
@@ -300,7 +301,7 @@ public class BackgroundTaskIntentService extends IntentService {
                         outputStream.write(bytes);
                         outputStream.close();
 
-                        Toast.makeText(context, "successfully downloaded", Toast.LENGTH_SHORT).show();
+                        if(BuildConfig.DEBUG) Toast.makeText(context, "successfully downloaded", Toast.LENGTH_SHORT).show();
 
                         //Create new object for storing in SQL db
                         DeviceAudioQueueItem deviceAudioQueueItem = new DeviceAudioQueueItem();
@@ -327,7 +328,7 @@ public class BackgroundTaskIntentService extends IntentService {
 
 
             // For our recurring task, we'll just display a message
-            Toast.makeText(context, "I'm running", Toast.LENGTH_SHORT).show();
+            if(BuildConfig.DEBUG) Toast.makeText(context, "I'm running", Toast.LENGTH_SHORT).show();
 
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
