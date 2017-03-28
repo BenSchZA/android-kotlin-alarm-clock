@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.activity.NewAlarmFragmentActivity;
@@ -198,10 +199,10 @@ public class NewAlarmFragment1 extends BaseFragment{
             myAlarmsListAdapter.notifyDataSetChanged();
 
             startHomeActivity();
-            Toast.makeText(getContext(), "Alarm deleted", Toast.LENGTH_SHORT);
+            Toast.makeText(getContext(), "Alarm deleted.", Toast.LENGTH_SHORT);
         } catch (NullPointerException e) {
             e.printStackTrace();
-            Toast.makeText(getContext(), "Oi! Don't delete me. Delete alarm failed!", Toast.LENGTH_SHORT);
+            if(BuildConfig.DEBUG) Toast.makeText(getContext(), "Oi! Don't delete me. Delete alarm failed!", Toast.LENGTH_SHORT);
         }
     }
 
