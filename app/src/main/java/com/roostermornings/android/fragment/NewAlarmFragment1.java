@@ -7,18 +7,26 @@ package com.roostermornings.android.fragment;
 
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.roostermornings.android.R;
+import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
+import com.roostermornings.android.activity.NewAlarmFragmentActivity;
+import com.roostermornings.android.adapter.MyAlarmsListAdapter;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.fragment.base.BaseFragment;
+import com.roostermornings.android.sqlutil.DeviceAlarmController;
+import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.util.RoosterUtils;
 
 import java.util.Calendar;
@@ -63,12 +71,17 @@ public class NewAlarmFragment1 extends BaseFragment{
     @BindView(R.id.new_alarm_fragment1_switch_recurring)
     SwitchCompat switchRecurring;
 
+    @BindView(R.id.new_alarm_fragment1_delete_alarm)
+    Button deleteAlarm;
+
 
     private static final String ARG_USER_UID_PARAM = "user_uid_param";
     public static final String TAG = NewAlarmFragment1.class.getSimpleName();
     private String mUserUidParam;
     private IAlarmSetListener mListener;
     Alarm mAlarm = new Alarm();
+    DeviceAlarmController deviceAlarmController;
+    DeviceAlarmTableManager deviceAlarmTableManager;
 
     Calendar cal = Calendar.getInstance();
 
@@ -96,6 +109,9 @@ public class NewAlarmFragment1 extends BaseFragment{
             mUserUidParam = getArguments().getString(ARG_USER_UID_PARAM);
         }
 
+        deviceAlarmController = new DeviceAlarmController(getContext());
+        deviceAlarmTableManager = new DeviceAlarmTableManager(getContext());
+
         mAlarm = mListener.getAlarmDetails();
         //Set current time
         mAlarm.setHour(hour);
@@ -110,7 +126,6 @@ public class NewAlarmFragment1 extends BaseFragment{
 
         //TODO: move to button
         mAlarm.setVibrate(true);
-
     }
 
     @Override
@@ -118,6 +133,8 @@ public class NewAlarmFragment1 extends BaseFragment{
                              Bundle savedInstanceState) {
 
         View view = initiate(inflater, R.layout.fragment_new_alarm_step1, container, false);
+        //If in edit mode, button should be visible
+        setDeleteButtonVisibility();
         textViewAlarmTime.setText(RoosterUtils.setAlarmTimeFromHourAndMinute(mAlarm));
         return view;
     }
@@ -161,6 +178,31 @@ public class NewAlarmFragment1 extends BaseFragment{
 
         openTimePicker();
 
+    }
+
+    public void setDeleteButtonVisibility() {
+        if(deviceAlarmTableManager.isSetInDB(NewAlarmFragmentActivity.getCurrentAlarmId())) {
+            deleteAlarm.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @OnClick(R.id.new_alarm_fragment1_delete_alarm)
+    public void deleteAlarm() {
+        try {
+            DeviceAlarmController deviceAlarmController = new DeviceAlarmController(getContext());
+
+            //Remove alarm *set* from local SQL database using retrieved Uid from firebase && Remove alarm from firebase
+            deviceAlarmController.deleteAlarmSetGlobal(mAlarm.getUid());
+
+            MyAlarmsListAdapter myAlarmsListAdapter = new MyAlarmsListAdapter();
+            myAlarmsListAdapter.notifyDataSetChanged();
+
+            startHomeActivity();
+            Toast.makeText(getContext(), "Alarm deleted", Toast.LENGTH_SHORT);
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            Toast.makeText(getContext(), "Oi! Don't delete me. Delete alarm failed!", Toast.LENGTH_SHORT);
+        }
     }
 
     @OnClick({R.id.new_alarm_fragment1_alarm_day_mon,
