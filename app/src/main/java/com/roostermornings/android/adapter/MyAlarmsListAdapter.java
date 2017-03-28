@@ -169,35 +169,6 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
             }
         });
 
-
-//        holder.imgDelete.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                if (mActivity instanceof MyAlarmsFragmentActivity) {
-//
-//                    View dialogMmpView = LayoutInflater.from(mActivity)
-//                            .inflate(R.layout.dialog_confirm_alarm_delete, null);
-//                    new MaterialDialog.Builder(mActivity)
-//                            .customView(dialogMmpView, false)
-//                            .positiveText(R.string.confirm)
-//                            .negativeText(R.string.cancel)
-//                            .negativeColorRes(R.color.grey)
-//                            .onPositive(new MaterialDialog.SingleButtonCallback() {
-//                                @Override
-//                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-//                                    mDataset.remove(position);
-//                                    notifyItemRemoved(position);
-//                                    notifyItemRangeChanged(position, mDataset.size());
-//                                    ((MyAlarmsFragmentActivity) mActivity).deleteAlarm(alarm.getUid());
-//                                }
-//                            })
-//                            .show();
-//
-//
-//                }
-//            }
-//        });
-
     }
 
     // Return the size of your dataset (invoked by the layout manager)
