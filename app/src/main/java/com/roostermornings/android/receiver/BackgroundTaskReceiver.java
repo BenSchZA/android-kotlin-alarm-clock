@@ -14,6 +14,7 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.service.BackgroundTaskIntentService;
 import com.roostermornings.android.service.FirebaseListenerService;
 import com.roostermornings.android.util.Constants;
@@ -32,7 +33,7 @@ public class BackgroundTaskReceiver extends BroadcastReceiver {
         // an Intent broadcast.
 
         Log.d("Background Message:", "BackgroundTaskReceiver");
-        Toast.makeText(context, "BackgroundTaskReceiver!", Toast.LENGTH_LONG).show();
+        if(BuildConfig.DEBUG) Toast.makeText(context, "BackgroundTaskReceiver!", Toast.LENGTH_LONG).show();
 
         Intent intentService = new Intent(context, BackgroundTaskIntentService.class);
         intentService.setAction(intent.getAction());
