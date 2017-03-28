@@ -82,8 +82,12 @@ public class AudioTableManager {
         values.put(AudioTableEntry.COLUMN_PICTURE, queue.getPicture());
         values.put(AudioTableEntry.COLUMN_DATE_UPLOADED, queue.getDate_created());
 
-        // Inserting Row
-        db.insert(AudioTableEntry.TABLE_NAME, null, values);
+        try {
+            // Inserting Row
+            db.insertOrThrow(AudioTableEntry.TABLE_NAME, null, values);
+        } catch(SQLiteConstraintException e){
+            e.printStackTrace();
+        }
         db.close();
     }
 

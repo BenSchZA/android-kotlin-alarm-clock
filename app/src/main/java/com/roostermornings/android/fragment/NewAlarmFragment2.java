@@ -94,9 +94,11 @@ public class NewAlarmFragment2 extends BaseFragment {
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     Channel channel = postSnapshot.getValue(Channel.class);
 
-                    channel.setSelected(false);
-                    channels.add(channel);
-                    mAdapter.notifyDataSetChanged();
+                    if(channel.isActive()) {
+                        channel.setSelected(false);
+                        channels.add(channel);
+                        mAdapter.notifyDataSetChanged();
+                    }
                 }
                 //TODO: check this solves bug
                 if (mListener != null) mListener.retrieveAlarmDetailsFromFirebase(); //this is only relevant for alarms being edited

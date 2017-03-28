@@ -53,11 +53,9 @@ public class BackgroundTaskIntentService extends IntentService {
         super("BackgroundTaskIntentService");
     }
 
-    public static void startActionBackgroundDownload(Context context, String param1, String param2) {
+    public static void startActionBackgroundDownload(Context context) {
         Intent intent = new Intent(context, BackgroundTaskIntentService.class);
         intent.setAction(Constants.ACTION_BACKGROUNDDOWNLOAD);
-        intent.putExtra(EXTRA_PARAM1, param1);
-        intent.putExtra(EXTRA_PARAM2, param2);
         context.startService(intent);
     }
 

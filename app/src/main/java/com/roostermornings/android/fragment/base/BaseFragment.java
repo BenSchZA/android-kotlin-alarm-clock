@@ -6,6 +6,7 @@
 package com.roostermornings.android.fragment.base;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -28,6 +29,7 @@ import javax.inject.Inject;
 
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
+import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.Friend;
 
@@ -97,5 +99,12 @@ public class BaseFragment extends Fragment implements Validator.ValidationListen
                 return lhs.getUser_name().compareTo(rhs.getUser_name());
             }
         });
+    }
+
+    protected void startHomeActivity() {
+        //This clears the back stack when starting home activity, to stop back stack loop
+        Intent homeIntent = new Intent(getContext(), MyAlarmsFragmentActivity.class);
+        homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(homeIntent);
     }
 }

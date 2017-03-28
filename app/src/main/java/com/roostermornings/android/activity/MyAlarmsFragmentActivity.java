@@ -150,16 +150,15 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         if (roosterCount > 0) {
             DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(getApplicationContext());
             DeviceAlarm deviceAlarm  = deviceAlarmTableManager.getNextPendingAlarm();
-            if(deviceAlarm == null) return;
-            for (Alarm alarm:
-                    mAlarms) {
-                alarm.setUnseen_roosters(0);
-                if(alarm.getUid().equals(deviceAlarm.getSetId())) {
-                    alarm.setUnseen_roosters(roosterCount);
-                    mAdapter.notifyDataSetChanged();
-                    return;
+            if(deviceAlarm == null) for (Alarm alarm: mAlarms) alarm.setUnseen_roosters(0);
+            else {
+                for (Alarm alarm : mAlarms) {
+                    alarm.setUnseen_roosters(0);
+                    if (alarm.getUid().equals(deviceAlarm.getSetId()))
+                        alarm.setUnseen_roosters(roosterCount);
                 }
             }
+            mAdapter.notifyDataSetChanged();
         }
 
         //Broadcast receiver filter to receive UI updates
@@ -250,8 +249,11 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void toggleAlarmSetEnable(String alarmId, boolean enabled) {
-        deviceAlarmController.setSetEnabled(alarmId, enabled);
+    public void toggleAlarmSetEnable(Alarm alarm, boolean enabled) {
+        deviceAlarmController.setSetEnabled(alarm.getUid(), enabled);
+        mAlarms.get(mAlarms.indexOf(alarm)).setEnabled(enabled);
+        updateRoosterNotification();
+        mAdapter.notifyDataSetChanged();
     }
 
     @OnClick(R.id.home_record_audio)

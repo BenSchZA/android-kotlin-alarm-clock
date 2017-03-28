@@ -4,7 +4,7 @@
   -->
 
 <resources>
-    <string name="app_name">Rooster Mornings</string>
+    <string name="app_name">Rooster</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="action_settings">Settings</string>
     <string name="action_profile">Profile</string>
@@ -43,6 +43,9 @@
     <string name="alarm_dismiss">Dismiss</string>
     <string name="alarm_default_name">Rise and Shine!</string>
     <string name="alarm_count"></string>
+    <string name="delete_alarm">Delete alarm</string>
+    <string name="repeat_alarm">Repeat alarm</string>
+    <string name="allow_friends">Allow friends to send audio notes to this alarm</string>
 
     <string name="friends">Friends</string>
     <string name="text_name_initials"></string>
