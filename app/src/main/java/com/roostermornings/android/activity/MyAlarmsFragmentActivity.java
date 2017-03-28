@@ -144,6 +144,11 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         }; mMyAlarmsReference.addListenerForSingleValueEvent(alarmsListener);
     }
 
+    @Override
+    public void onBackPressed() {
+        moveTaskToBack(true);
+    }
+
     private void updateRoosterNotification() {
         AudioTableManager audioTableManager = new AudioTableManager(this);
         Integer roosterCount = audioTableManager.countSocialAudioFiles();

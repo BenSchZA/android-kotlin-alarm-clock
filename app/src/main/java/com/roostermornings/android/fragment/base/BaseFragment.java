@@ -102,9 +102,7 @@ public class BaseFragment extends Fragment implements Validator.ValidationListen
     }
 
     protected void startHomeActivity() {
-        //This clears the back stack when starting home activity, to stop back stack loop
         Intent homeIntent = new Intent(getContext(), MyAlarmsFragmentActivity.class);
-        homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(homeIntent);
     }
 }
