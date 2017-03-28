@@ -29,6 +29,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.roostermornings.android.BaseApplication;
+import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.MyAlarmsListAdapter;
@@ -138,7 +139,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                Toast.makeText(MyAlarmsFragmentActivity.this, "Failed to load mAlarms.",
+                if(BuildConfig.DEBUG) Toast.makeText(MyAlarmsFragmentActivity.this, "Failed to load mAlarms.",
                         Toast.LENGTH_SHORT).show();
             }
         }; mMyAlarmsReference.addListenerForSingleValueEvent(alarmsListener);
