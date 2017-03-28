@@ -15,6 +15,8 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,13 +50,12 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
     public final static String TAG = NewAlarmFragmentActivity.class.getSimpleName();
     private ViewPager mViewPager;
     Alarm mAlarm = new Alarm();
-    private String mEditAlarmId = "";
+    private static String mEditAlarmId = "";
     Calendar mCalendar = Calendar.getInstance();
     private Fragment mFragment1;
     private Fragment mFragment2;
     private Menu menu;
     private DeviceAlarmController deviceAlarmController = new DeviceAlarmController(this);
-
 
     @BindView(R.id.toolbar_title)
     TextView toolbarTitle;
@@ -93,6 +94,8 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
         Bundle extras = getIntent().getExtras();
+        //Static variable, so clear on new instance
+        mEditAlarmId = "";
         if (extras != null && extras.containsKey("alarmId")) {
             mEditAlarmId = extras.getString("alarmId", "");
         }
@@ -101,9 +104,12 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
         } else {
             toolbarTitle.setText(getString(R.string.edit_alarm));
         }
-
     }
 
+    public static String getCurrentAlarmId() {
+        if(mEditAlarmId != null) return mEditAlarmId;
+        else return "";
+    }
 
     @Override
     public void onBackPressed() {
@@ -200,7 +206,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 database.getReference(String.format("alarms/%s/%s", mAuth.getCurrentUser().getUid(), alarmKey)).setValue(mAlarm);
 
                 //Download any social or channel audio files
-                startActionBackgroundDownload(this, "", "");
+                startActionBackgroundDownload(this);
 
                 Toast.makeText(getBaseContext(), (mEditAlarmId.length() == 0) ? "Alarm created!" : "Alarm edited!",
                         Toast.LENGTH_LONG).show();

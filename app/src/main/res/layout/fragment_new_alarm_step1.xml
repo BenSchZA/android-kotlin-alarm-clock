@@ -17,6 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/spacing_xxlarge"
+        android:layout_marginBottom="@dimen/spacing_xxlarge"
         android:clickable="true"
         android:focusable="true"
         android:gravity="center_horizontal"
@@ -25,10 +26,9 @@
         android:textSize="@dimen/text_huge" />
 
     <View
-        android:layout_marginTop="@dimen/spacing_large"
         android:layout_height="1dp"
         android:background="@color/white"
-        android:layout_width="match_parent"></View>
+        android:layout_width="match_parent"/>
 
     <android.support.v7.widget.SwitchCompat
         android:id="@+id/new_alarm_fragment1_switch_audio"
@@ -42,12 +42,12 @@
         android:textColor="@drawable/rooster_link_white"
         android:textSize="@dimen/text_large"
         android:padding="@dimen/spacing_large"
-        android:text="Allow friends to send audio notes to this alarm." />
+        android:text="@string/allow_friends" />
 
     <View
         android:layout_height="1dp"
         android:background="@color/white"
-        android:layout_width="match_parent"></View>
+        android:layout_width="match_parent"/>
 
     <LinearLayout
         android:id="@+id/days_parent"
@@ -194,6 +194,24 @@
         android:thumb="@drawable/switch_thumb"
         android:track="@drawable/switch_track"
         android:padding="@dimen/spacing_large"
-        android:text="Repeat alarm" />
+        android:text="@string/repeat_alarm" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_gravity="center|bottom">
+
+        <Button
+            android:id="@+id/new_alarm_fragment1_delete_alarm"
+            style="@style/RoosterButtonLightBlueStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|bottom"
+            android:layout_margin="@dimen/spacing_normal"
+            android:text="@string/delete_alarm"
+            android:visibility="invisible" />
+
+    </LinearLayout>
 
 </LinearLayout>

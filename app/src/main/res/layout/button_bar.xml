@@ -12,82 +12,86 @@
     android:layout_gravity="bottom"
     android:background="@color/grey_transparent"
     android:orientation="horizontal"
-    android:padding="@dimen/spacing_normal"
+    android:paddingTop="@dimen/spacing_normal_large"
+    android:paddingBottom="@dimen/spacing_normal_large"
     android:gravity="center_vertical"
     android:layout_alignParentBottom="true"
     android:layout_centerHorizontal="true">
 
     <FrameLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="1"
         android:clickable="true">
 
 
         <ImageButton
             android:id="@+id/home_my_alarms"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="center"
             android:layout_margin="@dimen/spacing_small"
-            android:background="@drawable/rooster_button_bar_add_alarm"
+            android:src="@drawable/rooster_button_bar_add_alarm"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"/>
 
     </FrameLayout>
 
     <FrameLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="1"
         android:clickable="true">
 
         <ImageButton
             android:id="@+id/home_my_uploads"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:layout_margin="@dimen/spacing_normal"
-            android:background="@drawable/rooster_button_bar_chat"
+            android:layout_margin="@dimen/spacing_small"
+            android:src="@drawable/rooster_button_bar_chat"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"/>
 
     </FrameLayout>
 
     <FrameLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="1"
         android:clickable="true">
 
         <ImageButton
             android:id="@+id/home_record_audio"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="center"
             android:layout_margin="@dimen/spacing_small"
-            android:background="@drawable/rooster_button_bar_record_audio"
+            android:src="@drawable/rooster_button_bar_record_audio"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true" />
 
     </FrameLayout>
 
     <FrameLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="1"
         android:clickable="true">
 
         <RelativeLayout
-            android:layout_width="35dp"
-            android:layout_height="35dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:clipChildren="false">
 
             <ImageButton
                 android:id="@+id/home_friends"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_margin="@dimen/spacing_small"
-                android:background="@drawable/rooster_button_bar_friends"
+                android:src="@drawable/rooster_button_bar_friends"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"/>
 
             <ImageView

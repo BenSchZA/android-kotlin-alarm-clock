@@ -57,8 +57,6 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
         TextView txtAlarmDays;
         @BindView(R.id.cardview_alarm_channel_textview)
         TextView txtAlarmChannel;
-        @BindView(R.id.cardview_alarm_delete)
-        ImageView imgDelete;
         @BindView(R.id.cardview_alarm_person)
         ImageView roosterNotificationPerson;
         @BindView(R.id.rooster_notification)
@@ -89,6 +87,10 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
         mActivity = activity;
         mApplication = application;
         setHasStableIds(true);
+    }
+
+    public MyAlarmsListAdapter() {
+
     }
 
 
@@ -126,15 +128,16 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
             if(alarm.getUnseen_roosters() != null && alarm.getUnseen_roosters() > 0) {
                 holder.roosterNotification.setVisibility(View.VISIBLE);
                 holder.roosterNotification.setText(String.valueOf(alarm.getUnseen_roosters()));
+            } else{
+                holder.roosterNotification.setVisibility(View.INVISIBLE);
             }
         }
 
         holder.switchEnable.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                alarm.setEnabled(!alarm.isEnabled());
-                holder.switchEnable.setChecked(alarm.isEnabled());
-                ((MyAlarmsFragmentActivity) mActivity).toggleAlarmSetEnable(alarm.getUid(), alarm.isEnabled());
+                holder.switchEnable.setChecked(!alarm.isEnabled());
+                ((MyAlarmsFragmentActivity) mActivity).toggleAlarmSetEnable(alarm, !alarm.isEnabled());
             }
         });
 
@@ -167,33 +170,33 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
         });
 
 
-        holder.imgDelete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mActivity instanceof MyAlarmsFragmentActivity) {
-
-                    View dialogMmpView = LayoutInflater.from(mActivity)
-                            .inflate(R.layout.dialog_confirm_alarm_delete, null);
-                    new MaterialDialog.Builder(mActivity)
-                            .customView(dialogMmpView, false)
-                            .positiveText(R.string.confirm)
-                            .negativeText(R.string.cancel)
-                            .negativeColorRes(R.color.grey)
-                            .onPositive(new MaterialDialog.SingleButtonCallback() {
-                                @Override
-                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                    mDataset.remove(position);
-                                    notifyItemRemoved(position);
-                                    notifyItemRangeChanged(position, mDataset.size());
-                                    ((MyAlarmsFragmentActivity) mActivity).deleteAlarm(alarm.getUid());
-                                }
-                            })
-                            .show();
-
-
-                }
-            }
-        });
+//        holder.imgDelete.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if (mActivity instanceof MyAlarmsFragmentActivity) {
+//
+//                    View dialogMmpView = LayoutInflater.from(mActivity)
+//                            .inflate(R.layout.dialog_confirm_alarm_delete, null);
+//                    new MaterialDialog.Builder(mActivity)
+//                            .customView(dialogMmpView, false)
+//                            .positiveText(R.string.confirm)
+//                            .negativeText(R.string.cancel)
+//                            .negativeColorRes(R.color.grey)
+//                            .onPositive(new MaterialDialog.SingleButtonCallback() {
+//                                @Override
+//                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+//                                    mDataset.remove(position);
+//                                    notifyItemRemoved(position);
+//                                    notifyItemRangeChanged(position, mDataset.size());
+//                                    ((MyAlarmsFragmentActivity) mActivity).deleteAlarm(alarm.getUid());
+//                                }
+//                            })
+//                            .show();
+//
+//
+//                }
+//            }
+//        });
 
     }
 

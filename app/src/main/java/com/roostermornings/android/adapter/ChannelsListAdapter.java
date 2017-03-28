@@ -120,9 +120,13 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
             }
         });
 
-        Picasso.with(mFragment.getContext()).load(mDataset.get(position).getPhoto()).
-                fit().into(holder.imgChannelImage);
-
+        //TODO: is this reasonable? if no image, then what?
+        try {
+            Picasso.with(mFragment.getContext()).load(mDataset.get(position).getPhoto()).
+                    fit().into(holder.imgChannelImage);
+        } catch(IllegalArgumentException e) {
+            e.printStackTrace();
+        }
     }
 
     private void toggleChannelSelection(Channel channelSelection) {

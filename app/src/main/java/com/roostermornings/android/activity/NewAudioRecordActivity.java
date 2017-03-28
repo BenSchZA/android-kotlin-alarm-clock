@@ -18,6 +18,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -39,6 +40,8 @@ import java.io.IOException;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import butterknife.OnLongClick;
+import butterknife.OnTouch;
 
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
@@ -111,9 +114,26 @@ public class NewAudioRecordActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    //TODO: longclick audio record
+//    @OnLongClick(R.id.new_audio_start_stop)
+//    public boolean longClickStartRecording() {
+//        startStopAudioRecording();
+//        return true;
+//    }
+//
+//    @OnTouch(R.id.new_audio_start_stop)
+//    public boolean releaseStopRecording(View pView, MotionEvent pEvent) {
+//        pView.onTouchEvent(pEvent);
+//        if (pEvent.getAction() == MotionEvent.ACTION_UP) {
+//            if (mRecording) {
+//                stopRecording();
+//            }
+//        }
+//        return false;
+//    }
+
     @OnClick(R.id.new_audio_start_stop)
     public void startStopAudioRecording() {
-
 
         if (!mRecording) {
 
