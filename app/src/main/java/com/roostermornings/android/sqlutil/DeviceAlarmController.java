@@ -247,6 +247,7 @@ public final class DeviceAlarmController {
                     deviceAlarmList) {
                 cancelAlarm(deviceAlarm);
             }
+            deviceAlarmTableManager.setSetEnabled(setId, enabled);
             removeSetChannelAudio(deviceAlarmList);
             updateFirebaseAlarmEnabled(setId, enabled);
         }
