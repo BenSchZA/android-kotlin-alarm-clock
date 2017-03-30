@@ -9,7 +9,7 @@ import com.google.firebase.database.IgnoreExtraProperties;
 
 @IgnoreExtraProperties
 public class ChannelRooster {
-    private String channel_name;
+    private String name;
     private boolean active;
     private String audio_file_name;
     private String audio_file_url;
@@ -24,8 +24,8 @@ public class ChannelRooster {
     public ChannelRooster() {
     }
 
-    public ChannelRooster(String channel_name, boolean active, String audio_file_name, String audio_file_url, String channel_uid, String description, String photo, int rooster_cycle_iteration, long upload_date) {
-        this.channel_name = channel_name;
+    public ChannelRooster(String name, boolean active, String audio_file_name, String audio_file_url, String channel_uid, String description, String photo, int rooster_cycle_iteration, long upload_date) {
+        this.name = name;
         this.active = active;
         this.audio_file_name = audio_file_name;
         this.audio_file_url = audio_file_url;
@@ -36,12 +36,12 @@ public class ChannelRooster {
         this.upload_date = upload_date;
     }
 
-    public String getChannel_name() {
-        return channel_name;
+    public String getName() {
+        return name;
     }
 
-    public void setChannel_name(String channel_name) {
-        this.channel_name = channel_name;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public boolean isActive() {

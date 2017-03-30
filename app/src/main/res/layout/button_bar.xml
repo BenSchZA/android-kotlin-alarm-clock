@@ -80,7 +80,7 @@
         android:clickable="true">
 
         <RelativeLayout
-            android:layout_width="wrap_content"
+            android:layout_width="34dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:clipChildren="false">
@@ -92,7 +92,8 @@
                 android:layout_gravity="center"
                 android:src="@drawable/rooster_button_bar_friends"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:clickable="true"/>
+                android:clickable="true"
+                android:layout_toStartOf="@+id/notification" />
 
             <ImageView
                 android:id="@+id/notification"

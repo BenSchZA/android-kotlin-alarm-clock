@@ -9,6 +9,8 @@ public class Constants {
 
     public final static String APP_FONT = "fonts/Nunito/Nunito-Bold.ttf";
 
+    public final static String FACEBOOK_APP_ID = "190341188110134";
+
     //BaseActivity
     public final static int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 10;
 
@@ -43,8 +45,12 @@ public class Constants {
     public final static String ACTION_ALARMDISPLAY = "rooster.update.ALARMDISPLAY";
     public final static String ACTION_ALARMTIMESUP = "rooster.update.ALARMTIMESUP";
 
+    //NewAudio activities
+    public final static String EXTRA_LOCAL_FILE_STRING = "localFileString";
+
     //AudioService notification IDs
     public final static int AUDIOSERVICE_NOTIFICATION_ID = 1000;
+    public final static String EXTRA_FRIENDS_LIST = "friendsList";
 
     //FirebaseListenerService intent actions
     public final static String ACTION_REQUESTNOTIFICATION = "rooster.update.REQUEST_NOTIFICATION";

@@ -148,8 +148,6 @@ public class FriendsInviteFragment3 extends BaseFragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        requestGetContacts();
-
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {

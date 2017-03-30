@@ -26,7 +26,7 @@
         android:theme="@style/AppTheme">
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
-            android:value="getResources().getString(R.string.facebook_app_id)" />
+            android:value="@string/facebook_app_id" />
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_stat_ic_notification" />
