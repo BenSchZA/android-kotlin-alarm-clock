@@ -156,6 +156,8 @@ public class BackgroundTaskIntentService extends IntentService {
         final DatabaseReference channelReference = FirebaseDatabase.getInstance().getReference()
                 .child("channels").child(channelId);
 
+        channelReference.keepSynced(true);
+
         ValueEventListener channelListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
