@@ -13,6 +13,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.service.notification.NotificationListenerService;
 
 import com.crashlytics.android.Crashlytics;
+import com.facebook.appevents.AppEventsLogger;
 import com.facebook.stetho.Stetho;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -54,6 +55,8 @@ public class BaseApplication extends android.app.Application {
         super.onCreate();
 
         Fabric.with(this, new Crashlytics());
+
+        AppEventsLogger.activateApp(this, Constants.FACEBOOK_APP_ID);
 
         //Override monospace font with custom font
         FontsOverride.setDefaultFont(this, "MONOSPACE", Constants.APP_FONT);
@@ -107,9 +110,9 @@ public class BaseApplication extends android.app.Application {
         }
 
         BackgroundTaskReceiver backgroundTaskReceiver = new BackgroundTaskReceiver();
-        backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(getApplicationContext());
-        backgroundTaskReceiver.scheduleBackgroundDailyTask(getApplicationContext());
-        backgroundTaskReceiver.scheduleBackgroundUpdateNotificationsTask(getApplicationContext());
+        backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(getApplicationContext(), true);
+        backgroundTaskReceiver.scheduleBackgroundDailyTask(getApplicationContext(), true);
+        backgroundTaskReceiver.scheduleBackgroundUpdateNotificationsTask(getApplicationContext(), true);
         //Start listener service to download Roosters on notification
         Intent notificationListenerIntent = new Intent(this, NotificationListenerService.class);
         startService(notificationListenerIntent);

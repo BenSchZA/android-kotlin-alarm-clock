@@ -33,6 +33,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
 
 import java.io.File;
@@ -277,7 +278,7 @@ public class NewAudioRecordActivity extends BaseActivity {
 
         Intent intent = new Intent(NewAudioRecordActivity.this, NewAudioFriendsActivity.class);
         Bundle bun = new Bundle();
-        bun.putString("localFileString", mAudioSavePathInDevice);
+        bun.putString(Constants.EXTRA_LOCAL_FILE_STRING, mAudioSavePathInDevice);
         intent.putExtras(bun);
         startActivity(intent);
     }

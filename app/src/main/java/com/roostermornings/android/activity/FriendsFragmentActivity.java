@@ -132,6 +132,9 @@ public class FriendsFragmentActivity extends BaseActivity implements
                     setTabNotification(position, false);
                     setButtonBarNotification(false);
                     ((BaseApplication) getApplication()).setNotificationFlag(0, Constants.FLAG_FRIENDREQUESTS);
+                } else if(position == 2) {
+                    FriendsInviteFragment3 friendsInviteFragment3 = (FriendsInviteFragment3)mSectionsPagerAdapter.getItem(2);
+                    friendsInviteFragment3.requestGetContacts();
                 }
             }
 

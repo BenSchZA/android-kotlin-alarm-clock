@@ -35,6 +35,7 @@ import com.roostermornings.android.fragment.NewAlarmFragment1;
 import com.roostermornings.android.fragment.NewAlarmFragment2;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
+import com.roostermornings.android.util.Constants;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -97,8 +98,8 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
         Bundle extras = getIntent().getExtras();
         //Static variable, so clear on new instance
         mEditAlarmId = "";
-        if (extras != null && extras.containsKey("alarmId")) {
-            mEditAlarmId = extras.getString("alarmId", "");
+        if (extras != null && extras.containsKey(Constants.EXTRA_ALARMID)) {
+            mEditAlarmId = extras.getString(Constants.EXTRA_ALARMID, "");
         }
         if (mEditAlarmId.length() == 0) {
             toolbarTitle.setText(getString(R.string.create_alarm));
