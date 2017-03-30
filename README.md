@@ -92,20 +92,20 @@ The background tasks that the BackgroundTaskIntentService handles are:
 ### Firebase
 
 # Diagrams
-![Diagram explainer](DiagramExplainer.png)
+![Diagram explainer](documentation-media/DiagramExplainer.png)
 
 ## BackgroundTaskIntentService
 ### Background audio caching task 
-![Background audio caching task](BackgroundAudioFetchServices.png)
+![Background audio caching task](documentation-media/BackgroundAudioFetchServices.png)
 
 ### Channel story algorithm
-![Channel story algorithm](ChannelStoryAlgorithm.png)
+![Channel story algorithm](documentation-media/ChannelStoryAlgorithm.png)
 
 ## UploadService
-![Upload service](UploadService.png)
+![Upload service](documentation-media/UploadService.png)
 
 ## AudioService
-![Audio service](AudioService.png)
+![Audio service](documentation-media/AudioService.png)
 
 
 
