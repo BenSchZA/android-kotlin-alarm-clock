@@ -18,6 +18,7 @@ import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 import com.roostermornings.android.util.Constants;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -232,6 +233,19 @@ public final class DeviceAlarmController {
         removeSetChannelAudio(deviceAlarmList);
         removeFirebaseAlarm(setId);
         deviceAlarmTableManager.deleteAlarmSet(setId);
+    }
+
+    //Case: local has an alarm that firebase doesn't Result: delete local alarm
+    public void syncAlarmSetGlobal(ArrayList<Alarm> firebaseAlarmSets) {
+        ArrayList<String> firebaseAlarmSetIDs = new ArrayList<>();
+        for (Alarm alarmSet:
+                firebaseAlarmSets) {
+            firebaseAlarmSetIDs.add(alarmSet.getUid());
+        }
+        for (DeviceAlarm deviceAlarmSet:
+        deviceAlarmTableManager.getAlarmSets()) {
+            if(!firebaseAlarmSetIDs.contains(deviceAlarmSet.getSetId())) deleteAlarmSetGlobal(deviceAlarmSet.getSetId());
+        }
     }
 
     public void setSetEnabled(String setId, boolean enabled) {

@@ -107,6 +107,10 @@ The background tasks that the BackgroundTaskIntentService handles are:
 ## AudioService
 ![Audio service](documentation-media/AudioService.png)
 
+## Alarm Display Activity
+### Alarm loading process
+![Alarm loading process](documentation-media/AlarmLoadingProcess.png)
+
 
 
 
