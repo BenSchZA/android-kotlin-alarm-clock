@@ -242,6 +242,7 @@ public final class DeviceAlarmController {
                 firebaseAlarmSets) {
             firebaseAlarmSetIDs.add(alarmSet.getUid());
         }
+        if(deviceAlarmTableManager.getAlarmSets() == null) return;
         for (DeviceAlarm deviceAlarmSet:
         deviceAlarmTableManager.getAlarmSets()) {
             if(!firebaseAlarmSetIDs.contains(deviceAlarmSet.getSetId())) deleteAlarmSetGlobal(deviceAlarmSet.getSetId());
