@@ -9,16 +9,13 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -26,11 +23,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.util.Constants;
@@ -41,8 +33,6 @@ import java.io.IOException;
 
 import butterknife.BindView;
 import butterknife.OnClick;
-import butterknife.OnLongClick;
-import butterknife.OnTouch;
 
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
@@ -54,11 +44,18 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 public class NewAudioRecordActivity extends BaseActivity {
 
     private long startTime;
-    private long elapsedTime;
+    private long countDownTime;
     private long runningTime;
-    private final int REFRESH_RATE = 100;
+    private final int REFRESH_RATE = 1;
     private final int MAX_RECORDING_TIME = 60000;
     private final String maxRecordingTime = "60";
+    private final int minAmplitude = 500;
+    private int maxAmplitude;
+    private double averageAmplitude;
+    private long timeSinceAcceptableAmplitudeStart;
+    private long cumulativeAcceptableAmplitudeTime;
+    private long timeOfUnsuccesfulAmplitude;
+    private long timeOfSuccesfulAmplitude;
     private String hours, minutes, seconds, milliseconds;
     private long secs, mins, hrs;
     private Handler mHandler = new Handler();
@@ -86,6 +83,9 @@ public class NewAudioRecordActivity extends BaseActivity {
 
     @BindView(R.id.new_audio_listen)
     ImageView imgNewAudioListen;
+
+    @BindView(R.id.new_message)
+    TextView txtMessage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,9 +135,15 @@ public class NewAudioRecordActivity extends BaseActivity {
 
     @OnClick(R.id.new_audio_start_stop)
     public void startStopAudioRecording() {
-
         if (!mRecording) {
-
+            //Reset acceptable amplitude timer
+            timeSinceAcceptableAmplitudeStart = 0;
+            timeOfUnsuccesfulAmplitude = System.currentTimeMillis();
+            timeOfSuccesfulAmplitude = System.currentTimeMillis();
+            cumulativeAcceptableAmplitudeTime = 0;
+            averageAmplitude = 0;
+            //Reset message from amplitude instructions to default
+            txtMessage.setText(getResources().getText(R.string.new_audio_instructions));
 
             randomAudioFileName = RoosterUtils.createRandomFileName(5) + "RoosterRecording.3gp";
             startTime = System.currentTimeMillis() + MAX_RECORDING_TIME;
@@ -188,6 +194,14 @@ public class NewAudioRecordActivity extends BaseActivity {
             layoutRecordParent.setVisibility(View.INVISIBLE);
         } catch(IllegalStateException e){
             e.printStackTrace();
+        }
+
+        if(cumulativeAcceptableAmplitudeTime < 5*1000) {
+            txtMessage.setText("Psst! That was very quiet, \n please record again...");
+            onDeleteAudioClick();
+            return;
+        } else {
+            txtMessage.setText("Time to continue and select some friends!");
         }
     }
 
@@ -273,7 +287,6 @@ public class NewAudioRecordActivity extends BaseActivity {
 
     @OnClick(R.id.new_audio_save)
     public void onSaveAudioFileClick() {
-
         if (!checkInternetConnection()) return;
 
         Intent intent = new Intent(NewAudioRecordActivity.this, NewAudioFriendsActivity.class);
@@ -286,15 +299,29 @@ public class NewAudioRecordActivity extends BaseActivity {
     private Runnable startTimer = new Runnable() {
         public void run() {
             if (mPaused) {
-                elapsedTime = startTime - runningTime;
+                countDownTime = startTime - runningTime;
                 mPaused = false;
             } else {
-                elapsedTime = startTime - System.currentTimeMillis();
+                maxAmplitude = mediaRecorder.getMaxAmplitude();
+                averageAmplitude = (maxAmplitude + averageAmplitude)/2;
+                if(averageAmplitude < minAmplitude && cumulativeAcceptableAmplitudeTime < 5*1000) {
+                    txtMessage.setText(getResources().getText(R.string.new_audio_amplitude_instructions));
+                    cumulativeAcceptableAmplitudeTime = cumulativeAcceptableAmplitudeTime + timeSinceAcceptableAmplitudeStart;
+                    timeSinceAcceptableAmplitudeStart = 0;
+                    timeOfUnsuccesfulAmplitude = System.currentTimeMillis();
+                }
+                else if(cumulativeAcceptableAmplitudeTime > 5*1000) {
+                    txtMessage.setText(getResources().getText(R.string.new_audio_instructions));
+                } else {
+                    timeSinceAcceptableAmplitudeStart = timeOfSuccesfulAmplitude - timeOfUnsuccesfulAmplitude;
+                    timeOfSuccesfulAmplitude = System.currentTimeMillis();
+                }
+                 countDownTime = startTime - System.currentTimeMillis();
             }
-            if(elapsedTime < 0){
+            if(countDownTime < 0){
                 stopRecording();
             } else{
-                updateTimer(elapsedTime);
+                updateTimer(countDownTime);
                 mHandler.postDelayed(this, REFRESH_RATE);
             }
         }
