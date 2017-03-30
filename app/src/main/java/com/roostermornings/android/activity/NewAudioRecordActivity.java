@@ -49,15 +49,16 @@ public class NewAudioRecordActivity extends BaseActivity {
     private final int REFRESH_RATE = 1;
     private final int MAX_RECORDING_TIME = 60000;
     private final String maxRecordingTime = "60";
-    private final int minAmplitude = 500;
+
+    private final int AUDIO_MIN_AMPLITUDE = 500;
+    private final int MIN_CUMULATIVE_TIME = 5000;
     private int maxAmplitude;
     private double averageAmplitude;
     private long timeSinceAcceptableAmplitudeStart;
     private long cumulativeAcceptableAmplitudeTime;
     private long timeOfUnsuccesfulAmplitude;
     private long timeOfSuccesfulAmplitude;
-    private String hours, minutes, seconds, milliseconds;
-    private long secs, mins, hrs;
+
     private Handler mHandler = new Handler();
     private boolean mRecording = false;
     private boolean mListening = false;
@@ -114,24 +115,6 @@ public class NewAudioRecordActivity extends BaseActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
-    //TODO: longclick audio record
-//    @OnLongClick(R.id.new_audio_start_stop)
-//    public boolean longClickStartRecording() {
-//        startStopAudioRecording();
-//        return true;
-//    }
-//
-//    @OnTouch(R.id.new_audio_start_stop)
-//    public boolean releaseStopRecording(View pView, MotionEvent pEvent) {
-//        pView.onTouchEvent(pEvent);
-//        if (pEvent.getAction() == MotionEvent.ACTION_UP) {
-//            if (mRecording) {
-//                stopRecording();
-//            }
-//        }
-//        return false;
-//    }
 
     @OnClick(R.id.new_audio_start_stop)
     public void startStopAudioRecording() {
@@ -196,12 +179,12 @@ public class NewAudioRecordActivity extends BaseActivity {
             e.printStackTrace();
         }
 
-        if(cumulativeAcceptableAmplitudeTime < 5*1000) {
-            txtMessage.setText("Psst! That was very quiet, \n please record again...");
+        //Check if cumulative amplitude condition has not been met, else continue
+        if(cumulativeAcceptableAmplitudeTime < MIN_CUMULATIVE_TIME) {
+            txtMessage.setText(getResources().getText(R.string.new_audio_quiet_instructions));
             onDeleteAudioClick();
-            return;
         } else {
-            txtMessage.setText("Time to continue and select some friends!");
+            txtMessage.setText(getResources().getText(R.string.new_audio_continue_instructions));
         }
     }
 
@@ -302,20 +285,24 @@ public class NewAudioRecordActivity extends BaseActivity {
                 countDownTime = startTime - runningTime;
                 mPaused = false;
             } else {
+
+                //This logic checks that the average recording amplitude is above a certain threshold for a cumulative amount of time
                 maxAmplitude = mediaRecorder.getMaxAmplitude();
                 averageAmplitude = (maxAmplitude + averageAmplitude)/2;
-                if(averageAmplitude < minAmplitude && cumulativeAcceptableAmplitudeTime < 5*1000) {
+                if(averageAmplitude < AUDIO_MIN_AMPLITUDE && cumulativeAcceptableAmplitudeTime < MIN_CUMULATIVE_TIME) {
                     txtMessage.setText(getResources().getText(R.string.new_audio_amplitude_instructions));
                     cumulativeAcceptableAmplitudeTime = cumulativeAcceptableAmplitudeTime + timeSinceAcceptableAmplitudeStart;
                     timeSinceAcceptableAmplitudeStart = 0;
                     timeOfUnsuccesfulAmplitude = System.currentTimeMillis();
                 }
-                else if(cumulativeAcceptableAmplitudeTime > 5*1000) {
+                else if(cumulativeAcceptableAmplitudeTime > MIN_CUMULATIVE_TIME) {
                     txtMessage.setText(getResources().getText(R.string.new_audio_instructions));
                 } else {
                     timeSinceAcceptableAmplitudeStart = timeOfSuccesfulAmplitude - timeOfUnsuccesfulAmplitude;
                     timeOfSuccesfulAmplitude = System.currentTimeMillis();
                 }
+                ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
                  countDownTime = startTime - System.currentTimeMillis();
             }
             if(countDownTime < 0){
@@ -328,6 +315,9 @@ public class NewAudioRecordActivity extends BaseActivity {
     };
 
     private void updateTimer(float time) {
+        String hours, minutes, seconds, milliseconds;
+        long secs, mins, hrs;
+
         secs = (long) (time / 1000);
         mins = (long) ((time / 1000) / 60);
         hrs = (long) (((time / 1000) / 60) / 60);
