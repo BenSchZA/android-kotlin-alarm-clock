@@ -103,10 +103,12 @@ public class SignInActivity extends BaseActivity {
 
                     @Override
                     public void onCancel() {
+                        Log.e("Facebook: ", "onCancel");
                     }
 
                     @Override
                     public void onError(FacebookException exception) {
+                        Log.e("Facebook: ", "onError");
                     }
                 }
         );

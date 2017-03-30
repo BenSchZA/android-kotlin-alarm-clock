@@ -28,6 +28,7 @@ import com.roostermornings.android.adapter.NewAudioFriendsListAdapter;
 import com.roostermornings.android.service.UploadService;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.domain.Users;
+import com.roostermornings.android.util.Constants;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -69,7 +70,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
         mRecyclerView.setAdapter(mAdapter);
 
         Bundle extras = getIntent().getExtras();
-        localFileString = extras.getString("localFileString");
+        localFileString = extras.getString(Constants.EXTRA_LOCAL_FILE_STRING);
 
         getFirebaseUser().getToken(true)
                 .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {

@@ -41,7 +41,7 @@ public class DeviceAudioQueueItem implements Serializable {
         this.queue_id = channelRooster.getChannel_uid();
         this.filename = audioFileUrl;
         // Channel doesn't send channel ID this.sender_id = ;
-        this.name = channelRooster.getChannel_name();
+        this.name = channelRooster.getName();
         this.picture = channelRooster.getPhoto();
         this.type = 1;
     }

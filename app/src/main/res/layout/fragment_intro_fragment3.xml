@@ -46,7 +46,7 @@
             <EditText
                 android:id="@+id/intro_mobile_number_edit_text"
                 style="@style/RoosterEditText"
-                android:layout_width="match_parent"
+                android:layout_width="@dimen/input_width_large"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:hint="@string/intro_mobile_hint"

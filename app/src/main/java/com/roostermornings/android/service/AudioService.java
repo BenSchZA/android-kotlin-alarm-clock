@@ -90,7 +90,7 @@ public class AudioService extends Service {
 
     /** methods for clients */
 
-    public void updateAlarmUI() {
+    private void updateAlarmUI() {
         //Send broadcast message to notify all receivers of new data, in this case UI data
         Intent intent = new Intent(Constants.ACTION_ALARMDISPLAY);
         Bundle bundle = new Bundle();
@@ -103,6 +103,7 @@ public class AudioService extends Service {
 
     public void startAlarmRoosters(String alarmUid) {
         this.alarmChannelUid = deviceAlarmTableManager.getAlarmSet(alarmUid).get(0).getChannel();
+        this.alarmUid = alarmUid;
 
         //Check if Social and Channel alarm content exists, else startDefaultAlarmTone
         ArrayList<DeviceAudioQueueItem> channelAudioItems;
@@ -130,9 +131,9 @@ public class AudioService extends Service {
         this.audioItems = audioTableManager.extractSocialAudioFiles();
         this.alarmCount = this.audioItems.size();
 
-        //TODO: !!!
+        //TODO: check
         //If this alarm does not allow social roosters, clear queue and move on to channel content
-        //if(deviceAlarmTableManager.getAlarmSet(alarmUid).get(0).isSocial()) this.audioItems = null;
+        if(deviceAlarmTableManager.getAlarmSet(this.alarmUid).get(0).isSocial()) this.audioItems = null;
 
         //Check conditions for playing default tone: people must wake up!
         if (this.audioItems == null || this.audioItems.isEmpty()) {
@@ -306,7 +307,7 @@ public class AudioService extends Service {
             e.printStackTrace();
         }
     }
-
+    //Not working
     public void skipPrevious() {
         snoozeAudioState();
         currentPositionRooster = 0;
@@ -348,6 +349,9 @@ public class AudioService extends Service {
         for (DeviceAudioQueueItem audioItem :
              audioTableManager.selectListened()) {
             audioTableManager.removeAudioEntry(audioItem);
+            //TODO: check no issues here
+            file = new File(getFilesDir() + "/" + audioItem.getFilename());
+            file.delete();
         }
         //delete record from arraylist
         audioItems.clear();
@@ -386,24 +390,24 @@ public class AudioService extends Service {
         sendBroadcast(intent);
     }
 
-    public void pauseSocialRooster() {
+    private void pauseSocialRooster() {
         foregroundNotification("Social Rooster paused");
 
         mediaPlayerRooster.pause();
         currentPositionRooster = mediaPlayerRooster.getCurrentPosition();
     }
 
-    public void pauseDefaultAlarmTone() {
+    private void pauseDefaultAlarmTone() {
         foregroundNotification("Alarm tone paused");
 
         mediaPlayerDefault.stop();
     }
 
-    public void startVibrate() {
+    private void startVibrate() {
         foregroundNotification("Alarm vibrate active");
     }
 
-    public void stopVibrate() {
+    private void stopVibrate() {
         stopForeground(true);
         //If vibrating then cancel
         Vibrator vibrator = (Vibrator) getApplicationContext().getSystemService(VIBRATOR_SERVICE);
@@ -459,7 +463,7 @@ public class AudioService extends Service {
         }
     }
 
-    public void stopAlarmAudio() {
+    private void stopAlarmAudio() {
         stopForeground(true);
         //If default tone or media playing then stop
         try {
