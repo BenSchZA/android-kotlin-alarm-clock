@@ -37,6 +37,7 @@ import com.roostermornings.android.domain.NodeAPIResult;
 import com.roostermornings.android.domain.SocialRooster;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.node_api.IHTTPClient;
+import com.roostermornings.android.util.Constants;
 
 import java.io.File;
 import java.sql.Timestamp;
@@ -101,8 +102,8 @@ public class UploadService extends Service {
             public void handleMessage(Message msg) {
                 // Process received messages here!
                 Bundle uploadData = msg.getData();
-                mAudioSavePathInDevice = uploadData.getString("localFileString");
-                friendsList = (ArrayList<User>) uploadData.getSerializable("friendsList");
+                mAudioSavePathInDevice = uploadData.getString(Constants.EXTRA_LOCAL_FILE_STRING);
+                friendsList = (ArrayList<User>) uploadData.getSerializable(Constants.EXTRA_FRIENDS_LIST);
                 uploadAudioFile(mAudioSavePathInDevice, friendsList);
             }
         };
@@ -112,7 +113,7 @@ public class UploadService extends Service {
 
     /** methods for clients */
 
-    public void uploadAudioFile(String mAudioSavePathInDevice, final ArrayList<User> friendsList) {
+    private void uploadAudioFile(String mAudioSavePathInDevice, final ArrayList<User> friendsList) {
 
         mStorageRef = FirebaseStorage.getInstance().getReference();
 
@@ -211,7 +212,7 @@ public class UploadService extends Service {
         });
     }
 
-    public IHTTPClient apiService() {
+    private IHTTPClient apiService() {
         BaseApplication baseApplication = (BaseApplication) getApplication();
         return baseApplication.getAPIService();
     }
@@ -222,8 +223,8 @@ public class UploadService extends Service {
         Message message = mHandler.obtainMessage();
         // Create a bundle
         Bundle uploadData = new Bundle();
-        uploadData.putString("localFileString", localFileString);
-        uploadData.putSerializable("friendsList", friendsList);
+        uploadData.putString(Constants.EXTRA_LOCAL_FILE_STRING, localFileString);
+        uploadData.putSerializable(Constants.EXTRA_FRIENDS_LIST, friendsList);
         // Attach bundle to the message
         message.setData(uploadData);
         // Send message through the handler

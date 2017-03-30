@@ -43,6 +43,7 @@ import com.mobsandgeeks.saripaar.Validator;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.activity.SplashActivity;
+import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.service.FirebaseListenerService;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.node_api.IHTTPClient;
@@ -278,6 +279,12 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         deviceAlarmController.deleteAlarmsLocal();
         //End user session
         mAuth.signOut();
+        //Cancel background task intents
+        BackgroundTaskReceiver backgroundTaskReceiver = new BackgroundTaskReceiver();
+        backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(this, false);
+        backgroundTaskReceiver.scheduleBackgroundDailyTask(this, false);
+        backgroundTaskReceiver.scheduleBackgroundUpdateNotificationsTask(this, false);
+        //Go to splash activity and onboarding
         Intent intent = new Intent(this, SplashActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
