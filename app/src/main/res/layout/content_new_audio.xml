@@ -54,6 +54,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/new_audio_time"
+            android:padding="@dimen/spacing_large"
             android:layout_centerHorizontal="true"
             android:gravity="center_horizontal"
             android:visibility="visible">
