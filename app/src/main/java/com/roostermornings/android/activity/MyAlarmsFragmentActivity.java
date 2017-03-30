@@ -115,7 +115,6 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     Alarm alarm = postSnapshot.getValue(Alarm.class);
-                    mAlarms.add(alarm);
 
                     //Register alarm sets on login
                     //Extract data from Alarm "alarm" and create new alarm set DeviceAlarm
@@ -124,16 +123,19 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                     if(alarmChannel != null) alarmChannelUID = alarmChannel.getId();
                     //Check SQL db to see if all alarms in set have fired
                     alarm.setEnabled(deviceAlarmTableManager.isSetEnabled(alarm.getUid()));
-                    //Recreate all enabled alarms
-                    deviceAlarmController.rebootAlarms();
+                    //If alarm from firebase does not exist locally, create it
                     if(!deviceAlarmTableManager.isSetInDB(alarm.getUid()) && alarm.isEnabled()) {
                         deviceAlarmController.registerAlarmSet(alarm.getUid(), alarm.getHour(), alarm.getMinute(),
                                 alarm.getDays(), alarm.isRecurring(), alarm.isVibrate(), alarmChannelUID, alarm.isAllow_friend_audio_files());
                     }
+                    mAlarms.add(alarm);
                     mAdapter.notifyItemInserted(mAlarms.size() - 1);
                     updateRoosterNotification();
                 }
-
+                //Recreate all enabled alarms as failsafe
+                deviceAlarmController.rebootAlarms();
+                //Case: local has an alarm that firebase doesn't Result: delete local alarm
+               deviceAlarmController.syncAlarmSetGlobal(mAlarms);
             }
 
             @Override
