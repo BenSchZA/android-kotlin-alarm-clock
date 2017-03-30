@@ -62,6 +62,7 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="new_audio_at_least_one_friend">Please select at least 1 friend</string>
     <string name="new_audio_instructions">Try not to talk about the weather...</string>
+    <string name="new_audio_amplitude_instructions">Please speak up, \n your friends need to hear you!</string>
     <string name="ok">OK</string>
     <string name="save">Save</string>
 
