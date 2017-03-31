@@ -110,6 +110,9 @@ public class NewAudioRecordActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_new_audio);
+
+        setDayNight();
+
         retrieveMyFriends();
     }
 

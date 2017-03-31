@@ -65,6 +65,8 @@ public class NewAudioFriendsActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_new_audio_friends);
 
+        setDayNight();
+
         getFirebaseUser().getToken(true)
                 .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
                     public void onComplete(@NonNull Task<GetTokenResult> task) {

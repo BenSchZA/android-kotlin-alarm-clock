@@ -27,7 +27,7 @@
         android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:text="@string/share_button"
         android:drawableLeft="@drawable/ic_share_white_24dp"
-        android:textSize="@dimen/text_normal"
+        android:textSize="@dimen/text_large"
         android:textColor="@color/white"
         android:textAllCaps="false"
         android:minHeight="48dp"
