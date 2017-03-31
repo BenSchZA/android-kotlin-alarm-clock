@@ -25,6 +25,7 @@ import com.google.firebase.auth.GetTokenResult;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.NewAudioFriendsListAdapter;
+import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.service.UploadService;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.domain.Users;
@@ -64,14 +65,6 @@ public class NewAudioFriendsActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_new_audio_friends);
 
-        mAdapter = new NewAudioFriendsListAdapter(mFriends, NewAudioFriendsActivity.this);
-
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(NewAudioFriendsActivity.this));
-        mRecyclerView.setAdapter(mAdapter);
-
-        Bundle extras = getIntent().getExtras();
-        localFileString = extras.getString(Constants.EXTRA_LOCAL_FILE_STRING);
-
         getFirebaseUser().getToken(true)
                 .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
                     public void onComplete(@NonNull Task<GetTokenResult> task) {
@@ -83,8 +76,24 @@ public class NewAudioFriendsActivity extends BaseActivity {
                     }
                 });
 
+        Bundle extras = getIntent().getExtras();
+        localFileString = extras.getString(Constants.EXTRA_LOCAL_FILE_STRING);
 
-        retrieveMyFriends();
+        if(extras.containsKey(Constants.EXTRA_FRIENDS_LIST) && (ArrayList<User>)extras.getSerializable(Constants.EXTRA_FRIENDS_LIST) != null) {
+            mFriends.addAll((ArrayList<User>) extras.getSerializable(Constants.EXTRA_FRIENDS_LIST));
+            if(mFriends.size() == 1 && mFriends.get(0).getSelected()) {
+                onSaveButtonClick();
+            } else if(!mFriends.isEmpty()) {
+                mAdapter = new NewAudioFriendsListAdapter(mFriends, NewAudioFriendsActivity.this);
+                mRecyclerView.setLayoutManager(new LinearLayoutManager(NewAudioFriendsActivity.this));
+                mRecyclerView.setAdapter(mAdapter);
+                mAdapter.notifyDataSetChanged();
+                btnNewAudioSave.setVisibility(View.VISIBLE);
+            } else if (checkInternetConnection()) {
+                Toast.makeText(this, "Do you have any Rooster friends?", Toast.LENGTH_LONG).show();
+                startHomeActivity();
+            }
+        }
     }
 
     @Override
@@ -113,58 +122,6 @@ public class NewAudioFriendsActivity extends BaseActivity {
             mBound = false;
         }
     };
-
-    private void retrieveMyFriends() {
-
-        if (!checkInternetConnection()) return;
-
-        FirebaseUser firebaseUser = getFirebaseUser();
-
-        if (firebaseUser == null) {
-            Log.d(TAG, "User not authenticated on FB!");
-            return;
-        }
-
-        Call<Users> call = mActivity.apiService().listUserFriendList(firebaseUser.getUid());
-
-        call.enqueue(new Callback<Users>() {
-            @Override
-            public void onResponse(Response<Users> response,
-                                   Retrofit retrofit) {
-
-                int statusCode = response.code();
-                Users apiResponse = response.body();
-
-                if (statusCode == 200) {
-
-                    mFriends = new ArrayList<>();
-                    mFriends.addAll(apiResponse.users);
-                    sortNames(mFriends);
-                    mAdapter = new NewAudioFriendsListAdapter(mFriends, NewAudioFriendsActivity.this);
-
-                    mRecyclerView.setLayoutManager(new LinearLayoutManager(NewAudioFriendsActivity.this));
-                    mRecyclerView.setAdapter(mAdapter);
-                    mAdapter.notifyDataSetChanged();
-                    btnNewAudioSave.setVisibility(View.VISIBLE);
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                Log.i(TAG, t.getLocalizedMessage());
-            }
-        });
-    }
-
-    public void sortNames(ArrayList<User> mUsers){
-        //Take arraylist and sort alphabetically
-        Collections.sort(mUsers, new Comparator<User>() {
-            @Override
-            public int compare(User lhs, User rhs) {
-                return lhs.getUser_name().compareTo(rhs.getUser_name());
-            }
-        });
-    }
 
     @OnClick(R.id.new_audio_upload_button)
     protected void onSaveButtonClick() {

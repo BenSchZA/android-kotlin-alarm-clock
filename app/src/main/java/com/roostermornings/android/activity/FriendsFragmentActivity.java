@@ -5,10 +5,12 @@
 
 package com.roostermornings.android.activity;
 
+import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -17,8 +19,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -33,10 +41,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.adapter.FriendsInviteListAdapter;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.fragment.FriendsInviteFragment3;
 import com.roostermornings.android.fragment.FriendsMyFragment1;
 import com.roostermornings.android.fragment.FriendsRequestFragment2;
+import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.FontsOverride;
 
@@ -81,6 +91,13 @@ public class FriendsFragmentActivity extends BaseActivity implements
     private DatabaseReference mFriendRequestsSentReference;
     private DatabaseReference mCurrentUserReference;
     private BroadcastReceiver receiver;
+
+    private int position;
+    protected FriendsFragmentActivity mThis = this;
+
+    FriendsMyFragment1 friendsInviteFragment1;
+    FriendsRequestFragment2 friendsInviteFragment2;
+    FriendsInviteFragment3 friendsInviteFragment3;
 
     public FriendsFragmentActivity() {
 
@@ -133,7 +150,6 @@ public class FriendsFragmentActivity extends BaseActivity implements
                     setButtonBarNotification(false);
                     ((BaseApplication) getApplication()).setNotificationFlag(0, Constants.FLAG_FRIENDREQUESTS);
                 } else if(position == 2) {
-                    FriendsInviteFragment3 friendsInviteFragment3 = (FriendsInviteFragment3)mSectionsPagerAdapter.getItem(2);
                     friendsInviteFragment3.requestGetContacts();
                 }
             }
@@ -146,6 +162,70 @@ public class FriendsFragmentActivity extends BaseActivity implements
         FontsOverride.changeTabsFont(getApplicationContext(), tabLayout, Constants.APP_FONT);
 
         buttonMyFriends.setBackgroundResource(R.drawable.rooster_button_bar_friends_active);
+
+        //Handle search intent
+        handleIntent(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        handleIntent(intent);
+    }
+
+    private void handleIntent(Intent intent) {
+        //mViewPager.setCurrentItem(sharedPreferences.getInt(Constants.FRIENDS_ACTIVITY_CURRENT_FRAGMENT, 0));
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            //use the query to search your data somehow
+            handleSearch(query);
+        }
+    }
+
+    private void handleSearch(String query) {
+        if(mViewPager.getCurrentItem() == 0) {
+            friendsInviteFragment1.searchRecyclerViewAdapter(query);
+        } else if(mViewPager.getCurrentItem() == 1) {
+            friendsInviteFragment2.searchRecyclerViewAdapter(query);
+        } else if(mViewPager.getCurrentItem() == 2) {
+            friendsInviteFragment3.searchRecyclerViewAdapter(query);
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_friends, menu);
+
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager =
+                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView =
+                (SearchView) menu.findItem(R.id.search).getActionView();
+        searchView.setSearchableInfo(
+                searchManager.getSearchableInfo(getComponentName()));
+
+        //When searchView is closed, refresh data
+        searchView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+
+            @Override
+            public void onViewDetachedFromWindow(View arg0) {
+                // search was detached/closed
+                if(mViewPager.getCurrentItem() == 0) {
+                    friendsInviteFragment1.notifyAdapter();
+                } else if(mViewPager.getCurrentItem() == 1) {
+                    friendsInviteFragment2.notifyAdapter();
+                } else if(mViewPager.getCurrentItem() == 2) {
+                    friendsInviteFragment3.notifyAdapter();
+                }
+            }
+
+            @Override
+            public void onViewAttachedToWindow(View arg0) {
+                // search was opened
+            }
+        });
+
+        return true;
     }
 
     @OnClick(R.id.home_record_audio)
@@ -168,8 +248,46 @@ public class FriendsFragmentActivity extends BaseActivity implements
         mSectionsPagerAdapter.addFrag(Fragment.instantiate(getApplicationContext(), FriendsRequestFragment2.class.getName()), "REQUESTS");
         mSectionsPagerAdapter.addFrag(Fragment.instantiate(getApplicationContext(), FriendsInviteFragment3.class.getName()), "INVITE");
 
+        friendsInviteFragment1 = (FriendsMyFragment1) mSectionsPagerAdapter.getItem(0);
+        friendsInviteFragment2 = (FriendsRequestFragment2) mSectionsPagerAdapter.getItem(1);
+        friendsInviteFragment3 = (FriendsInviteFragment3) mSectionsPagerAdapter.getItem(2);
+
         // Set up the ViewPager with the sections adapter.
         mViewPager.setAdapter(mSectionsPagerAdapter);
+    }
+
+    /**
+     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
+     * one of the sections/tabs/pages.
+     */
+    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+
+        private final List<Fragment> mFragmentList = new ArrayList<>();
+        private final List<String> mFragmentTitleList = new ArrayList<>();
+
+        public SectionsPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            return mFragmentList.get(position);
+        }
+
+        @Override
+        public int getCount() {
+            return mFragmentList.size();
+        }
+
+        public void addFrag(Fragment fragment, String title) {
+            mFragmentList.add(fragment);
+            mFragmentTitleList.add(title);
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return mFragmentTitleList.get(position);
+        }
     }
 
     private void createTabIcons() {
@@ -340,39 +458,5 @@ public class FriendsFragmentActivity extends BaseActivity implements
 
         //Notify user that friend request accepted
         Toast.makeText(this, rejectFriend.getUser_name() + "'s friend request rejected!", Toast.LENGTH_LONG).show();
-    }
-
-    /**
-     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
-     * one of the sections/tabs/pages.
-     */
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
-
-        private final List<Fragment> mFragmentList = new ArrayList<>();
-        private final List<String> mFragmentTitleList = new ArrayList<>();
-
-        public SectionsPagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            return mFragmentList.get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return mFragmentList.size();
-        }
-
-        public void addFrag(Fragment fragment, String title) {
-            mFragmentList.add(fragment);
-            mFragmentTitleList.add(title);
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return mFragmentTitleList.get(position);
-        }
     }
 }

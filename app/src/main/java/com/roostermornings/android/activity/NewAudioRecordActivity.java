@@ -14,6 +14,8 @@ import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.LinearLayoutManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,16 +25,28 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseUser;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.adapter.NewAudioFriendsListAdapter;
+import com.roostermornings.android.domain.Friend;
+import com.roostermornings.android.domain.User;
+import com.roostermornings.android.domain.Users;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import retrofit.Call;
+import retrofit.Callback;
+import retrofit.Response;
+import retrofit.Retrofit;
 
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
@@ -43,12 +57,16 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
  */
 public class NewAudioRecordActivity extends BaseActivity {
 
+    protected static final String TAG = NewAudioFriendsActivity.class.getSimpleName();
+
     private long startTime;
     private long countDownTime;
     private long runningTime;
     private final int REFRESH_RATE = 1;
     private final int MAX_RECORDING_TIME = 60000;
     private final String maxRecordingTime = "60";
+
+    private ArrayList<User> mFriends = new ArrayList<>();
 
     private final int AUDIO_MIN_AMPLITUDE = 500;
     private final int MIN_CUMULATIVE_TIME = 5000;
@@ -92,6 +110,7 @@ public class NewAudioRecordActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_new_audio);
+        retrieveMyFriends();
     }
 
     @Override
@@ -275,6 +294,21 @@ public class NewAudioRecordActivity extends BaseActivity {
         Intent intent = new Intent(NewAudioRecordActivity.this, NewAudioFriendsActivity.class);
         Bundle bun = new Bundle();
         bun.putString(Constants.EXTRA_LOCAL_FILE_STRING, mAudioSavePathInDevice);
+        if(getIntent().getExtras() != null && getIntent().getExtras().containsKey(Constants.EXTRA_FRIENDS_LIST) && (ArrayList<Friend>)getIntent().getSerializableExtra(Constants.EXTRA_FRIENDS_LIST) != null) {
+            ArrayList<User> tempUsers = new ArrayList<>();
+            ArrayList<Friend> tempFriends = (ArrayList<Friend>)getIntent().getSerializableExtra(Constants.EXTRA_FRIENDS_LIST);
+            for (User user:
+                 mFriends) {
+                if(user.getUid().equals(tempFriends.get(0).getUid())) {
+                    user.setSelected(true);
+                    tempUsers.add(user);
+                }
+            }
+            mFriends.clear();
+            mFriends.addAll(tempUsers);
+        }
+        bun.putSerializable(Constants.EXTRA_FRIENDS_LIST, mFriends);
+
         intent.putExtras(bun);
         startActivity(intent);
     }
@@ -412,5 +446,49 @@ public class NewAudioRecordActivity extends BaseActivity {
                 result1 == PackageManager.PERMISSION_GRANTED;
     }
 
+    private void retrieveMyFriends() {
 
+        if (!checkInternetConnection()) return;
+
+        FirebaseUser firebaseUser = getFirebaseUser();
+
+        if (firebaseUser == null) {
+            Log.d(TAG, "User not authenticated on FB!");
+            return;
+        }
+
+        Call<Users> call = apiService().listUserFriendList(firebaseUser.getUid());
+
+        call.enqueue(new Callback<Users>() {
+            @Override
+            public void onResponse(Response<Users> response,
+                                   Retrofit retrofit) {
+
+                int statusCode = response.code();
+                Users apiResponse = response.body();
+
+                if (statusCode == 200) {
+
+                    mFriends = new ArrayList<>();
+                    mFriends.addAll(apiResponse.users);
+                    sortNames(mFriends);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                Log.i(TAG, t.getLocalizedMessage());
+            }
+        });
+    }
+
+    public void sortNames(ArrayList<User> mUsers){
+        //Take arraylist and sort alphabetically
+        Collections.sort(mUsers, new Comparator<User>() {
+            @Override
+            public int compare(User lhs, User rhs) {
+                return lhs.getUser_name().compareTo(rhs.getUser_name());
+            }
+        });
+    }
 }
