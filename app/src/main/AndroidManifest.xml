@@ -143,7 +143,14 @@
             android:label="Friends"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustPan"
+            android:launchMode="singleTop" >
+            <meta-data android:name="android.app.searchable"
+                android:resource="@xml/searchable_friends" />
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+        </activity>
 
         <service
             android:name=".service.FirebaseListenerService"

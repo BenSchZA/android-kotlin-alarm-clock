@@ -75,6 +75,7 @@ public class Alarm {
         this.enabled = enabled;
     }
 
+    @Exclude //NB: exclude needs to be used even for methods, so that Firebase doesn't include in db object mapping
     public List<Integer> getDays() {
         List<Integer> alarmDays = new ArrayList<>();
         if (isMonday()) alarmDays.add(Calendar.MONDAY);

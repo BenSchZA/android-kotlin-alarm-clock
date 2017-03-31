@@ -131,9 +131,8 @@ public class AudioService extends Service {
         this.audioItems = audioTableManager.extractSocialAudioFiles();
         this.alarmCount = this.audioItems.size();
 
-        //TODO: check
         //If this alarm does not allow social roosters, clear queue and move on to channel content
-        if(deviceAlarmTableManager.getAlarmSet(this.alarmUid).get(0).isSocial()) this.audioItems = null;
+        if(!deviceAlarmTableManager.getAlarmSet(this.alarmUid).get(0).isSocial()) this.audioItems = null;
 
         //Check conditions for playing default tone: people must wake up!
         if (this.audioItems == null || this.audioItems.isEmpty()) {

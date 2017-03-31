@@ -268,18 +268,18 @@ public final class DeviceAlarmController {
         }
     }
 
-    public void removeFirebaseAlarm(String setId) {
+    private void removeFirebaseAlarm(String setId) {
         DatabaseReference alarmReference = FirebaseDatabase.getInstance().getReference()
                 .child("alarms").child(mCurrentUser.getUid()).child(setId);
         alarmReference.removeValue();
     }
 
-    public void updateFirebaseAlarmEnabled(String setId, boolean enabled) {
+    private void updateFirebaseAlarmEnabled(String setId, boolean enabled) {
         DatabaseReference alarmReference = FirebaseDatabase.getInstance().getReference()
                 .child("alarms").child(mCurrentUser.getUid()).child(setId);
 
         Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put(String.format("enabled"), enabled);
+        childUpdates.put("enabled", enabled);
 
         alarmReference.updateChildren(childUpdates);
     }

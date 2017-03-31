@@ -14,6 +14,9 @@ public class Constants {
     //BaseActivity
     public final static int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 10;
 
+    //FriendsFragmentActivity
+    public final static String FRIENDS_ACTIVITY_CURRENT_FRAGMENT = "currentFriendsFragment";
+
     //DeviceAlarmController intent actions
     public final static String ACTTION_ALARMRECEIVER = "receiver.ALARM_RECEIVER";
     // > display alarm icon
