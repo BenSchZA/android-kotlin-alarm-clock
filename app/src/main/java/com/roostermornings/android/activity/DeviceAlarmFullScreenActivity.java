@@ -90,6 +90,8 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
                 +WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
                 +WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 
+        setDayNight();
+
         //Get alarm UID for relating current alarm to channel content
         alarmUid = getIntent().getStringExtra(Constants.EXTRA_UID);
 

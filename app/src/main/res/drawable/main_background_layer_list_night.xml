@@ -7,7 +7,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     >
     <item
-        android:drawable="@drawable/main_background_gradient"
-        android:id="@+id/top_gradient1"
+        android:drawable="@drawable/main_background_gradient_night"
+        android:id="@+id/top_gradient"
         />
 </layer-list>

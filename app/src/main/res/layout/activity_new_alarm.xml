@@ -26,9 +26,10 @@
     </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.view.ViewPager
-        android:id="@+id/container"
+        android:id="@+id/activity_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@drawable/main_background_layer_list_day"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
 </android.support.design.widget.CoordinatorLayout>

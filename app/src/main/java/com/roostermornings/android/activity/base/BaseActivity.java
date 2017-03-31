@@ -8,12 +8,14 @@ package com.roostermornings.android.activity.base;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.app.Dialog;
+import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerManager;
@@ -24,6 +26,7 @@ import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -41,6 +44,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.mobsandgeeks.saripaar.ValidationError;
 import com.mobsandgeeks.saripaar.Validator;
 import com.roostermornings.android.BaseApplication;
+import com.roostermornings.android.R;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.activity.SplashActivity;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
@@ -53,6 +57,7 @@ import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.InternetHelper;
 import com.roostermornings.android.util.RoosterUtils;
 
+import java.util.Calendar;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -65,6 +70,9 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     public FirebaseAuth mAuth;
     protected FirebaseAuth.AuthStateListener mAuthListener;
     private static final String TAG = BaseActivity.class.getSimpleName();
+
+    private static Calendar calendar = Calendar.getInstance();
+
     public DatabaseReference mDatabase;
 
     public static User mCurrentUser;
@@ -382,5 +390,21 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         Intent intent = new Intent();
         intent.setComponent(new ComponentName("com.huawei.systemmanager", "com.huawei.systemmanger.optimize.process.ProtectActivity"));
         startActivity(intent);
+    }
+
+    public void setDayNight() {
+        try {
+            if (calendar.get(Calendar.HOUR_OF_DAY) >= 17) {
+                findViewById(R.id.activity_content).setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.main_background_layer_list_night, null));
+                findViewById(R.id.toolbar).setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.rooster_dark_blue, null));
+                findViewById(R.id.tabs).setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.rooster_dark_blue, null));
+            } else if (calendar.get(Calendar.HOUR_OF_DAY) > 7) {
+                findViewById(R.id.activity_content).setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.main_background_layer_list_day, null));
+                findViewById(R.id.toolbar).setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.rooster_blue, null));
+                findViewById(R.id.tabs).setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.rooster_blue, null));
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
     }
 }
