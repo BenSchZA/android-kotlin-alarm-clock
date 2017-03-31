@@ -15,8 +15,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -67,6 +65,8 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_new_alarm);
 
+        setDayNight();
+
         if (hasGingerbread()) {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
@@ -92,7 +92,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.container);
+        mViewPager = (ViewPager) findViewById(R.id.activity_content);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
         Bundle extras = getIntent().getExtras();

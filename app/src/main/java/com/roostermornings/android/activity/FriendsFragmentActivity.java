@@ -10,7 +10,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -19,14 +18,11 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -41,12 +37,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
-import com.roostermornings.android.adapter.FriendsInviteListAdapter;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.fragment.FriendsInviteFragment3;
 import com.roostermornings.android.fragment.FriendsMyFragment1;
 import com.roostermornings.android.fragment.FriendsRequestFragment2;
-import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.FontsOverride;
 
@@ -76,7 +70,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
     /**
      * The {@link ViewPager} that will host the section contents.
      */
-    @BindView(R.id.container)
+    @BindView(R.id.main_content)
     ViewPager mViewPager;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -107,6 +101,8 @@ public class FriendsFragmentActivity extends BaseActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_friends);
+
+        setDayNight();
 
         //Set toolbar title
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);

@@ -23,6 +23,7 @@ import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.activity.NewAlarmFragmentActivity;
+import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.MyAlarmsListAdapter;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.fragment.base.BaseFragment;
@@ -134,6 +135,7 @@ public class NewAlarmFragment1 extends BaseFragment{
                              Bundle savedInstanceState) {
 
         View view = initiate(inflater, R.layout.fragment_new_alarm_step1, container, false);
+
         //If in edit mode, button should be visible
         setDeleteButtonVisibility();
         textViewAlarmTime.setText(RoosterUtils.setAlarmTimeFromHourAndMinute(mAlarm));

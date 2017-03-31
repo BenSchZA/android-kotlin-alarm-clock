@@ -114,7 +114,9 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
         try {
             holder.txtAlarmTime.setText(RoosterUtils.setAlarmTimeFromHourAndMinute(mDataset.get(position)));
             holder.txtAlarmDays.setText(RoosterUtils.getAlarmDays(mDataset.get(position)));
-            holder.txtAlarmChannel.setText(mDataset.get(position).getChannel().getName());
+            if(mDataset.get(position).getChannel() != null) {
+                holder.txtAlarmChannel.setText(mDataset.get(position).getChannel().getName());
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
