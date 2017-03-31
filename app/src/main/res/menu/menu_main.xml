@@ -11,7 +11,6 @@
     <item
         android:id="@+id/action_add_alarm"
         android:icon="@drawable/ic_add_white_24dp"
-        android:title="@string/action_settings"
         app:showAsAction="always" />
 
     <item

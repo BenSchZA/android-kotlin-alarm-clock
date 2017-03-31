@@ -35,6 +35,7 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.FriendsInviteListAdapter;
+import com.roostermornings.android.adapter.FriendsMyListAdapter;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.LocalContacts;
 import com.roostermornings.android.domain.NodeUsers;
@@ -75,9 +76,6 @@ public class FriendsInviteFragment3 extends BaseFragment {
     @BindView(R.id.share_button)
     Button shareButton;
 
-    @BindView(R.id.rooster_contact_search)
-    EditText roosterContactSearch;
-
     private OnFragmentInteractionListener mListener;
 
     public FriendsInviteFragment3() {
@@ -102,7 +100,6 @@ public class FriendsInviteFragment3 extends BaseFragment {
 
         if (getArguments() != null) {
         }
-
         myContactsController = new MyContactsController(getContext());
     }
 
@@ -121,27 +118,6 @@ public class FriendsInviteFragment3 extends BaseFragment {
         mAdapter = new FriendsInviteListAdapter(mUsers, getContext());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mRecyclerView.setAdapter(mAdapter);
-
-        //Set listener for search text change
-        roosterContactSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
-                //Filter contacts by CharSequence
-                //Get reference to list adapter to access getFilter method
-                ((FriendsInviteListAdapter)mAdapter).refreshAll(mUsers);
-                ((FriendsInviteListAdapter)mAdapter).getFilter().filter(cs);
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable arg0) {
-
-            }
-        });
     }
 
     @Override
@@ -162,6 +138,18 @@ public class FriendsInviteFragment3 extends BaseFragment {
         mListener = null;
     }
 
+    public void searchRecyclerViewAdapter(String query) {
+        //Filter contacts by CharSequence
+        //Get reference to list adapter to access getFilter method
+        ((FriendsInviteListAdapter)mAdapter).refreshAll(mUsers);
+        ((FriendsInviteListAdapter)mAdapter).getFilter().filter(query);
+    }
+
+    public void notifyAdapter() {
+        ((FriendsInviteListAdapter)mAdapter).refreshAll(mUsers);
+        mAdapter.notifyDataSetChanged();
+    }
+
     @OnClick(R.id.share_button)
     public void onShareButtonClicked() {
         Intent sendIntent = new Intent();
@@ -174,8 +162,6 @@ public class FriendsInviteFragment3 extends BaseFragment {
         sendIntent = Intent.createChooser(sendIntent, "Share Rooster");
         startActivity(sendIntent);
     }
-
-    //mListener.onFragmentInteraction(uri);
 
     /**
      * This interface must be implemented by activities that contain this
