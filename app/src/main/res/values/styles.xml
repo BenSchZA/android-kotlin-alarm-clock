@@ -6,7 +6,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppThemeDay" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/rooster_blue</item>
         <item name="colorPrimaryDark">@color/rooster_blue</item>
@@ -22,16 +22,32 @@
         <item name="android:windowActivityTransitions">true</item>
     </style>
 
+    <style name="AppThemeNight" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/rooster_dark_blue</item>
+        <item name="colorPrimaryDark">@color/rooster_dark_blue</item>
+        <item name="colorAccent">@color/accent</item>
+
+        <item name="colorControlNormal">@color/normal</item>
+        <item name="colorControlActivated">@color/accent</item>
+        <item name="colorControlHighlight">@color/accent</item>
+
+        <!--Actually overridden to Nunito-Bold-->
+        <item name="android:typeface">monospace</item>
+
+        <item name="android:windowActivityTransitions">true</item>
+    </style>
+
     <!--Override action bar titles set in activity-->
 
-    <style name="AppTheme.NoActionBar">
+    <style name="AppThemeDay.NoActionBar">
         <item name="windowActionBar">true</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowAnimationStyle">@null</item>
         <item name="android:elevation">0dp</item>
     </style>
 
-    <style name="AppTheme.NoActionBarIntro" parent="AppTheme.NoActionBar">
+    <style name="AppTheme.NoActionBarIntro" parent="AppThemeDay.NoActionBar">
         <item name="android:windowTranslucentStatus">true</item>
     </style>
 
@@ -99,7 +115,7 @@
         <item name="android:background">@drawable/selectable_circle_small</item>
     </style>
 
-    <style name="FullscreenTheme" parent="AppTheme">
+    <style name="FullscreenTheme" parent="AppThemeDay">
         <item name="android:actionBarStyle">@style/FullscreenActionBarStyle</item>
         <item name="android:windowActionBarOverlay">true</item>
         <item name="android:windowBackground">@null</item>

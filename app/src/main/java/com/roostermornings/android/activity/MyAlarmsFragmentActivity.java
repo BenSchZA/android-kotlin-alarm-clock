@@ -70,6 +70,8 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_my_alarms);
 
+        setDayNight();
+
         //Set toolbar title
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
