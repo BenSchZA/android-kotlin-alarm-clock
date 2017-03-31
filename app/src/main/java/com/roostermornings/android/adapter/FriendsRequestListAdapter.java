@@ -16,6 +16,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -33,7 +35,7 @@ import java.util.ArrayList;
  * Created by bscholtz on 08/03/17.
  */
 
-public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsRequestListAdapter.ViewHolder> {
+public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsRequestListAdapter.ViewHolder> implements Filterable {
     private ArrayList<Friend> mDataset;
     private Context mContext;
 
@@ -61,6 +63,11 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
     public void add(int position, Friend item) {
         mDataset.add(position, item);
         notifyItemInserted(position);
+    }
+
+    public void refreshAll(ArrayList<Friend> myDataset) {
+        mDataset = myDataset;
+        notifyDataSetChanged();
     }
 
     public void remove(Friend item) {
@@ -179,6 +186,44 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
 
     public void updateList(){
         notifyDataSetChanged();
+    }
+
+    @Override
+    public Filter getFilter() {
+
+        final Filter filter = new Filter() {
+
+            @SuppressWarnings("unchecked")
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+
+                mDataset = (ArrayList<Friend>) results.values;
+                notifyDataSetChanged();
+            }
+
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+
+                FilterResults results = new FilterResults();
+                ArrayList<Friend> filteredContacts = new ArrayList<>();
+
+                //Perform your search here using the search constraint string
+                constraint = constraint.toString().toLowerCase();
+                for (int i = 0; i < mDataset.size(); i++) {
+                    String contactData = mDataset.get(i).getUser_name();
+                    if (contactData.toLowerCase().contains(constraint.toString()))  {
+                        filteredContacts.add(mDataset.get(i));
+                    }
+                }
+
+                results.count = filteredContacts.size();
+                results.values = filteredContacts;
+
+                return results;
+            }
+        };
+
+        return filter;
     }
 
 }

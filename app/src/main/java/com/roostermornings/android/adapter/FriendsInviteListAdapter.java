@@ -8,13 +8,10 @@ package com.roostermornings.android.adapter;
 import android.content.Context;
 import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
@@ -23,12 +20,9 @@ import android.widget.TextView;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.domain.Friend;
-import com.roostermornings.android.fragment.FriendsInviteFragment3;
 import com.roostermornings.android.util.RoosterUtils;
 
 import java.util.ArrayList;
-
-import butterknife.BindView;
 
 /**
  * Created by bscholtz on 06/03/17.
@@ -53,7 +47,7 @@ public class FriendsInviteListAdapter extends RecyclerView.Adapter<FriendsInvite
             imgProfilePic = (ImageView) itemView.findViewById(R.id.my_friends_profile_pic);
             txtName = (TextView) itemView.findViewById(R.id.my_friends_profile_name);
             txtInitials = (TextView) itemView.findViewById(R.id.txtInitials);
-            btnAdd = (Button) itemView.findViewById(R.id.friends_button);
+            btnAdd = (Button) itemView.findViewById(R.id.friends_add_button);
         }
     }
 

@@ -6,8 +6,10 @@
 package com.roostermornings.android.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
@@ -16,26 +18,30 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.roostermornings.android.R;
-import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
+import com.roostermornings.android.activity.NewAudioFriendsActivity;
+import com.roostermornings.android.activity.NewAudioRecordActivity;
 import com.roostermornings.android.domain.Friend;
-import com.roostermornings.android.domain.User;
+import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
+import java.sql.Array;
 import java.util.ArrayList;
 
 /**
  * Created by bscholtz on 08/03/17.
  */
 
-public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdapter.ViewHolder> {
+public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdapter.ViewHolder> implements Filterable {
     private ArrayList<Friend> mDataset;
     private Context mContext;
 
@@ -48,19 +54,26 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
         public TextView txtName;
         public TextView txtInitials;
         public ImageButton btnDelete;
+        public ImageButton btnSend;
 
         public ViewHolder(View v) {
             super(v);
             imgProfilePic = (ImageView) itemView.findViewById(R.id.my_friends_profile_pic);
             txtName = (TextView) itemView.findViewById(R.id.my_friends_profile_name);
             txtInitials = (TextView) itemView.findViewById(R.id.txtInitials);
-            btnDelete = (ImageButton) itemView.findViewById(R.id.friends_button);
+            btnDelete = (ImageButton) itemView.findViewById(R.id.friends_delete_button);
+            btnSend = (ImageButton) itemView.findViewById(R.id.friends_send_button);
         }
     }
 
     public void add(int position, Friend item) {
         mDataset.add(position, item);
         notifyItemInserted(position);
+    }
+
+    public void refreshAll(ArrayList<Friend> myDataset) {
+        mDataset = myDataset;
+        notifyDataSetChanged();
     }
 
     public void remove(Friend item) {
@@ -112,6 +125,19 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
                 }, 200);
             }
         });
+
+        holder.btnSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ArrayList<Friend> friendToSend = new ArrayList<>();
+                friendToSend.add(user);
+                Intent intent = new Intent(mContext, NewAudioRecordActivity.class);
+                Bundle bun = new Bundle();
+                bun.putSerializable(Constants.EXTRA_FRIENDS_LIST, friendToSend);
+                intent.putExtras(bun);
+                mContext.startActivity(intent);
+            }
+        });
     }
 
     private void setProfilePic(String url, final FriendsMyListAdapter.ViewHolder holder, final int position) {
@@ -154,6 +180,44 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
 
     public void updateList(){
         notifyDataSetChanged();
+    }
+
+    @Override
+    public Filter getFilter() {
+
+        final Filter filter = new Filter() {
+
+            @SuppressWarnings("unchecked")
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+
+                mDataset = (ArrayList<Friend>) results.values;
+                notifyDataSetChanged();
+            }
+
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+
+                FilterResults results = new FilterResults();
+                ArrayList<Friend> filteredContacts = new ArrayList<>();
+
+                //Perform your search here using the search constraint string
+                constraint = constraint.toString().toLowerCase();
+                for (int i = 0; i < mDataset.size(); i++) {
+                    String contactData = mDataset.get(i).getUser_name();
+                    if (contactData.toLowerCase().contains(constraint.toString()))  {
+                        filteredContacts.add(mDataset.get(i));
+                    }
+                }
+
+                results.count = filteredContacts.size();
+                results.values = filteredContacts;
+
+                return results;
+            }
+        };
+
+        return filter;
     }
 
 }

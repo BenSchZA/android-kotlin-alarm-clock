@@ -23,6 +23,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
+import com.roostermornings.android.adapter.FriendsInviteListAdapter;
 import com.roostermornings.android.adapter.FriendsMyListAdapter;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.User;
@@ -173,6 +174,18 @@ public class FriendsMyFragment1 extends BaseFragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    public void searchRecyclerViewAdapter(String query) {
+        //Filter contacts by CharSequence
+        //Get reference to list adapter to access getFilter method
+        ((FriendsMyListAdapter)mAdapter).refreshAll(mUsers);
+        ((FriendsMyListAdapter)mAdapter).getFilter().filter(query);
+    }
+
+    public void notifyAdapter() {
+        ((FriendsMyListAdapter)mAdapter).refreshAll(mUsers);
+        mAdapter.notifyDataSetChanged();
     }
 
     //mListener.onFragmentInteraction(uri);

@@ -8,8 +8,10 @@ package com.roostermornings.android.domain;
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 
+import java.io.Serializable;
+
 @IgnoreExtraProperties
-public class Friend {
+public class Friend implements Serializable {
     private String uid;
     private String user_name;
     private String profile_pic;
