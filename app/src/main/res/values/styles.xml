@@ -47,6 +47,10 @@
         <item name="android:elevation">0dp</item>
     </style>
 
+    <style name="SplashTheme" parent="AppTheme.NoActionBarIntro">
+        <item name="android:windowBackground">@drawable/splash_screen</item>
+    </style>
+
     <style name="AppTheme.NoActionBarIntro" parent="AppThemeDay.NoActionBar">
         <item name="android:windowTranslucentStatus">true</item>
     </style>

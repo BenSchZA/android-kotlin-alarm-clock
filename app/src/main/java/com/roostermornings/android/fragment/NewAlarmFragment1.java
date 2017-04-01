@@ -125,9 +125,6 @@ public class NewAlarmFragment1 extends BaseFragment{
                 setAlarmTime(hourOfDay, minute);
             }
         }, hour, minute, true); //24h time
-
-        //TODO: move to button
-        mAlarm.setVibrate(true);
     }
 
     @Override

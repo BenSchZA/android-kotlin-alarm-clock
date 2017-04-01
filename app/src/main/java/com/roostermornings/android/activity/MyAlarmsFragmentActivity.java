@@ -123,13 +123,14 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                     AlarmChannel alarmChannel = alarm.getChannel();
                     String alarmChannelUID = "";
                     if(alarmChannel != null) alarmChannelUID = alarmChannel.getId();
-                    //Check SQL db to see if all alarms in set have fired
-                    alarm.setEnabled(deviceAlarmTableManager.isSetEnabled(alarm.getUid()));
                     //If alarm from firebase does not exist locally, create it
                     if(!deviceAlarmTableManager.isSetInDB(alarm.getUid()) && alarm.isEnabled()) {
                         deviceAlarmController.registerAlarmSet(alarm.getUid(), alarm.getHour(), alarm.getMinute(),
                                 alarm.getDays(), alarm.isRecurring(), alarm.isVibrate(), alarmChannelUID, alarm.isAllow_friend_audio_files());
                     }
+                    //Check SQL db to see if all alarms in set have fired
+                    deviceAlarmController.setSetEnabled(alarm.getUid(), deviceAlarmTableManager.isSetEnabled(alarm.getUid()));
+                    //Add alarm to display array
                     mAlarms.add(alarm);
                     mAdapter.notifyItemInserted(mAlarms.size() - 1);
                     updateRoosterNotification();
