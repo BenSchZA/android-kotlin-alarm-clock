@@ -7,7 +7,6 @@ package com.roostermornings.android.fragment;
 
 import android.app.TimePickerDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
@@ -21,9 +20,7 @@ import android.widget.Toast;
 
 import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.R;
-import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.activity.NewAlarmFragmentActivity;
-import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.MyAlarmsListAdapter;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.fragment.base.BaseFragment;
@@ -133,8 +130,8 @@ public class NewAlarmFragment1 extends BaseFragment{
 
         View view = initiate(inflater, R.layout.fragment_new_alarm_step1, container, false);
 
-        //If in edit mode, button should be visible
-        setDeleteButtonVisibility();
+        //If in edit mode, delete button should be visible and alarm details should be updated
+        updateAlarmUIIfEdit();
         textViewAlarmTime.setText(RoosterUtils.setAlarmTimeFromHourAndMinute(mAlarm));
         return view;
     }
@@ -180,8 +177,9 @@ public class NewAlarmFragment1 extends BaseFragment{
 
     }
 
-    public void setDeleteButtonVisibility() {
+    public void updateAlarmUIIfEdit() {
         if(deviceAlarmTableManager.isSetInDB(NewAlarmFragmentActivity.getCurrentAlarmId())) {
+            mListener.retrieveAlarmDetailsFromSQL();
             deleteAlarm.setVisibility(View.VISIBLE);
         }
     }
@@ -212,60 +210,41 @@ public class NewAlarmFragment1 extends BaseFragment{
             R.id.new_alarm_fragment1_alarm_day_fri,
             R.id.new_alarm_fragment1_alarm_day_sat,
             R.id.new_alarm_fragment1_alarm_day_sun})
-    protected void selectEmbarkingNumber1(TextView selectedDay) {
+    protected void selectWeekDay(TextView selectedDay) {
         int day = Integer.parseInt((String) selectedDay.getTag());
         boolean selected = false;
         switch (day) {
             case 1:
                 selected = mAlarm.isMonday();
+                mAlarm.setMonday(!selected);
                 break;
             case 2:
                 selected = mAlarm.isTuesday();
+                mAlarm.setTuesday(!selected);
                 break;
             case 3:
                 selected = mAlarm.isWednesday();
+                mAlarm.setWednesday(!selected);
                 break;
             case 4:
                 selected = mAlarm.isThursday();
+                mAlarm.setThursday(!selected);
                 break;
             case 5:
                 selected = mAlarm.isFriday();
+                mAlarm.setFriday(!selected);
                 break;
             case 6:
                 selected = mAlarm.isSaturday();
+                mAlarm.setSaturday(!selected);
                 break;
             case 7:
                 selected = mAlarm.isSunday();
+                mAlarm.setSunday(!selected);
                 break;
         }
-        if (selected) selectedDay.setBackgroundResource(R.drawable.selectable_circle_background);
-        else selectedDay.setBackgroundResource(R.drawable.selected_circle_background);
-        selected = !selected;
-        switch (day) {
-            case 1:
-                mAlarm.setMonday(selected);
-                break;
-            case 2:
-                mAlarm.setTuesday(selected);
-                break;
-            case 3:
-                mAlarm.setWednesday(selected);
-                break;
-            case 4:
-                mAlarm.setThursday(selected);
-                break;
-            case 5:
-                mAlarm.setFriday(selected);
-                break;
-            case 6:
-                mAlarm.setSaturday(selected);
-                break;
-            case 7:
-                mAlarm.setSunday(selected);
-                break;
-        }
+        selectedDay.setSelected(!selected);
         mListener.setAlarmDetails(mAlarm);
-
     }
 
     @OnCheckedChanged(R.id.new_alarm_fragment1_switch_audio)
@@ -311,25 +290,25 @@ public class NewAlarmFragment1 extends BaseFragment{
         textViewSunday.setBackgroundResource(R.drawable.selectable_circle_background);
 
         if (mAlarm.isMonday()) {
-            textViewMonday.setBackgroundResource(R.drawable.selected_circle_background);
+            textViewMonday.setSelected(true);
         }
         if (mAlarm.isTuesday()) {
-            textViewTuesday.setBackgroundResource(R.drawable.selected_circle_background);
+            textViewTuesday.setSelected(true);
         }
         if (mAlarm.isWednesday()) {
-            textViewWednesday.setBackgroundResource(R.drawable.selected_circle_background);
+            textViewWednesday.setSelected(true);
         }
         if (mAlarm.isThursday()) {
-            textViewThursday.setBackgroundResource(R.drawable.selected_circle_background);
+            textViewThursday.setSelected(true);
         }
         if (mAlarm.isFriday()) {
-            textViewFriday.setBackgroundResource(R.drawable.selected_circle_background);
+            textViewFriday.setSelected(true);
         }
         if (mAlarm.isSaturday()) {
-            textViewSaturday.setBackgroundResource(R.drawable.selected_circle_background);
+            textViewSaturday.setSelected(true);
         }
         if (mAlarm.isSunday()) {
-            textViewSunday.setBackgroundResource(R.drawable.selected_circle_background);
+            textViewSunday.setSelected(true);
         }
 
         this.hour = mAlarm.getHour();
@@ -339,8 +318,6 @@ public class NewAlarmFragment1 extends BaseFragment{
 
         switchAudio.setChecked(mAlarm.isAllow_friend_audio_files());
         switchRecurring.setChecked(mAlarm.isRecurring());
-
-
     }
 
 }

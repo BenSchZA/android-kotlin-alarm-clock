@@ -162,10 +162,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     }
 
     protected void startHomeActivity() {
-        //This clears the back stack when starting home activity, to stop back stack loop
         Intent homeIntent = new Intent(this, MyAlarmsFragmentActivity.class);
-        //No long needed, return button override in MyAlarmsFragmentActivity
-//        homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(homeIntent);
     }
 

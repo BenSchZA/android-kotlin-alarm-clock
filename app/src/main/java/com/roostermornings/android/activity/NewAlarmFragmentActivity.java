@@ -31,11 +31,11 @@ import com.roostermornings.android.domain.AlarmChannel;
 import com.roostermornings.android.fragment.IAlarmSetListener;
 import com.roostermornings.android.fragment.NewAlarmFragment1;
 import com.roostermornings.android.fragment.NewAlarmFragment2;
+import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.util.Constants;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -50,12 +50,13 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
     public final static String TAG = NewAlarmFragmentActivity.class.getSimpleName();
     private ViewPager mViewPager;
     Alarm mAlarm = new Alarm();
-    private static String mEditAlarmId = "";
+    public static String mEditAlarmId = "";
     Calendar mCalendar = Calendar.getInstance();
     private Fragment mFragment1;
     private Fragment mFragment2;
     private Menu menu;
     private DeviceAlarmController deviceAlarmController = new DeviceAlarmController(this);
+    DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(this);
 
     @BindView(R.id.toolbar_title)
     TextView toolbarTitle;
@@ -168,10 +169,10 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                         alarmTime.add(Calendar.HOUR, 24);
                     }
 
-                    setAlarmDay(alarmTime);
+                    mAlarm.setAlarmDayFromCalendar(alarmTime);
                 }
 
-                List<Integer> alarmDays = new ArrayList<>();
+                List<Integer> alarmDays;
                 alarmDays = mAlarm.getDays();
 
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -190,7 +191,6 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 String alarmChannelUID = "";
                 if(alarmChannel != null) alarmChannelUID = alarmChannel.getId();
 
-                DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(this);
                 Integer iteration = deviceAlarmTableManager.getChannelStoryIteration(alarmChannelUID);
                 //if this is an existing alarm, delete from local storage before inserting another record
                 if (mEditAlarmId.length() != 0
@@ -205,6 +205,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 //Ensure iteration is not overwritten TODO: maybe don't set in SQL db initialisation and set defaults SQL entry value
                 if(iteration != null) deviceAlarmTableManager.setChannelStoryIteration(alarmChannelUID, iteration);
 
+                //Update firebase
                 database.getReference(String.format("alarms/%s/%s", mAuth.getCurrentUser().getUid(), alarmKey)).setValue(mAlarm);
 
                 //Download any social or channel audio files
@@ -229,34 +230,6 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
     @Override
     public Alarm getAlarmDetails() {
         return mAlarm;
-    }
-
-    private void setAlarmDay(Calendar alarmTime) {
-
-        switch (alarmTime.get(Calendar.DAY_OF_WEEK)) {
-            case Calendar.SUNDAY:
-                mAlarm.setSunday(true);
-                break;
-            case Calendar.MONDAY:
-                mAlarm.setMonday(true);
-                break;
-            case Calendar.TUESDAY:
-                mAlarm.setTuesday(true);
-                break;
-            case Calendar.WEDNESDAY:
-                mAlarm.setWednesday(true);
-                break;
-            case Calendar.THURSDAY:
-                mAlarm.setThursday(true);
-                break;
-            case Calendar.FRIDAY:
-                mAlarm.setFriday(true);
-                break;
-            case Calendar.SATURDAY:
-                mAlarm.setSaturday(true);
-                break;
-        }
-
     }
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
@@ -302,38 +275,21 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
     }
 
     @Override
-    public void retrieveAlarmDetailsFromFirebase() {
+    public void retrieveAlarmDetailsFromSQL() {
 
         if (mEditAlarmId.length() == 0) return;
 
-        DatabaseReference alarmReference = FirebaseDatabase.getInstance().getReference()
-                .child("alarms").child(getFirebaseUser().getUid()).child(mEditAlarmId);
+        List<DeviceAlarm> tempAlarms = deviceAlarmTableManager.getAlarmSet(mEditAlarmId);
+        mAlarm.fromDeviceAlarm(tempAlarms.get(0), deviceAlarmTableManager.isSetEnabled(mEditAlarmId));
+        List<Integer> alarmDays = deviceAlarmTableManager.getAlarmClassDays(mEditAlarmId);
+        mAlarm.setAlarmDayFromDeviceAlarm(alarmDays);
 
-        ValueEventListener alarmListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                mAlarm = dataSnapshot.getValue(Alarm.class);
-                mAlarm.setUid(mEditAlarmId);
-
-                if (mFragment1 instanceof NewAlarmFragment1) {
-                    ((NewAlarmFragment1) mFragment1).setEditedAlarmSettings();
-                }
-                if (mFragment2 instanceof NewAlarmFragment2) {
-                    ((NewAlarmFragment2) mFragment2).selectEditedAlarmChannel();
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                if(BuildConfig.DEBUG) Toast.makeText(NewAlarmFragmentActivity.this, "Failed to load mAlarms.",
-                        Toast.LENGTH_SHORT).show();
-            }
-        };
-
-        alarmReference.addListenerForSingleValueEvent(alarmListener);
-
-
+        if (mFragment1 instanceof NewAlarmFragment1) {
+            ((NewAlarmFragment1) mFragment1).setEditedAlarmSettings();
+        }
+        if (mFragment2 instanceof NewAlarmFragment2) {
+            ((NewAlarmFragment2) mFragment2).selectEditedAlarmChannel();
+        }
     }
 
     @Override
