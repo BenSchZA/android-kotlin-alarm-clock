@@ -11,6 +11,9 @@ public class Constants {
 
     public final static String FACEBOOK_APP_ID = "190341188110134";
 
+    //User settings
+    public final static String USER_SETTINGS_VIBRATE = "userSettingsVibrate";
+
     //BaseActivity
     public final static int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 10;
 

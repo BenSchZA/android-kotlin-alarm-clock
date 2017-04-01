@@ -81,7 +81,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
         mAlarm.setMinute(mMinute);
         mAlarm.setHour(mHour);
         mAlarm.setRecurring(false);
-        mAlarm.setVibrate(true);
+        mAlarm.setVibrate(sharedPreferences.getBoolean(Constants.USER_SETTINGS_VIBRATE, false));
         mAlarm.setAllow_friend_audio_files(true);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
