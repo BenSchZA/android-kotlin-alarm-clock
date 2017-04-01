@@ -27,37 +27,22 @@ public class SplashActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        initialize(R.layout.activity_splash);
+
         mFBUser = getFirebaseUser();
-
-        CountDownTimer countDownTimer = new CountDownTimer(2000, 2000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-
-            }
-
-            @Override
-            public void onFinish() {
-
-                //All users go through intro activity upon sign out -
-                // this ensures cell number is entered and if old user they are on-boarded, no harm done
-                if (mFBUser == null || mFBUser.getUid() == null) {
-                    navigateToActivity(IntroFragmentActivity.class);
-                } else {
-                    //TODO: go to alarm creation for new user?
-                    navigateToActivity(MyAlarmsFragmentActivity.class);
-                }
-
-            }
-        };
-        countDownTimer.start();
+        //All users go through intro activity upon sign out -
+        // this ensures cell number is entered and if old user they are on-boarded, no harm done
+        if (mFBUser == null || mFBUser.getUid() == null) {
+            navigateToActivity(IntroFragmentActivity.class);
+        } else {
+            //TODO: go to alarm creation for new user?
+            navigateToActivity(MyAlarmsFragmentActivity.class);
+        }
     }
 
     private void navigateToActivity(Class<? extends Activity> activityClass) {
         Intent i = new Intent(SplashActivity.this, activityClass);
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+        startActivity(i);
         finish();
-        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);startActivity(i);
-
     }
-
 }
