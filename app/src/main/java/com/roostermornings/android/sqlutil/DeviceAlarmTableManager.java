@@ -95,6 +95,16 @@ public class DeviceAlarmTableManager {
         return (cursor.getCount() > 0);
     }
 
+    public List<Integer> getAlarmClassDays(String setId) {
+        List<DeviceAlarm> deviceAlarms = getAlarmSet(setId);
+        List<Integer> alarmDays = new ArrayList<>();
+        for (DeviceAlarm deviceAlarm:
+             deviceAlarms) {
+            alarmDays.add(deviceAlarm.getDay());
+        }
+        return alarmDays;
+    }
+
     public List<DeviceAlarm> selectChanged() {
         SQLiteDatabase db = initDB();
 

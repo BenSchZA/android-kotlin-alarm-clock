@@ -138,7 +138,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                 //Recreate all enabled alarms as failsafe
                 deviceAlarmController.rebootAlarms();
                 //Case: local has an alarm that firebase doesn't Result: delete local alarm
-               deviceAlarmController.syncAlarmSetGlobal(mAlarms);
+                deviceAlarmController.syncAlarmSetGlobal(mAlarms);
             }
 
             @Override
