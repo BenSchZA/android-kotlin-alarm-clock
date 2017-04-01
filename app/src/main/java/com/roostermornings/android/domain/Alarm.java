@@ -7,6 +7,7 @@ package com.roostermornings.android.domain;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
+import com.roostermornings.android.sqlutil.DeviceAlarm;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -86,6 +87,79 @@ public class Alarm {
         if (isSaturday()) alarmDays.add(Calendar.SATURDAY);
         if (isSunday()) alarmDays.add(Calendar.SUNDAY);
         return alarmDays;
+    }
+
+    @Exclude
+    public void fromDeviceAlarm(DeviceAlarm deviceAlarm, boolean alarmSetEnabled) {
+        this.enabled = alarmSetEnabled;
+
+        if(deviceAlarm.getChannel() != null) {
+            this.channel = new AlarmChannel("", deviceAlarm.getChannel());
+        }
+        this.hour = deviceAlarm.getHour();
+        this.minute = deviceAlarm.getMinute();
+        this.recurring = deviceAlarm.getRecurring();
+        this.allow_friend_audio_files = deviceAlarm.isSocial();
+        this.vibrate = deviceAlarm.getVibrate();
+        this.uid = deviceAlarm.getSetId();
+        this.unseen_roosters = 0;
+    }
+
+    @Exclude
+    public void setAlarmDayFromDeviceAlarm(List<Integer> alarmDays) {
+        for (Integer day:
+                alarmDays) {
+            switch (day) {
+                case Calendar.SUNDAY:
+                    this.setSunday(true);
+                    break;
+                case Calendar.MONDAY:
+                    this.setMonday(true);
+                    break;
+                case Calendar.TUESDAY:
+                    this.setTuesday(true);
+                    break;
+                case Calendar.WEDNESDAY:
+                    this.setWednesday(true);
+                    break;
+                case Calendar.THURSDAY:
+                    this.setThursday(true);
+                    break;
+                case Calendar.FRIDAY:
+                    this.setFriday(true);
+                    break;
+                case Calendar.SATURDAY:
+                    this.setSaturday(true);
+                    break;
+            }
+        }
+    }
+
+    @Exclude
+    public void setAlarmDayFromCalendar(Calendar alarmTime) {
+        switch (alarmTime.get(Calendar.DAY_OF_WEEK)) {
+            case Calendar.SUNDAY:
+                this.setSunday(true);
+                break;
+            case Calendar.MONDAY:
+                this.setMonday(true);
+                break;
+            case Calendar.TUESDAY:
+                this.setTuesday(true);
+                break;
+            case Calendar.WEDNESDAY:
+                this.setWednesday(true);
+                break;
+            case Calendar.THURSDAY:
+                this.setThursday(true);
+                break;
+            case Calendar.FRIDAY:
+                this.setFriday(true);
+                break;
+            case Calendar.SATURDAY:
+                this.setSaturday(true);
+                break;
+        }
     }
 
     public Integer getUnseen_roosters() {

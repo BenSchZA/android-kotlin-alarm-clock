@@ -15,6 +15,6 @@ public interface IAlarmSetListener {
 
     public void setAlarmDetails(Alarm alarm);
     public Alarm getAlarmDetails();
-    public void retrieveAlarmDetailsFromFirebase();
+    public void retrieveAlarmDetailsFromSQL();
     public void setNextButtonCaption(String text);
 }
