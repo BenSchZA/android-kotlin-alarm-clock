@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Rooster Mornings Android.
+  ~ Copyright (c)  2017 Roosta Media. All rights reserved.
+  -->
+
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:drawable="@color/rooster_light_blue"/>
+
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/logo"/>
+    </item>
+
+    <!--<item android:left="@dimen/activity_horizontal_margin"-->
+        <!--android:right="@dimen/activity_horizontal_margin">-->
+        <!--<bitmap-->
+            <!--android:gravity="center|fill_horizontal"-->
+            <!--android:src="@drawable/rooster_slogan" />-->
+    <!--</item>-->
+
+</layer-list>
