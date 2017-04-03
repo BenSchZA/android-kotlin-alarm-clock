@@ -29,11 +29,14 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -365,20 +368,28 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         }
     }
 
-    public void requestPermissionIgnoreBatteryOptimization() {
-        if(RoosterUtils.hasM() && (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-                != PackageManager.PERMISSION_GRANTED)) {
-            Intent intent = new Intent();
-            String packageName = getPackageName();
-            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-            if (pm.isIgnoringBatteryOptimizations(packageName))
-                intent.setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
-            else {
-                intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-                intent.setData(Uri.parse("package:" + packageName));
-            }
-            startActivity(intent);
+    public void requestPermissionIgnoreBatteryOptimization(Context context) {
+        //Google wasn't happy with us programatically requesting this permission, so a dialog will have to do
+        String packageName = getPackageName();
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+
+        if(RoosterUtils.hasM() && pm.isIgnoringBatteryOptimizations(packageName) && !sharedPreferences.getBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false)) {
+            View dialogMmpView = LayoutInflater.from(context)
+                    .inflate(R.layout.dialog_permissions_explainer, null);
+            new MaterialDialog.Builder(context)
+                    .customView(dialogMmpView, false)
+                    .neutralText(R.string.neutral)
+                    .negativeColorRes(R.color.grey)
+                    .onNeutral(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, true);
+                            editor.commit();
+                            startActivity(getIntent());
+                        }
+                    })
+                    .show();
         }
     }
 
@@ -392,13 +403,13 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     public void setDayNight() {
         try {
             if (calendar.get(Calendar.HOUR_OF_DAY) >= 17) {
-                findViewById(R.id.activity_content).setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.main_background_layer_list_night, null));
-                findViewById(R.id.toolbar).setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.rooster_dark_blue, null));
-                findViewById(R.id.tabs).setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.rooster_dark_blue, null));
+                if(findViewById(R.id.activity_content) != null) findViewById(R.id.activity_content).setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.main_background_layer_list_night, null));
+                if(findViewById(R.id.toolbar) != null) findViewById(R.id.toolbar).setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.rooster_dark_blue, null));
+                if(findViewById(R.id.tabs) != null) findViewById(R.id.tabs).setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.rooster_dark_blue, null));
             } else if (calendar.get(Calendar.HOUR_OF_DAY) > 7) {
-                findViewById(R.id.activity_content).setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.main_background_layer_list_day, null));
-                findViewById(R.id.toolbar).setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.rooster_blue, null));
-                findViewById(R.id.tabs).setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.rooster_blue, null));
+                if(findViewById(R.id.activity_content) != null) findViewById(R.id.activity_content).setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.main_background_layer_list_day, null));
+                if(findViewById(R.id.toolbar) != null) findViewById(R.id.toolbar).setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.rooster_blue, null));
+                if(findViewById(R.id.tabs) != null) findViewById(R.id.tabs).setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.rooster_blue, null));
             }
         } catch (NullPointerException e) {
             e.printStackTrace();

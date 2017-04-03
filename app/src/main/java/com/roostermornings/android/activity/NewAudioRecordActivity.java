@@ -6,6 +6,7 @@
 package com.roostermornings.android.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -19,6 +20,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -115,8 +117,6 @@ public class NewAudioRecordActivity extends BaseActivity {
         initialize(R.layout.activity_new_audio);
 
         setDayNight();
-
-        retrieveMyFriends();
     }
 
     @Override
@@ -335,8 +335,8 @@ public class NewAudioRecordActivity extends BaseActivity {
             }
             mFriends.clear();
             mFriends.addAll(tempUsers);
+            bun.putSerializable(Constants.EXTRA_FRIENDS_LIST, mFriends);
         }
-        bun.putSerializable(Constants.EXTRA_FRIENDS_LIST, mFriends);
 
         intent.putExtras(bun);
         startActivity(intent);
@@ -475,51 +475,5 @@ public class NewAudioRecordActivity extends BaseActivity {
                 RECORD_AUDIO);
         return result == PackageManager.PERMISSION_GRANTED &&
                 result1 == PackageManager.PERMISSION_GRANTED;
-    }
-
-    private void retrieveMyFriends() {
-
-        if (!checkInternetConnection()) return;
-
-        FirebaseUser firebaseUser = getFirebaseUser();
-
-        if (firebaseUser == null) {
-            Log.d(TAG, "User not authenticated on FB!");
-            return;
-        }
-
-        Call<Users> call = apiService().listUserFriendList(firebaseUser.getUid());
-
-        call.enqueue(new Callback<Users>() {
-            @Override
-            public void onResponse(Response<Users> response,
-                                   Retrofit retrofit) {
-
-                int statusCode = response.code();
-                Users apiResponse = response.body();
-
-                if (statusCode == 200) {
-
-                    mFriends = new ArrayList<>();
-                    mFriends.addAll(apiResponse.users);
-                    sortNames(mFriends);
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                Log.i(TAG, t.getLocalizedMessage());
-            }
-        });
-    }
-
-    public void sortNames(ArrayList<User> mUsers){
-        //Take arraylist and sort alphabetically
-        Collections.sort(mUsers, new Comparator<User>() {
-            @Override
-            public int compare(User lhs, User rhs) {
-                return lhs.getUser_name().compareTo(rhs.getUser_name());
-            }
-        });
     }
 }

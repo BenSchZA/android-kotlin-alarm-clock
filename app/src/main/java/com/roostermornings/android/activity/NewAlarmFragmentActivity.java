@@ -74,7 +74,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
         }
 
         //Only performed for android M version, with Doze mode
-        requestPermissionIgnoreBatteryOptimization();
+        requestPermissionIgnoreBatteryOptimization(this);
 
         int mHour = mCalendar.get(Calendar.HOUR_OF_DAY);
         int mMinute = mCalendar.get(Calendar.MINUTE);
