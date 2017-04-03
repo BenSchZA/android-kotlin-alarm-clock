@@ -191,6 +191,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 String alarmChannelUID = "";
                 if(alarmChannel != null) alarmChannelUID = alarmChannel.getId();
 
+                //Get current iteration so that not overwritten on refresh/sync
                 Integer iteration = deviceAlarmTableManager.getChannelStoryIteration(alarmChannelUID);
                 //if this is an existing alarm, delete from local storage before inserting another record
                 if (mEditAlarmId.length() != 0
@@ -202,7 +203,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 mAlarm.setEnabled(true);
 
                 deviceAlarmController.registerAlarmSet(alarmKey, mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring(), mAlarm.isVibrate(), alarmChannelUID, mAlarm.isAllow_friend_audio_files());
-                //Ensure iteration is not overwritten TODO: maybe don't set in SQL db initialisation and set defaults SQL entry value
+                //Ensure iteration is not overwritten
                 if(iteration != null) deviceAlarmTableManager.setChannelStoryIteration(alarmChannelUID, iteration);
 
                 //Update firebase
@@ -214,6 +215,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 Toast.makeText(getBaseContext(), (mEditAlarmId.length() == 0) ? "Alarm created!" : "Alarm edited!",
                         Toast.LENGTH_LONG).show();
                 startHomeActivity();
+                //Explicitly finish activity, so that removed from backstack
                 finish();
             }
             return true;

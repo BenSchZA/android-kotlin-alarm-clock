@@ -10,17 +10,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import com.roostermornings.android.sqldata.DeviceAlarmTableHelper;
-import com.roostermornings.android.sqlutil.DeviceAlarm;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static com.roostermornings.android.sqldata.DeviceAlarmTableContract.AlarmTableEntry;
 
@@ -29,6 +24,8 @@ import static com.roostermornings.android.sqldata.DeviceAlarmTableContract.Alarm
  */
 
 public class DeviceAlarmTableManager {
+
+    private static SQLiteDatabase sqLiteDatabase;
 
     private DeviceAlarm alarm;
     private Context context;
@@ -44,7 +41,7 @@ public class DeviceAlarmTableManager {
         alarm = new DeviceAlarm();
     }
 
-    public void insertAlarm(DeviceAlarm alarm, String setId) {
+    void insertAlarm(DeviceAlarm alarm, String setId) {
 
         SQLiteDatabase db = initDB();
 
@@ -76,7 +73,7 @@ public class DeviceAlarmTableManager {
         db.close();
     }
 
-    public void updateAlarmMillis(int piId, long Millis) {
+    void updateAlarmMillis(int piId, long Millis) {
         SQLiteDatabase db = initDB();
         String updateQuery = "UPDATE " + AlarmTableEntry.TABLE_NAME + " SET " + AlarmTableEntry.COLUMN_MILLIS + " = " + Millis + " WHERE " + AlarmTableEntry.COLUMN_PI_ID + " = " + piId + ";";
 
@@ -92,7 +89,10 @@ public class DeviceAlarmTableManager {
 
         Cursor cursor = db.rawQuery(selectQuery, null);
 
-        return (cursor.getCount() > 0);
+        Boolean isSet = (cursor.getCount() > 0);
+        cursor.close();
+        db.close();
+        return isSet;
     }
 
     public List<Integer> getAlarmClassDays(String setId) {
@@ -120,7 +120,7 @@ public class DeviceAlarmTableManager {
         return alarmList;
     }
 
-    public List<DeviceAlarm> selectEnabled() {
+    List<DeviceAlarm> selectEnabled() {
         SQLiteDatabase db = initDB();
 
         List<DeviceAlarm> alarmList;
@@ -155,7 +155,7 @@ public class DeviceAlarmTableManager {
         db.close();
     }
 
-    public List<DeviceAlarm> selectSetEnabled(String setId) {
+    private List<DeviceAlarm> selectSetEnabled(String setId) {
         SQLiteDatabase db = initDB();
 
         List<DeviceAlarm> alarmList;
@@ -179,7 +179,7 @@ public class DeviceAlarmTableManager {
         }
     }
 
-    public void setSetEnabled(String setId, boolean enabled) {
+    void setSetEnabled(String setId, boolean enabled) {
         SQLiteDatabase db = initDB();
         if(enabled){
             TrueFalse = TRUE;
@@ -192,7 +192,7 @@ public class DeviceAlarmTableManager {
         db.close();
     }
 
-    public void setSetChanged(String setId, boolean enabled) {
+    void setSetChanged(String setId, boolean enabled) {
         if(enabled){
             TrueFalse = TRUE;
         }
@@ -223,10 +223,12 @@ public class DeviceAlarmTableManager {
         if(!checkValidCursor(cursor)) return null;
         cursor.moveToFirst();
 
-        return cursor.getInt(cursor.getColumnIndex(AlarmTableEntry.COLUMN_ITERATION));
+        Integer storyIteration = cursor.getInt(cursor.getColumnIndex(AlarmTableEntry.COLUMN_ITERATION));
+        db.close();
+        return storyIteration;
     }
 
-    public void clearChanged(List<DeviceAlarm> alarmList) {
+    void clearChanged(List<DeviceAlarm> alarmList) {
         SQLiteDatabase db = initDB();
 
         for (DeviceAlarm alarm :
@@ -237,21 +239,16 @@ public class DeviceAlarmTableManager {
         db.close();
     }
 
-    private void deleteAlarm(long piId) {
-        SQLiteDatabase db = initDB();
-
-        String execSql = "DELETE FROM " + AlarmTableEntry.TABLE_NAME + " WHERE " + AlarmTableEntry.COLUMN_PI_ID + " = " + piId + ";";
-
-        db.execSQL(execSql);
-        db.close();
-    }
-
     public Cursor getAlarms() {
         SQLiteDatabase db = initDB();
 
         String selectQuery = "SELECT * FROM " + AlarmTableEntry.TABLE_NAME + ";";
 
-        return db.rawQuery(selectQuery, null);
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        db.close();
+
+        return cursor;
     }
 
     public DeviceAlarm getNextPendingAlarm() {
@@ -263,10 +260,11 @@ public class DeviceAlarmTableManager {
         if(!checkValidCursor(cursor)) return null;
         List<DeviceAlarm> alarmList = extractAlarms(cursor);
 
+        db.close();
         return alarmList.get(0);
     }
 
-    public List<DeviceAlarm> getAlarmSets() {
+    List<DeviceAlarm> getAlarmSets() {
         SQLiteDatabase db = initDB();
 
         String selectQuery = "SELECT * FROM " + AlarmTableEntry.TABLE_NAME + " WHERE " + AlarmTableEntry.COLUMN_SET_ID + " IN (SELECT DISTINCT " + AlarmTableEntry.COLUMN_SET_ID + " AS id FROM " + AlarmTableEntry.TABLE_NAME + " ORDER BY " + AlarmTableEntry.COLUMN_SET_ID + " ASC);";
@@ -274,7 +272,9 @@ public class DeviceAlarmTableManager {
         Cursor cursor = db.rawQuery(selectQuery, null);
         if(!checkValidCursor(cursor)) return null;
 
-        return extractAlarms(cursor);
+        List<DeviceAlarm> alarmSets = extractAlarms(cursor);
+        db.close();
+        return alarmSets;
     }
 
     public List<DeviceAlarm> getAlarmSet(String setId) {
@@ -288,10 +288,20 @@ public class DeviceAlarmTableManager {
         Cursor cursor = db.rawQuery(selectQuery, null);
         alarmList = extractAlarms(cursor);
 
+        db.close();
         return alarmList;
     }
 
-    public void deleteAlarmSet(String setId) {
+    private void deleteAlarm(long piId) {
+        SQLiteDatabase db = initDB();
+
+        String execSql = "DELETE FROM " + AlarmTableEntry.TABLE_NAME + " WHERE " + AlarmTableEntry.COLUMN_PI_ID + " = " + piId + ";";
+
+        db.execSQL(execSql);
+        db.close();
+    }
+
+    void deleteAlarmSet(String setId) {
         SQLiteDatabase db = initDB();
 
         String execSql = "DELETE FROM " + AlarmTableEntry.TABLE_NAME + " WHERE " + AlarmTableEntry.COLUMN_SET_ID + " LIKE \"%" + setId + "%\";";
@@ -315,61 +325,17 @@ public class DeviceAlarmTableManager {
         return count;
     }
 
-    public String returnFirstAlarmSetId() {
-        SQLiteDatabase db = initDB();
-
-        String selectQuery = "SELECT " + AlarmTableEntry.COLUMN_SET_ID + " FROM " + AlarmTableEntry.TABLE_NAME;
-
-        Cursor cursor = db.rawQuery(selectQuery, null);
-
-        cursor.moveToFirst();
-        String setId;
-
-        try {
-            setId = cursor.getString(cursor.getColumnIndex("set_id"));
-
-            db.close();
-            cursor.close();
-            return setId;
-        } catch (android.database.CursorIndexOutOfBoundsException e) {
-            Log.e("CursorException:", e.toString());
-            return null;
-        }
-    }
-
-//    public Alarm getSingleAlarm(long setId, long piId)
-//    {
-//        SQLiteDatabase db = initDB();
-//
-//        Alarm alarm = new Alarm();
-//
-//        String selectQuery = "SELECT * FROM " + AlarmTableEntry.TABLE_NAME + " WHERE "
-//                + AlarmTableEntry.COLUMN_SET_ID + " = " + setId + " AND " + AlarmTableEntry.COLUMN_PI_ID
-//                + " = " + piId ;
-//
-//        Cursor cursor = db.rawQuery(selectQuery,null);
-//
-//        if (cursor.moveToFirst()) {
-//            do {
-//                alarm.setSetId(cursor.getInt(cursor.getColumnIndex("set_id")));
-//            } while (cursor.moveToNext());
-//        }
-//        cursor.close();
-//        db.close();
-//        return alarm;
-//    }
-
     private SQLiteDatabase initDB() {
         DeviceAlarmTableHelper dbHelper = new DeviceAlarmTableHelper(context);
-        return dbHelper.getWritableDatabase();
+        sqLiteDatabase = dbHelper.getWritableDatabase();
+        return sqLiteDatabase;
     }
 
     private Boolean checkValidCursor(Cursor cursor) {
-        if((cursor != null) && (cursor.getCount() > 0)) return true;
-        else return false;
+        return ((cursor != null) && (cursor.getCount() > 0));
     }
 
-    public List<DeviceAlarm> extractAlarms(Cursor cursor) {
+    private List<DeviceAlarm> extractAlarms(Cursor cursor) {
         List<DeviceAlarm> alarmList = new ArrayList<>();
         if (cursor.moveToFirst()) {
             do {
@@ -404,36 +370,3 @@ public class DeviceAlarmTableManager {
     }
 
 }
-
-//        // Define a projection that specifies which columns from the database
-//        // you will actually use after this query.
-//        String[] projection = {
-//                AlarmTableContract.AlarmTableEntry.COLUMN_PI_ID,
-//                AlarmTableContract.AlarmTableEntry.COLUMN_CHANGED,
-//        };
-//
-//        // Filter results WHERE "title" = 'My Title'
-//        String selection = AlarmTableContract.AlarmTableEntry.COLUMN_CHANGED + " = ?";
-//        String[] selectionArgs = { "1" };
-//
-//        // How you want the results sorted in the resulting Cursor
-//        String sortOrder =
-//                AlarmTableContract.AlarmTableEntry.COLUMN_CHANGED + " DESC";
-//
-//        Cursor cursor = db.query(
-//                AlarmTableContract.AlarmTableEntry.TABLE_NAME,                     // The table to query
-//                projection,                               // The columns to return
-//                selection,                                // The columns for the WHERE clause
-//                selectionArgs,                            // The values for the WHERE clause
-//                null,                                     // don't group the rows
-//                null,                                     // don't filter by row groups
-//                sortOrder                                 // The sort order
-//        );
-//
-//        List itemIds = new ArrayList<>();
-//        while(cursor.moveToNext()) {
-//            long itemId = cursor.getInt(
-//                    cursor.getColumnIndexOrThrow(AlarmTableContract.AlarmTableEntry.COLUMN_PI_ID));
-//            itemIds.add(itemId);
-//        }
-//        cursor.close();

@@ -142,6 +142,8 @@ public class UploadService extends Service {
                     @Override
                     public void onFailure(@NonNull Exception exception) {
                         // Handle unsuccessful upload
+                        //Delete local temp file
+                        localFile.delete();
                         Toast.makeText(getApplicationContext(), "Error uploading!", Toast.LENGTH_LONG).show();
                         endService();
                     }
