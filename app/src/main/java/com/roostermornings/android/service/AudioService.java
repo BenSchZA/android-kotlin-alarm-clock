@@ -297,6 +297,8 @@ public class AudioService extends Service {
             } else if (socialRoosterStatus) {
                 if(mediaPlayerRooster != null && mediaPlayerRooster.isPlaying()) mediaPlayerRooster.stop();
                 currentPositionRooster = 0;
+                //set audio file entry in SQL db as listened; to be removed when AudioService ends
+                audioTableManager.setListened(mThis.audioItem.getId());
                 mThis.audioItems = audioTableManager.extractAlarmChannelAudioFiles(mThis.alarmChannelUid);
                 mThis.alarmCount = mThis.audioItems.size();
                 if(!mThis.audioItems.isEmpty()) playChannelRooster(mThis.audioItems.get(0));

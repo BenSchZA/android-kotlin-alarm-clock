@@ -115,7 +115,6 @@ public final class DeviceAlarmController {
                 context.sendBroadcast(alarmChanged);
             }
         }
-
     }
 
     public void snoozeAlarm(String setId){
