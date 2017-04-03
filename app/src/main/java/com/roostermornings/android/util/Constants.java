@@ -70,4 +70,7 @@ public class Constants {
 
     //Intent extras
     public final static String EXTRA_ALARMID = "alarmId";
+
+    //Dialog boolean to indicate viewed
+    public final static String PERMISSIONS_DIALOG_OPTIMIZATION = "permissionsDialogOptimization";
 }

@@ -50,8 +50,7 @@
         android:layout_width="60dp"
         android:layout_height="wrap_content"
         android:layout_gravity="right|center_vertical"
-        android:text="Add"></Button>
-
+        android:text="Add"/>
     <!--<Button-->
         <!--android:id="@+id/new_audio_friend_add"-->
         <!--android:layout_width="wrap_content"-->
