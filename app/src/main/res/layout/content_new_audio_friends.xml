@@ -14,13 +14,28 @@
     tools:context="com.roostermornings.android.activity.NewAudioFriendsActivity"
     tools:showIn="@layout/activity_new_audio_friends">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/new_audio_friendsListView"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:padding="@dimen/spacing_normal"
-        android:clipToPadding="false" />
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/new_audio_friendsListView"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingTop="@dimen/spacing_normal"
+            android:paddingLeft="@dimen/spacing_normal"
+            android:paddingRight="@dimen/spacing_normal"
+            android:paddingBottom="@dimen/button_spacing_audio_friends"
+            android:clipToPadding="false"
+            android:visibility="gone"/>
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="@style/Widget.AppCompat.ProgressBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="visible"/>
+    </FrameLayout>
 
     <LinearLayout
         android:layout_width="wrap_content"

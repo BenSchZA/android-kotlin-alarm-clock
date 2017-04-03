@@ -16,6 +16,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -57,6 +58,9 @@ public class NewAudioFriendsActivity extends BaseActivity {
     UploadService mUploadService;
     private boolean mBound;
 
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
+
     @BindView(R.id.new_audio_upload_button)
     Button btnNewAudioSave;
 
@@ -86,18 +90,18 @@ public class NewAudioFriendsActivity extends BaseActivity {
 
         if(extras.containsKey(Constants.EXTRA_FRIENDS_LIST) && (ArrayList<User>)extras.getSerializable(Constants.EXTRA_FRIENDS_LIST) != null) {
             mFriends.addAll((ArrayList<User>) extras.getSerializable(Constants.EXTRA_FRIENDS_LIST));
-            if(mFriends.size() == 1 && mFriends.get(0).getSelected()) {
+            if(mFriends.size() > 0 && mFriends.get(0).getSelected()) {
                 onSaveButtonClick();
-            } else if(!mFriends.isEmpty()) {
-                mAdapter = new NewAudioFriendsListAdapter(mFriends, NewAudioFriendsActivity.this);
-                mRecyclerView.setLayoutManager(new LinearLayoutManager(NewAudioFriendsActivity.this));
-                mRecyclerView.setAdapter(mAdapter);
-                mAdapter.notifyDataSetChanged();
-                btnNewAudioSave.setVisibility(View.VISIBLE);
-            } else if (checkInternetConnection()) {
-                Toast.makeText(this, "Do you have any Rooster friends?", Toast.LENGTH_LONG).show();
-                startHomeActivity();
             }
+        } else if(checkInternetConnection()) {
+            mAdapter = new NewAudioFriendsListAdapter(mFriends, NewAudioFriendsActivity.this);
+            mRecyclerView.setLayoutManager(new LinearLayoutManager(NewAudioFriendsActivity.this));
+            mRecyclerView.setAdapter(mAdapter);
+
+            retrieveMyFriends();
+        } else {
+                Toast.makeText(this, "Do you have any Rooster friends? Or an internet connection?", Toast.LENGTH_LONG).show();
+                startHomeActivity();
         }
     }
 
@@ -156,5 +160,59 @@ public class NewAudioFriendsActivity extends BaseActivity {
 
         //Switch to home activity - alarms
         startHomeActivity();
+    }
+
+    private void retrieveMyFriends() {
+
+        if (!checkInternetConnection()) return;
+
+        FirebaseUser firebaseUser = getFirebaseUser();
+
+        if (firebaseUser == null) {
+            Log.d(TAG, "User not authenticated on FB!");
+            return;
+        }
+
+        Call<Users> call = apiService().listUserFriendList(firebaseUser.getUid());
+
+        call.enqueue(new Callback<Users>() {
+            @Override
+            public void onResponse(Response<Users> response,
+                                   Retrofit retrofit) {
+
+                int statusCode = response.code();
+                Users apiResponse = response.body();
+
+                if (statusCode == 200) {
+
+                    progressBar.setVisibility(View.GONE);
+                    mRecyclerView.setVisibility(View.VISIBLE);
+
+                    mFriends.clear();
+                    mFriends.addAll(apiResponse.users);
+                    sortNames(mFriends);
+                    mAdapter.notifyDataSetChanged();
+
+                    btnNewAudioSave.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                Log.i(TAG, t.getLocalizedMessage());
+                Toast.makeText(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG).show();
+                startHomeActivity();
+            }
+        });
+    }
+
+    public void sortNames(ArrayList<User> mUsers){
+        //Take arraylist and sort alphabetically
+        Collections.sort(mUsers, new Comparator<User>() {
+            @Override
+            public int compare(User lhs, User rhs) {
+                return lhs.getUser_name().compareTo(rhs.getUser_name());
+            }
+        });
     }
 }
