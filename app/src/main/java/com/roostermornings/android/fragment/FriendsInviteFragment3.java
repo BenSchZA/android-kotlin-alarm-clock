@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 
 import com.facebook.CustomTabMainActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -72,6 +73,9 @@ public class FriendsInviteFragment3 extends BaseFragment {
 
     @BindView(R.id.friendsInviteListView)
     RecyclerView mRecyclerView;
+
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
 
     @BindView(R.id.share_button)
     Button shareButton;
@@ -228,6 +232,10 @@ public class FriendsInviteFragment3 extends BaseFragment {
                     mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
                     mRecyclerView.setAdapter(mAdapter);
                     mAdapter.notifyDataSetChanged();
+
+                    //Make load spinner GONE and recyclerview VISIBLE
+                    progressBar.setVisibility(View.GONE);
+                    mRecyclerView.setVisibility(View.VISIBLE);
 
                     Log.d("apiResponse", apiResponse.toString());
                 }

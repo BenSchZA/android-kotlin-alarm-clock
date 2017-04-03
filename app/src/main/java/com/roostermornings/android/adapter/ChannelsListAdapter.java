@@ -5,19 +5,26 @@
 
 package com.roostermornings.android.adapter;
 
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.support.v4.app.Fragment;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.roostermornings.android.R;
 import com.roostermornings.android.domain.Channel;
 import com.roostermornings.android.fragment.NewAlarmFragment2;
+import com.roostermornings.android.util.RoosterUtils;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -36,6 +43,7 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
         public ImageView imgChannelImage;
         public ImageView imgChannelSelected;
         public CardView cardViewChannel;
+        public ProgressBar progressBar;
 
         public ViewHolder(View v) {
             super(v);
@@ -44,6 +52,7 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
             imgInfo = (TextView) v.findViewById(R.id.cardview_channel_info);
             imgChannelImage = (ImageView) v.findViewById(R.id.card_view_channel_image);
             imgChannelSelected = (ImageView) v.findViewById(R.id.cardview_channel_selected);
+            progressBar = (ProgressBar) v.findViewById(R.id.progressBar);
         }
     }
 
@@ -123,7 +132,18 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
         //TODO: is this reasonable? if no image, then what?
         try {
             Picasso.with(mFragment.getContext()).load(mDataset.get(position).getPhoto()).
-                    fit().into(holder.imgChannelImage);
+                    fit().into(holder.imgChannelImage, new Callback() {
+                @Override
+                public void onSuccess() {
+                    holder.progressBar.setVisibility(View.GONE);
+                    holder.imgChannelImage.setVisibility(View.VISIBLE);
+                }
+
+                @Override
+                public void onError() {
+
+                }
+            });
         } catch(IllegalArgumentException e) {
             e.printStackTrace();
         }

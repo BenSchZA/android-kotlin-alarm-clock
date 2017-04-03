@@ -68,7 +68,9 @@ public class NewAudioRecordActivity extends BaseActivity {
 
     private ArrayList<User> mFriends = new ArrayList<>();
 
-    private final int AUDIO_MIN_AMPLITUDE = 500;
+    //Silence average: 125
+    //Ambient music: 300
+    private final int AUDIO_MIN_AMPLITUDE = 250;
     private final int MIN_CUMULATIVE_TIME = 5000;
     private int maxAmplitude;
     private double averageAmplitude;
@@ -86,6 +88,7 @@ public class NewAudioRecordActivity extends BaseActivity {
     MediaPlayer mediaPlayer;
     public static final int RequestPermissionCode = 1;
     private String randomAudioFileName = "";
+    private Boolean fileProcessed = false;
 
     @BindView(R.id.new_audio_time)
     TextView txtAudioTime;
@@ -138,6 +141,19 @@ public class NewAudioRecordActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(!fileProcessed) {
+            try {
+                final File localFile = new File(mAudioSavePathInDevice);
+                localFile.delete();
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     @OnClick(R.id.new_audio_start_stop)
     public void startStopAudioRecording() {
         if (!mRecording) {
@@ -155,9 +171,18 @@ public class NewAudioRecordActivity extends BaseActivity {
 
             if (checkPermission()) {
 
+                String mAudioSaveDirectories = Environment.getExternalStorageDirectory().getAbsolutePath() + "/RoosterTempAudio/";
+
                 mAudioSavePathInDevice =
-                        Environment.getExternalStorageDirectory().getAbsolutePath() + "/" +
+                        mAudioSaveDirectories +
                                 randomAudioFileName;
+
+                File file = new File(mAudioSaveDirectories);
+                if(!file.mkdirs()) {
+                    mAudioSavePathInDevice =
+                            Environment.getExternalStorageDirectory().getAbsolutePath() + "/" +
+                                    randomAudioFileName;
+                }
 
                 MediaRecorderReady();
 
@@ -294,6 +319,7 @@ public class NewAudioRecordActivity extends BaseActivity {
     public void onSaveAudioFileClick() {
         if (!checkInternetConnection()) return;
 
+        //Manage whether audio file is being sent direct to a user or a list of users needs to be shown
         Intent intent = new Intent(NewAudioRecordActivity.this, NewAudioFriendsActivity.class);
         Bundle bun = new Bundle();
         bun.putString(Constants.EXTRA_LOCAL_FILE_STRING, mAudioSavePathInDevice);
@@ -314,6 +340,8 @@ public class NewAudioRecordActivity extends BaseActivity {
 
         intent.putExtras(bun);
         startActivity(intent);
+        //Show that file has been processed so that not deleted in onDestroy
+        fileProcessed = true;
     }
 
     private Runnable startTimer = new Runnable() {

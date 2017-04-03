@@ -22,13 +22,25 @@
         android:clickable="true"
         app:cardElevation="0dp">
 
-        <ImageView
-            android:id="@+id/card_view_channel_image"
-            android:src="@drawable/landscape"
-            android:maxHeight="400dp"
-            android:maxWidth="1000dp"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent">
+            <ImageView
+                android:id="@+id/card_view_channel_image"
+                android:src="@drawable/landscape"
+                android:maxHeight="400dp"
+                android:maxWidth="1000dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="invisible"/>
+            <ProgressBar
+                android:id="@+id/progressBar"
+                style="@style/Widget.AppCompat.ProgressBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="visible"/>
+        </FrameLayout>
 
         <TextView
             android:text="channel name"
