@@ -48,13 +48,27 @@
         android:textColor="@color/white"
         android:textSize="@dimen/text_normal_large"/>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/friendsInviteListView"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:padding="@dimen/spacing_normal"
-        android:clipToPadding="false"/>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/friendsInviteListView"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="@dimen/spacing_normal"
+            android:clipToPadding="false"
+            android:visibility="gone"/>
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="@style/Widget.AppCompat.ProgressBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="visible"/>
+    </FrameLayout>
 
 </LinearLayout>
 

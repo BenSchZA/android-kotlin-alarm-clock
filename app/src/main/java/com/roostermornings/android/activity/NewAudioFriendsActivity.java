@@ -22,6 +22,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
+import com.google.firebase.database.Exclude;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.NewAudioFriendsListAdapter;
@@ -31,6 +32,7 @@ import com.roostermornings.android.domain.User;
 import com.roostermornings.android.domain.Users;
 import com.roostermornings.android.util.Constants;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -50,6 +52,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
     private RecyclerView.Adapter mAdapter;
     private String localFileString = "";
     private String firebaseIdToken = "";
+    private Boolean fileProcessed = false;
 
     UploadService mUploadService;
     private boolean mBound;
@@ -102,6 +105,14 @@ public class NewAudioFriendsActivity extends BaseActivity {
     public void onDestroy() {
         super.onDestroy();
         if(mBound) unbindService(mUploadServiceConnection);
+        if(!fileProcessed) {
+            try {
+                final File localFile = new File(localFileString);
+                localFile.delete();
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private ServiceConnection mUploadServiceConnection = new ServiceConnection() {
@@ -116,6 +127,8 @@ public class NewAudioFriendsActivity extends BaseActivity {
 
             //Start upload service thread task
             mUploadService.processAudioFile(firebaseIdToken, localFileString, mFriends);
+            //Show that file has been processed so that not deleted in onDestroy
+            fileProcessed = true;
         }
 
         // Called when the connection with the service disconnects unexpectedly

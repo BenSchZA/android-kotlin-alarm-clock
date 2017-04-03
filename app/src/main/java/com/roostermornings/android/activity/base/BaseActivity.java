@@ -123,7 +123,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
 
     public boolean checkInternetConnection() {
         if (this.noInternetConnection()) {
-            Toast.makeText(getApplicationContext(), "No internet connection was found found, please " +
+            Toast.makeText(getApplicationContext(), "No internet connection was found, please " +
                     "connect and try again.", Toast.LENGTH_LONG).show();
             return false;
         }
