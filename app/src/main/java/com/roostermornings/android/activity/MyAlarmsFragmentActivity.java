@@ -289,9 +289,9 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         }
 
         //TODO: find out why alarm content being duplicated in recycler view on delete - do not refresh the activity like this
-        Intent intent = getIntent();
-        finish();
-        startActivity(intent);
+//        Intent intent = getIntent();
+//        finish();
+//        startActivity(intent);
     }
 
     public void editAlarm(String alarmId) {
