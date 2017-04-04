@@ -5,12 +5,14 @@
 
 package com.roostermornings.android.adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.widget.RecyclerView;
@@ -22,10 +24,14 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
+import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.activity.NewAudioFriendsActivity;
 import com.roostermornings.android.activity.NewAudioRecordActivity;
 import com.roostermornings.android.domain.Friend;
@@ -44,6 +50,7 @@ import java.util.ArrayList;
 public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdapter.ViewHolder> implements Filterable {
     private ArrayList<Friend> mDataset;
     private Context mContext;
+    private Activity mActivity;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -53,16 +60,16 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
         public ImageView imgProfilePic;
         public TextView txtName;
         public TextView txtInitials;
-        public ImageButton btnDelete;
         public ImageButton btnSend;
+        public LinearLayout linearLayout;
 
         public ViewHolder(View v) {
             super(v);
             imgProfilePic = (ImageView) itemView.findViewById(R.id.my_friends_profile_pic);
             txtName = (TextView) itemView.findViewById(R.id.my_friends_profile_name);
             txtInitials = (TextView) itemView.findViewById(R.id.txtInitials);
-            btnDelete = (ImageButton) itemView.findViewById(R.id.friends_delete_button);
             btnSend = (ImageButton) itemView.findViewById(R.id.friends_send_button);
+            linearLayout = (LinearLayout) itemView.findViewById(R.id.friendLayout);
         }
     }
 
@@ -83,9 +90,10 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public FriendsMyListAdapter(ArrayList<Friend> myDataset, Context context) {
+    public FriendsMyListAdapter(ArrayList<Friend> myDataset, Activity activity, Context context) {
         mDataset = myDataset;
         mContext = context;
+        mActivity = activity;
     }
 
     // Create new views (invoked by the layout manager)
@@ -100,7 +108,7 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(final FriendsMyListAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(final FriendsMyListAdapter.ViewHolder holder, final int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         final Friend user = mDataset.get(position);
@@ -109,22 +117,51 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
 
         setProfilePic(user.getProfile_pic(), holder, position);
 
-        holder.btnDelete.setOnClickListener(new View.OnClickListener() {
+        holder.linearLayout.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
-            public void onClick(View v) {
-
-                ((FriendsFragmentActivity)mContext).deleteFriend(user);
-
-                final Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        //Do something after 200ms
-                        remove(user);
-                    }
-                }, 200);
+            public boolean onLongClick(View view) {
+                    View dialogMmpView = LayoutInflater.from(mActivity)
+                            .inflate(R.layout.dialog_confirm_friend_delete, null);
+                    new MaterialDialog.Builder(mActivity)
+                            .customView(dialogMmpView, false)
+                            .positiveText(R.string.confirm)
+                            .negativeText(R.string.cancel)
+                            .negativeColorRes(R.color.grey)
+                            .onPositive(new MaterialDialog.SingleButtonCallback() {
+                                @Override
+                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                    ((FriendsFragmentActivity)mContext).deleteFriend(user);
+                                    final Handler handler = new Handler();
+                                    handler.postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            //Do something after 200ms
+                                            remove(user);
+                                        }
+                                    }, 200);
+                                }
+                            })
+                            .show();
+                return true;
             }
         });
+
+//        holder.btnDelete.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//
+//                ((FriendsFragmentActivity)mContext).deleteFriend(user);
+//
+//                final Handler handler = new Handler();
+//                handler.postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        //Do something after 200ms
+//                        remove(user);
+//                    }
+//                }, 200);
+//            }
+//        });
 
         holder.btnSend.setOnClickListener(new View.OnClickListener() {
             @Override

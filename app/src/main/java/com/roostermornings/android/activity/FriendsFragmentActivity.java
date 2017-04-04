@@ -347,8 +347,10 @@ public class FriendsFragmentActivity extends BaseActivity implements
             @Override
             public void onReceive(Context context, Intent intent) {
                 //do something based on the intent's action
-                setButtonBarNotification(true);
-                setTabNotification(1, true);
+                if (((BaseApplication) getApplication()).getNotificationFlag(Constants.FLAG_FRIENDREQUESTS) > 0) {
+                    setButtonBarNotification(true);
+                    setTabNotification(1, true);
+                }
             }
         };
         registerReceiver(receiver, firebaseListenerServiceFilter);

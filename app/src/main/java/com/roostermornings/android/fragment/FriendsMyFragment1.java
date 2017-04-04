@@ -96,7 +96,7 @@ public class FriendsMyFragment1 extends BaseFragment {
         super.onViewCreated(view, savedInstanceState);
         //Sort names alphabetically before notifying adapter
         sortNames(mUsers);
-        mAdapter = new FriendsMyListAdapter(mUsers, getContext());
+        mAdapter = new FriendsMyListAdapter(mUsers, getActivity(), getContext());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mRecyclerView.setAdapter(mAdapter);
     }

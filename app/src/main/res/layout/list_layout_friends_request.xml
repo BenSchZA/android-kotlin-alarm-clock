@@ -50,7 +50,8 @@
         android:layout_height="wrap_content"
         android:layout_marginRight="@dimen/spacing_large"
         android:layout_gravity="right|center_vertical"
-        android:text="@string/text_friends_button_add"/>
+        android:textAlignment="center"
+        android:text="@string/text_friends_button_accept"/>
 
     <ImageButton
         android:id="@+id/friends_button2"

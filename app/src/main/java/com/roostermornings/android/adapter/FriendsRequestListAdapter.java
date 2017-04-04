@@ -112,7 +112,7 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
             @Override
             public void onClick(View v) {
                 user.setSelected(!user.getSelected());
-                setButtonBackground(holder.btnAdd, user.getSelected());
+                holder.btnAdd.setSelected(user.getSelected());
 
                 ((FriendsFragmentActivity)mContext).acceptFriendRequest(user);
 
@@ -171,11 +171,6 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
             e.printStackTrace();
             holder.txtInitials.setText(RoosterUtils.getInitials(mDataset.get(position).getUser_name()));
         }
-    }
-
-    private void setButtonBackground(Button addButton, Boolean focused) {
-        if (focused) addButton.setBackground(mContext.getResources().getDrawable(R.drawable.rooster_button_light_blue));
-        else addButton.setBackground(mContext.getResources().getDrawable(R.drawable.rooster_button_semi_transparent));
     }
 
     // Return the size of your dataset (invoked by the layout manager)
