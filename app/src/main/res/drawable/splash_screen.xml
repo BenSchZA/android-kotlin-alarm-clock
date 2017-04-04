@@ -12,14 +12,7 @@
     <item>
         <bitmap
             android:gravity="center"
-            android:src="@drawable/logo"/>
+            android:src="@drawable/logo" />
     </item>
-
-    <!--<item android:left="@dimen/activity_horizontal_margin"-->
-        <!--android:right="@dimen/activity_horizontal_margin">-->
-        <!--<bitmap-->
-            <!--android:gravity="center|fill_horizontal"-->
-            <!--android:src="@drawable/rooster_slogan" />-->
-    <!--</item>-->
 
 </layer-list>

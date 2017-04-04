@@ -37,10 +37,9 @@
         android:layout_width="0dp"
         android:layout_weight="1"
         android:layout_height="wrap_content"
-        android:text="Friend name"
+        android:text="Name"
         android:layout_gravity="center_vertical"
         android:paddingLeft="@dimen/spacing_large"
-        android:layout_toLeftOf="@id/my_friends_profile_pic"
         android:textColor="@color/white"
         android:textSize="@dimen/text_normal_large" />
 

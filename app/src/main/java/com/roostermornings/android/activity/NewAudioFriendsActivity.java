@@ -50,6 +50,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
     protected static final String TAG = NewAudioFriendsActivity.class.getSimpleName();
     private NewAudioFriendsActivity mActivity = this;
     ArrayList<User> mFriends = new ArrayList<>();
+    ArrayList<User> mFriendsSelected = new ArrayList<>();
     private RecyclerView.Adapter mAdapter;
     private String localFileString = "";
     private String firebaseIdToken = "";
@@ -130,7 +131,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
             mBound = true;
 
             //Start upload service thread task
-            mUploadService.processAudioFile(firebaseIdToken, localFileString, mFriends);
+            mUploadService.processAudioFile(firebaseIdToken, localFileString, mFriendsSelected);
             //Show that file has been processed so that not deleted in onDestroy
             fileProcessed = true;
         }
@@ -147,7 +148,11 @@ public class NewAudioFriendsActivity extends BaseActivity {
 
         if (!checkInternetConnection()) return;
 
-        if(mFriends.isEmpty()) {
+        for(User friend : mFriends) {
+            if(friend.getSelected() != null && friend.getSelected()) mFriendsSelected.add(friend);
+        }
+
+        if(mFriendsSelected.isEmpty()) {
             Toast.makeText(NewAudioFriendsActivity.this, R.string.new_audio_at_least_one_friend, Toast.LENGTH_LONG);
             return;
         }

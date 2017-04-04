@@ -11,8 +11,12 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
+
+import static com.roostermornings.android.activity.base.BaseActivity.mCurrentUser;
 import static com.roostermornings.android.sqldata.AudioTableContract.AudioTableEntry;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.roostermornings.android.sqldata.AudioTableHelper;
 import com.roostermornings.android.util.Constants;
 
@@ -20,7 +24,9 @@ import java.io.File;
 import java.sql.Array;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by bscholtz on 2/14/17.

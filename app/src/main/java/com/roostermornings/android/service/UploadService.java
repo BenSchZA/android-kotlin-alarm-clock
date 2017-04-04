@@ -167,7 +167,6 @@ public class UploadService extends Service {
         String queueUrl = String.format("social_rooster_queue/%s", friend.getUid());
 
         String uploadKey = mDatabase.child(uploadUrl).push().getKey();
-        String queueKey = mDatabase.child(String.format("social_rooster_queue/%s", friend.getUid())).push().getKey();
 
         SocialRooster socialRoosterUploaded = new SocialRooster(firebaseStorageURL,
                 friend.getUser_name(),
@@ -181,10 +180,12 @@ public class UploadService extends Service {
                 false,
                 baseActivity.mCurrentUser.getProfile_pic(),
                 timestamp.getTime(),
-                friend.getUid(), queueKey, baseActivity.mCurrentUser.getUid());
+                friend.getUid(), uploadKey, baseActivity.mCurrentUser.getUid());
 
+
+        //Note the matching keys
         mDatabase.getDatabase().getReference(uploadUrl + "/" + uploadKey).setValue(socialRoosterUploaded);
-        mDatabase.getDatabase().getReference(queueUrl + "/" + queueKey).setValue(socialRoosterQueue);
+        mDatabase.getDatabase().getReference(queueUrl + "/" + uploadKey).setValue(socialRoosterQueue);
         sendInvitedFriendFCMMessage(friend.getUid());
         Toast.makeText(getApplicationContext(), friend.getUser_name() + " invited!", Toast.LENGTH_LONG).show();
     }
