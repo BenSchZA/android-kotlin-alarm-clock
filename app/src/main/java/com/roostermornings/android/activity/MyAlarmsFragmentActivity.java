@@ -278,6 +278,11 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         startActivity(new Intent(MyAlarmsFragmentActivity.this, FriendsFragmentActivity.class));
     }
 
+    @OnClick(R.id.home_my_uploads)
+    public void manageUploads() {
+        startActivity(new Intent(MyAlarmsFragmentActivity.this, MessageStatusActivity.class));
+    }
+
     public void deleteAlarm(String alarmId) {
         try {
             DeviceAlarmController deviceAlarmController = new DeviceAlarmController(this);
