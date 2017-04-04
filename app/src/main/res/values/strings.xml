@@ -50,6 +50,7 @@
     <string name="friends">Friends</string>
     <string name="text_name_initials"></string>
     <string name="text_friends_button_add">Add</string>
+    <string name="text_friends_button_accept">Accept</string>
     <string name="share_button">Invite friends</string>
     <string name="friends_search_title">Search...</string>
     <string name="search_hint_friends">Search...</string>
