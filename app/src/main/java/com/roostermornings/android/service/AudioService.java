@@ -21,6 +21,7 @@ import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
 
 import com.roostermornings.android.R;
+import com.roostermornings.android.sqlutil.AudioTableController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.sqlutil.AudioTableManager;
@@ -50,6 +51,7 @@ public class AudioService extends Service {
 
     ArrayList<DeviceAudioQueueItem> audioItems = new ArrayList<>();
     AudioTableManager audioTableManager = new AudioTableManager(this);
+    AudioTableController audioTableController = new AudioTableController(this);
     DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(this);
 
     private int alarmCycle;
@@ -349,6 +351,7 @@ public class AudioService extends Service {
         //delete record and file of all listened audio files
         for (DeviceAudioQueueItem audioItem :
              audioTableManager.selectListened()) {
+            if(audioItem.getType() != 1) audioTableController.setListened(audioItem.getQueue_id());
             audioTableManager.removeAudioEntry(audioItem);
             //TODO: check no issues here
             file = new File(getFilesDir() + "/" + audioItem.getFilename());

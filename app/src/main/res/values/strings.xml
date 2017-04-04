@@ -54,6 +54,11 @@
     <string name="friends_search_title">Search...</string>
     <string name="search_hint_friends">Search...</string>
 
+    <string name="roosters">Roosters</string>
+    <string name="status_sent">Sent</string>
+    <string name="status_delivered">Delivered</string>
+    <string name="status_awake">Awake</string>
+
     <string name="get_started">Get started</string>
     <string name="activity_signin_title">Sign up to Rooster to make \n your mornings epic!</string>
     <string name="terms_and_conditions">Terms and conditions</string>

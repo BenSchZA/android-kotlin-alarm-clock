@@ -234,6 +234,11 @@ public class FriendsFragmentActivity extends BaseActivity implements
         startHomeActivity();
     }
 
+    @OnClick(R.id.home_my_uploads)
+    public void manageUploads() {
+        startActivity(new Intent(FriendsFragmentActivity.this, MessageStatusActivity.class));
+    }
+
     private void createViewPager(ViewPager mViewPager) {
 
         // Create the adapter that will return a fragment for each of the three

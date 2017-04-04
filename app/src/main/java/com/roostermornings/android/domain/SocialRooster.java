@@ -5,6 +5,7 @@
 
 package com.roostermornings.android.domain;
 
+import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 
 /**
@@ -22,6 +23,9 @@ public class SocialRooster {
     private String queue_id;
     private String sender_id;
 
+    @Exclude
+    private Integer status;
+
     public SocialRooster(String audio_file_url, String user_name,
                          Boolean listened, String profile_pic, Long date_uploaded,
                          String receiver_id, String queue_id, String sender_id) {
@@ -38,6 +42,16 @@ public class SocialRooster {
     // Required default constructor for Firebase object mapping
     @SuppressWarnings("unused")
     public SocialRooster() {
+    }
+
+    @Exclude
+    public Integer getStatus() {
+        return status;
+    }
+
+    @Exclude
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 
     public String getQueue_id() {

@@ -73,4 +73,16 @@ public class Constants {
 
     //Dialog boolean to indicate viewed
     public final static String PERMISSIONS_DIALOG_OPTIMIZATION = "permissionsDialogOptimization";
+
+    //Calendar constants
+    public final static long TIME_MILLIS_1_MINUTE = 60000;
+    public final static long TIME_MILLIS_1_HOUR = 3600000;
+    public final static long TIME_MILLIS_1_DAY = 86400000;
+    public final static long TIME__MILLIS_1_WEEK = 604800000;
+
+    //MessageStatus Activity
+    public final static int MESSAGE_STATUS_SENT = 1;
+    public final static int MESSAGE_STATUS_DELIVERED = 2;
+    public final static int MESSAGE_STATUS_RECEIVED = 3;
+
 }
