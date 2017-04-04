@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Rooster Mornings Android.
+  ~ Copyright (c)  2017 Roosta Media. All rights reserved.
+  -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="@dimen/spacing_large">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Are you sure you wish to remove this friend?"
+        android:textColor="@color/rooster_blue"
+        android:textSize="@dimen/text_xlarge"
+        android:textStyle="bold" />
+
+</LinearLayout>
