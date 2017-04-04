@@ -18,22 +18,22 @@
             android:text="@string/text_name_initials"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/my_friends_profile_pic"
-            android:layout_alignTop="@+id/my_friends_profile_pic"
-            android:layout_alignRight="@+id/my_friends_profile_pic"
-            android:layout_alignBottom="@+id/my_friends_profile_pic"
+            android:layout_alignLeft="@+id/message_status_friend_profile_pic"
+            android:layout_alignTop="@+id/message_status_friend_profile_pic"
+            android:layout_alignRight="@+id/message_status_friend_profile_pic"
+            android:layout_alignBottom="@+id/message_status_friend_profile_pic"
             android:gravity="center"
             android:textColor="@color/white" />
         <ImageView
-            android:id="@+id/my_friends_profile_pic"
+            android:id="@+id/message_status_friend_profile_pic"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/new_audio_friends_profile_pic_circle"
-            android:alpha="0.3" />
+            android:background="@drawable/new_audio_friends_profile_pic_circle" />
+        <!--android:alpha="0.3"-->
     </RelativeLayout>
 
     <TextView
-        android:id="@+id/my_friends_profile_name"
+        android:id="@+id/message_status_friend_profile_name"
         android:layout_width="0dp"
         android:layout_weight="1"
         android:layout_height="wrap_content"
@@ -41,14 +41,16 @@
         android:layout_gravity="center_vertical"
         android:paddingLeft="@dimen/spacing_large"
         android:textColor="@color/white"
-        android:textSize="@dimen/text_normal_large" />
+        android:textSize="@dimen/text_xlarge" />
 
-    <Button
-        android:id="@+id/friends_add_button"
-        style="@style/RoosterButtonSemiTransparentStyle"
-        android:layout_width="60dp"
+    <TextView
+        android:id="@+id/message_status"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="right|center_vertical"
-        android:text="@string/text_friends_button_add"/>
+        android:text="Status"
+        android:layout_gravity="center_vertical|right"
+        android:textAlignment="textEnd"
+        android:textColor="@color/white_semi_transparent"
+        android:textSize="@dimen/text_xlarge" />
 
 </LinearLayout>
