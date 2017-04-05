@@ -110,6 +110,23 @@ public class AudioTableManager {
 
         updateRoosterCount();
     }
+
+    public DeviceAudioQueueItem extractAudioEntry(String queueId){
+        SQLiteDatabase db = initDB();
+
+        String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_QUEUE_ID + " = " + "'" + queueId + "'" + ";";
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        ArrayList<DeviceAudioQueueItem> deviceAudioQueueItems = extractAudioFiles(cursor);
+
+        db.close();
+
+        if(deviceAudioQueueItems!=null && deviceAudioQueueItems.size() > 0)
+            return deviceAudioQueueItems.get(0);
+        else
+            return null;
+    }
     
     public void removeChannelAudioEntry(String channelId) {
         SQLiteDatabase db = initDB();
@@ -176,8 +193,10 @@ public class AudioTableManager {
         String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_TYPE + " = " + FALSE + " OR " + AudioTableEntry.COLUMN_TYPE + " IS NULL;";
 
         Cursor cursor = db.rawQuery(selectQuery, null);
+        ArrayList<DeviceAudioQueueItem> deviceAudioQueueItems = extractAudioFiles(cursor);
+        db.close();
 
-        return extractAudioFiles(cursor);
+        return deviceAudioQueueItems;
     }
 
     public Integer countSocialAudioFiles() {
@@ -186,8 +205,11 @@ public class AudioTableManager {
         String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_TYPE + " = " + FALSE + " OR " + AudioTableEntry.COLUMN_TYPE + " IS NULL;";
 
         Cursor cursor = db.rawQuery(selectQuery, null);
+        Integer count = cursor.getCount();
+        cursor.close();
+        db.close();
 
-        return cursor.getCount();
+        return count;
     }
 
     public ArrayList<DeviceAudioQueueItem> extractAlarmChannelAudioFiles(String alarmUid) {
@@ -197,8 +219,10 @@ public class AudioTableManager {
         String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_TYPE + " = " + TRUE + " AND " + AudioTableEntry.COLUMN_QUEUE_ID + " = " + "'" + alarmUid + "'" + ";";
 
         Cursor cursor = db.rawQuery(selectQuery, null);
+        ArrayList<DeviceAudioQueueItem> deviceAudioQueueItems = extractAudioFiles(cursor);
+        db.close();
 
-        return extractAudioFiles(cursor);
+        return deviceAudioQueueItems;
     }
 
     public ArrayList<DeviceAudioQueueItem> extractAllChannelAudioFiles() {
@@ -207,8 +231,10 @@ public class AudioTableManager {
         String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_TYPE + " = " + TRUE + ";";
 
         Cursor cursor = db.rawQuery(selectQuery, null);
+        ArrayList<DeviceAudioQueueItem> deviceAudioQueueItems = extractAudioFiles(cursor);
+        db.close();
 
-        return extractAudioFiles(cursor);
+        return deviceAudioQueueItems;
     }
 
     public void setListened(int ID) {
@@ -226,8 +252,10 @@ public class AudioTableManager {
         String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_LISTENED + " = " + TRUE + ";";
 
         Cursor cursor = db.rawQuery(selectQuery, null);
+        ArrayList<DeviceAudioQueueItem> deviceAudioQueueItems = extractAudioFiles(cursor);
+        db.close();
 
-        return extractAudioFiles(cursor);
+        return deviceAudioQueueItems;
     }
 
     private ArrayList<DeviceAudioQueueItem> extractAudioFiles(Cursor cursor) {

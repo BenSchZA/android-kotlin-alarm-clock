@@ -114,8 +114,11 @@ public class BackgroundTaskIntentService extends IntentService {
         BaseActivity.setBadge(getApplicationContext(), ((BaseApplication)getApplication()).getNotificationFlag(Constants.FLAG_ROOSTERCOUNT));
         AudioTableManager audioTableManager = new AudioTableManager(getApplicationContext());
         audioTableManager.updateRoosterCount();
-        Intent intent = new Intent(this, FirebaseListenerService.class);
-        startService(intent);
+        //Check if an instance of service exists, if not then start
+        if(!FirebaseListenerService.running) {
+            Intent intent = new Intent(this, FirebaseListenerService.class);
+            startService(intent);
+        }
     }
 
     public void retrieveChannelContentData(final Context context) {
