@@ -5,6 +5,7 @@
 
 package com.roostermornings.android.domain;
 
+import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.gson.annotations.Expose;
 
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
  * Created by bscholtz on 06/03/17.
  */
 
+@IgnoreExtraProperties
 public class NodeUsers {
 
     @Expose

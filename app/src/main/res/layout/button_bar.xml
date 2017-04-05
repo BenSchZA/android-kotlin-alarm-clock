@@ -12,8 +12,6 @@
     android:layout_gravity="bottom"
     android:background="@color/grey_transparent"
     android:orientation="horizontal"
-    android:paddingTop="@dimen/spacing_normal_large"
-    android:paddingBottom="@dimen/spacing_normal_large"
     android:gravity="center_vertical"
     android:layout_alignParentBottom="true"
     android:layout_centerHorizontal="true">
@@ -33,7 +31,9 @@
             android:layout_margin="@dimen/spacing_small"
             android:src="@drawable/rooster_button_bar_add_alarm"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:clickable="true"/>
+            android:clickable="true"
+            android:padding="@dimen/spacing_normal_large"
+            android:soundEffectsEnabled="true"/>
 
     </FrameLayout>
 
@@ -51,7 +51,9 @@
             android:layout_margin="@dimen/spacing_small"
             android:src="@drawable/rooster_button_bar_chat"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:clickable="true"/>
+            android:clickable="true"
+            android:padding="@dimen/spacing_normal_large"
+            android:soundEffectsEnabled="true"/>
 
     </FrameLayout>
 
@@ -69,7 +71,9 @@
             android:layout_margin="@dimen/spacing_small"
             android:src="@drawable/rooster_button_bar_record_audio"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:clickable="true" />
+            android:clickable="true"
+            android:padding="@dimen/spacing_normal_large"
+            android:soundEffectsEnabled="true"/>
 
     </FrameLayout>
 
@@ -80,10 +84,11 @@
         android:clickable="true">
 
         <RelativeLayout
-            android:layout_width="34dp"
-            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:clipChildren="false">
+            android:clipChildren="false"
+            android:gravity="center">
 
             <ImageButton
                 android:id="@+id/home_friends"
@@ -93,16 +98,17 @@
                 android:src="@drawable/rooster_button_bar_friends"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
-                android:layout_toStartOf="@+id/notification" />
+                android:padding="@dimen/spacing_normal_large"
+                android:soundEffectsEnabled="true"/>
 
             <ImageView
                 android:id="@+id/notification"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/counter_circle_yellow"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentTop="true"
-                android:visibility="gone"/>
+                android:layout_alignRight="@id/home_friends"
+                android:layout_alignTop="@id/home_friends"
+                android:visibility="gone" />
 
         </RelativeLayout>
 
