@@ -15,6 +15,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -75,63 +76,104 @@ public class MessageStatusActivity extends BaseActivity {
 
         calendar = Calendar.getInstance();
 
-        mSocialRoosterUploadsReference = FirebaseDatabase.getInstance().getReference()
-                .child("social_rooster_uploads").child(getFirebaseUser().getUid());
-        mSocialRoosterUploadsReference.keepSynced(true);
-
-        ValueEventListener socialRoosterUploadsListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    final SocialRooster socialRoosterU  = postSnapshot.getValue(SocialRooster.class);
-                    if(socialRoosterU.getDate_uploaded() > (calendar.getTimeInMillis() - 2*Constants.TIME_MILLIS_1_DAY)) {
-                        mRoosters.add(socialRoosterU);
-                        mRoosters.get(mRoosters.indexOf(socialRoosterU)).setStatus(Constants.MESSAGE_STATUS_SENT);
-                        if(socialRoosterU.getListened()) {
-                            mRoosters.get(mRoosters.indexOf(socialRoosterU)).setStatus(Constants.MESSAGE_STATUS_RECEIVED);
-                            notifyAdapter();
-                            return;
-                        }
-                        notifyAdapter();
-
-                        mSocialRoosterQueueReference = FirebaseDatabase.getInstance().getReference()
-                                .child("social_rooster_queue").child(socialRoosterU.getReceiver_id()).child(socialRoosterU.getQueue_id());
-                        mSocialRoosterQueueReference.keepSynced(true);
-
-                        ValueEventListener socialRoosterQueueListener = new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                if(!dataSnapshot.exists()) {
-                                    mRoosters.get(mRoosters.indexOf(socialRoosterU)).setStatus(Constants.MESSAGE_STATUS_DELIVERED);
-                                }
-                                notifyAdapter();
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-                                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                                if(BuildConfig.DEBUG) Toast.makeText(MessageStatusActivity.this, "Failed to load message status.",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        }; mSocialRoosterQueueReference.addValueEventListener(socialRoosterQueueListener);
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                if(BuildConfig.DEBUG) Toast.makeText(MessageStatusActivity.this, "Failed to load message status.",
-                        Toast.LENGTH_SHORT).show();
-            }
-        }; mSocialRoosterUploadsReference.addValueEventListener(socialRoosterUploadsListener);
+        //Reload adapter data and set message status, set listener for new data
+        updateMessageStatus();
 
         //Set toolbar title
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         toolbarTitle.setText(getString(R.string.roosters));
+    }
+
+    private void updateMessageStatus() {
+        mSocialRoosterUploadsReference = FirebaseDatabase.getInstance().getReference()
+                .child("social_rooster_uploads").child(getFirebaseUser().getUid());
+        mSocialRoosterUploadsReference.keepSynced(true);
+
+        final ChildEventListener socialRoosterUploadsListener = new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                final SocialRooster socialRoosterU = dataSnapshot.getValue(SocialRooster.class);
+                for (SocialRooster item: mRoosters) if(item.getQueue_id().equals(socialRoosterU.getQueue_id())) {
+                    mRoosters.remove(item);
+                    break;
+                }
+                processSocialRoosterUploadsItem(socialRoosterU);
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                final SocialRooster socialRoosterU = dataSnapshot.getValue(SocialRooster.class);
+                for (SocialRooster item: mRoosters) if(item.getQueue_id().equals(socialRoosterU.getQueue_id())) {
+                    mRoosters.remove(item);
+                    break;
+                }
+                processSocialRoosterUploadsItem(socialRoosterU);
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                final SocialRooster socialRoosterU = dataSnapshot.getValue(SocialRooster.class);
+                for (SocialRooster item: mRoosters) if(item.getQueue_id().equals(socialRoosterU.getQueue_id())) {
+                    mRoosters.remove(item);
+                    return;
+                }
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+        mSocialRoosterUploadsReference.addChildEventListener(socialRoosterUploadsListener);
+    }
+
+    private void processSocialRoosterUploadsItem(final SocialRooster socialRoosterU) {
+        long dateUploaded;
+        try {
+            dateUploaded = socialRoosterU.getDate_uploaded();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            return;
+        }
+        if (dateUploaded > (calendar.getTimeInMillis() - 2 * Constants.TIME_MILLIS_1_DAY)) {
+            //Clear old entries on change
+            mRoosters.add(socialRoosterU);
+            mRoosters.get(mRoosters.indexOf(socialRoosterU)).setStatus(Constants.MESSAGE_STATUS_SENT);
+            if (socialRoosterU.getListened()) {
+                mRoosters.get(mRoosters.indexOf(socialRoosterU)).setStatus(Constants.MESSAGE_STATUS_RECEIVED);
+                notifyAdapter();
+            } else {
+                mSocialRoosterQueueReference = FirebaseDatabase.getInstance().getReference()
+                        .child("social_rooster_queue").child(socialRoosterU.getReceiver_id()).child(socialRoosterU.getQueue_id());
+                mSocialRoosterQueueReference.keepSynced(true);
+
+                ValueEventListener socialRoosterQueueListener = new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (!dataSnapshot.exists()) {
+                            mRoosters.get(mRoosters.indexOf(socialRoosterU)).setStatus(Constants.MESSAGE_STATUS_DELIVERED);
+                            notifyAdapter();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+                        if (BuildConfig.DEBUG)
+                            Toast.makeText(MessageStatusActivity.this, "Failed to load message status.",
+                                    Toast.LENGTH_SHORT).show();
+                    }
+                };
+                mSocialRoosterQueueReference.addValueEventListener(socialRoosterQueueListener);
+            }
+        }
     }
 
     private void notifyAdapter() {

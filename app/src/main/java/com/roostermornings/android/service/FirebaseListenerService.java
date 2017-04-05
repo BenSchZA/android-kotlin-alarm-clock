@@ -18,11 +18,14 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.domain.SocialRooster;
+import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.util.Constants;
 
 public class FirebaseListenerService extends Service {
     protected DatabaseReference mDatabase;
     protected FirebaseAuth mAuth;
+    static boolean running = false;
 
     public FirebaseListenerService() {
     }
@@ -35,6 +38,9 @@ public class FirebaseListenerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        running = true;
+        //Reset flags - NB onChildChanged called once for each child when first called
+        ((BaseApplication)getApplication()).setNotificationFlag(0, Constants.FLAG_FRIENDREQUESTS);
         //Listen for changes to Firebase user friend requests, display notification
         if(getFirebaseUser() != null) {
             mDatabase = FirebaseDatabase.getInstance().getReference();

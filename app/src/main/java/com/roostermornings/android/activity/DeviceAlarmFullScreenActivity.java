@@ -21,7 +21,6 @@ import android.os.PowerManager;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.util.Log;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -32,7 +31,6 @@ import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
-import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.util.Constants;
 import com.squareup.picasso.Callback;
@@ -138,11 +136,10 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         finish();
     }
 
-    //TODO:
-//    @OnClick(R.id.skip_previous)
-//    protected void onSkipPreviousButtonClicked() {
-//        mAudioService.skipPrevious();
-//    }
+    @OnClick(R.id.skip_previous)
+    protected void onSkipPreviousButtonClicked() {
+        mAudioService.skipPrevious();
+    }
 
     @OnClick(R.id.skip_next)
     protected void onSkipNextButtonClicked() {
@@ -167,7 +164,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
                 //Replace image and name with message if no Roosters etc.
                 setDefaultDisplayProfile();
             } else {
-                mAudioService.startAlarmRoosters(alarmUid);
+                mAudioService.startAlarmContent(alarmUid);
             }
         }
 

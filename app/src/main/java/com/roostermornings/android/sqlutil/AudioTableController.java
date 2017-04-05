@@ -23,9 +23,9 @@ public final class AudioTableController {
         this.context = context;
     }
 
-    public void setListened(String queueId) {
+    public void setListened(String senderId, String queueId) {
         DatabaseReference socialRoosterUploadsReference = FirebaseDatabase.getInstance().getReference()
-                .child("social_rooster_uploads").child(mCurrentUser.getUid()).child(queueId);
+                .child("social_rooster_uploads").child(senderId).child(queueId);
 
         Map<String, Object> childUpdates = new HashMap<>();
         childUpdates.put("listened", true);

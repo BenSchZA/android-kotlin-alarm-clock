@@ -157,8 +157,6 @@ public class FriendsFragmentActivity extends BaseActivity implements
 
         FontsOverride.changeTabsFont(getApplicationContext(), tabLayout, Constants.APP_FONT);
 
-        buttonMyFriends.setBackgroundResource(R.drawable.rooster_button_bar_friends_active);
-
         //Handle search intent
         handleIntent(getIntent());
     }
