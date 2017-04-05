@@ -13,7 +13,10 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -23,11 +26,9 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
-import com.google.firebase.database.Exclude;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.NewAudioFriendsListAdapter;
-import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.service.UploadService;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.domain.Users;
@@ -58,12 +59,10 @@ public class NewAudioFriendsActivity extends BaseActivity {
 
     UploadService mUploadService;
     private boolean mBound;
+    private static int statusCode = 0;
 
     @BindView(R.id.progressBar)
     ProgressBar progressBar;
-
-    @BindView(R.id.new_audio_upload_button)
-    Button btnNewAudioSave;
 
     @BindView(R.id.new_audio_friendsListView)
     RecyclerView mRecyclerView;
@@ -72,6 +71,11 @@ public class NewAudioFriendsActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_new_audio_friends);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         setDayNight();
 
@@ -92,7 +96,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
         if(extras.containsKey(Constants.EXTRA_FRIENDS_LIST) && (ArrayList<User>)extras.getSerializable(Constants.EXTRA_FRIENDS_LIST) != null) {
             mFriends.addAll((ArrayList<User>) extras.getSerializable(Constants.EXTRA_FRIENDS_LIST));
             if(mFriends.size() > 0 && mFriends.get(0).getSelected()) {
-                onSaveButtonClick();
+                onSendMenuItemClick();
             }
         } else if(checkInternetConnection()) {
             mAdapter = new NewAudioFriendsListAdapter(mFriends, NewAudioFriendsActivity.this);
@@ -104,6 +108,32 @@ public class NewAudioFriendsActivity extends BaseActivity {
                 Toast.makeText(this, "Do you have any Rooster friends? Or an internet connection?", Toast.LENGTH_LONG).show();
                 startHomeActivity();
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_new_audio, menu);
+        if(statusCode == 200) {
+            MenuItem item = menu.findItem(R.id.action_send);
+            item.setVisible(true);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_send) {
+            onSendMenuItemClick();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -143,8 +173,28 @@ public class NewAudioFriendsActivity extends BaseActivity {
         }
     };
 
-    @OnClick(R.id.new_audio_upload_button)
-    protected void onSaveButtonClick() {
+    @OnClick(R.id.home_friends)
+    public void manageFriends() {
+        startActivity(new Intent(NewAudioFriendsActivity.this, FriendsFragmentActivity.class));
+    }
+
+    @OnClick(R.id.home_my_alarms)
+    public void manageAlarms() {
+        startHomeActivity();
+    }
+
+    @OnClick(R.id.home_my_uploads)
+    public void manageUploads() {
+        startActivity(new Intent(NewAudioFriendsActivity.this, MessageStatusActivity.class));
+    }
+
+    @OnClick(R.id.home_record_audio)
+    public void recordNewAudio() {
+        if (!checkInternetConnection()) return;
+        startActivity(new Intent(NewAudioFriendsActivity.this, NewAudioRecordActivity.class));
+    }
+
+    private void onSendMenuItemClick() {
 
         if (!checkInternetConnection()) return;
 
@@ -185,7 +235,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
             public void onResponse(Response<Users> response,
                                    Retrofit retrofit) {
 
-                int statusCode = response.code();
+                statusCode = response.code();
                 Users apiResponse = response.body();
 
                 if (statusCode == 200) {
@@ -198,7 +248,8 @@ public class NewAudioFriendsActivity extends BaseActivity {
                     sortNames(mFriends);
                     mAdapter.notifyDataSetChanged();
 
-                    btnNewAudioSave.setVisibility(View.VISIBLE);
+                    //Recreate menu to show send item
+                    invalidateOptionsMenu();
                 }
             }
 

@@ -123,13 +123,17 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                     AlarmChannel alarmChannel = alarm.getChannel();
                     String alarmChannelUID = "";
                     if(alarmChannel != null) alarmChannelUID = alarmChannel.getId();
+
                     //If alarm from firebase does not exist locally, create it
                     if(!deviceAlarmTableManager.isSetInDB(alarm.getUid()) && alarm.isEnabled()) {
                         deviceAlarmController.registerAlarmSet(alarm.getUid(), alarm.getHour(), alarm.getMinute(),
                                 alarm.getDays(), alarm.isRecurring(), alarm.isVibrate(), alarmChannelUID, alarm.isAllow_friend_audio_files());
                     }
+
                     //Check SQL db to see if all alarms in set have fired
-                    deviceAlarmController.setSetEnabled(alarm.getUid(), deviceAlarmTableManager.isSetEnabled(alarm.getUid()));
+                    alarm.setEnabled(deviceAlarmTableManager.isSetEnabled(alarm.getUid()));
+                    deviceAlarmController.setSetEnabled(alarm.getUid(), alarm.isEnabled());
+
                     //Add alarm to display array
                     mAlarms.add(alarm);
                     mAdapter.notifyItemInserted(mAlarms.size() - 1);
@@ -158,9 +162,11 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     private void updateRoosterNotification() {
         AudioTableManager audioTableManager = new AudioTableManager(this);
         Integer roosterCount = audioTableManager.countSocialAudioFiles();
+
         if (roosterCount > 0) {
             DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(getApplicationContext());
             DeviceAlarm deviceAlarm  = deviceAlarmTableManager.getNextPendingAlarm();
+
             if(deviceAlarm == null) for (Alarm alarm: mAlarms) alarm.setUnseen_roosters(0);
             else {
                 for (Alarm alarm : mAlarms) {
@@ -181,9 +187,11 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
             public void onReceive(Context context, Intent intent) {
                 //do something based on the intent's action
                 Integer roosterCount = ((BaseApplication) getApplication()).getNotificationFlag(Constants.FLAG_ROOSTERCOUNT);
+
                 if(roosterCount > 0){
                     DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(getApplicationContext());
                     DeviceAlarm deviceAlarm  = deviceAlarmTableManager.getNextPendingAlarm();
+
                     if(deviceAlarm == null) return;
                     for (Alarm alarm:
                          mAlarms) {

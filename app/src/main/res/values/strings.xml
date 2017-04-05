@@ -34,7 +34,7 @@
     <string name="title_activity_new_audio">NewAudioActivity</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
-    <string name="send">send</string>
+    <string name="send">Send</string>
 
     <string name="my_alarms">My Alarms</string>
     <string name="create_alarm">Create Alarm</string>
