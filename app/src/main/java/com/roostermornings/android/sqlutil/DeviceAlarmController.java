@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.roostermornings.android.activity.base.BaseActivity.mCurrentUser;
+import static com.roostermornings.android.util.RoosterUtils.hasKitKat;
 import static com.roostermornings.android.util.RoosterUtils.hasLollipop;
 
 /**
@@ -106,9 +107,15 @@ public final class DeviceAlarmController {
                 AlarmManager.AlarmClockInfo alarmInfo = new AlarmManager.AlarmClockInfo(alarmTime, alarmInfoPendingIntent);
                 alarmMgr.setAlarmClock(alarmInfo, alarmPendingIntent);
 
-            } else {
+            } else if(hasKitKat()) {
                 //if older version of android, don't require info pending intent
                 alarmMgr.setExact(AlarmManager.RTC_WAKEUP, alarmTime, alarmPendingIntent);
+                // Show alarm in the status bar
+                Intent alarmChanged = new Intent(Constants.ACTION_ALARMCHANGED);
+                alarmChanged.putExtra(Constants.EXTRA_ALARMSET, true);
+                context.sendBroadcast(alarmChanged);
+            } else {
+                alarmMgr.set(AlarmManager.RTC_WAKEUP, alarmTime, alarmPendingIntent);
                 // Show alarm in the status bar
                 Intent alarmChanged = new Intent(Constants.ACTION_ALARMCHANGED);
                 alarmChanged.putExtra(Constants.EXTRA_ALARMSET, true);
@@ -146,15 +153,20 @@ public final class DeviceAlarmController {
             AlarmManager.AlarmClockInfo alarmInfo = new AlarmManager.AlarmClockInfo(alarmTime, alarmInfoPendingIntent);
             alarmMgr.setAlarmClock(alarmInfo, alarmPendingIntent);
 
-        } else {
-            //if older of android, don't require info pending intent
+        } else if(hasKitKat()) {
+            //if older version of android, don't require info pending intent
             alarmMgr.setExact(AlarmManager.RTC_WAKEUP, alarmTime, alarmPendingIntent);
             // Show alarm in the status bar
             Intent alarmChanged = new Intent(Constants.ACTION_ALARMCHANGED);
             alarmChanged.putExtra(Constants.EXTRA_ALARMSET, true);
             context.sendBroadcast(alarmChanged);
+        } else {
+            alarmMgr.set(AlarmManager.RTC_WAKEUP, alarmTime, alarmPendingIntent);
+            // Show alarm in the status bar
+            Intent alarmChanged = new Intent(Constants.ACTION_ALARMCHANGED);
+            alarmChanged.putExtra(Constants.EXTRA_ALARMSET, true);
+            context.sendBroadcast(alarmChanged);
         }
-
     }
 
     public void registerAlarmSet(String setId, int alarmHour, int alarmMinute, List<Integer> alarmDays, boolean repeatWeekly, boolean vibrate, String channel, boolean social) {

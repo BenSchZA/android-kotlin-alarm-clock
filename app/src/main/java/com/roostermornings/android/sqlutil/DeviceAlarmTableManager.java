@@ -29,7 +29,6 @@ public class DeviceAlarmTableManager {
 
     private DeviceAlarm alarm;
     private Context context;
-    private Calendar calendar = Calendar.getInstance();
 
     //SQL Arguments
     private String TrueFalse = "0";
