@@ -45,8 +45,6 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
     public static final String TAG = DeviceAlarmFullScreenActivity.class.getSimpleName();
 
-    PowerManager.WakeLock wakeLock;
-
     AudioService mAudioService;
     private boolean mBound;
     private BroadcastReceiver receiver;
@@ -238,7 +236,6 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
                     @Override
                     public void onError() {
-                        //imgSenderPic.setBackground(getResources().getDrawable(R.drawable.alarm_profile_pic_circle));
                         setDefaultDisplayProfile();
                     }
                 });
