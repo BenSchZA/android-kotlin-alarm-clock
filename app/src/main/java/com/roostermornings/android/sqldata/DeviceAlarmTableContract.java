@@ -31,8 +31,6 @@ public final class DeviceAlarmTableContract {
         public static final String COLUMN_CHANNEL = "channel";
         public static final String COLUMN_ITERATION = "iteration";
         public static final String COLUMN_LABEL = "label";
-        public static final String COLUMN_RINGTONE = "ringtone";
-        public static final String COLUMN_VIBRATE = "vibrate";
         public static final String COLUMN_ENABLED = "enabled";
         public static final String COLUMN_CHANGED = "changed";
 
@@ -56,8 +54,6 @@ public final class DeviceAlarmTableContract {
                     + AlarmTableEntry.COLUMN_ITERATION + " INTEGER NOT NULL, "
                     + AlarmTableEntry.COLUMN_LABEL + " TEXT, "
 
-                    + AlarmTableEntry.COLUMN_RINGTONE + " INTEGER DEFAULT 0, "
-                    + AlarmTableEntry.COLUMN_VIBRATE + " INTEGER DEFAULT 0, "
                     + AlarmTableEntry.COLUMN_ENABLED + " INTEGER DEFAULT 1, "
                     + AlarmTableEntry.COLUMN_CHANGED + " INTEGER DEFAULT 0, "
                     + AlarmTableEntry.COLUMN_DATE_CREATED + " DATE DEFAULT (datetime('now','localtime')), "

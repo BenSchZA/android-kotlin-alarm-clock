@@ -71,10 +71,6 @@ public final class DeviceAlarmController {
                 alarmIntent.putExtra(Constants.EXTRA_RECURRING, true);
             }
 
-            if (deviceAlarm.getVibrate()){
-                alarmIntent.putExtra(Constants.EXTRA_VIBRATE, true);
-            }
-
             PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(context,
                     deviceAlarm.getPiId(), alarmIntent,
                     PendingIntent.FLAG_UPDATE_CURRENT);
@@ -133,9 +129,6 @@ public final class DeviceAlarmController {
         Intent alarmIntent = new Intent(context, DeviceAlarmReceiver.class);
         alarmIntent.setAction(Constants.ACTTION_ALARMRECEIVER);
         alarmIntent.putExtra(Constants.EXTRA_REQUESTCODE, 0);
-
-        alarmIntent.putExtra(Constants.EXTRA_VIBRATE, true);
-        alarmIntent.putExtra(Constants.EXTRA_TONE, false);
         alarmIntent.putExtra(Constants.EXTRA_UID, setId);
 
         PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(context,
@@ -169,10 +162,10 @@ public final class DeviceAlarmController {
         }
     }
 
-    public void registerAlarmSet(String setId, int alarmHour, int alarmMinute, List<Integer> alarmDays, boolean repeatWeekly, boolean vibrate, String channel, boolean social) {
+    public void registerAlarmSet(String setId, int alarmHour, int alarmMinute, List<Integer> alarmDays, boolean repeatWeekly, String channel, boolean social) {
         List<DeviceAlarm> deviceAlarmList;
         DeviceAlarm deviceAlarmSet = new DeviceAlarm()
-                .initAlarmSet(alarmHour, alarmMinute, alarmDays, repeatWeekly, vibrate, channel, social);
+                .initAlarmSet(alarmHour, alarmMinute, alarmDays, repeatWeekly, channel, social);
         deviceAlarmList = deviceAlarmSet.getAlarmList();
 
         for (DeviceAlarm deviceAlarm :
@@ -312,9 +305,6 @@ public final class DeviceAlarmController {
 
         if (deviceAlarm.getRecurring()) {
             alarmIntent.putExtra(Constants.EXTRA_RECURRING, true);
-        }
-        if (deviceAlarm.getVibrate()){
-            alarmIntent.putExtra(Constants.EXTRA_VIBRATE, true);
         }
 
         PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(context,

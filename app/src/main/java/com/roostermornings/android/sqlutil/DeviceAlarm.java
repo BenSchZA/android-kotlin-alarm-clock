@@ -31,8 +31,6 @@ public class DeviceAlarm {
 
     private String channel;
     private String label;
-    private int ringtone;
-    private boolean vibrate;
     private boolean enabled;
     private boolean changed;
 
@@ -55,12 +53,11 @@ public class DeviceAlarm {
     alarmList = alarmSet.getAlarmList();*/
 
 
-    public DeviceAlarm initAlarmSet(int hour, int minute, List<Integer> alarmDays, boolean repeatWeekly, boolean vibrate, String channel, boolean allowSocialRoosters) {
+    public DeviceAlarm initAlarmSet(int hour, int minute, List<Integer> alarmDays, boolean repeatWeekly, String channel, boolean allowSocialRoosters) {
         this.hour = hour;
         this.minute = minute;
         this.alarmDays = alarmDays;
         this.recurring = repeatWeekly;
-        this.vibrate = vibrate;
         this.channel = channel;
         this.social = allowSocialRoosters;
         return this;
@@ -71,17 +68,16 @@ public class DeviceAlarm {
 
         while (dayIterator.hasNext()) {
             day = Integer.valueOf(dayIterator.next().toString());
-            deviceAlarmSet.add(new DeviceAlarm().setAlarm(this.hour, this.minute, day, this.recurring, this.vibrate, this.channel, this.social));
+            deviceAlarmSet.add(new DeviceAlarm().setAlarm(this.hour, this.minute, day, this.recurring, this.channel, this.social));
         }
         return deviceAlarmSet;
     }
 
-    private DeviceAlarm setAlarm(int hour, int minute, int day, boolean repeatWeekly, boolean vibrate, String channel, boolean social) {
+    private DeviceAlarm setAlarm(int hour, int minute, int day, boolean repeatWeekly, String channel, boolean social) {
         this.hour = hour;
         this.minute = minute;
         this.day = day;
         this.recurring = repeatWeekly;
-        this.vibrate = vibrate;
         this.alarmMillis = -1;
         this.channel = channel;
         this.social = social;
@@ -167,22 +163,6 @@ public class DeviceAlarm {
 
     public void setLabel(String label) {
         this.label = label;
-    }
-
-    public int getRingtone() {
-        return this.ringtone;
-    }
-
-    public void setRingtone(int ringtone) {
-        this.ringtone = ringtone;
-    }
-
-    public boolean getVibrate() {
-        return this.vibrate;
-    }
-
-    public void setVibrate(boolean vibrate) {
-        this.vibrate = vibrate;
     }
 
     public boolean getEnabled() {
