@@ -40,11 +40,15 @@
 
     <!--Override action bar titles set in activity-->
 
-    <style name="AppThemeDay.NoActionBar">
+    <style name="AppThemeDay.NoActionBar" parent="AppThemeDay">
         <item name="windowActionBar">true</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowAnimationStyle">@null</item>
         <item name="android:elevation">0dp</item>
+    </style>
+
+    <style name="SettingsTheme" parent="AppThemeDay.NoActionBar">
+        <item name="android:windowBackground">@drawable/main_background_layer_list_day</item>
     </style>
 
     <style name="SplashTheme" parent="AppTheme.NoActionBarIntro">

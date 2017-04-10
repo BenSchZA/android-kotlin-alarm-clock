@@ -7,7 +7,8 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:key="pref_key_user_settings">
+    android:key="pref_key_user_settings"
+    android:title="Settings">
     <PreferenceCategory
         android:title="Alarm Activation"
         android:key="pref_key_alarm_activation_settings">
