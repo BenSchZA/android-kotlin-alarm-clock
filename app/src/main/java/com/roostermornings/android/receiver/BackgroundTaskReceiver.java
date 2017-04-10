@@ -49,7 +49,7 @@ public class BackgroundTaskReceiver extends BroadcastReceiver {
         PendingIntent backgroundIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
 
         if(start) alarmMgrBackgroundTask.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 10 * 1000,
-                    1 * 60 * 1000, backgroundIntent);
+                    Constants.TIME_MILLIS_1_MINUTE, backgroundIntent);
         else alarmMgrBackgroundTask.cancel(backgroundIntent);
     }
 
@@ -62,7 +62,7 @@ public class BackgroundTaskReceiver extends BroadcastReceiver {
         PendingIntent backgroundIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
 
         if(start) alarmMgrBackgroundTask.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 10 * 1000,
-                    86400 * 1000, backgroundIntent);
+                Constants.TIME_MILLIS_1_DAY, backgroundIntent);
         else alarmMgrBackgroundTask.cancel(backgroundIntent);
     }
 
@@ -75,7 +75,7 @@ public class BackgroundTaskReceiver extends BroadcastReceiver {
         PendingIntent backgroundIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
 
         if(start) alarmMgrBackgroundTask.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 2 * 1000,
-                    60 * 1000, backgroundIntent);
+                    Constants.TIME_MILLIS_1_MINUTE, backgroundIntent);
         else alarmMgrBackgroundTask.cancel(backgroundIntent);
     }
 }
