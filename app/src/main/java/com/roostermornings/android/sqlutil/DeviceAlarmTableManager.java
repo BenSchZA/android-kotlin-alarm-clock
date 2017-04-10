@@ -55,7 +55,6 @@ public class DeviceAlarmTableManager {
         values.put(AlarmTableEntry.COLUMN_MINUTE, alarm.getMinute());
         values.put(AlarmTableEntry.COLUMN_DAY, alarm.getDay());
         values.put(AlarmTableEntry.COLUMN_RECURRING, alarm.getRecurring());
-        values.put(AlarmTableEntry.COLUMN_VIBRATE, alarm.getVibrate());
         values.put(AlarmTableEntry.COLUMN_MILLIS, alarm.getMillis());
         values.put(AlarmTableEntry.COLUMN_ITERATION, 1);
         values.put(AlarmTableEntry.COLUMN_CHANNEL, alarm.getChannel());
@@ -352,8 +351,6 @@ public class DeviceAlarmTableManager {
                 alarm.setSocial(cursor.getInt(cursor.getColumnIndex(AlarmTableEntry.COLUMN_SOCIAL)) > 0);
                 alarm.setChannel(cursor.getString(cursor.getColumnIndex(AlarmTableEntry.COLUMN_CHANNEL)));
                 alarm.setLabel(cursor.getString(cursor.getColumnIndex(AlarmTableEntry.COLUMN_LABEL)));
-                alarm.setRingtone(cursor.getInt(cursor.getColumnIndex(AlarmTableEntry.COLUMN_RINGTONE)));
-                alarm.setVibrate(cursor.getInt(cursor.getColumnIndex(AlarmTableEntry.COLUMN_VIBRATE)) > 0);
                 alarm.setEnabled(cursor.getInt(cursor.getColumnIndex(AlarmTableEntry.COLUMN_ENABLED)) > 0);
                 alarm.setChanged(cursor.getInt(cursor.getColumnIndex(AlarmTableEntry.COLUMN_CHANGED)) > 0);
 

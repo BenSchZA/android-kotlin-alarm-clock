@@ -156,14 +156,9 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
             deviceAlarmController = new DeviceAlarmController(getApplicationContext());
 
-            //TODO: This intent extra is not currently implemented
-            if (getIntent().getBooleanExtra(Constants.EXTRA_TONE, false)) {
-                mAudioService.startDefaultAlarmTone();
-                //Replace image and name with message if no Roosters etc.
-                setDefaultDisplayProfile();
-            } else {
-                mAudioService.startAlarmContent(alarmUid);
-            }
+            //Replace image and name with message if no Roosters etc.
+            setDefaultDisplayProfile();
+            mAudioService.startAlarmContent(alarmUid);
         }
 
         // Called when the connection with the service disconnects unexpectedly
