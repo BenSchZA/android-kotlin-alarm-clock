@@ -68,7 +68,7 @@ public class NewAudioRecordActivity extends BaseActivity {
     private final int MAX_RECORDING_TIME = 60000;
     private final String maxRecordingTime = "60";
 
-    private ArrayList<User> mFriends = new ArrayList<>();
+    private ArrayList<Friend> mFriends = new ArrayList<>();
 
     //Silence average: 125
     //Ambient music: 300
@@ -345,17 +345,9 @@ public class NewAudioRecordActivity extends BaseActivity {
         Bundle bun = new Bundle();
         bun.putString(Constants.EXTRA_LOCAL_FILE_STRING, mAudioSavePathInDevice);
         if(getIntent().getExtras() != null && getIntent().getExtras().containsKey(Constants.EXTRA_FRIENDS_LIST) && (ArrayList<Friend>)getIntent().getSerializableExtra(Constants.EXTRA_FRIENDS_LIST) != null) {
-            ArrayList<User> tempUsers = new ArrayList<>();
             ArrayList<Friend> tempFriends = (ArrayList<Friend>)getIntent().getSerializableExtra(Constants.EXTRA_FRIENDS_LIST);
-            for (User user:
-                 mFriends) {
-                if(user.getUid().equals(tempFriends.get(0).getUid())) {
-                    user.setSelected(true);
-                    tempUsers.add(user);
-                }
-            }
             mFriends.clear();
-            mFriends.addAll(tempUsers);
+            mFriends.addAll(tempFriends);
             bun.putSerializable(Constants.EXTRA_FRIENDS_LIST, mFriends);
         }
 

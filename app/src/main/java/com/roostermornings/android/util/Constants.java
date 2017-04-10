@@ -12,7 +12,12 @@ public class Constants {
     public final static String FACEBOOK_APP_ID = "190341188110134";
 
     //User settings
-    public final static String USER_SETTINGS_VIBRATE = "userSettingsVibrate";
+    //These are used in application_user_settings, but ensure strings are correct
+    public final static String USER_SETTINGS_VIBRATE = "pref_key_alarm_vibrate";
+    public final static String USER_SETTINGS_DEFAULT_TONE = "pref_key_alarm_default_tone";
+    public final static String USER_SETTINGS_DOWNLOAD_ON_DATA = "pref_key_download_on_data";
+
+    public final static long[] VIBRATE_PATTERN = {0, 1000, 500, 1000, 500};
 
     //BaseActivity
     public final static int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 10;

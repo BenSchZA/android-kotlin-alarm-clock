@@ -19,6 +19,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerManager;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -81,7 +82,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     public static User mCurrentUser;
 
     @Inject
-    protected SharedPreferences sharedPreferences;
+    public SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -91,6 +92,9 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
 
         //inject Dagger dependencies
         baseApplication.getRoosterApplicationComponent().inject(this);
+
+        //Set default application settings preferences - don't overwrite existing if false
+        setPreferenceManagerDefaultSettings(false);
 
         //get reference to Firebase database
         mDatabase = FirebaseDatabase.getInstance().getReference();
@@ -124,7 +128,26 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
 
     public BaseActivity(){}
 
+    private void setPreferenceManagerDefaultSettings(Boolean overwrite) {
+        // ensure user settings are set to default once when new user
+        // As long as you set the third argument to false, you can safely call this method
+        // every time your activity starts without overriding the user's saved preferences
+        // by resetting them to the defaults. However, if you set it to true, you will
+        // override any previous values with the defaults.
+
+        if(overwrite) {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.remove("pref_key_user_settings").apply();
+        }
+        PreferenceManager.setDefaultValues(this, R.xml.application_user_settings, overwrite);
+    }
+
     public boolean checkInternetConnection() {
+        if(!checkMobileDataConnection()) {
+            Toast.makeText(getApplicationContext(), "'Download/upload on mobile data' is disabled in Settings, " +
+                    "please enable this and try again.", Toast.LENGTH_LONG).show();
+        }
+
         if (this.noInternetConnection()) {
             Toast.makeText(getApplicationContext(), "No internet connection was found, please " +
                     "connect and try again.", Toast.LENGTH_LONG).show();
@@ -132,6 +155,16 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         }
 
         //checkFirebaseConnection(); #TODO - check why this is randomly failing
+        return true;
+    }
+
+    public boolean checkMobileDataConnection() {
+        if (mobileDataConnection() && !sharedPreferences.getBoolean(Constants.USER_SETTINGS_DOWNLOAD_ON_DATA, true)) {
+            //TODO: maybe display this once?
+//            Toast.makeText(getApplicationContext(), "'Download on mobile data' is disabled in Settings, " +
+//                    "please enable this and try again.", Toast.LENGTH_LONG).show();
+            return false;
+        }
         return true;
     }
 
@@ -162,6 +195,10 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
 
     protected boolean noInternetConnection() {
         return InternetHelper.noInternetConnection(this);
+    }
+
+    protected boolean mobileDataConnection() {
+        return  InternetHelper.mobileDataConnection(this);
     }
 
     protected void startHomeActivity() {
@@ -292,6 +329,12 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(this, false);
         backgroundTaskReceiver.scheduleBackgroundDailyTask(this, false);
         backgroundTaskReceiver.scheduleBackgroundUpdateNotificationsTask(this, false);
+        //Set default application settings preferences - don't overwrite existing if false
+        setPreferenceManagerDefaultSettings(true);
+        //Clear shared preferences
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        //TODO:
+        editor.apply();
         //Go to splash activity and onboarding
         Intent intent = new Intent(this, SplashActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -370,10 +413,11 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
 
     public void requestPermissionIgnoreBatteryOptimization(Context context) {
         //Google wasn't happy with us programatically requesting this permission, so a dialog will have to do
-        String packageName = getPackageName();
-        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+//        String packageName = getPackageName();
+//        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+//        RoosterUtils.hasM() && pm.isIgnoringBatteryOptimizations(packageName) &&
 
-        if(RoosterUtils.hasM() && pm.isIgnoringBatteryOptimizations(packageName) && !sharedPreferences.getBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false)) {
+        if(!sharedPreferences.getBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false)) {
             View dialogMmpView = LayoutInflater.from(context)
                     .inflate(R.layout.dialog_permissions_explainer, null);
             new MaterialDialog.Builder(context)

@@ -10,7 +10,7 @@
     android:layout_height="match_parent"
     android:layout_gravity="center"
     android:orientation="vertical"
-    tools:context="com.roostermornings.android.fragment.NewAlarmFragment1">
+    tools:context="com.roostermornings.android.fragment.new_alarm.NewAlarmFragment1">
 
     <TextView
         android:id="@+id/new_alarm_time"

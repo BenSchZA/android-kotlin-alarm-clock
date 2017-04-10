@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -78,6 +79,9 @@ public class SignInActivity extends BaseActivity {
 
     @BindView(R.id.signin_button_google)
     Button mButtonSigninGoogle;
+
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -167,13 +171,17 @@ public class SignInActivity extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        if (!checkInternetConnection()) return;
+
         //Result returned from launching Facebook authentication
         if (requestCode == CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode()) {
+            progressBar.setVisibility(View.VISIBLE);
             facebookCallbackManager.onActivityResult(requestCode, resultCode, data);
         }
 
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
+            progressBar.setVisibility(View.VISIBLE);
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             handleSignInResult(result);
         }
@@ -181,6 +189,8 @@ public class SignInActivity extends BaseActivity {
 
     //Facebook
     private void handleFacebookAccessToken(AccessToken token) {
+        if (!checkInternetConnection()) return;
+
         Log.d(TAG, "handleFacebookAccessToken:" + token);
 
         final AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
@@ -237,6 +247,9 @@ public class SignInActivity extends BaseActivity {
                             proceedToMyAlarmsActivity();
 
                         } else{
+                            //Remove progress bar on failure
+                            progressBar.setVisibility(View.GONE);
+
                             Log.w(TAG, "Facebook: signInWithCredential", task.getException());
                             Toast.makeText(SignInActivity.this, task.getException().getMessage(),
                                     Toast.LENGTH_LONG).show();
@@ -258,6 +271,8 @@ public class SignInActivity extends BaseActivity {
     }
 
     private void firebaseAuthWithGoogle(GoogleSignInResult result) {
+        if (!checkInternetConnection()) return;
+
         final GoogleSignInAccount account = result.getSignInAccount();
         Log.d(TAG, "firebaseAuthWithGoogle:" + account.getId());
 
@@ -271,11 +286,7 @@ public class SignInActivity extends BaseActivity {
                         // If sign in fails, display a message to the user. If sign in succeeds
                         // the auth state listener will be notified and logic to handle the
                         // signed in user can be handled in the listener.
-                        if (!task.isSuccessful()) {
-                            Log.w(TAG, "Google: signInWithCredential", task.getException());
-                            Toast.makeText(SignInActivity.this, task.getException().getMessage(),
-                                    Toast.LENGTH_LONG).show();
-                        } else{
+                        if (task.isSuccessful()) {
                             String deviceToken = FirebaseInstanceId.getInstance().getToken();
                             FirebaseDatabase database = FirebaseDatabase.getInstance();
 
@@ -317,6 +328,14 @@ public class SignInActivity extends BaseActivity {
                             mDatabase.updateChildren(childUpdates);
 
                             proceedToMyAlarmsActivity();
+
+                        } else{
+                            //Remove progress bar on failure
+                            progressBar.setVisibility(View.GONE);
+
+                            Log.w(TAG, "Google: signInWithCredential", task.getException());
+                            Toast.makeText(SignInActivity.this, task.getException().getMessage(),
+                                    Toast.LENGTH_LONG).show();
                         }
                     }
                 });
@@ -324,6 +343,9 @@ public class SignInActivity extends BaseActivity {
 
     //On successful authentication, proceed to alarms activity
     private void proceedToMyAlarmsActivity() {
+        //Remove progress bar on success
+        progressBar.setVisibility(View.GONE);
+
         //TODO: go to alarm creation for new user?
         Intent intent = new Intent(SignInActivity.this, MyAlarmsFragmentActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
