@@ -9,16 +9,22 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Point;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Display;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -256,6 +262,29 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_profile) {
+//            View popupView = getLayoutInflater().inflate(R.layout.fragment_profile, null);
+//
+//            PopupWindow popupWindow = new PopupWindow(popupView,
+//                    LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+//
+//            popupWindow.setFocusable(true);
+//
+////            Display display = getWindowManager().getDefaultDisplay();
+////            Point size = new Point();
+////            display.getSize(size);
+////            int width = size.x;
+////            int height = size.y;
+////
+////            popupWindow.setWidth(width - 200);
+////            popupWindow.setHeight(height - 200);
+//            popupWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
+////            popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+//            popupWindow.setClippingEnabled(false);
+//            popupWindow.showAtLocation(findViewById(android.R.id.content), Gravity.CENTER, 0, 0);
+
+            Intent i = new Intent(this, ProfileActivity.class);
+            startActivity(i);
+
             return true;
         }
         if (id == R.id.action_settings) {
