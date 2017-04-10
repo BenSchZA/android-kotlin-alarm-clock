@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Rooster Mornings Android.
+  ~ Copyright (c)  2017 Roosta Media. All rights reserved.
+  -->
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.roostermornings.android.activity.MainActivity">
+    <item
+        android:id="@+id/action_back"
+        android:orderInCategory="100"
+        android:icon="@drawable/md_nav_back"
+        app:showAsAction="always" />
+
+</menu>

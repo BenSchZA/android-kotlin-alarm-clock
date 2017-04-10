@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Rooster Mornings Android.
+  ~ Copyright (c)  2017 Roosta Media. All rights reserved.
+  -->
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:key="pref_key_user_settings">
+    <PreferenceCategory
+        android:title="Alarm Activation"
+        android:key="pref_key_alarm_activation_settings">
+        <CheckBoxPreference
+            android:key="pref_key_alarm_vibrate"
+            android:summary="Enable or disable alarm vibrate"
+            android:title="Alarm vibrate"
+            android:defaultValue="false"
+            android:persistent="true"/>
+        <RingtonePreference
+            android:key="pref_key_alarm_default_tone"
+            android:title="Default alarm ringtone"
+            android:summary="Choose the default ringtone to play if no channel content is selected
+and no social roosters are received"
+            android:ringtoneType="alarm"
+            android:persistent="true"
+            android:showDefault="true"
+            android:showSilent="false"
+            android:defaultValue="DEFAULT_SOUND" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="Data usage"
+        android:key="pref_key_data_usage">
+        <CheckBoxPreference
+            android:key="pref_key_download_on_data"
+            android:summary="Allow the download/upload of content on a mobile data connection"
+            android:title="Download/upload on mobile data"
+            android:defaultValue="true"
+            android:persistent="true">
+        </CheckBoxPreference>
+        </PreferenceCategory>
+</PreferenceScreen>

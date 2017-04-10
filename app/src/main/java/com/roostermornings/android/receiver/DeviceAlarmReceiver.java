@@ -7,10 +7,13 @@ package com.roostermornings.android.receiver;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.support.v4.content.WakefulBroadcastReceiver;
 
 import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
+import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
@@ -18,12 +21,14 @@ import com.roostermornings.android.util.Constants;
 
 import static android.content.Context.VIBRATOR_SERVICE;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static com.facebook.FacebookSdk.getApplicationContext;
 
 public class DeviceAlarmReceiver extends WakefulBroadcastReceiver {
 
     private Context context;
     private DeviceAlarmController alarmController;
     private DeviceAlarmTableManager alarmTableManager;
+    private SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -54,11 +59,18 @@ public class DeviceAlarmReceiver extends WakefulBroadcastReceiver {
             alarmTableManager.setAlarmEnabled(intent.getIntExtra(Constants.EXTRA_REQUESTCODE, 0), false);
         }
 
-        if (intent.getBooleanExtra(Constants.EXTRA_VIBRATE, false)) {
+
+        if (sharedPreferences.getBoolean(Constants.USER_SETTINGS_VIBRATE, false)) {
             Vibrator vibrator = (Vibrator) context.getSystemService(VIBRATOR_SERVICE);
-            long[] vibratePattern = {0, 1000, 500, 1000, 500};
+            long[] vibratePattern = Constants.VIBRATE_PATTERN;
             int vibrateRepeat = 2;
             vibrator.vibrate(vibratePattern, vibrateRepeat);
+        } else {
+            //If vibrating then cancel
+            Vibrator vibrator = (Vibrator) getApplicationContext().getSystemService(VIBRATOR_SERVICE);
+            if (vibrator.hasVibrator()) {
+                vibrator.cancel();
+            }
         }
 
         if (intent.getBooleanExtra(Constants.EXTRA_TONE, false)) {
