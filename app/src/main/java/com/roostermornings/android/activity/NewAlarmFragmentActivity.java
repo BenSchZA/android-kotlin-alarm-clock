@@ -7,30 +7,30 @@ package com.roostermornings.android.activity;
 
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.AlarmChannel;
 import com.roostermornings.android.fragment.IAlarmSetListener;
-import com.roostermornings.android.fragment.NewAlarmFragment1;
-import com.roostermornings.android.fragment.NewAlarmFragment2;
+import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment1;
+import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment2;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
@@ -117,7 +117,21 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
     @Override
     public void onBackPressed() {
         if (mViewPager.getCurrentItem() == 0) {
-            super.onBackPressed();
+
+            View dialogMmpView = LayoutInflater.from(this)
+                    .inflate(R.layout.dialog_confirm_alarm_changes, null);
+            new MaterialDialog.Builder(this)
+                    .customView(dialogMmpView, false)
+                    .positiveText(R.string.neutral)
+                    .negativeText(R.string.cancel)
+                    .negativeColorRes(R.color.grey)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            NewAlarmFragmentActivity.super.onBackPressed();
+                        }
+                    })
+                    .show();
         } else {
             mViewPager.setCurrentItem(mViewPager.getCurrentItem() - 1);
         }

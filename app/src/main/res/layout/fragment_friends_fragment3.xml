@@ -10,7 +10,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.roostermornings.android.fragment.FriendsInviteFragment3">
+    tools:context="com.roostermornings.android.fragment.friends.FriendsInviteFragment3">
 
     <Button
         android:id="@+id/share_button"

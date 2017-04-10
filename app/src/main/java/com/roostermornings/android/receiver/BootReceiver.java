@@ -25,7 +25,6 @@ public class BootReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        //TODO: set up correctly
         if(BuildConfig.DEBUG) Toast.makeText(context, "BootReceiver!", Toast.LENGTH_LONG).show();
 
         this.context = context;
@@ -34,15 +33,13 @@ public class BootReceiver extends BroadcastReceiver {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         BackgroundTaskReceiver backgroundTaskReceiver = new BackgroundTaskReceiver();
 
-        alarmController.rebootAlarms();
         if (auth != null && auth.getCurrentUser().getUid() != null) {
-            if(BuildConfig.DEBUG) Toast.makeText(context, "Tasks started, valid user!", Toast.LENGTH_LONG).show();
-            //TODO: check for authentication
-//            alarmController.rebootAlarms();
-//            backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(context);
-//            backgroundTaskReceiver.scheduleBackgroundDailyTask(context);
+            Toast.makeText(context, "Tasks started, valid user!", Toast.LENGTH_LONG).show();
+            alarmController.rebootAlarms();
+            backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(context, true);
+            backgroundTaskReceiver.scheduleBackgroundDailyTask(context, true);
         } else {
-            if(BuildConfig.DEBUG) Toast.makeText(context, "Tasks not started, invalid user!", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "Tasks not started, invalid user!", Toast.LENGTH_LONG).show();
         }
     }
 }

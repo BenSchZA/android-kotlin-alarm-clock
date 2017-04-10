@@ -8,8 +8,10 @@ package com.roostermornings.android.service;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
@@ -18,6 +20,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 
 import com.roostermornings.android.R;
@@ -80,6 +83,12 @@ public class AudioService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
+    }
+
+    @Override
+    public void onDestroy() {
+        endService(null);
+        super.onDestroy();
     }
 
     @Override
@@ -179,6 +188,8 @@ public class AudioService extends Service {
 
         //Set media player to alarm volume
         mediaPlayerRooster.setAudioStreamType(AudioManager.STREAM_ALARM);
+        //Check stream volume above minimum
+        checkStreamVolume();
 
         file = new File(getFilesDir() + "/" + audioItem.getFilename());
 
@@ -357,11 +368,13 @@ public class AudioService extends Service {
     }
 
     private void startVibrate() {
-        foregroundNotification("Alarm vibrate active");
+        Vibrator vibrator = (Vibrator) getApplicationContext().getSystemService(VIBRATOR_SERVICE);
+        long[] vibratePattern = Constants.VIBRATE_PATTERN;
+        int vibrateRepeat = 2;
+        vibrator.vibrate(vibratePattern, vibrateRepeat);
     }
 
     private void stopVibrate() {
-        stopForeground(true);
         //If vibrating then cancel
         Vibrator vibrator = (Vibrator) getApplicationContext().getSystemService(VIBRATOR_SERVICE);
         if (vibrator.hasVibrator()) {
@@ -387,14 +400,25 @@ public class AudioService extends Service {
     public void startDefaultAlarmTone() {
         foregroundNotification("Alarm ringtone playing");
 
-        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-        //In case no alarm tone previously set
-        if (notification == null) {
-            notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String strRingtonePreference = sharedPreferences.getString(Constants.USER_SETTINGS_DEFAULT_TONE, "DEFAULT_SOUND");
+
+        Uri notification = Uri.parse(strRingtonePreference);
+        //In case alarm tone URI does not exist
+        if(RingtoneManager.getRingtone(this, notification) == null) {
+            notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
             if (notification == null) {
-                notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+                notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                if (notification == null) {
+                    notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+                }
             }
         }
+
+        //Check stream volume above minimum
+        checkStreamVolume();
+
+        //Start audio stream
         try {
             mediaPlayerDefault.setAudioStreamType(AudioManager.STREAM_ALARM);
             mediaPlayerDefault.setDataSource(this, notification);
@@ -410,6 +434,21 @@ public class AudioService extends Service {
 
         } catch (IOException e) {
             e.printStackTrace();
+            //If audio fails, vibrate instead - if that fails... well enjoy your sleep.
+            startVibrate();
+        }
+    }
+
+    private void checkStreamVolume() {
+        //Ensure audio volume is acceptable TODO: what is acceptable?
+        //Max volume seems to be 7
+        AudioManager audio = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        int currentVolume = audio.getStreamVolume(AudioManager.STREAM_ALARM);
+        int maxVolume = audio.getStreamMaxVolume(AudioManager.STREAM_ALARM);
+        float percent = 0.5f;
+        int minVolume = (int) (maxVolume*percent);
+        if(currentVolume < minVolume) {
+            audio.setStreamVolume(AudioManager.STREAM_ALARM, minVolume, 0);
         }
     }
 

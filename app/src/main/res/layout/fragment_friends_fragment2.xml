@@ -10,7 +10,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.roostermornings.android.fragment.FriendsRequestFragment2">
+    tools:context="com.roostermornings.android.fragment.friends.FriendsRequestFragment2">
 
     <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
 

@@ -38,9 +38,9 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.Friend;
-import com.roostermornings.android.fragment.FriendsInviteFragment3;
-import com.roostermornings.android.fragment.FriendsMyFragment1;
-import com.roostermornings.android.fragment.FriendsRequestFragment2;
+import com.roostermornings.android.fragment.friends.FriendsInviteFragment3;
+import com.roostermornings.android.fragment.friends.FriendsMyFragment1;
+import com.roostermornings.android.fragment.friends.FriendsRequestFragment2;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.FontsOverride;
 

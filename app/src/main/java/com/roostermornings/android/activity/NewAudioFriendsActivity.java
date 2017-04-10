@@ -29,12 +29,14 @@ import com.google.firebase.auth.GetTokenResult;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.NewAudioFriendsListAdapter;
+import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.service.UploadService;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.domain.Users;
 import com.roostermornings.android.util.Constants;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -56,6 +58,8 @@ public class NewAudioFriendsActivity extends BaseActivity {
     private String localFileString = "";
     private String firebaseIdToken = "";
     private Boolean fileProcessed = false;
+
+    Bundle extras = getIntent().getExtras();
 
     UploadService mUploadService;
     private boolean mBound;
@@ -90,15 +94,9 @@ public class NewAudioFriendsActivity extends BaseActivity {
                     }
                 });
 
-        Bundle extras = getIntent().getExtras();
         localFileString = extras.getString(Constants.EXTRA_LOCAL_FILE_STRING);
 
-        if(extras.containsKey(Constants.EXTRA_FRIENDS_LIST) && (ArrayList<User>)extras.getSerializable(Constants.EXTRA_FRIENDS_LIST) != null) {
-            mFriends.addAll((ArrayList<User>) extras.getSerializable(Constants.EXTRA_FRIENDS_LIST));
-            if(mFriends.size() > 0 && mFriends.get(0).getSelected()) {
-                onSendMenuItemClick();
-            }
-        } else if(checkInternetConnection()) {
+        if(checkInternetConnection()) {
             mAdapter = new NewAudioFriendsListAdapter(mFriends, NewAudioFriendsActivity.this);
             mRecyclerView.setLayoutManager(new LinearLayoutManager(NewAudioFriendsActivity.this));
             mRecyclerView.setAdapter(mAdapter);
@@ -199,7 +197,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
         if (!checkInternetConnection()) return;
 
         for(User friend : mFriends) {
-            if(friend.getSelected() != null && friend.getSelected()) mFriendsSelected.add(friend);
+            if(friend.getSelected()) mFriendsSelected.add(friend);
         }
 
         if(mFriendsSelected.isEmpty()) {
@@ -245,6 +243,33 @@ public class NewAudioFriendsActivity extends BaseActivity {
 
                     mFriends.clear();
                     mFriends.addAll(apiResponse.users);
+
+                    if(extras.containsKey(Constants.EXTRA_FRIENDS_LIST) && (ArrayList<Friend>)extras.getSerializable(Constants.EXTRA_FRIENDS_LIST) != null) {
+
+                        ArrayList<Friend> tempFriends = (ArrayList<Friend>)extras.getSerializable(Constants.EXTRA_FRIENDS_LIST);
+                        ArrayList<User> tempUsers = new ArrayList<>();
+
+                        for(User user: mFriends) {
+                            try {
+                                if (user.getUid().equals(tempFriends.get(0).getUid())) {
+                                    user.setSelected(true);
+                                    tempUsers.add(user);
+                                    break;
+                                }
+                            } catch (NullPointerException e) {
+                                e.printStackTrace();
+                                break;
+                            }
+                        }
+
+                        mFriends.clear();
+                        mFriends.addAll(tempUsers);
+                        if(mFriends.size() > 0 && mFriends.get(0).getSelected()) {
+                            onSendMenuItemClick();
+                            return;
+                        }
+                    }
+
                     sortNames(mFriends);
                     mAdapter.notifyDataSetChanged();
 
