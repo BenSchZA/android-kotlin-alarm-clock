@@ -184,12 +184,15 @@
             android:theme="@style/AppThemeDay.NoActionBar" />
         <activity
             android:name=".activity.SettingsActivity"
-            android:theme="@style/SettingsTheme" >
+            android:theme="@style/SettingsTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name=".activity.ProfileActivity"
+            android:theme="@style/AppThemeDay.NoActionBar" />
     </application>
 
 </manifest>

@@ -17,7 +17,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.PowerManager;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.util.Log;
@@ -209,7 +208,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         if (audioItem.getPicture() != null && audioItem.getPicture().length() != 0) {
             setProfilePic(audioItem.getPicture());
         } else {
-            imgSenderPic.setBackground(getResources().getDrawable(R.drawable.alarm_profile_pic_circle));
+            imgSenderPic.setBackground(getResources().getDrawable(R.drawable.large_profile_pic_circle));
         }
         txtSenderName.setText(audioItem.getName());
         txtAlarmCount.setText(String.format("%s of %s", alarmPosition, alarmCount));
