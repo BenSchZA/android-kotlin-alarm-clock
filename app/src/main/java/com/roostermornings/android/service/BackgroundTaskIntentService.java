@@ -8,6 +8,8 @@ package com.roostermornings.android.service;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
@@ -34,6 +36,7 @@ import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.InternetHelper;
 import com.roostermornings.android.util.RoosterUtils;
 
 import java.io.FileOutputStream;
@@ -53,6 +56,8 @@ public class BackgroundTaskIntentService extends IntentService {
     protected DatabaseReference mDatabase;
     protected FirebaseAuth mAuth;
     protected StorageReference mStorageRef;
+
+    SharedPreferences sharedPreferences;
 
     private AudioTableManager mAudioTableManager;
 
@@ -99,6 +104,7 @@ public class BackgroundTaskIntentService extends IntentService {
     }
 
     private void handleActionBackgroundDownload(String param1, String param2) {
+        //if(InternetHelper.mobileDataConnection(this) && !sharedPreferences.getBoolean(Constants.USER_SETTINGS_DOWNLOAD_ON_DATA, true)) return;
         retrieveChannelContentData(getApplicationContext());
         retrieveSocialRoosterData(getApplicationContext());
     }

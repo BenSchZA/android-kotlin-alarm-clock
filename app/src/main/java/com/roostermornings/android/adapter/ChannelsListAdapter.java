@@ -5,11 +5,7 @@
 
 package com.roostermornings.android.adapter;
 
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.support.v4.app.Fragment;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -22,8 +18,7 @@ import android.widget.TextView;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.roostermornings.android.R;
 import com.roostermornings.android.domain.Channel;
-import com.roostermornings.android.fragment.NewAlarmFragment2;
-import com.roostermornings.android.util.RoosterUtils;
+import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment2;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
