@@ -82,7 +82,6 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
         mAlarm.setMinute(mMinute);
         mAlarm.setHour(mHour);
         mAlarm.setRecurring(false);
-        mAlarm.setVibrate(sharedPreferences.getBoolean(Constants.USER_SETTINGS_VIBRATE, false));
         mAlarm.setAllow_friend_audio_files(true);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -216,7 +215,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 //Set enabled flag to true on new or edited alarm
                 mAlarm.setEnabled(true);
 
-                deviceAlarmController.registerAlarmSet(alarmKey, mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring(), mAlarm.isVibrate(), alarmChannelUID, mAlarm.isAllow_friend_audio_files());
+                deviceAlarmController.registerAlarmSet(alarmKey, mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring(), alarmChannelUID, mAlarm.isAllow_friend_audio_files());
                 //Ensure iteration is not overwritten
                 if(iteration != null) deviceAlarmTableManager.setChannelStoryIteration(alarmChannelUID, iteration);
 

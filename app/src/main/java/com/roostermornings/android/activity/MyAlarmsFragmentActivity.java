@@ -127,7 +127,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                     //If alarm from firebase does not exist locally, create it
                     if(!deviceAlarmTableManager.isSetInDB(alarm.getUid()) && alarm.isEnabled()) {
                         deviceAlarmController.registerAlarmSet(alarm.getUid(), alarm.getHour(), alarm.getMinute(),
-                                alarm.getDays(), alarm.isRecurring(), alarm.isVibrate(), alarmChannelUID, alarm.isAllow_friend_audio_files());
+                                alarm.getDays(), alarm.isRecurring(), alarmChannelUID, alarm.isAllow_friend_audio_files());
                     }
 
                     //Check SQL db to see if all alarms in set have fired

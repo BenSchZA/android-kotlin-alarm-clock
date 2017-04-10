@@ -36,8 +36,6 @@ public class Alarm {
     private String uid;
 
     @Exclude
-    private boolean vibrate;
-    @Exclude
     private Integer unseen_roosters;
 
     // Required default constructor for Firebase object mapping
@@ -47,7 +45,7 @@ public class Alarm {
 
     public Alarm(AlarmChannel channel, boolean monday, boolean tuesday, boolean wednesday,
                  boolean thursday, boolean friday, boolean saturday, boolean
-                         sunday, int hour, int minute, boolean recurring, boolean allow_friend_audio_files, boolean vibrate, String uid) {
+                         sunday, int hour, int minute, boolean recurring, boolean allow_friend_audio_files, String uid) {
         this.channel = channel;
         this.monday = monday;
         this.tuesday = tuesday;
@@ -61,7 +59,6 @@ public class Alarm {
         this.recurring = recurring;
         this.allow_friend_audio_files = allow_friend_audio_files;
 
-        this.vibrate = vibrate;
         this.uid = uid;
 
         this.unseen_roosters = 0;
@@ -100,7 +97,6 @@ public class Alarm {
         this.minute = deviceAlarm.getMinute();
         this.recurring = deviceAlarm.getRecurring();
         this.allow_friend_audio_files = deviceAlarm.isSocial();
-        this.vibrate = deviceAlarm.getVibrate();
         this.uid = deviceAlarm.getSetId();
         this.unseen_roosters = 0;
     }
@@ -272,14 +268,6 @@ public class Alarm {
 
     public void setRecurring(boolean recurring) {
         this.recurring = recurring;
-    }
-
-    public boolean isVibrate() {
-        return vibrate;
-    }
-
-    public void setVibrate(boolean vibrate) {
-        this.vibrate = vibrate;
     }
 }
 
