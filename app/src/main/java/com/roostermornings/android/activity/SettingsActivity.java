@@ -5,19 +5,11 @@
 
 package com.roostermornings.android.activity;
 
-import android.app.Activity;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.widget.TextView;
-
-import com.roostermornings.android.R;
-import com.roostermornings.android.activity.base.BaseActivity;
+import android.preference.PreferenceActivity;
 import com.roostermornings.android.fragment.SettingsFragment;
 
-import butterknife.BindView;
-
-public class SettingsActivity extends BaseActivity {
+public class SettingsActivity extends PreferenceActivity {
 
 //    @BindView(R.id.toolbar_title)
 //    TextView toolbarTitle;

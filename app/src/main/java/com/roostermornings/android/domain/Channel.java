@@ -20,6 +20,7 @@ public class Channel implements Serializable {
 
     private Integer current_rooster_cycle_iteration;
     private Boolean new_alarms_start_at_first_iteration;
+    private Integer priority;
     private String description;
     private String name;
     private String photo;
@@ -35,7 +36,7 @@ public class Channel implements Serializable {
     public Channel() {
     }
 
-    public Channel(int current_rooster_cycle_iteration, boolean new_alarms_start_at_first_iteration, String description, String name, String photo, int rooster_count, boolean active, boolean selected, String uid) {
+    public Channel(int current_rooster_cycle_iteration, boolean new_alarms_start_at_first_iteration, String description, String name, String photo, int rooster_count, boolean active, boolean selected, String uid, Integer priority) {
         this.current_rooster_cycle_iteration = current_rooster_cycle_iteration;
         this.new_alarms_start_at_first_iteration = new_alarms_start_at_first_iteration;
         this.description = description;
@@ -45,6 +46,15 @@ public class Channel implements Serializable {
         this.active = active;
         this.selected = selected;
         this.uid = uid;
+        this.priority = priority;
+    }
+
+    public Integer getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Integer priority) {
+        this.priority = priority;
     }
 
     public int getCurrent_rooster_cycle_iteration() {

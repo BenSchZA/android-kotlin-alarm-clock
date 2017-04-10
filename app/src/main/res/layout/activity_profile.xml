@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Rooster Mornings Android.
+  ~ Copyright (c)  2017 Roosta Media. All rights reserved.
+  -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/activity_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".activity.SettingsActivity"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="@dimen/spacing_normal_large"
+    android:background="@drawable/main_background_layer_list_day">
+
+    <ImageButton
+        android:onClick="onClickProfilePic"
+        android:clickable="true"
+        android:id="@+id/settings_profile_pic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/spacing_normal_large"
+        android:layout_gravity="center"
+        android:background="@drawable/large_profile_pic_circle" />
+
+    <EditText
+        android:id="@+id/settings_profile_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/spacing_normal_large"
+        android:layout_gravity="center"
+        android:text=""
+        android:maxLines="1" />
+
+    <Button
+        android:clickable="true"
+        android:id="@+id/settings_delete_profile"
+        style="@style/RoosterButtonLightBlueStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_margin="@dimen/spacing_normal"
+        android:text="Delete profile" />
+
+</LinearLayout>
