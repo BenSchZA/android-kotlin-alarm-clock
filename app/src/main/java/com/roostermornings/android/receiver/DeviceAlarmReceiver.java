@@ -73,10 +73,6 @@ public class DeviceAlarmReceiver extends WakefulBroadcastReceiver {
             }
         }
 
-        if (intent.getBooleanExtra(Constants.EXTRA_TONE, false)) {
-            intentAlarmFullscreen.putExtra(Constants.EXTRA_TONE, true);
-        }
-
         //Include intent to allow completeWakefulIntent from activity
         intentAlarmFullscreen.putExtra(Constants.DEVICE_ALARM_RECEIVER_WAKEFUL_INTENT, new Intent(context, DeviceAlarmReceiver.class));
 
