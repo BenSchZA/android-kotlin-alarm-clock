@@ -38,6 +38,7 @@ public class Constants {
     //DeviceAlarmController config constants
     public final static int ALARM_SNOOZETIME = 10 * 60 * 1000;
     public final static int ALARM_DEFAULTTIME = 1 * 60 * 1000;
+    public final static String ACTION_CANCEL_SNOOZE = "android.intent.action.CANCEL_SNOOZE";
 
     //DeviceAlarm extras
     public static final String EXTRA_RECURRING = "extra_recurring";
@@ -93,5 +94,4 @@ public class Constants {
 
     //Storage
     public final static String STORAGE_USER_PROFILE_PICTURE = "users/profile_pictures/";
-
 }

@@ -221,7 +221,6 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         BaseApplication baseApplication = (BaseApplication) getApplication();
 
         return baseApplication.getAPIService();
-
     }
 
     public FirebaseUser getFirebaseUser() {

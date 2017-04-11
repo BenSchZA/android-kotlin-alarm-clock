@@ -68,8 +68,6 @@ public class NewAudioRecordActivity extends BaseActivity {
     private final int MAX_RECORDING_TIME = 60000;
     private final String maxRecordingTime = "60";
 
-    private ArrayList<Friend> mFriends = new ArrayList<>();
-
     //Silence average: 125
     //Ambient music: 300
     private final int AUDIO_MIN_AMPLITUDE = 250;
@@ -192,7 +190,7 @@ public class NewAudioRecordActivity extends BaseActivity {
 
             if (checkPermission()) {
 
-                String mAudioSaveDirectories = Environment.getExternalStorageDirectory().getAbsolutePath() + "/RoosterTempAudio/";
+                String mAudioSaveDirectories = getFilesDir().getAbsolutePath() + "/RoosterTempAudio/";
 
                 mAudioSavePathInDevice =
                         mAudioSaveDirectories +
@@ -201,7 +199,7 @@ public class NewAudioRecordActivity extends BaseActivity {
                 File file = new File(mAudioSaveDirectories);
                 if(!file.mkdirs()) {
                     mAudioSavePathInDevice =
-                            Environment.getExternalStorageDirectory().getAbsolutePath() + "/" +
+                            getFilesDir().getAbsolutePath() + "/" +
                                     randomAudioFileName;
                 }
 
@@ -344,10 +342,8 @@ public class NewAudioRecordActivity extends BaseActivity {
         Intent intent = new Intent(NewAudioRecordActivity.this, NewAudioFriendsActivity.class);
         Bundle bun = new Bundle();
         bun.putString(Constants.EXTRA_LOCAL_FILE_STRING, mAudioSavePathInDevice);
-        if(getIntent().getExtras() != null && getIntent().getExtras().containsKey(Constants.EXTRA_FRIENDS_LIST) && (ArrayList<Friend>)getIntent().getSerializableExtra(Constants.EXTRA_FRIENDS_LIST) != null) {
-            ArrayList<Friend> tempFriends = (ArrayList<Friend>)getIntent().getSerializableExtra(Constants.EXTRA_FRIENDS_LIST);
-            mFriends.clear();
-            mFriends.addAll(tempFriends);
+        if(getIntent().getExtras() != null && getIntent().getExtras().containsKey(Constants.EXTRA_FRIENDS_LIST) && (ArrayList<User>)getIntent().getSerializableExtra(Constants.EXTRA_FRIENDS_LIST) != null) {
+            ArrayList<User> mFriends = (ArrayList<User>)getIntent().getSerializableExtra(Constants.EXTRA_FRIENDS_LIST);
             bun.putSerializable(Constants.EXTRA_FRIENDS_LIST, mFriends);
         }
 

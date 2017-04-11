@@ -24,6 +24,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 
 import com.roostermornings.android.R;
+import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.sqlutil.AudioTableController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
@@ -35,6 +36,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import javax.inject.Inject;
+
+import static com.facebook.FacebookSdk.getApplicationContext;
 
 //Service to manage playing and pausing audio during Rooster alarm
 public class AudioService extends Service {
@@ -355,15 +360,11 @@ public class AudioService extends Service {
     }
 
     private void pauseRooster() {
-        foregroundNotification("Alarm content paused");
-
         mediaPlayerRooster.pause();
         currentPositionRooster = mediaPlayerRooster.getCurrentPosition();
     }
 
     private void pauseDefaultAlarmTone() {
-        foregroundNotification("Alarm tone paused");
-
         mediaPlayerDefault.stop();
     }
 
@@ -383,6 +384,10 @@ public class AudioService extends Service {
     }
 
     public void snoozeAudioState(){
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String strSnoozeTime = sharedPreferences.getString(Constants.USER_SETTINGS_SNOOZE_TIME, "10");
+
+        snoozeNotification("Alarm snoozed " + strSnoozeTime + " minutes - touch to dismiss");
         try {
             if (mediaPlayerRooster.isPlaying()) pauseRooster();
             if (mediaPlayerDefault.isPlaying()) pauseDefaultAlarmTone();
@@ -482,7 +487,26 @@ public class AudioService extends Service {
 
         Notification notification=new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.logo)
-                .setContentText("Rooster Mornings: " + state)
+                .setContentTitle("Rooster Mornings")
+                .setContentText(state)
+                .setContentIntent(pendingIntent).build();
+
+        startForeground(Constants.AUDIOSERVICE_NOTIFICATION_ID, notification);
+    }
+
+    private void snoozeNotification(String state) {
+        Intent launchIntent = new Intent(this, MyAlarmsFragmentActivity.class);
+        launchIntent.putExtra(Constants.EXTRA_ALARMID, alarmUid);
+        launchIntent.setAction(Constants.ACTION_CANCEL_SNOOZE);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
+                launchIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        Notification notification=new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.logo)
+                .setContentTitle("Rooster Mornings")
+                .setContentText(state)
+                .setAutoCancel(true)
                 .setContentIntent(pendingIntent).build();
 
         startForeground(Constants.AUDIOSERVICE_NOTIFICATION_ID, notification);

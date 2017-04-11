@@ -7,6 +7,7 @@ package com.roostermornings.android.fragment.base;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.res.ResourcesCompat;
@@ -34,12 +35,17 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.Friend;
+import com.roostermornings.android.domain.User;
+import com.roostermornings.android.node_api.IHTTPClient;
 
 import butterknife.ButterKnife;
 
 public class BaseFragment extends Fragment implements Validator.ValidationListener {
 
     protected DatabaseReference mDatabase;
+
+    @Inject
+    public SharedPreferences sharedPreferences;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -76,6 +82,14 @@ public class BaseFragment extends Fragment implements Validator.ValidationListen
 
     }
 
+    public boolean checkInternetConnection() {
+        return ((BaseActivity) getActivity()).checkInternetConnection();
+    }
+
+    public IHTTPClient apiService() {
+        return ((BaseActivity) getActivity()).apiService();
+    }
+
     protected void hideSoftKeyboard() {
         ((BaseActivity) getActivity()).hideSoftKeyboard();
     }
@@ -93,11 +107,21 @@ public class BaseFragment extends Fragment implements Validator.ValidationListen
         }
     }
 
-    public void sortNames(ArrayList<Friend> mUsers){
+    public void sortNamesFriends(ArrayList<Friend> mUsers){
         //Take arraylist and sort alphabetically
         Collections.sort(mUsers, new Comparator<Friend>() {
             @Override
             public int compare(Friend lhs, Friend rhs) {
+                return lhs.getUser_name().compareTo(rhs.getUser_name());
+            }
+        });
+    }
+
+    public void sortNamesUsers(ArrayList<User> mUsers){
+        //Take arraylist and sort alphabetically
+        Collections.sort(mUsers, new Comparator<User>() {
+            @Override
+            public int compare(User lhs, User rhs) {
                 return lhs.getUser_name().compareTo(rhs.getUser_name());
             }
         });

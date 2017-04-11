@@ -6,6 +6,7 @@
 package com.roostermornings.android.fragment.friends;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -15,21 +16,30 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
+import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.adapter.FriendsMyListAdapter;
 import com.roostermornings.android.domain.Friend;
+import com.roostermornings.android.domain.User;
+import com.roostermornings.android.domain.Users;
 import com.roostermornings.android.fragment.base.BaseFragment;
+import com.roostermornings.android.util.Constants;
 
 import java.util.ArrayList;
 
 import butterknife.BindView;
+import retrofit.Call;
+import retrofit.Callback;
+import retrofit.Response;
+import retrofit.Retrofit;
+
+import static com.facebook.FacebookSdk.getApplicationContext;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -43,11 +53,16 @@ public class FriendsMyFragment1 extends BaseFragment {
 
     protected static final String TAG = FriendsFragmentActivity.class.getSimpleName();
 
-    ArrayList<Friend> mUsers = new ArrayList<>();
+    ArrayList<User> mUsers = new ArrayList<>();
     private DatabaseReference mFriendsReference;
     private DatabaseReference mUserReference;
 
     private RecyclerView.Adapter mAdapter;
+
+    private static int statusCode = -1;
+
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
 
     @BindView(R.id.friendsMyListView)
     RecyclerView mRecyclerView;
@@ -74,6 +89,9 @@ public class FriendsMyFragment1 extends BaseFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //Ensure check for Node complete reset
+        statusCode = -1;
+
         if (getArguments() != null) {
         }
     }
@@ -81,9 +99,16 @@ public class FriendsMyFragment1 extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
+        View view = initiate(inflater, R.layout.fragment_friends_fragment1, container, false);
+        //Check if node response already exists
+        if(statusCode == 200) {
+            progressBar.setVisibility(View.GONE);
+            mRecyclerView.setVisibility(View.VISIBLE);
+        } else {
+            retrieveMyFriends();
+        }
         // Inflate the layout for this fragment
-        return initiate(inflater, R.layout.fragment_friends_fragment1, container, false);
+        return view;
     }
 
     //NB: bind ButterKnife to view and then initialise UI elements
@@ -91,73 +116,115 @@ public class FriendsMyFragment1 extends BaseFragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         //Sort names alphabetically before notifying adapter
-        sortNames(mUsers);
+        sortNamesUsers(mUsers);
         mAdapter = new FriendsMyListAdapter(mUsers, getActivity(), getContext());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mRecyclerView.setAdapter(mAdapter);
     }
 
-    //Retrieve list of friends from Firebase for current user
-    private void getFriends() {
-        mFriendsReference = mDatabase
-                .child("users").child(getFirebaseUser().getUid()).child("friends");
-        mFriendsReference.keepSynced(true);
+    private void retrieveMyFriends() {
 
-        ChildEventListener friendsListener = new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                mUsers.add(dataSnapshot.getValue(Friend.class));
-                //Sort names alphabetically before notifying adapter
-                sortNames(mUsers);
-                mAdapter.notifyDataSetChanged();
-            }
+        if (!checkInternetConnection()) return;
 
+        FirebaseUser firebaseUser = getFirebaseUser();
+
+        if (firebaseUser == null) {
+            if(BuildConfig.DEBUG) Log.d(TAG, "User not authenticated on FB!");
+            return;
+        }
+
+        Call<Users> call = apiService().listUserFriendList(firebaseUser.getUid());
+
+        call.enqueue(new Callback<Users>() {
             @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                Friend friend = dataSnapshot.getValue(Friend.class);
-                Friend friendRemove = null;
-                for (Friend oldUser:mUsers) {
-                    if(oldUser.getUid().equals(friend.getUid())){
-                        friendRemove = oldUser;
-                    }
-                }
-                if(friendRemove != null) {
-                    mUsers.remove(friendRemove);
-                    mUsers.add(friend);
-                    //Sort names alphabetically before notifying adapter
-                    sortNames(mUsers);
+            public void onResponse(Response<Users> response,
+                                   Retrofit retrofit) {
+
+                statusCode = response.code();
+                Users apiResponse = response.body();
+
+                if (statusCode == 200) {
+
+                    progressBar.setVisibility(View.GONE);
+                    mRecyclerView.setVisibility(View.VISIBLE);
+
+                    mUsers.clear();
+                    mUsers.addAll(apiResponse.users);
+
+                    sortNamesUsers(mUsers);
                     mAdapter.notifyDataSetChanged();
                 }
             }
 
             @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                mUsers.remove(dataSnapshot.getValue(Friend.class));
-                //Sort names alphabetically before notifying adapter
-                sortNames(mUsers);
-                mAdapter.notifyDataSetChanged();
+            public void onFailure(Throwable t) {
+                Log.i(TAG, t.getLocalizedMessage());
+                Toast.makeText(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG).show();
+                progressBar.setVisibility(View.GONE);
             }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                showToast(getContext(), "Failed to load user.", Toast.LENGTH_SHORT);
-            }
-        };
-        mFriendsReference.addChildEventListener(friendsListener);
+        });
     }
+
+//    //Retrieve list of friends from Firebase for current user
+//    private void getFriends() {
+//        mFriendsReference = mDatabase
+//                .child("users").child(getFirebaseUser().getUid()).child("friends");
+//        mFriendsReference.keepSynced(true);
+//
+//        ChildEventListener friendsListener = new ChildEventListener() {
+//            @Override
+//            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+//                mUsers.add(dataSnapshot.getValue(Friend.class));
+//                //Sort names alphabetically before notifying adapter
+//                sortNamesFriends(mUsers);
+//                mAdapter.notifyDataSetChanged();
+//            }
+//
+//            @Override
+//            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+//                Friend friend = dataSnapshot.getValue(Friend.class);
+//                Friend friendRemove = null;
+//                for (Friend oldUser:mUsers) {
+//                    if(oldUser.getUid().equals(friend.getUid())){
+//                        friendRemove = oldUser;
+//                    }
+//                }
+//                if(friendRemove != null) {
+//                    mUsers.remove(friendRemove);
+//                    mUsers.add(friend);
+//                    //Sort names alphabetically before notifying adapter
+//                    sortNamesFriends(mUsers);
+//                    mAdapter.notifyDataSetChanged();
+//                }
+//            }
+//
+//            @Override
+//            public void onChildRemoved(DataSnapshot dataSnapshot) {
+//                mUsers.remove(dataSnapshot.getValue(Friend.class));
+//                //Sort names alphabetically before notifying adapter
+//                sortNamesFriends(mUsers);
+//                mAdapter.notifyDataSetChanged();
+//            }
+//
+//            @Override
+//            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+//                showToast(getContext(), "Failed to load user.", Toast.LENGTH_SHORT);
+//            }
+//        };
+//        mFriendsReference.addChildEventListener(friendsListener);
+//    }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
 
         getDatabaseReference();
-        getFriends();
 
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
@@ -171,6 +238,11 @@ public class FriendsMyFragment1 extends BaseFragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
     }
 
     public void searchRecyclerViewAdapter(String query) {
@@ -200,10 +272,5 @@ public class FriendsMyFragment1 extends BaseFragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
     }
 }
