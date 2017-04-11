@@ -16,6 +16,7 @@ public class Constants {
     public final static String USER_SETTINGS_VIBRATE = "pref_key_alarm_vibrate";
     public final static String USER_SETTINGS_DEFAULT_TONE = "pref_key_alarm_default_tone";
     public final static String USER_SETTINGS_DOWNLOAD_ON_DATA = "pref_key_download_on_data";
+    public final static String USER_SETTINGS_SNOOZE_TIME = "pref_key_alarm_snooze_time";
 
     public final static long[] VIBRATE_PATTERN = {0, 1000, 500, 1000, 500};
 
@@ -89,5 +90,8 @@ public class Constants {
     public final static int MESSAGE_STATUS_SENT = 1;
     public final static int MESSAGE_STATUS_DELIVERED = 2;
     public final static int MESSAGE_STATUS_RECEIVED = 3;
+
+    //Storage
+    public final static String STORAGE_USER_PROFILE_PICTURE = "users/profile_pictures/";
 
 }

@@ -247,6 +247,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         if (getFirebaseUser() != null) {
             DatabaseReference thisUserReference = mDatabase
                     .child("users").child(getFirebaseUser().getUid());
+            thisUserReference.keepSynced(true);
             thisUserReference.addValueEventListener(userListener);
         }
     }
