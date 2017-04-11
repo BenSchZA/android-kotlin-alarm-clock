@@ -35,6 +35,7 @@ import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.activity.NewAudioFriendsActivity;
 import com.roostermornings.android.activity.NewAudioRecordActivity;
 import com.roostermornings.android.domain.Friend;
+import com.roostermornings.android.domain.User;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
 import com.squareup.picasso.Callback;
@@ -48,7 +49,7 @@ import java.util.ArrayList;
  */
 
 public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdapter.ViewHolder> implements Filterable {
-    private ArrayList<Friend> mDataset;
+    private ArrayList<User> mDataset;
     private Context mContext;
     private Activity mActivity;
 
@@ -73,24 +74,24 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
         }
     }
 
-    public void add(int position, Friend item) {
+    public void add(int position, User item) {
         mDataset.add(position, item);
         notifyItemInserted(position);
     }
 
-    public void refreshAll(ArrayList<Friend> myDataset) {
+    public void refreshAll(ArrayList<User> myDataset) {
         mDataset = myDataset;
         notifyDataSetChanged();
     }
 
-    public void remove(Friend item) {
+    public void remove(User item) {
         int position = mDataset.indexOf(item);
         mDataset.remove(position);
         notifyItemRemoved(position);
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public FriendsMyListAdapter(ArrayList<Friend> myDataset, Activity activity, Context context) {
+    public FriendsMyListAdapter(ArrayList<User> myDataset, Activity activity, Context context) {
         mDataset = myDataset;
         mContext = context;
         mActivity = activity;
@@ -111,7 +112,7 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
     public void onBindViewHolder(final FriendsMyListAdapter.ViewHolder holder, final int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        final Friend user = mDataset.get(position);
+        final User user = mDataset.get(position);
         user.setSelected(false);
         holder.txtName.setText(mDataset.get(position).getUser_name());
 
@@ -166,7 +167,7 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
         holder.btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ArrayList<Friend> friendToSend = new ArrayList<>();
+                ArrayList<User> friendToSend = new ArrayList<>();
                 friendToSend.add(user);
                 Intent intent = new Intent(mContext, NewAudioRecordActivity.class);
                 Bundle bun = new Bundle();
@@ -228,7 +229,7 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
 
-                mDataset = (ArrayList<Friend>) results.values;
+                mDataset = (ArrayList<User>) results.values;
                 notifyDataSetChanged();
             }
 
@@ -236,7 +237,7 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
             protected FilterResults performFiltering(CharSequence constraint) {
 
                 FilterResults results = new FilterResults();
-                ArrayList<Friend> filteredContacts = new ArrayList<>();
+                ArrayList<User> filteredContacts = new ArrayList<>();
 
                 //Perform your search here using the search constraint string
                 constraint = constraint.toString().toLowerCase();

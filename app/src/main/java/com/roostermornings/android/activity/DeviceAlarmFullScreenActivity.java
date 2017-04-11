@@ -109,7 +109,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
-        deviceAlarmController.snoozeAlarm(alarmUid);
+        deviceAlarmController.snoozeAlarm(alarmUid, false);
         mAudioService.snoozeAudioState();
         if(mBound) unbindService(mAudioServiceConnection);
         mBound = false;
@@ -118,7 +118,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
     @OnClick(R.id.alarm_snooze_button)
     protected void onAlarmSnoozeButtonClicked() {
-        deviceAlarmController.snoozeAlarm(alarmUid);
+        deviceAlarmController.snoozeAlarm(alarmUid, false);
         mAudioService.snoozeAudioState();
         if(mBound) unbindService(mAudioServiceConnection);
         mBound = false;
@@ -208,7 +208,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         if (audioItem.getPicture() != null && audioItem.getPicture().length() != 0) {
             setProfilePic(audioItem.getPicture());
         } else {
-            imgSenderPic.setBackground(getResources().getDrawable(R.drawable.large_profile_pic_circle));
+            setDefaultDisplayProfile();
         }
         txtSenderName.setText(audioItem.getName());
         txtAlarmCount.setText(String.format("%s of %s", alarmPosition, alarmCount));
@@ -239,6 +239,6 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.logo);
         Drawable d = new BitmapDrawable(getResources(), bm);
         txtSenderName.setText(R.string.alarm_default_name);
-        imgSenderPic.setBackground(d);
+        imgSenderPic.setImageDrawable(d);
     }
 }
