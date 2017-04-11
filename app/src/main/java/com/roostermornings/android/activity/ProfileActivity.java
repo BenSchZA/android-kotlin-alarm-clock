@@ -68,6 +68,8 @@ public class ProfileActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_profile);
 
+        setDayNight();
+
         //Set toolbar title
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
