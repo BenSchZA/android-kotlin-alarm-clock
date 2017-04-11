@@ -9,6 +9,8 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.widget.Toast;
 
 import com.google.firebase.database.DatabaseReference;
@@ -124,7 +126,9 @@ public final class DeviceAlarmController {
         //Add new pending intent for 10 minutes time
         alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Calendar alarmCalendar = Calendar.getInstance();
-        alarmCalendar.setTimeInMillis(alarmCalendar.getTimeInMillis() + Constants.ALARM_SNOOZETIME);
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        alarmCalendar.setTimeInMillis(alarmCalendar.getTimeInMillis() + Long.valueOf(sharedPreferences.getString(Constants.USER_SETTINGS_SNOOZE_TIME, "10"))*Constants.TIME_MILLIS_1_MINUTE);
 
         Intent alarmIntent = new Intent(context, DeviceAlarmReceiver.class);
         alarmIntent.setAction(Constants.ACTTION_ALARMRECEIVER);

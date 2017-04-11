@@ -101,6 +101,7 @@ public class FriendsMyFragment1 extends BaseFragment {
     private void getFriends() {
         mFriendsReference = mDatabase
                 .child("users").child(getFirebaseUser().getUid()).child("friends");
+        mFriendsReference.keepSynced(true);
 
         ChildEventListener friendsListener = new ChildEventListener() {
             @Override
