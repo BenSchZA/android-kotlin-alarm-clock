@@ -26,6 +26,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
+import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.NewAudioFriendsListAdapter;
@@ -59,7 +60,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
     private String firebaseIdToken = "";
     private Boolean fileProcessed = false;
 
-    Bundle extras = getIntent().getExtras();
+    Bundle extras;
 
     UploadService mUploadService;
     private boolean mBound;
@@ -94,12 +95,30 @@ public class NewAudioFriendsActivity extends BaseActivity {
                     }
                 });
 
+        //Load intent extras
+        extras = getIntent().getExtras();
         localFileString = extras.getString(Constants.EXTRA_LOCAL_FILE_STRING);
 
         if(checkInternetConnection()) {
             mAdapter = new NewAudioFriendsListAdapter(mFriends, NewAudioFriendsActivity.this);
             mRecyclerView.setLayoutManager(new LinearLayoutManager(NewAudioFriendsActivity.this));
             mRecyclerView.setAdapter(mAdapter);
+
+            if(extras.containsKey(Constants.EXTRA_FRIENDS_LIST) && (ArrayList<User>)extras.getSerializable(Constants.EXTRA_FRIENDS_LIST) != null) {
+
+                ArrayList<User> tempUsers = (ArrayList<User>)extras.getSerializable(Constants.EXTRA_FRIENDS_LIST);
+
+                for(User user: tempUsers) {
+                    user.setSelected(true);
+                }
+
+                mFriends.clear();
+                mFriends.addAll(tempUsers);
+                if(mFriends.size() > 0 && mFriends.get(0).getSelected()) {
+                    onSendMenuItemClick();
+                    return;
+                }
+            }
 
             retrieveMyFriends();
         } else {
@@ -222,7 +241,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
         FirebaseUser firebaseUser = getFirebaseUser();
 
         if (firebaseUser == null) {
-            Log.d(TAG, "User not authenticated on FB!");
+            if(BuildConfig.DEBUG) Log.d(TAG, "User not authenticated on FB!");
             return;
         }
 
@@ -243,32 +262,6 @@ public class NewAudioFriendsActivity extends BaseActivity {
 
                     mFriends.clear();
                     mFriends.addAll(apiResponse.users);
-
-                    if(extras.containsKey(Constants.EXTRA_FRIENDS_LIST) && (ArrayList<Friend>)extras.getSerializable(Constants.EXTRA_FRIENDS_LIST) != null) {
-
-                        ArrayList<Friend> tempFriends = (ArrayList<Friend>)extras.getSerializable(Constants.EXTRA_FRIENDS_LIST);
-                        ArrayList<User> tempUsers = new ArrayList<>();
-
-                        for(User user: mFriends) {
-                            try {
-                                if (user.getUid().equals(tempFriends.get(0).getUid())) {
-                                    user.setSelected(true);
-                                    tempUsers.add(user);
-                                    break;
-                                }
-                            } catch (NullPointerException e) {
-                                e.printStackTrace();
-                                break;
-                            }
-                        }
-
-                        mFriends.clear();
-                        mFriends.addAll(tempUsers);
-                        if(mFriends.size() > 0 && mFriends.get(0).getSelected()) {
-                            onSendMenuItemClick();
-                            return;
-                        }
-                    }
 
                     sortNames(mFriends);
                     mAdapter.notifyDataSetChanged();

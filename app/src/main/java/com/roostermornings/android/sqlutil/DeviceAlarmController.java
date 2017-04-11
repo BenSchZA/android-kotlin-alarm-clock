@@ -122,7 +122,7 @@ public final class DeviceAlarmController {
         }
     }
 
-    public void snoozeAlarm(String setId){
+    public void snoozeAlarm(String setId, Boolean cancel){
         //Add new pending intent for 10 minutes time
         alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Calendar alarmCalendar = Calendar.getInstance();
@@ -138,6 +138,11 @@ public final class DeviceAlarmController {
         PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(context,
                 0, alarmIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
+
+        if(cancel) {
+            alarmPendingIntent.cancel();
+            return;
+        }
 
         long alarmTime = alarmCalendar.getTimeInMillis();
 

@@ -38,6 +38,7 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.Friend;
+import com.roostermornings.android.domain.User;
 import com.roostermornings.android.fragment.friends.FriendsInviteFragment3;
 import com.roostermornings.android.fragment.friends.FriendsMyFragment1;
 import com.roostermornings.android.fragment.friends.FriendsRequestFragment2;
@@ -415,7 +416,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
     }
 
     //Delete friend from Firebase user friend list
-    public void deleteFriend(Friend deleteFriend) {
+    public void deleteFriend(User deleteFriend) {
 
         String currentUserUrl = String.format("users/%s/friends/%s", mCurrentUser.getUid(), deleteFriend.getUid());
         String friendUserUrl = String.format("users/%s/friends/%s", deleteFriend.getUid(), mCurrentUser.getUid());

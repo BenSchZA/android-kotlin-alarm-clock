@@ -220,7 +220,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
                     mUsers = new ArrayList<>();
                     mUsers.addAll(apiResponse.users.get(0));
                     //Sort names alphabetically before notifying adapter
-                    sortNames(mUsers);
+                    sortNamesFriends(mUsers);
                     mAdapter = new FriendsInviteListAdapter(mUsers, getContext());
 
                     mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));

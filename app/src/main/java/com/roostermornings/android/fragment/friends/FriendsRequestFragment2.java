@@ -91,7 +91,7 @@ public class FriendsRequestFragment2 extends BaseFragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        sortNames(mUsers);
+        sortNamesFriends(mUsers);
         mAdapter = new FriendsRequestListAdapter(mUsers, getContext());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mRecyclerView.setAdapter(mAdapter);
@@ -107,7 +107,7 @@ public class FriendsRequestFragment2 extends BaseFragment {
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     mUsers.add(postSnapshot.getValue(Friend.class));
                     //Sort names alphabetically before notifying adapter
-                    sortNames(mUsers);
+                    sortNamesFriends(mUsers);
                     mAdapter.notifyDataSetChanged();
                 }
             }

@@ -117,6 +117,14 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
             }
         }
 
+        if(getIntent().getAction() != null && getIntent().getAction().equals(Constants.ACTION_CANCEL_SNOOZE)) {
+            try {
+                deviceAlarmController.snoozeAlarm(extras.getString(Constants.EXTRA_ALARMID), true);
+            } catch(NullPointerException e) {
+                e.printStackTrace();
+            }
+        }
+
         ValueEventListener alarmsListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
