@@ -47,7 +47,7 @@ public class RoosterUtils {
         if (displayName != null) {
             tempStringArray = displayName.split(" ", 2);
             for (String s : tempStringArray) {
-                initials = initials.concat(String.valueOf(s.charAt(0)));
+                if(!s.isEmpty()) initials = initials.concat(String.valueOf(s.charAt(0)));
             }
         }
         return initials;

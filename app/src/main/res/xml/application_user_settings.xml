@@ -28,6 +28,15 @@ and no social roosters are received"
             android:showDefault="true"
             android:showSilent="false"
             android:defaultValue="DEFAULT_SOUND" />
+        <EditTextPreference
+            android:key="pref_key_alarm_snooze_time"
+            android:title="Alarm snooze time"
+            android:summary="The duration of the alarm snooze time in minutes"
+            android:defaultValue="10"
+            android:hint="Time (minutes)"
+            android:persistent="true"
+            android:maxLines="1"
+            android:inputType="numberDecimal" />
     </PreferenceCategory>
     <PreferenceCategory
         android:title="Data usage"
