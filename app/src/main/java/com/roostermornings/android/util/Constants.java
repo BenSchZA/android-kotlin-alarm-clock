@@ -17,6 +17,7 @@ public class Constants {
     public final static String USER_SETTINGS_DEFAULT_TONE = "pref_key_alarm_default_tone";
     public final static String USER_SETTINGS_DOWNLOAD_ON_DATA = "pref_key_download_on_data";
     public final static String USER_SETTINGS_SNOOZE_TIME = "pref_key_alarm_snooze_time";
+    public final static String USER_SETTINGS_ROOSTER_ORDER = "pref_key_rooster_order";
 
     public final static long[] VIBRATE_PATTERN = {0, 1000, 500, 1000, 500};
 
@@ -36,7 +37,6 @@ public class Constants {
     public final static String EXTRA_ALARMSET = "alarmSet";
 
     //DeviceAlarmController config constants
-    public final static int ALARM_SNOOZETIME = 10 * 60 * 1000;
     public final static int ALARM_DEFAULTTIME = 1 * 60 * 1000;
     public final static String ACTION_CANCEL_SNOOZE = "android.intent.action.CANCEL_SNOOZE";
 

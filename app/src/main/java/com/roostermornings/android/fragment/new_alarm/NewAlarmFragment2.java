@@ -25,8 +25,10 @@ import com.roostermornings.android.adapter.ChannelsListAdapter;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.AlarmChannel;
 import com.roostermornings.android.domain.Channel;
+import com.roostermornings.android.domain.ChannelRooster;
 import com.roostermornings.android.fragment.IAlarmSetListener;
 import com.roostermornings.android.fragment.base.BaseFragment;
+import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 
 import java.util.ArrayList;
 
@@ -41,7 +43,8 @@ public class NewAlarmFragment2 extends BaseFragment {
     private IAlarmSetListener mListener;
 
     private DatabaseReference mChannelsReference;
-    private ArrayList<Channel> channels = new ArrayList<Channel>();
+    private DatabaseReference mChannelRoostersReference;
+    private ArrayList<ChannelRooster> channelRoosters = new ArrayList<ChannelRooster>();
 
     @BindView(R.id.channelsListView)
     RecyclerView mRecyclerView;
@@ -77,41 +80,77 @@ public class NewAlarmFragment2 extends BaseFragment {
 
         mChannelsReference = FirebaseDatabase.getInstance().getReference()
                 .child("channels");
+        mChannelsReference.keepSynced(true);
 
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
         mRecyclerView.setHasFixedSize(true);
-        mAdapter = new ChannelsListAdapter(channels, NewAlarmFragment2.this);
+        mAdapter = new ChannelsListAdapter(channelRoosters, NewAlarmFragment2.this);
 
         // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(this.getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mAdapter);
 
-        ValueEventListener alarmsListener = new ValueEventListener() {
+        ValueEventListener channelsListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    Channel channel = postSnapshot.getValue(Channel.class);
+                    final Channel channel = postSnapshot.getValue(Channel.class);
 
-                    if(channel.isActive()) {
-                        channel.setSelected(false);
-                        channels.add(channel);
-                        mAdapter.notifyDataSetChanged();
+                    if (channel.isActive()) {
+                        if(channel.isNew_alarms_start_at_first_iteration()) {
+                            DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(getContext());
+                            Integer iteration = deviceAlarmTableManager.getChannelStoryIteration(channel.getUid());
+                            if(iteration != null && iteration > 0) {
+                                mChannelRoostersReference = FirebaseDatabase.getInstance().getReference()
+                                        .child("channel_rooster_uploads").child(channel.getUid()).child(String.valueOf(iteration));
+                            }
+                            else {
+                                //TODO: what if doesn't exist? Let's hope Node functions shifts them
+                                mChannelRoostersReference = FirebaseDatabase.getInstance().getReference()
+                                        .child("channel_rooster_uploads").child(channel.getUid()).child("1");
+                            }
+                        } else {
+                            mChannelRoostersReference = FirebaseDatabase.getInstance().getReference()
+                                    .child("channel_rooster_uploads").child(channel.getUid()).child(String.valueOf(channel.getCurrent_rooster_cycle_iteration()));
+                        }
+                        mChannelRoostersReference.keepSynced(true);
+
+                        ValueEventListener channelRoostersListener = new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                    ChannelRooster channelRooster = dataSnapshot.getValue(ChannelRooster.class);
+                                if(channelRooster != null && channelRooster.isActive()) {
+                                    channelRooster.setSelected(false);
+                                    channelRoosters.add(channelRooster);
+                                    mAdapter.notifyDataSetChanged();
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+                                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+                                showToast(getContext(), "Failed to load channel.", Toast.LENGTH_SHORT);
+                            }
+                        };
+                        mChannelRoostersReference.addValueEventListener(channelRoostersListener);
+
+                        //TODO: check this solves bug
+                        if (mListener != null)
+                            mListener.retrieveAlarmDetailsFromSQL(); //this is only relevant for alarms being edited
                     }
                 }
-                //TODO: check this solves bug
-                if (mListener != null) mListener.retrieveAlarmDetailsFromSQL(); //this is only relevant for alarms being edited
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                showToast(getContext(), "Failed to load channels.", Toast.LENGTH_SHORT);
+                showToast(getContext(), "Failed to load channel.", Toast.LENGTH_SHORT);
             }
         };
-        mChannelsReference.addValueEventListener(alarmsListener);
+        mChannelsReference.addValueEventListener(channelsListener);
 
         return view;
     }
@@ -141,9 +180,9 @@ public class NewAlarmFragment2 extends BaseFragment {
         }
     }
 
-    public void setSelectedChannel(Channel channel) {
+    public void setSelectedChannel(ChannelRooster channelRooster) {
         Alarm alarm = mListener.getAlarmDetails();
-        alarm.setChannel(new AlarmChannel(channel.getName(), channel.getUid()));
+        alarm.setChannel(new AlarmChannel(channelRooster.getName(), channelRooster.getChannel_uid()));
         mListener.setAlarmDetails(alarm);
     }
 
@@ -153,10 +192,10 @@ public class NewAlarmFragment2 extends BaseFragment {
         AlarmChannel alarmChannel = alarm.getChannel();
         if(alarmChannel == null) return;
 
-        for (Channel channel : channels) {
-            if (alarmChannel.getId().equals(channel.getUid())) {
-                channel.setSelected(true);
-                alarm.getChannel().setName(channel.getName());
+        for (ChannelRooster channelRooster : channelRoosters) {
+            if (alarmChannel.getId().equals(channelRooster.getChannel_uid())) {
+                channelRooster.setSelected(true);
+                alarm.getChannel().setName(channelRooster.getName());
                 mAdapter.notifyDataSetChanged();
             }
         }

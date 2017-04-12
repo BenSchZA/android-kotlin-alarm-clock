@@ -156,7 +156,7 @@ public class BackgroundTaskIntentService extends IntentService {
             existingChannelQueueIDs.add(audioItem.getQueue_id());
         }
         if (existingChannelQueueIDs.contains(channelId)) return;
-
+        //Check firebase auth
         if (mAuth.getCurrentUser() == null || mAuth.getCurrentUser() == null) {
             Log.d(TAG, "User not authenticated on FB!");
             return;
