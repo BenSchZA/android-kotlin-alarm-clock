@@ -5,6 +5,7 @@
 
 package com.roostermornings.android.domain;
 
+import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 
 @IgnoreExtraProperties
@@ -18,6 +19,9 @@ public class ChannelRooster {
     private String photo;
     private int rooster_cycle_iteration;
     private long upload_date;
+
+    @Exclude
+    private Boolean selected;
 
     // Required default constructor for Firebase object mapping
     @SuppressWarnings("unused")
@@ -34,6 +38,16 @@ public class ChannelRooster {
         this.photo = photo;
         this.rooster_cycle_iteration = rooster_cycle_iteration;
         this.upload_date = upload_date;
+    }
+
+    @Exclude
+    public boolean isSelected() {
+        return selected;
+    }
+
+    @Exclude
+    public void setSelected(boolean selected) {
+        this.selected = selected;
     }
 
     public String getName() {

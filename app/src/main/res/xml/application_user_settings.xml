@@ -23,11 +23,17 @@
             android:title="Default alarm ringtone"
             android:summary="Choose the default ringtone to play if no channel content is selected
 and no social roosters are received"
-            android:ringtoneType="alarm"
+            android:ringtoneType="ringtone"
             android:persistent="true"
             android:showDefault="true"
             android:showSilent="false"
-            android:defaultValue="DEFAULT_SOUND" />
+            android:defaultValue="android.intent.extra.ringtone.DEFAULT_URI" />
+        <CheckBoxPreference
+            android:key="pref_key_rooster_order"
+            android:summary="Set channel rooster content to occur before social rooster content"
+            android:title="Alarm rooster order"
+            android:defaultValue="false"
+            android:persistent="true"/>
         <EditTextPreference
             android:key="pref_key_alarm_snooze_time"
             android:title="Alarm snooze time"
