@@ -240,5 +240,6 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         Drawable d = new BitmapDrawable(getResources(), bm);
         txtSenderName.setText(R.string.alarm_default_name);
         imgSenderPic.setImageDrawable(d);
+        imgSenderPic.setBackground(null);
     }
 }

@@ -12,12 +12,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
@@ -30,8 +33,10 @@ import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.RoosterUtils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Timer;
@@ -133,12 +138,24 @@ public class AudioService extends Service {
         }
         //Try append new content to end of existing content, if it fails - fail safe and play default alarm tone
         try {
-            //If this alarm does not allow social roosters, move on to channel content
-            if (!socialAudioItems.isEmpty() && deviceAlarmTableManager.getAlarmSet(this.alarmUid).get(0).isSocial()) {
-                this.audioItems.addAll(socialAudioItems);
-            }
-            if (!channelAudioItems.isEmpty()) {
-                this.audioItems.addAll(channelAudioItems);
+            //Reorder channel and social queue according to user preferences
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            if(sharedPreferences.getBoolean(Constants.USER_SETTINGS_ROOSTER_ORDER, false)) {
+                //If this alarm does not allow social roosters, move on to channel content
+                if (!socialAudioItems.isEmpty() && deviceAlarmTableManager.getAlarmSet(this.alarmUid).get(0).isSocial()) {
+                    this.audioItems.addAll(socialAudioItems);
+                }
+                if (!channelAudioItems.isEmpty()) {
+                    this.audioItems.addAll(channelAudioItems);
+                }
+            } else {
+                if (!channelAudioItems.isEmpty()) {
+                    this.audioItems.addAll(channelAudioItems);
+                }
+                //If this alarm does not allow social roosters, move on to channel content
+                if (!socialAudioItems.isEmpty() && deviceAlarmTableManager.getAlarmSet(this.alarmUid).get(0).isSocial()) {
+                    this.audioItems.addAll(socialAudioItems);
+                }
             }
             if (this.audioItems.isEmpty()) {
                 startDefaultAlarmTone();
@@ -406,11 +423,17 @@ public class AudioService extends Service {
         foregroundNotification("Alarm ringtone playing");
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String strRingtonePreference = sharedPreferences.getString(Constants.USER_SETTINGS_DEFAULT_TONE, "DEFAULT_SOUND");
+        String strRingtonePreference = sharedPreferences.getString(Constants.USER_SETTINGS_DEFAULT_TONE, "android.intent.extra.ringtone.DEFAULT_URI");
+
+        RingtoneManager ringtoneManager = new RingtoneManager(this);
+        ringtoneManager.setType(RingtoneManager.TYPE_ALL);
 
         Uri notification = Uri.parse(strRingtonePreference);
         //In case alarm tone URI does not exist
-        if(RingtoneManager.getRingtone(this, notification) == null) {
+        //Ringtonemanager used to check if exists: from Android docs:
+        //If the given URI cannot be opened for any reason, this method will attempt to fallback on another sound.
+        //If it cannot find any, it will return null.
+        if(RingtoneManager.getRingtone(this, notification) == null || ringtoneManager.getRingtonePosition(notification) < 0) {
             notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
             if (notification == null) {
                 notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
@@ -434,6 +457,7 @@ public class AudioService extends Service {
                 @Override
                 public void onPrepared(MediaPlayer mediaPlayer) {
                     mediaPlayerDefault.start();
+                    //Start timer to kill after 5 minutes
                     startTimer();
                 }});
 
@@ -502,12 +526,14 @@ public class AudioService extends Service {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
                 launchIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        Notification notification=new NotificationCompat.Builder(this)
+        Notification notification = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.logo)
                 .setContentTitle("Rooster Mornings")
                 .setContentText(state)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent).build();
+        //Above not working
+        notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
         startForeground(Constants.AUDIOSERVICE_NOTIFICATION_ID, notification);
     }

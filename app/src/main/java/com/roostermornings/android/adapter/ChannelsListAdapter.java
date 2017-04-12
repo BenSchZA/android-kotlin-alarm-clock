@@ -17,7 +17,7 @@ import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.roostermornings.android.R;
-import com.roostermornings.android.domain.Channel;
+import com.roostermornings.android.domain.ChannelRooster;
 import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment2;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
@@ -25,7 +25,7 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 
 public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapter.ViewHolder> {
-    private ArrayList<Channel> mDataset;
+    private ArrayList<ChannelRooster> mDataset;
     private Fragment mFragment;
 
     // Provide a reference to the views for each data item
@@ -51,7 +51,7 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
         }
     }
 
-    public void add(int position, Channel item) {
+    public void add(int position, ChannelRooster item) {
         mDataset.add(position, item);
         notifyItemInserted(position);
     }
@@ -63,7 +63,7 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public ChannelsListAdapter(ArrayList<Channel> myDataset, Fragment fragment) {
+    public ChannelsListAdapter(ArrayList<ChannelRooster> myDataset, Fragment fragment) {
         mDataset = myDataset;
         mFragment = fragment;
     }
@@ -144,9 +144,9 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
         }
     }
 
-    private void toggleChannelSelection(Channel channelSelection) {
+    private void toggleChannelSelection(ChannelRooster channelSelection) {
         //Clear all channels except selected
-        for (Channel channel : mDataset) {
+        for (ChannelRooster channel : mDataset) {
             if (!(channel == channelSelection)) channel.setSelected(false);
         }
         //Toggle selected channel
