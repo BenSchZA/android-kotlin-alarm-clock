@@ -36,7 +36,7 @@ public class Alarm {
     private String uid;
 
     @Exclude
-    private Integer unseen_roosters;
+    private Integer unseen_roosters = -1;
 
     // Required default constructor for Firebase object mapping
     @SuppressWarnings("unused")

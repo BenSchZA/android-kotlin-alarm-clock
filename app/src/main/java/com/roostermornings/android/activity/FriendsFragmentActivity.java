@@ -46,7 +46,9 @@ import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.FontsOverride;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -435,8 +437,15 @@ public class FriendsFragmentActivity extends BaseActivity implements
         //Create friend object from current signed in user
         Friend currentUserFriend = new Friend(mCurrentUser.getUid(), mCurrentUser.getUser_name(), mCurrentUser.getProfile_pic(), mCurrentUser.getCell_number());
 
-        mDatabase.getDatabase().getReference(currentUserUrl).setValue(acceptFriend);
-        mDatabase.getDatabase().getReference(friendUserUrl).setValue(currentUserFriend);
+        //Update current user and friend entry as: uid:boolean
+        Map<String, Object> childUpdates = new HashMap<>();
+        childUpdates.put(acceptFriend.getUid(), true);
+        mDatabase.getDatabase().getReference(currentUserUrl).updateChildren(childUpdates);
+        childUpdates.clear();
+
+        childUpdates.put(currentUserFriend.getUid(), true);
+        mDatabase.getDatabase().getReference(friendUserUrl).updateChildren(childUpdates);
+        childUpdates.clear();
 
         String receivedUrl = String.format("friend_requests_received/%s/%s", mCurrentUser.getUid(), acceptFriend.getUid());
         String sentUrl = String.format("friend_requests_sent/%s/%s", acceptFriend.getUid(), mCurrentUser.getUid());

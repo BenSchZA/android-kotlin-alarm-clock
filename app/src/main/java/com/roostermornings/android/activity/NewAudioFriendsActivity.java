@@ -220,7 +220,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
         }
 
         if(mFriendsSelected.isEmpty()) {
-            Toast.makeText(NewAudioFriendsActivity.this, R.string.new_audio_at_least_one_friend, Toast.LENGTH_LONG);
+            Toast.makeText(NewAudioFriendsActivity.this, R.string.new_audio_at_least_one_friend, Toast.LENGTH_LONG).show();
             return;
         }
 
