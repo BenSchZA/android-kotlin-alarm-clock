@@ -5,6 +5,7 @@
 
 package com.roostermornings.android.util;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.provider.ContactsContract;
@@ -13,6 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.InputStream;
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -28,7 +30,7 @@ public class MyContactsController {
 
     private Context context;
 
-    private Map<String, String> contactsMap;
+    private ArrayList<String> contactsMap;
     private JSONObject countryCodes;
     private JSONArray countryCodesArray;
 
@@ -36,11 +38,28 @@ public class MyContactsController {
         this.context = c;
     }
 
+    private static ArrayList<String> getContacts(Context context) {
+        ArrayList<String> result = new ArrayList<>();
+
+        ContentResolver cr = context.getContentResolver();
+        Cursor cursor = cr.query(
+                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                null, null, null, null);
+
+        if(cursor == null) return null;
+        if (cursor.getCount() > 0) {
+            while (cursor.moveToNext()) {
+                String number = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                result.add(number);
+            }
+            cursor.close();
+        }
+        return result;
+    }
+
     public ArrayList<String> processContacts() {
         contactsMap = getContacts(context);
-        JSONObject JSONContactsObject = new JSONObject(contactsMap);
-        JSONObject JSONProcessedContactsObject = new JSONObject();
-        ArrayList<String> ProcessedContactsArray = new ArrayList<>();
+        ArrayList<String> processedContactsArray = new ArrayList<>();
         String NSNNumber;
 
         try {
@@ -50,24 +69,17 @@ public class MyContactsController {
             e.printStackTrace();
         }
 
-        try {
-            Iterator<String> JSONKeyIterator = JSONContactsObject.keys();
-            while (JSONKeyIterator.hasNext()) {
-                String key = JSONKeyIterator.next();
-                String contactNumber = JSONContactsObject.get(key).toString();
+        for (String contactNumber:
+             contactsMap) {
+            try {
                 contactNumber = contactNumber.replaceAll("[^0-9+]", "");
-                JSONContactsObject.put(key, contactNumber);
                 NSNNumber = processContactCountry(contactNumber);
-                JSONProcessedContactsObject.put(key, NSNNumber);
-                if (NSNNumber.length() > 0) ProcessedContactsArray.add(NSNNumber);
+                if (NSNNumber.length() > 0) processedContactsArray.add(NSNNumber);
+            } catch (NullPointerException e){
+                e.printStackTrace();
             }
-        } catch (org.json.JSONException e) {
-            e.printStackTrace();
-        } catch (java.lang.StringIndexOutOfBoundsException e2) {
-            e2.printStackTrace();
         }
-
-        return ProcessedContactsArray;
+        return processedContactsArray;
     }
 
     public String processContactCountry(String contactNumber) {
@@ -131,20 +143,5 @@ public class MyContactsController {
             return null;
         }
         return JSONString;
-    }
-
-    private static Map<String, String> getContacts(Context context) {
-        Map<String, String> result = new HashMap<>();
-        Cursor cursor = context.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
-        while (cursor.moveToNext()) {
-            int phone_idx = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-            int name_idx = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
-            String phone = cursor.getString(phone_idx);
-            String name = cursor.getString(name_idx);
-            result.put(name, phone);
-        }
-        cursor.close();
-
-        return result;
     }
 }
