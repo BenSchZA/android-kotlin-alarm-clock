@@ -29,7 +29,7 @@ public class Channel implements Serializable {
     private String uid;
 
     @Exclude
-    private Boolean selected;
+    private Boolean selected = false;
 
     // Required default constructor for Firebase object mapping
     @SuppressWarnings("unused")

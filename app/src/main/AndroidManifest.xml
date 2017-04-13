@@ -175,16 +175,17 @@
             android:theme="@style/AppThemeDay.NoActionBar" />
         <activity
             android:name=".activity.SettingsActivity"
-            android:theme="@style/AppThemeDay.NoActionBar"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan" >
+            android:theme="@style/AppThemeDay.NoActionBar"
+            android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.ProfileActivity"
+        <activity
+            android:name=".activity.ProfileActivity"
             android:theme="@style/AppThemeDay.NoActionBar" />
     </application>
 
