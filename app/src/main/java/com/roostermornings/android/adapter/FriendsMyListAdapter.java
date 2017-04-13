@@ -34,6 +34,7 @@ import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.activity.NewAudioFriendsActivity;
 import com.roostermornings.android.activity.NewAudioRecordActivity;
+import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.util.Constants;
@@ -167,6 +168,7 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
         holder.btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(!((BaseActivity)mContext).checkInternetConnection()) return;
                 ArrayList<User> friendToSend = new ArrayList<>();
                 friendToSend.add(user);
                 Intent intent = new Intent(mContext, NewAudioRecordActivity.class);
