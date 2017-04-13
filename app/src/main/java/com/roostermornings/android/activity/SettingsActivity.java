@@ -28,7 +28,7 @@ public class SettingsActivity extends BaseActivity {
 
         setDayNight();
 
-        // Display the fragment as the main content.
+        //Display the fragment as the main content
         getFragmentManager().beginTransaction()
                 .add(R.id.activity_content, new SettingsFragment())
                 .commit();
