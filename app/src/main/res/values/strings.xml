@@ -55,7 +55,7 @@
     <string name="friends_search_title">Search...</string>
     <string name="search_hint_friends">Search...</string>
 
-    <string name="roosters">Roosters</string>
+    <string name="message_status_activity_title">Social Roosters Sent</string>
     <string name="status_sent">Sent</string>
     <string name="status_delivered">Delivered</string>
     <string name="status_awake">Awake</string>
@@ -77,5 +77,6 @@
     <string name="ok">OK</string>
     <string name="save">Save</string>
 
+<string name="settings_activity_title">Settings</string>
 
 </resources>

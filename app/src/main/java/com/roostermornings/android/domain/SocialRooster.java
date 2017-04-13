@@ -7,6 +7,7 @@ package com.roostermornings.android.domain;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
+import com.roostermornings.android.util.Constants;
 
 /**
  * Created by steven on 2017/02/10.
@@ -24,7 +25,7 @@ public class SocialRooster {
     private String sender_id;
 
     @Exclude
-    private Integer status;
+    private Integer status = -1;
 
     public SocialRooster(String audio_file_url, String user_name,
                          Boolean listened, String profile_pic, Long date_uploaded,

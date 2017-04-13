@@ -141,20 +141,20 @@ public class AudioService extends Service {
             //Reorder channel and social queue according to user preferences
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
             if(sharedPreferences.getBoolean(Constants.USER_SETTINGS_ROOSTER_ORDER, false)) {
+                if (!channelAudioItems.isEmpty()) {
+                    this.audioItems.addAll(channelAudioItems);
+                }
                 //If this alarm does not allow social roosters, move on to channel content
                 if (!socialAudioItems.isEmpty() && deviceAlarmTableManager.getAlarmSet(this.alarmUid).get(0).isSocial()) {
                     this.audioItems.addAll(socialAudioItems);
-                }
-                if (!channelAudioItems.isEmpty()) {
-                    this.audioItems.addAll(channelAudioItems);
                 }
             } else {
-                if (!channelAudioItems.isEmpty()) {
-                    this.audioItems.addAll(channelAudioItems);
-                }
                 //If this alarm does not allow social roosters, move on to channel content
                 if (!socialAudioItems.isEmpty() && deviceAlarmTableManager.getAlarmSet(this.alarmUid).get(0).isSocial()) {
                     this.audioItems.addAll(socialAudioItems);
+                }
+                if (!channelAudioItems.isEmpty()) {
+                    this.audioItems.addAll(channelAudioItems);
                 }
             }
             if (this.audioItems.isEmpty()) {
