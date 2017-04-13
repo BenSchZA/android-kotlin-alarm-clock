@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Rooster Mornings Android.
+  ~ Copyright (c)  2017 Roosta Media. All rights reserved.
+  -->
+
+<android.support.design.widget.AppBarLayout android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:elevation="0dp"
+    android:theme="@style/AppTheme.AppBarOverlay"
+    app:elevation="0dp"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <include layout="@layout/partial_toolbar"/>
+
+</android.support.design.widget.AppBarLayout>

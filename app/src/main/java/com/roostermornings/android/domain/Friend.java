@@ -19,7 +19,7 @@ public class Friend implements Serializable {
 
     //Using Firebase @Exclude annotation ensures that property is not UPLOADED to db - include above getter/setter for proper operation
     @Exclude
-    private Boolean selected; //this is important for list of friends that need to be selected eg for creating a new alarm
+    private Boolean selected = false; //this is important for list of friends that need to be selected eg for creating a new alarm
 
     public Friend(){}
 

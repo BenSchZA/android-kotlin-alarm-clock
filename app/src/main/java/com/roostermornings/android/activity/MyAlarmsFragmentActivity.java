@@ -5,6 +5,7 @@
 
 package com.roostermornings.android.activity;
 
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -41,6 +42,7 @@ import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.MyAlarmsListAdapter;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.AlarmChannel;
+import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
@@ -117,6 +119,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
             }
         }
 
+        //Clear snooze if action
         if(getIntent().getAction() != null && getIntent().getAction().equals(Constants.ACTION_CANCEL_SNOOZE)) {
             try {
                 deviceAlarmController.snoozeAlarm(extras.getString(Constants.EXTRA_ALARMID), true);

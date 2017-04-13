@@ -6,6 +6,7 @@
 package com.roostermornings.android.sqlutil;
 
 import android.app.AlarmManager;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +19,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
+import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.util.Constants;
 
 import java.util.ArrayList;
@@ -52,13 +54,13 @@ public final class DeviceAlarmController {
     //Take a set of alarms and recreate intents, overwriting if already existing, and clearing changed flag if set
     public void refreshAlarms(List<DeviceAlarm> deviceAlarmList) {
         for (DeviceAlarm deviceAlarm : deviceAlarmList) {
-            setAlarm(deviceAlarm);
+            setAlarm(deviceAlarm, false);
         }
         deviceAlarmTableManager.clearChanged(deviceAlarmList);
     }
 
     //Create pending intent for individual alarm (done once for each alarm in set)
-    private void setAlarm(DeviceAlarm deviceAlarm) {
+    private void setAlarm(DeviceAlarm deviceAlarm, Boolean cancel) {
         if (deviceAlarm.getEnabled()) {
             alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             Calendar alarmCalendar = Calendar.getInstance();
@@ -76,6 +78,15 @@ public final class DeviceAlarmController {
             PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(context,
                     deviceAlarm.getPiId(), alarmIntent,
                     PendingIntent.FLAG_UPDATE_CURRENT);
+
+            //Use setAlarm with cancel Boolean set to true - this recreates intent in order to clear it
+            if(cancel) {
+                //Cancel alarm intent
+                alarmMgr.cancel(alarmPendingIntent);
+                //The below method is reeeaaallly delayed...?
+                //alarmPendingIntent.cancel();
+                return;
+            }
 
             alarmCalendar.set(alarmCalendar.get(Calendar.YEAR), alarmCalendar.get(Calendar.MONTH), alarmCalendar.get(Calendar.DATE), deviceAlarm.getHour(), deviceAlarm.getMinute());
             alarmCalendar.set(Calendar.WEEK_OF_MONTH, systemCalendar.get(Calendar.WEEK_OF_MONTH));
@@ -140,7 +151,13 @@ public final class DeviceAlarmController {
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
         if(cancel) {
+            //Cancel alarm intent
             alarmPendingIntent.cancel();
+            //Clear foreground notification
+            NotificationManager notificationManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.cancel(Constants.AUDIOSERVICE_NOTIFICATION_ID);
+            //Stop audio service
+            context.stopService(new Intent(context, AudioService.class));
             return;
         }
 
@@ -306,24 +323,8 @@ public final class DeviceAlarmController {
     }
 
     private void cancelAlarm(DeviceAlarm deviceAlarm) {
-        alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Intent alarmIntent = new Intent(context, DeviceAlarmReceiver.class);
-        alarmIntent.setAction(Constants.ACTTION_ALARMRECEIVER);
-        alarmIntent.putExtra(Constants.EXTRA_REQUESTCODE, deviceAlarm.getPiId());
-        alarmIntent.putExtra(Constants.EXTRA_UID, deviceAlarm.getSetId());
-
-        if (deviceAlarm.getRecurring()) {
-            alarmIntent.putExtra(Constants.EXTRA_RECURRING, true);
-        }
-
-        PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(context,
-                deviceAlarm.getPiId(), alarmIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-
-        // If the alarm has been set, cancel it
-        if (alarmMgr != null) {
-             alarmMgr.cancel(alarmPendingIntent);
-        }
+        //Use setAlarm with cancel Boolean set to true - this recreates intent in order to clear it
+        setAlarm(deviceAlarm, true);
     }
 
     //Used to recreate alarm intents after reboot. All ENABLED alarms recreated.

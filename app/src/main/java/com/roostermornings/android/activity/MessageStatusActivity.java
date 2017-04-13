@@ -83,7 +83,7 @@ public class MessageStatusActivity extends BaseActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-        toolbarTitle.setText(getString(R.string.roosters));
+        toolbarTitle.setText(getString(R.string.message_status_activity_title));
     }
 
     private void updateMessageStatus() {
@@ -145,9 +145,9 @@ public class MessageStatusActivity extends BaseActivity {
         if (dateUploaded > (calendar.getTimeInMillis() - 2 * Constants.TIME_MILLIS_1_DAY)) {
             //Clear old entries on change
             mRoosters.add(socialRoosterU);
-            mRoosters.get(mRoosters.indexOf(socialRoosterU)).setStatus(Constants.MESSAGE_STATUS_SENT);
+            if(mRoosters.indexOf(socialRoosterU) > -1) mRoosters.get(mRoosters.indexOf(socialRoosterU)).setStatus(Constants.MESSAGE_STATUS_SENT);
             if (socialRoosterU.getListened()) {
-                mRoosters.get(mRoosters.indexOf(socialRoosterU)).setStatus(Constants.MESSAGE_STATUS_RECEIVED);
+                if(mRoosters.indexOf(socialRoosterU) > -1) mRoosters.get(mRoosters.indexOf(socialRoosterU)).setStatus(Constants.MESSAGE_STATUS_RECEIVED);
                 notifyAdapter();
             } else {
                 mSocialRoosterQueueReference = FirebaseDatabase.getInstance().getReference()
@@ -158,7 +158,7 @@ public class MessageStatusActivity extends BaseActivity {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         if (!dataSnapshot.exists()) {
-                            mRoosters.get(mRoosters.indexOf(socialRoosterU)).setStatus(Constants.MESSAGE_STATUS_DELIVERED);
+                            if(mRoosters.indexOf(socialRoosterU) > -1) mRoosters.get(mRoosters.indexOf(socialRoosterU)).setStatus(Constants.MESSAGE_STATUS_DELIVERED);
                             notifyAdapter();
                         }
                     }

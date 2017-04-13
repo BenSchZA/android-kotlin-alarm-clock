@@ -21,7 +21,7 @@ public class ChannelRooster {
     private long upload_date;
 
     @Exclude
-    private Boolean selected;
+    private Boolean selected = false;
 
     // Required default constructor for Firebase object mapping
     @SuppressWarnings("unused")
