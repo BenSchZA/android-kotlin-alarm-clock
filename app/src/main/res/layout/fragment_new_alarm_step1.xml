@@ -50,17 +50,21 @@
         android:layout_width="match_parent"/>
 
     <LinearLayout
-        android:id="@+id/days_parent"
+        android:id="@+id/days_parent1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="horizontal"
-        android:padding="@dimen/spacing_xxlarge">
+        android:paddingBottom="@dimen/spacing_xsmall"
+        android:paddingTop="@dimen/spacing_xxlarge"
+        android:paddingRight="@dimen/spacing_xxlarge"
+        android:paddingLeft="@dimen/spacing_xxlarge">
 
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:padding="@dimen/spacing_normal"
             android:clickable="true">
 
             <TextView
@@ -80,7 +84,8 @@
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:padding="@dimen/spacing_normal"
             android:clickable="true">
 
             <TextView
@@ -97,7 +102,8 @@
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:padding="@dimen/spacing_normal"
             android:clickable="true">
 
             <TextView
@@ -114,7 +120,8 @@
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:padding="@dimen/spacing_normal"
             android:clickable="true">
 
             <TextView
@@ -131,7 +138,8 @@
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:padding="@dimen/spacing_normal"
             android:clickable="true">
 
             <TextView
@@ -145,11 +153,25 @@
                 android:text="F" />
         </FrameLayout>
 
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/days_parent2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="horizontal"
+        android:paddingBottom="@dimen/spacing_xxlarge"
+        android:paddingLeft="@dimen/spacing_xxlarge"
+        android:paddingRight="@dimen/spacing_xxlarge"
+        android:paddingTop="@dimen/spacing_xsmall">
+
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:clickable="true">
+            android:layout_gravity="center"
+            android:clickable="true"
+            android:padding="@dimen/spacing_normal">
 
             <TextView
                 android:id="@+id/new_alarm_fragment1_alarm_day_sat"
@@ -165,8 +187,9 @@
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:clickable="true">
+            android:layout_gravity="center"
+            android:clickable="true"
+            android:padding="@dimen/spacing_normal">
 
             <TextView
                 android:id="@+id/new_alarm_fragment1_alarm_day_sun"
@@ -178,7 +201,6 @@
                 android:tag="7"
                 android:text="S" />
         </FrameLayout>
-
 
     </LinearLayout>
 

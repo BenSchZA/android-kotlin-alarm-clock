@@ -41,8 +41,11 @@ public class NewAlarmFragment1 extends BaseFragment{
     @BindView(R.id.new_alarm_time)
     TextView textViewAlarmTime;
 
-    @BindView(R.id.days_parent)
-    LinearLayout daysParentLinearLayout;
+    @BindView(R.id.days_parent1)
+    LinearLayout daysParentLinearLayout1;
+
+    @BindView(R.id.days_parent2)
+    LinearLayout daysParentLinearLayout2;
 
     @BindView(R.id.new_alarm_fragment1_alarm_day_mon)
     TextView textViewMonday;

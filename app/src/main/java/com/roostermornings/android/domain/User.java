@@ -20,7 +20,7 @@ public class User implements Serializable {
     private String profile_pic;
     private String user_name;
     private String cell_number;
-    private HashMap<String, User> friends;
+    private HashMap<String, Boolean> friends;
     private String uid;
     private Integer unseen_roosters;
 
@@ -39,7 +39,7 @@ public class User implements Serializable {
                 String user_name,
                 String cell_number,
                 String uid,
-                HashMap<String, User> friends,
+                HashMap<String, Boolean> friends,
                 Integer unseen_roosters) {
 
         this.channels = channels;
@@ -60,11 +60,11 @@ public class User implements Serializable {
         this.unseen_roosters = unseen_roosters;
     }
 
-    public HashMap<String, User> getFriends() {
+    public HashMap<String, Boolean> getFriends() {
         return friends;
     }
 
-    public void setFriends(HashMap<String, User> friends) {
+    public void setFriends(HashMap<String, Boolean> friends) {
         this.friends = friends;
     }
 
