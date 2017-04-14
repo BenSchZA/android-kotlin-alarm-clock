@@ -44,7 +44,7 @@
     <string name="alarm_default_name">Rise and Shine!</string>
     <string name="alarm_count"></string>
     <string name="delete_alarm">Delete alarm</string>
-    <string name="repeat_alarm">Repeat alarm</string>
+    <string name="repeat_alarm">Repeat weekly</string>
     <string name="allow_friends">Allow friends to send audio notes to this alarm</string>
 
     <string name="friends">Friends</string>
