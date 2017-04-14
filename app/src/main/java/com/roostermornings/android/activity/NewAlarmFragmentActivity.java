@@ -285,8 +285,6 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
             }
             return null;
         }
-
-
     }
 
     @Override
