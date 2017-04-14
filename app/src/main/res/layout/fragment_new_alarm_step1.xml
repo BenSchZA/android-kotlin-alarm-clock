@@ -4,236 +4,238 @@
   -->
 
 <LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_gravity="center"
-    android:orientation="vertical"
-    tools:context="com.roostermornings.android.fragment.new_alarm.NewAlarmFragment1">
-
-    <TextView
-        android:id="@+id/new_alarm_time"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing_xxlarge"
-        android:layout_marginBottom="@dimen/spacing_xxlarge"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center_horizontal"
-        android:text="HH:MM"
-        android:textColor="@drawable/rooster_link_white"
-        android:textSize="@dimen/text_huge" />
-
-    <View
-        android:layout_height="1dp"
-        android:background="@color/white"
-        android:layout_width="match_parent"/>
-
-    <android.support.v7.widget.SwitchCompat
-        android:id="@+id/new_alarm_fragment1_switch_audio"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:checked="true"
-        android:paddingLeft="@dimen/spacing_normal"
-        android:paddingRight="@dimen/spacing_large"
-        android:thumb="@drawable/switch_thumb"
-        android:track="@drawable/switch_track"
-        android:textColor="@drawable/rooster_link_white"
-        android:textSize="@dimen/text_large"
-        android:padding="@dimen/spacing_large"
-        android:text="@string/allow_friends" />
-
-    <View
-        android:layout_height="1dp"
-        android:background="@color/white"
-        android:layout_width="match_parent"/>
-
-    <LinearLayout
-        android:id="@+id/days_parent1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:paddingBottom="@dimen/spacing_xsmall"
-        android:paddingTop="@dimen/spacing_xxlarge"
-        android:paddingRight="@dimen/spacing_xxlarge"
-        android:paddingLeft="@dimen/spacing_xxlarge">
-
-        <FrameLayout
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:padding="@dimen/spacing_normal"
-            android:clickable="true">
-
+            android:orientation="vertical">
             <TextView
-                android:id="@+id/new_alarm_fragment1_alarm_day_mon"
-                style="@style/AlarmDayCircle"
-                android:layout_width="wrap_content"
+                android:id="@+id/new_alarm_time"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/spacing_xxlarge"
+                android:layout_marginBottom="@dimen/spacing_xxlarge"
                 android:clickable="true"
-                android:tag="1"
-                android:text="M" />
+                android:focusable="true"
+                android:gravity="center_horizontal"
+                android:text="HH:MM"
+                android:textColor="@drawable/rooster_link_white"
+                android:textSize="@dimen/text_xxxhuge" />
 
+            <View
+                android:layout_height="1dp"
+                android:background="@color/white"
+                android:layout_width="match_parent"/>
 
-        </FrameLayout>
-
-
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:padding="@dimen/spacing_normal"
-            android:clickable="true">
-
-            <TextView
-                android:id="@+id/new_alarm_fragment1_alarm_day_tue"
-                style="@style/AlarmDayCircle"
-                android:layout_width="wrap_content"
+            <android.support.v7.widget.SwitchCompat
+                android:id="@+id/new_alarm_fragment1_switch_audio"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:clickable="true"
-                android:tag="2"
-                android:text="T" />
-        </FrameLayout>
+                android:checked="true"
+                android:paddingLeft="@dimen/spacing_normal"
+                android:paddingRight="@dimen/spacing_large"
+                android:thumb="@drawable/switch_thumb"
+                android:track="@drawable/switch_track"
+                android:textColor="@drawable/rooster_link_white"
+                android:textSize="@dimen/text_large"
+                android:padding="@dimen/spacing_large"
+                android:text="@string/allow_friends" />
 
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:padding="@dimen/spacing_normal"
-            android:clickable="true">
+            <View
+                android:layout_height="1dp"
+                android:background="@color/white"
+                android:layout_width="match_parent"/>
 
-            <TextView
-                android:id="@+id/new_alarm_fragment1_alarm_day_wed"
-                style="@style/AlarmDayCircle"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:id="@+id/days_parent1"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:clickable="true"
-                android:tag="3"
-                android:text="W" />
-        </FrameLayout>
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingBottom="@dimen/spacing_xsmall"
+                android:paddingTop="@dimen/spacing_xxlarge"
+                android:paddingRight="@dimen/spacing_xxlarge"
+                android:paddingLeft="@dimen/spacing_xxlarge">
 
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:padding="@dimen/spacing_normal"
-            android:clickable="true">
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:padding="@dimen/spacing_normal"
+                    android:clickable="true">
 
-            <TextView
-                android:id="@+id/new_alarm_fragment1_alarm_day_thu"
-                style="@style/AlarmDayCircle"
-                android:layout_width="wrap_content"
+                    <TextView
+                        android:id="@+id/new_alarm_fragment1_alarm_day_mon"
+                        style="@style/AlarmDayCircle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:clickable="true"
+                        android:tag="1"
+                        android:text="M" />
+
+
+                </FrameLayout>
+
+
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:padding="@dimen/spacing_normal"
+                    android:clickable="true">
+
+                    <TextView
+                        android:id="@+id/new_alarm_fragment1_alarm_day_tue"
+                        style="@style/AlarmDayCircle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:clickable="true"
+                        android:tag="2"
+                        android:text="T" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:padding="@dimen/spacing_normal"
+                    android:clickable="true">
+
+                    <TextView
+                        android:id="@+id/new_alarm_fragment1_alarm_day_wed"
+                        style="@style/AlarmDayCircle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:clickable="true"
+                        android:tag="3"
+                        android:text="W" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:padding="@dimen/spacing_normal"
+                    android:clickable="true">
+
+                    <TextView
+                        android:id="@+id/new_alarm_fragment1_alarm_day_thu"
+                        style="@style/AlarmDayCircle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:clickable="true"
+                        android:tag="4"
+                        android:text="T" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:padding="@dimen/spacing_normal"
+                    android:clickable="true">
+
+                    <TextView
+                        android:id="@+id/new_alarm_fragment1_alarm_day_fri"
+                        style="@style/AlarmDayCircle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:clickable="true"
+                        android:tag="5"
+                        android:text="F" />
+                </FrameLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/days_parent2"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:clickable="true"
-                android:tag="4"
-                android:text="T" />
-        </FrameLayout>
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingBottom="@dimen/spacing_xxlarge"
+                android:paddingLeft="@dimen/spacing_xxlarge"
+                android:paddingRight="@dimen/spacing_xxlarge"
+                android:paddingTop="@dimen/spacing_xsmall">
 
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:padding="@dimen/spacing_normal"
-            android:clickable="true">
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:clickable="true"
+                    android:padding="@dimen/spacing_normal">
 
-            <TextView
-                android:id="@+id/new_alarm_fragment1_alarm_day_fri"
-                style="@style/AlarmDayCircle"
-                android:layout_width="wrap_content"
+                    <TextView
+                        android:id="@+id/new_alarm_fragment1_alarm_day_sat"
+                        style="@style/AlarmDayCircle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:clickable="true"
+                        android:tag="6"
+                        android:text="S" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:clickable="true"
+                    android:padding="@dimen/spacing_normal">
+
+                    <TextView
+                        android:id="@+id/new_alarm_fragment1_alarm_day_sun"
+                        style="@style/AlarmDayCircle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:clickable="true"
+                        android:tag="7"
+                        android:text="S" />
+                </FrameLayout>
+
+            </LinearLayout>
+
+            <android.support.v7.widget.SwitchCompat
+                android:id="@+id/new_alarm_fragment1_switch_recurring"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:clickable="true"
-                android:tag="5"
-                android:text="F" />
-        </FrameLayout>
+                android:checked="false"
+                android:paddingLeft="@dimen/spacing_normal"
+                android:paddingRight="@dimen/spacing_large"
+                android:textColor="@drawable/rooster_link_white"
+                android:textSize="@dimen/text_large"
+                android:thumb="@drawable/switch_thumb"
+                android:track="@drawable/switch_track"
+                android:padding="@dimen/spacing_large"
+                android:text="@string/repeat_alarm" />
 
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/days_parent2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:orientation="horizontal"
-        android:paddingBottom="@dimen/spacing_xxlarge"
-        android:paddingLeft="@dimen/spacing_xxlarge"
-        android:paddingRight="@dimen/spacing_xxlarge"
-        android:paddingTop="@dimen/spacing_xsmall">
-
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:clickable="true"
-            android:padding="@dimen/spacing_normal">
-
-            <TextView
-                android:id="@+id/new_alarm_fragment1_alarm_day_sat"
-                style="@style/AlarmDayCircle"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:clickable="true"
-                android:tag="6"
-                android:text="S" />
-        </FrameLayout>
+                android:layout_gravity="bottom"
+                android:orientation="vertical">
 
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:clickable="true"
-            android:padding="@dimen/spacing_normal">
-
-            <TextView
-                android:id="@+id/new_alarm_fragment1_alarm_day_sun"
-                style="@style/AlarmDayCircle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:clickable="true"
-                android:tag="7"
-                android:text="S" />
-        </FrameLayout>
-
-    </LinearLayout>
-
-    <android.support.v7.widget.SwitchCompat
-        android:id="@+id/new_alarm_fragment1_switch_recurring"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:checked="false"
-        android:paddingLeft="@dimen/spacing_normal"
-        android:paddingRight="@dimen/spacing_large"
-        android:textColor="@drawable/rooster_link_white"
-        android:textSize="@dimen/text_large"
-        android:thumb="@drawable/switch_thumb"
-        android:track="@drawable/switch_track"
-        android:padding="@dimen/spacing_large"
-        android:text="@string/repeat_alarm" />
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_gravity="center|bottom">
-
-        <Button
-            android:id="@+id/new_alarm_fragment1_delete_alarm"
-            style="@style/RoosterButtonLightBlueStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal|bottom"
-            android:layout_margin="@dimen/spacing_normal"
-            android:text="@string/delete_alarm"
-            android:visibility="invisible" />
-
-    </LinearLayout>
-
+                <Button
+                    android:id="@+id/new_alarm_fragment1_delete_alarm"
+                    style="@style/RoosterButtonLightBlueStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_margin="@dimen/spacing_xxxlarge"
+                    android:text="@string/delete_alarm"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>

@@ -77,7 +77,6 @@ public class NewAlarmFragment1 extends BaseFragment{
     @BindView(R.id.new_alarm_fragment1_delete_alarm)
     Button deleteAlarm;
 
-
     private static final String ARG_USER_UID_PARAM = "user_uid_param";
     public static final String TAG = NewAlarmFragment1.class.getSimpleName();
     private String mUserUidParam;
@@ -275,7 +274,7 @@ public class NewAlarmFragment1 extends BaseFragment{
 
     private void openTimePicker() {
 
-        mTimePickerDialog.setTitle(getString(R.string.new_alarm_set_time));
+        //mTimePickerDialog.setTitle(getString(R.string.new_alarm_set_time));
         mTimePickerDialog.show();
 
     }

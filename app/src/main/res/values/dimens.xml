@@ -12,6 +12,8 @@
     <dimen name="appbar_padding_top">8dp</dimen>
     <dimen name="button_spacing_audio_friends">82dp</dimen>
 
+    <dimen name="text_xxxhuge">80sp</dimen>
+    <dimen name="text_xxhuge">60sp</dimen>
     <dimen name="text_huge">48sp</dimen>
     <dimen name="text_xxxlarge">32sp</dimen>
     <dimen name="text_xxlarge">25sp</dimen>
