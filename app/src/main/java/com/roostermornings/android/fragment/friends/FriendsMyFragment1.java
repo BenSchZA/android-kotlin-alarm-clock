@@ -153,6 +153,9 @@ public class FriendsMyFragment1 extends BaseFragment {
 
                     sortNamesUsers(mUsers);
                     mAdapter.notifyDataSetChanged();
+
+//                    SharedPreferences.Editor editor =  sharedPreferences.edit();
+//                    editor
                 }
             }
 

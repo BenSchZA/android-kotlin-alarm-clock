@@ -9,6 +9,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.ArraySet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,6 +32,11 @@ import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import butterknife.BindView;
 
@@ -44,7 +50,8 @@ public class NewAlarmFragment2 extends BaseFragment {
 
     private DatabaseReference mChannelsReference;
     private DatabaseReference mChannelRoostersReference;
-    private ArrayList<ChannelRooster> channelRoosters = new ArrayList<ChannelRooster>();
+    private ArrayList<ChannelRooster> channelRoosters = new ArrayList<>();
+    private Map<Integer, ChannelRooster> channelRoosterMap = new TreeMap<>(Collections.reverseOrder());
 
     @BindView(R.id.channelsListView)
     RecyclerView mRecyclerView;
@@ -95,51 +102,20 @@ public class NewAlarmFragment2 extends BaseFragment {
         ValueEventListener channelsListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     final Channel channel = postSnapshot.getValue(Channel.class);
 
                     if (channel.isActive()) {
                         if(channel.isNew_alarms_start_at_first_iteration()) {
-                            DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(getContext());
+                            final DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(getContext());
                             Integer iteration = deviceAlarmTableManager.getChannelStoryIteration(channel.getUid());
-                            if(iteration != null && iteration > 0) {
-                                mChannelRoostersReference = FirebaseDatabase.getInstance().getReference()
-                                        .child("channel_rooster_uploads").child(channel.getUid()).child(String.valueOf(iteration));
-                            }
-                            else {
-                                //TODO: what if doesn't exist? Let's hope Node functions shifts them
-                                mChannelRoostersReference = FirebaseDatabase.getInstance().getReference()
-                                        .child("channel_rooster_uploads").child(channel.getUid()).child("1");
-                            }
+                            if(iteration == null || iteration <= 0) iteration = 1;
+                            getChannelRoosterData(channel, iteration);
                         } else {
-                            mChannelRoostersReference = FirebaseDatabase.getInstance().getReference()
-                                    .child("channel_rooster_uploads").child(channel.getUid()).child(String.valueOf(channel.getCurrent_rooster_cycle_iteration()));
+                            Integer iteration = channel.getCurrent_rooster_cycle_iteration();
+                            if(iteration == null || iteration <= 0) iteration = 1;
+                            getChannelRoosterData(channel, iteration);
                         }
-                        mChannelRoostersReference.keepSynced(true);
-
-                        ValueEventListener channelRoostersListener = new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                    ChannelRooster channelRooster = dataSnapshot.getValue(ChannelRooster.class);
-                                if(channelRooster != null && channelRooster.isActive()) {
-                                    channelRooster.setSelected(false);
-                                    channelRoosters.add(channelRooster);
-                                    mAdapter.notifyDataSetChanged();
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-                                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                                showToast(getContext(), "Failed to load channel.", Toast.LENGTH_SHORT);
-                            }
-                        };
-                        mChannelRoostersReference.addValueEventListener(channelRoostersListener);
-
-                        //TODO: check this solves bug
-                        if (mListener != null)
-                            mListener.retrieveAlarmDetailsFromSQL(); //this is only relevant for alarms being edited
                     }
                 }
             }
@@ -153,6 +129,76 @@ public class NewAlarmFragment2 extends BaseFragment {
         mChannelsReference.addValueEventListener(channelsListener);
 
         return view;
+    }
+
+    private void getChannelRoosterData(final Channel channel, final Integer iteration) {
+        final DatabaseReference channelRoosterUploadsReference = FirebaseDatabase.getInstance().getReference()
+                .child("channel_rooster_uploads").child(channel.getUid());
+        //Ensure latest data is pulled
+        channelRoosterUploadsReference.keepSynced(true);
+
+        ValueEventListener channelRoosterUploadsListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                TreeMap<Integer,ChannelRooster> channelIterationMap = new TreeMap<>();
+                //Check if node has children i.e. channelId content exists
+                if(dataSnapshot.getChildrenCount() == 0) return;
+                //Iterate over all content children
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                    ChannelRooster channelRooster = postSnapshot.getValue(ChannelRooster.class);
+                    if(channelRooster.isActive() && (channelRooster.getRooster_cycle_iteration() != iteration)) {
+                        channelIterationMap.put(channelRooster.getRooster_cycle_iteration(), channelRooster);
+                        findNextValidChannelRooster(channelIterationMap, channel, iteration);
+                        refreshChannelRoosters();
+                    } else if(channelRooster.isActive()) {
+                        channelRooster.setSelected(false);
+                        channelRoosterMap.put(channel.getPriority(), channelRooster);
+                        refreshChannelRoosters();
+                        return;
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+        channelRoosterUploadsReference.addListenerForSingleValueEvent(channelRoosterUploadsListener);
+    }
+
+    private void refreshChannelRoosters() {
+        //TreeMap ensures unique and allows sorting by priority! How cool is that?
+        channelRoosters.clear();
+        channelRoosters.addAll(channelRoosterMap.values());
+        if (mListener != null)
+            mListener.retrieveAlarmDetailsFromSQL(); //this is only relevant for alarms being edited
+        mAdapter.notifyDataSetChanged();
+    }
+
+    private void findNextValidChannelRooster(TreeMap<Integer,ChannelRooster> channelIterationMap, Channel channel, Integer iteration) {
+        final DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(getContext());
+        //Check head and tail of naturally sorted TreeMap for next valid channel content
+        SortedMap<Integer,ChannelRooster> tailMap = channelIterationMap.tailMap(iteration);
+        SortedMap<Integer,ChannelRooster> headMap = channelIterationMap.headMap(iteration);
+        if(!tailMap.isEmpty()) {
+            //User is starting story at next valid entry
+            //Set SQL entry for iteration to current valid story iteration, to be incremented on play
+            deviceAlarmTableManager.setChannelStoryIteration(channel.getUid(), tailMap.firstKey());
+            //Retrieve channel audio
+            ChannelRooster channelRooster = channelIterationMap.get(tailMap.firstKey());
+            channelRooster.setSelected(false);
+            channelRoosterMap.put(channel.getPriority(), channelRooster);
+        }
+        else if(!headMap.isEmpty()) {
+            //User is starting story from beginning again, at valid entry
+            //Set SQL entry for iteration to current valid story iteration, to be incremented on play
+            deviceAlarmTableManager.setChannelStoryIteration(channel.getUid(), headMap.firstKey());
+            //Retrieve channel audio
+            ChannelRooster channelRooster = channelIterationMap.get(headMap.firstKey());
+            channelRooster.setSelected(false);
+            channelRoosterMap.put(channel.getPriority(), channelRooster);
+        }
     }
 
     @Override
