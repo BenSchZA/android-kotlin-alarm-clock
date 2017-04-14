@@ -180,7 +180,9 @@ public class BackgroundTaskIntentService extends IntentService {
 
                 //Check if channel has content and whether a story or not
                 final Integer iteration;
-                if(channel.isNew_alarms_start_at_first_iteration()) iteration = deviceAlarmTableManager.getChannelStoryIteration(channelId);
+                if(channel.isNew_alarms_start_at_first_iteration() && deviceAlarmTableManager.getChannelStoryIteration(channelId) != null) iteration = deviceAlarmTableManager.getChannelStoryIteration(channelId);
+                    //If iteration is null, this means no entry in db - set to 1 and process from there
+                else if (channel.isNew_alarms_start_at_first_iteration()) iteration = 1;
                 else if (channel.getCurrent_rooster_cycle_iteration() < 1) return;
                 else iteration = channel.getCurrent_rooster_cycle_iteration();
 
