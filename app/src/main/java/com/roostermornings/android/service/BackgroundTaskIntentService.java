@@ -288,8 +288,8 @@ public class BackgroundTaskIntentService extends IntentService {
     private void retrieveChannelContentAudio(final ChannelRooster channelRooster, final Context context) {
 
         try {
-            //TODO: replace with audiofileURL
-            StorageReference audioFileRef = mStorageRef.child("channel_roosters/" + channelRooster.getAudio_file_name());
+            //https://firebase.google.com/docs/storage/android/download-files
+            StorageReference audioFileRef = mStorageRef.getStorage().getReferenceFromUrl(channelRooster.getAudio_file_url());
             final String audioFileUniqueName = "audio" + RoosterUtils.createRandomFileName(5) + ".3gp";
 
             final long FIVE_MEGABYTE = 5 * 1024 * 1024;
