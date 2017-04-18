@@ -6,57 +6,43 @@
 package com.roostermornings.android.activity;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.LinearLayoutManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseUser;
 import com.roostermornings.android.R;
-import com.roostermornings.android.activity.base.BaseActivity;
-import com.roostermornings.android.adapter.NewAudioFriendsListAdapter;
+import com.roostermornings.android.activity.base.BaseActivity;;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.User;
-import com.roostermornings.android.domain.Users;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 
 import butterknife.BindView;
 import butterknife.OnClick;
-import retrofit.Call;
-import retrofit.Callback;
-import retrofit.Response;
-import retrofit.Retrofit;
 
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
-/**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
- */
 public class NewAudioRecordActivity extends BaseActivity {
 
     protected static final String TAG = NewAudioFriendsActivity.class.getSimpleName();
@@ -80,14 +66,21 @@ public class NewAudioRecordActivity extends BaseActivity {
     private long timeOfSuccesfulAmplitude;
 
     private Handler mHandler = new Handler();
-    private boolean mRecording = false;
-    private boolean mListening = false;
-    private boolean mPaused = false;
+
     String mAudioSavePathInDevice = null;
     MediaRecorder mediaRecorder;
     MediaPlayer mediaPlayer;
+    int audioLength = 0;
+
     private String randomAudioFileName = "";
     private Boolean fileProcessed = false;
+
+    private static int newAudioStatus = 0;
+    private static final int NEW_AUDIO_RECORDING = 1;
+    private static final int NEW_AUDIO_LISTENING = 2;
+    private static final int NEW_AUDIO_PAUSED = 3;
+    private static final int NEW_AUDIO_READY_RECORD = 4;
+    private static final int NEW_AUDIO_READY_LISTEN = 5;
 
     @BindView(R.id.new_audio_time)
     TextView txtAudioTime;
@@ -112,6 +105,8 @@ public class NewAudioRecordActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_new_audio);
+
+        newAudioStatus = NEW_AUDIO_READY_RECORD;
 
         setDayNight();
     }
@@ -172,20 +167,77 @@ public class NewAudioRecordActivity extends BaseActivity {
         startActivity(new Intent(NewAudioRecordActivity.this, NewAudioRecordActivity.class));
     }
 
+    private void setNewAudioStatus(int status) {
+        newAudioStatus = status;
+        switch(status){
+            case NEW_AUDIO_READY_RECORD:
+                mHandler.removeCallbacks(startTimer);
+                layoutListenParent.setVisibility(View.INVISIBLE);
+                layoutRecordParent.setVisibility(View.VISIBLE);
+                if(!txtMessage.getText().equals(getResources().getText(R.string.new_audio_quiet_instructions))) {
+                    txtMessage.setText(getResources().getText(R.string.new_audio_instructions));
+                }
+                txtAudioTime.setText(maxRecordingTime);
+                break;
+            case NEW_AUDIO_READY_LISTEN:
+                mHandler.removeCallbacks(startTimer);
+                imgAudioStartStop.setBackgroundResource(R.drawable.rooster_record_audio_circle_inner_selectable);
+                imgNewAudioListen.setBackgroundResource(R.drawable.rooster_new_audio_play_button);
+                layoutListenParent.setVisibility(View.VISIBLE);
+                layoutRecordParent.setVisibility(View.INVISIBLE);
+
+                try {
+                    Uri uri = Uri.parse(mAudioSavePathInDevice);
+                    MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+                    mmr.setDataSource(this, uri);
+                    String duration = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+                    audioLength = Integer.parseInt(duration);
+                    updateTimer(audioLength);
+                } catch(Resources.NotFoundException e) {
+                    e.printStackTrace();
+                } catch(IllegalArgumentException e) {
+                    e.printStackTrace();
+                }
+
+                break;
+            case NEW_AUDIO_RECORDING:
+                //Reset message from amplitude instructions to default
+                txtMessage.setText(getResources().getText(R.string.new_audio_instructions));
+                imgAudioStartStop.setBackgroundResource(R.drawable.rooster_record_audio_circle_inner_recording);
+                imgAudioStartStop.requestLayout();
+
+                startTime = System.currentTimeMillis() + MAX_RECORDING_TIME;
+                break;
+            case NEW_AUDIO_PAUSED:
+                imgNewAudioListen.setBackgroundResource(R.drawable.rooster_new_audio_play_button);
+                break;
+            case NEW_AUDIO_LISTENING:
+                imgNewAudioListen.setBackgroundResource(R.drawable.rooster_new_audio_pause_button);
+
+                if(mediaPlayer != null && mediaPlayer.getCurrentPosition() > 0) {
+                    startTime = System.currentTimeMillis() + audioLength - mediaPlayer.getCurrentPosition();
+                } else {
+                    startTime = System.currentTimeMillis() + audioLength;
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
     @OnClick(R.id.new_audio_start_stop)
     public void startStopAudioRecording() {
-        if (!mRecording) {
+        if (newAudioStatus != NEW_AUDIO_RECORDING) {
+            setNewAudioStatus(NEW_AUDIO_RECORDING);
+
             //Reset acceptable amplitude timer
             timeSinceAcceptableAmplitudeStart = 0;
             timeOfUnsuccesfulAmplitude = System.currentTimeMillis();
             timeOfSuccesfulAmplitude = System.currentTimeMillis();
             cumulativeAcceptableAmplitudeTime = 0;
             averageAmplitude = 0;
-            //Reset message from amplitude instructions to default
-            txtMessage.setText(getResources().getText(R.string.new_audio_instructions));
 
             randomAudioFileName = RoosterUtils.createRandomFileName(5) + "RoosterRecording.3gp";
-            startTime = System.currentTimeMillis() + MAX_RECORDING_TIME;
 
             if (checkPermission()) {
 
@@ -202,46 +254,38 @@ public class NewAudioRecordActivity extends BaseActivity {
                                     randomAudioFileName;
                 }
 
-                MediaRecorderReady();
+                mediaRecorderReady();
 
                 try {
                     mediaRecorder.prepare();
                     mediaRecorder.start();
+                    mHandler.removeCallbacks(startTimer);
+                    mHandler.postDelayed(startTimer, 0);
                 } catch (IllegalStateException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-
-                mHandler.removeCallbacks(startTimer);
-                mHandler.postDelayed(startTimer, 0);
-
-                imgAudioStartStop.setBackgroundResource(R.drawable.rooster_record_audio_circle_inner_recording);
-                imgAudioStartStop.requestLayout();
-                mRecording = true;
-
-
             } else {
                 requestPermission();
             }
 
         } else {
             stopRecording();
+            setNewAudioStatus(NEW_AUDIO_READY_LISTEN);
         }
     }
 
     public void stopRecording() {
         try {
             mHandler.removeCallbacks(startTimer);
-            mRecording = false;
             mediaRecorder.stop();
-            imgAudioStartStop.setBackgroundResource(R.drawable.rooster_record_audio_circle_inner_selectable);
-            layoutListenParent.setVisibility(View.VISIBLE);
-            layoutRecordParent.setVisibility(View.INVISIBLE);
         } catch(IllegalStateException e){
             e.printStackTrace();
+            onDeleteAudioClick();
+        } catch(RuntimeException e){
+            e.printStackTrace();
+            onDeleteAudioClick();
         }
 
         //Check if cumulative amplitude condition has not been met, else continue
@@ -255,82 +299,70 @@ public class NewAudioRecordActivity extends BaseActivity {
 
     @OnClick(R.id.new_audio_delete)
     public void onDeleteAudioClick() {
-
+        setNewAudioStatus(NEW_AUDIO_READY_RECORD);
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.stop();
             mediaPlayer.release();
-            MediaRecorderReady();
+            mediaRecorderReady();
         }
         File file = new File(mAudioSavePathInDevice);
         file.delete();
-        layoutListenParent.setVisibility(View.INVISIBLE);
-        layoutRecordParent.setVisibility(View.VISIBLE);
-        txtAudioTime.setText(maxRecordingTime);
-        mHandler.removeCallbacks(startTimer);
-
     }
 
     @OnClick(R.id.new_audio_listen)
     public void onAudioListenClick() {
 
         try {
+            switch (newAudioStatus) {
+                case NEW_AUDIO_READY_LISTEN:
 
-            if (!mListening && !mPaused) { //playback initiated
-
-                startTime = System.currentTimeMillis() + MAX_RECORDING_TIME;
-                mediaPlayer = new MediaPlayer();
-                try {
-                    mediaPlayer.setDataSource(mAudioSavePathInDevice);
-                    mediaPlayer.prepare();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                mListening = true;
-                mediaPlayer.start();
-
-                mHandler.removeCallbacks(startTimer);
-                mHandler.postDelayed(startTimer, 0);
-                mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                    @Override
-                    public void onCompletion(MediaPlayer mediaPlayer) {
-
-                        try {
-
-                            mPaused = false;
-                            mListening = false;
-                            mHandler.removeCallbacks(startTimer);
-                            txtAudioTime.setText(maxRecordingTime);
-                            mediaPlayer.stop();
-                            imgNewAudioListen.setBackgroundResource(R.drawable.rooster_new_audio_play_button);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-
+                    mediaPlayer = new MediaPlayer();
+                    try {
+                        mediaPlayer.setDataSource(mAudioSavePathInDevice);
+                        mediaPlayer.prepare();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                });
-                imgNewAudioListen.setBackgroundResource(R.drawable.rooster_new_audio_pause_button);
 
+                    mediaPlayer.start();
 
-            } else if (!mPaused) { //user paused playback
+                    mHandler.removeCallbacks(startTimer);
+                    mHandler.postDelayed(startTimer, 0);
+                    mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        @Override
+                        public void onCompletion(MediaPlayer mediaPlayer) {
 
-                mPaused = true;
-                mediaPlayer.pause();
-                runningTime = System.currentTimeMillis();
-                mHandler.removeCallbacks(startTimer);
-                imgNewAudioListen.setBackgroundResource(R.drawable.rooster_new_audio_play_button);
+                            try {
+                                setNewAudioStatus(NEW_AUDIO_READY_LISTEN);
+                                mediaPlayer.stop();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
 
-            } else { //user resumed playback
+                    setNewAudioStatus(NEW_AUDIO_LISTENING);
+                    break;
+                case NEW_AUDIO_LISTENING:
 
-                mPaused = false;
-                mediaPlayer.start();
-                mHandler.postDelayed(startTimer, 0);
+                    setNewAudioStatus(NEW_AUDIO_PAUSED);
+                    mediaPlayer.pause();
+                    mHandler.removeCallbacks(startTimer);
+
+                    break;
+                case NEW_AUDIO_PAUSED:
+
+                    setNewAudioStatus(NEW_AUDIO_LISTENING);
+                    mediaPlayer.start();
+                    mHandler.postDelayed(startTimer, 0);
+
+                    break;
+                default:
+                    break;
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     @OnClick(R.id.new_audio_save)
@@ -354,95 +386,59 @@ public class NewAudioRecordActivity extends BaseActivity {
 
     private Runnable startTimer = new Runnable() {
         public void run() {
-            if (mPaused) {
-                countDownTime = startTime - runningTime;
-                mPaused = false;
-            } else {
+            switch(newAudioStatus) {
+                case NEW_AUDIO_PAUSED:
+                    break;
+                case NEW_AUDIO_LISTENING:
+                    break;
+                case NEW_AUDIO_RECORDING:
+                    //This logic checks that the average recording amplitude is above a certain threshold for a cumulative amount of time
+                    maxAmplitude = mediaRecorder.getMaxAmplitude();
+                    averageAmplitude = (maxAmplitude + averageAmplitude)/2;
+                    if(averageAmplitude < AUDIO_MIN_AMPLITUDE && cumulativeAcceptableAmplitudeTime < MIN_CUMULATIVE_TIME) {
+                        txtMessage.setText(getResources().getText(R.string.new_audio_time_amplitude_instructions));
+                        cumulativeAcceptableAmplitudeTime = cumulativeAcceptableAmplitudeTime + timeSinceAcceptableAmplitudeStart;
+                        timeSinceAcceptableAmplitudeStart = 0;
+                        timeOfUnsuccesfulAmplitude = System.currentTimeMillis();
+                    } else if(cumulativeAcceptableAmplitudeTime > MIN_CUMULATIVE_TIME) {
+                        txtMessage.setText(getResources().getText(R.string.new_audio_instructions));
+                    } else {
+                        txtMessage.setText(getResources().getText(R.string.new_audio_time_instructions));
+                        timeSinceAcceptableAmplitudeStart = timeOfSuccesfulAmplitude - timeOfUnsuccesfulAmplitude;
+                        timeOfSuccesfulAmplitude = System.currentTimeMillis();
+                    }
+                    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-                //This logic checks that the average recording amplitude is above a certain threshold for a cumulative amount of time
-                maxAmplitude = mediaRecorder.getMaxAmplitude();
-                averageAmplitude = (maxAmplitude + averageAmplitude)/2;
-                if(averageAmplitude < AUDIO_MIN_AMPLITUDE && cumulativeAcceptableAmplitudeTime < MIN_CUMULATIVE_TIME) {
-                    txtMessage.setText(getResources().getText(R.string.new_audio_amplitude_instructions));
-                    cumulativeAcceptableAmplitudeTime = cumulativeAcceptableAmplitudeTime + timeSinceAcceptableAmplitudeStart;
-                    timeSinceAcceptableAmplitudeStart = 0;
-                    timeOfUnsuccesfulAmplitude = System.currentTimeMillis();
-                }
-                else if(cumulativeAcceptableAmplitudeTime > MIN_CUMULATIVE_TIME) {
-                    txtMessage.setText(getResources().getText(R.string.new_audio_instructions));
-                } else {
-                    timeSinceAcceptableAmplitudeStart = timeOfSuccesfulAmplitude - timeOfUnsuccesfulAmplitude;
-                    timeOfSuccesfulAmplitude = System.currentTimeMillis();
-                }
-                ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    if(countDownTime < 0) stopRecording();
+                    break;
+                default:
+                    break;
+            }
+            countDownTime = startTime - System.currentTimeMillis();
 
-                 countDownTime = startTime - System.currentTimeMillis();
-            }
-            if(countDownTime < 0){
-                stopRecording();
-            } else{
-                updateTimer(countDownTime);
-                mHandler.postDelayed(this, REFRESH_RATE);
-            }
+            updateTimer(countDownTime);
+            mHandler.postDelayed(this, REFRESH_RATE);
         }
     };
 
     private void updateTimer(float time) {
-        String hours, minutes, seconds, milliseconds;
-        long secs, mins, hrs;
-
-        secs = (long) (time / 1000);
-        mins = (long) ((time / 1000) / 60);
-        hrs = (long) (((time / 1000) / 60) / 60);
+        String displaySeconds;
+        long seconds;
+        seconds = (long) (time / 1000);
 
 		/* Convert the seconds to String
          * and format to ensure it has
 		 * a leading zero when required
 		 */
-        secs = secs % 60;
-        seconds = String.valueOf(secs);
-        if (secs == 0) {
-            seconds = "0";
-        }
-
-		/* Convert the minutes to String and format the String */
-
-        mins = mins % 60;
-        minutes = String.valueOf(mins);
-        if (mins == 0) {
-            minutes = "00";
-        }
-        if (mins < 10 && mins > 0) {
-            minutes = "0" + minutes;
-        }
-
-    	/* Convert the hours to String and format the String */
-
-        hours = String.valueOf(hrs);
-        if (hrs == 0) {
-            hours = "00";
-        }
-        if (hrs < 10 && hrs > 0) {
-            hours = "0" + hours;
-        }
-
-    	/* Although we are not using milliseconds on the timer in this example
-         * I included the code in the event that you wanted to include it on your own
-    	 */
-        milliseconds = String.valueOf((long) time);
-        if (milliseconds.length() == 2) {
-            milliseconds = "0" + milliseconds;
-        }
-        if (milliseconds.length() <= 1) {
-            milliseconds = "00";
-        }
-        milliseconds = milliseconds.substring(milliseconds.length() - 3, milliseconds.length() - 2);
+        seconds = seconds % 60;
+        displaySeconds = String.valueOf(seconds);
 
 		/* Setting the timer text to the elapsed time */
-        txtAudioTime.setText(seconds);
+        txtAudioTime.setText(displaySeconds);
     }
 
-    public void MediaRecorderReady() {
+    private void mediaRecorderReady() {
+
         mediaRecorder = new MediaRecorder();
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
