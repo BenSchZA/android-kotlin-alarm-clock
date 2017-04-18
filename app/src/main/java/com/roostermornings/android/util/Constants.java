@@ -18,11 +18,14 @@ public class Constants {
     public final static String USER_SETTINGS_DOWNLOAD_ON_DATA = "pref_key_download_on_data";
     public final static String USER_SETTINGS_SNOOZE_TIME = "pref_key_alarm_snooze_time";
     public final static String USER_SETTINGS_ROOSTER_ORDER = "pref_key_rooster_order";
+    public final static String ABOUT_APP_VERSION = "pref_key_static_field_version";
 
     public final static long[] VIBRATE_PATTERN = {0, 1000, 500, 1000, 500};
 
-    //BaseActivity
-    public final static int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 10;
+    //Permission request codes
+    public final static int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 1;
+    public final static int MY_PERMISSIONS_REQUEST_CHANGE_PROFILE_PIC = 2;
+    public final static int MY_PERMISSIONS_REQUEST_AUDIO_RECORD = 3;
 
     //FriendsFragmentActivity
     public final static String FRIENDS_ACTIVITY_CURRENT_FRAGMENT = "currentFriendsFragment";
