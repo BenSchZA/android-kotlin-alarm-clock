@@ -55,4 +55,15 @@ and no social roosters are received"
             android:persistent="true">
         </CheckBoxPreference>
         </PreferenceCategory>
+    <PreferenceCategory
+        android:title="About"
+        android:key="pref_key_about"
+        android:selectable="false"
+        android:persistent="false">
+    <Preference
+        android:key="pref_key_static_field_version"
+        android:selectable="false"
+        android:persistent="false"
+        android:title="Version" />
+    </PreferenceCategory>
 </PreferenceScreen>

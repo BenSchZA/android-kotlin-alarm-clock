@@ -6,6 +6,8 @@
 package com.roostermornings.android.fragment;
 
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -21,7 +23,9 @@ import android.widget.TextView;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.R;
+import com.roostermornings.android.util.Constants;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,5 +47,9 @@ public class SettingsFragment extends PreferenceFragment {
 
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.application_user_settings);
+
+        // Display app version to user
+        String versionName = BuildConfig.VERSION_NAME;
+        findPreference(Constants.ABOUT_APP_VERSION).setSummary(versionName);
     }
 }
