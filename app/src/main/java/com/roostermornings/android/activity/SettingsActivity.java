@@ -26,7 +26,7 @@ public class SettingsActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         initialize(R.layout.custom_preference_screen_layout);
 
-        setDayNight();
+        //setDayNight();
 
         //Display the fragment as the main content
         getFragmentManager().beginTransaction()

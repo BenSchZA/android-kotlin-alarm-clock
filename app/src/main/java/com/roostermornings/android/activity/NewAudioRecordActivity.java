@@ -86,7 +86,6 @@ public class NewAudioRecordActivity extends BaseActivity {
     String mAudioSavePathInDevice = null;
     MediaRecorder mediaRecorder;
     MediaPlayer mediaPlayer;
-    public static final int RequestPermissionCode = 1;
     private String randomAudioFileName = "";
     private Boolean fileProcessed = false;
 
@@ -454,14 +453,14 @@ public class NewAudioRecordActivity extends BaseActivity {
 
     private void requestPermission() {
         ActivityCompat.requestPermissions(NewAudioRecordActivity.this, new
-                String[]{WRITE_EXTERNAL_STORAGE, RECORD_AUDIO}, RequestPermissionCode);
+                String[]{WRITE_EXTERNAL_STORAGE, RECORD_AUDIO}, Constants.MY_PERMISSIONS_REQUEST_AUDIO_RECORD);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
         switch (requestCode) {
-            case RequestPermissionCode:
+            case Constants.MY_PERMISSIONS_REQUEST_AUDIO_RECORD:
                 if (grantResults.length > 0) {
                     boolean StoragePermission = grantResults[0] ==
                             PackageManager.PERMISSION_GRANTED;
@@ -473,6 +472,8 @@ public class NewAudioRecordActivity extends BaseActivity {
                         Toast.makeText(NewAudioRecordActivity.this, "Permission Denied", Toast.LENGTH_LONG).show();
                     }
                 }
+                break;
+            default:
                 break;
         }
     }
