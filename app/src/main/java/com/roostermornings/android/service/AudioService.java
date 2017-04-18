@@ -180,18 +180,22 @@ public class AudioService extends Service {
                     }
                     if (mThis.audioItems.isEmpty()) {
                         startDefaultAlarmTone();
+                        unregisterReceiver(receiver);
                         return;
                     }
                 } catch (NullPointerException e){
                     e.printStackTrace();
                     startDefaultAlarmTone();
+                    unregisterReceiver(receiver);
                     return;
                 }
                 playAlarmRoosters();
+                unregisterReceiver(receiver);
 
             }
         }; registerReceiver(receiver, audioServiceChannelDownloadFinishedFilter);
 
+        //Try to fetch undownloaded channel content for 30 seconds if it doesn't already exist
         try {
             if (!mThis.alarmChannelUid.equals("") && !alarm.getLabel().equals(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED) && channelAudioItems == null) {
                 if (((BaseActivity) getApplicationContext()).checkInternetConnection()) {
