@@ -13,7 +13,6 @@ import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -28,7 +27,6 @@ import android.widget.Toast;
 
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;;
-import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
@@ -49,7 +47,6 @@ public class NewAudioRecordActivity extends BaseActivity {
 
     private long startTime;
     private long countDownTime;
-    private long runningTime;
     private final int REFRESH_RATE = 1;
     private final int MAX_RECORDING_TIME = 60000;
     private final String maxRecordingTime = "60";
@@ -62,8 +59,8 @@ public class NewAudioRecordActivity extends BaseActivity {
     private double averageAmplitude;
     private long timeSinceAcceptableAmplitudeStart;
     private long cumulativeAcceptableAmplitudeTime;
-    private long timeOfUnsuccesfulAmplitude;
-    private long timeOfSuccesfulAmplitude;
+    private long timeOfUnsuccessfulAmplitude;
+    private long timeOfSuccessfulAmplitude;
 
     private Handler mHandler = new Handler();
 
@@ -232,8 +229,8 @@ public class NewAudioRecordActivity extends BaseActivity {
 
             //Reset acceptable amplitude timer
             timeSinceAcceptableAmplitudeStart = 0;
-            timeOfUnsuccesfulAmplitude = System.currentTimeMillis();
-            timeOfSuccesfulAmplitude = System.currentTimeMillis();
+            timeOfUnsuccessfulAmplitude = System.currentTimeMillis();
+            timeOfSuccessfulAmplitude = System.currentTimeMillis();
             cumulativeAcceptableAmplitudeTime = 0;
             averageAmplitude = 0;
 
@@ -399,13 +396,13 @@ public class NewAudioRecordActivity extends BaseActivity {
                         txtMessage.setText(getResources().getText(R.string.new_audio_time_amplitude_instructions));
                         cumulativeAcceptableAmplitudeTime = cumulativeAcceptableAmplitudeTime + timeSinceAcceptableAmplitudeStart;
                         timeSinceAcceptableAmplitudeStart = 0;
-                        timeOfUnsuccesfulAmplitude = System.currentTimeMillis();
+                        timeOfUnsuccessfulAmplitude = System.currentTimeMillis();
                     } else if(cumulativeAcceptableAmplitudeTime > MIN_CUMULATIVE_TIME) {
                         txtMessage.setText(getResources().getText(R.string.new_audio_instructions));
                     } else {
                         txtMessage.setText(getResources().getText(R.string.new_audio_time_instructions));
-                        timeSinceAcceptableAmplitudeStart = timeOfSuccesfulAmplitude - timeOfUnsuccesfulAmplitude;
-                        timeOfSuccesfulAmplitude = System.currentTimeMillis();
+                        timeSinceAcceptableAmplitudeStart = timeOfSuccessfulAmplitude - timeOfUnsuccessfulAmplitude;
+                        timeOfSuccessfulAmplitude = System.currentTimeMillis();
                     }
                     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
