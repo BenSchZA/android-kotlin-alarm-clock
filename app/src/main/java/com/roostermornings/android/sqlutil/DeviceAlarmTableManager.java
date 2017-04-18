@@ -59,6 +59,7 @@ public class DeviceAlarmTableManager {
         values.put(AlarmTableEntry.COLUMN_ITERATION, 1);
         values.put(AlarmTableEntry.COLUMN_CHANNEL, alarm.getChannel());
         values.put(AlarmTableEntry.COLUMN_SOCIAL, alarm.isSocial());
+        values.put(AlarmTableEntry.COLUMN_LABEL, alarm.getLabel());
 
         values.put(AlarmTableEntry.COLUMN_CHANGED, alarm.getChanged());
 
@@ -116,6 +117,18 @@ public class DeviceAlarmTableManager {
 
         db.close();
         return alarmList;
+    }
+
+    public void updateAlarmLabel(String label) {
+        String setId = getNextPendingAlarm().getSetId();
+        if(setId == null) return;
+
+        SQLiteDatabase db = initDB();
+        String updateQuery = "UPDATE " + AlarmTableEntry.TABLE_NAME + " SET " + AlarmTableEntry.COLUMN_LABEL + " = '" + label + "' WHERE " + AlarmTableEntry.COLUMN_SET_ID + " LIKE \"%" + setId + "%\";";
+
+        db.execSQL(updateQuery);
+
+        db.close();
     }
 
     List<DeviceAlarm> selectEnabled() {

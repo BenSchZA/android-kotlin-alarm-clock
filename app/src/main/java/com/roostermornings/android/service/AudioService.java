@@ -8,8 +8,10 @@ package com.roostermornings.android.service;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.media.AudioAttributes;
@@ -26,9 +28,13 @@ import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
+import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.sqlutil.AudioTableController;
+import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.sqlutil.AudioTableManager;
@@ -45,6 +51,7 @@ import java.util.TimerTask;
 import javax.inject.Inject;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
+import static com.roostermornings.android.service.BackgroundTaskIntentService.startActionBackgroundDownload;
 
 //Service to manage playing and pausing audio during Rooster alarm
 public class AudioService extends Service {
@@ -61,11 +68,17 @@ public class AudioService extends Service {
 
     protected AudioService mThis = this;
 
+    private BroadcastReceiver receiver;
+
+    ArrayList<DeviceAudioQueueItem> channelAudioItems;
+    ArrayList<DeviceAudioQueueItem> socialAudioItems;
+
     ArrayList<DeviceAudioQueueItem> audioItems = new ArrayList<>();
     AudioTableManager audioTableManager = new AudioTableManager(this);
     AudioTableController audioTableController = new AudioTableController(this);
     DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(this);
 
+    private DeviceAlarm alarm;
     private int alarmCycle;
     private String alarmChannelUid;
     private String alarmUid;
@@ -120,13 +133,12 @@ public class AudioService extends Service {
     }
 
     public void startAlarmContent(String alarmUid) {
+        this.alarm = deviceAlarmTableManager.getAlarmSet(alarmUid).get(0);
         this.alarmChannelUid = deviceAlarmTableManager.getAlarmSet(alarmUid).get(0).getChannel();
         this.alarmUid = alarmUid;
 
         //Check if Social and Channel alarm content exists, else startDefaultAlarmTone
-        ArrayList<DeviceAudioQueueItem> channelAudioItems;
         channelAudioItems = audioTableManager.extractAlarmChannelAudioFiles(mThis.alarmChannelUid);
-        ArrayList<DeviceAudioQueueItem> socialAudioItems;
         socialAudioItems = audioTableManager.extractSocialAudioFiles();
 
         this.alarmCycle = 0;
@@ -136,37 +148,85 @@ public class AudioService extends Service {
             playAlarmRoosters();
             return;
         }
-        //Try append new content to end of existing content, if it fails - fail safe and play default alarm tone
-        try {
-            //Reorder channel and social queue according to user preferences
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-            if(sharedPreferences.getBoolean(Constants.USER_SETTINGS_ROOSTER_ORDER, false)) {
-                if (!channelAudioItems.isEmpty()) {
-                    this.audioItems.addAll(channelAudioItems);
+
+        //Broadcast receiver filter to receive download finished updates
+        IntentFilter audioServiceChannelDownloadFinishedFilter = new IntentFilter();
+        audioServiceChannelDownloadFinishedFilter.addAction(Constants.ACTION_CHANNEL_DOWNLOAD_FINISHED);
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                //do something based on the intent's action
+
+                //Try append new content to end of existing content, if it fails - fail safe and play default alarm tone
+                try {
+                    //Reorder channel and social queue according to user preferences
+                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                    if(sharedPreferences.getBoolean(Constants.USER_SETTINGS_ROOSTER_ORDER, false)) {
+                        if (!mThis.channelAudioItems.isEmpty()) {
+                            mThis.audioItems.addAll(channelAudioItems);
+                        }
+                        //If this alarm does not allow social roosters, move on to channel content
+                        if (!socialAudioItems.isEmpty() && deviceAlarmTableManager.getAlarmSet(mThis.alarmUid).get(0).isSocial()) {
+                            mThis.audioItems.addAll(socialAudioItems);
+                        }
+                    } else {
+                        //If this alarm does not allow social roosters, move on to channel content
+                        if (!socialAudioItems.isEmpty() && deviceAlarmTableManager.getAlarmSet(mThis.alarmUid).get(0).isSocial()) {
+                            mThis.audioItems.addAll(socialAudioItems);
+                        }
+                        if (!channelAudioItems.isEmpty()) {
+                            mThis.audioItems.addAll(channelAudioItems);
+                        }
+                    }
+                    if (mThis.audioItems.isEmpty()) {
+                        startDefaultAlarmTone();
+                        return;
+                    }
+                } catch (NullPointerException e){
+                    e.printStackTrace();
+                    startDefaultAlarmTone();
+                    return;
                 }
-                //If this alarm does not allow social roosters, move on to channel content
-                if (!socialAudioItems.isEmpty() && deviceAlarmTableManager.getAlarmSet(this.alarmUid).get(0).isSocial()) {
-                    this.audioItems.addAll(socialAudioItems);
+                playAlarmRoosters();
+
+            }
+        }; registerReceiver(receiver, audioServiceChannelDownloadFinishedFilter);
+
+        try {
+            if (!mThis.alarmChannelUid.equals("") && !alarm.getLabel().equals(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED) && channelAudioItems == null) {
+                if (((BaseActivity) getApplicationContext()).checkInternetConnection()) {
+                    //Download any social or channel audio files
+                    startActionBackgroundDownload(mThis);
+                    startDownloadTimer();
+                } else {
+                    //Send broadcast message to notify all receivers of download finished
+                    Intent intent = new Intent(Constants.ACTION_CHANNEL_DOWNLOAD_FINISHED);
+                    sendBroadcast(intent);
                 }
             } else {
-                //If this alarm does not allow social roosters, move on to channel content
-                if (!socialAudioItems.isEmpty() && deviceAlarmTableManager.getAlarmSet(this.alarmUid).get(0).isSocial()) {
-                    this.audioItems.addAll(socialAudioItems);
-                }
-                if (!channelAudioItems.isEmpty()) {
-                    this.audioItems.addAll(channelAudioItems);
-                }
+                //Send broadcast message to notify all receivers of download finished
+                Intent intent = new Intent(Constants.ACTION_CHANNEL_DOWNLOAD_FINISHED);
+                sendBroadcast(intent);
             }
-            if (this.audioItems.isEmpty()) {
-                startDefaultAlarmTone();
-                return;
-            }
-        } catch (NullPointerException e){
+        } catch(NullPointerException e) {
             e.printStackTrace();
-            startDefaultAlarmTone();
-            return;
+            //Send broadcast message to notify all receivers of download finished
+            Intent intent = new Intent(Constants.ACTION_CHANNEL_DOWNLOAD_FINISHED);
+            sendBroadcast(intent);
         }
-        playAlarmRoosters();
+    }
+
+    //Set timer to kill alarm after 5 minutes
+    private void startDownloadTimer() {
+        timer.schedule(new timerDownloadTask(), Constants.AUDIOSERVICE_DOWNLOAD_TASK_LIMIT);
+    }
+
+    private class timerDownloadTask extends TimerTask {
+        public void run() {
+            //Send broadcast message to notify all receivers of download finished
+            Intent intent = new Intent(Constants.ACTION_CHANNEL_DOWNLOAD_FINISHED);
+            sendBroadcast(intent);
+        }
     }
 
     private void playAlarmRoosters() {

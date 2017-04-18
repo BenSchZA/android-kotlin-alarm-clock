@@ -52,7 +52,7 @@ public class FirebaseListenerService extends Service {
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                     //Send broadcast message to notify all receivers of new notification
-                    Intent intent = new Intent("rooster.update.REQUEST_NOTIFICATION");
+                    Intent intent = new Intent(Constants.ACTION_REQUESTNOTIFICATION);
                     sendBroadcast(intent);
                 }
 
