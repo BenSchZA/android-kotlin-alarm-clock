@@ -29,8 +29,8 @@ public class DeviceAlarm {
     private boolean social;
     private long alarmMillis;
 
-    private String channel;
-    private String label;
+    private String channel = "";
+    private String label = "";
     private boolean enabled;
     private boolean changed;
 
