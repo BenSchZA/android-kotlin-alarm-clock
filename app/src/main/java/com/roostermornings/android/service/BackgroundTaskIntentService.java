@@ -60,6 +60,7 @@ public class BackgroundTaskIntentService extends IntentService {
     SharedPreferences sharedPreferences;
 
     private AudioTableManager mAudioTableManager;
+    private DeviceAlarmTableManager deviceAlarmTableManager;
 
     public BackgroundTaskIntentService() {
         super("BackgroundTaskIntentService");
@@ -104,6 +105,7 @@ public class BackgroundTaskIntentService extends IntentService {
     }
 
     private void handleActionBackgroundDownload(String param1, String param2) {
+        deviceAlarmTableManager = new DeviceAlarmTableManager(getApplicationContext());
         //if(InternetHelper.mobileDataConnection(this) && !sharedPreferences.getBoolean(Constants.USER_SETTINGS_DOWNLOAD_ON_DATA, true)) return;
         retrieveChannelContentData(getApplicationContext());
         retrieveSocialRoosterData(getApplicationContext());
@@ -230,7 +232,8 @@ public class BackgroundTaskIntentService extends IntentService {
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
-
+                        //Show that an attempted download has occurred - this is used when "streaming" alarm content in AudioService
+                        deviceAlarmTableManager.updateAlarmLabel(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED);
                     }
                 };
                 channelRoosterUploadsReference.addListenerForSingleValueEvent(channelRoosterUploadsListener);
@@ -239,6 +242,8 @@ public class BackgroundTaskIntentService extends IntentService {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+                //Show that an attempted download has occurred - this is used when "streaming" alarm content in AudioService
+                deviceAlarmTableManager.updateAlarmLabel(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED);
             }
         };
         channelReference.addListenerForSingleValueEvent(channelListener);
@@ -314,8 +319,14 @@ public class BackgroundTaskIntentService extends IntentService {
                         //store in local SQLLite database
                         mAudioTableManager.insertChannelAudioFile(deviceAudioQueueItem);
 
+                        //Send broadcast message to notify all receivers of download finished
+                        Intent intent = new Intent(Constants.ACTION_CHANNEL_DOWNLOAD_FINISHED);
+                        sendBroadcast(intent);
+
                     } catch (Exception e) {
                         e.printStackTrace();
+                        //Show that an attempted download has occurred - this is used when "streaming" alarm content in AudioService
+                        deviceAlarmTableManager.updateAlarmLabel(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED);
                     }
 
 
@@ -324,6 +335,8 @@ public class BackgroundTaskIntentService extends IntentService {
                 @Override
                 public void onFailure(@NonNull Exception exception) {
                     // Handle any errors
+                    //Show that an attempted download has occurred - this is used when "streaming" alarm content in AudioService
+                    deviceAlarmTableManager.updateAlarmLabel(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED);
                 }
             });
 
@@ -333,6 +346,8 @@ public class BackgroundTaskIntentService extends IntentService {
 
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
+            //Show that an attempted download has occurred - this is used when "streaming" alarm content in AudioService
+            deviceAlarmTableManager.updateAlarmLabel(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED);
         }
     }
 

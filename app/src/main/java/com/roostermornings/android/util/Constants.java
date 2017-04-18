@@ -40,7 +40,6 @@ public class Constants {
     public final static String EXTRA_ALARMSET = "alarmSet";
 
     //DeviceAlarmController config constants
-    public final static int ALARM_DEFAULTTIME = 1 * 60 * 1000;
     public final static String ACTION_CANCEL_SNOOZE = "android.intent.action.CANCEL_SNOOZE";
 
     //DeviceAlarm extras
@@ -48,6 +47,9 @@ public class Constants {
     public static final String EXTRA_VIBRATE = "extra_vibrate";
     public static final String EXTRA_TONE = "extra_tone";
     public static final String EXTRA_UID = "extra_uid";
+
+    //DeviceAlarmTable constants
+    public static final String ALARM_CHANNEL_DOWNLOAD_FAILED = "failed";
 
     //DeviceAlarmReceiver wakeful intent
     public static final String DEVICE_ALARM_RECEIVER_WAKEFUL_INTENT = "DeviceAlarmReceiver.WAKEFUL_INTENT";
@@ -60,6 +62,11 @@ public class Constants {
     //AudioService intent actions
     public final static String ACTION_ALARMDISPLAY = "rooster.update.ALARMDISPLAY";
     public final static String ACTION_ALARMTIMESUP = "rooster.update.ALARMTIMESUP";
+    public final static String ACTION_CHANNEL_DOWNLOAD_FINISHED = "rooster.notify.CHANNEL_DOWNLOAD_FINISHED";
+
+    //AudioService timers
+    public final static int ALARM_DEFAULTTIME = 5 * 60 * 1000;
+    public final static int AUDIOSERVICE_DOWNLOAD_TASK_LIMIT = 30 * 1000;
 
     //NewAudio activities
     public final static String EXTRA_LOCAL_FILE_STRING = "localFileString";
