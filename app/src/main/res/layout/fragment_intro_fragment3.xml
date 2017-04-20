@@ -49,6 +49,7 @@
                 android:layout_width="@dimen/input_width_large"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
+                android:textAlignment="center"
                 android:hint="@string/intro_mobile_hint"
                 android:inputType="phone" />
 

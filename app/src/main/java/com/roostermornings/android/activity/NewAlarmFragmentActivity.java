@@ -84,15 +84,10 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
         mAlarm.setRecurring(false);
         mAlarm.setAllow_friend_audio_files(true);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.activity_content);
+        mViewPager = (ViewPager) findViewById(R.id.channelRecyclerView);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
         Bundle extras = getIntent().getExtras();
@@ -102,9 +97,9 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
             mEditAlarmId = extras.getString(Constants.EXTRA_ALARMID, "");
         }
         if (mEditAlarmId.length() == 0) {
-            toolbarTitle.setText(getString(R.string.create_alarm));
+            setupToolbar(toolbarTitle, getString(R.string.create_alarm));
         } else {
-            toolbarTitle.setText(getString(R.string.edit_alarm));
+            setupToolbar(toolbarTitle, getString(R.string.edit_alarm));
         }
     }
 

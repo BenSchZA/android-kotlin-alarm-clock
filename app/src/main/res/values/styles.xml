@@ -18,8 +18,17 @@
 
         <!--Actually overridden to Nunito-Bold-->
         <item name="android:typeface">monospace</item>
+        <!--Used for preference screen text colour-->
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textColorSecondary">@color/white_30_percent_transparent</item>
+
+        <item name="actionOverflowMenuStyle">@style/ActionBarMenuStyle</item>
 
         <item name="android:windowActivityTransitions">true</item>
+    </style>
+
+    <style name="ActionBarMenuStyle" parent="Widget.AppCompat.PopupMenu.Overflow">
+        <item name="android:popupBackground">@drawable/main_background_layer_list_day</item>
     </style>
 
     <style name="AppThemeNight" parent="Theme.AppCompat.Light.DarkActionBar">
@@ -44,7 +53,6 @@
         <item name="windowActionBar">true</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowAnimationStyle">@null</item>
-        <item name="android:elevation">0dp</item>
     </style>
 
     <style name="SplashTheme" parent="AppTheme.NoActionBarIntro">

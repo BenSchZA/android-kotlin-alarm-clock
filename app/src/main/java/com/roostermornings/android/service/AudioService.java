@@ -59,7 +59,9 @@ public class AudioService extends Service {
     // Binder given to clients
     private final IBinder mBinder = new LocalBinder();
 
+    private BroadcastReceiver receiver;
     private static Timer timer = new Timer();
+    private static Timer downloadTimer = new Timer();
 
     MediaPlayer mediaPlayerDefault = new MediaPlayer();
     MediaPlayer mediaPlayerRooster = new MediaPlayer();
@@ -67,8 +69,6 @@ public class AudioService extends Service {
     private DeviceAudioQueueItem audioItem;
 
     protected AudioService mThis = this;
-
-    private BroadcastReceiver receiver;
 
     ArrayList<DeviceAudioQueueItem> channelAudioItems;
     ArrayList<DeviceAudioQueueItem> socialAudioItems;
@@ -156,7 +156,9 @@ public class AudioService extends Service {
             @Override
             public void onReceive(Context context, Intent intent) {
                 //do something based on the intent's action
-
+                //Cancel download attempt timer and ensure BroadcastReceiver not re-triggered
+                if(downloadTimer != null) downloadTimer.cancel();
+                if(receiver != null) unregisterReceiver(receiver);
                 //Try append new content to end of existing content, if it fails - fail safe and play default alarm tone
                 try {
                     //Reorder channel and social queue according to user preferences
@@ -180,27 +182,27 @@ public class AudioService extends Service {
                     }
                     if (mThis.audioItems.isEmpty()) {
                         startDefaultAlarmTone();
-                        unregisterReceiver(receiver);
                         return;
                     }
                 } catch (NullPointerException e){
                     e.printStackTrace();
                     startDefaultAlarmTone();
-                    unregisterReceiver(receiver);
                     return;
                 }
                 playAlarmRoosters();
-                unregisterReceiver(receiver);
-
             }
         }; registerReceiver(receiver, audioServiceChannelDownloadFinishedFilter);
 
-        //Try to fetch undownloaded channel content for 30 seconds if it doesn't already exist
+        //Try to fetch un-downloaded channel content for 30 seconds if it doesn't already exist
         try {
-            if (!mThis.alarmChannelUid.equals("") && !alarm.getLabel().equals(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED) && channelAudioItems == null) {
+            if (((BaseActivity)getApplicationContext()).checkInternetConnection()
+                    && !mThis.alarmChannelUid.equals("")
+                    && !alarm.getLabel().equals(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED)
+                    && channelAudioItems == null) {
                 if (((BaseActivity) getApplicationContext()).checkInternetConnection()) {
                     //Download any social or channel audio files
                     startActionBackgroundDownload(mThis);
+                    //Start alarm after 30 seconds or after download finished
                     startDownloadTimer();
                 } else {
                     //Send broadcast message to notify all receivers of download finished
@@ -222,7 +224,7 @@ public class AudioService extends Service {
 
     //Set timer to kill alarm after 5 minutes
     private void startDownloadTimer() {
-        timer.schedule(new timerDownloadTask(), Constants.AUDIOSERVICE_DOWNLOAD_TASK_LIMIT);
+        downloadTimer.schedule(new timerDownloadTask(), Constants.AUDIOSERVICE_DOWNLOAD_TASK_LIMIT);
     }
 
     private class timerDownloadTask extends TimerTask {
@@ -400,7 +402,7 @@ public class AudioService extends Service {
             //Remove entry from SQL db
             audioTableManager.removeAudioEntry(audioItem);
             //Specifically delete file here to avoid loop - what happens if file note deleted and entry only removed on success?
-            file = new File(getFilesDir() + "/" + audioItem.getFilename());
+            file = new File(getFilesDir(), audioItem.getFilename());
             file.delete();
         }
         //delete record from arraylist
@@ -484,6 +486,9 @@ public class AudioService extends Service {
     }
 
     public void startDefaultAlarmTone() {
+
+        //Check that another alarm isn't already playing
+        if(mediaPlayerRooster != null && mediaPlayerRooster.isPlaying()) return;
         foregroundNotification("Alarm ringtone playing");
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);

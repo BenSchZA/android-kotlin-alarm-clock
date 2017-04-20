@@ -187,7 +187,7 @@ public class UploadService extends Service {
         mDatabase.getDatabase().getReference(uploadUrl + "/" + uploadKey).setValue(socialRoosterUploaded);
         mDatabase.getDatabase().getReference(queueUrl + "/" + uploadKey).setValue(socialRoosterQueue);
         sendInvitedFriendFCMMessage(friend.getUid());
-        Toast.makeText(getApplicationContext(), friend.getUser_name() + " invited!", Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "Social rooster sent to" + friend.getUser_name() + " !", Toast.LENGTH_LONG).show();
     }
 
     private void sendInvitedFriendFCMMessage(String recipientUserId) {
