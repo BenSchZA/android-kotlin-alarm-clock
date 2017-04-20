@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.roostermornings.android.activity.base.BaseActivity.mCurrentUser;
+import static com.roostermornings.android.service.BackgroundTaskIntentService.startActionBackgroundDownload;
 import static com.roostermornings.android.util.RoosterUtils.hasKitKat;
 import static com.roostermornings.android.util.RoosterUtils.hasLollipop;
 
@@ -205,7 +206,7 @@ public final class DeviceAlarmController {
         notifyUserAlarmTime(deviceAlarmTableManager.getAlarmSet(setId));
     }
 
-    private void notifyUserAlarmTime(List<DeviceAlarm> deviceAlarmList) {
+    public void notifyUserAlarmTime(List<DeviceAlarm> deviceAlarmList) {
         Calendar alarmCalendar = Calendar.getInstance();
         Calendar systemCalendar = Calendar.getInstance();
 
@@ -247,6 +248,7 @@ public final class DeviceAlarmController {
 
     private void deleteAlarmSetLocal(String setId) {
         List<DeviceAlarm> deviceAlarmList = deviceAlarmTableManager.getAlarmSet(setId);
+        deviceAlarmTableManager.deleteAlarmSet(setId);
         for (DeviceAlarm deviceAlarm :
                 deviceAlarmList) {
             cancelAlarm(deviceAlarm);
@@ -281,6 +283,9 @@ public final class DeviceAlarmController {
 
     public void setSetEnabled(String setId, boolean enabled) {
         if(enabled) {
+            //Trigger audio download
+            //Download any social or channel audio files
+            startActionBackgroundDownload(context);
             //Set all intents for enabled alarms
             deviceAlarmTableManager.setSetEnabled(setId, enabled);
             deviceAlarmTableManager.setSetChanged(setId, true);

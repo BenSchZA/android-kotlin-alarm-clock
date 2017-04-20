@@ -9,7 +9,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.ArraySet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,7 +33,6 @@ import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -53,7 +51,7 @@ public class NewAlarmFragment2 extends BaseFragment {
     private ArrayList<ChannelRooster> channelRoosters = new ArrayList<>();
     private Map<Integer, ChannelRooster> channelRoosterMap = new TreeMap<>(Collections.reverseOrder());
 
-    @BindView(R.id.channelsListView)
+    @BindView(R.id.channelRecyclerView)
     RecyclerView mRecyclerView;
 
     private RecyclerView.Adapter mAdapter;

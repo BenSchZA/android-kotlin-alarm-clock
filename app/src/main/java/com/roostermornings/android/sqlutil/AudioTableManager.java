@@ -133,7 +133,7 @@ public class AudioTableManager {
 
         for (DeviceAudioQueueItem deviceAudioQueueItem:
                 extractAlarmChannelAudioFiles(channelId)) {
-            File file = new File(context.getFilesDir() + "/" + deviceAudioQueueItem);
+            File file = new File(context.getFilesDir(), deviceAudioQueueItem.getFilename());
             file.delete();
         }
 
@@ -212,11 +212,11 @@ public class AudioTableManager {
         return count;
     }
 
-    public ArrayList<DeviceAudioQueueItem> extractAlarmChannelAudioFiles(String alarmUid) {
+    public ArrayList<DeviceAudioQueueItem> extractAlarmChannelAudioFiles(String channelQueueId) {
 
         SQLiteDatabase db = initDB();
 
-        String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_TYPE + " = " + TRUE + " AND " + AudioTableEntry.COLUMN_QUEUE_ID + " = " + "'" + alarmUid + "'" + ";";
+        String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_TYPE + " = " + TRUE + " AND " + AudioTableEntry.COLUMN_QUEUE_ID + " = " + "'" + channelQueueId + "'" + ";";
 
         Cursor cursor = db.rawQuery(selectQuery, null);
         ArrayList<DeviceAudioQueueItem> deviceAudioQueueItems = extractAudioFiles(cursor);
@@ -233,7 +233,7 @@ public class AudioTableManager {
         Cursor cursor = db.rawQuery(selectQuery, null);
         ArrayList<DeviceAudioQueueItem> deviceAudioQueueItems = extractAudioFiles(cursor);
         db.close();
-
+        //TODO: returning empty! occasionally
         return deviceAudioQueueItems;
     }
 

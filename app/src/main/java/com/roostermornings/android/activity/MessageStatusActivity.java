@@ -80,10 +80,7 @@ public class MessageStatusActivity extends BaseActivity {
         updateMessageStatus();
 
         //Set toolbar title
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-        toolbarTitle.setText(getString(R.string.message_status_activity_title));
+        setupToolbar(toolbarTitle, getString(R.string.message_status_activity_title));
     }
 
     private void updateMessageStatus() {

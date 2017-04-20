@@ -51,7 +51,8 @@
     <string name="text_name_initials"></string>
     <string name="text_friends_button_add">Add</string>
     <string name="text_friends_button_accept">Accept</string>
-    <string name="share_button">Invite friends</string>
+    <string name="share_button">Share Rooster</string>
+    <string name="invite_contacts">Invite contacts who have Rooster installed</string>
     <string name="friends_search_title">Search...</string>
     <string name="search_hint_friends">Search...</string>
 
@@ -75,8 +76,11 @@
     <string name="new_audio_time_amplitude_instructions">Keep recording and speak up, \n your friends need to hear you!</string>
     <string name="new_audio_continue_instructions">Time to continue and select some friends!</string>
     <string name="new_audio_quiet_instructions">Psst! That was very quiet, \n please record again...</string>
+
     <string name="ok">OK</string>
     <string name="save">Save</string>
+    <string name="channel_prompt_1">Pick a channel to wake up to</string>
+    <string name="channel_prompt_2">Or just hit \"Save\" to proceed without one</string>
 
 <string name="settings_activity_title">Settings</string>
 

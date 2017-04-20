@@ -57,8 +57,6 @@ public class BackgroundTaskIntentService extends IntentService {
     protected FirebaseAuth mAuth;
     protected StorageReference mStorageRef;
 
-    SharedPreferences sharedPreferences;
-
     private AudioTableManager mAudioTableManager;
     private DeviceAlarmTableManager deviceAlarmTableManager;
 
