@@ -4,11 +4,11 @@
   ~ Copyright (c)  2017 Roosta Media. All rights reserved.
   -->
 
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_content"
+    android:id="@+id/channelRecyclerView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/main_background_layer_list_day"
@@ -17,16 +17,36 @@
     tools:context="com.roostermornings.android.activity.MyAlarmsFragmentActivity"
     tools:showIn="@layout/activity_my_alarms">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/home_alarmsListView"
-        android:layout_width="fill_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:padding="@dimen/spacing_normal_large"
-        android:clipToPadding="false" />
+    <android.support.design.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/button_bar">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/home_alarmsListView"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:paddingLeft="@dimen/fab_margin"
+            android:paddingRight="@dimen/fab_margin"
+            android:paddingTop="@dimen/fab_margin"
+            android:paddingBottom="@dimen/fab_bottom_padding"
+            android:clipToPadding="false" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/add_alarm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/fab_margin"
+            android:layout_gravity="end|bottom"
+            android:background="@color/rooster_light_blue"
+            app:borderWidth="0dp"
+            android:src="@drawable/ic_add_white_24dp"
+            android:clickable="true" />
+
+    </android.support.design.widget.CoordinatorLayout>
 
     <include
         android:id="@+id/button_bar"
         layout="@layout/button_bar" />
 
-</LinearLayout>
+</RelativeLayout>

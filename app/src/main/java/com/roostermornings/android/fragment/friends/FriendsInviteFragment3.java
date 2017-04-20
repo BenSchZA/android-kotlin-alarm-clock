@@ -62,6 +62,8 @@ public class FriendsInviteFragment3 extends BaseFragment {
 
     private BaseActivity baseActivity;
 
+    private static int statusCode = -1;
+
     ArrayList<Friend> mUsers = new ArrayList<>();
     private RecyclerView.Adapter mAdapter;
 
@@ -95,6 +97,9 @@ public class FriendsInviteFragment3 extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //Ensure check for Node complete reset
+        statusCode = -1;
 
         if (getArguments() != null) {
         }
@@ -190,18 +195,30 @@ public class FriendsInviteFragment3 extends BaseFragment {
     }
 
     private void executeNodeMyContactsTask() {
-        FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
-        mUser.getToken(true)
-                .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
-                    public void onComplete(@NonNull Task<GetTokenResult> task) {
-                        if (task.isSuccessful()) {
-                            String idToken = task.getResult().getToken();
-                            checkLocalContactsNode(idToken);
-                        } else {
-                            // Handle error -> task.getException();
-                        }
-                    }
-                });
+        //Check if node response already exists
+        if(statusCode == 200) {
+            progressBar.setVisibility(View.GONE);
+            mRecyclerView.setVisibility(View.VISIBLE);
+        } else {
+            if (!checkInternetConnection()) {
+                progressBar.setVisibility(View.GONE);
+            } else {
+                progressBar.setVisibility(View.VISIBLE);
+                mRecyclerView.setVisibility(View.GONE);
+                getFirebaseUser().getToken(true)
+                        .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+                            public void onComplete(@NonNull Task<GetTokenResult> task) {
+                                if (task.isSuccessful()) {
+                                    String idToken = task.getResult().getToken();
+                                    checkLocalContactsNode(idToken);
+                                } else {
+                                    // Handle error -> task.getException();
+                                    progressBar.setVisibility(View.GONE);
+                                }
+                            }
+                        });
+            }
+        }
     }
 
     private void checkLocalContactsNode(String idToken) {
@@ -212,7 +229,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
             public void onResponse(Response<NodeUsers> response,
                                    Retrofit retrofit) {
 
-                int statusCode = response.code();
+                statusCode = response.code();
                 NodeUsers apiResponse = response.body();
 
                 if (statusCode == 200) {

@@ -13,6 +13,7 @@ import android.content.IntentFilter;
 import android.graphics.Point;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -63,6 +64,8 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     TextView toolbarTitle;
     @BindView(R.id.button_bar)
     LinearLayout buttonBarLayout;
+    @BindView(R.id.add_alarm)
+    FloatingActionButton buttonAddAlarm;
 
     private DatabaseReference mMyAlarmsReference;
     private ArrayList<Alarm> mAlarms = new ArrayList<>();
@@ -81,10 +84,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         setDayNight();
 
         //Set toolbar title
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-        toolbarTitle.setText(getString(R.string.my_alarms));
+        setupToolbar(toolbarTitle, getString(R.string.my_alarms));
 
         mMyAlarmsReference = FirebaseDatabase.getInstance().getReference()
                 .child("alarms").child(getFirebaseUser().getUid());
@@ -267,35 +267,10 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if(id == R.id.action_add_alarm) {
-            startActivity(new Intent(MyAlarmsFragmentActivity.this, NewAlarmFragmentActivity.class));
-        }
-
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_profile) {
-//            View popupView = getLayoutInflater().inflate(R.layout.fragment_profile, null);
-//
-//            PopupWindow popupWindow = new PopupWindow(popupView,
-//                    LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-//
-//            popupWindow.setFocusable(true);
-//
-////            Display display = getWindowManager().getDefaultDisplay();
-////            Point size = new Point();
-////            display.getSize(size);
-////            int width = size.x;
-////            int height = size.y;
-////
-////            popupWindow.setWidth(width - 200);
-////            popupWindow.setHeight(height - 200);
-//            popupWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
-////            popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-//            popupWindow.setClippingEnabled(false);
-//            popupWindow.showAtLocation(findViewById(android.R.id.content), Gravity.CENTER, 0, 0);
-
             Intent i = new Intent(this, ProfileActivity.class);
             startActivity(i);
-
             return true;
         }
         if (id == R.id.action_settings) {
@@ -311,10 +286,20 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     }
 
     public void toggleAlarmSetEnable(Alarm alarm, boolean enabled) {
+        if(enabled) {
+            //Notify user of time until next alarm, once alarm millis has been updated in db
+            deviceAlarmController.notifyUserAlarmTime(deviceAlarmTableManager.getAlarmSet(alarm.getUid()));
+        }
+
         deviceAlarmController.setSetEnabled(alarm.getUid(), enabled);
         mAlarms.get(mAlarms.indexOf(alarm)).setEnabled(enabled);
         updateRoosterNotification();
         mAdapter.notifyDataSetChanged();
+    }
+
+    @OnClick(R.id.add_alarm)
+    public void onClickAddAlarm() {
+        startActivity(new Intent(MyAlarmsFragmentActivity.this, NewAlarmFragmentActivity.class));
     }
 
     @OnClick(R.id.home_record_audio)
@@ -336,17 +321,11 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     public void deleteAlarm(String alarmId) {
         try {
             DeviceAlarmController deviceAlarmController = new DeviceAlarmController(this);
-
             //Remove alarm *set* from local SQL database using retrieved Uid from firebase && Remove alarm from firebase
             deviceAlarmController.deleteAlarmSetGlobal(alarmId);
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
-
-        //TODO: find out why alarm content being duplicated in recycler view on delete - do not refresh the activity like this
-//        Intent intent = getIntent();
-//        finish();
-//        startActivity(intent);
     }
 
     public void editAlarm(String alarmId) {

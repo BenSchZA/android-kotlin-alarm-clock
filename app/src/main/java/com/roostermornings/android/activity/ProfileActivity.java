@@ -87,10 +87,7 @@ public class ProfileActivity extends BaseActivity {
         setDayNight();
 
         //Set toolbar title
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-        toolbarTitle.setText("My Profile");
+        setupToolbar(toolbarTitle, "My Profile");
 
         profileName.setText(mCurrentUser.getUser_name());
         profileMobileNumber.setText(mCurrentUser.getCell_number());
