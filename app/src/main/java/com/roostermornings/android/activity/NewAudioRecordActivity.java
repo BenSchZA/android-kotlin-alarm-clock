@@ -135,6 +135,7 @@ public class NewAudioRecordActivity extends BaseActivity {
         super.onDestroy();
         if(!fileProcessed) {
             try {
+                if(mAudioSavePathInDevice == null) return;
                 final File localFile = new File(mAudioSavePathInDevice);
                 localFile.delete();
             } catch(Exception e) {
@@ -461,6 +462,8 @@ public class NewAudioRecordActivity extends BaseActivity {
                             PackageManager.PERMISSION_GRANTED;
 
                     if (StoragePermission && RecordPermission) {
+                        setNewAudioStatus(NEW_AUDIO_READY_LISTEN);
+                        startStopAudioRecording();
                     } else {
                         Toast.makeText(NewAudioRecordActivity.this, "Permission Denied", Toast.LENGTH_LONG).show();
                     }

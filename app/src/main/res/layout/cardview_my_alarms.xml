@@ -15,10 +15,10 @@
         android:id="@+id/card_view_alarms"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:foreground="@drawable/selectable_item_background"
-        app:cardBackgroundColor="@color/card_white_transparent"
         app:cardCornerRadius="6dp"
         app:cardElevation="0dp"
+        app:cardBackgroundColor="@color/card_white_transparent"
+        android:foreground="@drawable/selectable_item_background"
         android:clickable="true">
 
         <LinearLayout
@@ -103,17 +103,6 @@
             </FrameLayout>
 
             </LinearLayout>
-
-
-            <!--<ImageButton-->
-                <!--android:id="@+id/cardview_alarm_delete"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="match_parent"-->
-                <!--android:layout_marginTop="@dimen/spacing_large"-->
-                <!--android:layout_marginBottom="@dimen/spacing_large"-->
-                <!--android:background="@drawable/md_transparent"-->
-                <!--android:clickable="true"-->
-                <!--android:src="@drawable/selectable_delete_icon" />-->
 
             <Switch
                 android:id="@+id/switch_enable"

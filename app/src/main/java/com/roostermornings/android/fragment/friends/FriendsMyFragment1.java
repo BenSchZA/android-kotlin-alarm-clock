@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -19,7 +20,10 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.database.DatabaseReference;
 import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.R;
@@ -56,6 +60,7 @@ public class FriendsMyFragment1 extends BaseFragment {
     ArrayList<User> mUsers = new ArrayList<>();
     private DatabaseReference mFriendsReference;
     private DatabaseReference mUserReference;
+    private String firebaseIdToken = "";
 
     private RecyclerView.Adapter mAdapter;
 
@@ -105,7 +110,24 @@ public class FriendsMyFragment1 extends BaseFragment {
             progressBar.setVisibility(View.GONE);
             mRecyclerView.setVisibility(View.VISIBLE);
         } else {
-            retrieveMyFriends();
+            if (!checkInternetConnection()) {
+                progressBar.setVisibility(View.GONE);
+            } else {
+                progressBar.setVisibility(View.VISIBLE);
+                mRecyclerView.setVisibility(View.GONE);
+                getFirebaseUser().getToken(true)
+                        .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+                            public void onComplete(@NonNull Task<GetTokenResult> task) {
+                                if (task.isSuccessful()) {
+                                    firebaseIdToken = task.getResult().getToken();
+                                    retrieveMyFriends();
+                                } else {
+                                    // Handle error -> task.getException();
+                                    progressBar.setVisibility(View.GONE);
+                                }
+                            }
+                        });
+            }
         }
         // Inflate the layout for this fragment
         return view;
@@ -133,7 +155,11 @@ public class FriendsMyFragment1 extends BaseFragment {
             return;
         }
 
-        Call<Users> call = apiService().listUserFriendList(firebaseUser.getUid());
+        if(firebaseIdToken.equals("")) {
+            Toast.makeText(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        Call<Users> call = apiService().retrieveUserFriends(firebaseIdToken);
 
         call.enqueue(new Callback<Users>() {
             @Override

@@ -7,7 +7,7 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_content"
+    android:id="@+id/channelRecyclerView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/main_background_layer_list_day"
@@ -32,7 +32,7 @@
             android:layout_gravity="center"
             android:layout_marginBottom="@dimen/spacing_xxlarge"
             android:layout_marginTop="@dimen/spacing_xxxlarge"
-            android:background="@drawable/large_profile_pic_circle" />
+            android:background="@drawable/xlarge_profile_pic_circle" />
 
         <TextView
             android:id="@+id/alarm_sender_name"
@@ -44,19 +44,7 @@
             android:textColor="@color/white"
             android:textSize="@dimen/text_xxlarge" />
 
-        <TextView
-            android:id="@+id/alarm_count"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/spacing_xlarge"
-            android:gravity="center"
-            android:text="@string/alarm_count"
-            android:textColor="@color/white"
-            android:textSize="@dimen/text_xlarge" />
-
-        <!--TODO: add logic-->
-
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -67,8 +55,30 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/ic_skip_previous_white_24dp"
-                android:layout_gravity="center"
+                android:layout_alignParentLeft="true"
                 android:clickable="true"/>
+
+            <TextView
+                android:id="@+id/alarm_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_xlarge"
+                android:layout_marginLeft="@dimen/spacing_normal"
+                android:layout_marginRight="@dimen/spacing_normal"
+                android:layout_centerInParent="true"
+                android:text="@string/alarm_count"
+                android:textColor="@color/white"
+                android:textSize="@dimen/text_xlarge" />
+
+            <Button
+                android:id="@+id/skip_next"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:background="@drawable/ic_skip_next_white_24dp"
+                android:clickable="true" />
+
+        </RelativeLayout>
 
             <Button
                 android:id="@+id/alarm_snooze_button"
@@ -78,16 +88,6 @@
                 android:layout_gravity="center"
                 android:layout_margin="@dimen/spacing_normal"
                 android:text="Snooze"/>
-
-            <Button
-                android:id="@+id/skip_next"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ic_skip_next_white_24dp"
-                android:layout_gravity="center"
-                android:clickable="true"/>
-
-        </LinearLayout>
 
 
     </LinearLayout>

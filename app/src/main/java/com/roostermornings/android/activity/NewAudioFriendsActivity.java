@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -36,6 +37,8 @@ import com.roostermornings.android.domain.User;
 import com.roostermornings.android.domain.Users;
 import com.roostermornings.android.util.Constants;
 
+import org.w3c.dom.Text;
+
 import java.io.File;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -48,6 +51,8 @@ import retrofit.Call;
 import retrofit.Callback;
 import retrofit.Response;
 import retrofit.Retrofit;
+
+import static com.facebook.FacebookSdk.getApplicationContext;
 
 public class NewAudioFriendsActivity extends BaseActivity {
 
@@ -77,11 +82,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_new_audio_friends);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-
+        setupToolbar(null, null);
         setDayNight();
 
         getFirebaseUser().getToken(true)
@@ -89,6 +90,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
                     public void onComplete(@NonNull Task<GetTokenResult> task) {
                         if (task.isSuccessful()) {
                             firebaseIdToken = task.getResult().getToken();
+                            retrieveMyFriends();
                         } else {
                             // Handle error -> task.getException();
                         }
@@ -119,8 +121,6 @@ public class NewAudioFriendsActivity extends BaseActivity {
                     return;
                 }
             }
-
-            retrieveMyFriends();
         } else {
                 Toast.makeText(this, "Do you have any Rooster friends? Or an internet connection?", Toast.LENGTH_LONG).show();
                 startHomeActivity();
@@ -245,7 +245,11 @@ public class NewAudioFriendsActivity extends BaseActivity {
             return;
         }
 
-        Call<Users> call = apiService().listUserFriendList(firebaseUser.getUid());
+        if(firebaseIdToken.equals("")) {
+            Toast.makeText(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        Call<Users> call = apiService().retrieveUserFriends(firebaseIdToken);
 
         call.enqueue(new Callback<Users>() {
             @Override

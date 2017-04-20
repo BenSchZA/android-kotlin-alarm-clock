@@ -19,8 +19,13 @@ import retrofit.http.Path;
 
 public interface IHTTPClient {
 
+    //Deprecated
     @GET("api/friends/{userId}")
     Call<Users> listUserFriendList(@Path("userId") String userId);
+
+    //Uses boolean value for friends in profile
+    @GET("api/my_friends/{tokenId}")
+    Call<Users> retrieveUserFriends(@Path("tokenId") String tokenId);
 
     @POST("api/my_contacts")
     Call<NodeUsers> checkLocalContacts(@Body LocalContacts body);

@@ -108,10 +108,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
         setDayNight();
 
         //Set toolbar title
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-        toolbarTitle.setText(getString(R.string.friends));
+        setupToolbar(toolbarTitle, getString(R.string.friends));
 
         //Keep local and Firebase alarm dbs synced, and enable offline persistence
         mFriendRequestsReceivedReference = FirebaseDatabase.getInstance().getReference()
