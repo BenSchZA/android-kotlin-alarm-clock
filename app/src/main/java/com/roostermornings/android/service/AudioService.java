@@ -168,15 +168,15 @@ public class AudioService extends Service {
                             mThis.audioItems.addAll(channelAudioItems);
                         }
                         //If this alarm does not allow social roosters, move on to channel content
-                        if (!socialAudioItems.isEmpty() && deviceAlarmTableManager.getAlarmSet(mThis.alarmUid).get(0).isSocial()) {
+                        if (!mThis.socialAudioItems.isEmpty() && deviceAlarmTableManager.getAlarmSet(mThis.alarmUid).get(0).isSocial()) {
                             mThis.audioItems.addAll(socialAudioItems);
                         }
                     } else {
                         //If this alarm does not allow social roosters, move on to channel content
-                        if (!socialAudioItems.isEmpty() && deviceAlarmTableManager.getAlarmSet(mThis.alarmUid).get(0).isSocial()) {
+                        if (!mThis.socialAudioItems.isEmpty() && deviceAlarmTableManager.getAlarmSet(mThis.alarmUid).get(0).isSocial()) {
                             mThis.audioItems.addAll(socialAudioItems);
                         }
-                        if (!channelAudioItems.isEmpty()) {
+                        if (!mThis.channelAudioItems.isEmpty()) {
                             mThis.audioItems.addAll(channelAudioItems);
                         }
                     }
@@ -195,11 +195,10 @@ public class AudioService extends Service {
 
         //Try to fetch un-downloaded channel content for 30 seconds if it doesn't already exist
         try {
-            if (((BaseActivity)getApplicationContext()).checkInternetConnection()
-                    && !mThis.alarmChannelUid.equals("")
+            if (!mThis.alarmChannelUid.equals("")
                     && !alarm.getLabel().equals(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED)
                     && channelAudioItems == null) {
-                if (((BaseActivity) getApplicationContext()).checkInternetConnection()) {
+                if (((BaseActivity) getBaseContext()).checkInternetConnection()) {
                     //Download any social or channel audio files
                     startActionBackgroundDownload(mThis);
                     //Start alarm after 30 seconds or after download finished
