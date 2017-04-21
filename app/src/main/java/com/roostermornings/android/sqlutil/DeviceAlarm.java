@@ -53,7 +53,8 @@ public class DeviceAlarm {
     alarmList = alarmSet.getAlarmList();*/
 
 
-    public DeviceAlarm initAlarmSet(int hour, int minute, List<Integer> alarmDays, boolean repeatWeekly, String channel, boolean allowSocialRoosters) {
+    public DeviceAlarm initAlarmSet(boolean enabled, int hour, int minute, List<Integer> alarmDays, boolean repeatWeekly, String channel, boolean allowSocialRoosters) {
+        this.enabled = enabled;
         this.hour = hour;
         this.minute = minute;
         this.alarmDays = alarmDays;
@@ -68,12 +69,13 @@ public class DeviceAlarm {
 
         while (dayIterator.hasNext()) {
             day = Integer.valueOf(dayIterator.next().toString());
-            deviceAlarmSet.add(new DeviceAlarm().setAlarm(this.hour, this.minute, day, this.recurring, this.channel, this.social));
+            deviceAlarmSet.add(new DeviceAlarm().setAlarm(this.enabled, this.hour, this.minute, day, this.recurring, this.channel, this.social));
         }
         return deviceAlarmSet;
     }
 
-    private DeviceAlarm setAlarm(int hour, int minute, int day, boolean repeatWeekly, String channel, boolean social) {
+    private DeviceAlarm setAlarm(boolean enabled, int hour, int minute, int day, boolean repeatWeekly, String channel, boolean social) {
+        this.enabled = enabled;
         this.hour = hour;
         this.minute = minute;
         this.day = day;
