@@ -210,7 +210,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 //Set enabled flag to true on new or edited alarm
                 mAlarm.setEnabled(true);
 
-                deviceAlarmController.registerAlarmSet(alarmKey, mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring(), alarmChannelUID, mAlarm.isAllow_friend_audio_files());
+                deviceAlarmController.registerAlarmSet(mAlarm.isEnabled(), alarmKey, mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring(), alarmChannelUID, mAlarm.isAllow_friend_audio_files());
                 //Ensure iteration is not overwritten
                 if(iteration != null) deviceAlarmTableManager.setChannelStoryIteration(alarmChannelUID, iteration);
 
@@ -288,6 +288,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
         if (mEditAlarmId.length() == 0) return;
 
         List<DeviceAlarm> tempAlarms = deviceAlarmTableManager.getAlarmSet(mEditAlarmId);
+        if(tempAlarms.size() < 1) return;
         mAlarm.fromDeviceAlarm(tempAlarms.get(0), deviceAlarmTableManager.isSetEnabled(mEditAlarmId));
         List<Integer> alarmDays = deviceAlarmTableManager.getAlarmClassDays(mEditAlarmId);
         mAlarm.setAlarmDayFromDeviceAlarm(alarmDays);

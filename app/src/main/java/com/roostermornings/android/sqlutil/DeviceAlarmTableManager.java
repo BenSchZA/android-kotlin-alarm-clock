@@ -51,6 +51,7 @@ public class DeviceAlarmTableManager {
 
         values.put(AlarmTableEntry.COLUMN_SET_ID, alarm.getSetId());
 
+        values.put(AlarmTableEntry.COLUMN_ENABLED, alarm.getEnabled());
         values.put(AlarmTableEntry.COLUMN_HOUR, alarm.getHour());
         values.put(AlarmTableEntry.COLUMN_MINUTE, alarm.getMinute());
         values.put(AlarmTableEntry.COLUMN_DAY, alarm.getDay());
@@ -183,7 +184,9 @@ public class DeviceAlarmTableManager {
 
     public boolean isSetEnabled(String setId) {
         try{
-            return getAlarmSet(setId).size() == selectSetEnabled(setId).size();
+            return getAlarmSet(setId) != null
+                    && getAlarmSet(setId).size() > 0
+                    && getAlarmSet(setId).size() == selectSetEnabled(setId).size();
         } catch(NullPointerException e) {
             e.printStackTrace();
             return false;

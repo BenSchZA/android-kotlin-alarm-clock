@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Rooster Mornings Android.
+  ~ Copyright (c)  2017 Roosta Media. All rights reserved.
+  -->
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/my_alarms"
+        android:enabled="true"
+        android:icon="@drawable/ic_alarm_white_24dp"
+        android:title="Alarms"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/message_status"
+        android:enabled="true"
+        android:icon="@drawable/ic_chat_bubble_outline_white_24dp"
+        android:title="Roosters"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/rooster_record"
+        android:enabled="true"
+        android:icon="@drawable/ic_mic_white_24dp"
+        android:title="Record"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/my_friends"
+        android:enabled="true"
+        android:icon="@drawable/ic_group_white_24dp"
+        android:title="Friends"
+        app:showAsAction="ifRoom" />
+</menu>

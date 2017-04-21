@@ -4,7 +4,20 @@
   ~ Copyright (c)  2017 Roosta Media. All rights reserved.
   -->
 
-<LinearLayout
+<!--<android.support.design.widget.BottomNavigationView android:id="@+id/bottom_navigation"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_alignParentBottom="true"-->
+    <!--app:itemBackground="@color/rooster_light_blue"-->
+    <!--app:itemIconTint="@color/white"-->
+    <!--app:itemTextColor="@color/white"-->
+    <!--app:menu="@menu/menu_bottom_navigation"-->
+    <!--xmlns:android="http://schemas.android.com/apk/res/android"-->
+    <!--xmlns:app="http://schemas.android.com/apk/res-auto" />-->
+
+
+
+    <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/button_bar"
     android:layout_width="match_parent"
