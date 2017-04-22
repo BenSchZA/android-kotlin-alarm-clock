@@ -67,12 +67,10 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     @BindView(R.id.add_alarm)
     FloatingActionButton buttonAddAlarm;
 
-    private DatabaseReference mMyAlarmsReference;
     private ArrayList<Alarm> mAlarms = new ArrayList<>();
     private DeviceAlarmController deviceAlarmController;
     private DeviceAlarmTableManager deviceAlarmTableManager;
     private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
 
     private BroadcastReceiver receiver;
 
@@ -86,7 +84,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         //Set toolbar title
         setupToolbar(toolbarTitle, getString(R.string.my_alarms));
 
-        mMyAlarmsReference = FirebaseDatabase.getInstance().getReference()
+        DatabaseReference mMyAlarmsReference = FirebaseDatabase.getInstance().getReference()
                 .child("alarms").child(getFirebaseUser().getUid());
 
         //Keep local and Firebase alarm dbs synced, and enable offline persistence
@@ -95,7 +93,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         mAdapter = new MyAlarmsListAdapter(mAlarms, MyAlarmsFragmentActivity.this, getApplication());
 
         // use a linear layout manager
-        mLayoutManager = new LinearLayoutManager(this);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mAdapter);
 
@@ -120,7 +118,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         }
 
         //Clear snooze if action
-        if(getIntent().getAction() != null && getIntent().getAction().equals(Constants.ACTION_CANCEL_SNOOZE)) {
+        if(Constants.ACTION_CANCEL_SNOOZE.equals(getIntent().getAction())) {
             try {
                 deviceAlarmController.snoozeAlarm(extras.getString(Constants.EXTRA_ALARMID), true);
             } catch(NullPointerException e) {
@@ -134,7 +132,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     Alarm alarm = postSnapshot.getValue(Alarm.class);
-
+                    
                     //Register alarm sets on login
                     //Extract data from Alarm "alarm" and create new alarm set DeviceAlarm
                     AlarmChannel alarmChannel = alarm.getChannel();
@@ -286,11 +284,6 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     }
 
     public void toggleAlarmSetEnable(Alarm alarm, boolean enabled) {
-        if(enabled) {
-            //Notify user of time until next alarm, once alarm millis has been updated in db
-            deviceAlarmController.notifyUserAlarmTime(deviceAlarmTableManager.getAlarmSet(alarm.getUid()));
-        }
-
         deviceAlarmController.setSetEnabled(alarm.getUid(), enabled);
         mAlarms.get(mAlarms.indexOf(alarm)).setEnabled(enabled);
         updateRoosterNotification();

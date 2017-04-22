@@ -283,14 +283,16 @@ public final class DeviceAlarmController {
 
     public void setSetEnabled(String setId, boolean enabled) {
         if(enabled) {
-            //Trigger audio download
-            //Download any social or channel audio files
-            startActionBackgroundDownload(context);
             //Set all intents for enabled alarms
             deviceAlarmTableManager.setSetEnabled(setId, enabled);
             deviceAlarmTableManager.setSetChanged(setId, true);
             refreshAlarms(deviceAlarmTableManager.selectChanged());
             updateFirebaseAlarmEnabled(setId, enabled);
+            //Trigger audio download
+            //Download any social or channel audio files
+            startActionBackgroundDownload(context);
+            //Notify user of time until next alarm, once alarm millis has been updated in db
+            notifyUserAlarmTime(deviceAlarmTableManager.getAlarmSet(setId));
         } else{
             List<DeviceAlarm> deviceAlarmList = deviceAlarmTableManager.getAlarmSet(setId);
             for (DeviceAlarm deviceAlarm :

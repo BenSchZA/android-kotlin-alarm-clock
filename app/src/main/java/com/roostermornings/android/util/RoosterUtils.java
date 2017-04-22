@@ -41,6 +41,10 @@ public class RoosterUtils {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD;
     }
 
+    public static Boolean notNull(Object object) {
+        return object != null;
+    }
+
     public static String getInitials(String displayName) {
         String initials = "";
         String tempStringArray[];

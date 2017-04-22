@@ -245,7 +245,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
             return;
         }
 
-        if(firebaseIdToken.equals("")) {
+        if("".equals(firebaseIdToken)) {
             Toast.makeText(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG).show();
             return;
         }

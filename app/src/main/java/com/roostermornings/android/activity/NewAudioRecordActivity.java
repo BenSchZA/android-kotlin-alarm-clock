@@ -172,7 +172,7 @@ public class NewAudioRecordActivity extends BaseActivity {
                 mHandler.removeCallbacks(startTimer);
                 layoutListenParent.setVisibility(View.INVISIBLE);
                 layoutRecordParent.setVisibility(View.VISIBLE);
-                if(!txtMessage.getText().equals(getResources().getText(R.string.new_audio_quiet_instructions))) {
+                if(!getResources().getText(R.string.new_audio_quiet_instructions).equals(txtMessage.getText())) {
                     txtMessage.setText(getResources().getText(R.string.new_audio_instructions));
                 }
                 txtAudioTime.setText(maxRecordingTime);
@@ -239,18 +239,9 @@ public class NewAudioRecordActivity extends BaseActivity {
 
             if (checkPermission()) {
 
-                String mAudioSaveDirectories = getFilesDir().getAbsolutePath() + "/RoosterTempAudio/";
-
                 mAudioSavePathInDevice =
-                        mAudioSaveDirectories +
+                        getFilesDir().getAbsolutePath() + "/" +
                                 randomAudioFileName;
-
-                File file = new File(mAudioSaveDirectories);
-                if(!file.mkdirs()) {
-                    mAudioSavePathInDevice =
-                            getFilesDir().getAbsolutePath() + "/" +
-                                    randomAudioFileName;
-                }
 
                 mediaRecorderReady();
 
