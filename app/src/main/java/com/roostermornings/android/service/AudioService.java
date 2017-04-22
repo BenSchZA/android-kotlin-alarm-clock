@@ -39,6 +39,7 @@ import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.InternetHelper;
 import com.roostermornings.android.util.RoosterUtils;
 
 import java.io.File;
@@ -157,8 +158,15 @@ public class AudioService extends Service {
             public void onReceive(Context context, Intent intent) {
                 //do something based on the intent's action
                 //Cancel download attempt timer and ensure BroadcastReceiver not re-triggered
-                if(downloadTimer != null) downloadTimer.cancel();
-                if(receiver != null) unregisterReceiver(receiver);
+                try {
+                    if (downloadTimer != null) downloadTimer.cancel();
+                } catch(IllegalArgumentException e) {
+                    e.printStackTrace();
+                } try {
+                    if (receiver != null) unregisterReceiver(receiver);
+                } catch(IllegalArgumentException e) {
+                    e.printStackTrace();
+                }
                 //Try append new content to end of existing content, if it fails - fail safe and play default alarm tone
                 try {
                     //Reorder channel and social queue according to user preferences
@@ -195,10 +203,10 @@ public class AudioService extends Service {
 
         //Try to fetch un-downloaded channel content for 30 seconds if it doesn't already exist
         try {
-            if (!mThis.alarmChannelUid.equals("")
-                    && !alarm.getLabel().equals(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED)
+            if (!"".equals(mThis.alarmChannelUid)
+                    && !Constants.ALARM_CHANNEL_DOWNLOAD_FAILED.equals(alarm.getLabel())
                     && channelAudioItems == null) {
-                if (((BaseActivity) getBaseContext()).checkInternetConnection()) {
+                if (!InternetHelper.noInternetConnection(this)) {
                     //Download any social or channel audio files
                     startActionBackgroundDownload(mThis);
                     //Start alarm after 30 seconds or after download finished

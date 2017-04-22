@@ -12,21 +12,14 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 
-import static com.roostermornings.android.activity.base.BaseActivity.mCurrentUser;
-import static com.roostermornings.android.sqldata.AudioTableContract.AudioTableEntry;
-
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.roostermornings.android.sqldata.AudioTableHelper;
 import com.roostermornings.android.util.Constants;
 
 import java.io.File;
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import static com.roostermornings.android.sqldata.AudioTableContract.AudioTableEntry;
 
 /**
  * Created by bscholtz on 2/14/17.
@@ -46,7 +39,7 @@ public class AudioTableManager {
     }
 
 
-    public void insertSocialAudioFile(DeviceAudioQueueItem queue) {
+    public Boolean insertSocialAudioFile(DeviceAudioQueueItem queue) {
 
         SQLiteDatabase db = initDB();
 
@@ -66,13 +59,15 @@ public class AudioTableManager {
             db.insertOrThrow(AudioTableEntry.TABLE_NAME, null, values);
         } catch(SQLiteConstraintException e){
             e.printStackTrace();
+            db.close();
+            return false;
         }
         db.close();
-
         updateRoosterCount();
+        return true;
     }
 
-    public void insertChannelAudioFile(DeviceAudioQueueItem queue) {
+    public Boolean insertChannelAudioFile(DeviceAudioQueueItem queue) {
 
         SQLiteDatabase db = initDB();
 
@@ -93,8 +88,11 @@ public class AudioTableManager {
             db.insertOrThrow(AudioTableEntry.TABLE_NAME, null, values);
         } catch(SQLiteConstraintException e){
             e.printStackTrace();
+            db.close();
+            return false;
         }
         db.close();
+        return true;
     }
 
     public void removeAudioEntry(DeviceAudioQueueItem deviceAudioQueueItem){
@@ -111,21 +109,13 @@ public class AudioTableManager {
         updateRoosterCount();
     }
 
-    public DeviceAudioQueueItem extractAudioEntry(String queueId){
+    public void setChannelAudioFileName(String channelId, String channelAudioFileName) {
         SQLiteDatabase db = initDB();
 
-        String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_QUEUE_ID + " = " + "'" + queueId + "'" + ";";
+        String updateQuery = "UPDATE " + AudioTableEntry.TABLE_NAME + " SET " + AudioTableEntry.COLUMN_FILENAME + " = '" + channelAudioFileName + "' WHERE " + AudioTableEntry.COLUMN_QUEUE_ID + " = '" + channelId + "';";
 
-        Cursor cursor = db.rawQuery(selectQuery, null);
-
-        ArrayList<DeviceAudioQueueItem> deviceAudioQueueItems = extractAudioFiles(cursor);
-
+        db.execSQL(updateQuery);
         db.close();
-
-        if(deviceAudioQueueItems!=null && deviceAudioQueueItems.size() > 0)
-            return deviceAudioQueueItems.get(0);
-        else
-            return null;
     }
     
     public void removeChannelAudioEntry(String channelId) {
@@ -235,6 +225,24 @@ public class AudioTableManager {
         db.close();
         //TODO: returning empty! occasionally
         return deviceAudioQueueItems;
+    }
+
+    public Boolean isChannelAudioInDatabase(String channelId) {
+        SQLiteDatabase db = initDB();
+
+        String selectQuery = "SELECT 1 FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_TYPE + " = " + TRUE + " AND " + AudioTableEntry.COLUMN_QUEUE_ID + " LIKE \"%" + channelId + "%\";";
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if(cursor.getCount() > 0) {
+            db.close();
+            cursor.close();
+            return true;
+        } else {
+            db.close();
+            cursor.close();
+            return false;
+        }
     }
 
     public void setListened(int ID) {
