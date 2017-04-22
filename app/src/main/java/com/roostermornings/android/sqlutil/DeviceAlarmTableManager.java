@@ -121,6 +121,7 @@ public class DeviceAlarmTableManager {
     }
 
     public void updateAlarmLabel(String label) {
+        //Update the label of the next occuring alarm to show whether a download has failed, or other notices
         String setId = getNextPendingAlarm().getSetId();
         if(setId == null) return;
 

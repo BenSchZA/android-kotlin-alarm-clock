@@ -5,24 +5,29 @@
 
 package com.roostermornings.android.domain;
 
+import android.support.annotation.NonNull;
+
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
+import com.roostermornings.android.util.RoosterUtils;
 
 import java.io.Serializable;
 import java.util.HashMap;
+
+import static com.roostermornings.android.util.RoosterUtils.notNull;
 
 @IgnoreExtraProperties
 public class User implements Serializable {
 
     private HashMap<String, Boolean> channels;
-    private String device_type;
-    private String device_token;
-    private String profile_pic;
-    private String user_name;
-    private String cell_number;
+    private String device_type = "";
+    private String device_token = "";
+    private String profile_pic = "";
+    private String user_name = "";
+    private String cell_number = "";
     private HashMap<String, Object> friends;
-    private String uid;
-    private Integer unseen_roosters;
+    private String uid = "";
+    private Integer unseen_roosters = 0;
 
     @Exclude
     private Boolean selected = false; //this is important for list of friends that need to be selected eg for creating a new alarm
@@ -42,14 +47,14 @@ public class User implements Serializable {
                 HashMap<String, Object> friends,
                 Integer unseen_roosters) {
 
-        this.channels = channels;
-        this.cell_number = cell_number;
-        this.device_token = device_token;
-        this.device_type = device_type;
-        this.profile_pic = profile_pic;
-        this.user_name = user_name;
-        this.uid = uid;
-        this.unseen_roosters = unseen_roosters;
+        if(notNull(channels)) this.channels = channels;
+        if(notNull(cell_number)) this.cell_number = cell_number;
+        if(notNull(device_token)) this.device_token = device_token;
+        if(notNull(device_type)) this.device_type = device_type;
+        if(notNull(profile_pic)) this.profile_pic = profile_pic;
+        if(notNull(user_name)) this.user_name = user_name;
+        if(notNull(uid)) this.uid = uid;
+        if(notNull(unseen_roosters)) this.unseen_roosters = unseen_roosters;
     }
 
     public Integer getUnseen_roosters() {

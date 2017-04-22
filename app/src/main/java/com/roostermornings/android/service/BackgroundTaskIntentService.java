@@ -147,15 +147,10 @@ public class BackgroundTaskIntentService extends IntentService {
         if (deviceAlarm == null) return;
         //Check if channel has a valid ID, else next pending alarm has no channel
         final String channelId = deviceAlarm.getChannel();
-        if (channelId == null || channelId.equals("")) return;
+        if ("".equals(channelId)) return;
 
         //If the current ChannelRooster is in SQL db, then don't download
-        ArrayList<String> existingChannelQueueIDs = new ArrayList<>();
-        for (DeviceAudioQueueItem audioItem :
-                mAudioTableManager.extractAllChannelAudioFiles()) {
-            existingChannelQueueIDs.add(audioItem.getQueue_id());
-        }
-        if (existingChannelQueueIDs.contains(channelId)) return;
+        if(mAudioTableManager.isChannelAudioInDatabase(channelId)) return;
         //Check firebase auth
         if (mAuth.getCurrentUser() == null || mAuth.getCurrentUser() == null) {
             Log.d(TAG, "User not authenticated on FB!");
@@ -218,8 +213,7 @@ public class BackgroundTaskIntentService extends IntentService {
                             deviceAlarmTableManager.setChannelStoryIteration(channelId, tailMap.firstKey());
                             //Retrieve channel audio
                             retrieveChannelContentAudio(channelIterationMap.get(tailMap.firstKey()), context);
-                        }
-                        else if(!headMap.isEmpty()) {
+                        } else if(!headMap.isEmpty()) {
                             //User is starting story from beginning again, at valid entry
                             //Set SQL entry for iteration to current valid story iteration, to be incremented on play
                             deviceAlarmTableManager.setChannelStoryIteration(channelId, headMap.firstKey());
@@ -271,12 +265,7 @@ public class BackgroundTaskIntentService extends IntentService {
 
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     SocialRooster socialRooster = postSnapshot.getValue(SocialRooster.class);
-                    //If firebase queue entry is older than two weeks then delete from db and don't process
-                    if (System.currentTimeMillis() - socialRooster.getDate_uploaded() >= 1209600000) {
-                        queueReference.child(postSnapshot.getKey()).removeValue();
-                    } else {
-                        retrieveSocialRoosterAudio(socialRooster, context);
-                    }
+                    retrieveSocialRoosterAudio(socialRooster, context);
                 }
             }
 
@@ -290,56 +279,72 @@ public class BackgroundTaskIntentService extends IntentService {
 
     private void retrieveChannelContentAudio(final ChannelRooster channelRooster, final Context context) {
 
+        if(channelRooster == null) return;
+        if(channelRooster.getChannel_uid() == null) return;
+
+        //Check if audio in db, if so return and don't download
+        //An issue here is that it's asynchronous AF, so you get lots of download tasks queued,
+        //and then the db entry is relied upon to check for existing audio files,
+        //but it is only entered on completion...
+        //If download fails...? Remove db entry? but then could loop
+        //New solution: ensure only one download task
+        //Previous solution: inser into db and then download, updating filename on completion using:
+        //mAudioTableManager.setChannelAudioFileName(channelRooster.getChannel_uid(), audioFileUniqueName);
+
+        if(mAudioTableManager.isChannelAudioInDatabase(channelRooster.getChannel_uid())) return;
+
         try {
             //https://firebase.google.com/docs/storage/android/download-files
-            StorageReference audioFileRef = mStorageRef.getStorage().getReferenceFromUrl(channelRooster.getAudio_file_url());
+            final StorageReference audioFileRef = mStorageRef.getStorage().getReferenceFromUrl(channelRooster.getAudio_file_url());
             final String audioFileUniqueName = "audio" + RoosterUtils.createRandomFileName(5) + ".3gp";
 
             final long FIVE_MEGABYTE = 5 * 1024 * 1024;
-            audioFileRef.getBytes(FIVE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                @Override
-                public void onSuccess(byte[] bytes) {
 
-                    try {
-                        FileOutputStream outputStream;
-                        outputStream = context.openFileOutput(audioFileUniqueName, Context.MODE_PRIVATE);
-                        outputStream.write(bytes);
-                        outputStream.close();
+            //Create new object for storing in SQL db
+            DeviceAudioQueueItem deviceAudioQueueItem = new DeviceAudioQueueItem();
+            deviceAudioQueueItem.fromChannelRooster(channelRooster, audioFileUniqueName);
+            //Could use channelRooster.getUpload_date(), but then can't use for purging files
+            deviceAudioQueueItem.setDate_created(System.currentTimeMillis());
 
-                        if(BuildConfig.DEBUG) Toast.makeText(context, "successfully downloaded", Toast.LENGTH_SHORT).show();
+            //store in local SQLLite database and check if successful
+            if(mAudioTableManager.insertChannelAudioFile(deviceAudioQueueItem)) {
 
-                        //Create new object for storing in SQL db
-                        DeviceAudioQueueItem deviceAudioQueueItem = new DeviceAudioQueueItem();
-                        deviceAudioQueueItem.fromChannelRooster(channelRooster, audioFileUniqueName);
-                        //Could use channelRooster.getUpload_date(), but then can't use for purging files
-                        deviceAudioQueueItem.setDate_created(System.currentTimeMillis());
+                audioFileRef.getBytes(FIVE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                    @Override
+                    public void onSuccess(byte[] bytes) {
 
-                        //store in local SQLLite database
-                        mAudioTableManager.insertChannelAudioFile(deviceAudioQueueItem);
+                        try {
+                            FileOutputStream outputStream;
+                            outputStream = context.openFileOutput(audioFileUniqueName, Context.MODE_PRIVATE);
+                            outputStream.write(bytes);
+                            outputStream.close();
 
-                        //Send broadcast message to notify all receivers of download finished
-                        Intent intent = new Intent(Constants.ACTION_CHANNEL_DOWNLOAD_FINISHED);
-                        sendBroadcast(intent);
+                            if (BuildConfig.DEBUG)
+                                Toast.makeText(context, "successfully downloaded", Toast.LENGTH_SHORT).show();
 
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                            //Send broadcast message to notify all receivers of download finished
+                            Intent intent = new Intent(Constants.ACTION_CHANNEL_DOWNLOAD_FINISHED);
+                            sendBroadcast(intent);
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            //Show that an attempted download has occurred - this is used when "streaming" alarm content in AudioService
+                            deviceAlarmTableManager.updateAlarmLabel(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED);
+                            mAudioTableManager.removeChannelAudioEntry(channelRooster.getChannel_uid());
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Handle any errors
                         //Show that an attempted download has occurred - this is used when "streaming" alarm content in AudioService
                         deviceAlarmTableManager.updateAlarmLabel(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED);
+                        mAudioTableManager.removeChannelAudioEntry(channelRooster.getChannel_uid());
                     }
+                });
+            }
 
 
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-                    // Handle any errors
-                    //Show that an attempted download has occurred - this is used when "streaming" alarm content in AudioService
-                    deviceAlarmTableManager.updateAlarmLabel(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED);
-                }
-            });
-
-
-            // For our recurring task, we'll just display a message
             if(BuildConfig.DEBUG) Toast.makeText(context, "I'm running", Toast.LENGTH_SHORT).show();
 
         } catch (Exception e) {
@@ -350,6 +355,8 @@ public class BackgroundTaskIntentService extends IntentService {
     }
 
     private void retrieveSocialRoosterAudio(final SocialRooster socialRooster, final Context context) {
+
+        if(socialRooster == null) return;
 
         try {
 
