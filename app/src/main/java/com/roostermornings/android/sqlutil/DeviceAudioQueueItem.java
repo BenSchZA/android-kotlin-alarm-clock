@@ -17,14 +17,14 @@ import java.io.Serializable;
 public class DeviceAudioQueueItem implements Serializable {
     private int id;
     //Queue id also acts as alarm id
-    private String queue_id;
-    private String filename;
-    private long date_created;
-    private String sender_id;
-    private String name;
-    private String picture;
+    private String queue_id = "";
+    private String filename = "";
+    private long date_created = 0;
+    private String sender_id = "";
+    private String name = "";
+    private String picture = "";
     private String listened;
-    private int type;
+    private int type = -1;
 
     public void fromSocialRooster(SocialRooster socialRooster, String audioFileUrl) {
         this.queue_id = socialRooster.getQueue_id();
