@@ -95,6 +95,8 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
 
                 if (mFragment instanceof NewAlarmFragment2 && mDataset.get(position).isSelected()) {
                     ((NewAlarmFragment2) mFragment).setSelectedChannel(mDataset.get(position));
+                } else if(mFragment instanceof NewAlarmFragment2) {
+                    ((NewAlarmFragment2) mFragment).clearSelectedChannel();
                 }
 
                 holder.imgChannelSelected.setVisibility(View.VISIBLE);
