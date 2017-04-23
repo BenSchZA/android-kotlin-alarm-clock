@@ -13,7 +13,6 @@
     tools:context="com.roostermornings.android.activity.MyAlarmsFragmentActivity">
 
     <include layout="@layout/custom_toolbar"/>
-
     <include layout="@layout/content_my_alarms"/>
 
 </android.support.design.widget.CoordinatorLayout>

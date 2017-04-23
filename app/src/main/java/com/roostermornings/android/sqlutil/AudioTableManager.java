@@ -118,7 +118,7 @@ public class AudioTableManager {
         db.close();
     }
     
-    public void removeChannelAudioEntry(String channelId) {
+    public void removeChannelAudioEntries(String channelId) {
         SQLiteDatabase db = initDB();
 
         for (DeviceAudioQueueItem deviceAudioQueueItem:
@@ -161,11 +161,11 @@ public class AudioTableManager {
     public void removeAllChannelAudioFiles() {
         for (DeviceAudioQueueItem deviceAudioQueueItem:
              extractAllChannelAudioFiles()) {
-            removeChannelAudioEntry(deviceAudioQueueItem.getQueue_id());
+            removeChannelAudioEntries(deviceAudioQueueItem.getQueue_id());
         }
     }
 
-    public void clearAudioFiles(){
+    private void clearAudioFiles(){
         SQLiteDatabase db = initDB();
 
         String execSql = "DELETE FROM " + AudioTableEntry.TABLE_NAME + ";";
