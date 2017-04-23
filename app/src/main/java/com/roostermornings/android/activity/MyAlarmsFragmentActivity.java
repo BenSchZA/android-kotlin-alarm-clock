@@ -132,7 +132,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     Alarm alarm = postSnapshot.getValue(Alarm.class);
-                    
+
                     //Register alarm sets on login
                     //Extract data from Alarm "alarm" and create new alarm set DeviceAlarm
                     AlarmChannel alarmChannel = alarm.getChannel();
