@@ -51,10 +51,26 @@
                 android:background="@color/white"
                 android:layout_width="match_parent"/>
 
+            <android.support.v7.widget.SwitchCompat
+                android:id="@+id/new_alarm_fragment1_switch_recurring"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="false"
+                android:paddingLeft="@dimen/spacing_normal"
+                android:paddingRight="@dimen/spacing_large"
+                android:textColor="@drawable/rooster_link_white"
+                android:textSize="@dimen/text_large"
+                android:thumb="@drawable/switch_thumb"
+                android:track="@drawable/switch_track"
+                android:padding="@dimen/spacing_large"
+                android:text="@string/repeat_alarm" />
+
             <LinearLayout
                 android:id="@+id/days_parent1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:animateLayoutChanges="true"
                 android:gravity="center"
                 android:orientation="horizontal"
                 android:paddingBottom="@dimen/spacing_xsmall"
@@ -161,6 +177,8 @@
                 android:id="@+id/days_parent2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:animateLayoutChanges="true"
                 android:gravity="center"
                 android:orientation="horizontal"
                 android:paddingBottom="@dimen/spacing_xxlarge"
@@ -205,20 +223,6 @@
                 </FrameLayout>
 
             </LinearLayout>
-
-            <android.support.v7.widget.SwitchCompat
-                android:id="@+id/new_alarm_fragment1_switch_recurring"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:checked="false"
-                android:paddingLeft="@dimen/spacing_normal"
-                android:paddingRight="@dimen/spacing_large"
-                android:textColor="@drawable/rooster_link_white"
-                android:textSize="@dimen/text_large"
-                android:thumb="@drawable/switch_thumb"
-                android:track="@drawable/switch_track"
-                android:padding="@dimen/spacing_large"
-                android:text="@string/repeat_alarm" />
 
             <LinearLayout
                 android:layout_width="match_parent"

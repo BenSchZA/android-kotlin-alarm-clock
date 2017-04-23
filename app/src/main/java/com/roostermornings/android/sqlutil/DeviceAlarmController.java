@@ -57,7 +57,8 @@ public final class DeviceAlarmController {
         for (DeviceAlarm deviceAlarm : deviceAlarmList) {
             setAlarm(deviceAlarm, false);
         }
-        deviceAlarmTableManager.clearChanged(deviceAlarmList);
+        //Clear all changed flags
+        deviceAlarmTableManager.clearChanged();
     }
 
     //Create pending intent for individual alarm (done once for each alarm in set)
@@ -206,7 +207,7 @@ public final class DeviceAlarmController {
         notifyUserAlarmTime(deviceAlarmTableManager.getAlarmSet(setId));
     }
 
-    public void notifyUserAlarmTime(List<DeviceAlarm> deviceAlarmList) {
+    private void notifyUserAlarmTime(List<DeviceAlarm> deviceAlarmList) {
         Calendar alarmCalendar = Calendar.getInstance();
         Calendar systemCalendar = Calendar.getInstance();
 
@@ -234,19 +235,21 @@ public final class DeviceAlarmController {
         if(days == 0 && hours != 0) nextAlarmTimeString = String.format("%s hours, and %s minutes", hours, minutes);
         else if(days == 0 && hours == 0) nextAlarmTimeString = String.format("%s minutes", minutes);
         else nextAlarmTimeString = String.format("%s days, %s hours, and %s minutes", days, hours, minutes);
-        Toast.makeText(context, "Alarm set for " + nextAlarmTimeString + " from now.", Toast.LENGTH_LONG).show();
+
+        //Ensure alarm time accurate before notice
+        if(minutes >= 0 && hours >= 0 && days >= 0) Toast.makeText(context, "Alarm set for " + nextAlarmTimeString + " from now.", Toast.LENGTH_LONG).show();
     }
 
-    public void deleteAlarmsLocal() {
+    public void deleteAllLocalAlarms() {
         List<DeviceAlarm> deviceAlarmList = deviceAlarmTableManager.getAlarmSets();
         if(deviceAlarmList == null) return;
         for (DeviceAlarm deviceAlarm:
                 deviceAlarmList) {
-            deleteAlarmSetLocal(deviceAlarm.getSetId());
+            deleteAlarmSetIntents(deviceAlarm.getSetId());
         }
     }
 
-    private void deleteAlarmSetLocal(String setId) {
+    private void deleteAlarmSetIntents(String setId) {
         List<DeviceAlarm> deviceAlarmList = deviceAlarmTableManager.getAlarmSet(setId);
         deviceAlarmTableManager.deleteAlarmSet(setId);
         for (DeviceAlarm deviceAlarm :
@@ -258,30 +261,37 @@ public final class DeviceAlarmController {
     //Remove entire set of alarms, first recreate intent EXACTLY as before, then call alarmMgr.cancel(intent)
     public void deleteAlarmSetGlobal(String setId) {
         List<DeviceAlarm> deviceAlarmList = deviceAlarmTableManager.getAlarmSet(setId);
-        for (DeviceAlarm deviceAlarm :
-                deviceAlarmList) {
-            cancelAlarm(deviceAlarm);
-        }
-        removeSetChannelAudio(deviceAlarmList);
+        if(deviceAlarmList != null) removeSetChannelAudio(deviceAlarmList);
+        deleteAlarmSetIntents(setId);
         removeFirebaseAlarm(setId);
-        deviceAlarmTableManager.deleteAlarmSet(setId);
+    }
+
+    private void removeSetChannelAudio(List<DeviceAlarm> deviceAlarmList) {
+        if (!deviceAlarmList.isEmpty()) {
+            AudioTableManager audioTableManager = new AudioTableManager(context);
+            String channelId = deviceAlarmList.get(0).getChannel();
+            if (channelId != null) audioTableManager.removeChannelAudioEntries(channelId);
+        }
     }
 
     //Case: local has an alarm that firebase doesn't Result: delete local alarm
     public void syncAlarmSetGlobal(ArrayList<Alarm> firebaseAlarmSets) {
         ArrayList<String> firebaseAlarmSetIDs = new ArrayList<>();
+        //Create array of Firebase alarm IDs to compare against local alarms
         for (Alarm alarmSet:
                 firebaseAlarmSets) {
             firebaseAlarmSetIDs.add(alarmSet.getUid());
         }
+        //If no local alarms, no problem, nothing to do
         if(deviceAlarmTableManager.getAlarmSets() == null) return;
+        //Check if every local alarm exists in Firebase, else delete global
         for (DeviceAlarm deviceAlarmSet:
         deviceAlarmTableManager.getAlarmSets()) {
             if(!firebaseAlarmSetIDs.contains(deviceAlarmSet.getSetId())) deleteAlarmSetGlobal(deviceAlarmSet.getSetId());
         }
     }
 
-    public void setSetEnabled(String setId, boolean enabled) {
+    public void setSetEnabled(String setId, boolean enabled, boolean notifyUser) {
         if(enabled) {
             //Set all intents for enabled alarms
             deviceAlarmTableManager.setSetEnabled(setId, enabled);
@@ -291,8 +301,10 @@ public final class DeviceAlarmController {
             //Trigger audio download
             //Download any social or channel audio files
             startActionBackgroundDownload(context);
-            //Notify user of time until next alarm, once alarm millis has been updated in db
-            notifyUserAlarmTime(deviceAlarmTableManager.getAlarmSet(setId));
+            if(notifyUser) {
+                //Notify user of time until next alarm, once alarm millis has been updated in db
+                notifyUserAlarmTime(deviceAlarmTableManager.getAlarmSet(setId));
+            }
         } else{
             List<DeviceAlarm> deviceAlarmList = deviceAlarmTableManager.getAlarmSet(setId);
             for (DeviceAlarm deviceAlarm :
@@ -300,7 +312,8 @@ public final class DeviceAlarmController {
                 cancelAlarm(deviceAlarm);
             }
             deviceAlarmTableManager.setSetEnabled(setId, enabled);
-            removeSetChannelAudio(deviceAlarmList);
+            //TODO: fresh data or less data usage?
+            //removeSetChannelAudio(deviceAlarmList);
             updateFirebaseAlarmEnabled(setId, enabled);
         }
     }
@@ -319,14 +332,6 @@ public final class DeviceAlarmController {
         childUpdates.put("enabled", enabled);
 
         alarmReference.updateChildren(childUpdates);
-    }
-
-    private void removeSetChannelAudio(List<DeviceAlarm> deviceAlarmList) {
-        if (!deviceAlarmList.isEmpty()) {
-            AudioTableManager audioTableManager = new AudioTableManager(context);
-            String channelId = deviceAlarmList.get(0).getChannel();
-            if (channelId != null) audioTableManager.removeChannelAudioEntry(channelId);
-        }
     }
 
     private void cancelAlarm(DeviceAlarm deviceAlarm) {
