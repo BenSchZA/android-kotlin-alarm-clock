@@ -24,6 +24,17 @@ public class SplashActivity extends BaseActivity {
 
     FirebaseUser mFBUser;
 
+    //TODO: implement and check auth
+//    @Override
+//    public void onStart() {
+//        super.onStart();
+//
+//        // Monitor launch times and interval from installation
+//        RateThisApp.onStart(this);
+//        // If the condition is satisfied, "Rate this app" dialog will be shown
+//        RateThisApp.showRateDialogIfNeeded(this);
+//    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

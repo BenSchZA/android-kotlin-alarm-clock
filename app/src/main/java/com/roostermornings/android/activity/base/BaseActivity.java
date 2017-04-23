@@ -313,10 +313,11 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     public void signOut() {
         //Ensure no audio remaining from old user
         AudioTableManager audioTableManager = new AudioTableManager(this);
-        audioTableManager.clearAudioFiles();
+        audioTableManager.removeAllSocialAudioItems();
+        audioTableManager.removeAllChannelAudioFiles();
         //Ensure no alarms left from old user
         DeviceAlarmController deviceAlarmController = new DeviceAlarmController(this);
-        deviceAlarmController.deleteAlarmsLocal();
+        deviceAlarmController.deleteAllLocalAlarms();
         //End user session
         mAuth.signOut();
         //Cancel background task intents

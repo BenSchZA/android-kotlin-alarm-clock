@@ -243,14 +243,10 @@ public class DeviceAlarmTableManager {
         return storyIteration;
     }
 
-    void clearChanged(List<DeviceAlarm> alarmList) {
+    void clearChanged() {
         SQLiteDatabase db = initDB();
-
-        for (DeviceAlarm alarm :
-                alarmList) {
-            String updateQuery = "UPDATE " + AlarmTableEntry.TABLE_NAME + " SET " + AlarmTableEntry.COLUMN_CHANGED + " = " + FALSE + " WHERE " + AlarmTableEntry.COLUMN_PI_ID + " = " + alarm.getPiId() + ";";
-            db.execSQL(updateQuery);
-        }
+        String updateQuery = "UPDATE " + AlarmTableEntry.TABLE_NAME + " SET " + AlarmTableEntry.COLUMN_CHANGED + " = " + FALSE + ";";
+        db.execSQL(updateQuery);
         db.close();
     }
 
