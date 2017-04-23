@@ -266,8 +266,12 @@ public class NewAlarmFragment1 extends BaseFragment{
 
         if (isChecked) {
             mAlarm.setRecurring(true);
+            daysParentLinearLayout1.setVisibility(View.VISIBLE);
+            daysParentLinearLayout2.setVisibility(View.VISIBLE);
         } else {
             mAlarm.setRecurring(false);
+            daysParentLinearLayout1.setVisibility(View.GONE);
+            daysParentLinearLayout2.setVisibility(View.GONE);
         }
         mListener.setAlarmDetails(mAlarm);
     }

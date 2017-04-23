@@ -8,8 +8,6 @@ package com.roostermornings.android.service;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
@@ -27,7 +25,6 @@ import com.google.firebase.storage.StorageReference;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.activity.base.BaseActivity;
-import com.roostermornings.android.adapter.MyAlarmsListAdapter;
 import com.roostermornings.android.domain.Channel;
 import com.roostermornings.android.domain.ChannelRooster;
 import com.roostermornings.android.domain.SocialRooster;
@@ -36,15 +33,9 @@ import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.util.Constants;
-import com.roostermornings.android.util.InternetHelper;
 import com.roostermornings.android.util.RoosterUtils;
 
 import java.io.FileOutputStream;
-import java.sql.Array;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -330,7 +321,7 @@ public class BackgroundTaskIntentService extends IntentService {
                             e.printStackTrace();
                             //Show that an attempted download has occurred - this is used when "streaming" alarm content in AudioService
                             deviceAlarmTableManager.updateAlarmLabel(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED);
-                            mAudioTableManager.removeChannelAudioEntry(channelRooster.getChannel_uid());
+                            mAudioTableManager.removeChannelAudioEntries(channelRooster.getChannel_uid());
                         }
                     }
                 }).addOnFailureListener(new OnFailureListener() {
@@ -339,7 +330,7 @@ public class BackgroundTaskIntentService extends IntentService {
                         // Handle any errors
                         //Show that an attempted download has occurred - this is used when "streaming" alarm content in AudioService
                         deviceAlarmTableManager.updateAlarmLabel(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED);
-                        mAudioTableManager.removeChannelAudioEntry(channelRooster.getChannel_uid());
+                        mAudioTableManager.removeChannelAudioEntries(channelRooster.getChannel_uid());
                     }
                 });
             }

@@ -36,7 +36,7 @@ buildscript {
 
         // We recommend changing it to the latest version from our changelog:
         // https://docs.fabric.io/android/changelog.html#fabric-gradle-plugin
-        classpath 'io.fabric.tools:gradle:1.+'
+        classpath 'io.fabric.tools:gradle:1.22.1'
     }
 }
 
@@ -46,7 +46,7 @@ repositories {
     maven { url 'https://maven.fabric.io/public' }
 }
 
-def support_lib_version = "25.2.0"
+def support_lib_version = "25.3.1"
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])

@@ -58,6 +58,7 @@ import butterknife.OnClick;
 public class MyAlarmsFragmentActivity extends BaseActivity {
 
     public static final String TAG = MyAlarmsFragmentActivity.class.getSimpleName();
+
     @BindView(R.id.home_alarmsListView)
     RecyclerView mRecyclerView;
     @BindView(R.id.toolbar_title)
@@ -86,8 +87,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
         DatabaseReference mMyAlarmsReference = FirebaseDatabase.getInstance().getReference()
                 .child("alarms").child(getFirebaseUser().getUid());
-
-        //Keep local and Firebase alarm dbs synced, and enable offline persistence
+        //Keep local and Firebase alarm dbs synced
         mMyAlarmsReference.keepSynced(true);
 
         mAdapter = new MyAlarmsListAdapter(mAlarms, MyAlarmsFragmentActivity.this, getApplication());
@@ -147,11 +147,13 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
                     //Check SQL db to see if all alarms in set have fired
                     alarm.setEnabled(deviceAlarmTableManager.isSetEnabled(alarm.getUid()));
-                    deviceAlarmController.setSetEnabled(alarm.getUid(), alarm.isEnabled());
+                    //Set set enabled flag and don't notify user
+                    deviceAlarmController.setSetEnabled(alarm.getUid(), alarm.isEnabled(), false);
 
-                    //Add alarm to display array
+                    //Add alarm to adapter display arraylist and notify adapter of change
                     mAlarms.add(alarm);
                     mAdapter.notifyItemInserted(mAlarms.size() - 1);
+                    //Notify adapter of new data to be displayed
                     updateRoosterNotification();
                 }
                 //Recreate all enabled alarms as failsafe
@@ -284,9 +286,13 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     }
 
     public void toggleAlarmSetEnable(Alarm alarm, boolean enabled) {
-        deviceAlarmController.setSetEnabled(alarm.getUid(), enabled);
+        //Toggle alarm set enabled
+        deviceAlarmController.setSetEnabled(alarm.getUid(), enabled, true);
+        //Set adapter arraylist item to enabled
         mAlarms.get(mAlarms.indexOf(alarm)).setEnabled(enabled);
+        //Update notification of pending social roosters
         updateRoosterNotification();
+        //Notify adapter of new data to be displayed
         mAdapter.notifyDataSetChanged();
     }
 
