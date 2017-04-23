@@ -230,6 +230,12 @@ public class NewAlarmFragment2 extends BaseFragment {
         mListener.setAlarmDetails(alarm);
     }
 
+    public void clearSelectedChannel() {
+        Alarm alarm = mListener.getAlarmDetails();
+        alarm.setChannel(new AlarmChannel());
+        mListener.setAlarmDetails(alarm);
+    }
+
     public void selectEditedAlarmChannel() {
 
         final Alarm alarm = (mListener == null) ? new Alarm() : mListener.getAlarmDetails();
