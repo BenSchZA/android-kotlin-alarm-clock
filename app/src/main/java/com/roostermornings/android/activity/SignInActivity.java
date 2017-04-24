@@ -22,7 +22,9 @@ import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
+import com.facebook.Profile;
 import com.facebook.internal.CallbackManagerImpl;
+import com.facebook.internal.ImageRequest;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
@@ -45,6 +47,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.User;
+import com.roostermornings.android.util.RoosterUtils;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -53,6 +56,8 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
+import static com.roostermornings.android.util.RoosterUtils.notNull;
 
 public class SignInActivity extends BaseActivity {
 
@@ -209,19 +214,23 @@ public class SignInActivity extends BaseActivity {
 
                             String photoURLString;
                             try {
-                                photoURLString = mAuth.getCurrentUser().getPhotoUrl().toString();
+                                //photoURLString = mAuth.getCurrentUser().getPhotoUrl().toString();
+                                int dimensionPixelSize = getResources().getDimensionPixelSize(com.facebook.R.dimen.com_facebook_profilepictureview_preset_size_normal);
+                                Profile profile = Profile.getCurrentProfile();
+                                photoURLString = ImageRequest.getProfilePictureUri(profile.getId(), dimensionPixelSize, dimensionPixelSize).toString();
                             }catch (java.lang.NullPointerException e){
                                 e.printStackTrace();
                                 photoURLString = null;
                             }
 
+                            if(mAuth.getCurrentUser() == null) return;
                             User user = new User(null,
                                     "android",
                                     deviceToken,
                                     photoURLString,
-                                    mAuth.getCurrentUser().getDisplayName(),
+                                    notNull(mAuth.getCurrentUser().getDisplayName()) ? mAuth.getCurrentUser().getDisplayName():"",
                                     mMobileNumber,
-                                    mAuth.getCurrentUser().getUid(),
+                                    notNull(mAuth.getCurrentUser().getUid()) ? mAuth.getCurrentUser().getUid():null,
                                     null,
                                     0);
 
@@ -251,7 +260,7 @@ public class SignInActivity extends BaseActivity {
                             progressBar.setVisibility(View.GONE);
 
                             Log.w(TAG, "Facebook: signInWithCredential", task.getException());
-                            Toast.makeText(SignInActivity.this, task.getException().getMessage(),
+                            Toast.makeText(SignInActivity.this, notNull(task.getException().getMessage()) ? task.getException().getMessage():"Facebook sign-in failed.",
                                     Toast.LENGTH_LONG).show();
                         }
                     }
@@ -266,7 +275,8 @@ public class SignInActivity extends BaseActivity {
             firebaseAuthWithGoogle(result);
         } else {
             // Signed out, show unauthenticated UI.
-//            updateUI(false);
+            Toast.makeText(SignInActivity.this, "Google sign-in failed.",
+            Toast.LENGTH_LONG).show();
         }
     }
 
@@ -291,20 +301,16 @@ public class SignInActivity extends BaseActivity {
                             FirebaseDatabase database = FirebaseDatabase.getInstance();
 
                             String photoURLString;
-                            try {
-                                photoURLString = mAuth.getCurrentUser().getPhotoUrl().toString();
-                            }catch (java.lang.NullPointerException e){
-                                e.printStackTrace();
-                                photoURLString = null;
-                            }
+                            photoURLString = notNull(account.getPhotoUrl()) ? account.getPhotoUrl().toString():null;
 
+                            if(mAuth.getCurrentUser() == null) return;
                             User user = new User(null,
                                     "android",
                                     deviceToken,
                                     photoURLString,
-                                    mAuth.getCurrentUser().getDisplayName(),
+                                    notNull(mAuth.getCurrentUser().getDisplayName()) ? mAuth.getCurrentUser().getDisplayName():"",
                                     mMobileNumber,
-                                    mAuth.getCurrentUser().getUid(),
+                                    notNull(mAuth.getCurrentUser().getUid()) ? mAuth.getCurrentUser().getUid():null,
                                     null,
                                     0);
 
@@ -334,7 +340,7 @@ public class SignInActivity extends BaseActivity {
                             progressBar.setVisibility(View.GONE);
 
                             Log.w(TAG, "Google: signInWithCredential", task.getException());
-                            Toast.makeText(SignInActivity.this, task.getException().getMessage(),
+                            Toast.makeText(SignInActivity.this, notNull(task.getException().getMessage()) ? task.getException().getMessage():"Google sign-in failed.",
                                     Toast.LENGTH_LONG).show();
                         }
                     }

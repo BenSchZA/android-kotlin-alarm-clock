@@ -12,6 +12,7 @@ import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -119,7 +120,7 @@ public class NewAlarmFragment1 extends BaseFragment{
         mAlarm.setHour(hour);
         mAlarm.setMinute(minute);
 
-        mTimePickerDialog = new TimePickerDialog(getContext(), new TimePickerDialog.OnTimeSetListener() {
+        mTimePickerDialog = new TimePickerDialog(getContext(), R.style.TimeDialogTheme, new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                 setAlarmTime(hourOfDay, minute);
@@ -136,6 +137,7 @@ public class NewAlarmFragment1 extends BaseFragment{
         //If in edit mode, delete button should be visible and alarm details should be updated
         updateAlarmUIIfEdit();
         textViewAlarmTime.setText(RoosterUtils.setAlarmTimeFromHourAndMinute(mAlarm));
+        textViewAlarmTime.setAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.pulse));
         return view;
     }
 
@@ -270,6 +272,8 @@ public class NewAlarmFragment1 extends BaseFragment{
             daysParentLinearLayout2.setVisibility(View.VISIBLE);
         } else {
             mAlarm.setRecurring(false);
+            //Only allow day selection if recurring
+            mAlarm.clearDays();
             daysParentLinearLayout1.setVisibility(View.GONE);
             daysParentLinearLayout2.setVisibility(View.GONE);
         }
