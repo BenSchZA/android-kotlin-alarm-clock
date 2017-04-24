@@ -53,6 +53,7 @@
 
             <Button
                 android:id="@+id/skip_previous"
+                android:visibility="invisible"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/ic_skip_previous_white_24dp"
@@ -73,6 +74,7 @@
 
             <Button
                 android:id="@+id/skip_next"
+                android:visibility="invisible"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"

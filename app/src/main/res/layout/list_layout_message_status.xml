@@ -29,7 +29,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/small_profile_pic_circle" />
-        <!--android:alpha="0.3"-->
     </RelativeLayout>
 
     <TextView
@@ -50,7 +49,7 @@
         android:text="Status"
         android:layout_gravity="center_vertical|right"
         android:textAlignment="textEnd"
-        android:textColor="@color/white_semi_transparent"
+        android:textColor="@color/white_30_percent_transparent"
         android:textSize="@dimen/text_xlarge" />
 
 </LinearLayout>
