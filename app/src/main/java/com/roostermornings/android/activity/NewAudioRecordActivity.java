@@ -19,6 +19,7 @@ import android.support.v4.content.ContextCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -103,9 +104,8 @@ public class NewAudioRecordActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_new_audio);
 
-        newAudioStatus = NEW_AUDIO_READY_RECORD;
-
         setDayNight();
+        setNewAudioStatus(NEW_AUDIO_READY_RECORD);
     }
 
     @Override
@@ -169,6 +169,7 @@ public class NewAudioRecordActivity extends BaseActivity {
         newAudioStatus = status;
         switch(status){
             case NEW_AUDIO_READY_RECORD:
+                layoutRecordParent.setAnimation(AnimationUtils.loadAnimation(this, R.anim.pulse));
                 mHandler.removeCallbacks(startTimer);
                 layoutListenParent.setVisibility(View.INVISIBLE);
                 layoutRecordParent.setVisibility(View.VISIBLE);
@@ -178,6 +179,7 @@ public class NewAudioRecordActivity extends BaseActivity {
                 txtAudioTime.setText(maxRecordingTime);
                 break;
             case NEW_AUDIO_READY_LISTEN:
+                layoutRecordParent.clearAnimation();
                 mHandler.removeCallbacks(startTimer);
                 imgAudioStartStop.setBackgroundResource(R.drawable.rooster_record_audio_circle_inner_selectable);
                 imgNewAudioListen.setBackgroundResource(R.drawable.rooster_new_audio_play_button);
@@ -199,6 +201,7 @@ public class NewAudioRecordActivity extends BaseActivity {
 
                 break;
             case NEW_AUDIO_RECORDING:
+                layoutRecordParent.setAnimation(AnimationUtils.loadAnimation(this, R.anim.pulse));
                 //Reset message from amplitude instructions to default
                 txtMessage.setText(getResources().getText(R.string.new_audio_instructions));
                 imgAudioStartStop.setBackgroundResource(R.drawable.rooster_record_audio_circle_inner_recording);
@@ -207,9 +210,11 @@ public class NewAudioRecordActivity extends BaseActivity {
                 startTime = System.currentTimeMillis() + MAX_RECORDING_TIME;
                 break;
             case NEW_AUDIO_PAUSED:
+                layoutRecordParent.clearAnimation();
                 imgNewAudioListen.setBackgroundResource(R.drawable.rooster_new_audio_play_button);
                 break;
             case NEW_AUDIO_LISTENING:
+                layoutRecordParent.clearAnimation();
                 imgNewAudioListen.setBackgroundResource(R.drawable.rooster_new_audio_pause_button);
 
                 if(mediaPlayer != null && mediaPlayer.getCurrentPosition() > 0) {

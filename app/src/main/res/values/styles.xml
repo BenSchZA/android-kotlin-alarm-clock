@@ -20,6 +20,7 @@
         <item name="android:typeface">monospace</item>
         <!--Used for preference screen text colour-->
         <item name="android:textColor">@color/white</item>
+        <item name="android:textColorPrimary">@color/white</item>
         <item name="android:textColorSecondary">@color/white_30_percent_transparent</item>
 
         <!--<item name="actionOverflowMenuStyle">@style/ActionBarMenuStyle</item>-->
@@ -38,6 +39,16 @@
         <item name="android:textColorPrimary">@android:color/black</item>
         <item name="android:textColor">@android:color/black</item>
         <item name="android:textColorSecondary">@android:color/black</item>
+    </style>
+
+    <!--http://www.materialdoc.com/time-pickers/-->
+    <style name="TimeDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="colorControlNormal">@color/rooster_blue</item>
+        <item name="colorControlActivated">@color/gradient_start_day</item>
+        <item name="textColorAlertDialogListItem">@color/rooster_blue</item>
+        <item name="colorAccent">@color/rooster_blue</item>
+        <item name="android:textColorPrimary">@color/rooster_blue</item>
+        <item name="android:windowBackground">@drawable/time_picker_background</item>
     </style>
 
     <style name="AppThemeNight" parent="Theme.AppCompat.Light.DarkActionBar">

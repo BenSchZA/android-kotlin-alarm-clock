@@ -5,10 +5,6 @@
   -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <selector xmlns:android="http://schemas.android.com/apk/res/android">
-        <item android:state_checked="true" android:drawable="@drawable/switch_color_track">
-        </item>
-        <item android:state_checked="false" android:drawable="@drawable/switch_color_track">
-        </item>
-    </selector>
+        <item android:state_checked="true" android:drawable="@drawable/switch_color_track"/>
+        <item android:state_checked="false" android:drawable="@drawable/switch_color_track"/>
 </selector>

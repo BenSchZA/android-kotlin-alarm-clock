@@ -220,8 +220,6 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 //Download any social or channel audio files
                 startActionBackgroundDownload(this);
 
-                Toast.makeText(getBaseContext(), (mEditAlarmId.length() == 0) ? "Alarm created!" : "Alarm edited!",
-                        Toast.LENGTH_LONG).show();
                 startHomeActivity();
                 //Explicitly finish activity, so that removed from backstack
                 finish();

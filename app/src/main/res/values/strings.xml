@@ -27,7 +27,7 @@
     <string name="email_address">Email address</string>
     <string name="phone_number">Phone number</string>
     <string name="name">Name</string>
-    <string name="password">Password</string>
+    <string name="password">Password: at lest 6 letters AND numbers</string>
     <string name="next">Next</string>
     <string name="submit">Submit</string>
 
@@ -46,6 +46,7 @@
     <string name="delete_alarm">Delete alarm</string>
     <string name="repeat_alarm">Repeat alarm time</string>
     <string name="allow_friends">Allow friends to send audio notes to this alarm</string>
+    <string name="permissions_explainer">Some Android phones have power usage optimisation that interferes with Rooster, please check your phone settings - sometimes called \'Protected Apps\'.</string>
 
     <string name="friends">Friends</string>
     <string name="text_name_initials"></string>

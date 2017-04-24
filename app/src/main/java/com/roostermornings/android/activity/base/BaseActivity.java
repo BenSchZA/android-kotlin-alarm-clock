@@ -63,6 +63,8 @@ import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 
+import static com.roostermornings.android.util.RoosterUtils.notNull;
+
 public class BaseActivity extends AppCompatActivity implements Validator.ValidationListener {
 
     private Dialog progressDialog;
@@ -433,17 +435,10 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         }
     }
 
-    //TODO: notify user to add protected app if exists - this add not working
-    public void requestPermissionProtectActivity() {
-        Intent intent = new Intent();
-        intent.setComponent(new ComponentName("com.huawei.systemmanager", "com.huawei.systemmanger.optimize.process.ProtectActivity"));
-        startActivity(intent);
-    }
-
     public void setupToolbar(TextView toolbarTitle, String title) {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        if(notNull(getSupportActionBar())) getSupportActionBar().setDisplayShowTitleEnabled(false);
         if(toolbarTitle != null && title != null) toolbarTitle.setText(title);
     }
 

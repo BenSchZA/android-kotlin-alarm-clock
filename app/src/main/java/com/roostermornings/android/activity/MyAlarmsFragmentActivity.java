@@ -24,6 +24,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
@@ -81,6 +82,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         initialize(R.layout.activity_my_alarms);
 
         setDayNight();
+        buttonAddAlarm.setAnimation(AnimationUtils.loadAnimation(this, R.anim.pulse));
 
         //Set toolbar title
         setupToolbar(toolbarTitle, getString(R.string.my_alarms));
