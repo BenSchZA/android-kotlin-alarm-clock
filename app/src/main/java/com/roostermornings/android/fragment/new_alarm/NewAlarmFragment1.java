@@ -12,7 +12,11 @@ import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
+import android.view.animation.ScaleAnimation;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -270,12 +274,37 @@ public class NewAlarmFragment1 extends BaseFragment{
             mAlarm.setRecurring(true);
             daysParentLinearLayout1.setVisibility(View.VISIBLE);
             daysParentLinearLayout2.setVisibility(View.VISIBLE);
+
+            //Start animation
+            AnimationSet animation = new AnimationSet(true);
+            animation.addAnimation(new AlphaAnimation(0.0F, 1.0F));
+            animation.addAnimation(new ScaleAnimation(0.8f, 1, 0.8f, 1));
+            animation.setDuration(300);
+            daysParentLinearLayout1.startAnimation(animation);
+            daysParentLinearLayout2.startAnimation(animation);
         } else {
             mAlarm.setRecurring(false);
             //Only allow day selection if recurring
             mAlarm.clearDays();
-            daysParentLinearLayout1.setVisibility(View.GONE);
-            daysParentLinearLayout2.setVisibility(View.GONE);
+
+            //Start animation
+            AnimationSet animation = new AnimationSet(true);
+            animation.addAnimation(new AlphaAnimation(1.0F, 0.0F));
+            animation.addAnimation(new ScaleAnimation(1, 0.8f, 1, 0.8f));
+            animation.setDuration(300);
+            daysParentLinearLayout1.startAnimation(animation);
+            daysParentLinearLayout2.startAnimation(animation);
+            animation.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {}
+                @Override
+                public void onAnimationRepeat(Animation animation) {}
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    daysParentLinearLayout1.setVisibility(View.GONE);
+                    daysParentLinearLayout2.setVisibility(View.GONE);
+                }
+            });
         }
         mListener.setAlarmDetails(mAlarm);
     }

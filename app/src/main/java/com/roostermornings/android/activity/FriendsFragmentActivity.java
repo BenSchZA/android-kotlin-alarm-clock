@@ -428,8 +428,8 @@ public class FriendsFragmentActivity extends BaseActivity implements
     //Accept friend request and update Firebase DB
     public void acceptFriendRequest(Friend acceptFriend) {
 
-        String currentUserUrl = String.format("users/%s/friends/%s", mCurrentUser.getUid(), acceptFriend.getUid());
-        String friendUserUrl = String.format("users/%s/friends/%s", acceptFriend.getUid(), mCurrentUser.getUid());
+        String currentUserUrl = String.format("users/%s/friends", mCurrentUser.getUid());
+        String friendUserUrl = String.format("users/%s/friends", acceptFriend.getUid());
 
         //Create friend object from current signed in user
         Friend currentUserFriend = new Friend(mCurrentUser.getUid(), mCurrentUser.getUser_name(), mCurrentUser.getProfile_pic(), mCurrentUser.getCell_number());
