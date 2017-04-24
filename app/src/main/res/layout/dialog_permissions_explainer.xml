@@ -13,9 +13,8 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Sometimes battery optimisations can stop your alarm from going off,
-        please check in your phone settings that Rooster is allowed to run in the background
-        and/or is added to a 'protected apps' list. Try not to force close Rooster."
+        android:autoLink="web"
+        android:text="@string/permissions_explainer"
         android:textColor="@color/rooster_blue"
         android:textSize="@dimen/text_xlarge"
         android:textStyle="bold" />

@@ -14,6 +14,7 @@ import android.content.IntentFilter;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,7 +63,7 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
         @BindView(R.id.rooster_notification)
         TextView roosterNotification;
         @BindView(R.id.switch_enable)
-        Switch switchEnable;
+        SwitchCompat switchEnable;
 
         public ViewHolder(View v) {
             super(v);
@@ -121,7 +122,6 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
             e.printStackTrace();
         }
 
-        holder.switchEnable.setEnabled(true);
         holder.switchEnable.setChecked(alarm.isEnabled());
 
         if(alarm.isAllow_friend_audio_files()) {
@@ -138,7 +138,6 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
         holder.switchEnable.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                holder.switchEnable.setChecked(!alarm.isEnabled());
                 ((MyAlarmsFragmentActivity) mActivity).toggleAlarmSetEnable(alarm, !alarm.isEnabled());
             }
         });

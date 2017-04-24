@@ -43,7 +43,7 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
     @BindView(R.id.signup_email_address_edittext)
     EditText mEmailAddress;
 
-    @Password(min = 6, scheme = Password.Scheme.ALPHA_NUMERIC_MIXED_CASE_SYMBOLS)
+    @Password(min = 6, scheme = Password.Scheme.ALPHA_NUMERIC)
     @BindView(R.id.signup_password_edittext)
     EditText mPassword;
 

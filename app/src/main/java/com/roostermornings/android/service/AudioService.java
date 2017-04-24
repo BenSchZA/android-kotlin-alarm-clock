@@ -479,15 +479,22 @@ public class AudioService extends Service {
 
         snoozeNotification("Alarm snoozed " + strSnoozeTime + " minutes - touch to dismiss");
         try {
-            if (mediaPlayerRooster.isPlaying()) pauseRooster();
-            if (mediaPlayerDefault.isPlaying()) pauseDefaultAlarmTone();
-        } catch(NullPointerException e){
+            if (mediaPlayerRooster != null && mediaPlayerRooster.isPlaying()) pauseRooster();
+        } catch(Exception e){
             e.printStackTrace();
             stopAlarmAudio();
         }
+
+        try {
+            if (mediaPlayerDefault != null && mediaPlayerDefault.isPlaying()) pauseDefaultAlarmTone();
+        } catch(Exception e){
+            e.printStackTrace();
+            stopAlarmAudio();
+        }
+
         //If vibrating then cancel
         Vibrator vibrator = (Vibrator) getApplicationContext().getSystemService(VIBRATOR_SERVICE);
-        if (vibrator.hasVibrator()) {
+        if (vibrator != null && vibrator.hasVibrator()) {
             vibrator.cancel();
         }
     }

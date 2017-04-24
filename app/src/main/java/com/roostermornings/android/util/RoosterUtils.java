@@ -18,9 +18,6 @@ import java.util.Random;
 
 public class RoosterUtils {
 
-    private static String mRandomAudioFileName = "ABCDEFGHIJKLMNOP";
-    static Random random;
-
     public static boolean hasM() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
     }
@@ -48,7 +45,7 @@ public class RoosterUtils {
     public static String getInitials(String displayName) {
         String initials = "";
         String tempStringArray[];
-        if (displayName != null) {
+        if (notNull(displayName) && !"".equals(displayName)) {
             tempStringArray = displayName.split(" ", 2);
             for (String s : tempStringArray) {
                 if(!s.isEmpty()) initials = initials.concat(String.valueOf(s.charAt(0)));
@@ -66,7 +63,8 @@ public class RoosterUtils {
     }
 
     public static String createRandomFileName(int string) {
-        random = new Random();
+        Random random = new Random();
+        String mRandomAudioFileName = "ABCDEFGHIJKLMNOP";
         StringBuilder stringBuilder = new StringBuilder(string);
         int i = 0;
         while (i < string) {

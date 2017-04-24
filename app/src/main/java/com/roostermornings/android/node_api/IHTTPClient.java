@@ -32,5 +32,4 @@ public interface IHTTPClient {
 
     @POST("api/social_upload_notification")
     Call<NodeAPIResult> notifySocialUploadRecipient(@Body FCMPayloadSocialRooster body);
-
 }
