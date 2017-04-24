@@ -86,6 +86,7 @@ public class AudioService extends Service {
     private int playDuration;
     private int alarmCount;
     private int alarmPosition;
+    private boolean multipleAudioFiles = false;
     private File file;
 
     private int currentPositionRooster;
@@ -129,6 +130,7 @@ public class AudioService extends Service {
         bundle.putSerializable("audioItem", audioItem);
         bundle.putInt("alarmPosition", alarmPosition);
         bundle.putInt("alarmCount", alarmCount);
+        bundle.putBoolean("multipleAudioFiles", audioItems.size()>1);
         intent.putExtras(bundle);
         sendBroadcast(intent);
     }

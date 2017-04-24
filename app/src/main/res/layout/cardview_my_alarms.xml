@@ -21,6 +21,8 @@
         android:foreground="@drawable/selectable_item_background"
         android:clickable="true">
 
+        <!---->
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -110,6 +112,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginLeft="@dimen/spacing_small"
                 android:layout_marginRight="@dimen/spacing_large"
+                android:hapticFeedbackEnabled="true"
                 android:clickable="true"
                 android:focusable="true"
                 android:soundEffectsEnabled="true"
