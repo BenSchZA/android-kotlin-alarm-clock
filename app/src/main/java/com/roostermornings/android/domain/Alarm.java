@@ -87,6 +87,17 @@ public class Alarm {
     }
 
     @Exclude
+    public void clearDays() {
+        this.setMonday(false);
+        this.setTuesday(false);
+        this.setWednesday(false);
+        this.setThursday(false);
+        this.setFriday(false);
+        this.setSaturday(false);
+        this.setSunday(false);
+    }
+
+    @Exclude
     public void fromDeviceAlarm(DeviceAlarm deviceAlarm, boolean alarmSetEnabled) {
         this.enabled = alarmSetEnabled;
 

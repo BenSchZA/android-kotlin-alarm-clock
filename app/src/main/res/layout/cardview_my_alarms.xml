@@ -104,14 +104,16 @@
 
             </LinearLayout>
 
-            <Switch
+            <android.support.v7.widget.SwitchCompat
                 android:id="@+id/switch_enable"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="@dimen/spacing_small"
                 android:layout_marginRight="@dimen/spacing_large"
-                android:layout_gravity="center"
-                android:checked="true" />
+                android:clickable="true"
+                android:focusable="true"
+                android:soundEffectsEnabled="true"
+                android:layout_gravity="center" />
 
         </LinearLayout>
 

@@ -3,29 +3,52 @@
   ~ Copyright (c)  2017 Roosta Media. All rights reserved.
   -->
 
-<LinearLayout
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+<android.support.design.widget.CoordinatorLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
     xmlns:android="http://schemas.android.com/apk/res/android">
-    <ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
-        <LinearLayout
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/content"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-            <TextView
-                android:id="@+id/new_alarm_time"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_xxlarge"
-                android:layout_marginBottom="@dimen/spacing_xxlarge"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_horizontal"
-                android:text="HH:MM"
-                android:textColor="@drawable/rooster_link_white"
-                android:textSize="@dimen/text_xxxhuge" />
+
+                <TextView
+                    android:id="@+id/new_alarm_time"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_xxlarge"
+                    android:layout_marginBottom="@dimen/spacing_xxlarge"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_horizontal"
+                    android:text="HH:MM"
+                    android:textColor="@drawable/rooster_link_white"
+                    android:textSize="@dimen/text_xxxhuge" />
+
+            <!--android:layoutAnimation="@android:anim/slide_in_left"-->
+
+
+            <!--<TimePicker-->
+                <!--android:id="@+id/timePicker"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:numbersTextColor="@color/white"-->
+                <!--android:numbersInnerTextColor="@color/white"-->
+                <!--android:layout_gravity="center_horizontal"-->
+                <!--android:timePickerMode="spinner"/>-->
+
+            <!--<NumberPicker-->
+                <!--android:theme="@style/NumberPickerTheme"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_gravity="center_horizontal" />-->
 
             <View
                 android:layout_height="1dp"
@@ -37,14 +60,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:checked="true"
-                android:paddingLeft="@dimen/spacing_normal"
-                android:paddingRight="@dimen/spacing_large"
-                android:thumb="@drawable/switch_thumb"
-                android:track="@drawable/switch_track"
                 android:textColor="@drawable/rooster_link_white"
                 android:textSize="@dimen/text_large"
                 android:padding="@dimen/spacing_large"
                 android:text="@string/allow_friends" />
+
+            <!-- android:thumb="@drawable/switch_thumb"
+                android:track="@drawable/switch_track"-->
 
             <View
                 android:layout_height="1dp"
@@ -56,14 +78,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:checked="false"
-                android:paddingLeft="@dimen/spacing_normal"
-                android:paddingRight="@dimen/spacing_large"
                 android:textColor="@drawable/rooster_link_white"
                 android:textSize="@dimen/text_large"
-                android:thumb="@drawable/switch_thumb"
-                android:track="@drawable/switch_track"
                 android:padding="@dimen/spacing_large"
                 android:text="@string/repeat_alarm" />
+
+            <!--android:thumb="@drawable/switch_thumb"
+                android:track="@drawable/switch_track"-->
 
             <LinearLayout
                 android:id="@+id/days_parent1"
@@ -74,7 +95,7 @@
                 android:gravity="center"
                 android:orientation="horizontal"
                 android:paddingBottom="@dimen/spacing_xsmall"
-                android:paddingTop="@dimen/spacing_xxlarge"
+                android:paddingTop="@dimen/spacing_normal_large"
                 android:paddingRight="@dimen/spacing_xxlarge"
                 android:paddingLeft="@dimen/spacing_xxlarge">
 
@@ -181,7 +202,7 @@
                 android:animateLayoutChanges="true"
                 android:gravity="center"
                 android:orientation="horizontal"
-                android:paddingBottom="@dimen/spacing_xxlarge"
+                android:paddingBottom="@dimen/spacing_normal_large"
                 android:paddingLeft="@dimen/spacing_xxlarge"
                 android:paddingRight="@dimen/spacing_xxlarge"
                 android:paddingTop="@dimen/spacing_xsmall">
@@ -224,22 +245,26 @@
 
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:orientation="vertical">
-
-                <Button
-                    android:id="@+id/new_alarm_fragment1_delete_alarm"
-                    style="@style/RoosterButtonLightBlueStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_margin="@dimen/spacing_xxxlarge"
-                    android:text="@string/delete_alarm"
-                    android:visibility="gone" />
-            </LinearLayout>
         </LinearLayout>
-    </ScrollView>
-</LinearLayout>
+
+    <LinearLayout
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_margin="@dimen/spacing_xlarge"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/new_alarm_fragment1_delete_alarm"
+            style="@style/RoosterButtonLightBlueStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/delete_alarm"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    </RelativeLayout>
+
+    </android.support.design.widget.CoordinatorLayout>
