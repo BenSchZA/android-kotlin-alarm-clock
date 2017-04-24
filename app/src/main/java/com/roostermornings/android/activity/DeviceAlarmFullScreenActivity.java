@@ -20,6 +20,7 @@ import android.os.IBinder;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -180,9 +181,17 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
                 //do something based on the intent's action
                 switch(intent.getAction()){
                     case Constants.ACTION_ALARMDISPLAY:
+                        //Update alarm UI based on audio service broadcast
                         audioItem = (DeviceAudioQueueItem) intent.getExtras().getSerializable("audioItem");
                         alarmPosition = intent.getIntExtra("alarmPosition", alarmPosition);
                         alarmCount = intent.getIntExtra("alarmCount", alarmCount);
+                        if(intent.getBooleanExtra("multipleAudioFiles", false)) {
+                            skipNext.setVisibility(View.VISIBLE);
+                            skipPrevious.setVisibility(View.VISIBLE);
+                        } else {
+                            skipNext.setVisibility(View.INVISIBLE);
+                            skipPrevious.setVisibility(View.INVISIBLE);
+                        }
                         setAlarmUI();
                         break;
                     case Constants.ACTION_ALARMTIMESUP:

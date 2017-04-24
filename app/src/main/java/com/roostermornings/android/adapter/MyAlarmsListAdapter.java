@@ -18,6 +18,7 @@ import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -130,8 +131,12 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
             if(alarm.getUnseen_roosters() != null && alarm.getUnseen_roosters() > 0) {
                 holder.roosterNotification.setVisibility(View.VISIBLE);
                 holder.roosterNotification.setText(String.valueOf(alarm.getUnseen_roosters()));
+                holder.roosterNotificationPerson.setAnimation(AnimationUtils.loadAnimation(mActivity.getApplicationContext(), R.anim.pulse));
+                holder.roosterNotification.setAnimation(AnimationUtils.loadAnimation(mActivity.getApplicationContext(), R.anim.pulse));
             } else{
                 holder.roosterNotification.setVisibility(View.INVISIBLE);
+                holder.roosterNotificationPerson.clearAnimation();
+                holder.roosterNotification.clearAnimation();
             }
         }
 
