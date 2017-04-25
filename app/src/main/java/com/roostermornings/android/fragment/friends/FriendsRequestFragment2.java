@@ -21,6 +21,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.adapter.FriendsRequestListAdapter;
@@ -92,8 +93,8 @@ public class FriendsRequestFragment2 extends BaseFragment {
         super.onViewCreated(view, savedInstanceState);
 
         sortNamesFriends(mUsers);
-        mAdapter = new FriendsRequestListAdapter(mUsers, getContext());
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        mAdapter = new FriendsRequestListAdapter(mUsers, BaseApplication.AppContext);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(BaseApplication.AppContext));
         mRecyclerView.setAdapter(mAdapter);
     }
 
@@ -115,7 +116,7 @@ public class FriendsRequestFragment2 extends BaseFragment {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                showToast(getContext(), "Failed to load user.", Toast.LENGTH_SHORT);
+                showToast(BaseApplication.AppContext, "Failed to load user.", Toast.LENGTH_SHORT);
             }
         };
         mRequestsReference.addValueEventListener(friendsListener);

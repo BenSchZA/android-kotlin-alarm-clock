@@ -20,6 +20,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.adapter.ChannelsListAdapter;
 import com.roostermornings.android.domain.Alarm;
@@ -51,7 +52,7 @@ public class NewAlarmFragment2 extends BaseFragment {
     private ArrayList<ChannelRooster> channelRoosters = new ArrayList<>();
     private Map<Integer, ChannelRooster> channelRoosterMap = new TreeMap<>(Collections.reverseOrder());
 
-    @BindView(R.id.channelRecyclerView)
+    @BindView(R.id.main_content)
     RecyclerView mRecyclerView;
 
     private RecyclerView.Adapter mAdapter;
@@ -90,10 +91,10 @@ public class NewAlarmFragment2 extends BaseFragment {
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
         mRecyclerView.setHasFixedSize(true);
-        mAdapter = new ChannelsListAdapter(channelRoosters, NewAlarmFragment2.this);
+        mAdapter = new ChannelsListAdapter(BaseApplication.AppContext, channelRoosters, NewAlarmFragment2.this);
 
         // use a linear layout manager
-        mLayoutManager = new LinearLayoutManager(this.getActivity());
+        mLayoutManager = new LinearLayoutManager(BaseApplication.AppContext);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mAdapter);
 
@@ -105,7 +106,7 @@ public class NewAlarmFragment2 extends BaseFragment {
 
                     if (channel.isActive()) {
                         if(channel.isNew_alarms_start_at_first_iteration()) {
-                            final DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(getContext());
+                            final DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(BaseApplication.AppContext);
                             Integer iteration = deviceAlarmTableManager.getChannelStoryIteration(channel.getUid());
                             if(iteration == null || iteration <= 0) iteration = 1;
                             getChannelRoosterData(channel, iteration);
@@ -121,7 +122,7 @@ public class NewAlarmFragment2 extends BaseFragment {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                showToast(getContext(), "Failed to load channel.", Toast.LENGTH_SHORT);
+                showToast(BaseApplication.AppContext, "Failed to load channel.", Toast.LENGTH_SHORT);
             }
         };
         mChannelsReference.addValueEventListener(channelsListener);
@@ -175,7 +176,7 @@ public class NewAlarmFragment2 extends BaseFragment {
     }
 
     private void findNextValidChannelRooster(TreeMap<Integer,ChannelRooster> channelIterationMap, Channel channel, Integer iteration) {
-        final DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(getContext());
+        final DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(BaseApplication.AppContext);
         //Check head and tail of naturally sorted TreeMap for next valid channel content
         SortedMap<Integer,ChannelRooster> tailMap = channelIterationMap.tailMap(iteration);
         SortedMap<Integer,ChannelRooster> headMap = channelIterationMap.headMap(iteration);

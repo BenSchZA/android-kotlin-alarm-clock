@@ -6,7 +6,6 @@
 package com.roostermornings.android.activity;
 
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.widget.TextView;
 
 import com.roostermornings.android.R;
@@ -25,11 +24,11 @@ public class SettingsActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         initialize(R.layout.custom_preference_screen_layout);
 
-        setDayNight();
+        //setDayNight();
 
         //Display the fragment as the main content
         getFragmentManager().beginTransaction()
-                .add(R.id.channelRecyclerView, new SettingsFragment())
+                .add(R.id.main_content, new SettingsFragment())
                 .commit();
 
         //Set toolbar title

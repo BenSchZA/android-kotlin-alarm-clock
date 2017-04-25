@@ -25,6 +25,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.database.DatabaseReference;
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
@@ -139,8 +140,8 @@ public class FriendsMyFragment1 extends BaseFragment {
         super.onViewCreated(view, savedInstanceState);
         //Sort names alphabetically before notifying adapter
         sortNamesUsers(mUsers);
-        mAdapter = new FriendsMyListAdapter(mUsers, getActivity(), getContext());
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        mAdapter = new FriendsMyListAdapter(mUsers, getActivity(), BaseApplication.AppContext);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(BaseApplication.AppContext));
         mRecyclerView.setAdapter(mAdapter);
     }
 

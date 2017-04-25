@@ -176,7 +176,7 @@
         <activity
             android:name=".activity.SettingsActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppThemeDay.NoActionBar"
+            android:theme="@style/PreferenceTheme"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />

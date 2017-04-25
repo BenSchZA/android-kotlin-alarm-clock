@@ -44,6 +44,8 @@ public class BaseApplication extends android.app.Application {
     protected FirebaseAuth mAuth;
     protected DatabaseReference mDatabase;
 
+    public static Context AppContext;
+
     //Global flag set from FirebaseListenerService to indicate new notification
     private static int notificationFlag;
     private BroadcastReceiver receiver;
@@ -54,6 +56,9 @@ public class BaseApplication extends android.app.Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        //Context to be used in all fragments that could be detached
+        AppContext = getApplicationContext();
 
         Fabric.with(this, new Crashlytics());
 

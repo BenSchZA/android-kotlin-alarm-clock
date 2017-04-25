@@ -73,7 +73,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
     /**
      * The {@link ViewPager} that will host the section contents.
      */
-    @BindView(R.id.main_content)
+    @BindView(R.id.friendsViewPager)
     ViewPager mViewPager;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide

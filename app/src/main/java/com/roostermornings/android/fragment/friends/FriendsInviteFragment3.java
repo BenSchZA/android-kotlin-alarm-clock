@@ -27,6 +27,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.activity.base.BaseActivity;
@@ -103,7 +104,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
 
         if (getArguments() != null) {
         }
-        myContactsController = new MyContactsController(getContext());
+        myContactsController = new MyContactsController(BaseApplication.AppContext);
     }
 
     @Override
@@ -118,8 +119,8 @@ public class FriendsInviteFragment3 extends BaseFragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mAdapter = new FriendsInviteListAdapter(mUsers, getContext());
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        mAdapter = new FriendsInviteListAdapter(mUsers, BaseApplication.AppContext);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(BaseApplication.AppContext));
         mRecyclerView.setAdapter(mAdapter);
     }
 
@@ -188,7 +189,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
 
     public void requestGetContacts() {
         baseActivity = (BaseActivity) getActivity();
-        if (ContextCompat.checkSelfPermission(getContext(),
+        if (ContextCompat.checkSelfPermission(BaseApplication.AppContext,
                 android.Manifest.permission.READ_CONTACTS)
                 == PackageManager.PERMISSION_GRANTED) executeNodeMyContactsTask();
         else  baseActivity.requestPermissionReadContacts();
@@ -238,9 +239,9 @@ public class FriendsInviteFragment3 extends BaseFragment {
                     mUsers.addAll(apiResponse.users.get(0));
                     //Sort names alphabetically before notifying adapter
                     sortNamesFriends(mUsers);
-                    mAdapter = new FriendsInviteListAdapter(mUsers, getContext());
+                    mAdapter = new FriendsInviteListAdapter(mUsers, BaseApplication.AppContext);
 
-                    mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+                    mRecyclerView.setLayoutManager(new LinearLayoutManager(BaseApplication.AppContext));
                     mRecyclerView.setAdapter(mAdapter);
                     mAdapter.notifyDataSetChanged();
 

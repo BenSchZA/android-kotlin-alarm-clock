@@ -14,6 +14,7 @@ import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.view.Menu;
@@ -27,7 +28,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.roostermornings.android.R;
-import com.roostermornings.android.activity.base.BaseActivity;;
+import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
@@ -44,11 +45,10 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class NewAudioRecordActivity extends BaseActivity {
 
-    protected static final String TAG = NewAudioFriendsActivity.class.getSimpleName();
-
     private long startTime;
     private long countDownTime;
-    private final int REFRESH_RATE = 1;
+    //NB: this refresh rate has a direct influence on performance as well as tuning of record time/amplitude calculations
+    private final int REFRESH_RATE = 100;
     private final int MAX_RECORDING_TIME = 60000;
     private final String maxRecordingTime = "60";
 
@@ -63,22 +63,23 @@ public class NewAudioRecordActivity extends BaseActivity {
     private long timeOfUnsuccessfulAmplitude;
     private long timeOfSuccessfulAmplitude;
 
-    private Handler mHandler = new Handler();
+    private final Handler mHandler = new Handler();
 
-    String mAudioSavePathInDevice = null;
-    MediaRecorder mediaRecorder;
-    MediaPlayer mediaPlayer;
-    int audioLength = 0;
+    private String mAudioSavePathInDevice = null;
+    private MediaRecorder mediaRecorder;
+    private MediaPlayer mediaPlayer;
+    private int audioLength = 0;
 
     private String randomAudioFileName = "";
     private Boolean fileProcessed = false;
 
-    private static int newAudioStatus = 0;
+    private int newAudioStatus = 0;
     private static final int NEW_AUDIO_RECORDING = 1;
     private static final int NEW_AUDIO_LISTENING = 2;
     private static final int NEW_AUDIO_PAUSED = 3;
     private static final int NEW_AUDIO_READY_RECORD = 4;
     private static final int NEW_AUDIO_READY_LISTEN = 5;
+    private static final int NEW_AUDIO_RECORD_ERROR = 6;
 
     @BindView(R.id.new_audio_time)
     TextView txtAudioTime;
@@ -168,23 +169,35 @@ public class NewAudioRecordActivity extends BaseActivity {
     private void setNewAudioStatus(int status) {
         newAudioStatus = status;
         switch(status){
+            case NEW_AUDIO_RECORD_ERROR:
+                layoutRecordParent.setAnimation(AnimationUtils.loadAnimation(this, R.anim.pulse));
+                mHandler.removeCallbacks(startTimer);
+                layoutListenParent.setVisibility(View.INVISIBLE);
+                layoutRecordParent.setVisibility(View.VISIBLE);
+                //Clear red recording focus
+                imgAudioStartStop.setSelected(false);
+                txtMessage.setText(getResources().getText(R.string.new_audio_quiet_instructions));
+                txtAudioTime.setText(maxRecordingTime);
+                break;
             case NEW_AUDIO_READY_RECORD:
                 layoutRecordParent.setAnimation(AnimationUtils.loadAnimation(this, R.anim.pulse));
                 mHandler.removeCallbacks(startTimer);
                 layoutListenParent.setVisibility(View.INVISIBLE);
                 layoutRecordParent.setVisibility(View.VISIBLE);
-                if(!getResources().getText(R.string.new_audio_quiet_instructions).equals(txtMessage.getText())) {
-                    txtMessage.setText(getResources().getText(R.string.new_audio_instructions));
-                }
+                //Clear red recording focus
+                imgAudioStartStop.setSelected(false);
+                txtMessage.setText(getResources().getText(R.string.new_audio_instructions));
                 txtAudioTime.setText(maxRecordingTime);
                 break;
             case NEW_AUDIO_READY_LISTEN:
                 layoutRecordParent.clearAnimation();
                 mHandler.removeCallbacks(startTimer);
-                imgAudioStartStop.setBackgroundResource(R.drawable.rooster_record_audio_circle_inner_selectable);
+                layoutRecordParent.setVisibility(View.INVISIBLE);
+                //Clear red recording focus
+                imgAudioStartStop.setSelected(false);
                 imgNewAudioListen.setBackgroundResource(R.drawable.rooster_new_audio_play_button);
                 layoutListenParent.setVisibility(View.VISIBLE);
-                layoutRecordParent.setVisibility(View.INVISIBLE);
+                txtMessage.setText(getResources().getText(R.string.new_audio_continue_instructions));
 
                 try {
                     Uri uri = Uri.parse(mAudioSavePathInDevice);
@@ -204,8 +217,7 @@ public class NewAudioRecordActivity extends BaseActivity {
                 layoutRecordParent.setAnimation(AnimationUtils.loadAnimation(this, R.anim.pulse));
                 //Reset message from amplitude instructions to default
                 txtMessage.setText(getResources().getText(R.string.new_audio_instructions));
-                imgAudioStartStop.setBackgroundResource(R.drawable.rooster_record_audio_circle_inner_recording);
-                imgAudioStartStop.requestLayout();
+                imgAudioStartStop.setSelected(true);
 
                 startTime = System.currentTimeMillis() + MAX_RECORDING_TIME;
                 break;
@@ -266,41 +278,46 @@ public class NewAudioRecordActivity extends BaseActivity {
 
         } else {
             stopRecording();
-            setNewAudioStatus(NEW_AUDIO_READY_LISTEN);
         }
     }
 
-    public void stopRecording() {
+    private void stopRecording() {
         try {
             mHandler.removeCallbacks(startTimer);
             mediaRecorder.stop();
         } catch(IllegalStateException e){
             e.printStackTrace();
-            onDeleteAudioClick();
+            deleteAudio();
+            setNewAudioStatus(NEW_AUDIO_READY_RECORD);
         } catch(RuntimeException e){
             e.printStackTrace();
-            onDeleteAudioClick();
+            deleteAudio();
+            setNewAudioStatus(NEW_AUDIO_READY_RECORD);
         }
 
         //Check if cumulative amplitude condition has not been met, else continue
         if(cumulativeAcceptableAmplitudeTime < MIN_CUMULATIVE_TIME) {
-            txtMessage.setText(getResources().getText(R.string.new_audio_quiet_instructions));
-            onDeleteAudioClick();
+            deleteAudio();
+            setNewAudioStatus(NEW_AUDIO_RECORD_ERROR);
         } else {
-            txtMessage.setText(getResources().getText(R.string.new_audio_continue_instructions));
+            setNewAudioStatus(NEW_AUDIO_READY_LISTEN);
         }
     }
 
     @OnClick(R.id.new_audio_delete)
     public void onDeleteAudioClick() {
         setNewAudioStatus(NEW_AUDIO_READY_RECORD);
+        deleteAudio();
+    }
+
+    private boolean deleteAudio() {
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.stop();
             mediaPlayer.release();
             mediaRecorderReady();
         }
         File file = new File(mAudioSavePathInDevice);
-        file.delete();
+        return file.delete();
     }
 
     @OnClick(R.id.new_audio_listen)
@@ -367,9 +384,16 @@ public class NewAudioRecordActivity extends BaseActivity {
         Intent intent = new Intent(NewAudioRecordActivity.this, NewAudioFriendsActivity.class);
         Bundle bun = new Bundle();
         bun.putString(Constants.EXTRA_LOCAL_FILE_STRING, mAudioSavePathInDevice);
-        if(getIntent().getExtras() != null && getIntent().getExtras().containsKey(Constants.EXTRA_FRIENDS_LIST) && (ArrayList<User>)getIntent().getSerializableExtra(Constants.EXTRA_FRIENDS_LIST) != null) {
-            ArrayList<User> mFriends = (ArrayList<User>)getIntent().getSerializableExtra(Constants.EXTRA_FRIENDS_LIST);
-            bun.putSerializable(Constants.EXTRA_FRIENDS_LIST, mFriends);
+
+        //If this fails (shouldn't) then user can select from list of friends rather than direct message,
+        //no harm done
+        try {
+            if(getIntent().getExtras() != null && getIntent().getExtras().containsKey(Constants.EXTRA_FRIENDS_LIST)) {
+                ArrayList<User> mFriends = (ArrayList<User>)getIntent().getSerializableExtra(Constants.EXTRA_FRIENDS_LIST);
+                bun.putSerializable(Constants.EXTRA_FRIENDS_LIST, mFriends);
+            }
+        } catch(ClassCastException e) {
+            e.printStackTrace();
         }
 
         intent.putExtras(bun);
@@ -378,21 +402,35 @@ public class NewAudioRecordActivity extends BaseActivity {
         fileProcessed = true;
     }
 
-    private Runnable startTimer = new Runnable() {
+    private final Runnable startTimer = new Runnable() {
         public void run() {
             switch(newAudioStatus) {
+                case NEW_AUDIO_READY_RECORD:
+                    mHandler.removeCallbacks(startTimer);
+                    txtAudioTime.setText(maxRecordingTime);
+                    break;
+                case NEW_AUDIO_RECORD_ERROR:
+                    mHandler.removeCallbacks(startTimer);
+                    txtAudioTime.setText(maxRecordingTime);
+                    break;
                 case NEW_AUDIO_PAUSED:
                     break;
                 case NEW_AUDIO_LISTENING:
+                    countDownTime = startTime - System.currentTimeMillis();
+                    updateTimer(countDownTime);
+                    mHandler.postDelayed(this, REFRESH_RATE);
                     break;
                 case NEW_AUDIO_RECORDING:
                     //This logic checks that the average recording amplitude is above a certain threshold for a cumulative amount of time
                     maxAmplitude = mediaRecorder.getMaxAmplitude();
                     averageAmplitude = (maxAmplitude + averageAmplitude)/2;
+
+                    //TODO: error here
+                    cumulativeAcceptableAmplitudeTime = cumulativeAcceptableAmplitudeTime + timeSinceAcceptableAmplitudeStart;
+                    timeSinceAcceptableAmplitudeStart = 0;
+
                     if(averageAmplitude < AUDIO_MIN_AMPLITUDE && cumulativeAcceptableAmplitudeTime < MIN_CUMULATIVE_TIME) {
                         txtMessage.setText(getResources().getText(R.string.new_audio_time_amplitude_instructions));
-                        cumulativeAcceptableAmplitudeTime = cumulativeAcceptableAmplitudeTime + timeSinceAcceptableAmplitudeStart;
-                        timeSinceAcceptableAmplitudeStart = 0;
                         timeOfUnsuccessfulAmplitude = System.currentTimeMillis();
                     } else if(cumulativeAcceptableAmplitudeTime > MIN_CUMULATIVE_TIME) {
                         txtMessage.setText(getResources().getText(R.string.new_audio_instructions));
@@ -404,14 +442,16 @@ public class NewAudioRecordActivity extends BaseActivity {
                     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
                     if(countDownTime < 0) stopRecording();
+
+                    countDownTime = startTime - System.currentTimeMillis();
+                    updateTimer(countDownTime);
+                    mHandler.postDelayed(this, REFRESH_RATE);
                     break;
                 default:
+                    mHandler.removeCallbacks(startTimer);
+                    txtAudioTime.setText(maxRecordingTime);
                     break;
             }
-            countDownTime = startTime - System.currentTimeMillis();
-
-            updateTimer(countDownTime);
-            mHandler.postDelayed(this, REFRESH_RATE);
         }
     };
 
@@ -448,7 +488,7 @@ public class NewAudioRecordActivity extends BaseActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+                                           @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
             case Constants.MY_PERMISSIONS_REQUEST_AUDIO_RECORD:
                 if (grantResults.length > 0) {
@@ -470,7 +510,7 @@ public class NewAudioRecordActivity extends BaseActivity {
         }
     }
 
-    public boolean checkPermission() {
+    private boolean checkPermission() {
         int result = ContextCompat.checkSelfPermission(getApplicationContext(),
                 WRITE_EXTERNAL_STORAGE);
         int result1 = ContextCompat.checkSelfPermission(getApplicationContext(),

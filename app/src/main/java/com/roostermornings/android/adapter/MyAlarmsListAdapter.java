@@ -25,6 +25,7 @@ import android.widget.TextView;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.afollestad.materialdialogs.Theme;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
@@ -160,10 +161,9 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
 
                 if (mActivity instanceof MyAlarmsFragmentActivity) {
 
-                    View dialogMmpView = LayoutInflater.from(mActivity)
-                            .inflate(R.layout.dialog_confirm_alarm_delete, null);
                     new MaterialDialog.Builder(mActivity)
-                            .customView(dialogMmpView, false)
+                            .theme(Theme.LIGHT)
+                            .content(R.string.dialog_confirm_alarm_delete)
                             .positiveText(R.string.confirm)
                             .negativeText(R.string.cancel)
                             .negativeColorRes(R.color.grey)
