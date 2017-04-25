@@ -4,7 +4,7 @@
   -->
 
 <LinearLayout
-    android:id="@+id/channelRecyclerView"
+    android:id="@+id/main_content"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -60,12 +60,11 @@
                 android:layout_gravity="center"
                 android:visibility="visible">
 
-
                 <FrameLayout
                     android:id="@+id/new_audio_circle_outer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/rooster_record_audio_circle_outer">
+                    android:background="@drawable/rooster_record_audio_circle_outer" >
 
                     <ImageView
                         android:id="@+id/new_audio_start_stop"
@@ -73,8 +72,7 @@
                         android:layout_height="wrap_content"
                         android:layout_margin="10dp"
                         android:background="@drawable/rooster_record_audio_circle_inner_selectable"
-                        android:clickable="true"
-                        android:focusable="true" />
+                        android:clickable="true" />
 
                 </FrameLayout>
 

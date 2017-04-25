@@ -14,25 +14,19 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 
-import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
-import com.roostermornings.android.activity.base.BaseActivity;
-import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.sqlutil.AudioTableController;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
@@ -40,18 +34,13 @@ import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.InternetHelper;
-import com.roostermornings.android.util.RoosterUtils;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.inject.Inject;
-
-import static com.facebook.FacebookSdk.getApplicationContext;
 import static com.roostermornings.android.service.BackgroundTaskIntentService.startActionBackgroundDownload;
 
 //Service to manage playing and pausing audio during Rooster alarm
@@ -61,23 +50,23 @@ public class AudioService extends Service {
     private final IBinder mBinder = new LocalBinder();
 
     private BroadcastReceiver receiver;
-    private static Timer timer = new Timer();
-    private static Timer downloadTimer = new Timer();
+    private static final Timer timer = new Timer();
+    private static final Timer downloadTimer = new Timer();
 
-    MediaPlayer mediaPlayerDefault = new MediaPlayer();
-    MediaPlayer mediaPlayerRooster = new MediaPlayer();
+    private final MediaPlayer mediaPlayerDefault = new MediaPlayer();
+    private final MediaPlayer mediaPlayerRooster = new MediaPlayer();
 
     private DeviceAudioQueueItem audioItem;
 
-    protected AudioService mThis = this;
+    private final AudioService mThis = this;
 
-    ArrayList<DeviceAudioQueueItem> channelAudioItems;
-    ArrayList<DeviceAudioQueueItem> socialAudioItems;
+    private ArrayList<DeviceAudioQueueItem> channelAudioItems;
+    private ArrayList<DeviceAudioQueueItem> socialAudioItems;
 
-    ArrayList<DeviceAudioQueueItem> audioItems = new ArrayList<>();
-    AudioTableManager audioTableManager = new AudioTableManager(this);
-    AudioTableController audioTableController = new AudioTableController(this);
-    DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(this);
+    private final ArrayList<DeviceAudioQueueItem> audioItems = new ArrayList<>();
+    private final AudioTableManager audioTableManager = new AudioTableManager(this);
+    private final AudioTableController audioTableController = new AudioTableController(this);
+    private final DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(this);
 
     private DeviceAlarm alarm;
     private int alarmCycle;
@@ -86,7 +75,6 @@ public class AudioService extends Service {
     private int playDuration;
     private int alarmCount;
     private int alarmPosition;
-    private boolean multipleAudioFiles = false;
     private File file;
 
     private int currentPositionRooster;
@@ -445,7 +433,7 @@ public class AudioService extends Service {
         }
     }
 
-    public void notifyActivityTimesUp() {
+    private void notifyActivityTimesUp() {
         //Send broadcast message to notify receiver to stop alarm and release wakelock
         Intent intent = new Intent(Constants.ACTION_ALARMTIMESUP);
         sendBroadcast(intent);
@@ -501,7 +489,7 @@ public class AudioService extends Service {
         }
     }
 
-    public void startDefaultAlarmTone() {
+    private void startDefaultAlarmTone() {
 
         //Check that another alarm isn't already playing
         if(mediaPlayerRooster != null && mediaPlayerRooster.isPlaying()) return;

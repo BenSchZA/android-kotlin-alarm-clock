@@ -23,6 +23,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.NewAlarmFragmentActivity;
@@ -116,15 +117,15 @@ public class NewAlarmFragment1 extends BaseFragment{
             mUserUidParam = getArguments().getString(ARG_USER_UID_PARAM);
         }
 
-        deviceAlarmController = new DeviceAlarmController(getContext());
-        deviceAlarmTableManager = new DeviceAlarmTableManager(getContext());
+        deviceAlarmController = new DeviceAlarmController(BaseApplication.AppContext);
+        deviceAlarmTableManager = new DeviceAlarmTableManager(BaseApplication.AppContext);
 
         mAlarm = mListener.getAlarmDetails();
         //Set current time
         mAlarm.setHour(hour);
         mAlarm.setMinute(minute);
 
-        mTimePickerDialog = new TimePickerDialog(getContext(), R.style.TimeDialogTheme, new TimePickerDialog.OnTimeSetListener() {
+        mTimePickerDialog = new TimePickerDialog(BaseApplication.AppContext, R.style.TimeDialogTheme, new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                 setAlarmTime(hourOfDay, minute);
@@ -141,7 +142,7 @@ public class NewAlarmFragment1 extends BaseFragment{
         //If in edit mode, delete button should be visible and alarm details should be updated
         updateAlarmUIIfEdit();
         textViewAlarmTime.setText(RoosterUtils.setAlarmTimeFromHourAndMinute(mAlarm));
-        textViewAlarmTime.setAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.pulse));
+        textViewAlarmTime.setAnimation(AnimationUtils.loadAnimation(BaseApplication.AppContext, R.anim.pulse));
         return view;
     }
 
@@ -196,7 +197,7 @@ public class NewAlarmFragment1 extends BaseFragment{
     @OnClick(R.id.new_alarm_fragment1_delete_alarm)
     public void deleteAlarm() {
         try {
-            DeviceAlarmController deviceAlarmController = new DeviceAlarmController(getContext());
+            DeviceAlarmController deviceAlarmController = new DeviceAlarmController(BaseApplication.AppContext);
 
             //Remove alarm *set* from local SQL database using retrieved Uid from firebase && Remove alarm from firebase
             deviceAlarmController.deleteAlarmSetGlobal(mAlarm.getUid());
@@ -205,10 +206,10 @@ public class NewAlarmFragment1 extends BaseFragment{
             myAlarmsListAdapter.notifyDataSetChanged();
 
             startHomeActivity();
-            Toast.makeText(getContext(), "Alarm deleted.", Toast.LENGTH_SHORT);
+            Toast.makeText(BaseApplication.AppContext, "Alarm deleted.", Toast.LENGTH_SHORT);
         } catch (NullPointerException e) {
             e.printStackTrace();
-            if(BuildConfig.DEBUG) Toast.makeText(getContext(), "Oi! Don't delete me. Delete alarm failed!", Toast.LENGTH_SHORT);
+            if(BuildConfig.DEBUG) Toast.makeText(BaseApplication.AppContext, "Oi! Don't delete me. Delete alarm failed!", Toast.LENGTH_SHORT);
         }
     }
 

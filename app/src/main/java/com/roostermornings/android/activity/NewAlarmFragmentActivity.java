@@ -12,17 +12,16 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.afollestad.materialdialogs.Theme;
 import com.google.firebase.database.FirebaseDatabase;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
@@ -87,7 +86,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.channelRecyclerView);
+        mViewPager = (ViewPager) findViewById(R.id.main_content);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
         Bundle extras = getIntent().getExtras();
@@ -112,10 +111,9 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
     public void onBackPressed() {
         if (mViewPager.getCurrentItem() == 0) {
 
-            View dialogMmpView = LayoutInflater.from(this)
-                    .inflate(R.layout.dialog_confirm_alarm_changes, null);
             new MaterialDialog.Builder(this)
-                    .customView(dialogMmpView, false)
+                    .theme(Theme.LIGHT)
+                    .content(R.string.dialog_confirm_changes)
                     .positiveText(R.string.neutral)
                     .negativeText(R.string.cancel)
                     .negativeColorRes(R.color.grey)

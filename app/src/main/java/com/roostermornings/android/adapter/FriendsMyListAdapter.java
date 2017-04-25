@@ -29,6 +29,7 @@ import android.widget.TextView;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.afollestad.materialdialogs.Theme;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
@@ -122,10 +123,10 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
         holder.linearLayout.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                    View dialogMmpView = LayoutInflater.from(mActivity)
-                            .inflate(R.layout.dialog_confirm_friend_delete, null);
+
                     new MaterialDialog.Builder(mActivity)
-                            .customView(dialogMmpView, false)
+                            .theme(Theme.LIGHT)
+                            .content(R.string.dialog_confirm_friend_delete)
                             .positiveText(R.string.confirm)
                             .negativeText(R.string.cancel)
                             .negativeColorRes(R.color.grey)
@@ -185,6 +186,7 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
         try{
             Picasso.with(mContext).load(url)
                     .resize(50, 50)
+                    .centerCrop()
                     .into(holder.imgProfilePic, new Callback() {
                         @Override
                         public void onSuccess() {

@@ -128,7 +128,7 @@ public class BaseFragment extends Fragment implements Validator.ValidationListen
     }
 
     protected void startHomeActivity() {
-        Intent homeIntent = new Intent(getContext(), MyAlarmsFragmentActivity.class);
+        Intent homeIntent = new Intent(BaseApplication.AppContext, MyAlarmsFragmentActivity.class);
         startActivity(homeIntent);
     }
 }

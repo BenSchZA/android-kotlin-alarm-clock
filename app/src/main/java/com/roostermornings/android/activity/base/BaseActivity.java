@@ -7,7 +7,6 @@ package com.roostermornings.android.activity.base;
 
 import android.app.ActivityManager;
 import android.app.Dialog;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -34,6 +33,7 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.afollestad.materialdialogs.Theme;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -69,7 +69,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
 
     private Dialog progressDialog;
     public FirebaseAuth mAuth;
-    protected FirebaseAuth.AuthStateListener mAuthListener;
+    private FirebaseAuth.AuthStateListener mAuthListener;
     private static final String TAG = BaseActivity.class.getSimpleName();
 
     private static Calendar calendar = Calendar.getInstance();
@@ -155,14 +155,8 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         return true;
     }
 
-    public boolean checkMobileDataConnection() {
-        if (mobileDataConnection() && !sharedPreferences.getBoolean(Constants.USER_SETTINGS_DOWNLOAD_ON_DATA, true)) {
-            //TODO: maybe display this once?
-//            Toast.makeText(getApplicationContext(), "'Download on mobile data' is disabled in Settings, " +
-//                    "please enable this and try again.", Toast.LENGTH_LONG).show();
-            return false;
-        }
-        return true;
+    private boolean checkMobileDataConnection() {
+        return !(mobileDataConnection() && !sharedPreferences.getBoolean(Constants.USER_SETTINGS_DOWNLOAD_ON_DATA, true));
     }
 
     protected void checkFirebaseConnection() {
@@ -175,7 +169,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
                             Log.i(TAG, "Firebase CONNECTED");
                         } else {
                             Log.i(TAG, "Firebase NOT CONNECTED");
-                            Toast.makeText(getApplicationContext(), "The application could not connect to the " +
+                            Toast.makeText(BaseApplication.AppContext, "The application could not connect to the " +
                                     "Rooster backend, please check your internet connection and try again.",
                                     Toast.LENGTH_LONG).show();
                         }
@@ -190,11 +184,11 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
 
     }
 
-    protected boolean noInternetConnection() {
+    private boolean noInternetConnection() {
         return InternetHelper.noInternetConnection(this);
     }
 
-    protected boolean mobileDataConnection() {
+    private boolean mobileDataConnection() {
         return  InternetHelper.mobileDataConnection(this);
     }
 
@@ -225,7 +219,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         return mAuth.getCurrentUser();
     }
 
-    protected void retrieveMyUserDetails() {
+    private void retrieveMyUserDetails() {
         ValueEventListener userListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -276,7 +270,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         if (progressDialog != null) progressDialog.hide();
     }
 
-    protected Dialog showIndeterminateProgress() {
+    private Dialog showIndeterminateProgress() {
         final Dialog dialog = new Dialog(this,
                 android.R.style.Theme_Translucent);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -362,7 +356,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         context.sendBroadcast(intent);
     }
 
-    public static String getLauncherClassName(Context context) {
+    private static String getLauncherClassName(Context context) {
 
         PackageManager pm = context.getPackageManager();
 
@@ -373,8 +367,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         for (ResolveInfo resolveInfo : resolveInfos) {
             String pkgName = resolveInfo.activityInfo.applicationInfo.packageName;
             if (pkgName.equalsIgnoreCase(context.getPackageName())) {
-                String className = resolveInfo.activityInfo.name;
-                return className;
+                return resolveInfo.activityInfo.name;
             }
         }
         return null;
@@ -416,10 +409,10 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
 //        RoosterUtils.hasM() && pm.isIgnoringBatteryOptimizations(packageName) &&
 
         if(!sharedPreferences.getBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false)) {
-            View dialogMmpView = LayoutInflater.from(context)
-                    .inflate(R.layout.dialog_permissions_explainer, null);
+
             new MaterialDialog.Builder(context)
-                    .customView(dialogMmpView, false)
+                    .theme(Theme.LIGHT)
+                    .content(R.string.dialog_permissions_explainer)
                     .neutralText(R.string.neutral)
                     .negativeColorRes(R.color.grey)
                     .onNeutral(new MaterialDialog.SingleButtonCallback() {
@@ -427,7 +420,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                             SharedPreferences.Editor editor = sharedPreferences.edit();
                             editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, true);
-                            editor.commit();
+                            editor.apply();
                             startActivity(getIntent());
                         }
                     })
@@ -438,18 +431,18 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     public void setupToolbar(TextView toolbarTitle, String title) {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        if(notNull(getSupportActionBar())) getSupportActionBar().setDisplayShowTitleEnabled(false);
+        if(getSupportActionBar() != null) getSupportActionBar().setDisplayShowTitleEnabled(false);
         if(toolbarTitle != null && title != null) toolbarTitle.setText(title);
     }
 
     public void setDayNight() {
         try {
             if (calendar.get(Calendar.HOUR_OF_DAY) >= 17) {
-                if(findViewById(R.id.channelRecyclerView) != null) findViewById(R.id.channelRecyclerView).setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.main_background_layer_list_night, null));
+                if(findViewById(R.id.main_content) != null) findViewById(R.id.main_content).setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.main_background_layer_list_night, null));
                 if(findViewById(R.id.toolbar) != null) findViewById(R.id.toolbar).setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.rooster_dark_blue, null));
                 if(findViewById(R.id.tabs) != null) findViewById(R.id.tabs).setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.rooster_dark_blue, null));
             } else if (calendar.get(Calendar.HOUR_OF_DAY) > 7) {
-                if(findViewById(R.id.channelRecyclerView) != null) findViewById(R.id.channelRecyclerView).setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.main_background_layer_list_day, null));
+                if(findViewById(R.id.main_content) != null) findViewById(R.id.main_content).setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.main_background_layer_list_day, null));
                 if(findViewById(R.id.toolbar) != null) findViewById(R.id.toolbar).setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.rooster_blue, null));
                 if(findViewById(R.id.tabs) != null) findViewById(R.id.tabs).setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.rooster_blue, null));
             }
