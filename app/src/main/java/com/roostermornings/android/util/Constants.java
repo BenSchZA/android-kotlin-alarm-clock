@@ -71,9 +71,12 @@ public class Constants {
     //NewAudio activities
     public final static String EXTRA_LOCAL_FILE_STRING = "localFileString";
 
-    //AudioService notification IDs
-    public final static int AUDIOSERVICE_NOTIFICATION_ID = 1000;
+    //AudioService
     public final static String EXTRA_FRIENDS_LIST = "friendsList";
+
+    //Notification IDs
+    public final static int AUDIOSERVICE_NOTIFICATION_ID = 1000;
+    public final static int UPLOADSERVICE_NOTIFICATION_ID = 2000;
 
     //FirebaseListenerService intent actions
     public final static String ACTION_REQUESTNOTIFICATION = "rooster.update.REQUEST_NOTIFICATION";

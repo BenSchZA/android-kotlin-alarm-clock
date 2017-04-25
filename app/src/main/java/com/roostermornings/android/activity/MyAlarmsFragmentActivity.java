@@ -49,7 +49,7 @@ import butterknife.OnClick;
 
 public class MyAlarmsFragmentActivity extends BaseActivity {
 
-    public static final String TAG = MyAlarmsFragmentActivity.class.getSimpleName();
+    private static final String TAG = MyAlarmsFragmentActivity.class.getSimpleName();
 
     @BindView(R.id.home_alarmsListView)
     RecyclerView mRecyclerView;
@@ -60,7 +60,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     @BindView(R.id.add_alarm)
     FloatingActionButton buttonAddAlarm;
 
-    private ArrayList<Alarm> mAlarms = new ArrayList<>();
+    private final ArrayList<Alarm> mAlarms = new ArrayList<>();
     private DeviceAlarmController deviceAlarmController;
     private DeviceAlarmTableManager deviceAlarmTableManager;
     private RecyclerView.Adapter mAdapter;
@@ -326,7 +326,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         startActivity(intent);
     }
 
-    public void setButtonBarNotification(boolean notification) {
+    private void setButtonBarNotification(boolean notification) {
         ImageView buttonBarNotification = (ImageView) buttonBarLayout.findViewById(R.id.notification);
         if (notification) buttonBarNotification.setVisibility(View.VISIBLE);
         else buttonBarNotification.setVisibility(View.GONE);

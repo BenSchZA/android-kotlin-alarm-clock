@@ -151,6 +151,7 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
         try{
             Picasso.with(mContext).load(url)
                     .resize(50, 50)
+                    .centerCrop()
                     .into(holder.imgProfilePic, new Callback() {
                         @Override
                         public void onSuccess() {

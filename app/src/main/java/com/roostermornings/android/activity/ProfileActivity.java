@@ -244,7 +244,7 @@ public class ProfileActivity extends BaseActivity {
             Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
             byteArray = new byte[selectedImage.getByteCount()];
             //Resize bitmap
-            selectedImage = getResizedBitmap(selectedImage, 400);
+            selectedImage = getResizedBitmap(selectedImage, 250);
             //Convert to byte array
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             selectedImage.compress(Bitmap.CompressFormat.PNG, 100, stream);
@@ -298,6 +298,7 @@ public class ProfileActivity extends BaseActivity {
         try {
             Picasso.with(ProfileActivity.this).load(uri)
                     .resize(400, 400)
+                    .centerCrop()
                     .into(profilePic, new Callback() {
                         @Override
                         public void onSuccess() {
@@ -324,6 +325,7 @@ public class ProfileActivity extends BaseActivity {
         try {
         Picasso.with(ProfileActivity.this).load(url)
                 .resize(400, 400)
+                .centerCrop()
                 .into(profilePic, new Callback() {
                     @Override
                     public void onSuccess() {
