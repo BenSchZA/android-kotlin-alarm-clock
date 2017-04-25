@@ -6,9 +6,9 @@
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:drawable="@drawable/rooster_record_audio_circle_inner_recording_pressed" android:state_pressed="true"></item>
+    <item android:drawable="@drawable/rooster_record_audio_circle_inner_recording_pressed" android:state_pressed="true"/>
 
-    <item android:drawable="@drawable/rooster_record_audio_circle_inner_recording" android:state_focused="true"></item>
+    <item android:drawable="@drawable/rooster_record_audio_circle_inner_recording" android:state_selected="true"/>
 
-    <item android:drawable="@drawable/rooster_record_audio_circle_inner"></item>
+    <item android:drawable="@drawable/rooster_record_audio_circle_inner"/>
 </selector>

@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.SocialRooster;
@@ -111,8 +112,9 @@ public class MessageStatusListAdapter extends RecyclerView.Adapter<MessageStatus
     private void setProfilePic(String url, final MessageStatusListAdapter.ViewHolder holder, final int position) {
 
         try{
-            Picasso.with(mContext).load(url)
+            Picasso.with(BaseApplication.AppContext).load(url)
                     .resize(50, 50)
+                    .centerCrop()
                     .into(holder.imgProfilePic, new Callback() {
                         @Override
                         public void onSuccess() {
@@ -120,12 +122,14 @@ public class MessageStatusListAdapter extends RecyclerView.Adapter<MessageStatus
                             RoundedBitmapDrawable imageDrawable = RoundedBitmapDrawableFactory.create(mContext.getResources(), imageBitmap);
                             imageDrawable.setCircular(true);
                             imageDrawable.setCornerRadius(Math.max(imageBitmap.getWidth(), imageBitmap.getHeight()) / 2.0f);
-                            //holder.imgProfilePic.setImageAlpha(0);
+                            holder.txtInitials.setText("");
+                            holder.imgProfilePic.setAlpha(1f);
                             holder.imgProfilePic.setImageDrawable(imageDrawable);
                         }
 
                         @Override
                         public void onError() {
+                            holder.imgProfilePic.setAlpha(0.3f);
                             holder.txtInitials.setText(RoosterUtils.getInitials(mDataset.get(position).getUser_name()));
                         }
                     });

@@ -227,6 +227,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
         Picasso.with(DeviceAlarmFullScreenActivity.this).load(url)
                 .resize(400, 400)
+                .centerCrop()
                 .into(imgSenderPic, new Callback() {
                     @Override
                     public void onSuccess() {

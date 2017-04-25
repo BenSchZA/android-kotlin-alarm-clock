@@ -5,6 +5,7 @@
 
 package com.roostermornings.android.adapter;
 
+import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -16,6 +17,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.afollestad.materialdialogs.Theme;
 import com.roostermornings.android.R;
 import com.roostermornings.android.domain.ChannelRooster;
 import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment2;
@@ -24,9 +26,12 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
+import static com.roostermornings.android.R.color.black;
+
 public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapter.ViewHolder> {
     private ArrayList<ChannelRooster> mDataset;
     private Fragment mFragment;
+    private Context context;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -63,7 +68,8 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public ChannelsListAdapter(ArrayList<ChannelRooster> myDataset, Fragment fragment) {
+    public ChannelsListAdapter(Context context, ArrayList<ChannelRooster> myDataset, Fragment fragment) {
+        this.context = context;
         mDataset = myDataset;
         mFragment = fragment;
     }
@@ -118,6 +124,7 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
                 new MaterialDialog.Builder(mFragment.getContext())
                         .title(mDataset.get(position).getName())
                         .content(mDataset.get(position).getDescription())
+                        .theme(Theme.LIGHT)
                         .positiveText(R.string.ok)
                         .negativeText("")
                         .show();
@@ -126,10 +133,11 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
             }
         });
 
-        //TODO: is this reasonable? if no image, then what?
         try {
-            Picasso.with(mFragment.getContext()).load(mDataset.get(position).getPhoto()).
-                    fit().into(holder.imgChannelImage, new Callback() {
+            Picasso.with(mFragment.getContext()).load(mDataset.get(position).getPhoto())
+                    .fit()
+                    .centerCrop()
+                    .into(holder.imgChannelImage, new Callback() {
                 @Override
                 public void onSuccess() {
                     holder.progressBar.setVisibility(View.GONE);

@@ -240,6 +240,7 @@ public class DeviceAlarmTableManager {
 
         Integer storyIteration = cursor.getInt(cursor.getColumnIndex(AlarmTableEntry.COLUMN_ITERATION));
         db.close();
+        cursor.close();
         return storyIteration;
     }
 

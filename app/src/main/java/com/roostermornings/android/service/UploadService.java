@@ -57,14 +57,13 @@ public class UploadService extends Service {
 
     protected static final String TAG = UploadService.class.getSimpleName();
 
-    private UploadService mThis = this;
+    private final UploadService mThis = this;
 
-    private final static int NOTIFICATION_ID = 2000;
     private Handler mHandler;
     private StorageReference mStorageRef;
     String mAudioSavePathInDevice = "";
     ArrayList<User> friendsList = new ArrayList<>();
-    BaseActivity baseActivity;
+    private static final BaseActivity baseActivity = new BaseActivity();
     String firebaseIdToken;
 
     public UploadService() {
@@ -89,8 +88,6 @@ public class UploadService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         foregroundNotification("Audio upload in progress");
-
-        baseActivity = new BaseActivity();
 
         // Create a new background thread for processing messages or runnables sequentially
         mThis.handlerThread = new HandlerThread("AudioUploadHandler");
@@ -163,7 +160,7 @@ public class UploadService extends Service {
         //get reference to Firebase database
         DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
 
-        String uploadUrl = String.format("social_rooster_uploads/%s", baseActivity.mAuth.getCurrentUser().getUid());
+        String uploadUrl = String.format("social_rooster_uploads/%s", currentUser.getUid());
         String queueUrl = String.format("social_rooster_queue/%s", friend.getUid());
 
         String uploadKey = mDatabase.child(uploadUrl).push().getKey();
@@ -176,18 +173,17 @@ public class UploadService extends Service {
                 friend.getUid(), uploadKey, currentUser.getUid());
 
         SocialRooster socialRoosterQueue = new SocialRooster(firebaseStorageURL,
-                baseActivity.mCurrentUser.getUser_name(),
+                BaseActivity.mCurrentUser.getUser_name(),
                 false,
-                baseActivity.mCurrentUser.getProfile_pic(),
+                BaseActivity.mCurrentUser.getProfile_pic(),
                 timestamp.getTime(),
-                friend.getUid(), uploadKey, baseActivity.mCurrentUser.getUid());
-
+                friend.getUid(), uploadKey, BaseActivity.mCurrentUser.getUid());
 
         //Note the matching keys
         mDatabase.getDatabase().getReference(uploadUrl + "/" + uploadKey).setValue(socialRoosterUploaded);
         mDatabase.getDatabase().getReference(queueUrl + "/" + uploadKey).setValue(socialRoosterQueue);
         sendInvitedFriendFCMMessage(friend.getUid());
-        Toast.makeText(getApplicationContext(), "Social rooster sent to " + friend.getUser_name() + " !", Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "Social rooster sent to " + friend.getUser_name() + "!", Toast.LENGTH_LONG).show();
     }
 
     private void sendInvitedFriendFCMMessage(String recipientUserId) {
@@ -245,6 +241,6 @@ public class UploadService extends Service {
                 .setContentText("Rooster Mornings: " + state)
                 .setContentIntent(pendingIntent).build();
 
-        startForeground(NOTIFICATION_ID, notification);
+        startForeground(Constants.UPLOADSERVICE_NOTIFICATION_ID, notification);
     }
 }

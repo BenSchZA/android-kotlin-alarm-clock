@@ -27,7 +27,7 @@
     <string name="email_address">Email address</string>
     <string name="phone_number">Phone number</string>
     <string name="name">Name</string>
-    <string name="password">Password: at lest 6 letters AND numbers</string>
+    <string name="password">Password: 6+ alpha &amp; numeric</string>
     <string name="next">Next</string>
     <string name="submit">Submit</string>
 
@@ -46,7 +46,6 @@
     <string name="delete_alarm">Delete alarm</string>
     <string name="repeat_alarm">Repeat alarm time</string>
     <string name="allow_friends">Allow friends to send audio notes to this alarm</string>
-    <string name="permissions_explainer">Some Android phones have power usage optimisation that interferes with Rooster, please check your phone settings - sometimes called \'Protected Apps\'.</string>
 
     <string name="friends">Friends</string>
     <string name="text_name_initials"></string>
@@ -83,6 +82,11 @@
     <string name="channel_prompt_1">Pick a channel to wake up to</string>
     <string name="channel_prompt_2">Or just hit \"Save\" to proceed without one</string>
 
-<string name="settings_activity_title">Settings</string>
+    <string name="settings_activity_title">Settings</string>
+
+    <string name="dialog_confirm_changes">The alarm has not been set, are you sure you wish to discard changes?</string>
+    <string name="dialog_confirm_alarm_delete">Are you sure you wish to delete this alarm?</string>
+    <string name="dialog_confirm_friend_delete">Are you sure you wish to remove this friend?</string>
+    <string name="dialog_permissions_explainer">Some Android phones have power usage optimisation that interferes with Rooster, please check your phone settings - sometimes called \'Protected Apps\'.</string>
 
 </resources>
