@@ -287,7 +287,7 @@ public class BackgroundTaskIntentService extends IntentService {
         try {
             //https://firebase.google.com/docs/storage/android/download-files
             final StorageReference audioFileRef = mStorageRef.getStorage().getReferenceFromUrl(channelRooster.getAudio_file_url());
-            final String audioFileUniqueName = "audio" + RoosterUtils.createRandomFileName(5) + ".3gp";
+            final String audioFileUniqueName = Constants.FILENAME_PREFIX_ROOSTER_CONTENT + RoosterUtils.createRandomFileName(5) + ".3gp";
 
             final long FIVE_MEGABYTE = 5 * 1024 * 1024;
 
@@ -352,7 +352,7 @@ public class BackgroundTaskIntentService extends IntentService {
         try {
 
             StorageReference audioFileRef = mStorageRef.child("social_rooster_uploads/" + socialRooster.getAudio_file_url());
-            final String audioFileUniqueName = "audio" + RoosterUtils.createRandomFileName(5) + ".3gp";
+            final String audioFileUniqueName = Constants.FILENAME_PREFIX_ROOSTER_CONTENT + RoosterUtils.createRandomFileName(5) + ".3gp";
             final DatabaseReference queueRecordReference = FirebaseDatabase.getInstance().getReference()
                     .child("social_rooster_queue").child(mAuth.getCurrentUser().getUid()).child(socialRooster.getQueue_id());
 

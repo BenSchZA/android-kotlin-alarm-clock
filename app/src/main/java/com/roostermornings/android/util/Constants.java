@@ -107,4 +107,8 @@ public class Constants {
 
     //Storage
     public final static String STORAGE_USER_PROFILE_PICTURE = "users/profile_pictures/";
+
+    //Filenames
+    public final static String FILENAME_PREFIX_ROOSTER_TEMP_RECORDING = "RoosterRecording";
+    public final static String FILENAME_PREFIX_ROOSTER_CONTENT = "audio";
 }

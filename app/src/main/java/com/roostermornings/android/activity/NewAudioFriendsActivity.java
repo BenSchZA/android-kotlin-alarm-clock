@@ -63,7 +63,6 @@ public class NewAudioFriendsActivity extends BaseActivity {
     private RecyclerView.Adapter mAdapter;
     private String localFileString = "";
     private String firebaseIdToken = "";
-    private Boolean fileProcessed = false;
 
     Bundle extras;
 
@@ -157,14 +156,6 @@ public class NewAudioFriendsActivity extends BaseActivity {
     public void onDestroy() {
         super.onDestroy();
         if(mBound) unbindService(mUploadServiceConnection);
-        if(!fileProcessed) {
-            try {
-                final File localFile = new File(localFileString);
-                localFile.delete();
-            } catch(Exception e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     private ServiceConnection mUploadServiceConnection = new ServiceConnection() {
@@ -179,8 +170,6 @@ public class NewAudioFriendsActivity extends BaseActivity {
 
             //Start upload service thread task
             mUploadService.processAudioFile(firebaseIdToken, localFileString, mFriendsSelected);
-            //Show that file has been processed so that not deleted in onDestroy
-            fileProcessed = true;
         }
 
         // Called when the connection with the service disconnects unexpectedly

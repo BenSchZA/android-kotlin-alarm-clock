@@ -71,7 +71,6 @@ public class NewAudioRecordActivity extends BaseActivity {
     private int audioLength = 0;
 
     private String randomAudioFileName = "";
-    private Boolean fileProcessed = false;
 
     private int newAudioStatus = 0;
     private static final int NEW_AUDIO_RECORDING = 1;
@@ -134,15 +133,6 @@ public class NewAudioRecordActivity extends BaseActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(!fileProcessed) {
-            try {
-                if(mAudioSavePathInDevice == null) return;
-                final File localFile = new File(mAudioSavePathInDevice);
-                localFile.delete();
-            } catch(Exception e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     @OnClick(R.id.home_friends)
@@ -252,7 +242,7 @@ public class NewAudioRecordActivity extends BaseActivity {
             cumulativeAcceptableAmplitudeTime = 0;
             averageAmplitude = 0;
 
-            randomAudioFileName = RoosterUtils.createRandomFileName(5) + "RoosterRecording.3gp";
+            randomAudioFileName = RoosterUtils.createRandomFileName(5) + Constants.FILENAME_PREFIX_ROOSTER_TEMP_RECORDING + ".3gp";
 
             if (checkPermission()) {
 
@@ -398,8 +388,6 @@ public class NewAudioRecordActivity extends BaseActivity {
 
         intent.putExtras(bun);
         startActivity(intent);
-        //Show that file has been processed so that not deleted in onDestroy
-        fileProcessed = true;
     }
 
     private final Runnable startTimer = new Runnable() {
