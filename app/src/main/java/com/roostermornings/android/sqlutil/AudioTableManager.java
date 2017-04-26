@@ -223,8 +223,29 @@ public class AudioTableManager {
         Cursor cursor = db.rawQuery(selectQuery, null);
         ArrayList<DeviceAudioQueueItem> deviceAudioQueueItems = extractAudioFiles(cursor);
         db.close();
-        //TODO: returning empty! occasionally
+
         return deviceAudioQueueItems;
+    }
+
+    public ArrayList<String> extractAllAudioFileNames() {
+        SQLiteDatabase db = initDB();
+
+        ArrayList<String> audioFileNameList = new ArrayList<>();
+
+        String selectQuery = "SELECT " + AudioTableEntry.COLUMN_FILENAME + " FROM " + AudioTableEntry.TABLE_NAME + ";";
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                audioFileNameList.add(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_FILENAME)));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+
+        db.close();
+
+        return audioFileNameList;
     }
 
     public Boolean isChannelAudioInDatabase(String channelId) {

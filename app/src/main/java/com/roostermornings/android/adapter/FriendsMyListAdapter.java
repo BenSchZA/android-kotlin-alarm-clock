@@ -169,14 +169,14 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
         holder.btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!((BaseActivity)mContext).checkInternetConnection()) return;
+                if(!((BaseActivity)mActivity).checkInternetConnection()) return;
                 ArrayList<User> friendToSend = new ArrayList<>();
                 friendToSend.add(user);
-                Intent intent = new Intent(mContext, NewAudioRecordActivity.class);
+                Intent intent = new Intent(mActivity, NewAudioRecordActivity.class);
                 Bundle bun = new Bundle();
                 bun.putSerializable(Constants.EXTRA_FRIENDS_LIST, friendToSend);
                 intent.putExtras(bun);
-                mContext.startActivity(intent);
+                mActivity.startActivity(intent);
             }
         });
     }

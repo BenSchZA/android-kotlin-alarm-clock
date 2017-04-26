@@ -36,6 +36,7 @@ import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.InternetHelper;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Timer;
@@ -49,7 +50,7 @@ public class AudioService extends Service {
     // Binder given to clients
     private final IBinder mBinder = new LocalBinder();
 
-    private BroadcastReceiver receiver;
+    private static BroadcastReceiver receiver;
     private static final Timer timer = new Timer();
     private static final Timer downloadTimer = new Timer();
 
@@ -63,12 +64,12 @@ public class AudioService extends Service {
     private ArrayList<DeviceAudioQueueItem> channelAudioItems;
     private ArrayList<DeviceAudioQueueItem> socialAudioItems;
 
-    private final ArrayList<DeviceAudioQueueItem> audioItems = new ArrayList<>();
+    private static ArrayList<DeviceAudioQueueItem> audioItems = new ArrayList<>();
     private final AudioTableManager audioTableManager = new AudioTableManager(this);
     private final AudioTableController audioTableController = new AudioTableController(this);
     private final DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(this);
 
-    private DeviceAlarm alarm;
+    private static DeviceAlarm alarm;
     private int alarmCycle;
     private String alarmChannelUid;
     private String alarmUid;
@@ -124,7 +125,17 @@ public class AudioService extends Service {
     }
 
     public void startAlarmContent(String alarmUid) {
-        this.alarm = deviceAlarmTableManager.getAlarmSet(alarmUid).get(0);
+
+        //Check if audio already playing
+        try {
+            if (mediaPlayerRooster.isPlaying() || mediaPlayerDefault.isPlaying()) {
+                return;
+            }
+        } catch(IllegalStateException e) {
+            e.printStackTrace();
+        }
+
+        alarm = deviceAlarmTableManager.getAlarmSet(alarmUid).get(0);
         this.alarmChannelUid = deviceAlarmTableManager.getAlarmSet(alarmUid).get(0).getChannel();
         this.alarmUid = alarmUid;
 
@@ -146,7 +157,7 @@ public class AudioService extends Service {
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                //do something based on the intent's action
+
                 //Cancel download attempt timer and ensure BroadcastReceiver not re-triggered
                 try {
                     if (downloadTimer != null) downloadTimer.cancel();
@@ -157,28 +168,35 @@ public class AudioService extends Service {
                 } catch(IllegalArgumentException e) {
                     e.printStackTrace();
                 }
+
+                //Check if old content exists
+                if(audioItems.size() > 0) {
+                    playAlarmRoosters();
+                    return;
+                }
+
                 //Try append new content to end of existing content, if it fails - fail safe and play default alarm tone
                 try {
                     //Reorder channel and social queue according to user preferences
                     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                     if(sharedPreferences.getBoolean(Constants.USER_SETTINGS_ROOSTER_ORDER, false)) {
                         if (!mThis.channelAudioItems.isEmpty()) {
-                            mThis.audioItems.addAll(channelAudioItems);
+                            audioItems.addAll(channelAudioItems);
                         }
                         //If this alarm does not allow social roosters, move on to channel content
                         if (!mThis.socialAudioItems.isEmpty() && deviceAlarmTableManager.getAlarmSet(mThis.alarmUid).get(0).isSocial()) {
-                            mThis.audioItems.addAll(socialAudioItems);
+                            audioItems.addAll(socialAudioItems);
                         }
                     } else {
                         //If this alarm does not allow social roosters, move on to channel content
                         if (!mThis.socialAudioItems.isEmpty() && deviceAlarmTableManager.getAlarmSet(mThis.alarmUid).get(0).isSocial()) {
-                            mThis.audioItems.addAll(socialAudioItems);
+                            audioItems.addAll(socialAudioItems);
                         }
                         if (!mThis.channelAudioItems.isEmpty()) {
-                            mThis.audioItems.addAll(channelAudioItems);
+                            audioItems.addAll(channelAudioItems);
                         }
                     }
-                    if (mThis.audioItems.isEmpty()) {
+                    if (audioItems.isEmpty()) {
                         startDefaultAlarmTone();
                         return;
                     }
@@ -235,10 +253,10 @@ public class AudioService extends Service {
     private void playAlarmRoosters() {
 
         //Show the number of social and channel roosters combined
-        this.alarmCount = this.audioItems.size();
+        this.alarmCount = audioItems.size();
 
         //Check conditions for playing default tone: people must wake up!
-        if (this.audioItems == null || this.audioItems.isEmpty()) {
+        if (audioItems == null || audioItems.isEmpty()) {
             startDefaultAlarmTone();
             return;
         }
@@ -300,9 +318,9 @@ public class AudioService extends Service {
                             //set audio file entry in SQL db as listened; to be removed when AudioService ends
                             audioTableManager.setListened(mThis.audioItem.getId());
                             //Check if at end of queue, else play next file
-                            if (mThis.audioItems.size() == mThis.audioItems.indexOf(audioItem) + 1) {
+                            if (audioItems.size() == audioItems.indexOf(audioItem) + 1) {
                                 mThis.alarmCycle++;
-                                playRooster(mThis.audioItems.get(0));
+                                playRooster(audioItems.get(0));
                             } else{
                                 playRooster(getNextAudioItem());
                             }
@@ -318,23 +336,23 @@ public class AudioService extends Service {
             audioTableManager.setListened(audioItem.getId());
 
             //delete record from arraylist
-            mThis.audioItems.remove(audioItem);
+            audioItems.remove(audioItem);
         }
     }
 
     private DeviceAudioQueueItem getNextAudioItem(){
-        if (mThis.audioItems.size() == mThis.audioItems.indexOf(audioItem) + 1) {
-            return mThis.audioItems.get(0);
+        if (audioItems.size() == audioItems.indexOf(audioItem) + 1) {
+            return audioItems.get(0);
         } else {
-            return mThis.audioItems.get(mThis.audioItems.indexOf(audioItem) + 1);
+            return audioItems.get(audioItems.indexOf(audioItem) + 1);
         }
     }
 
     private DeviceAudioQueueItem getPreviousAudioItem() {
-        if (mThis.audioItems.indexOf(audioItem) - 1 < 0) {
-            return mThis.audioItems.get(mThis.audioItems.size() - 1);
+        if (audioItems.indexOf(audioItem) - 1 < 0) {
+            return audioItems.get(audioItems.size() - 1);
         } else{
-            return mThis.audioItems.get(mThis.audioItems.indexOf(audioItem) - 1);
+            return audioItems.get(audioItems.indexOf(audioItem) - 1);
         }
     }
 
@@ -391,17 +409,31 @@ public class AudioService extends Service {
 
     public void endService(ServiceConnection conn) {
         processListenedChannels();
-        //delete record and file of all listened audio files
+        //Delete record of all listened audio files
         for (DeviceAudioQueueItem audioItem :
              audioTableManager.selectListened()) {
             //Set the listened flag in firebase
             if(audioItem.getType() != 1) audioTableController.setListened(audioItem.getSender_id(), audioItem.getQueue_id());
             //Remove entry from SQL db
             audioTableManager.removeAudioEntry(audioItem);
-            //Specifically delete file here to avoid loop - what happens if file note deleted and entry only removed on success?
-            file = new File(getFilesDir(), audioItem.getFilename());
-            file.delete();
         }
+
+        //Delete all files not contained in SQL db
+        File[] files = getFilesDir().listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.contains(Constants.FILENAME_PREFIX_ROOSTER_CONTENT);
+            }
+        });
+        ArrayList<String> audioFileNames = audioTableManager.extractAllAudioFileNames();
+        if(audioFileNames != null) {
+            for (File file :
+                    files) {
+                if (audioFileNames.contains(file.getName()))
+                    file.delete();
+            }
+        }
+
         //delete record from arraylist
         audioItems.clear();
         //clear variables
@@ -493,6 +525,7 @@ public class AudioService extends Service {
 
         //Check that another alarm isn't already playing
         if(mediaPlayerRooster != null && mediaPlayerRooster.isPlaying()) return;
+        if(mediaPlayerDefault != null && mediaPlayerDefault.isPlaying()) return;
         foregroundNotification("Alarm ringtone playing");
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -534,7 +567,7 @@ public class AudioService extends Service {
                     startTimer();
                 }});
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             //If audio fails, vibrate instead - if that fails... well enjoy your sleep.
             startVibrate();
