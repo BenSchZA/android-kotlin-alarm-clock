@@ -40,6 +40,7 @@ import com.roostermornings.android.node_api.IHTTPClient;
 import com.roostermornings.android.util.Constants;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 
@@ -122,8 +123,6 @@ public class UploadService extends Service {
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        //Delete local temp file
-                        localFile.delete();
                         // Get a URL to the uploaded content
                         String firebaseStorageURL = file.getLastPathSegment();
 
@@ -139,8 +138,6 @@ public class UploadService extends Service {
                     @Override
                     public void onFailure(@NonNull Exception exception) {
                         // Handle unsuccessful upload
-                        //Delete local temp file
-                        localFile.delete();
                         Toast.makeText(getApplicationContext(), "Error uploading!", Toast.LENGTH_LONG).show();
                         endService();
                     }
@@ -148,6 +145,18 @@ public class UploadService extends Service {
     }
 
     private void endService(){
+        //Delete all temporary recording files
+        File[] files = getFilesDir().listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.contains(Constants.FILENAME_PREFIX_ROOSTER_TEMP_RECORDING);
+            }
+        });
+        for (File file:
+             files) {
+            file.delete();
+        }
+
         stopForeground(true);
         handlerThread.quitSafely();
         this.stopSelf();

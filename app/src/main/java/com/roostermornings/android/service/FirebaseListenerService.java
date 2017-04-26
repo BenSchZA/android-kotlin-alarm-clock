@@ -78,36 +78,37 @@ public class FirebaseListenerService extends Service {
             };
             mRequestsReference.addChildEventListener(friendRequestListener);
 
-            DatabaseReference mRoosterReference = mDatabase
-                    .child("social_rooster_queue").child(getFirebaseUser().getUid());
-
-            ChildEventListener roosterListener = new ChildEventListener() {
-                @Override
-                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    BaseActivity.setBadge(getApplicationContext(), ((BaseApplication)getApplication()).getNotificationFlag(Constants.FLAG_ROOSTERCOUNT));
-                }
-
-                @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                    BaseActivity.setBadge(getApplicationContext(), ((BaseApplication)getApplication()).getNotificationFlag(Constants.FLAG_ROOSTERCOUNT));
-                }
-
-                @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot) {
-                    BaseActivity.setBadge(getApplicationContext(), ((BaseApplication)getApplication()).getNotificationFlag(Constants.FLAG_ROOSTERCOUNT));
-                }
-
-                @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-                    BaseActivity.setBadge(getApplicationContext(), ((BaseApplication)getApplication()).getNotificationFlag(Constants.FLAG_ROOSTERCOUNT));
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            };
-            mRoosterReference.addChildEventListener(roosterListener);
+            //TODO: implement badge count
+//            DatabaseReference mRoosterReference = mDatabase
+//                    .child("social_rooster_queue").child(getFirebaseUser().getUid());
+//
+//            ChildEventListener roosterListener = new ChildEventListener() {
+//                @Override
+//                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+//                    BaseActivity.setBadge(getApplicationContext(), ((BaseApplication)getApplication()).getNotificationFlag(Constants.FLAG_ROOSTERCOUNT));
+//                }
+//
+//                @Override
+//                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+//                    BaseActivity.setBadge(getApplicationContext(), ((BaseApplication)getApplication()).getNotificationFlag(Constants.FLAG_ROOSTERCOUNT));
+//                }
+//
+//                @Override
+//                public void onChildRemoved(DataSnapshot dataSnapshot) {
+//                    BaseActivity.setBadge(getApplicationContext(), ((BaseApplication)getApplication()).getNotificationFlag(Constants.FLAG_ROOSTERCOUNT));
+//                }
+//
+//                @Override
+//                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+//                    BaseActivity.setBadge(getApplicationContext(), ((BaseApplication)getApplication()).getNotificationFlag(Constants.FLAG_ROOSTERCOUNT));
+//                }
+//
+//                @Override
+//                public void onCancelled(DatabaseError databaseError) {
+//
+//                }
+//            };
+//            mRoosterReference.addChildEventListener(roosterListener);
         }
 
         return START_STICKY;
