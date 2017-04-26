@@ -102,10 +102,10 @@ public class NewAlarmFragment1 extends BaseFragment{
         // Required empty public constructor
     }
 
-    public static NewAlarmFragment1 newInstance(String param1) {
+    public static NewAlarmFragment1 newInstance(String userUid) {
         NewAlarmFragment1 fragment = new NewAlarmFragment1();
         Bundle args = new Bundle();
-        args.putString(ARG_USER_UID_PARAM, param1);
+        args.putString(ARG_USER_UID_PARAM, userUid);
         fragment.setArguments(args);
         return fragment;
     }
@@ -125,7 +125,7 @@ public class NewAlarmFragment1 extends BaseFragment{
         mAlarm.setHour(hour);
         mAlarm.setMinute(minute);
 
-        mTimePickerDialog = new TimePickerDialog(BaseApplication.AppContext, R.style.TimeDialogTheme, new TimePickerDialog.OnTimeSetListener() {
+        mTimePickerDialog = new TimePickerDialog(getActivity(), R.style.TimeDialogTheme, new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                 setAlarmTime(hourOfDay, minute);
@@ -182,9 +182,7 @@ public class NewAlarmFragment1 extends BaseFragment{
 
     @OnClick(R.id.new_alarm_time)
     public void onTimeClick() {
-
-        openTimePicker();
-
+        mTimePickerDialog.show();
     }
 
     public void updateAlarmUIIfEdit() {
@@ -206,7 +204,7 @@ public class NewAlarmFragment1 extends BaseFragment{
             myAlarmsListAdapter.notifyDataSetChanged();
 
             startHomeActivity();
-            Toast.makeText(BaseApplication.AppContext, "Alarm deleted.", Toast.LENGTH_SHORT);
+            Toast.makeText(BaseApplication.AppContext, "Alarm deleted.", Toast.LENGTH_SHORT).show();
         } catch (NullPointerException e) {
             e.printStackTrace();
             if(BuildConfig.DEBUG) Toast.makeText(BaseApplication.AppContext, "Oi! Don't delete me. Delete alarm failed!", Toast.LENGTH_SHORT);
@@ -309,14 +307,6 @@ public class NewAlarmFragment1 extends BaseFragment{
         }
         mListener.setAlarmDetails(mAlarm);
     }
-
-    private void openTimePicker() {
-
-        //mTimePickerDialog.setTitle(getString(R.string.new_alarm_set_time));
-        mTimePickerDialog.show();
-
-    }
-
 
     public void setEditedAlarmSettings() {
 

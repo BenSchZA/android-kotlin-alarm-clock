@@ -116,6 +116,7 @@ public class DeviceAlarmTableManager {
 
         alarmList = extractAlarms(cursor);
 
+        cursor.close();
         db.close();
         return alarmList;
     }
@@ -144,6 +145,7 @@ public class DeviceAlarmTableManager {
 
         alarmList = extractAlarms(cursor);
 
+        cursor.close();
         db.close();
         return alarmList;
     }
@@ -179,6 +181,7 @@ public class DeviceAlarmTableManager {
 
         alarmList = extractAlarms(cursor);
 
+        cursor.close();
         db.close();
         return alarmList;
     }
@@ -251,18 +254,6 @@ public class DeviceAlarmTableManager {
         db.close();
     }
 
-    public Cursor getAlarms() {
-        SQLiteDatabase db = initDB();
-
-        String selectQuery = "SELECT * FROM " + AlarmTableEntry.TABLE_NAME + ";";
-
-        Cursor cursor = db.rawQuery(selectQuery, null);
-
-        db.close();
-
-        return cursor;
-    }
-
     public DeviceAlarm getNextPendingAlarm() {
         SQLiteDatabase db = initDB();
 
@@ -273,6 +264,7 @@ public class DeviceAlarmTableManager {
         List<DeviceAlarm> alarmList = extractAlarms(cursor);
 
         db.close();
+        cursor.close();
         return alarmList.get(0);
     }
 
@@ -286,6 +278,7 @@ public class DeviceAlarmTableManager {
 
         List<DeviceAlarm> alarmSets = extractAlarms(cursor);
         db.close();
+        cursor.close();
         return alarmSets;
     }
 
@@ -301,6 +294,7 @@ public class DeviceAlarmTableManager {
         alarmList = extractAlarms(cursor);
 
         db.close();
+        cursor.close();
         return alarmList;
     }
 

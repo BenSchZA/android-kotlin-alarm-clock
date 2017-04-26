@@ -323,10 +323,6 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         backgroundTaskReceiver.scheduleBackgroundUpdateNotificationsTask(this, false);
         //Set default application settings preferences - don't overwrite existing if false
         setPreferenceManagerDefaultSettings(true);
-        //Clear shared preferences
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        //TODO:
-        editor.apply();
         //Go to splash activity and onboarding
         Intent intent = new Intent(this, SplashActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
