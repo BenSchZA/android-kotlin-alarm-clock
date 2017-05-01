@@ -104,7 +104,9 @@ public class NewAudioRecordActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_new_audio);
 
-        setDayNight();
+        setDayNightTheme();
+        setButtonBarSelection();
+
         setNewAudioStatus(NEW_AUDIO_READY_RECORD);
     }
 

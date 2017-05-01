@@ -59,7 +59,8 @@ public class MessageStatusActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_message_status);
 
-        setDayNight();
+        setDayNightTheme();
+        setButtonBarSelection();
 
         mAdapter = new MessageStatusListAdapter(mRoosters, MessageStatusActivity.this, getApplication());
 

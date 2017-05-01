@@ -45,16 +45,29 @@ and no social roosters are received"
             android:inputType="numberDecimal" />
     </PreferenceCategory>
     <PreferenceCategory
-        android:title="Data usage"
-        android:key="pref_key_data_usage">
-        <CheckBoxPreference
-            android:key="pref_key_download_on_data"
-            android:summary="Allow the download/upload of content on a mobile data connection"
-            android:title="Download/upload on mobile data"
-            android:defaultValue="true"
-            android:persistent="true">
-        </CheckBoxPreference>
-        </PreferenceCategory>
+        android:title="User Interface"
+        android:key="pref_key_user_interface">
+        <ListPreference
+            android:title="Day/night theme"
+            android:key="pref_key_day_night_theme"
+            android:persistent="true"
+            android:summary="Select whether to display the day/night theme automatically by time and timezone, or select it manually"
+            android:dialogTitle="Select day/night theme option"
+            android:entries="@array/user_settings_day_night_theme_entries"
+            android:entryValues="@array/user_settings_day_night_theme_entry_values"
+            android:defaultValue="@array/user_settings_day_night_theme_default_values" />
+    </PreferenceCategory>
+    <!--<PreferenceCategory-->
+        <!--android:title="Data usage"-->
+        <!--android:key="pref_key_data_usage">-->
+        <!--<CheckBoxPreference-->
+            <!--android:key="pref_key_download_on_data"-->
+            <!--android:summary="Allow the download/upload of content on a mobile data connection"-->
+            <!--android:title="Download/upload on mobile data"-->
+            <!--android:defaultValue="true"-->
+            <!--android:persistent="true">-->
+        <!--</CheckBoxPreference>-->
+        <!--</PreferenceCategory>-->
     <PreferenceCategory
         android:title="About"
         android:key="pref_key_about"

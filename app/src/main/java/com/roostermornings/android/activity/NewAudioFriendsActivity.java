@@ -13,14 +13,11 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -31,16 +28,11 @@ import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.NewAudioFriendsListAdapter;
-import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.service.UploadService;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.domain.Users;
 import com.roostermornings.android.util.Constants;
 
-import org.w3c.dom.Text;
-
-import java.io.File;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -51,8 +43,6 @@ import retrofit.Call;
 import retrofit.Callback;
 import retrofit.Response;
 import retrofit.Retrofit;
-
-import static com.facebook.FacebookSdk.getApplicationContext;
 
 public class NewAudioFriendsActivity extends BaseActivity {
 
@@ -82,7 +72,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
         initialize(R.layout.activity_new_audio_friends);
 
         setupToolbar(null, null);
-        setDayNight();
+        setDayNightTheme();
 
         getFirebaseUser().getToken(true)
                 .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
