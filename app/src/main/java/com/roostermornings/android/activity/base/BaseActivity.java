@@ -45,7 +45,10 @@ import com.mobsandgeeks.saripaar.ValidationError;
 import com.mobsandgeeks.saripaar.Validator;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
+import com.roostermornings.android.activity.FriendsFragmentActivity;
+import com.roostermornings.android.activity.MessageStatusActivity;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
+import com.roostermornings.android.activity.NewAudioRecordActivity;
 import com.roostermornings.android.activity.SplashActivity;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.service.FirebaseListenerService;
@@ -424,11 +427,38 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         }
     }
 
-    public void setupToolbar(TextView toolbarTitle, String title) {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        if(getSupportActionBar() != null) getSupportActionBar().setDisplayShowTitleEnabled(false);
-        if(toolbarTitle != null && title != null) toolbarTitle.setText(title);
+    public boolean setupToolbar(TextView toolbarTitle, String title) {
+        try {
+            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
+            if (getSupportActionBar() != null)
+                getSupportActionBar().setDisplayShowTitleEnabled(false);
+            if (toolbarTitle != null && title != null) toolbarTitle.setText(title);
+
+            return true;
+        } catch(NullPointerException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean setButtonBarSelection() {
+        try {
+            if (this instanceof MyAlarmsFragmentActivity)
+                findViewById(R.id.home_my_alarms).setSelected(true);
+            else if (this instanceof MessageStatusActivity)
+                findViewById(R.id.home_my_uploads).setSelected(true);
+            else if (this instanceof NewAudioRecordActivity)
+                findViewById(R.id.home_record_audio).setSelected(true);
+            else if (this instanceof FriendsFragmentActivity)
+                findViewById(R.id.home_friends).setSelected(true);
+            else
+                return false;
+            return true;
+        } catch(NullPointerException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public void setDayNight() {
@@ -444,6 +474,62 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
             }
         } catch (NullPointerException e) {
             e.printStackTrace();
+        }
+    }
+
+    public boolean setDayNightTheme() {
+        try {
+            String[] dayNightThemeArrayEntries = getResources().getStringArray(R.array.user_settings_day_night_theme_entry_values);
+            SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(BaseApplication.AppContext);
+
+            if (dayNightThemeArrayEntries[0].equals(defaultSharedPreferences.getString(Constants.USER_SETTINGS_DAY_NIGHT_THEME, ""))) {
+                if (calendar.get(Calendar.HOUR_OF_DAY) >= 17) {
+                    return setThemeNight();
+                } else if (calendar.get(Calendar.HOUR_OF_DAY) > 7) {
+                    return setThemeDay();
+                }
+            } else if (dayNightThemeArrayEntries[1].equals(defaultSharedPreferences.getString(Constants.USER_SETTINGS_DAY_NIGHT_THEME, ""))) {
+                return setThemeDay();
+            } else if (dayNightThemeArrayEntries[2].equals(defaultSharedPreferences.getString(Constants.USER_SETTINGS_DAY_NIGHT_THEME, ""))) {
+                return setThemeNight();
+            } else {
+                if (calendar.get(Calendar.HOUR_OF_DAY) >= 17) {
+                    return setThemeNight();
+                } else if (calendar.get(Calendar.HOUR_OF_DAY) > 7) {
+                    return setThemeDay();
+                }
+            }
+
+            return true;
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private boolean setThemeDay(){
+        try {
+            if(findViewById(R.id.main_content) != null) findViewById(R.id.main_content).setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.main_background_layer_list_day, null));
+            if(findViewById(R.id.toolbar) != null) findViewById(R.id.toolbar).setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.rooster_blue, null));
+            if(findViewById(R.id.tabs) != null) findViewById(R.id.tabs).setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.rooster_blue, null));
+
+            return true;
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private boolean setThemeNight(){
+        try {
+            if(findViewById(R.id.main_content) != null) findViewById(R.id.main_content).setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.main_background_layer_list_night, null));
+            if(findViewById(R.id.toolbar) != null) findViewById(R.id.toolbar).setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.rooster_dark_blue, null));
+            if(findViewById(R.id.tabs) != null) findViewById(R.id.tabs).setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.rooster_dark_blue, null));
+
+            return true;
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 }

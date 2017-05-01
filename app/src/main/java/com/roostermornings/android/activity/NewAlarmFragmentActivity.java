@@ -13,10 +13,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.DialogAction;
@@ -65,7 +63,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_new_alarm);
 
-        setDayNight();
+        setDayNightTheme();
 
         if (hasGingerbread()) {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
