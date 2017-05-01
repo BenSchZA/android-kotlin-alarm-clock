@@ -93,9 +93,6 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         //inject Dagger dependencies
         baseApplication.getRoosterApplicationComponent().inject(this);
 
-        //Set default application settings preferences - don't overwrite existing if false
-        setPreferenceManagerDefaultSettings(false);
-
         //get reference to Firebase database
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
@@ -109,17 +106,10 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     // User is signed in
-                    //Start Firebase listeners applicable to all activities - primarily to update notifications
-                    if(!isServiceRunning(FirebaseListenerService.class))
-                        startService(new Intent(getApplicationContext(), FirebaseListenerService.class));
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                 } else {
                     // User is signed out
                     Log.d(TAG, "onAuthStateChanged:signed_out");
-//                    Intent intent = new Intent(BaseActivity.this, SplashActivity.class);
-//                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//                    startActivity(intent);
-//                    finish();
                 }
             }
         };
@@ -127,20 +117,6 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     }
 
     public BaseActivity(){}
-
-    private void setPreferenceManagerDefaultSettings(Boolean overwrite) {
-        // ensure user settings are set to default once when new user
-        // As long as you set the third argument to false, you can safely call this method
-        // every time your activity starts without overriding the user's saved preferences
-        // by resetting them to the defaults. However, if you set it to true, you will
-        // override any previous values with the defaults.
-
-        if(overwrite) {
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.remove("pref_key_user_settings").apply();
-        }
-        PreferenceManager.setDefaultValues(this, R.xml.application_user_settings, overwrite);
-    }
 
     public boolean checkInternetConnection() {
         if(!checkMobileDataConnection()) {
@@ -310,27 +286,9 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     }
 
     public void signOut() {
-        //Ensure no audio remaining from old user
-        AudioTableManager audioTableManager = new AudioTableManager(this);
-        audioTableManager.removeAllSocialAudioItems();
-        audioTableManager.removeAllChannelAudioFiles();
-        //Ensure no alarms left from old user
-        DeviceAlarmController deviceAlarmController = new DeviceAlarmController(this);
-        deviceAlarmController.deleteAllLocalAlarms();
-        //End user session
+        //End user session - auth state listener in BaseApplication will be triggered
+        // and necessary signout procedure performed
         mAuth.signOut();
-        //Cancel background task intents
-        BackgroundTaskReceiver backgroundTaskReceiver = new BackgroundTaskReceiver();
-        backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(this, false);
-        backgroundTaskReceiver.scheduleBackgroundDailyTask(this, false);
-        backgroundTaskReceiver.scheduleBackgroundUpdateNotificationsTask(this, false);
-        //Set default application settings preferences - don't overwrite existing if false
-        setPreferenceManagerDefaultSettings(true);
-        //Go to splash activity and onboarding
-        Intent intent = new Intent(this, SplashActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
     }
 
     private boolean isServiceRunning(Class<?> serviceClass) {
@@ -458,22 +416,6 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         } catch(NullPointerException e) {
             e.printStackTrace();
             return false;
-        }
-    }
-
-    public void setDayNight() {
-        try {
-            if (calendar.get(Calendar.HOUR_OF_DAY) >= 17) {
-                if(findViewById(R.id.main_content) != null) findViewById(R.id.main_content).setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.main_background_layer_list_night, null));
-                if(findViewById(R.id.toolbar) != null) findViewById(R.id.toolbar).setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.rooster_dark_blue, null));
-                if(findViewById(R.id.tabs) != null) findViewById(R.id.tabs).setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.rooster_dark_blue, null));
-            } else if (calendar.get(Calendar.HOUR_OF_DAY) > 7) {
-                if(findViewById(R.id.main_content) != null) findViewById(R.id.main_content).setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.main_background_layer_list_day, null));
-                if(findViewById(R.id.toolbar) != null) findViewById(R.id.toolbar).setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.rooster_blue, null));
-                if(findViewById(R.id.tabs) != null) findViewById(R.id.tabs).setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.rooster_blue, null));
-            }
-        } catch (NullPointerException e) {
-            e.printStackTrace();
         }
     }
 
