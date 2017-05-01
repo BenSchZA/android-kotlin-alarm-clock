@@ -38,5 +38,4 @@ public interface RoosterApplicationComponent {
     //Each method may have a Qualifier annotation as well.
 
     SharedPreferences sharedPreferences();
-
 }
