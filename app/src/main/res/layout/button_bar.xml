@@ -44,7 +44,8 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
             android:padding="@dimen/spacing_normal_large"
-            android:soundEffectsEnabled="true"/>
+            android:soundEffectsEnabled="true"
+            android:contentDescription="My alarms"/>
 
     </FrameLayout>
 
@@ -64,7 +65,8 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
             android:padding="@dimen/spacing_normal_large"
-            android:soundEffectsEnabled="true"/>
+            android:soundEffectsEnabled="true"
+            android:contentDescription="My social roosters"/>
 
     </FrameLayout>
 
@@ -84,7 +86,8 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
             android:padding="@dimen/spacing_normal_large"
-            android:soundEffectsEnabled="true"/>
+            android:soundEffectsEnabled="true"
+            android:contentDescription="Record audio"/>
 
     </FrameLayout>
 
@@ -110,7 +113,8 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
                 android:padding="@dimen/spacing_normal_large"
-                android:soundEffectsEnabled="true"/>
+                android:soundEffectsEnabled="true"
+                android:contentDescription="My friends"/>
 
             <ImageView
                 android:id="@+id/notification"

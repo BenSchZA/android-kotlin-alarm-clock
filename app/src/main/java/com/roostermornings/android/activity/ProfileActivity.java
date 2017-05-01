@@ -5,7 +5,6 @@
 
 package com.roostermornings.android.activity;
 
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -21,9 +20,7 @@ import android.support.v4.content.FileProvider;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -38,20 +35,16 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
-import com.roostermornings.android.domain.User;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.MyContactsController;
-import com.roostermornings.android.util.RoosterUtils;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -61,9 +54,7 @@ import butterknife.OnClick;
 import butterknife.OnTextChanged;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
-import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
-import static android.provider.MediaStore.EXTRA_OUTPUT;
 import static java.text.DateFormat.getDateTimeInstance;
 
 public class ProfileActivity extends BaseActivity {
@@ -84,7 +75,7 @@ public class ProfileActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_profile);
 
-        setDayNight();
+        setDayNightTheme();
 
         //Set toolbar title
         setupToolbar(toolbarTitle, "My Profile");

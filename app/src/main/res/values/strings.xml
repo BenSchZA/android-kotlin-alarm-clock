@@ -89,4 +89,18 @@
     <string name="dialog_confirm_friend_delete">Are you sure you wish to remove this friend?</string>
     <string name="dialog_permissions_explainer">Some Android phones have power usage optimisation that interferes with Rooster, please check your phone settings - sometimes called \'Protected Apps\'.</string>
 
+    <string-array name="user_settings_day_night_theme_entries">
+        <item>Automatically set by time and timezone</item>
+        <item>Day theme (light)</item>
+        <item>Night theme (dark)</item>
+    </string-array>
+    <string-array name="user_settings_day_night_theme_entry_values">
+        <item>USER_SETTINGS_DAY_NIGHT_THEME_AUTOMATIC</item>
+        <item>USER_SETTINGS_DAY_THEME</item>
+        <item>USER_SETTINGS_NIGHT_THEME</item>
+    </string-array>
+    <string-array name="user_settings_day_night_theme_default_values">
+        <item>USER_SETTINGS_DAY_NIGHT_THEME_AUTOMATIC</item>
+    </string-array>
+
 </resources>

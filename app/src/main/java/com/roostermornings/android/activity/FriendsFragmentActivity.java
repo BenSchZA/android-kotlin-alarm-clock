@@ -105,7 +105,8 @@ public class FriendsFragmentActivity extends BaseActivity implements
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_friends);
 
-        setDayNight();
+        setDayNightTheme();
+        setButtonBarSelection();
 
         //Set toolbar title
         setupToolbar(toolbarTitle, getString(R.string.friends));

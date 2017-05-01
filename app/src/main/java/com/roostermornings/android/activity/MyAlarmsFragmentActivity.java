@@ -72,7 +72,9 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_my_alarms);
 
-        setDayNight();
+        setDayNightTheme();
+        setButtonBarSelection();
+
         buttonAddAlarm.setAnimation(AnimationUtils.loadAnimation(this, R.anim.pulse));
 
         //Set toolbar title

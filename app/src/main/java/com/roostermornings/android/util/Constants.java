@@ -13,6 +13,7 @@ public class Constants {
 
     //User settings
     //These are used in application_user_settings, but ensure strings are correct
+    public final static String USER_SETTINGS_DAY_NIGHT_THEME  = "pref_key_day_night_theme";
     public final static String USER_SETTINGS_VIBRATE = "pref_key_alarm_vibrate";
     public final static String USER_SETTINGS_DEFAULT_TONE = "pref_key_alarm_default_tone";
     public final static String USER_SETTINGS_DOWNLOAD_ON_DATA = "pref_key_download_on_data";
