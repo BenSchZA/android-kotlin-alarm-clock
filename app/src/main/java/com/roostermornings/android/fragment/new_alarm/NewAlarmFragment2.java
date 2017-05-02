@@ -29,7 +29,6 @@ import com.roostermornings.android.domain.Channel;
 import com.roostermornings.android.domain.ChannelRooster;
 import com.roostermornings.android.fragment.IAlarmSetListener;
 import com.roostermornings.android.fragment.base.BaseFragment;
-import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -106,8 +105,7 @@ public class NewAlarmFragment2 extends BaseFragment {
 
                     if (channel.isActive()) {
                         if(channel.isNew_alarms_start_at_first_iteration()) {
-                            final DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(BaseApplication.AppContext);
-                            Integer iteration = deviceAlarmTableManager.getChannelStoryIteration(channel.getUid());
+                            Integer iteration = baseApplication.deviceAlarmTableManager.getChannelStoryIteration(channel.getUid());
                             if(iteration == null || iteration <= 0) iteration = 1;
                             getChannelRoosterData(channel, iteration);
                         } else {
@@ -176,14 +174,13 @@ public class NewAlarmFragment2 extends BaseFragment {
     }
 
     private void findNextValidChannelRooster(TreeMap<Integer,ChannelRooster> channelIterationMap, Channel channel, Integer iteration) {
-        final DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(BaseApplication.AppContext);
         //Check head and tail of naturally sorted TreeMap for next valid channel content
         SortedMap<Integer,ChannelRooster> tailMap = channelIterationMap.tailMap(iteration);
         SortedMap<Integer,ChannelRooster> headMap = channelIterationMap.headMap(iteration);
         if(!tailMap.isEmpty()) {
             //User is starting story at next valid entry
             //Set SQL entry for iteration to current valid story iteration, to be incremented on play
-            deviceAlarmTableManager.setChannelStoryIteration(channel.getUid(), tailMap.firstKey());
+            baseApplication.deviceAlarmTableManager.setChannelStoryIteration(channel.getUid(), tailMap.firstKey());
             //Retrieve channel audio
             ChannelRooster channelRooster = channelIterationMap.get(tailMap.firstKey());
             channelRooster.setSelected(false);
@@ -192,7 +189,7 @@ public class NewAlarmFragment2 extends BaseFragment {
         else if(!headMap.isEmpty()) {
             //User is starting story from beginning again, at valid entry
             //Set SQL entry for iteration to current valid story iteration, to be incremented on play
-            deviceAlarmTableManager.setChannelStoryIteration(channel.getUid(), headMap.firstKey());
+            baseApplication.deviceAlarmTableManager.setChannelStoryIteration(channel.getUid(), headMap.firstKey());
             //Retrieve channel audio
             ChannelRooster channelRooster = channelIterationMap.get(headMap.firstKey());
             channelRooster.setSelected(false);

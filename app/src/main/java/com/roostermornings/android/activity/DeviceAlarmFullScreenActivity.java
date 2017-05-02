@@ -31,7 +31,6 @@ import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
-import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.util.Constants;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
@@ -40,8 +39,6 @@ import butterknife.BindView;
 import butterknife.OnClick;
 
 public class DeviceAlarmFullScreenActivity extends BaseActivity {
-
-    DeviceAlarmController deviceAlarmController;
 
     public static final String TAG = DeviceAlarmFullScreenActivity.class.getSimpleName();
 
@@ -110,7 +107,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
-        deviceAlarmController.snoozeAlarm(alarmUid, false);
+        baseApplication.deviceAlarmController.snoozeAlarm(alarmUid, false);
         mAudioService.snoozeAudioState();
         if(mBound) unbindService(mAudioServiceConnection);
         mBound = false;
@@ -119,7 +116,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
     @OnClick(R.id.alarm_snooze_button)
     protected void onAlarmSnoozeButtonClicked() {
-        deviceAlarmController.snoozeAlarm(alarmUid, false);
+        baseApplication.deviceAlarmController.snoozeAlarm(alarmUid, false);
         mAudioService.snoozeAudioState();
         if(mBound) unbindService(mAudioServiceConnection);
         mBound = false;
@@ -153,8 +150,6 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
             AudioService.LocalBinder binder = (AudioService.LocalBinder) service;
             mAudioService = binder.getService();
             mBound = true;
-
-            deviceAlarmController = new DeviceAlarmController(getApplicationContext());
 
             //Replace image and name with message if no Roosters etc.
             setDefaultDisplayProfile();

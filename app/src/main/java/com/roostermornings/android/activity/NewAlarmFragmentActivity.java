@@ -52,8 +52,6 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
     private Fragment mFragment1;
     private Fragment mFragment2;
     private Menu menu;
-    private DeviceAlarmController deviceAlarmController = new DeviceAlarmController(this);
-    DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(this);
 
     @BindView(R.id.toolbar_title)
     TextView toolbarTitle;
@@ -196,22 +194,22 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 if(alarmChannel != null) alarmChannelUID = alarmChannel.getId();
 
                 //Get current iteration so that not overwritten on refresh/sync
-                Integer iteration = deviceAlarmTableManager.getChannelStoryIteration(alarmChannelUID);
+                Integer iteration = baseApplication.deviceAlarmTableManager.getChannelStoryIteration(alarmChannelUID);
                 //if this is an existing alarm, delete from local storage before inserting another record
                 if (mEditAlarmId.length() != 0
                         && mAlarm.getUid().length() > 0) {
-                    deviceAlarmController.deleteAlarmSetGlobal(mAlarm.getUid());
+                    baseApplication.deviceAlarmController.deleteAlarmSetGlobal(mAlarm.getUid());
                 }
 
                 //Set enabled flag to true on new or edited alarm
                 mAlarm.setEnabled(true);
 
-                deviceAlarmController.registerAlarmSet(mAlarm.isEnabled(), alarmKey, mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring(), alarmChannelUID, mAlarm.isAllow_friend_audio_files());
+                baseApplication.deviceAlarmController.registerAlarmSet(mAlarm.isEnabled(), alarmKey, mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring(), alarmChannelUID, mAlarm.isAllow_friend_audio_files());
                 //Ensure iteration is not overwritten
-                if(iteration != null) deviceAlarmTableManager.setChannelStoryIteration(alarmChannelUID, iteration);
+                if(iteration != null) baseApplication.deviceAlarmTableManager.setChannelStoryIteration(alarmChannelUID, iteration);
 
                 //Update firebase
-                database.getReference(String.format("alarms/%s/%s", mAuth.getCurrentUser().getUid(), alarmKey)).setValue(mAlarm);
+                database.getReference(String.format("alarms/%s/%s", mCurrentUser.getUid(), alarmKey)).setValue(mAlarm);
 
                 //Download any social or channel audio files
                 startActionBackgroundDownload(this);
@@ -281,11 +279,11 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
 
         if (mEditAlarmId.length() == 0) return;
 
-        List<DeviceAlarm> tempAlarms = deviceAlarmTableManager.getAlarmSet(mEditAlarmId);
+        List<DeviceAlarm> tempAlarms = baseApplication.deviceAlarmTableManager.getAlarmSet(mEditAlarmId);
         if(tempAlarms.size() < 1) return;
-        mAlarm.fromDeviceAlarm(tempAlarms.get(0), deviceAlarmTableManager.isSetEnabled(mEditAlarmId));
+        mAlarm.fromDeviceAlarm(tempAlarms.get(0), baseApplication.deviceAlarmTableManager.isSetEnabled(mEditAlarmId));
         if(mAlarm.isRecurring()) {
-            List<Integer> alarmDays = deviceAlarmTableManager.getAlarmClassDays(mEditAlarmId);
+            List<Integer> alarmDays = baseApplication.deviceAlarmTableManager.getAlarmClassDays(mEditAlarmId);
             mAlarm.setAlarmDayFromDeviceAlarm(alarmDays);
         }
 
