@@ -47,14 +47,17 @@ public class BaseFragment extends Fragment implements Validator.ValidationListen
     @Inject
     public SharedPreferences sharedPreferences;
 
+    public static BaseApplication baseApplication;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        baseApplication = (BaseApplication)getActivity().getApplication();
+
         getDatabaseReference();
 
-        ((BaseApplication) getActivity().getApplication()).getRoosterApplicationComponent().inject(this);
-
+        baseApplication.getRoosterApplicationComponent().inject(this);
     }
 
     protected View initiate(LayoutInflater inflater, int resource, ViewGroup root, boolean attachToRoot){

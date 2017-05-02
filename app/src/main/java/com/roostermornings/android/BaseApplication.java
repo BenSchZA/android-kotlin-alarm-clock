@@ -17,25 +17,32 @@ import android.preference.PreferenceManager;
 import android.service.notification.NotificationListenerService;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.stetho.Stetho;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.roostermornings.android.activity.SplashActivity;
 import com.roostermornings.android.dagger.DaggerRoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationModule;
+import com.roostermornings.android.domain.User;
 import com.roostermornings.android.node_api.IHTTPClient;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.service.FirebaseListenerService;
 import com.roostermornings.android.sqldata.AudioTableHelper;
 import com.roostermornings.android.sqldata.DeviceAlarmTableHelper;
+import com.roostermornings.android.sqlutil.AudioTableController;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
+import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.FontsOverride;
 
@@ -66,6 +73,14 @@ public class BaseApplication extends android.app.Application {
     private static int roosterCount;
     private static int friendRequests;
 
+    public static User mCurrentUser;
+
+    public DeviceAlarmTableManager deviceAlarmTableManager;
+    public DeviceAlarmController deviceAlarmController;
+    public AudioTableManager audioTableManager;
+    public AudioTableController audioTableController;
+    public BackgroundTaskReceiver backgroundTaskReceiver;
+
     @Inject
     public SharedPreferences sharedPreferences;
 
@@ -75,6 +90,13 @@ public class BaseApplication extends android.app.Application {
 
         //Context to be used in all fragments that could be detached
         AppContext = getApplicationContext();
+
+        //Classes used throughout application
+        deviceAlarmTableManager = new DeviceAlarmTableManager(AppContext);
+        deviceAlarmController = new DeviceAlarmController(AppContext);
+        audioTableManager = new AudioTableManager(AppContext);
+        audioTableController = new AudioTableController(AppContext);
+        backgroundTaskReceiver = new BackgroundTaskReceiver();
 
         sharedPreferences = getSharedPreferences(this.getString(R.string.preferences_key), Context.MODE_PRIVATE);
 
@@ -133,8 +155,8 @@ public class BaseApplication extends android.app.Application {
 //            dbAlarm.close();
         }
 
-        //Set default application settings preferences - don't overwrite existing if false
-        setPreferenceManagerDefaultSettings(false);
+        //get reference to Firebase database
+        mDatabase = FirebaseDatabase.getInstance().getReference();
 
         // Add Firebase auth state listener
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -145,6 +167,9 @@ public class BaseApplication extends android.app.Application {
                     // User is signed in
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
 
+                    //retrieve static User for current user
+                    retrieveMyUserDetails();
+
                     startBackgroundServices();
                     // Start Firebase listeners applicable to all activities - primarily to update notifications
                     if(!isServiceRunning(FirebaseListenerService.class))
@@ -152,7 +177,6 @@ public class BaseApplication extends android.app.Application {
                 } else {
                     // User is signed out
                     Log.d(TAG, "onAuthStateChanged:signed_out");
-                    signOut();
                 }
             }
         };
@@ -161,43 +185,32 @@ public class BaseApplication extends android.app.Application {
         mAuth.addAuthStateListener(mAuthListener);
     }
 
-    public void signOut() {
-        try {
-            //Ensure no audio remaining from old user
-            AudioTableManager audioTableManager = new AudioTableManager(this);
-            audioTableManager.removeAllSocialAudioItems();
-            audioTableManager.removeAllChannelAudioFiles();
-            //Ensure no alarms left from old user
-            DeviceAlarmController deviceAlarmController = new DeviceAlarmController(this);
-            deviceAlarmController.deleteAllLocalAlarms();
-            //Cancel background task intents
-            BackgroundTaskReceiver backgroundTaskReceiver = new BackgroundTaskReceiver();
-            backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(this, false);
-            backgroundTaskReceiver.scheduleBackgroundDailyTask(this, false);
-            backgroundTaskReceiver.scheduleBackgroundUpdateNotificationsTask(this, false);
-            //Set default application settings preferences - don't overwrite existing if false
-            setPreferenceManagerDefaultSettings(true);
-        } catch (NullPointerException e) {
-            e.printStackTrace();
+    private void retrieveMyUserDetails() {
+        ValueEventListener userListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                mCurrentUser = dataSnapshot.getValue(User.class);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+                Toast.makeText(getApplicationContext(), "Failed to load user.",
+                        Toast.LENGTH_SHORT).show();
+            }
+        };
+
+        if (getFirebaseUser() != null) {
+            DatabaseReference thisUserReference = mDatabase
+                    .child("users").child(getFirebaseUser().getUid());
+            thisUserReference.keepSynced(true);
+            thisUserReference.addValueEventListener(userListener);
         }
-        //Go to splash activity and onboarding
-        Intent intent = new Intent(BaseApplication.this, SplashActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
     }
 
-    private void setPreferenceManagerDefaultSettings(Boolean overwrite) {
-        // ensure user settings are set to default once when new user
-        // As long as you set the third argument to false, you can safely call this method
-        // every time your activity starts without overriding the user's saved preferences
-        // by resetting them to the defaults. However, if you set it to true, you will
-        // override any previous values with the defaults.
-
-        if(overwrite) {
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.remove("pref_key_user_settings").apply();
-        }
-        PreferenceManager.setDefaultValues(this, R.xml.application_user_settings, overwrite);
+    private FirebaseUser getFirebaseUser() {
+        if (mAuth == null) mAuth = FirebaseAuth.getInstance();
+        return mAuth.getCurrentUser();
     }
 
     private boolean isServiceRunning(Class<?> serviceClass) {

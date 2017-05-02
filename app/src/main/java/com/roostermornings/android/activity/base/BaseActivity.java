@@ -50,12 +50,8 @@ import com.roostermornings.android.activity.MessageStatusActivity;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.activity.NewAudioRecordActivity;
 import com.roostermornings.android.activity.SplashActivity;
-import com.roostermornings.android.receiver.BackgroundTaskReceiver;
-import com.roostermornings.android.service.FirebaseListenerService;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.node_api.IHTTPClient;
-import com.roostermornings.android.sqlutil.AudioTableManager;
-import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.InternetHelper;
 
@@ -81,6 +77,8 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
 
     public static User mCurrentUser;
 
+    public static BaseApplication baseApplication;
+
     @Inject
     public SharedPreferences sharedPreferences;
 
@@ -88,16 +86,18 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        final BaseApplication baseApplication = (BaseApplication) getApplication();
+        baseApplication = (BaseApplication) getApplication();
 
         //inject Dagger dependencies
         baseApplication.getRoosterApplicationComponent().inject(this);
 
+        //Set default application settings preferences - don't overwrite existing if false
+        setPreferenceManagerDefaultSettings(false);
+
+        mCurrentUser = baseApplication.mCurrentUser;
+
         //get reference to Firebase database
         mDatabase = FirebaseDatabase.getInstance().getReference();
-
-        //retrieve static User for current user
-        retrieveMyUserDetails();
 
         // [START auth_state_listener]
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -113,7 +113,6 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
                 }
             }
         };
-
     }
 
     public BaseActivity(){}
@@ -198,29 +197,6 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         return mAuth.getCurrentUser();
     }
 
-    private void retrieveMyUserDetails() {
-        ValueEventListener userListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                mCurrentUser = dataSnapshot.getValue(User.class);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                Toast.makeText(getApplicationContext(), "Failed to load user.",
-                        Toast.LENGTH_SHORT).show();
-            }
-        };
-
-        if (getFirebaseUser() != null) {
-            DatabaseReference thisUserReference = mDatabase
-                    .child("users").child(getFirebaseUser().getUid());
-            thisUserReference.keepSynced(true);
-            thisUserReference.addValueEventListener(userListener);
-        }
-    }
-
     @Override
     public void onStart() {
         super.onStart();
@@ -234,6 +210,18 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         if (mAuthListener != null) {
             mAuth.removeAuthStateListener(mAuthListener);
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(getFirebaseUser() != null) startServices(true);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        startServices(false);
     }
 
     public void showProgressDialog() {
@@ -286,9 +274,43 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     }
 
     public void signOut() {
+        try {
+            //Ensure no audio remaining from old user
+            baseApplication.audioTableManager.removeAllSocialAudioItems();
+            baseApplication.audioTableManager.removeAllChannelAudioFiles();
+            //Ensure no alarms left from old user
+            baseApplication.deviceAlarmController.deleteAllLocalAlarms();
+            //Cancel background task intents
+            baseApplication.backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(this, false);
+            baseApplication.backgroundTaskReceiver.scheduleBackgroundDailyTask(this, false);
+            baseApplication.backgroundTaskReceiver.scheduleBackgroundUpdateNotificationsTask(this, false);
+            //Set default application settings preferences - don't overwrite existing if false
+            setPreferenceManagerDefaultSettings(true);
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
         //End user session - auth state listener in BaseApplication will be triggered
         // and necessary signout procedure performed
         mAuth.signOut();
+
+        //Go to splash activity and onboarding
+        Intent intent = new Intent(BaseActivity.this, SplashActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+    }
+
+    private void setPreferenceManagerDefaultSettings(Boolean overwrite) {
+        // ensure user settings are set to default once when new user
+        // As long as you set the third argument to false, you can safely call this method
+        // every time your activity starts without overriding the user's saved preferences
+        // by resetting them to the defaults. However, if you set it to true, you will
+        // override any previous values with the defaults.
+
+        if(overwrite) {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.remove("pref_key_user_settings").apply();
+        }
+        PreferenceManager.setDefaultValues(this, R.xml.application_user_settings, overwrite);
     }
 
     private boolean isServiceRunning(Class<?> serviceClass) {

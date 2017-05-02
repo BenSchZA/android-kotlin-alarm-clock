@@ -319,12 +319,14 @@ public final class DeviceAlarmController {
     }
 
     private void removeFirebaseAlarm(String setId) {
+        if(mCurrentUser == null) return;
         DatabaseReference alarmReference = FirebaseDatabase.getInstance().getReference()
                 .child("alarms").child(mCurrentUser.getUid()).child(setId);
         alarmReference.removeValue();
     }
 
     private void updateFirebaseAlarmEnabled(String setId, boolean enabled) {
+        if(mCurrentUser == null) return;
         DatabaseReference alarmReference = FirebaseDatabase.getInstance().getReference()
                 .child("alarms").child(mCurrentUser.getUid()).child(setId);
 
