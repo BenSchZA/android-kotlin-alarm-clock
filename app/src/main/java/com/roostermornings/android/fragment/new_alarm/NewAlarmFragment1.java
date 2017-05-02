@@ -88,8 +88,6 @@ public class NewAlarmFragment1 extends BaseFragment{
     private String mUserUidParam;
     private IAlarmSetListener mListener;
     Alarm mAlarm = new Alarm();
-    DeviceAlarmController deviceAlarmController;
-    DeviceAlarmTableManager deviceAlarmTableManager;
 
     Calendar cal = Calendar.getInstance();
 
@@ -116,9 +114,6 @@ public class NewAlarmFragment1 extends BaseFragment{
         if (getArguments() != null) {
             mUserUidParam = getArguments().getString(ARG_USER_UID_PARAM);
         }
-
-        deviceAlarmController = new DeviceAlarmController(BaseApplication.AppContext);
-        deviceAlarmTableManager = new DeviceAlarmTableManager(BaseApplication.AppContext);
 
         mAlarm = mListener.getAlarmDetails();
         //Set current time
@@ -186,7 +181,7 @@ public class NewAlarmFragment1 extends BaseFragment{
     }
 
     public void updateAlarmUIIfEdit() {
-        if(deviceAlarmTableManager.isSetInDB(NewAlarmFragmentActivity.getCurrentAlarmId())) {
+        if(baseApplication.deviceAlarmTableManager.isSetInDB(NewAlarmFragmentActivity.getCurrentAlarmId())) {
             mListener.retrieveAlarmDetailsFromSQL();
             deleteAlarm.setVisibility(View.VISIBLE);
         }
@@ -195,10 +190,8 @@ public class NewAlarmFragment1 extends BaseFragment{
     @OnClick(R.id.new_alarm_fragment1_delete_alarm)
     public void deleteAlarm() {
         try {
-            DeviceAlarmController deviceAlarmController = new DeviceAlarmController(BaseApplication.AppContext);
-
             //Remove alarm *set* from local SQL database using retrieved Uid from firebase && Remove alarm from firebase
-            deviceAlarmController.deleteAlarmSetGlobal(mAlarm.getUid());
+            baseApplication.deviceAlarmController.deleteAlarmSetGlobal(mAlarm.getUid());
 
             MyAlarmsListAdapter myAlarmsListAdapter = new MyAlarmsListAdapter();
             myAlarmsListAdapter.notifyDataSetChanged();

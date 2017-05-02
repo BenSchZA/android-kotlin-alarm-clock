@@ -36,10 +36,7 @@ import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.MyAlarmsListAdapter;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.AlarmChannel;
-import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
-import com.roostermornings.android.sqlutil.DeviceAlarmController;
-import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.util.Constants;
 
 import java.util.ArrayList;
@@ -61,8 +58,6 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     FloatingActionButton buttonAddAlarm;
 
     private final ArrayList<Alarm> mAlarms = new ArrayList<>();
-    private DeviceAlarmController deviceAlarmController;
-    private DeviceAlarmTableManager deviceAlarmTableManager;
     private RecyclerView.Adapter mAdapter;
 
     private BroadcastReceiver receiver;
@@ -95,9 +90,6 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         //Check for new Firebase datachange notifications and register broadcast receiver
         updateRequestNotification();
 
-        deviceAlarmController = new DeviceAlarmController(this);
-        deviceAlarmTableManager = new DeviceAlarmTableManager(this);
-
         Bundle extras = getIntent().getExtras();
         if (extras != null && extras.containsKey("message")) {
             String fcm_message = extras.getString("message", "");
@@ -115,7 +107,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         //Clear snooze if action
         if(Constants.ACTION_CANCEL_SNOOZE.equals(getIntent().getAction())) {
             try {
-                deviceAlarmController.snoozeAlarm(extras.getString(Constants.EXTRA_ALARMID), true);
+                baseApplication.deviceAlarmController.snoozeAlarm(extras.getString(Constants.EXTRA_ALARMID), true);
             } catch(NullPointerException e) {
                 e.printStackTrace();
             }
@@ -135,15 +127,15 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                     if(alarmChannel != null) alarmChannelUID = alarmChannel.getId();
 
                     //If alarm from firebase does not exist locally, create it
-                    if(!deviceAlarmTableManager.isSetInDB(alarm.getUid())) {
-                        deviceAlarmController.registerAlarmSet(alarm.isEnabled(), alarm.getUid(), alarm.getHour(), alarm.getMinute(),
+                    if(!baseApplication.deviceAlarmTableManager.isSetInDB(alarm.getUid())) {
+                        baseApplication.deviceAlarmController.registerAlarmSet(alarm.isEnabled(), alarm.getUid(), alarm.getHour(), alarm.getMinute(),
                                 alarm.getDays(), alarm.isRecurring(), alarmChannelUID, alarm.isAllow_friend_audio_files());
                     }
 
                     //Check SQL db to see if all alarms in set have fired
-                    alarm.setEnabled(deviceAlarmTableManager.isSetEnabled(alarm.getUid()));
+                    alarm.setEnabled(baseApplication.deviceAlarmTableManager.isSetEnabled(alarm.getUid()));
                     //Set set enabled flag and don't notify user
-                    deviceAlarmController.setSetEnabled(alarm.getUid(), alarm.isEnabled(), false);
+                    baseApplication.deviceAlarmController.setSetEnabled(alarm.getUid(), alarm.isEnabled(), false);
 
                     //Add alarm to adapter display arraylist and notify adapter of change
                     mAlarms.add(alarm);
@@ -152,9 +144,9 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                     updateRoosterNotification();
                 }
                 //Recreate all enabled alarms as failsafe
-                deviceAlarmController.rebootAlarms();
+                baseApplication.deviceAlarmController.rebootAlarms();
                 //Case: local has an alarm that firebase doesn't Result: delete local alarm
-                deviceAlarmController.syncAlarmSetGlobal(mAlarms);
+                baseApplication.deviceAlarmController.syncAlarmSetGlobal(mAlarms);
             }
 
             @Override
@@ -172,12 +164,10 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     }
 
     private void updateRoosterNotification() {
-        AudioTableManager audioTableManager = new AudioTableManager(this);
-        Integer roosterCount = audioTableManager.countSocialAudioFiles();
+        Integer roosterCount = baseApplication.audioTableManager.countSocialAudioFiles();
 
         if (roosterCount > 0) {
-            DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(getApplicationContext());
-            DeviceAlarm deviceAlarm  = deviceAlarmTableManager.getNextPendingAlarm();
+            DeviceAlarm deviceAlarm  = baseApplication.deviceAlarmTableManager.getNextPendingAlarm();
 
             if(deviceAlarm == null) for (Alarm alarm: mAlarms) alarm.setUnseen_roosters(0);
             else {
@@ -198,11 +188,10 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 //do something based on the intent's action
-                Integer roosterCount = ((BaseApplication) getApplication()).getNotificationFlag(Constants.FLAG_ROOSTERCOUNT);
+                Integer roosterCount = baseApplication.getNotificationFlag(Constants.FLAG_ROOSTERCOUNT);
 
                 if(roosterCount > 0){
-                    DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(getApplicationContext());
-                    DeviceAlarm deviceAlarm  = deviceAlarmTableManager.getNextPendingAlarm();
+                    DeviceAlarm deviceAlarm  = baseApplication.deviceAlarmTableManager.getNextPendingAlarm();
 
                     if(deviceAlarm == null) return;
                     for (Alarm alarm:
@@ -282,7 +271,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
     public void toggleAlarmSetEnable(Alarm alarm, boolean enabled) {
         //Toggle alarm set enabled
-        deviceAlarmController.setSetEnabled(alarm.getUid(), enabled, true);
+        baseApplication.deviceAlarmController.setSetEnabled(alarm.getUid(), enabled, true);
         //Set adapter arraylist item to enabled
         mAlarms.get(mAlarms.indexOf(alarm)).setEnabled(enabled);
         //Update notification of pending social roosters
@@ -314,9 +303,8 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
     public void deleteAlarm(String alarmId) {
         try {
-            DeviceAlarmController deviceAlarmController = new DeviceAlarmController(this);
             //Remove alarm *set* from local SQL database using retrieved Uid from firebase && Remove alarm from firebase
-            deviceAlarmController.deleteAlarmSetGlobal(alarmId);
+            baseApplication.deviceAlarmController.deleteAlarmSetGlobal(alarmId);
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
