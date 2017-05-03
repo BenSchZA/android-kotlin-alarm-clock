@@ -37,6 +37,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.fragment.friends.FriendsInviteFragment3;
@@ -49,6 +50,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -96,14 +99,33 @@ public class FriendsFragmentActivity extends BaseActivity implements
     FriendsRequestFragment2 friendsInviteFragment2;
     FriendsInviteFragment3 friendsInviteFragment3;
 
+    @Inject BaseApplication baseApplication;
+
+    @Override
+    protected void inject(RoosterApplicationComponent component) {
+        component.inject(this);
+    }
+
     public FriendsFragmentActivity() {
 
+    }
+
+    public interface FriendsInviteInterface {
+        //Send invite to Rooster user from contact list
+        void inviteUser(Friend inviteFriend);
+    }
+
+    public interface FriendsRequestInterface {
+        //Accept friend request and update Firebase DB
+        void acceptFriendRequest(Friend acceptFriend);
+        void rejectFriendRequest(Friend rejectFriend);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_friends);
+        inject(((BaseApplication)getApplication()).getRoosterApplicationComponent());
 
         setDayNightTheme();
         setButtonBarSelection();
@@ -145,7 +167,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
                 if (position == 1) {
                     setTabNotification(position, false);
                     setButtonBarNotification(false);
-                    ((BaseApplication) getApplication()).setNotificationFlag(0, Constants.FLAG_FRIENDREQUESTS);
+                    baseApplication.setNotificationFlag(0, Constants.FLAG_FRIENDREQUESTS);
                 } else if(position == 2) {
                     friendsInviteFragment3.requestGetContacts();
                 }
@@ -399,22 +421,6 @@ public class FriendsFragmentActivity extends BaseActivity implements
         }
     }
 
-    //Send invite to Rooster user from contact list
-    public void inviteUser(Friend inviteFriend) {
-
-        String inviteUrl = String.format("friend_requests_received/%s/%s", inviteFriend.getUid(), mCurrentUser.getUid());
-        String currentUserUrl = String.format("friend_requests_sent/%s/%s", mCurrentUser.getUid(), inviteFriend.getUid());
-
-        //Create friend object from current signed in user
-        Friend currentUserFriend = new Friend(mCurrentUser.getUid(), mCurrentUser.getUser_name(), mCurrentUser.getProfile_pic(), mCurrentUser.getCell_number());
-
-        //Append to received and sent request list
-        mDatabase.getDatabase().getReference(inviteUrl).setValue(currentUserFriend);
-        mDatabase.getDatabase().getReference(currentUserUrl).setValue(inviteFriend);
-
-        Toast.makeText(this, inviteFriend.getUser_name() + " invited!", Toast.LENGTH_LONG).show();
-    }
-
     //Delete friend from Firebase user friend list
     public void deleteFriend(User deleteFriend) {
 
@@ -424,48 +430,5 @@ public class FriendsFragmentActivity extends BaseActivity implements
         //Clear current user's and friend's friend list
         mDatabase.getDatabase().getReference(currentUserUrl).setValue(null);
         mDatabase.getDatabase().getReference(friendUserUrl).setValue(null);
-    }
-
-    //Accept friend request and update Firebase DB
-    public void acceptFriendRequest(Friend acceptFriend) {
-
-        String currentUserUrl = String.format("users/%s/friends", mCurrentUser.getUid());
-        String friendUserUrl = String.format("users/%s/friends", acceptFriend.getUid());
-
-        //Create friend object from current signed in user
-        Friend currentUserFriend = new Friend(mCurrentUser.getUid(), mCurrentUser.getUser_name(), mCurrentUser.getProfile_pic(), mCurrentUser.getCell_number());
-
-        //Update current user and friend entry as: uid:boolean
-        Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put(acceptFriend.getUid(), true);
-        mDatabase.getDatabase().getReference(currentUserUrl).updateChildren(childUpdates);
-        childUpdates.clear();
-
-        childUpdates.put(currentUserFriend.getUid(), true);
-        mDatabase.getDatabase().getReference(friendUserUrl).updateChildren(childUpdates);
-        childUpdates.clear();
-
-        String receivedUrl = String.format("friend_requests_received/%s/%s", mCurrentUser.getUid(), acceptFriend.getUid());
-        String sentUrl = String.format("friend_requests_sent/%s/%s", acceptFriend.getUid(), mCurrentUser.getUid());
-
-        //Clear received and sent request list
-        mDatabase.getDatabase().getReference(receivedUrl).setValue(null);
-        mDatabase.getDatabase().getReference(sentUrl).setValue(null);
-
-        //Notify user that friend request accepted
-        Toast.makeText(this, acceptFriend.getUser_name() + "'s friend request accepted!", Toast.LENGTH_LONG).show();
-    }
-
-    public void rejectFriendRequest(Friend rejectFriend) {
-
-        String receivedUrl = String.format("friend_requests_received/%s/%s", mCurrentUser.getUid(), rejectFriend.getUid());
-        String sentUrl = String.format("friend_requests_sent/%s/%s", rejectFriend.getUid(), mCurrentUser.getUid());
-
-        //Clear received and sent request list
-        mDatabase.getDatabase().getReference(receivedUrl).setValue(null);
-        mDatabase.getDatabase().getReference(sentUrl).setValue(null);
-
-        //Notify user that friend request accepted
-        Toast.makeText(this, rejectFriend.getUser_name() + "'s friend request rejected!", Toast.LENGTH_LONG).show();
     }
 }

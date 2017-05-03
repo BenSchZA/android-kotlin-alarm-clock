@@ -30,6 +30,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.roostermornings.android.activity.SplashActivity;
+import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.activity.base.BaseActivity_MembersInjector;
 import com.roostermornings.android.dagger.DaggerRoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationModule;
@@ -62,9 +64,6 @@ public class BaseApplication extends android.app.Application {
     public IHTTPClient mAPIService;
     protected FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
-    protected DatabaseReference mDatabase;
-
-    public static Context AppContext;
 
     //Global flag set from FirebaseListenerService to indicate new notification
     private static int notificationFlag;
@@ -74,31 +73,24 @@ public class BaseApplication extends android.app.Application {
     private static int friendRequests;
 
     public static User mCurrentUser;
+    public static DatabaseReference mDatabase;
 
-    public DeviceAlarmTableManager deviceAlarmTableManager;
-    public DeviceAlarmController deviceAlarmController;
-    public AudioTableManager audioTableManager;
-    public AudioTableController audioTableController;
-    public BackgroundTaskReceiver backgroundTaskReceiver;
-
-    @Inject
-    public SharedPreferences sharedPreferences;
+    @Inject BackgroundTaskReceiver backgroundTaskReceiver;
+    @Inject SharedPreferences sharedPreferences;
+    public static Context AppContext;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        //Context to be used in all fragments that could be detached
-        AppContext = getApplicationContext();
+        AppContext = getBaseContext();
 
-        //Classes used throughout application
-        deviceAlarmTableManager = new DeviceAlarmTableManager(AppContext);
-        deviceAlarmController = new DeviceAlarmController(AppContext);
-        audioTableManager = new AudioTableManager(AppContext);
-        audioTableController = new AudioTableController(AppContext);
-        backgroundTaskReceiver = new BackgroundTaskReceiver();
+        //Set database persistence to keep offline alarm edits synced
+        //Calls to setPersistenceEnabled() must be made before any other usage of FirebaseDatabase instance
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
-        sharedPreferences = getSharedPreferences(this.getString(R.string.preferences_key), Context.MODE_PRIVATE);
+        //Database reference to be used everywhere
+        mDatabase = FirebaseDatabase.getInstance().getReference();
 
         Fabric.with(this, new Crashlytics());
 
@@ -125,6 +117,8 @@ public class BaseApplication extends android.app.Application {
                 .roosterApplicationModule(new RoosterApplicationModule(this))
                 .build();
 
+        roosterApplicationComponent.inject(this);
+
         //Create Retrofit API class for managing Node API
         mRetrofit = new Retrofit.Builder()
                 .baseUrl(getResources().getString(R.string.node_api_url))
@@ -132,9 +126,6 @@ public class BaseApplication extends android.app.Application {
                 .build();
 
         mAPIService = mRetrofit.create(IHTTPClient.class);
-
-        //set database persistence to keep offline alarm edits synced
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
         updateNotification();
 
@@ -154,9 +145,6 @@ public class BaseApplication extends android.app.Application {
 //            dbAudio.close();
 //            dbAlarm.close();
         }
-
-        //get reference to Firebase database
-        mDatabase = FirebaseDatabase.getInstance().getReference();
 
         // Add Firebase auth state listener
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -224,7 +212,6 @@ public class BaseApplication extends android.app.Application {
     }
 
     private void startBackgroundServices() {
-        BackgroundTaskReceiver backgroundTaskReceiver = new BackgroundTaskReceiver();
         backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(getApplicationContext(), true);
         backgroundTaskReceiver.scheduleBackgroundDailyTask(getApplicationContext(), true);
         backgroundTaskReceiver.scheduleBackgroundUpdateNotificationsTask(getApplicationContext(), true);

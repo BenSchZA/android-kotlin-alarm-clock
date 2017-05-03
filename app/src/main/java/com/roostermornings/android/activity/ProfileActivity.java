@@ -33,8 +33,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.MyContactsController;
 import com.squareup.picasso.Callback;
@@ -71,9 +73,15 @@ public class ProfileActivity extends BaseActivity {
     String mCurrentPhotoPath;
 
     @Override
+    protected void inject(RoosterApplicationComponent component) {
+        component.inject(this);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_profile);
+        inject(((BaseApplication)getApplication()).getRoosterApplicationComponent());
 
         setDayNightTheme();
 

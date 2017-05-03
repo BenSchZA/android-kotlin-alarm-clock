@@ -25,10 +25,13 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.adapter.FriendsRequestListAdapter;
+import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.fragment.base.BaseFragment;
 
 import java.util.ArrayList;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 
@@ -55,6 +58,13 @@ public class FriendsRequestFragment2 extends BaseFragment {
 
     private OnFragmentInteractionListener mListener;
 
+    @Inject Context AppContext;
+
+    @Override
+    protected void inject(RoosterApplicationComponent component) {
+        component.inject(this);
+    }
+
     public FriendsRequestFragment2() {
         // Required empty public constructor
     }
@@ -74,6 +84,7 @@ public class FriendsRequestFragment2 extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        inject(((BaseApplication)getActivity().getApplication()).getRoosterApplicationComponent());
 
         if (getArguments() != null) {
         }
@@ -93,8 +104,8 @@ public class FriendsRequestFragment2 extends BaseFragment {
         super.onViewCreated(view, savedInstanceState);
 
         sortNamesFriends(mUsers);
-        mAdapter = new FriendsRequestListAdapter(mUsers, BaseApplication.AppContext);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(BaseApplication.AppContext));
+        mAdapter = new FriendsRequestListAdapter(mUsers);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(AppContext));
         mRecyclerView.setAdapter(mAdapter);
     }
 
@@ -116,7 +127,7 @@ public class FriendsRequestFragment2 extends BaseFragment {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                showToast(BaseApplication.AppContext, "Failed to load user.", Toast.LENGTH_SHORT);
+                showToast(AppContext, "Failed to load user.", Toast.LENGTH_SHORT);
             }
         };
         mRequestsReference.addValueEventListener(friendsListener);

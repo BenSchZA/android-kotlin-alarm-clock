@@ -50,8 +50,16 @@ import com.roostermornings.android.activity.MessageStatusActivity;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.activity.NewAudioRecordActivity;
 import com.roostermornings.android.activity.SplashActivity;
+import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.User;
+import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.node_api.IHTTPClient;
+import com.roostermornings.android.receiver.BackgroundTaskReceiver;
+import com.roostermornings.android.service.UploadService;
+import com.roostermornings.android.sqlutil.AudioTableController;
+import com.roostermornings.android.sqlutil.AudioTableManager;
+import com.roostermornings.android.sqlutil.DeviceAlarmController;
+import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.InternetHelper;
 
@@ -61,10 +69,12 @@ import java.util.List;
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
+import dagger.Module;
+import dagger.Provides;
 
 import static com.roostermornings.android.util.RoosterUtils.notNull;
 
-public class BaseActivity extends AppCompatActivity implements Validator.ValidationListener {
+public abstract class BaseActivity extends AppCompatActivity implements Validator.ValidationListener, BaseFragment.BaseActivityListener, UploadService.BaseActivityListener {
 
     private Dialog progressDialog;
     public FirebaseAuth mAuth;
@@ -77,18 +87,21 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
 
     public static User mCurrentUser;
 
-    public static BaseApplication baseApplication;
+    @Inject Context AppContext;
+    @Inject SharedPreferences sharedPreferences;
+    @Inject DeviceAlarmController deviceAlarmController;
+    @Inject AudioTableManager audioTableManager;
+    @Inject BackgroundTaskReceiver backgroundTaskReceiver;
 
-    @Inject
-    public SharedPreferences sharedPreferences;
+    protected abstract void inject(RoosterApplicationComponent component);
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        baseApplication = (BaseApplication) getApplication();
+        BaseApplication baseApplication = (BaseApplication) getApplication();
 
-        //inject Dagger dependencies
+        //Inject Dagger dependencies
         baseApplication.getRoosterApplicationComponent().inject(this);
 
         //Set default application settings preferences - don't overwrite existing if false
@@ -97,7 +110,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         mCurrentUser = baseApplication.mCurrentUser;
 
         //get reference to Firebase database
-        mDatabase = FirebaseDatabase.getInstance().getReference();
+        mDatabase = baseApplication.mDatabase;
 
         // [START auth_state_listener]
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -117,6 +130,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
 
     public BaseActivity(){}
 
+    @Override
     public boolean checkInternetConnection() {
         if(!checkMobileDataConnection()) {
             Toast.makeText(getApplicationContext(), "'Download/upload on mobile data' is disabled in Settings, " +
@@ -147,7 +161,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
                             Log.i(TAG, "Firebase CONNECTED");
                         } else {
                             Log.i(TAG, "Firebase NOT CONNECTED");
-                            Toast.makeText(BaseApplication.AppContext, "The application could not connect to the " +
+                            Toast.makeText(AppContext, "The application could not connect to the " +
                                     "Rooster backend, please check your internet connection and try again.",
                                     Toast.LENGTH_LONG).show();
                         }
@@ -185,6 +199,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
 
     }
 
+    @Override
     public IHTTPClient apiService() {
 
         BaseApplication baseApplication = (BaseApplication) getApplication();
@@ -192,6 +207,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         return baseApplication.getAPIService();
     }
 
+    @Override
     public FirebaseUser getFirebaseUser() {
         if (mAuth == null) mAuth = FirebaseAuth.getInstance();
         return mAuth.getCurrentUser();
@@ -212,17 +228,18 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
         }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        if(getFirebaseUser() != null) startServices(true);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        startServices(false);
-    }
+    //TODO
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        if(getFirebaseUser() != null) startServices(true);
+//    }
+//
+//    @Override
+//    public void onPause() {
+//        super.onPause();
+//        startServices(false);
+//    }
 
     public void showProgressDialog() {
         if (progressDialog == null) {
@@ -276,14 +293,14 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     public void signOut() {
         try {
             //Ensure no audio remaining from old user
-            baseApplication.audioTableManager.removeAllSocialAudioItems();
-            baseApplication.audioTableManager.removeAllChannelAudioFiles();
+            audioTableManager.removeAllSocialAudioItems();
+            audioTableManager.removeAllChannelAudioFiles();
             //Ensure no alarms left from old user
-            baseApplication.deviceAlarmController.deleteAllLocalAlarms();
+            deviceAlarmController.deleteAllLocalAlarms();
             //Cancel background task intents
-            baseApplication.backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(this, false);
-            baseApplication.backgroundTaskReceiver.scheduleBackgroundDailyTask(this, false);
-            baseApplication.backgroundTaskReceiver.scheduleBackgroundUpdateNotificationsTask(this, false);
+            backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(this, false);
+            backgroundTaskReceiver.scheduleBackgroundDailyTask(this, false);
+            backgroundTaskReceiver.scheduleBackgroundUpdateNotificationsTask(this, false);
             //Set default application settings preferences - don't overwrite existing if false
             setPreferenceManagerDefaultSettings(true);
         } catch (NullPointerException e) {
@@ -444,7 +461,7 @@ public class BaseActivity extends AppCompatActivity implements Validator.Validat
     public boolean setDayNightTheme() {
         try {
             String[] dayNightThemeArrayEntries = getResources().getStringArray(R.array.user_settings_day_night_theme_entry_values);
-            SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(BaseApplication.AppContext);
+            SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(AppContext);
 
             if (dayNightThemeArrayEntries[0].equals(defaultSharedPreferences.getString(Constants.USER_SETTINGS_DAY_NIGHT_THEME, ""))) {
                 if (calendar.get(Calendar.HOUR_OF_DAY) >= 17) {

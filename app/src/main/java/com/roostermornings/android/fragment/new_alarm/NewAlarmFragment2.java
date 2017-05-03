@@ -23,12 +23,15 @@ import com.google.firebase.database.ValueEventListener;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.adapter.ChannelsListAdapter;
+import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.AlarmChannel;
 import com.roostermornings.android.domain.Channel;
 import com.roostermornings.android.domain.ChannelRooster;
 import com.roostermornings.android.fragment.IAlarmSetListener;
 import com.roostermornings.android.fragment.base.BaseFragment;
+import com.roostermornings.android.sqlutil.DeviceAlarmController;
+import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,8 +39,9 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import butterknife.BindView;
+import javax.inject.Inject;
 
+import butterknife.BindView;
 
 public class NewAlarmFragment2 extends BaseFragment {
 
@@ -57,8 +61,33 @@ public class NewAlarmFragment2 extends BaseFragment {
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
+    @Inject DeviceAlarmTableManager deviceAlarmTableManager;
+    @Inject Context AppContext;
+
+    @Override
+    protected void inject(RoosterApplicationComponent component) {
+        component.inject(this);
+    }
+
     public NewAlarmFragment2() {
         // Required empty public constructor
+    }
+
+    public interface ChannelInterface {
+//            public void setSelectedChannel(ChannelRooster channelRooster) {
+//Alarm alarm = mListener.getAlarmDetails();
+//        alarm.setChannel(new AlarmChannel(channelRooster.getName(), channelRooster.getChannel_uid()));
+//        mListener.setAlarmDetails(alarm);
+//    }
+//
+//    public void clearSelectedChannel() {
+//        Alarm alarm = mListener.getAlarmDetails();
+//        alarm.setChannel(new AlarmChannel());
+//        mListener.setAlarmDetails(alarm);
+//    }
+
+        void setSelectedChannel(ChannelRooster channelRooster);
+        void clearSelectedChannel();
     }
 
     public static NewAlarmFragment2 newInstance(String param1) {
@@ -72,6 +101,8 @@ public class NewAlarmFragment2 extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        inject(((BaseApplication)getActivity().getApplication()).getRoosterApplicationComponent());
+
         if (getArguments() != null) {
             mUserUidParam = getArguments().getString(ARG_USER_UID_PARAM);
         }
@@ -90,10 +121,10 @@ public class NewAlarmFragment2 extends BaseFragment {
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
         mRecyclerView.setHasFixedSize(true);
-        mAdapter = new ChannelsListAdapter(BaseApplication.AppContext, channelRoosters, NewAlarmFragment2.this);
+        mAdapter = new ChannelsListAdapter(channelRoosters, getActivity());
 
         // use a linear layout manager
-        mLayoutManager = new LinearLayoutManager(BaseApplication.AppContext);
+        mLayoutManager = new LinearLayoutManager(AppContext);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mAdapter);
 
@@ -105,7 +136,7 @@ public class NewAlarmFragment2 extends BaseFragment {
 
                     if (channel.isActive()) {
                         if(channel.isNew_alarms_start_at_first_iteration()) {
-                            Integer iteration = baseApplication.deviceAlarmTableManager.getChannelStoryIteration(channel.getUid());
+                            Integer iteration = deviceAlarmTableManager.getChannelStoryIteration(channel.getUid());
                             if(iteration == null || iteration <= 0) iteration = 1;
                             getChannelRoosterData(channel, iteration);
                         } else {
@@ -120,7 +151,7 @@ public class NewAlarmFragment2 extends BaseFragment {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                showToast(BaseApplication.AppContext, "Failed to load channel.", Toast.LENGTH_SHORT);
+                showToast(AppContext, "Failed to load channel.", Toast.LENGTH_SHORT);
             }
         };
         mChannelsReference.addValueEventListener(channelsListener);
@@ -180,7 +211,7 @@ public class NewAlarmFragment2 extends BaseFragment {
         if(!tailMap.isEmpty()) {
             //User is starting story at next valid entry
             //Set SQL entry for iteration to current valid story iteration, to be incremented on play
-            baseApplication.deviceAlarmTableManager.setChannelStoryIteration(channel.getUid(), tailMap.firstKey());
+            deviceAlarmTableManager.setChannelStoryIteration(channel.getUid(), tailMap.firstKey());
             //Retrieve channel audio
             ChannelRooster channelRooster = channelIterationMap.get(tailMap.firstKey());
             channelRooster.setSelected(false);
@@ -189,7 +220,7 @@ public class NewAlarmFragment2 extends BaseFragment {
         else if(!headMap.isEmpty()) {
             //User is starting story from beginning again, at valid entry
             //Set SQL entry for iteration to current valid story iteration, to be incremented on play
-            baseApplication.deviceAlarmTableManager.setChannelStoryIteration(channel.getUid(), headMap.firstKey());
+            deviceAlarmTableManager.setChannelStoryIteration(channel.getUid(), headMap.firstKey());
             //Retrieve channel audio
             ChannelRooster channelRooster = channelIterationMap.get(headMap.firstKey());
             channelRooster.setSelected(false);
@@ -220,18 +251,6 @@ public class NewAlarmFragment2 extends BaseFragment {
         if (visible) {
             if (mListener != null) mListener.setNextButtonCaption(getString(R.string.save));
         }
-    }
-
-    public void setSelectedChannel(ChannelRooster channelRooster) {
-        Alarm alarm = mListener.getAlarmDetails();
-        alarm.setChannel(new AlarmChannel(channelRooster.getName(), channelRooster.getChannel_uid()));
-        mListener.setAlarmDetails(alarm);
-    }
-
-    public void clearSelectedChannel() {
-        Alarm alarm = mListener.getAlarmDetails();
-        alarm.setChannel(new AlarmChannel());
-        mListener.setAlarmDetails(alarm);
     }
 
     public void selectEditedAlarmChannel() {

@@ -13,8 +13,10 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.fragment.IIntroFragmentListener;
 import com.roostermornings.android.fragment.intro.IntroFragment1;
 import com.roostermornings.android.fragment.intro.IntroFragment2;
@@ -39,9 +41,16 @@ public class IntroFragmentActivity extends BaseActivity implements IIntroFragmen
     TabLayout tabLayout;
 
     @Override
+    protected void inject(RoosterApplicationComponent component) {
+        component.inject(this);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.fragmentactivity_intro);
+        inject(((BaseApplication)getApplication()).getRoosterApplicationComponent());
+
         createViewPager(mPager);
         tabLayout.setupWithViewPager(mPager, true);
     }

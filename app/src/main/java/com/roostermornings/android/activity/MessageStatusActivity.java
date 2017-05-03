@@ -20,10 +20,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.MessageStatusListAdapter;
+import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.SocialRooster;
 import com.roostermornings.android.util.Constants;
 
@@ -31,6 +33,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -54,15 +58,23 @@ public class MessageStatusActivity extends BaseActivity {
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
+    @Inject BaseApplication baseApplication;
+
+    @Override
+    protected void inject(RoosterApplicationComponent component) {
+        component.inject(this);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_message_status);
+        inject(((BaseApplication)getApplication()).getRoosterApplicationComponent());
 
         setDayNightTheme();
         setButtonBarSelection();
 
-        mAdapter = new MessageStatusListAdapter(mRoosters, MessageStatusActivity.this, getApplication());
+        mAdapter = new MessageStatusListAdapter(mRoosters, MessageStatusActivity.this);
 
         // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(this);

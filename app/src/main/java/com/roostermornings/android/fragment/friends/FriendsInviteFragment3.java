@@ -32,6 +32,7 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.FriendsInviteListAdapter;
+import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.LocalContacts;
 import com.roostermornings.android.domain.NodeUsers;
@@ -39,6 +40,8 @@ import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.util.MyContactsController;
 
 import java.util.ArrayList;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -79,6 +82,13 @@ public class FriendsInviteFragment3 extends BaseFragment {
 
     private OnFragmentInteractionListener mListener;
 
+    @Inject Context AppContext;
+
+    @Override
+    protected void inject(RoosterApplicationComponent component) {
+        component.inject(this);
+    }
+
     public FriendsInviteFragment3() {
         // Required empty public constructor
     }
@@ -98,13 +108,14 @@ public class FriendsInviteFragment3 extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        inject(((BaseApplication)getActivity().getApplication()).getRoosterApplicationComponent());
 
         //Ensure check for Node complete reset
         statusCode = -1;
 
         if (getArguments() != null) {
         }
-        myContactsController = new MyContactsController(BaseApplication.AppContext);
+        myContactsController = new MyContactsController(AppContext);
     }
 
     @Override
@@ -119,8 +130,8 @@ public class FriendsInviteFragment3 extends BaseFragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mAdapter = new FriendsInviteListAdapter(mUsers, BaseApplication.AppContext);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(BaseApplication.AppContext));
+        mAdapter = new FriendsInviteListAdapter(mUsers);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(AppContext));
         mRecyclerView.setAdapter(mAdapter);
     }
 
@@ -189,7 +200,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
 
     public void requestGetContacts() {
         baseActivity = (BaseActivity) getActivity();
-        if (ContextCompat.checkSelfPermission(BaseApplication.AppContext,
+        if (ContextCompat.checkSelfPermission(AppContext,
                 android.Manifest.permission.READ_CONTACTS)
                 == PackageManager.PERMISSION_GRANTED) executeNodeMyContactsTask();
         else  baseActivity.requestPermissionReadContacts();
@@ -223,7 +234,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
     }
 
     private void checkLocalContactsNode(String idToken) {
-        Call<NodeUsers> call = baseActivity.apiService().checkLocalContacts(new LocalContacts(myContactsController.processContacts(), idToken));
+        Call<NodeUsers> call = apiService().checkLocalContacts(new LocalContacts(myContactsController.processContacts(), idToken));
 
         call.enqueue(new Callback<NodeUsers>() {
             @Override
@@ -239,15 +250,15 @@ public class FriendsInviteFragment3 extends BaseFragment {
                     mUsers.addAll(apiResponse.users.get(0));
                     //Sort names alphabetically before notifying adapter
                     sortNamesFriends(mUsers);
-                    mAdapter = new FriendsInviteListAdapter(mUsers, BaseApplication.AppContext);
 
-                    mRecyclerView.setLayoutManager(new LinearLayoutManager(BaseApplication.AppContext));
+                    mRecyclerView.setLayoutManager(new LinearLayoutManager(AppContext));
                     mRecyclerView.setAdapter(mAdapter);
                     mAdapter.notifyDataSetChanged();
 
                     //Make load spinner GONE and recyclerview VISIBLE
                     progressBar.setVisibility(View.GONE);
                     mRecyclerView.setVisibility(View.VISIBLE);
+                    mRecyclerView.requestLayout();
 
                     Log.d("apiResponse", apiResponse.toString());
                 }

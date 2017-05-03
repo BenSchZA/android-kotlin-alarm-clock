@@ -16,21 +16,29 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
+import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.util.RoosterUtils;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+
+import static com.roostermornings.android.BaseApplication.AppContext;
+import static com.roostermornings.android.BaseApplication.mCurrentUser;
+import static com.roostermornings.android.BaseApplication.mDatabase;
+
 /**
  * Created by bscholtz on 06/03/17.
  */
 
-public class FriendsInviteListAdapter extends RecyclerView.Adapter<FriendsInviteListAdapter.ViewHolder> implements Filterable {
+public class FriendsInviteListAdapter extends RecyclerView.Adapter<FriendsInviteListAdapter.ViewHolder> implements Filterable, FriendsFragmentActivity.FriendsInviteInterface {
     private ArrayList<Friend> mDataset;
-    private Context mContext;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -67,11 +75,9 @@ public class FriendsInviteListAdapter extends RecyclerView.Adapter<FriendsInvite
         notifyItemRemoved(position);
     }
 
-
     // Provide a suitable constructor (depends on the kind of dataset)
-    public FriendsInviteListAdapter(ArrayList<Friend> myDataset, Context context) {
+    public FriendsInviteListAdapter(ArrayList<Friend> myDataset) {
         mDataset = myDataset;
-        mContext = context;
     }
 
     // Create new views (invoked by the layout manager)
@@ -99,7 +105,7 @@ public class FriendsInviteListAdapter extends RecyclerView.Adapter<FriendsInvite
                 user.setSelected(!user.getSelected());
                 holder.btnAdd.setSelected(user.getSelected());
 
-                ((FriendsFragmentActivity)mContext).inviteUser(user);
+                inviteUser(user);
 
                 final Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
@@ -118,10 +124,6 @@ public class FriendsInviteListAdapter extends RecyclerView.Adapter<FriendsInvite
     @Override
     public int getItemCount() {
         return mDataset.size();
-    }
-
-    public void updateList(){
-        notifyDataSetChanged();
     }
 
     @Override
@@ -162,4 +164,19 @@ public class FriendsInviteListAdapter extends RecyclerView.Adapter<FriendsInvite
         return filter;
     }
 
+    @Override
+    public void inviteUser(Friend inviteFriend) {
+
+        String inviteUrl = String.format("friend_requests_received/%s/%s", inviteFriend.getUid(), mCurrentUser.getUid());
+        String currentUserUrl = String.format("friend_requests_sent/%s/%s", mCurrentUser.getUid(), inviteFriend.getUid());
+
+        //Create friend object from current signed in user
+        Friend currentUserFriend = new Friend(mCurrentUser.getUid(), mCurrentUser.getUser_name(), mCurrentUser.getProfile_pic(), mCurrentUser.getCell_number());
+
+        //Append to received and sent request list
+        mDatabase.getDatabase().getReference(inviteUrl).setValue(currentUserFriend);
+        mDatabase.getDatabase().getReference(currentUserUrl).setValue(inviteFriend);
+
+        Toast.makeText(AppContext, inviteFriend.getUser_name() + " invited!", Toast.LENGTH_LONG).show();
+    }
 }

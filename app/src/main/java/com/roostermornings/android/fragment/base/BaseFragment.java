@@ -34,20 +34,53 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.node_api.IHTTPClient;
 
 import butterknife.ButterKnife;
 
-public class BaseFragment extends Fragment implements Validator.ValidationListener {
+public abstract class BaseFragment extends Fragment implements Validator.ValidationListener {
 
     protected DatabaseReference mDatabase;
 
-    @Inject
-    public SharedPreferences sharedPreferences;
+    @Inject Context AppContext;
+    @Inject BaseApplication baseApplication;
 
-    public static BaseApplication baseApplication;
+    public static BaseActivityListener baseActivityListener;
+
+    protected abstract void inject(RoosterApplicationComponent component);
+
+    public interface BaseActivityListener {
+        void onValidationSucceeded();
+        void onValidationFailed(List<ValidationError> errors);
+        boolean checkInternetConnection();
+        IHTTPClient apiService();
+        FirebaseUser getFirebaseUser();
+    }
+
+    public boolean checkInternetConnection() {
+        return baseActivityListener.checkInternetConnection();
+    }
+
+    public IHTTPClient apiService() {
+        return baseActivityListener.apiService();
+    }
+
+    public FirebaseUser getFirebaseUser() {
+        return baseActivityListener.getFirebaseUser();
+    }
+
+    @Override
+    public void onValidationSucceeded() {
+        baseActivityListener.onValidationSucceeded();
+    }
+
+    @Override
+    public void onValidationFailed(List<ValidationError> errors) {
+        baseActivityListener.onValidationFailed(errors);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -58,6 +91,12 @@ public class BaseFragment extends Fragment implements Validator.ValidationListen
         getDatabaseReference();
 
         baseApplication.getRoosterApplicationComponent().inject(this);
+
+        try {
+            baseActivityListener = (BaseActivityListener) getActivity();
+        } catch (ClassCastException castException) {
+            /* The activity does not implement the listener. */
+        }
     }
 
     protected View initiate(LayoutInflater inflater, int resource, ViewGroup root, boolean attachToRoot){
@@ -71,34 +110,6 @@ public class BaseFragment extends Fragment implements Validator.ValidationListen
     protected DatabaseReference getDatabaseReference() {
         mDatabase = FirebaseDatabase.getInstance().getReference();
         return mDatabase;
-    }
-
-    @Override
-    public void onValidationSucceeded() {
-        ((BaseActivity) getActivity()).onValidationSucceeded();
-    }
-
-    @Override
-    public void onValidationFailed(List<ValidationError> errors) {
-        //TODO: fix crash here
-        ((BaseActivity) getActivity()).onValidationFailed(errors);
-
-    }
-
-    public boolean checkInternetConnection() {
-        return ((BaseActivity) getActivity()).checkInternetConnection();
-    }
-
-    public IHTTPClient apiService() {
-        return ((BaseActivity) getActivity()).apiService();
-    }
-
-    protected void hideSoftKeyboard() {
-        ((BaseActivity) getActivity()).hideSoftKeyboard();
-    }
-
-    protected FirebaseUser getFirebaseUser() {
-        return ((BaseActivity) getActivity()).getFirebaseUser();
     }
 
     public void showToast(Context c, String message, int toastLength) {
@@ -131,7 +142,7 @@ public class BaseFragment extends Fragment implements Validator.ValidationListen
     }
 
     protected void startHomeActivity() {
-        Intent homeIntent = new Intent(BaseApplication.AppContext, MyAlarmsFragmentActivity.class);
+        Intent homeIntent = new Intent(AppContext, MyAlarmsFragmentActivity.class);
         startActivity(homeIntent);
     }
 }

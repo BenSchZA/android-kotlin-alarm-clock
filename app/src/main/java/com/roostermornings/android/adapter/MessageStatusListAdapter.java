@@ -30,12 +30,15 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static com.roostermornings.android.BaseApplication.AppContext;
+
 public class MessageStatusListAdapter extends RecyclerView.Adapter<MessageStatusListAdapter.ViewHolder> {
     private ArrayList<SocialRooster> mDataset = new ArrayList<>();
-    private Context mContext;
     private Activity mActivity;
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -70,9 +73,8 @@ public class MessageStatusListAdapter extends RecyclerView.Adapter<MessageStatus
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public MessageStatusListAdapter(ArrayList<SocialRooster> myDataset, Activity activity, Context context) {
+    public MessageStatusListAdapter(ArrayList<SocialRooster> myDataset, Activity activity) {
         mDataset = myDataset;
-        mContext = context;
         mActivity = activity;
     }
 
@@ -96,13 +98,13 @@ public class MessageStatusListAdapter extends RecyclerView.Adapter<MessageStatus
         setProfilePic(socialRooster.getProfile_pic(), holder, position);
         switch(socialRooster.getStatus()) {
             case Constants.MESSAGE_STATUS_SENT:
-                holder.txtStatus.setText(mContext.getResources().getText(R.string.status_sent));
+                holder.txtStatus.setText(AppContext.getResources().getText(R.string.status_sent));
                 break;
             case Constants.MESSAGE_STATUS_DELIVERED:
-                holder.txtStatus.setText(mContext.getResources().getText(R.string.status_delivered));
+                holder.txtStatus.setText(AppContext.getResources().getText(R.string.status_delivered));
                 break;
             case Constants.MESSAGE_STATUS_RECEIVED:
-                holder.txtStatus.setText(mContext.getResources().getText(R.string.status_awake));
+                holder.txtStatus.setText(AppContext.getResources().getText(R.string.status_awake));
                 break;
             default:
                 break;
@@ -112,14 +114,14 @@ public class MessageStatusListAdapter extends RecyclerView.Adapter<MessageStatus
     private void setProfilePic(String url, final MessageStatusListAdapter.ViewHolder holder, final int position) {
 
         try{
-            Picasso.with(BaseApplication.AppContext).load(url)
+            Picasso.with(AppContext).load(url)
                     .resize(50, 50)
                     .centerCrop()
                     .into(holder.imgProfilePic, new Callback() {
                         @Override
                         public void onSuccess() {
                             Bitmap imageBitmap = ((BitmapDrawable) holder.imgProfilePic.getDrawable()).getBitmap();
-                            RoundedBitmapDrawable imageDrawable = RoundedBitmapDrawableFactory.create(mContext.getResources(), imageBitmap);
+                            RoundedBitmapDrawable imageDrawable = RoundedBitmapDrawableFactory.create(AppContext.getResources(), imageBitmap);
                             imageDrawable.setCircular(true);
                             imageDrawable.setCornerRadius(Math.max(imageBitmap.getWidth(), imageBitmap.getHeight()) / 2.0f);
                             holder.txtInitials.setText("");
