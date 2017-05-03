@@ -21,8 +21,10 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.Theme;
 import com.google.firebase.database.FirebaseDatabase;
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.AlarmChannel;
 import com.roostermornings.android.fragment.IAlarmSetListener;
@@ -35,6 +37,8 @@ import com.roostermornings.android.util.Constants;
 
 import java.util.Calendar;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 
@@ -56,10 +60,19 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
     @BindView(R.id.toolbar_title)
     TextView toolbarTitle;
 
+    @Inject DeviceAlarmController deviceAlarmController;
+    @Inject DeviceAlarmTableManager deviceAlarmTableManager;
+
+    @Override
+    protected void inject(RoosterApplicationComponent component) {
+        component.inject(this);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_new_alarm);
+        inject(((BaseApplication)getApplication()).getRoosterApplicationComponent());
 
         setDayNightTheme();
 
@@ -194,19 +207,19 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 if(alarmChannel != null) alarmChannelUID = alarmChannel.getId();
 
                 //Get current iteration so that not overwritten on refresh/sync
-                Integer iteration = baseApplication.deviceAlarmTableManager.getChannelStoryIteration(alarmChannelUID);
+                Integer iteration = deviceAlarmTableManager.getChannelStoryIteration(alarmChannelUID);
                 //if this is an existing alarm, delete from local storage before inserting another record
                 if (mEditAlarmId.length() != 0
                         && mAlarm.getUid().length() > 0) {
-                    baseApplication.deviceAlarmController.deleteAlarmSetGlobal(mAlarm.getUid());
+                    deviceAlarmController.deleteAlarmSetGlobal(mAlarm.getUid());
                 }
 
                 //Set enabled flag to true on new or edited alarm
                 mAlarm.setEnabled(true);
 
-                baseApplication.deviceAlarmController.registerAlarmSet(mAlarm.isEnabled(), alarmKey, mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring(), alarmChannelUID, mAlarm.isAllow_friend_audio_files());
+                deviceAlarmController.registerAlarmSet(mAlarm.isEnabled(), alarmKey, mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring(), alarmChannelUID, mAlarm.isAllow_friend_audio_files());
                 //Ensure iteration is not overwritten
-                if(iteration != null) baseApplication.deviceAlarmTableManager.setChannelStoryIteration(alarmChannelUID, iteration);
+                if(iteration != null) deviceAlarmTableManager.setChannelStoryIteration(alarmChannelUID, iteration);
 
                 //Update firebase
                 database.getReference(String.format("alarms/%s/%s", mCurrentUser.getUid(), alarmKey)).setValue(mAlarm);
@@ -279,11 +292,11 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
 
         if (mEditAlarmId.length() == 0) return;
 
-        List<DeviceAlarm> tempAlarms = baseApplication.deviceAlarmTableManager.getAlarmSet(mEditAlarmId);
+        List<DeviceAlarm> tempAlarms = deviceAlarmTableManager.getAlarmSet(mEditAlarmId);
         if(tempAlarms.size() < 1) return;
-        mAlarm.fromDeviceAlarm(tempAlarms.get(0), baseApplication.deviceAlarmTableManager.isSetEnabled(mEditAlarmId));
+        mAlarm.fromDeviceAlarm(tempAlarms.get(0), deviceAlarmTableManager.isSetEnabled(mEditAlarmId));
         if(mAlarm.isRecurring()) {
-            List<Integer> alarmDays = baseApplication.deviceAlarmTableManager.getAlarmClassDays(mEditAlarmId);
+            List<Integer> alarmDays = deviceAlarmTableManager.getAlarmClassDays(mEditAlarmId);
             mAlarm.setAlarmDayFromDeviceAlarm(alarmDays);
         }
 

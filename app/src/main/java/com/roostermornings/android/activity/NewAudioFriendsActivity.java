@@ -24,10 +24,12 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.NewAudioFriendsListAdapter;
+import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.service.UploadService;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.domain.Users;
@@ -67,9 +69,15 @@ public class NewAudioFriendsActivity extends BaseActivity {
     RecyclerView mRecyclerView;
 
     @Override
+    protected void inject(RoosterApplicationComponent component) {
+        component.inject(this);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_new_audio_friends);
+        inject(((BaseApplication)getApplication()).getRoosterApplicationComponent());
 
         setupToolbar(null, null);
         setDayNightTheme();
@@ -159,6 +167,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
             mBound = true;
 
             //Start upload service thread task
+            mUploadService.setBaseActivityListener(NewAudioFriendsActivity.this);
             mUploadService.processAudioFile(firebaseIdToken, localFileString, mFriendsSelected);
         }
 

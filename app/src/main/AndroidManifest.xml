@@ -124,20 +124,8 @@
             android:showOnLockScreen="true"
             android:theme="@style/AppThemeDay.NoActionBar" />
 
-        <service
-            android:name=".service.BackgroundTaskIntentService"
-            android:exported="false" />
-        <service android:name=".service.RoosterFirebaseMessagingService">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
-        <service android:name=".service.RoosterFirebaseInstanceIdService">
-            <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
-            </intent-filter>
-        </service>
-
+        <!--singleTop necessary for searchable activity to avoid multiple instances of activity-->
+        <!--https://inthecheesefactory.com/blog/understand-android-activity-launchmode/en-->
         <activity
             android:name=".activity.FriendsFragmentActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -157,16 +145,30 @@
 
         <service
             android:name=".service.FirebaseListenerService"
-            android:enabled="true"
-            android:exported="true" />
+            android:enabled="true" />
         <service
             android:name=".service.AudioService"
-            android:enabled="true"
-            android:exported="true" />
+            android:enabled="true" />
         <service
             android:name=".service.UploadService"
-            android:enabled="true"
-            android:exported="true" />
+            android:enabled="true" />
+        <service
+            android:name=".service.BackgroundTaskIntentService"
+            android:exported="false" />
+
+        <!--Neither of these services should use exported="false", to ensure they are accessible from other applications via the filter-->
+        <service
+            android:name=".service.RoosterFirebaseMessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".service.RoosterFirebaseInstanceIdService">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+            </intent-filter>
+        </service>
 
         <activity
             android:name=".activity.MessageStatusActivity"
@@ -186,7 +188,10 @@
         </activity>
         <activity
             android:name=".activity.ProfileActivity"
-            android:theme="@style/AppThemeDay.NoActionBar" />
+            android:theme="@style/AppThemeDay.NoActionBar"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden|screenSize" />
+
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.roostermornings.android.fileprovider"
@@ -194,7 +199,7 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"/>
+                android:resource="@xml/file_paths" />
         </provider>
 
     </application>

@@ -5,6 +5,7 @@
 
 package com.roostermornings.android.adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
@@ -18,20 +19,26 @@ import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.Theme;
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
+import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.domain.Alarm;
+import com.roostermornings.android.domain.AlarmChannel;
 import com.roostermornings.android.domain.ChannelRooster;
+import com.roostermornings.android.fragment.IAlarmSetListener;
 import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment2;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
-import static com.roostermornings.android.R.color.black;
+import javax.inject.Inject;
 
-public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapter.ViewHolder> {
+import static com.roostermornings.android.BaseApplication.AppContext;
+
+public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapter.ViewHolder> implements NewAlarmFragment2.ChannelInterface {
     private ArrayList<ChannelRooster> mDataset;
-    private Fragment mFragment;
-    private Context context;
+    private Activity mActivity;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -68,10 +75,9 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public ChannelsListAdapter(Context context, ArrayList<ChannelRooster> myDataset, Fragment fragment) {
-        this.context = context;
-        mDataset = myDataset;
-        mFragment = fragment;
+    public ChannelsListAdapter(ArrayList<ChannelRooster> mDataset, Activity mActivity) {
+        this.mDataset = mDataset;
+        this.mActivity = mActivity;
     }
 
     public ChannelsListAdapter() {
@@ -99,10 +105,10 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
             public void onClick(View view) {
                 toggleChannelSelection(mDataset.get(position));
 
-                if (mFragment instanceof NewAlarmFragment2 && mDataset.get(position).isSelected()) {
-                    ((NewAlarmFragment2) mFragment).setSelectedChannel(mDataset.get(position));
-                } else if(mFragment instanceof NewAlarmFragment2) {
-                    ((NewAlarmFragment2) mFragment).clearSelectedChannel();
+                if (mDataset.get(position).isSelected()) {
+                    setSelectedChannel(mDataset.get(position));
+                } else {
+                    clearSelectedChannel();
                 }
 
                 holder.imgChannelSelected.setVisibility(View.VISIBLE);
@@ -121,7 +127,7 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
             @Override
             public void onClick(View view) {
 
-                new MaterialDialog.Builder(mFragment.getContext())
+                new MaterialDialog.Builder(mActivity)
                         .title(mDataset.get(position).getName())
                         .content(mDataset.get(position).getDescription())
                         .theme(Theme.LIGHT)
@@ -134,7 +140,7 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
         });
 
         try {
-            Picasso.with(mFragment.getContext()).load(mDataset.get(position).getPhoto())
+            Picasso.with(AppContext).load(mDataset.get(position).getPhoto())
                     .fit()
                     .centerCrop()
                     .into(holder.imgChannelImage, new Callback() {
@@ -152,6 +158,22 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
         } catch(IllegalArgumentException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void setSelectedChannel(ChannelRooster channelRooster) {
+        IAlarmSetListener mListener = (IAlarmSetListener) mActivity;
+        Alarm alarm = mListener.getAlarmDetails();
+        alarm.setChannel(new AlarmChannel(channelRooster.getName(), channelRooster.getChannel_uid()));
+        mListener.setAlarmDetails(alarm);
+    }
+
+    @Override
+    public void clearSelectedChannel() {
+        IAlarmSetListener mListener = (IAlarmSetListener) mActivity;
+        Alarm alarm = mListener.getAlarmDetails();
+        alarm.setChannel(new AlarmChannel());
+        mListener.setAlarmDetails(alarm);
     }
 
     private void toggleChannelSelection(ChannelRooster channelSelection) {

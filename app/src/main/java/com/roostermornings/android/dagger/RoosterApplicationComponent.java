@@ -11,8 +11,31 @@ import javax.inject.Singleton;
 
 import dagger.Component;
 
+import com.roostermornings.android.BaseApplication;
+import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
+import com.roostermornings.android.activity.FriendsFragmentActivity;
+import com.roostermornings.android.activity.IntroFragmentActivity;
+import com.roostermornings.android.activity.MessageStatusActivity;
+import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
+import com.roostermornings.android.activity.NewAlarmFragmentActivity;
+import com.roostermornings.android.activity.NewAudioFriendsActivity;
+import com.roostermornings.android.activity.NewAudioRecordActivity;
+import com.roostermornings.android.activity.ProfileActivity;
+import com.roostermornings.android.activity.SettingsActivity;
+import com.roostermornings.android.activity.SignInActivity;
+import com.roostermornings.android.activity.SignupEmailActivity;
+import com.roostermornings.android.activity.SplashActivity;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.fragment.base.BaseFragment;
+import com.roostermornings.android.fragment.friends.FriendsInviteFragment3;
+import com.roostermornings.android.fragment.friends.FriendsMyFragment1;
+import com.roostermornings.android.fragment.friends.FriendsRequestFragment2;
+import com.roostermornings.android.fragment.intro.IntroFragment1;
+import com.roostermornings.android.fragment.intro.IntroFragment2;
+import com.roostermornings.android.fragment.intro.IntroFragment3;
+import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment1;
+import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment2;
+import com.roostermornings.android.service.UploadService;
 
 /**
  * Annotates an interface or abstract class for which a fully-formed, dependency-injected implementation
@@ -29,10 +52,34 @@ public interface RoosterApplicationComponent {
     //A members-injection method may be void or return its single parameter as a convenience for chaining.
 
     void inject(RoosterApplicationModule roosterApplicationModule);
-
+    void inject(BaseApplication baseApplication);
     void inject(BaseActivity baseActivity);
-
     void inject(BaseFragment baseFragment);
+
+    void inject(DeviceAlarmFullScreenActivity activity);
+    void inject(FriendsFragmentActivity activity);
+    void inject(IntroFragmentActivity activity);
+    void inject(MessageStatusActivity activity);
+    void inject(MyAlarmsFragmentActivity activity);
+    void inject(NewAlarmFragmentActivity activity);
+    void inject(NewAudioFriendsActivity activity);
+    void inject(NewAudioRecordActivity activity);
+    void inject(ProfileActivity activity);
+    void inject(SettingsActivity activity);
+    void inject(SignInActivity activity);
+    void inject(SignupEmailActivity activity);
+    void inject(SplashActivity activity);
+
+    void inject(FriendsInviteFragment3 fragment);
+    void inject(FriendsMyFragment1 fragment);
+    void inject(FriendsRequestFragment2 fragment);
+    void inject(IntroFragment1 fragment);
+    void inject(IntroFragment2 fragment);
+    void inject(IntroFragment3 fragment);
+    void inject(NewAlarmFragment1 fragment);
+    void inject(NewAlarmFragment2 fragment);
+
+    void inject(UploadService service);
 
     //Provision methods have no parameters and return an injected or provided type.
     //Each method may have a Qualifier annotation as well.

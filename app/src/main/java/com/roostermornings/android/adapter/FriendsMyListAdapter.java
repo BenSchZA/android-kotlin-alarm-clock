@@ -30,21 +30,22 @@ import android.widget.TextView;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.Theme;
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
-import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
-import com.roostermornings.android.activity.NewAudioFriendsActivity;
 import com.roostermornings.android.activity.NewAudioRecordActivity;
 import com.roostermornings.android.activity.base.BaseActivity;
-import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
-import java.sql.Array;
 import java.util.ArrayList;
+
+import javax.inject.Inject;
+
+import static com.roostermornings.android.BaseApplication.AppContext;
 
 /**
  * Created by bscholtz on 08/03/17.
@@ -52,7 +53,6 @@ import java.util.ArrayList;
 
 public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdapter.ViewHolder> implements Filterable {
     private ArrayList<User> mDataset;
-    private Context mContext;
     private Activity mActivity;
 
     // Provide a reference to the views for each data item
@@ -93,9 +93,8 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public FriendsMyListAdapter(ArrayList<User> myDataset, Activity activity, Context context) {
+    public FriendsMyListAdapter(ArrayList<User> myDataset, Activity activity) {
         mDataset = myDataset;
-        mContext = context;
         mActivity = activity;
     }
 
@@ -133,7 +132,7 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
                             .onPositive(new MaterialDialog.SingleButtonCallback() {
                                 @Override
                                 public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                    ((FriendsFragmentActivity)mContext).deleteFriend(user);
+                                    ((FriendsFragmentActivity)mActivity).deleteFriend(user);
                                     final Handler handler = new Handler();
                                     handler.postDelayed(new Runnable() {
                                         @Override
@@ -153,7 +152,7 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
 //            @Override
 //            public void onClick(View v) {
 //
-//                ((FriendsFragmentActivity)mContext).deleteFriend(user);
+//                ((FriendsFragmentActivity)appContext).deleteFriend(user);
 //
 //                final Handler handler = new Handler();
 //                handler.postDelayed(new Runnable() {
@@ -184,14 +183,14 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
     private void setProfilePic(String url, final FriendsMyListAdapter.ViewHolder holder, final int position) {
 
         try{
-            Picasso.with(mContext).load(url)
+            Picasso.with(AppContext).load(url)
                     .resize(50, 50)
                     .centerCrop()
                     .into(holder.imgProfilePic, new Callback() {
                         @Override
                         public void onSuccess() {
                             Bitmap imageBitmap = ((BitmapDrawable) holder.imgProfilePic.getDrawable()).getBitmap();
-                            RoundedBitmapDrawable imageDrawable = RoundedBitmapDrawableFactory.create(mContext.getResources(), imageBitmap);
+                            RoundedBitmapDrawable imageDrawable = RoundedBitmapDrawableFactory.create(AppContext.getResources(), imageBitmap);
                             imageDrawable.setCircular(true);
                             imageDrawable.setCornerRadius(Math.max(imageBitmap.getWidth(), imageBitmap.getHeight()) / 2.0f);
                             //holder.imgProfilePic.setImageAlpha(0);
@@ -210,8 +209,8 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
     }
 
     private void setButtonBackground(Button addButton, Boolean focused) {
-        if (focused) addButton.setBackground(mContext.getResources().getDrawable(R.drawable.rooster_button_light_blue));
-        else addButton.setBackground(mContext.getResources().getDrawable(R.drawable.rooster_button_semi_transparent));
+        if (focused) addButton.setBackground(AppContext.getResources().getDrawable(R.drawable.rooster_button_light_blue));
+        else addButton.setBackground(AppContext.getResources().getDrawable(R.drawable.rooster_button_semi_transparent));
     }
 
     // Return the size of your dataset (invoked by the layout manager)
