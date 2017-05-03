@@ -8,8 +8,10 @@ package com.roostermornings.android.activity;
 import android.os.Bundle;
 import android.widget.TextView;
 
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.fragment.SettingsFragment;
 
 import butterknife.BindView;
@@ -20,9 +22,15 @@ public class SettingsActivity extends BaseActivity {
     TextView toolbarTitle;
 
     @Override
+    protected void inject(RoosterApplicationComponent component) {
+        component.inject(this);
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.custom_preference_screen_layout);
+        inject(((BaseApplication)getApplication()).getRoosterApplicationComponent());
 
         //setDayNightTheme();
 

@@ -28,6 +28,7 @@ import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.Channel;
 import com.roostermornings.android.domain.ChannelRooster;
 import com.roostermornings.android.domain.SocialRooster;
+import com.roostermornings.android.sqlutil.AudioTableController;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
@@ -48,8 +49,9 @@ public class BackgroundTaskIntentService extends IntentService {
     protected FirebaseAuth mAuth;
     protected StorageReference mStorageRef;
 
-    private AudioTableManager mAudioTableManager;
-    private DeviceAlarmTableManager deviceAlarmTableManager;
+    private final AudioTableManager audioTableManager = new AudioTableManager(this);
+    private final AudioTableController audioTableController = new AudioTableController(this);
+    private final DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(this);
 
     public BackgroundTaskIntentService() {
         super("BackgroundTaskIntentService");
@@ -94,7 +96,6 @@ public class BackgroundTaskIntentService extends IntentService {
     }
 
     private void handleActionBackgroundDownload(String param1, String param2) {
-        deviceAlarmTableManager = new DeviceAlarmTableManager(getApplicationContext());
         //if(InternetHelper.mobileDataConnection(this) && !sharedPreferences.getBoolean(Constants.USER_SETTINGS_DOWNLOAD_ON_DATA, true)) return;
         retrieveChannelContentData(getApplicationContext());
         retrieveSocialRoosterData(getApplicationContext());
@@ -102,14 +103,12 @@ public class BackgroundTaskIntentService extends IntentService {
 
     private void handleActionDailyTask() {
         //Purge audio files from SQL db that are older than two weeks
-        mAudioTableManager = new AudioTableManager(getApplicationContext());
-        mAudioTableManager.purgeSocialAudioFiles();
+        audioTableManager.purgeSocialAudioFiles();
         //TODO: update list adaptor
     }
 
     private void handleActionMinuteTask() {
         BaseActivity.setBadge(getApplicationContext(), ((BaseApplication)getApplication()).getNotificationFlag(Constants.FLAG_ROOSTERCOUNT));
-        AudioTableManager audioTableManager = new AudioTableManager(getApplicationContext());
         audioTableManager.updateRoosterCount();
         //Check if an instance of service exists, if not then start
         if(!FirebaseListenerService.running) {
@@ -123,7 +122,6 @@ public class BackgroundTaskIntentService extends IntentService {
         mAuth = FirebaseAuth.getInstance();
         mStorageRef = FirebaseStorage.getInstance().getReference();
         mDatabase = FirebaseDatabase.getInstance().getReference();
-        mAudioTableManager = new AudioTableManager(context);
 
         if (mAuth.getCurrentUser() == null || mAuth.getCurrentUser() == null) {
             Log.d(TAG, "User not authenticated on FB!");
@@ -131,7 +129,6 @@ public class BackgroundTaskIntentService extends IntentService {
         }
 
         //Get next pending alarm
-        final DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(this);
         final DeviceAlarm deviceAlarm = deviceAlarmTableManager.getNextPendingAlarm();
 
         //If there is no pending alarm, don't retrieve channel content
@@ -141,7 +138,7 @@ public class BackgroundTaskIntentService extends IntentService {
         if ("".equals(channelId)) return;
 
         //If the current ChannelRooster is in SQL db, then don't download
-        if(mAudioTableManager.isChannelAudioInDatabase(channelId)) return;
+        if(audioTableManager.isChannelAudioInDatabase(channelId)) return;
         //Check firebase auth
         if (mAuth.getCurrentUser() == null || mAuth.getCurrentUser() == null) {
             Log.d(TAG, "User not authenticated on FB!");
@@ -237,7 +234,6 @@ public class BackgroundTaskIntentService extends IntentService {
         mAuth = FirebaseAuth.getInstance();
         mStorageRef = FirebaseStorage.getInstance().getReference();
         mDatabase = FirebaseDatabase.getInstance().getReference();
-        mAudioTableManager = new AudioTableManager(context);
 
         if (mAuth.getCurrentUser() == null || mAuth.getCurrentUser() == null) {
             Log.d(TAG, "User not authenticated on FB!");
@@ -282,7 +278,7 @@ public class BackgroundTaskIntentService extends IntentService {
         //Previous solution: inser into db and then download, updating filename on completion using:
         //mAudioTableManager.setChannelAudioFileName(channelRooster.getChannel_uid(), audioFileUniqueName);
 
-        if(mAudioTableManager.isChannelAudioInDatabase(channelRooster.getChannel_uid())) return;
+        if(audioTableManager.isChannelAudioInDatabase(channelRooster.getChannel_uid())) return;
 
         try {
             //https://firebase.google.com/docs/storage/android/download-files
@@ -298,7 +294,7 @@ public class BackgroundTaskIntentService extends IntentService {
             deviceAudioQueueItem.setDate_created(System.currentTimeMillis());
 
             //store in local SQLLite database and check if successful
-            if(mAudioTableManager.insertChannelAudioFile(deviceAudioQueueItem)) {
+            if(audioTableManager.insertChannelAudioFile(deviceAudioQueueItem)) {
 
                 audioFileRef.getBytes(FIVE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                     @Override
@@ -321,7 +317,7 @@ public class BackgroundTaskIntentService extends IntentService {
                             e.printStackTrace();
                             //Show that an attempted download has occurred - this is used when "streaming" alarm content in AudioService
                             deviceAlarmTableManager.updateAlarmLabel(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED);
-                            mAudioTableManager.removeChannelAudioEntries(channelRooster.getChannel_uid());
+                            audioTableManager.removeChannelAudioEntries(channelRooster.getChannel_uid());
                         }
                     }
                 }).addOnFailureListener(new OnFailureListener() {
@@ -330,7 +326,7 @@ public class BackgroundTaskIntentService extends IntentService {
                         // Handle any errors
                         //Show that an attempted download has occurred - this is used when "streaming" alarm content in AudioService
                         deviceAlarmTableManager.updateAlarmLabel(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED);
-                        mAudioTableManager.removeChannelAudioEntries(channelRooster.getChannel_uid());
+                        audioTableManager.removeChannelAudioEntries(channelRooster.getChannel_uid());
                     }
                 });
             }
@@ -374,7 +370,7 @@ public class BackgroundTaskIntentService extends IntentService {
                         deviceAudioQueueItem.fromSocialRooster(socialRooster, audioFileUniqueName);
 
                         //store in local SQLLite database
-                        mAudioTableManager.insertSocialAudioFile(deviceAudioQueueItem);
+                        audioTableManager.insertSocialAudioFile(deviceAudioQueueItem);
 
                         //remove record of queue from FB database
                         queueRecordReference.removeValue();

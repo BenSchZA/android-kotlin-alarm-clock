@@ -22,8 +22,10 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.mobsandgeeks.saripaar.Validator;
 import com.mobsandgeeks.saripaar.annotation.NotEmpty;
 import com.mobsandgeeks.saripaar.annotation.Password;
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.User;
 
 import java.util.HashMap;
@@ -52,9 +54,15 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
     boolean mAlreadyUser = false;
 
     @Override
+    protected void inject(RoosterApplicationComponent component) {
+        component.inject(this);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_signup_email);
+        inject(((BaseApplication)getApplication()).getRoosterApplicationComponent());
 
         //instantiate saripaar validator to validate fields with NotEmpty annotations
         validator = new Validator(this);

@@ -26,14 +26,19 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 import com.roostermornings.android.service.AudioService;
+import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.util.Constants;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -73,10 +78,19 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     @BindView(R.id.skip_previous)
     Button skipPrevious;
 
+    @Inject DeviceAlarmController deviceAlarmController;
+
+    @Override
+    protected void inject(RoosterApplicationComponent component) {
+        component.inject(this);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_device_alarm_full_screen);
+        inject(((BaseApplication)getApplication()).getRoosterApplicationComponent());
+
         //Used to ensure alarm shows over lock-screen
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                 +WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
@@ -107,7 +121,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
-        baseApplication.deviceAlarmController.snoozeAlarm(alarmUid, false);
+        deviceAlarmController.snoozeAlarm(alarmUid, false);
         mAudioService.snoozeAudioState();
         if(mBound) unbindService(mAudioServiceConnection);
         mBound = false;
@@ -116,7 +130,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
     @OnClick(R.id.alarm_snooze_button)
     protected void onAlarmSnoozeButtonClicked() {
-        baseApplication.deviceAlarmController.snoozeAlarm(alarmUid, false);
+        deviceAlarmController.snoozeAlarm(alarmUid, false);
         mAudioService.snoozeAudioState();
         if(mBound) unbindService(mAudioServiceConnection);
         mBound = false;

@@ -30,6 +30,7 @@ import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.adapter.FriendsMyListAdapter;
+import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.domain.Users;
@@ -37,6 +38,8 @@ import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.util.Constants;
 
 import java.util.ArrayList;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import retrofit.Call;
@@ -75,6 +78,13 @@ public class FriendsMyFragment1 extends BaseFragment {
 
     private OnFragmentInteractionListener mListener;
 
+    @Inject Context AppContext;
+
+    @Override
+    protected void inject(RoosterApplicationComponent component) {
+        component.inject(this);
+    }
+
     public FriendsMyFragment1() {
         // Required empty public constructor
     }
@@ -94,6 +104,7 @@ public class FriendsMyFragment1 extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        inject(((BaseApplication)getActivity().getApplication()).getRoosterApplicationComponent());
 
         //Ensure check for Node complete reset
         statusCode = -1;
@@ -140,8 +151,8 @@ public class FriendsMyFragment1 extends BaseFragment {
         super.onViewCreated(view, savedInstanceState);
         //Sort names alphabetically before notifying adapter
         sortNamesUsers(mUsers);
-        mAdapter = new FriendsMyListAdapter(mUsers, getActivity(), BaseApplication.AppContext);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(BaseApplication.AppContext));
+        mAdapter = new FriendsMyListAdapter(mUsers, getActivity());
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(AppContext));
         mRecyclerView.setAdapter(mAdapter);
     }
 
