@@ -44,8 +44,10 @@ import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.util.RoosterUtils;
 
@@ -89,9 +91,15 @@ public class SignInActivity extends BaseActivity {
     ProgressBar progressBar;
 
     @Override
+    protected void inject(RoosterApplicationComponent component) {
+        component.inject(this);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_sign_in);
+        inject(((BaseApplication)getApplication()).getRoosterApplicationComponent());
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {

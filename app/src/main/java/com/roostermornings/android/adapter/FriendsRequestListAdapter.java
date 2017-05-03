@@ -21,23 +21,33 @@ import android.widget.Filterable;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
+import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.util.RoosterUtils;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import static com.roostermornings.android.BaseApplication.AppContext;
+import static com.roostermornings.android.BaseApplication.mCurrentUser;
+import static com.roostermornings.android.BaseApplication.mDatabase;
 
 /**
  * Created by bscholtz on 08/03/17.
  */
 
-public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsRequestListAdapter.ViewHolder> implements Filterable {
+public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsRequestListAdapter.ViewHolder> implements Filterable, FriendsFragmentActivity.FriendsRequestInterface {
     private ArrayList<Friend> mDataset;
-    private Context mContext;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -78,9 +88,8 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
 
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public FriendsRequestListAdapter(ArrayList<Friend> myDataset, Context context) {
+    public FriendsRequestListAdapter(ArrayList<Friend> myDataset) {
         mDataset = myDataset;
-        mContext = context;
     }
 
 
@@ -114,7 +123,7 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
                 user.setSelected(!user.getSelected());
                 holder.btnAdd.setSelected(user.getSelected());
 
-                ((FriendsFragmentActivity)mContext).acceptFriendRequest(user);
+                acceptFriendRequest(user);
 
                 final Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
@@ -132,7 +141,7 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
             @Override
             public void onClick(View v) {
 
-                ((FriendsFragmentActivity)mContext).rejectFriendRequest(user);
+                rejectFriendRequest(user);
 
                 final Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
@@ -149,14 +158,14 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
     private void setProfilePic(String url, final FriendsRequestListAdapter.ViewHolder holder, final int position) {
 
         try{
-            Picasso.with(mContext).load(url)
+            Picasso.with(AppContext).load(url)
                     .resize(50, 50)
                     .centerCrop()
                     .into(holder.imgProfilePic, new Callback() {
                         @Override
                         public void onSuccess() {
                             Bitmap imageBitmap = ((BitmapDrawable) holder.imgProfilePic.getDrawable()).getBitmap();
-                            RoundedBitmapDrawable imageDrawable = RoundedBitmapDrawableFactory.create(mContext.getResources(), imageBitmap);
+                            RoundedBitmapDrawable imageDrawable = RoundedBitmapDrawableFactory.create(AppContext.getResources(), imageBitmap);
                             imageDrawable.setCircular(true);
                             imageDrawable.setCornerRadius(Math.max(imageBitmap.getWidth(), imageBitmap.getHeight()) / 2.0f);
                             //holder.imgProfilePic.setImageAlpha(0);
@@ -222,4 +231,46 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
         return filter;
     }
 
+    //Accept friend request and update Firebase DB
+    public void acceptFriendRequest(Friend acceptFriend) {
+
+        String currentUserUrl = String.format("users/%s/friends", mCurrentUser.getUid());
+        String friendUserUrl = String.format("users/%s/friends", acceptFriend.getUid());
+
+        //Create friend object from current signed in user
+        Friend currentUserFriend = new Friend(mCurrentUser.getUid(), mCurrentUser.getUser_name(), mCurrentUser.getProfile_pic(), mCurrentUser.getCell_number());
+
+        //Update current user and friend entry as: uid:boolean
+        Map<String, Object> childUpdates = new HashMap<>();
+        childUpdates.put(acceptFriend.getUid(), true);
+        mDatabase.getDatabase().getReference(currentUserUrl).updateChildren(childUpdates);
+        childUpdates.clear();
+
+        childUpdates.put(currentUserFriend.getUid(), true);
+        mDatabase.getDatabase().getReference(friendUserUrl).updateChildren(childUpdates);
+        childUpdates.clear();
+
+        String receivedUrl = String.format("friend_requests_received/%s/%s", mCurrentUser.getUid(), acceptFriend.getUid());
+        String sentUrl = String.format("friend_requests_sent/%s/%s", acceptFriend.getUid(), mCurrentUser.getUid());
+
+        //Clear received and sent request list
+        mDatabase.getDatabase().getReference(receivedUrl).setValue(null);
+        mDatabase.getDatabase().getReference(sentUrl).setValue(null);
+
+        //Notify user that friend request accepted
+        Toast.makeText(AppContext, acceptFriend.getUser_name() + "'s friend request accepted!", Toast.LENGTH_LONG).show();
+    }
+
+    public void rejectFriendRequest(Friend rejectFriend) {
+
+        String receivedUrl = String.format("friend_requests_received/%s/%s", mCurrentUser.getUid(), rejectFriend.getUid());
+        String sentUrl = String.format("friend_requests_sent/%s/%s", rejectFriend.getUid(), mCurrentUser.getUid());
+
+        //Clear received and sent request list
+        mDatabase.getDatabase().getReference(receivedUrl).setValue(null);
+        mDatabase.getDatabase().getReference(sentUrl).setValue(null);
+
+        //Notify user that friend request accepted
+        Toast.makeText(AppContext, rejectFriend.getUser_name() + "'s friend request rejected!", Toast.LENGTH_LONG).show();
+    }
 }

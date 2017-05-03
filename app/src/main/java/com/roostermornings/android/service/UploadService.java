@@ -5,6 +5,7 @@
 
 package com.roostermornings.android.service;
 
+import android.app.Activity;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -64,8 +65,21 @@ public class UploadService extends Service {
     private StorageReference mStorageRef;
     String mAudioSavePathInDevice = "";
     ArrayList<User> friendsList = new ArrayList<>();
-    private static final BaseActivity baseActivity = new BaseActivity();
     String firebaseIdToken;
+
+    private BaseActivityListener baseActivityListener;
+
+    public void setBaseActivityListener(Activity activity) {
+        baseActivityListener = (BaseActivityListener) activity;
+    }
+
+    public interface BaseActivityListener {
+        FirebaseUser getFirebaseUser();
+    }
+
+    public FirebaseUser getFirebaseUser() {
+        return baseActivityListener.getFirebaseUser();
+    }
 
     public UploadService() {
     }
@@ -165,7 +179,7 @@ public class UploadService extends Service {
     private void inviteUsers(User friend, String firebaseStorageURL) {
 
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-        FirebaseUser currentUser = baseActivity.getFirebaseUser();
+        FirebaseUser currentUser = getFirebaseUser();
         //get reference to Firebase database
         DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
 

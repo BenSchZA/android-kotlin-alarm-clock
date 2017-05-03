@@ -15,7 +15,9 @@ import android.widget.EditText;
 
 import com.mobsandgeeks.saripaar.Validator;
 import com.mobsandgeeks.saripaar.annotation.NotEmpty;
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
+import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.fragment.IIntroFragmentListener;
 import com.roostermornings.android.fragment.base.BaseFragment;
 
@@ -36,6 +38,10 @@ public class IntroFragment3 extends BaseFragment {
 
     IIntroFragmentListener mListener;
 
+    @Override
+    protected void inject(RoosterApplicationComponent component) {
+        component.inject(this);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -53,6 +59,7 @@ public class IntroFragment3 extends BaseFragment {
 
     @Override
     public void onAttach(Context context) {
+        inject(((BaseApplication)getActivity().getApplication()).getRoosterApplicationComponent());
 
         super.onAttach(context);
         if (context instanceof IIntroFragmentListener) {
