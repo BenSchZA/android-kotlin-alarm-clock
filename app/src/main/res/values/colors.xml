@@ -21,13 +21,21 @@
     <color name="white_30_percent_transparent">#B3FFFFFF</color>
     <color name="card_white_transparent">#33FFFFFF</color>
 
-    <color name="rooster_blue">#276CD5</color>
-    <color name="rooster_light_blue">#2c77fd</color>
-    <color name="rooster_dark_blue">#011752</color>
+    <!--<color name="rooster_blue">#276CD5</color>-->
+    <!--<color name="rooster_light_blue">#2c77fd</color>-->
+    <!--<color name="rooster_dark_blue">#011752</color>-->
 
-    <color name="gradient_start_day">#50aced</color>
-    <color name="gradient_center_day">#8bb0cc</color>
-    <color name="gradient_end_day">#ffb88c</color>
+    <color name="rooster_blue">#2C77FD</color>
+    <color name="rooster_light_blue">#3483f8</color>
+    <color name="rooster_dark_blue">#286BD5</color>
+
+    <!--<color name="gradient_start_day">#50aced</color>-->
+    <!--<color name="gradient_center_day">#8bb0cc</color>-->
+    <!--<color name="gradient_end_day">#ffb88c</color>-->
+    <color name="gradient_start_day">#3483f8</color>
+    <color name="gradient_center_day">#9eb1c1</color>
+    <color name="gradient_end_day">#fcb78c</color>
+
 
     <color name="gradient_start_night">#001861</color>
     <color name="gradient_center_night">#1f4464</color>

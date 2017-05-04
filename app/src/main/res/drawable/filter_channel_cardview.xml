@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Rooster Mornings Android.
+  ~ Copyright (c)  2017 Roosta Media. All rights reserved.
+  -->
+
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape>
+            <gradient
+                android:angle="270"
+                android:startColor="@color/grey_transparent"
+                android:centerColor="@android:color/transparent"
+                android:endColor="@color/grey_transparent"
+                android:type="linear" />
+        </shape>
+    </item>
+</selector>
