@@ -13,7 +13,7 @@
     <string name="section_format">Hello World from section: %1$d</string>
 
     <string name="intro_screen1_blurb">Wake up to surprise voice notes from your friends.</string>
-    <string name="intro_screen2_blurb">Choose Channel roosters for daily inspiration, jokes, music, and more!</string>
+    <string name="intro_screen2_blurb">Choose channel roosters for daily inspiration, jokes, music, and more!</string>
     <string name="intro_screen3_blurb">We need your number so that we can help you find your friends</string>
     <string name="intro_get_started">Let’s do this</string>
     <string name="intro_mobile_hint">Mobile number</string>
@@ -49,7 +49,7 @@
     <string name="alarm_count"></string>
     <string name="delete_alarm">Delete alarm</string>
     <string name="repeat_alarm">Repeat alarm time</string>
-    <string name="allow_friends">Allow friends to send audio notes to this alarm</string>
+    <string name="allow_friends">Allow friends to send roosters to this alarm</string>
 
     <string name="friends">Friends</string>
     <string name="text_name_initials"></string>
@@ -76,7 +76,7 @@
 
     <string name="ok">OK</string>
     <string name="save">Save</string>
-    <string name="channel_prompt_1">Pick a channel to wake up to</string>
+    <string name="channel_prompt_1">Pick an eye-opening channel to wake up to</string>
     <string name="channel_prompt_2">Or just hit \"Save\" to proceed without one</string>
 
     <string name="settings_activity_title">Settings</string>
@@ -87,7 +87,7 @@
     <string name="dialog_permissions_explainer">Some Android phones have power usage optimisation that interferes with Rooster, please check your phone settings - sometimes called \'Protected Apps\'.</string>
 
     <string-array name="user_settings_day_night_theme_entries">
-        <item>Automatically set by time and timezone</item>
+        <item>Automatically set by timezone</item>
         <item>Day theme (light)</item>
         <item>Night theme (dark)</item>
     </string-array>

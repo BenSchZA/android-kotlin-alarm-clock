@@ -69,8 +69,8 @@ public class BaseApplication extends android.app.Application {
     private static int notificationFlag;
     private BroadcastReceiver receiver;
 
-    private static int roosterCount;
-    private static int friendRequests;
+    private static int roosterCount = 0;
+    private static int friendRequests = 0;
 
     public static User mCurrentUser;
     public static DatabaseReference mDatabase;

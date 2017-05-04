@@ -31,30 +31,32 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_collapseMode="parallax" >
+            android:layout_height="wrap_content" >
 
-            <TextView
+            <me.grantland.widget.AutofitTextView
+                android:maxLines="1"
                 android:id="@+id/channel_prompt_1"
                 android:layout_width="wrap_content"
+                android:paddingLeft="@dimen/spacing_large"
+                android:paddingRight="@dimen/spacing_large"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_large"
-                android:layout_marginBottom="@dimen/spacing_normal"
                 android:layout_centerHorizontal="true"
                 android:text="@string/channel_prompt_1"
                 android:textAlignment="center"
                 android:textSize="@dimen/text_xlarge"
                 android:textColor="@color/white" />
-            <TextView
-                android:id="@+id/channel_prompt_2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_below="@id/channel_prompt_1"
-                android:text="@string/channel_prompt_2"
-                android:textAlignment="center"
-                android:textSize="@dimen/text_large"
-                android:textColor="@color/white_30_percent_transparent"/>
+            <!--android:layout_marginBottom="@dimen/spacing_normal"-->
+            <!--<TextView-->
+                <!--android:id="@+id/channel_prompt_2"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_centerHorizontal="true"-->
+                <!--android:layout_below="@id/channel_prompt_1"-->
+                <!--android:text="@string/channel_prompt_2"-->
+                <!--android:textAlignment="center"-->
+                <!--android:textSize="@dimen/text_large"-->
+                <!--android:textColor="@color/white_30_percent_transparent"/>-->
 
         </RelativeLayout>
 

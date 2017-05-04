@@ -12,7 +12,6 @@
     android:layout_marginTop="@dimen/spacing_normal"
     android:orientation="vertical">
 
-    <!-- A CardView that contains a TextView -->
     <android.support.v7.widget.CardView
         android:id="@+id/card_view_alarms"
         android:layout_width="match_parent"
@@ -28,7 +27,8 @@
             <ImageView
                 android:id="@+id/card_view_channel_image"
                 android:src="@drawable/landscape"
-                android:maxHeight="400dp"
+                android:foreground="@drawable/filter_channel_cardview"
+                android:maxHeight="500dp"
                 android:maxWidth="1000dp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -43,7 +43,7 @@
         </FrameLayout>
 
         <TextView
-            android:text="channel name"
+            android:text="Channel Name"
             android:id="@+id/cardview_channel_name"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textStyle="bold"

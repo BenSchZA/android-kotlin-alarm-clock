@@ -251,14 +251,11 @@ public class FriendsInviteFragment3 extends BaseFragment {
                     //Sort names alphabetically before notifying adapter
                     sortNamesFriends(mUsers);
 
-                    mRecyclerView.setLayoutManager(new LinearLayoutManager(AppContext));
-                    mRecyclerView.setAdapter(mAdapter);
-                    mAdapter.notifyDataSetChanged();
+                    notifyAdapter();
 
                     //Make load spinner GONE and recyclerview VISIBLE
                     progressBar.setVisibility(View.GONE);
                     mRecyclerView.setVisibility(View.VISIBLE);
-                    mRecyclerView.requestLayout();
 
                     Log.d("apiResponse", apiResponse.toString());
                 }

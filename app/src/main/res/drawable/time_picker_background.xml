@@ -11,9 +11,14 @@
     android:insetRight="16dp"
     android:insetBottom="16dp">
 
-    <shape android:shape="rectangle">
-        <corners android:radius="2dp" />
-        <solid android:color="@color/gradient_start_day" />
-    </shape>
-
+    <layer-list>
+        <item android:id="@+id/main_content"
+            android:drawable="@drawable/main_background_layer_list" />
+        <item>
+            <shape android:shape="rectangle">
+                <corners android:radius="2dp" />
+                <!--<solid android:color="@color/gradient_start_day" />-->
+            </shape>
+        </item>
+    </layer-list>
 </inset>

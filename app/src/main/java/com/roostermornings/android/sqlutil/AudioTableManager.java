@@ -196,6 +196,9 @@ public class AudioTableManager {
 
         Cursor cursor = db.rawQuery(selectQuery, null);
         Integer count = cursor.getCount();
+
+        if(count < 0) count = 0;
+
         cursor.close();
         db.close();
 
