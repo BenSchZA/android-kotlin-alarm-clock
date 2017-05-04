@@ -48,9 +48,4 @@ public class IntroFragment2 extends BaseFragment {
         }
 
     }
-
-    @OnClick(R.id.intro_2_get_started_button)
-    public void onGetStartedClick() {
-        mListener.onGetStartedClick();
-    }
 }

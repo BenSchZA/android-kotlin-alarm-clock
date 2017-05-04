@@ -31,7 +31,6 @@ import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 public class RoosterApplicationModule {
 
     BaseApplication baseApplication;
-    BaseActivity baseActivity;
 
     //pass the base application into the constructor for context
     public RoosterApplicationModule(BaseApplication baseApplication) {
