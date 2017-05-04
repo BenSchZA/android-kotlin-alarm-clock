@@ -323,6 +323,10 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         try {
             //Remove alarm *set* from local SQL database using retrieved Uid from firebase && Remove alarm from firebase
             deviceAlarmController.deleteAlarmSetGlobal(alarmId);
+            //Update notification of pending social roosters
+            updateRoosterNotification();
+            //Notify adapter of new data to be displayed
+            mAdapter.notifyDataSetChanged();
         } catch (NullPointerException e) {
             e.printStackTrace();
         }

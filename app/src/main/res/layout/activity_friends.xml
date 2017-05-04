@@ -44,7 +44,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/appbar"
-            android:background="@drawable/main_background_layer_list_day">
+            android:background="@drawable/main_background_layer_list">
 
             <android.support.v4.view.ViewPager
                 android:id="@+id/friendsViewPager"

@@ -24,7 +24,6 @@ import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -56,10 +55,8 @@ import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.node_api.IHTTPClient;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.service.UploadService;
-import com.roostermornings.android.sqlutil.AudioTableController;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
-import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.InternetHelper;
 
@@ -69,10 +66,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
-import dagger.Module;
-import dagger.Provides;
-
-import static com.roostermornings.android.util.RoosterUtils.notNull;
 
 public abstract class BaseActivity extends AppCompatActivity implements Validator.ValidationListener, BaseFragment.BaseActivityListener, UploadService.BaseActivityListener {
 
@@ -490,7 +483,8 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
 
     private boolean setThemeDay(){
         try {
-            if(findViewById(R.id.main_content) != null) findViewById(R.id.main_content).setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.main_background_layer_list_day, null));
+            //if(findViewById(R.id.main_content) != null) findViewById(R.id.main_content).setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.main_background_layer_list, null));
+            if(findViewById(R.id.main_content) != null) findViewById(R.id.main_content).setSelected(false);
             if(findViewById(R.id.toolbar) != null) findViewById(R.id.toolbar).setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.rooster_blue, null));
             if(findViewById(R.id.tabs) != null) findViewById(R.id.tabs).setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.rooster_blue, null));
 
@@ -503,7 +497,8 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
 
     private boolean setThemeNight(){
         try {
-            if(findViewById(R.id.main_content) != null) findViewById(R.id.main_content).setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.main_background_layer_list_night, null));
+            //if(findViewById(R.id.main_content) != null) findViewById(R.id.main_content).setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.main_background_layer_list_night, null));
+            if(findViewById(R.id.main_content) != null) findViewById(R.id.main_content).setSelected(true);
             if(findViewById(R.id.toolbar) != null) findViewById(R.id.toolbar).setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.rooster_dark_blue, null));
             if(findViewById(R.id.tabs) != null) findViewById(R.id.tabs).setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.rooster_dark_blue, null));
 
