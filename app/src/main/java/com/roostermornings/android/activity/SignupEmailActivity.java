@@ -89,13 +89,6 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
 
     }
 
-    @OnClick(R.id.terms_and_conditions_link)
-    protected void onTermsAndConditionsClicked() {
-        Intent i = new Intent(Intent.ACTION_VIEW);
-        i.setData(Uri.parse(getString(R.string.rooster_website_t_and_c_url)));
-        startActivity(i);
-    }
-
     @Override
     public void onValidationSucceeded() {
 

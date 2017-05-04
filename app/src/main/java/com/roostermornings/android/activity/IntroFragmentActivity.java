@@ -12,6 +12,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.view.View;
+import android.widget.Button;
 
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
@@ -21,12 +23,15 @@ import com.roostermornings.android.fragment.IIntroFragmentListener;
 import com.roostermornings.android.fragment.intro.IntroFragment1;
 import com.roostermornings.android.fragment.intro.IntroFragment2;
 import com.roostermornings.android.fragment.intro.IntroFragment3;
+import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment1;
+import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment2;
 import com.roostermornings.android.util.MyContactsController;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
+import butterknife.OnClick;
 
 public class IntroFragmentActivity extends BaseActivity implements IIntroFragmentListener {
 
@@ -39,6 +44,8 @@ public class IntroFragmentActivity extends BaseActivity implements IIntroFragmen
     ViewPager mPager;
     @BindView(R.id.tabDots)
     TabLayout tabLayout;
+    @BindView(R.id.intro_get_started_button)
+    Button getStartedButton;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -67,6 +74,33 @@ public class IntroFragmentActivity extends BaseActivity implements IIntroFragmen
 
         // Set up the ViewPager with the sections adapter.
         mViewPager.setAdapter(mSectionsPagerAdapter);
+
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                switch (position) {
+                    case 0:
+                        getStartedButton.setVisibility(View.VISIBLE);
+                        break;
+                    case 1:
+                        getStartedButton.setVisibility(View.VISIBLE);
+                        break;
+                    case 2:
+                        getStartedButton.setVisibility(View.GONE);
+                        break;
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
     }
 
     @Override
@@ -92,7 +126,7 @@ public class IntroFragmentActivity extends BaseActivity implements IIntroFragmen
         startActivity(intent);
     }
 
-    @Override
+    @OnClick(R.id.intro_get_started_button)
     public void onGetStartedClick() {
         mPager.setCurrentItem(2);
     }

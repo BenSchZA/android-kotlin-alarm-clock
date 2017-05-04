@@ -15,6 +15,7 @@ android:layout_height="wrap_content">
     android:layout_height="match_parent">
 
 </android.support.v4.view.ViewPager>
+
 <android.support.design.widget.TabLayout
     android:id="@+id/tabDots"
     android:layout_alignParentBottom="true"
@@ -27,4 +28,19 @@ android:layout_height="wrap_content">
     app:tabMinWidth="@dimen/intro_dots_height"
     app:tabPaddingStart="@dimen/spacing_xxlarge"
     app:tabPaddingEnd="@dimen/spacing_xxlarge"/>
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:paddingBottom="@dimen/spacing_xxxlarge"
+        android:layout_above="@id/tabDots">
+        <Button
+            android:id="@+id/intro_get_started_button"
+            style="@style/RoosterButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/intro_get_started" />
+    </FrameLayout>
+
 </RelativeLayout>

@@ -47,12 +47,5 @@ public class IntroFragment1 extends BaseFragment {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
         }
-
     }
-
-    @OnClick(R.id.intro_1_get_started_button)
-    public void onGetStartedClick() {
-        mListener.onGetStartedClick();
-    }
-
 }
