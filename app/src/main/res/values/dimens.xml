@@ -37,7 +37,7 @@
 
     <dimen name="input_width_large">260dp</dimen>
 
-    <dimen name="intro_dots_height">30dp</dimen>
+    <dimen name="intro_dots_height">10dp</dimen>
     <dimen name="intro_dots_margin_bottom">20dp</dimen>
     <dimen name="intro_slide_title">18sp</dimen>
 

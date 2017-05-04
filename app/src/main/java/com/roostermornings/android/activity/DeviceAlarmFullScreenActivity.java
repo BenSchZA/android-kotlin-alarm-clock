@@ -235,7 +235,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     protected void setProfilePic(String url) {
 
         Picasso.with(DeviceAlarmFullScreenActivity.this).load(url)
-                .resize(400, 400)
+                .resize(600, 600)
                 .centerCrop()
                 .into(imgSenderPic, new Callback() {
                     @Override

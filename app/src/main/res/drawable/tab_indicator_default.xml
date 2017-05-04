@@ -9,7 +9,7 @@
         <shape
             android:innerRadius="0dp"
             android:shape="ring"
-            android:thickness="18dp"
+            android:thickness="12dp"
             android:useLevel="false">
             <solid android:color="@color/white_transparent"/>
         </shape>

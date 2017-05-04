@@ -6,6 +6,7 @@
 package com.roostermornings.android.activity;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -75,8 +76,8 @@ public class SignInActivity extends BaseActivity {
     @BindView(R.id.already_user_textview)
     TextView mTextViewAlreadyUser;
 
-    @BindView(R.id.signin_button_email)
-    Button mButtonSigninEmail;
+    @BindView(R.id.sign_up_email_textview)
+    TextView mTextViewSignUpEmail;
 
     @BindView(R.id.signin_button_facebook)
     Button mButtonSigninFacebook;
@@ -148,20 +149,24 @@ public class SignInActivity extends BaseActivity {
 
     @OnClick(R.id.already_user_textview)
     public void onAlreadyUserClicked() {
-
         Intent intent = new Intent(SignInActivity.this, SignupEmailActivity.class);
         intent.putExtra(getApplicationContext().getString(R.string.extras_mobile_number), mMobileNumber);
         intent.putExtra(getApplicationContext().getString(R.string.extras_already_user), true);
         startActivity(intent);
-
     }
 
-    @OnClick(R.id.signin_button_email)
-    public void onEmailSigninButtonClick() {
-
+    @OnClick(R.id.sign_up_email_textview)
+    public void onSignUpEmailClicked() {
         Intent intent = new Intent(SignInActivity.this, SignupEmailActivity.class);
         intent.putExtra(getApplicationContext().getString(R.string.extras_mobile_number), mMobileNumber);
         startActivity(intent);
+    }
+
+    @OnClick(R.id.terms_and_conditions_link)
+    protected void onTermsAndConditionsClicked() {
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setData(Uri.parse(getString(R.string.rooster_website_t_and_c_url)));
+        startActivity(i);
     }
 
     @OnClick(R.id.signin_button_facebook)
