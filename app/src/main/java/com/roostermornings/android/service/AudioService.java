@@ -294,21 +294,21 @@ public class AudioService extends Service {
         //Check stream volume above minimum
         checkStreamVolume();
 
+        //Set alarm count display
+        alarmPosition = audioItems.indexOf(mThis.audioItem) + 1;
+        //Send broadcast to DeviceAlarmFullScreenActivity with UI data
+        updateAlarmUI();
+
         file = new File(getFilesDir() + "/" + audioItem.getFilename());
 
         try {
             mediaPlayerRooster.reset();
             mediaPlayerRooster.setDataSource(file.getPath());
 
-            mediaPlayerRooster.prepareAsync();
             mediaPlayerRooster.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mediaPlayer) {
                     mediaPlayerRooster.start();
-                    //Set alarm count display
-                    alarmPosition = audioItems.indexOf(mThis.audioItem) + 1;
-                    //Send broadcast to DeviceAlarmFullScreenActivity with UI data
-                    updateAlarmUI();
 
                     mediaPlayerRooster.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                         @Override
@@ -328,6 +328,26 @@ public class AudioService extends Service {
                     });
                 }
             });
+
+            mediaPlayerRooster.setOnErrorListener(new MediaPlayer.OnErrorListener(){
+                @Override
+                public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
+                    //set audio file entry in SQL db as listened; to be removed when AudioService ends
+                    audioTableManager.setListened(mThis.audioItem.getId());
+                    //Check if at end of queue, else play next file
+                    if (audioItems.size() == audioItems.indexOf(audioItem) + 1) {
+                        //If an error occurs on the last queue item, assume error on all and start default alarm tone as fail safe
+                        startDefaultAlarmTone();
+                    } else{
+                        playRooster(getNextAudioItem());
+                    }
+                    return true;
+                }
+            });
+
+            //Prepare mediaplayer on new thread: onCompletion or onError listener called
+            mediaPlayerRooster.prepareAsync();
+
         } catch (IOException e) {
             e.printStackTrace();
             //Social rooster will never play... let's not go here

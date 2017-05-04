@@ -99,7 +99,7 @@ public class AudioTableManager {
         SQLiteDatabase db = initDB();
 
         File file = new File(context.getFilesDir() + "/" + deviceAudioQueueItem.getFilename());
-        if(!file.delete()) return;
+        file.delete();
 
         String execSql = "DELETE FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_ID + " = " + deviceAudioQueueItem.getId() + ";";
 

@@ -44,15 +44,6 @@
                 android:textSize="@dimen/intro_slide_title"
                 android:textStyle="bold" />
 
-            <Button
-                android:id="@+id/intro_2_get_started_button"
-                style="@style/RoosterButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="@dimen/spacing_normal_large"
-                android:text="@string/get_started" />
-
         </LinearLayout>
 
     </RelativeLayout>

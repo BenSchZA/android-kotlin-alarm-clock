@@ -35,10 +35,13 @@ import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
+import com.squareup.picasso.Picasso;
 
 import java.io.FileOutputStream;
 import java.util.SortedMap;
 import java.util.TreeMap;
+
+import static com.roostermornings.android.BaseApplication.AppContext;
 
 public class BackgroundTaskIntentService extends IntentService {
     public static final String TAG = BackgroundTaskIntentService.class.getSimpleName();
@@ -293,6 +296,9 @@ public class BackgroundTaskIntentService extends IntentService {
             //Could use channelRooster.getUpload_date(), but then can't use for purging files
             deviceAudioQueueItem.setDate_created(System.currentTimeMillis());
 
+            //Pre-cache image to display on alarm screen, in case no internet connection
+            Picasso.with(AppContext).load(channelRooster.getPhoto()).fetch();
+
             //store in local SQLLite database and check if successful
             if(audioTableManager.insertChannelAudioFile(deviceAudioQueueItem)) {
 
@@ -371,6 +377,9 @@ public class BackgroundTaskIntentService extends IntentService {
 
                         //store in local SQLLite database
                         audioTableManager.insertSocialAudioFile(deviceAudioQueueItem);
+
+                        //Pre-cache image to display on alarm screen, in case no internet connection
+                        Picasso.with(AppContext).load(socialRooster.getProfile_pic()).fetch();
 
                         //remove record of queue from FB database
                         queueRecordReference.removeValue();

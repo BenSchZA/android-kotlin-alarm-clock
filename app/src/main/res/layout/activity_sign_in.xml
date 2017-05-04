@@ -10,86 +10,112 @@
     android:layout_height="match_parent"
     android:background="@color/rooster_light_blue"
     android:paddingLeft="@dimen/activity_horizontal_margin"
-
+    android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".activity.SignInActivity">
 
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="@style/Widget.AppCompat.ProgressBar"
-        android:layout_width="match_parent"
+    <ImageView
+        android:id="@+id/rooster_logo"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_centerVertical="true"
-        android:visibility="gone"/>
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="100dp"
+        android:src="@drawable/logo" />
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:gravity="center_horizontal"
-        android:orientation="vertical">
+        android:layout_below="@+id/rooster_logo"
+        android:layout_marginTop="@dimen/spacing_xxlarge"
+        android:gravity="center_horizontal" >
 
-        <ImageView
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/logo" />
+            android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
+            <!--This button is necessary to override the default Facebook login button-->
+            <com.facebook.login.widget.LoginButton
+                android:id="@+id/login_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="30dp"
+                android:layout_marginBottom="30dp"
+                android:visibility="gone" />
+
+            <Button
+                android:drawableLeft="@drawable/com_facebook_button_login_logo"
+                android:drawablePadding="@dimen/spacing_normal"
+                android:paddingLeft="@dimen/spacing_normal_large"
+                android:paddingRight="@dimen/spacing_normal_large"
+                android:id="@+id/signin_button_facebook"
+                style="@style/RoosterButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="@dimen/spacing_normal"
+                android:text="@string/signup_facebook" />
+
+            <Button
+                android:drawableLeft="@drawable/googleg_standard_color_18"
+                android:drawablePadding="@dimen/spacing_normal"
+                android:paddingLeft="@dimen/spacing_normal_large"
+                android:paddingRight="@dimen/spacing_normal_large"
+                android:id="@+id/signin_button_google"
+                style="@style/RoosterButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="@dimen/spacing_normal"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:text="@string/signup_google">
+            </Button>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="center_horizontal">
+
+                <TextView
+                    android:id="@+id/already_user_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/spacing_xlarge"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:text="Login"
+                    android:textColor="@drawable/rooster_link_white" />
+
+                <TextView
+                    android:id="@+id/sign_up_email_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/spacing_xlarge"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:text="Sign Up With Email"
+                    android:textColor="@drawable/rooster_link_white" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="@style/Widget.AppCompat.ProgressBar"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginBottom="@dimen/spacing_xxlarge"
-            android:layout_marginTop="10dp"
-            android:paddingTop="20dp"
-            android:text="@string/activity_signin_title"
-            android:textColor="@color/white"
-            android:textSize="@dimen/text_large"
-            android:textAlignment="center" />
+            android:visibility="gone"/>
 
-        <com.facebook.login.widget.LoginButton
-            android:id="@+id/login_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="30dp"
-            android:layout_marginBottom="30dp"
-            android:visibility="gone" />
-
-        <Button
-            android:id="@+id/signin_button_facebook"
-            style="@style/RoosterButtonStyle"
-            android:layout_width="260dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="@dimen/spacing_normal"
-            android:layout_marginTop="@dimen/spacing_normal"
-            android:text="@string/signup_facebook" />
-
-        <Button
-            android:id="@+id/signin_button_google"
-            style="@style/RoosterButtonStyle"
-            android:layout_width="260dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="@dimen/spacing_normal"
-            android:layout_marginTop="@dimen/spacing_normal"
-            android:text="@string/signup_google" />
-
-        <Button
-            android:id="@+id/signin_button_email"
-            style="@style/RoosterButtonStyle"
-            android:layout_width="260dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_margin="@dimen/spacing_normal"
-            android:text="@string/signup_email">
-
-            <requestFocus />
-        </Button>
-
-    </LinearLayout>
+    </FrameLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -99,14 +125,14 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/already_user_textview"
+            android:id="@+id/terms_and_conditions_link"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/spacing_xlarge"
             android:clickable="true"
             android:focusable="true"
-            android:gravity="end"
-            android:text="Already a user? Sign in."
+            android:gravity="center|bottom"
+            android:text="@string/terms_and_conditions"
             android:textColor="@drawable/rooster_link_white" />
 
     </LinearLayout>
