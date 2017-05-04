@@ -31,7 +31,7 @@ and no social roosters are received"
         <CheckBoxPreference
             android:key="pref_key_rooster_order"
             android:summary="Set channel rooster content to occur before social rooster content"
-            android:title="Alarm rooster order"
+            android:title="Alarm rooster ordering"
             android:defaultValue="false"
             android:persistent="true"/>
         <EditTextPreference
@@ -51,8 +51,8 @@ and no social roosters are received"
             android:title="Day/night theme"
             android:key="pref_key_day_night_theme"
             android:persistent="true"
-            android:summary="Select whether to display the day/night theme automatically by time and timezone, or select it manually"
-            android:dialogTitle="Select day/night theme option"
+            android:summary="Display the day/night theme automatically by timezone, or select it manually"
+            android:dialogTitle="Select option"
             android:entries="@array/user_settings_day_night_theme_entries"
             android:entryValues="@array/user_settings_day_night_theme_entry_values"
             android:defaultValue="@array/user_settings_day_night_theme_default_values" />

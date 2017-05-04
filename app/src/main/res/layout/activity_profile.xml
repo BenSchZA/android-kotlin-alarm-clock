@@ -25,7 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="@dimen/spacing_normal_large"
-        android:background="@drawable/main_background_layer_list_day"
+        android:background="@drawable/main_background_layer_list"
         android:orientation="vertical"
         android:gravity="center"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
