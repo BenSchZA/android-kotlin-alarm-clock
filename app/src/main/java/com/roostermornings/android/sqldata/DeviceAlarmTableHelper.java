@@ -9,6 +9,8 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import static com.roostermornings.android.BaseApplication.AppContext;
+
 /**
  * Created by bscholtz on 2/14/17.
  */
@@ -18,7 +20,20 @@ public class DeviceAlarmTableHelper extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION = 1;
     public static final String DATABASE_NAME = "DeviceAlarmTable.db";
 
-    public DeviceAlarmTableHelper(Context context) {
+    private static DeviceAlarmTableHelper mInstance = null;
+
+    public static DeviceAlarmTableHelper getInstance() {
+
+        // Use the application context, which will ensure that you
+        // don't accidentally leak an Activity's context.
+        // See this article for more information: http://bit.ly/6LRzfx
+        if (mInstance == null) {
+            mInstance = new DeviceAlarmTableHelper(AppContext);
+        }
+        return mInstance;
+    }
+
+    private DeviceAlarmTableHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 

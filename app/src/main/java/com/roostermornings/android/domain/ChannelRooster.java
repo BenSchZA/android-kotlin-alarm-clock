@@ -22,6 +22,9 @@ public class ChannelRooster {
 
     @Exclude
     private Boolean selected = false;
+    @Exclude
+    private String channel_description;
+    private String channel_photo;
 
     // Required default constructor for Firebase object mapping
     @SuppressWarnings("unused")
@@ -38,6 +41,26 @@ public class ChannelRooster {
         this.photo = photo;
         this.rooster_cycle_iteration = rooster_cycle_iteration;
         this.upload_date = upload_date;
+    }
+
+    @Exclude
+    public String getChannel_description() {
+        return channel_description;
+    }
+
+    @Exclude
+    public void setChannel_description(String channel_description) {
+        this.channel_description = channel_description;
+    }
+
+    @Exclude
+    public String getChannel_photo() {
+        return channel_photo;
+    }
+
+    @Exclude
+    public void setChannel_photo(String channel_photo) {
+        this.channel_photo = channel_photo;
     }
 
     @Exclude
