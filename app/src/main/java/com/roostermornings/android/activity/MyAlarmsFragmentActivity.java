@@ -85,95 +85,116 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         initialize(R.layout.activity_my_alarms);
         inject(((BaseApplication)getApplication()).getRoosterApplicationComponent());
 
-        setDayNightTheme();
-        setButtonBarSelection();
+        //Final context to be used in threads
+        final Context context = this;
 
-        buttonAddAlarm.setAnimation(AnimationUtils.loadAnimation(this, R.anim.pulse));
-
-        //Set toolbar title
-        setupToolbar(toolbarTitle, getString(R.string.my_alarms));
-
-        DatabaseReference mMyAlarmsReference = FirebaseDatabase.getInstance().getReference()
-                .child("alarms").child(getFirebaseUser().getUid());
-        //Keep local and Firebase alarm dbs synced
-        mMyAlarmsReference.keepSynced(true);
-
-        mAdapter = new MyAlarmsListAdapter(mAlarms, MyAlarmsFragmentActivity.this, getApplication());
-
-        // use a linear layout manager
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(mLayoutManager);
-        mRecyclerView.setAdapter(mAdapter);
-
-        //Check for new Firebase datachange notifications and register broadcast receiver
-        updateRequestNotification();
-
-        Bundle extras = getIntent().getExtras();
-        if (extras != null && extras.containsKey("message")) {
-            String fcm_message = extras.getString("message", "");
-            if (fcm_message.length() > 0) {
-
-                new MaterialDialog.Builder(getApplicationContext())
-                        .title("Hey, we thought you should know!")
-                        .content(fcm_message)
-                        .positiveText(R.string.ok)
-                        .negativeText("")
-                        .show();
-            }
-        }
-
-        //Clear snooze if action
-        if(Constants.ACTION_CANCEL_SNOOZE.equals(getIntent().getAction())) {
-            try {
-                deviceAlarmController.snoozeAlarm(extras.getString(Constants.EXTRA_ALARMID), true);
-            } catch(NullPointerException e) {
-                e.printStackTrace();
-            }
-        }
-
-        ValueEventListener alarmsListener = new ValueEventListener() {
+        //UI setup thread
+        new Thread() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void run() {
+                //Setup day/night theme selection (based on settings, and time)
+                setDayNightTheme();
+                //Set highlighting of button bar
+                setButtonBarSelection();
+                //Animate FAB with pulse
+                buttonAddAlarm.setAnimation(AnimationUtils.loadAnimation(context, R.anim.pulse));
+                //Set toolbar title
+                setupToolbar(toolbarTitle, getString(R.string.my_alarms));
 
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    Alarm alarm = postSnapshot.getValue(Alarm.class);
+                //Set up adapter for monitoring alarm objects
+                mAdapter = new MyAlarmsListAdapter(mAlarms, MyAlarmsFragmentActivity.this, getApplication());
+                //Use a linear layout manager
+                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(context);
+                mRecyclerView.setLayoutManager(mLayoutManager);
+                mRecyclerView.setAdapter(mAdapter);
+                //Check for new Firebase datachange notifications and register broadcast receiver
+                updateRequestNotification();
+            }
+        }.run();
 
-                    //Register alarm sets on login
-                    //Extract data from Alarm "alarm" and create new alarm set DeviceAlarm
-                    AlarmChannel alarmChannel = alarm.getChannel();
-                    String alarmChannelUID = "";
-                    if(alarmChannel != null) alarmChannelUID = alarmChannel.getId();
+        //Process intent bundle thread
+        new Thread() {
+            @Override
+            public void run() {
+                Bundle extras = getIntent().getExtras();
+                if (extras != null && extras.containsKey("message")) {
+                    String fcm_message = extras.getString("message", "");
+                    if (fcm_message.length() > 0) {
 
-                    //If alarm from firebase does not exist locally, create it
-                    if(!deviceAlarmTableManager.isSetInDB(alarm.getUid())) {
-                        deviceAlarmController.registerAlarmSet(alarm.isEnabled(), alarm.getUid(), alarm.getHour(), alarm.getMinute(),
-                                alarm.getDays(), alarm.isRecurring(), alarmChannelUID, alarm.isAllow_friend_audio_files());
+                        new MaterialDialog.Builder(getApplicationContext())
+                                .title("Hey, we thought you should know!")
+                                .content(fcm_message)
+                                .positiveText(R.string.ok)
+                                .negativeText("")
+                                .show();
+                    }
+                }
+
+                //Clear snooze if action
+                if(Constants.ACTION_CANCEL_SNOOZE.equals(getIntent().getAction())) {
+                    try {
+                        deviceAlarmController.snoozeAlarm(extras.getString(Constants.EXTRA_ALARMID), true);
+                    } catch(NullPointerException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }.run();
+
+        //Firebase listview setup thread
+        new Thread() {
+            @Override
+            public void run() {
+                DatabaseReference mMyAlarmsReference = FirebaseDatabase.getInstance().getReference()
+                        .child("alarms").child(getFirebaseUser().getUid());
+                //Keep local and Firebase alarm dbs synced
+                mMyAlarmsReference.keepSynced(true);
+
+                ValueEventListener alarmsListener = new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+
+                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                            Alarm alarm = postSnapshot.getValue(Alarm.class);
+
+                            //Register alarm sets on login
+                            //Extract data from Alarm "alarm" and create new alarm set DeviceAlarm
+                            AlarmChannel alarmChannel = alarm.getChannel();
+                            String alarmChannelUID = "";
+                            if(alarmChannel != null) alarmChannelUID = alarmChannel.getId();
+
+                            //If alarm from firebase does not exist locally, create it
+                            if(!deviceAlarmTableManager.isSetInDB(alarm.getUid())) {
+                                deviceAlarmController.registerAlarmSet(alarm.isEnabled(), alarm.getUid(), alarm.getHour(), alarm.getMinute(),
+                                        alarm.getDays(), alarm.isRecurring(), alarmChannelUID, alarm.isAllow_friend_audio_files());
+                            }
+
+                            //Check SQL db to see if all alarms in set have fired
+                            alarm.setEnabled(deviceAlarmTableManager.isSetEnabled(alarm.getUid()));
+                            //Set set enabled flag and don't notify user
+                            deviceAlarmController.setSetEnabled(alarm.getUid(), alarm.isEnabled(), false);
+
+                            //Add alarm to adapter display arraylist and notify adapter of change
+                            mAlarms.add(alarm);
+                            mAdapter.notifyItemInserted(mAlarms.size() - 1);
+                            //Notify adapter of new data to be displayed
+                            updateRoosterNotification();
+                        }
+                        //Recreate all enabled alarms as failsafe
+                        deviceAlarmController.rebootAlarms();
+                        //Case: local has an alarm that firebase doesn't Result: delete local alarm
+                        deviceAlarmController.syncAlarmSetGlobal(mAlarms);
                     }
 
-                    //Check SQL db to see if all alarms in set have fired
-                    alarm.setEnabled(deviceAlarmTableManager.isSetEnabled(alarm.getUid()));
-                    //Set set enabled flag and don't notify user
-                    deviceAlarmController.setSetEnabled(alarm.getUid(), alarm.isEnabled(), false);
-
-                    //Add alarm to adapter display arraylist and notify adapter of change
-                    mAlarms.add(alarm);
-                    mAdapter.notifyItemInserted(mAlarms.size() - 1);
-                    //Notify adapter of new data to be displayed
-                    updateRoosterNotification();
-                }
-                //Recreate all enabled alarms as failsafe
-                deviceAlarmController.rebootAlarms();
-                //Case: local has an alarm that firebase doesn't Result: delete local alarm
-                deviceAlarmController.syncAlarmSetGlobal(mAlarms);
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+                        if(BuildConfig.DEBUG) Toast.makeText(MyAlarmsFragmentActivity.this, "Failed to load mAlarms.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }; mMyAlarmsReference.addListenerForSingleValueEvent(alarmsListener);
             }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                if(BuildConfig.DEBUG) Toast.makeText(MyAlarmsFragmentActivity.this, "Failed to load mAlarms.",
-                        Toast.LENGTH_SHORT).show();
-            }
-        }; mMyAlarmsReference.addListenerForSingleValueEvent(alarmsListener);
+        }.run();
     }
 
     @Override
@@ -182,21 +203,26 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     }
 
     private void updateRoosterNotification() {
-        Integer roosterCount = audioTableManager.countSocialAudioFiles();
 
-        if (roosterCount > 0) {
-            DeviceAlarm deviceAlarm  = deviceAlarmTableManager.getNextPendingAlarm();
+        new Thread() {
+            @Override
+            public void run() {
+                Integer roosterCount = audioTableManager.countSocialAudioFiles();
+                if (roosterCount > 0) {
+                    DeviceAlarm deviceAlarm  = deviceAlarmTableManager.getNextPendingAlarm();
 
-            if(deviceAlarm == null) for (Alarm alarm: mAlarms) alarm.setUnseen_roosters(0);
-            else {
-                for (Alarm alarm : mAlarms) {
-                    alarm.setUnseen_roosters(0);
-                    if (alarm.getUid().equals(deviceAlarm.getSetId()))
-                        alarm.setUnseen_roosters(roosterCount);
+                    if(deviceAlarm == null) for (Alarm alarm: mAlarms) alarm.setUnseen_roosters(0);
+                    else {
+                        for (Alarm alarm : mAlarms) {
+                            alarm.setUnseen_roosters(0);
+                            if (alarm.getUid().equals(deviceAlarm.getSetId()))
+                                alarm.setUnseen_roosters(roosterCount);
+                        }
+                    }
+                    mAdapter.notifyDataSetChanged();
                 }
             }
-            mAdapter.notifyDataSetChanged();
-        }
+        }.run();
 
         //Broadcast receiver filter to receive UI updates
         IntentFilter firebaseListenerServiceFilter = new IntentFilter();
@@ -287,15 +313,20 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void toggleAlarmSetEnable(Alarm alarm, boolean enabled) {
-        //Toggle alarm set enabled
-        deviceAlarmController.setSetEnabled(alarm.getUid(), enabled, true);
-        //Set adapter arraylist item to enabled
-        mAlarms.get(mAlarms.indexOf(alarm)).setEnabled(enabled);
-        //Update notification of pending social roosters
-        updateRoosterNotification();
-        //Notify adapter of new data to be displayed
-        mAdapter.notifyDataSetChanged();
+    public void toggleAlarmSetEnable(final Alarm alarm, final boolean enabled) {
+        new Thread() {
+            @Override
+            public void run() {
+                //Toggle alarm set enabled
+                deviceAlarmController.setSetEnabled(alarm.getUid(), enabled, true);
+                //Set adapter arraylist item to enabled
+                mAlarms.get(mAlarms.indexOf(alarm)).setEnabled(enabled);
+                //Update notification of pending social roosters
+                updateRoosterNotification();
+                //Notify adapter of new data to be displayed
+                mAdapter.notifyDataSetChanged();
+            }
+        }.run();
     }
 
     @OnClick(R.id.add_alarm)
@@ -319,17 +350,22 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         startActivity(new Intent(MyAlarmsFragmentActivity.this, MessageStatusActivity.class));
     }
 
-    public void deleteAlarm(String alarmId) {
-        try {
-            //Remove alarm *set* from local SQL database using retrieved Uid from firebase && Remove alarm from firebase
-            deviceAlarmController.deleteAlarmSetGlobal(alarmId);
-            //Update notification of pending social roosters
-            updateRoosterNotification();
-            //Notify adapter of new data to be displayed
-            mAdapter.notifyDataSetChanged();
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
+    public void deleteAlarm(final String alarmId) {
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    //Remove alarm *set* from local SQL database using retrieved Uid from firebase && Remove alarm from firebase
+                    deviceAlarmController.deleteAlarmSetGlobal(alarmId);
+                    //Update notification of pending social roosters
+                    updateRoosterNotification();
+                    //Notify adapter of new data to be displayed
+                    mAdapter.notifyDataSetChanged();
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.run();
     }
 
     public void editAlarm(String alarmId) {

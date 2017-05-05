@@ -48,6 +48,7 @@
     <string name="alarm_default_name">Rise and Shine!</string>
     <string name="alarm_count"></string>
     <string name="delete_alarm">Delete alarm</string>
+    <string name="save_alarm">Save alarm</string>
     <string name="repeat_alarm">Repeat alarm time</string>
     <string name="allow_friends">Allow friends to send roosters to this alarm</string>
 
@@ -55,21 +56,21 @@
     <string name="text_name_initials"></string>
     <string name="text_friends_button_add">Add</string>
     <string name="text_friends_button_accept">Accept</string>
-    <string name="share_button">Share Rooster</string>
-    <string name="invite_contacts">Invite contacts who have Rooster installed</string>
+    <string name="share_button">Invite to Rooster</string>
+    <string name="invite_contacts">Invite contacts who have Rooster</string>
     <string name="friends_search_title">Search...</string>
     <string name="search_hint_friends">Search...</string>
 
-    <string name="message_status_activity_title">Social Roosters Sent</string>
+    <string name="message_status_activity_title">Sent Roosters</string>
     <string name="status_sent">Sent</string>
     <string name="status_delivered">Delivered</string>
     <string name="status_awake">Awake</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="new_audio_at_least_one_friend">Please select at least 1 friend.</string>
-    <string name="new_audio_instructions">Try not to talk about the weather...</string>
+    <string name="new_audio_instructions">Record something funny, \n moving, kind or pointless \n to surprise your friends.</string>
     <string name="new_audio_time_instructions">Keep recording, \n your friends need to hear you!</string>
+    <string name="new_audio_post_delete_instructions">If at first you don’t succeed, \n skydiving is not for you.</string>
     <string name="new_audio_time_amplitude_instructions">Keep recording and speak up, \n your friends need to hear you!</string>
     <string name="new_audio_continue_instructions">Time to continue and select some friends!</string>
     <string name="new_audio_quiet_instructions">Psst! That was very quiet, \n please record again...</string>
@@ -85,6 +86,8 @@
     <string name="dialog_confirm_alarm_delete">Are you sure you wish to delete this alarm?</string>
     <string name="dialog_confirm_friend_delete">Are you sure you wish to remove this friend?</string>
     <string name="dialog_permissions_explainer">Some Android phones have power usage optimisation that interferes with Rooster, please check your phone settings - sometimes called \'Protected Apps\'.</string>
+
+    <string name="invite_to_rooster_message">How cool would it be if you could wake up to surprise voice notes from me and other friends? \n\nYou can also wake up to different content channels such as inspiration, comedy, music, news, meditation, bird calls and more! \n\nLike the best things in life, it’s free :) \nhttp://www.onelink.to/rooster</string>
 
     <string-array name="user_settings_day_night_theme_entries">
         <item>Automatically set by timezone</item>

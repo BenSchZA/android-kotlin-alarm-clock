@@ -86,6 +86,9 @@ public class NewAlarmFragment1 extends BaseFragment{
     @BindView(R.id.new_alarm_fragment1_delete_alarm)
     Button deleteAlarm;
 
+    @BindView(R.id.new_alarm_fragment1_save_alarm)
+    Button saveAlarm;
+
     private static final String ARG_USER_UID_PARAM = "user_uid_param";
     public static final String TAG = NewAlarmFragment1.class.getSimpleName();
     private String mUserUidParam;
@@ -107,6 +110,11 @@ public class NewAlarmFragment1 extends BaseFragment{
         component.inject(this);
     }
 
+    private NewAlarmInterface newAlarmInterface;
+    public interface NewAlarmInterface{
+        void saveAndExit();
+    }
+
     public NewAlarmFragment1() {
         // Required empty public constructor
     }
@@ -123,6 +131,12 @@ public class NewAlarmFragment1 extends BaseFragment{
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         inject(((BaseApplication)getActivity().getApplication()).getRoosterApplicationComponent());
+
+        try {
+            newAlarmInterface = (NewAlarmInterface) getActivity();
+        } catch (ClassCastException castException) {
+            /* The activity does not implement the listener. */
+        }
 
         if (getArguments() != null) {
             mUserUidParam = getArguments().getString(ARG_USER_UID_PARAM);
@@ -150,7 +164,7 @@ public class NewAlarmFragment1 extends BaseFragment{
         //If in edit mode, delete button should be visible and alarm details should be updated
         updateAlarmUIIfEdit();
         textViewAlarmTime.setText(RoosterUtils.setAlarmTimeFromHourAndMinute(mAlarm));
-        textViewAlarmTime.setAnimation(AnimationUtils.loadAnimation(AppContext, R.anim.pulse));
+        textViewAlarmTime.startAnimation(AnimationUtils.loadAnimation(AppContext, R.anim.pulse));
         return view;
     }
 
@@ -191,12 +205,13 @@ public class NewAlarmFragment1 extends BaseFragment{
     @OnClick(R.id.new_alarm_time)
     public void onTimeClick() {
         mTimePickerDialog.show();
+        textViewAlarmTime.clearAnimation();
     }
 
     public void updateAlarmUIIfEdit() {
         if(deviceAlarmTableManager.isSetInDB(NewAlarmFragmentActivity.getCurrentAlarmId())) {
             mListener.retrieveAlarmDetailsFromSQL();
-            deleteAlarm.setVisibility(View.VISIBLE);
+            saveAlarm.setVisibility(View.VISIBLE);
         }
     }
 
@@ -215,6 +230,11 @@ public class NewAlarmFragment1 extends BaseFragment{
             e.printStackTrace();
             if(BuildConfig.DEBUG) Toast.makeText(AppContext, "Oi! Don't delete me. Delete alarm failed!", Toast.LENGTH_SHORT);
         }
+    }
+
+    @OnClick(R.id.new_alarm_fragment1_save_alarm)
+    public void saveAlarm() {
+        if(newAlarmInterface != null) newAlarmInterface.saveAndExit();
     }
 
     @OnClick({R.id.new_alarm_fragment1_alarm_day_mon,

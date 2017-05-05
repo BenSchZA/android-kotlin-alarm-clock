@@ -38,6 +38,8 @@ import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.util.Constants;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -188,7 +190,7 @@ public class FriendsMyFragment1 extends BaseFragment {
 
                     mUsers.clear();
                     mUsers.addAll(apiResponse.users);
-
+                    while(mUsers.remove(null));
                     sortNamesUsers(mUsers);
                     mAdapter.notifyDataSetChanged();
 //TODO:
@@ -199,7 +201,7 @@ public class FriendsMyFragment1 extends BaseFragment {
 
             @Override
             public void onFailure(Throwable t) {
-                Log.i(TAG, t.getLocalizedMessage());
+                Log.i(TAG, t.getLocalizedMessage()==null?"":t.getLocalizedMessage());
                 Toast.makeText(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG).show();
                 progressBar.setVisibility(View.GONE);
             }

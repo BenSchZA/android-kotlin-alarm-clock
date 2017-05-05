@@ -74,18 +74,6 @@ public class NewAlarmFragment2 extends BaseFragment {
     }
 
     public interface ChannelInterface {
-//            public void setSelectedChannel(ChannelRooster channelRooster) {
-//Alarm alarm = mListener.getAlarmDetails();
-//        alarm.setChannel(new AlarmChannel(channelRooster.getName(), channelRooster.getChannel_uid()));
-//        mListener.setAlarmDetails(alarm);
-//    }
-//
-//    public void clearSelectedChannel() {
-//        Alarm alarm = mListener.getAlarmDetails();
-//        alarm.setChannel(new AlarmChannel());
-//        mListener.setAlarmDetails(alarm);
-//    }
-
         void setSelectedChannel(ChannelRooster channelRooster);
         void clearSelectedChannel();
     }
@@ -174,6 +162,12 @@ public class NewAlarmFragment2 extends BaseFragment {
                 //Iterate over all content children
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     ChannelRooster channelRooster = postSnapshot.getValue(ChannelRooster.class);
+
+                    //Set channelrooster display picture to banner image & description to channel description
+                    //In future channelrooster specific details will be shown in discover page
+                    channelRooster.setChannel_photo(channel.getPhoto());
+                    channelRooster.setChannel_description(channel.getDescription());
+
                     if(channelRooster.isActive() && (channelRooster.getRooster_cycle_iteration() != iteration)) {
                         channelIterationMap.put(channelRooster.getRooster_cycle_iteration(), channelRooster);
                         findNextValidChannelRooster(channelIterationMap, channel, iteration);

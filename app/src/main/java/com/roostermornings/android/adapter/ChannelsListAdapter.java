@@ -129,8 +129,7 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
 
                 new MaterialDialog.Builder(mActivity)
                         .title(mDataset.get(position).getName())
-                        .content(mDataset.get(position).getDescription())
-                        .theme(Theme.LIGHT)
+                        .content(mDataset.get(position).getChannel_description())
                         .positiveText(R.string.ok)
                         .negativeText("")
                         .show();
@@ -140,7 +139,7 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
         });
 
         try {
-            Picasso.with(AppContext).load(mDataset.get(position).getPhoto())
+            Picasso.with(AppContext).load(mDataset.get(position).getChannel_photo())
                     .fit()
                     .centerCrop()
                     .into(holder.imgChannelImage, new Callback() {

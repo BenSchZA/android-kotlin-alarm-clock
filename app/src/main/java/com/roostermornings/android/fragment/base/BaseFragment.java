@@ -126,6 +126,8 @@ public abstract class BaseFragment extends Fragment implements Validator.Validat
         Collections.sort(mUsers, new Comparator<Friend>() {
             @Override
             public int compare(Friend lhs, Friend rhs) {
+                //If null, pretend equal
+                if(lhs == null || rhs == null || lhs.getUser_name() == null || rhs.getUser_name() == null) return 0;
                 return lhs.getUser_name().compareTo(rhs.getUser_name());
             }
         });
@@ -136,6 +138,8 @@ public abstract class BaseFragment extends Fragment implements Validator.Validat
         Collections.sort(mUsers, new Comparator<User>() {
             @Override
             public int compare(User lhs, User rhs) {
+                //If null, pretend equal
+                if(lhs == null || rhs == null || lhs.getUser_name() == null || rhs.getUser_name() == null) return 0;
                 return lhs.getUser_name().compareTo(rhs.getUser_name());
             }
         });
