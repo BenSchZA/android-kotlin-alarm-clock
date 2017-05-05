@@ -24,6 +24,13 @@
         <item name="android:textColorSecondary">@color/white_30_percent_transparent</item>
 
         <!--<item name="android:windowActivityTransitions">true</item>-->
+
+        <!--MaterialDialog Theme-->
+        <item name="md_title_color">@color/black</item>
+        <item name="md_content_color">@color/black</item>
+        <item name="md_positive_color">@color/rooster_light_blue</item>
+        <item name="md_neutral_color">@color/grey</item>
+        <item name="md_negative_color">@android:color/holo_red_light</item>
     </style>
 
     <style name="ActionBarMenuStyle" parent="Widget.AppCompat.PopupMenu.Overflow">
@@ -59,7 +66,7 @@
         <item name="android:textColorPrimary">@android:color/white</item>
     </style>
 
-    <style name="AppThemeNight" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppThemeNight" parent="AppThemeDay">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/rooster_dark_blue</item>
         <item name="colorPrimaryDark">@color/rooster_dark_blue</item>

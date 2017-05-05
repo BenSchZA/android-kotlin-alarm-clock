@@ -178,6 +178,7 @@ public class NewAudioRecordActivity extends BaseActivity {
                 imgAudioStartStop.setSelected(false);
                 txtMessage.setText(getResources().getText(R.string.new_audio_quiet_instructions));
                 txtAudioTime.setText(maxRecordingTime);
+                txtAudioTime.setVisibility(View.VISIBLE);
                 break;
             case NEW_AUDIO_READY_RECORD:
                 layoutRecordParent.setAnimation(AnimationUtils.loadAnimation(this, R.anim.pulse));
@@ -186,8 +187,10 @@ public class NewAudioRecordActivity extends BaseActivity {
                 layoutRecordParent.setVisibility(View.VISIBLE);
                 //Clear red recording focus
                 imgAudioStartStop.setSelected(false);
-                txtMessage.setText(getResources().getText(R.string.new_audio_instructions));
+                if(!txtMessage.getText().equals(getResources().getString(R.string.new_audio_post_delete_instructions)))
+                    txtMessage.setText(getResources().getText(R.string.new_audio_instructions));
                 txtAudioTime.setText(maxRecordingTime);
+                txtAudioTime.setVisibility(View.VISIBLE);
                 break;
             case NEW_AUDIO_READY_LISTEN:
                 layoutRecordParent.clearAnimation();
@@ -198,6 +201,9 @@ public class NewAudioRecordActivity extends BaseActivity {
                 imgNewAudioListen.setBackgroundResource(R.drawable.rooster_new_audio_play_button);
                 layoutListenParent.setVisibility(View.VISIBLE);
                 txtMessage.setText(getResources().getText(R.string.new_audio_continue_instructions));
+
+                //Don't display countdown for playback - uncomment to display
+                txtAudioTime.setVisibility(View.GONE);
 
                 try {
                     Uri uri = Uri.parse(mAudioSavePathInDevice);
@@ -307,6 +313,7 @@ public class NewAudioRecordActivity extends BaseActivity {
     @OnClick(R.id.new_audio_delete)
     public void onDeleteAudioClick() {
         setNewAudioStatus(NEW_AUDIO_READY_RECORD);
+        txtMessage.setText(getResources().getString(R.string.new_audio_post_delete_instructions));
         deleteAudio();
     }
 

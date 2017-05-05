@@ -263,6 +263,15 @@
             android:layout_gravity="center"
             android:text="@string/delete_alarm"
             android:visibility="gone" />
+
+        <Button
+            android:id="@+id/new_alarm_fragment1_save_alarm"
+            style="@style/RoosterButtonLightBlueStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/save_alarm"
+            android:visibility="gone" />
     </LinearLayout>
 
     </RelativeLayout>

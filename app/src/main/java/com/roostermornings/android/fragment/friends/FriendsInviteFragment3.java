@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -49,6 +50,8 @@ import retrofit.Call;
 import retrofit.Callback;
 import retrofit.Response;
 import retrofit.Retrofit;
+
+import static com.facebook.FacebookSdk.getApplicationContext;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -169,9 +172,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
     public void onShareButtonClicked() {
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
-        sendIntent.putExtra(Intent.EXTRA_TEXT, "How cool would it be if you could wake up " +
-                "to epic surprise voice notes from me and other friends? " +
-                "Download Rooster for awesome mornings: http://onelink.to/rooster");
+        sendIntent.putExtra(Intent.EXTRA_TEXT, getResources().getString(R.string.invite_to_rooster_message));
         sendIntent.setType("text/plain");
 
         sendIntent = Intent.createChooser(sendIntent, "Share Rooster");
@@ -248,6 +249,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
 
                     mUsers = new ArrayList<>();
                     mUsers.addAll(apiResponse.users.get(0));
+                    while(mUsers.remove(null));
                     //Sort names alphabetically before notifying adapter
                     sortNamesFriends(mUsers);
 
@@ -263,7 +265,9 @@ public class FriendsInviteFragment3 extends BaseFragment {
 
             @Override
             public void onFailure(Throwable t) {
-                Log.i(TAG, t.getLocalizedMessage());
+                Log.i(TAG, t.getLocalizedMessage()==null?"":t.getLocalizedMessage());
+                Toast.makeText(getApplicationContext(), "Loading contacts failed, please try again.", Toast.LENGTH_LONG).show();
+                progressBar.setVisibility(View.GONE);
             }
         });
     }

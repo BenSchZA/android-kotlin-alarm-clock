@@ -20,6 +20,7 @@ import android.support.v4.content.FileProvider;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -90,7 +91,8 @@ public class ProfileActivity extends BaseActivity {
 
         profileName.setText(mCurrentUser.getUser_name());
         profileMobileNumber.setText(mCurrentUser.getCell_number());
-        setProfilePicFromURL(mCurrentUser.getProfile_pic());
+        if(!TextUtils.isEmpty(mCurrentUser.getProfile_pic()))
+            setProfilePicFromURL(mCurrentUser.getProfile_pic());
     }
 
     @OnClick(R.id.settings_profile_pic)
