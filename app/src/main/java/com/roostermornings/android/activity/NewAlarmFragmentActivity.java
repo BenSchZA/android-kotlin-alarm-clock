@@ -5,6 +5,7 @@
 
 package com.roostermornings.android.activity;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.annotation.NonNull;
@@ -45,7 +46,7 @@ import butterknife.BindView;
 import static com.roostermornings.android.service.BackgroundTaskIntentService.startActionBackgroundDownload;
 import static com.roostermornings.android.util.RoosterUtils.hasGingerbread;
 
-public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetListener {
+public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetListener, NewAlarmFragment1.NewAlarmInterface {
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
     public final static String TAG = NewAlarmFragmentActivity.class.getSimpleName();
@@ -156,8 +157,24 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
         if (id == R.id.action_next) {
             if (mViewPager.getCurrentItem() == 0) mViewPager.setCurrentItem(1);
             else {
-                //save alarm!
+                saveAndExit();
+            }
+            return true;
+        }
 
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void saveAndExit() {
+        //Leave activity with thread running
+        startHomeActivity();
+        //Context for use in thread
+        final Context context = this;
+        new Thread() {
+            @Override
+            public void run() {
+                //save alarm!
                 //if no day set, automatically set to correct day of week
                 if (!mAlarm.isMonday()
                         && !mAlarm.isTuesday()
@@ -225,16 +242,9 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 database.getReference(String.format("alarms/%s/%s", mCurrentUser.getUid(), alarmKey)).setValue(mAlarm);
 
                 //Download any social or channel audio files
-                startActionBackgroundDownload(this);
-
-                startHomeActivity();
-                //Explicitly finish activity, so that removed from backstack
-                finish();
+                startActionBackgroundDownload(context);
             }
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+        }.run();
     }
 
     @Override

@@ -59,10 +59,8 @@ public class AudioTableManager {
             db.insertOrThrow(AudioTableEntry.TABLE_NAME, null, values);
         } catch(SQLiteConstraintException e){
             e.printStackTrace();
-            db.close();
             return false;
         }
-        db.close();
         updateRoosterCount();
         return true;
     }
@@ -88,10 +86,8 @@ public class AudioTableManager {
             db.insertOrThrow(AudioTableEntry.TABLE_NAME, null, values);
         } catch(SQLiteConstraintException e){
             e.printStackTrace();
-            db.close();
             return false;
         }
-        db.close();
         return true;
     }
 
@@ -104,7 +100,6 @@ public class AudioTableManager {
         String execSql = "DELETE FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_ID + " = " + deviceAudioQueueItem.getId() + ";";
 
         db.execSQL(execSql);
-        db.close();
 
         updateRoosterCount();
     }
@@ -115,7 +110,6 @@ public class AudioTableManager {
         String updateQuery = "UPDATE " + AudioTableEntry.TABLE_NAME + " SET " + AudioTableEntry.COLUMN_FILENAME + " = '" + channelAudioFileName + "' WHERE " + AudioTableEntry.COLUMN_QUEUE_ID + " = '" + channelId + "';";
 
         db.execSQL(updateQuery);
-        db.close();
     }
     
     public void removeChannelAudioEntries(String channelId) {
@@ -129,8 +123,6 @@ public class AudioTableManager {
 
         String execSql = "DELETE FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_QUEUE_ID + " = '" + channelId + "' AND " + AudioTableEntry.COLUMN_TYPE + " = 1" + ";";
         db.execSQL(execSql);
-
-        db.close();
     }
 
     public void updateRoosterCount() {
@@ -172,8 +164,6 @@ public class AudioTableManager {
 
         db.execSQL(execSql);
         db.execSQL("VACUUM");
-
-        db.close();
     }
 
     public ArrayList<DeviceAudioQueueItem> extractSocialAudioFiles() {
@@ -184,7 +174,6 @@ public class AudioTableManager {
 
         Cursor cursor = db.rawQuery(selectQuery, null);
         ArrayList<DeviceAudioQueueItem> deviceAudioQueueItems = extractAudioFiles(cursor);
-        db.close();
 
         return deviceAudioQueueItems;
     }
@@ -200,7 +189,6 @@ public class AudioTableManager {
         if(count < 0) count = 0;
 
         cursor.close();
-        db.close();
 
         return count;
     }
@@ -213,7 +201,6 @@ public class AudioTableManager {
 
         Cursor cursor = db.rawQuery(selectQuery, null);
         ArrayList<DeviceAudioQueueItem> deviceAudioQueueItems = extractAudioFiles(cursor);
-        db.close();
 
         return deviceAudioQueueItems;
     }
@@ -225,7 +212,6 @@ public class AudioTableManager {
 
         Cursor cursor = db.rawQuery(selectQuery, null);
         ArrayList<DeviceAudioQueueItem> deviceAudioQueueItems = extractAudioFiles(cursor);
-        db.close();
 
         return deviceAudioQueueItems;
     }
@@ -246,8 +232,6 @@ public class AudioTableManager {
         }
         cursor.close();
 
-        db.close();
-
         return audioFileNameList;
     }
 
@@ -259,11 +243,9 @@ public class AudioTableManager {
         Cursor cursor = db.rawQuery(selectQuery, null);
 
         if(cursor.getCount() > 0) {
-            db.close();
             cursor.close();
             return true;
         } else {
-            db.close();
             cursor.close();
             return false;
         }
@@ -275,7 +257,6 @@ public class AudioTableManager {
         String updateQuery = "UPDATE " + AudioTableEntry.TABLE_NAME + " SET " + AudioTableEntry.COLUMN_LISTENED + " = " + TRUE + " WHERE " + AudioTableEntry.COLUMN_ID + " = " + ID + ";";
 
         db.execSQL(updateQuery);
-        db.close();
     }
 
     public ArrayList<DeviceAudioQueueItem> selectListened() {
@@ -285,7 +266,6 @@ public class AudioTableManager {
 
         Cursor cursor = db.rawQuery(selectQuery, null);
         ArrayList<DeviceAudioQueueItem> deviceAudioQueueItems = extractAudioFiles(cursor);
-        db.close();
 
         return deviceAudioQueueItems;
     }
@@ -316,7 +296,7 @@ public class AudioTableManager {
     }
 
     private SQLiteDatabase initDB() {
-        AudioTableHelper dbHelper = new AudioTableHelper(context);
+        AudioTableHelper dbHelper = AudioTableHelper.getInstance();
         return dbHelper.getWritableDatabase();
     }
 }
