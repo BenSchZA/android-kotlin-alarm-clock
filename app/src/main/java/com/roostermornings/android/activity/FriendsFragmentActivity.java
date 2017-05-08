@@ -245,21 +245,6 @@ public class FriendsFragmentActivity extends BaseActivity implements
         return true;
     }
 
-    @OnClick(R.id.home_record_audio)
-    public void recordNewAudio() {
-        startActivity(new Intent(FriendsFragmentActivity.this, NewAudioRecordActivity.class));
-    }
-
-    @OnClick(R.id.home_my_alarms)
-    public void manageAlarms() {
-        startHomeActivity();
-    }
-
-    @OnClick(R.id.home_my_uploads)
-    public void manageUploads() {
-        startActivity(new Intent(FriendsFragmentActivity.this, MessageStatusActivity.class));
-    }
-
     private void createViewPager(ViewPager mViewPager) {
 
         // Create the adapter that will return a fragment for each of the three
