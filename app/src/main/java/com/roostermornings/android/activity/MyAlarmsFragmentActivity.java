@@ -329,27 +329,6 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         }.run();
     }
 
-    @OnClick(R.id.add_alarm)
-    public void onClickAddAlarm() {
-        startActivity(new Intent(MyAlarmsFragmentActivity.this, NewAlarmFragmentActivity.class));
-    }
-
-    @OnClick(R.id.home_record_audio)
-    public void recordNewAudio() {
-        if (!checkInternetConnection()) return;
-        startActivity(new Intent(MyAlarmsFragmentActivity.this, NewAudioRecordActivity.class));
-    }
-
-    @OnClick(R.id.home_friends)
-    public void manageFriends() {
-        startActivity(new Intent(MyAlarmsFragmentActivity.this, FriendsFragmentActivity.class));
-    }
-
-    @OnClick(R.id.home_my_uploads)
-    public void manageUploads() {
-        startActivity(new Intent(MyAlarmsFragmentActivity.this, MessageStatusActivity.class));
-    }
-
     public void deleteAlarm(final String alarmId) {
         new Thread() {
             @Override
@@ -366,6 +345,11 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                 }
             }
         }.run();
+    }
+
+    @OnClick(R.id.add_alarm)
+    public void onClickAddAlarm() {
+        startActivity(new Intent(this, NewAlarmFragmentActivity.class));
     }
 
     public void editAlarm(String alarmId) {
