@@ -251,6 +251,22 @@ public class AudioTableManager {
         }
     }
 
+    public Boolean isSocialAudioInDatabase(String socialId) {
+        SQLiteDatabase db = initDB();
+
+        String selectQuery = "SELECT 1 FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_TYPE + " = " + FALSE + " AND " + AudioTableEntry.COLUMN_QUEUE_ID + " LIKE \"%" + socialId + "%\";";
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if(cursor.getCount() > 0) {
+            cursor.close();
+            return true;
+        } else {
+            cursor.close();
+            return false;
+        }
+    }
+
     public void setListened(int ID) {
         SQLiteDatabase db = initDB();
 

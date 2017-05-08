@@ -49,50 +49,50 @@ public class RoosterApplicationModule {
 
     @Provides
     @Singleton
-    public Context provideContext() {
+    Context provideContext() {
         return baseApplication;
     }
 
     @Provides
     @Singleton
-    public BaseApplication providesBaseApplication() {
+    BaseApplication providesBaseApplication() {
         return baseApplication;
     }
 
     @Provides
     @Singleton
-    public SharedPreferences provideSharedPreferences() {
+    SharedPreferences provideSharedPreferences() {
         return baseApplication.getSharedPreferences(baseApplication.getString(R.string.preferences_key),
                 Context.MODE_PRIVATE);
     }
 
     @Provides
     @Singleton
-    public DeviceAlarmTableManager provideDeviceAlarmTableManager(BaseApplication baseApplication) {
+    DeviceAlarmTableManager provideDeviceAlarmTableManager(BaseApplication baseApplication) {
         return new DeviceAlarmTableManager(baseApplication);
     }
 
     @Provides
     @Singleton
-    public DeviceAlarmController provideDeviceAlarmController(BaseApplication baseApplication) {
+    DeviceAlarmController provideDeviceAlarmController(BaseApplication baseApplication) {
         return new DeviceAlarmController(baseApplication);
     }
 
     @Provides
     @Singleton
-    public AudioTableManager provideAudioTableManager(BaseApplication baseApplication) {
+    AudioTableManager provideAudioTableManager(BaseApplication baseApplication) {
         return new AudioTableManager(baseApplication);
     }
 
     @Provides
     @Singleton
-    public AudioTableController provideAudioTableController(BaseApplication baseApplication) {
+    AudioTableController provideAudioTableController(BaseApplication baseApplication) {
         return new AudioTableController(baseApplication);
     }
 
     @Provides
     @Singleton
-    public BackgroundTaskReceiver provideBackgroundTaskReceiver() {
+    BackgroundTaskReceiver provideBackgroundTaskReceiver() {
         return new BackgroundTaskReceiver();
     }
 }
