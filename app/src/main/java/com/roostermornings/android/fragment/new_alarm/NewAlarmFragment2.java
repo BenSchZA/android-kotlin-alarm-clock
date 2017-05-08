@@ -35,7 +35,9 @@ import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -53,7 +55,7 @@ public class NewAlarmFragment2 extends BaseFragment {
     private DatabaseReference mChannelsReference;
     private DatabaseReference mChannelRoostersReference;
     private ArrayList<ChannelRooster> channelRoosters = new ArrayList<>();
-    private Map<Integer, ChannelRooster> channelRoosterMap = new TreeMap<>(Collections.reverseOrder());
+    private Map<Integer, List<ChannelRooster>> channelRoosterMap = new TreeMap<>(Collections.reverseOrder());
 
     @BindView(R.id.main_content)
     RecyclerView mRecyclerView;
@@ -116,33 +118,38 @@ public class NewAlarmFragment2 extends BaseFragment {
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mAdapter);
 
-        ValueEventListener channelsListener = new ValueEventListener() {
+        new Thread() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    final Channel channel = postSnapshot.getValue(Channel.class);
+            public void run() {
+                ValueEventListener channelsListener = new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                            final Channel channel = postSnapshot.getValue(Channel.class);
 
-                    if (channel.isActive()) {
-                        if(channel.isNew_alarms_start_at_first_iteration()) {
-                            Integer iteration = deviceAlarmTableManager.getChannelStoryIteration(channel.getUid());
-                            if(iteration == null || iteration <= 0) iteration = 1;
-                            getChannelRoosterData(channel, iteration);
-                        } else {
-                            Integer iteration = channel.getCurrent_rooster_cycle_iteration();
-                            if(iteration == null || iteration <= 0) iteration = 1;
-                            getChannelRoosterData(channel, iteration);
+                            if (channel.isActive()) {
+                                if(channel.isNew_alarms_start_at_first_iteration()) {
+                                    Integer iteration = deviceAlarmTableManager.getChannelStoryIteration(channel.getUid());
+                                    if(iteration == null || iteration <= 0) iteration = 1;
+                                    getChannelRoosterData(channel, iteration);
+                                } else {
+                                    Integer iteration = channel.getCurrent_rooster_cycle_iteration();
+                                    if(iteration == null || iteration <= 0) iteration = 1;
+                                    getChannelRoosterData(channel, iteration);
+                                }
+                            }
                         }
                     }
-                }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                showToast(AppContext, "Failed to load channel.", Toast.LENGTH_SHORT);
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+                        showToast(AppContext, "Failed to load channel.", Toast.LENGTH_SHORT);
+                    }
+                };
+                mChannelsReference.addValueEventListener(channelsListener);
             }
-        };
-        mChannelsReference.addValueEventListener(channelsListener);
+        }.run();
 
         return view;
     }
@@ -170,15 +177,24 @@ public class NewAlarmFragment2 extends BaseFragment {
 
                     if(channelRooster.isActive() && (channelRooster.getRooster_cycle_iteration() != iteration)) {
                         channelIterationMap.put(channelRooster.getRooster_cycle_iteration(), channelRooster);
-                        findNextValidChannelRooster(channelIterationMap, channel, iteration);
-                        refreshChannelRoosters();
                     } else if(channelRooster.isActive()) {
                         channelRooster.setSelected(false);
-                        channelRoosterMap.put(channel.getPriority(), channelRooster);
+                        //This method allows multiple objects per key
+                        if(channelRoosterMap.containsKey(channel.getPriority())) {
+                            channelRoosterMap.get(channel.getPriority()).add(channelRooster);
+                        } else {
+                            List<ChannelRooster> values = new ArrayList<>();
+                            values.add(channelRooster);
+                            channelRoosterMap.put(channel.getPriority(), values);
+                        }
                         refreshChannelRoosters();
                         return;
                     }
                 }
+                if(!channelIterationMap.isEmpty() && iteration != null) {
+                    findNextValidChannelRooster(channelIterationMap, channel, iteration);
+                }
+                refreshChannelRoosters();
             }
 
             @Override
@@ -190,36 +206,65 @@ public class NewAlarmFragment2 extends BaseFragment {
     }
 
     private void refreshChannelRoosters() {
-        //TreeMap ensures unique and allows sorting by priority! How cool is that?
-        channelRoosters.clear();
-        channelRoosters.addAll(channelRoosterMap.values());
-        if (mListener != null)
-            mListener.retrieveAlarmDetailsFromSQL(); //this is only relevant for alarms being edited
-        mAdapter.notifyDataSetChanged();
+        new Thread() {
+            @Override
+            public void run() {
+                //TreeMap ensures unique and allows sorting by priority! How cool is that?
+                channelRoosters.clear();
+                //This method allows us to have multiple objects per priority key
+                List<ChannelRooster> values = new ArrayList<>();
+                for(List<ChannelRooster> channelRoosterList : channelRoosterMap.values()) {
+                    values.addAll(channelRoosterList);
+                }
+                if(!values.isEmpty()) channelRoosters.addAll(values);
+                if (mListener != null)
+                    mListener.retrieveAlarmDetailsFromSQL(); //this is only relevant for alarms being edited
+                mAdapter.notifyDataSetChanged();
+            }
+        }.run();
     }
 
-    private void findNextValidChannelRooster(TreeMap<Integer,ChannelRooster> channelIterationMap, Channel channel, Integer iteration) {
-        //Check head and tail of naturally sorted TreeMap for next valid channel content
-        SortedMap<Integer,ChannelRooster> tailMap = channelIterationMap.tailMap(iteration);
-        SortedMap<Integer,ChannelRooster> headMap = channelIterationMap.headMap(iteration);
-        if(!tailMap.isEmpty()) {
-            //User is starting story at next valid entry
-            //Set SQL entry for iteration to current valid story iteration, to be incremented on play
-            deviceAlarmTableManager.setChannelStoryIteration(channel.getUid(), tailMap.firstKey());
-            //Retrieve channel audio
-            ChannelRooster channelRooster = channelIterationMap.get(tailMap.firstKey());
-            channelRooster.setSelected(false);
-            channelRoosterMap.put(channel.getPriority(), channelRooster);
-        }
-        else if(!headMap.isEmpty()) {
-            //User is starting story from beginning again, at valid entry
-            //Set SQL entry for iteration to current valid story iteration, to be incremented on play
-            deviceAlarmTableManager.setChannelStoryIteration(channel.getUid(), headMap.firstKey());
-            //Retrieve channel audio
-            ChannelRooster channelRooster = channelIterationMap.get(headMap.firstKey());
-            channelRooster.setSelected(false);
-            channelRoosterMap.put(channel.getPriority(), channelRooster);
-        }
+    private void findNextValidChannelRooster(final TreeMap<Integer,ChannelRooster> channelIterationMap, final Channel channel, final Integer iteration) {
+        new Thread() {
+            @Override
+            public void run() {
+                //Check head and tail of naturally sorted TreeMap for next valid channel content
+                SortedMap<Integer,ChannelRooster> tailMap = channelIterationMap.tailMap(iteration);
+                SortedMap<Integer,ChannelRooster> headMap = channelIterationMap.headMap(iteration);
+                if(!tailMap.isEmpty()) {
+                    //User is starting story at next valid entry
+                    //Set SQL entry for iteration to current valid story iteration, to be incremented on play
+                    deviceAlarmTableManager.setChannelStoryIteration(channel.getUid(), tailMap.firstKey());
+                    //Retrieve channel audio
+                    ChannelRooster channelRooster = channelIterationMap.get(tailMap.firstKey());
+                    channelRooster.setSelected(false);
+                    //This method allows multiple objects per key
+                    if(channelRoosterMap.containsKey(channel.getPriority())) {
+                        channelRoosterMap.get(channel.getPriority()).add(channelRooster);
+                    } else {
+                        List<ChannelRooster> values = new ArrayList<>();
+                        values.add(channelRooster);
+                        channelRoosterMap.put(channel.getPriority(), values);
+                    }
+                }
+                else if(!headMap.isEmpty()) {
+                    //User is starting story from beginning again, at valid entry
+                    //Set SQL entry for iteration to current valid story iteration, to be incremented on play
+                    deviceAlarmTableManager.setChannelStoryIteration(channel.getUid(), headMap.firstKey());
+                    //Retrieve channel audio
+                    ChannelRooster channelRooster = channelIterationMap.get(headMap.firstKey());
+                    channelRooster.setSelected(false);
+                    //This method allows multiple objects per key
+                    if(channelRoosterMap.containsKey(channel.getPriority())) {
+                        channelRoosterMap.get(channel.getPriority()).add(channelRooster);
+                    } else {
+                        List<ChannelRooster> values = new ArrayList<>();
+                        values.add(channelRooster);
+                        channelRoosterMap.put(channel.getPriority(), values);
+                    }
+                }
+            }
+        }.run();
     }
 
     @Override
