@@ -46,17 +46,6 @@
                 android:textAlignment="center"
                 android:textSize="@dimen/text_xlarge"
                 android:textColor="@color/white" />
-            <!--android:layout_marginBottom="@dimen/spacing_normal"-->
-            <!--<TextView-->
-                <!--android:id="@+id/channel_prompt_2"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_centerHorizontal="true"-->
-                <!--android:layout_below="@id/channel_prompt_1"-->
-                <!--android:text="@string/channel_prompt_2"-->
-                <!--android:textAlignment="center"-->
-                <!--android:textSize="@dimen/text_large"-->
-                <!--android:textColor="@color/white_30_percent_transparent"/>-->
 
         </RelativeLayout>
 

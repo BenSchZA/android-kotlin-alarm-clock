@@ -178,27 +178,6 @@ public class NewAudioFriendsActivity extends BaseActivity {
         }
     };
 
-    @OnClick(R.id.home_friends)
-    public void manageFriends() {
-        startActivity(new Intent(NewAudioFriendsActivity.this, FriendsFragmentActivity.class));
-    }
-
-    @OnClick(R.id.home_my_alarms)
-    public void manageAlarms() {
-        startHomeActivity();
-    }
-
-    @OnClick(R.id.home_my_uploads)
-    public void manageUploads() {
-        startActivity(new Intent(NewAudioFriendsActivity.this, MessageStatusActivity.class));
-    }
-
-    @OnClick(R.id.home_record_audio)
-    public void recordNewAudio() {
-        if (!checkInternetConnection()) return;
-        startActivity(new Intent(NewAudioFriendsActivity.this, NewAudioRecordActivity.class));
-    }
-
     private void onSendMenuItemClick() {
 
         if (!checkInternetConnection()) return;

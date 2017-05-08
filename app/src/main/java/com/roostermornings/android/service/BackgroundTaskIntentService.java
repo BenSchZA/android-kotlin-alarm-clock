@@ -42,8 +42,12 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RunnableFuture;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static com.roostermornings.android.BaseApplication.AppContext;
 
@@ -125,8 +129,11 @@ public class BackgroundTaskIntentService extends IntentService {
     }
 
     public void retrieveChannelContentData(final Context context) {
-        //The oneInstanceTask creates a new thread, only if one doesn't exist already
-        Executor executor = Executors.newSingleThreadExecutor();
+        //The oneInstanceTask creates a new thread, only if one doesn't exist already - implements 1 minute time limit
+        ExecutorService executor = new ThreadPoolExecutor(1, 1, 1, TimeUnit.MINUTES,
+                new SynchronousQueue<Runnable>(),
+                new ThreadPoolExecutor.DiscardPolicy());
+
         class oneInstanceTask implements Runnable {
             public void run() {
                 //Retrieve firebase audio files and cache to be played for next alarm
@@ -244,8 +251,11 @@ public class BackgroundTaskIntentService extends IntentService {
     }
 
     public void retrieveSocialRoosterData(final Context context) {
-        //The oneInstanceTask creates a new thread, only if one doesn't exist already
-        Executor executor = Executors.newSingleThreadExecutor();
+        //The oneInstanceTask creates a new thread, only if one doesn't exist already - implements 1 minute time limit
+        ExecutorService executor = new ThreadPoolExecutor(1, 1, 1, TimeUnit.MINUTES,
+                new SynchronousQueue<Runnable>(),
+                new ThreadPoolExecutor.DiscardPolicy());
+
         class oneInstanceTask implements Runnable {
             public void run() {
                 //Retrieve firebase audio files and cache to be played for next alarm
