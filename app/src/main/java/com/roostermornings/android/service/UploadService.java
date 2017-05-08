@@ -142,7 +142,7 @@ public class UploadService extends Service {
 
                         for (User friend : friendsList) {
                             if (friend.getSelected()) {
-                                inviteUsers(friend, firebaseStorageURL);
+                                sendRoosterToUser(friend, firebaseStorageURL);
                             }
                         }
                         endService();
@@ -176,7 +176,7 @@ public class UploadService extends Service {
         this.stopSelf();
     }
 
-    private void inviteUsers(User friend, String firebaseStorageURL) {
+    private void sendRoosterToUser(User friend, String firebaseStorageURL) {
 
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         FirebaseUser currentUser = getFirebaseUser();
@@ -205,11 +205,11 @@ public class UploadService extends Service {
         //Note the matching keys
         mDatabase.getDatabase().getReference(uploadUrl + "/" + uploadKey).setValue(socialRoosterUploaded);
         mDatabase.getDatabase().getReference(queueUrl + "/" + uploadKey).setValue(socialRoosterQueue);
-        sendInvitedFriendFCMMessage(friend.getUid());
+        socialRoosterNotifyUserFCMMessage(friend.getUid());
         Toast.makeText(getApplicationContext(), "Social rooster sent to " + friend.getUser_name() + "!", Toast.LENGTH_LONG).show();
     }
 
-    private void sendInvitedFriendFCMMessage(String recipientUserId) {
+    private void socialRoosterNotifyUserFCMMessage(String recipientUserId) {
         Call<NodeAPIResult> call = apiService().notifySocialUploadRecipient(
                 new FCMPayloadSocialRooster(mThis.firebaseIdToken, recipientUserId));
 

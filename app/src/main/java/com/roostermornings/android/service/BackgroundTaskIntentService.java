@@ -40,6 +40,10 @@ import com.squareup.picasso.Picasso;
 import java.io.FileOutputStream;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RunnableFuture;
 
 import static com.roostermornings.android.BaseApplication.AppContext;
 
@@ -121,150 +125,164 @@ public class BackgroundTaskIntentService extends IntentService {
     }
 
     public void retrieveChannelContentData(final Context context) {
-        //Retrieve firebase audio files and cache to be played for next alarm
-        mAuth = FirebaseAuth.getInstance();
-        mStorageRef = FirebaseStorage.getInstance().getReference();
-        mDatabase = FirebaseDatabase.getInstance().getReference();
+        //The oneInstanceTask creates a new thread, only if one doesn't exist already
+        Executor executor = Executors.newSingleThreadExecutor();
+        class oneInstanceTask implements Runnable {
+            public void run() {
+                //Retrieve firebase audio files and cache to be played for next alarm
+                mAuth = FirebaseAuth.getInstance();
+                mStorageRef = FirebaseStorage.getInstance().getReference();
+                mDatabase = FirebaseDatabase.getInstance().getReference();
 
-        if (mAuth.getCurrentUser() == null || mAuth.getCurrentUser() == null) {
-            Log.d(TAG, "User not authenticated on FB!");
-            return;
-        }
+                if (mAuth.getCurrentUser() == null || mAuth.getCurrentUser() == null) {
+                    Log.d(TAG, "User not authenticated on FB!");
+                    return;
+                }
 
-        //Get next pending alarm
-        final DeviceAlarm deviceAlarm = deviceAlarmTableManager.getNextPendingAlarm();
+                //Get next pending alarm
+                final DeviceAlarm deviceAlarm = deviceAlarmTableManager.getNextPendingAlarm();
 
-        //If there is no pending alarm, don't retrieve channel content
-        if (deviceAlarm == null) return;
-        //Check if channel has a valid ID, else next pending alarm has no channel
-        final String channelId = deviceAlarm.getChannel();
-        if ("".equals(channelId)) return;
+                //If there is no pending alarm, don't retrieve channel content
+                if (deviceAlarm == null) return;
+                //Check if channel has a valid ID, else next pending alarm has no channel
+                final String channelId = deviceAlarm.getChannel();
+                if ("".equals(channelId)) return;
 
-        //If the current ChannelRooster is in SQL db, then don't download
-        if(audioTableManager.isChannelAudioInDatabase(channelId)) return;
-        //Check firebase auth
-        if (mAuth.getCurrentUser() == null || mAuth.getCurrentUser() == null) {
-            Log.d(TAG, "User not authenticated on FB!");
-            return;
-        }
+                //If the current ChannelRooster is in SQL db, then don't download
+                if(audioTableManager.isChannelAudioInDatabase(channelId)) return;
+                //Check firebase auth
+                if (mAuth.getCurrentUser() == null || mAuth.getCurrentUser() == null) {
+                    Log.d(TAG, "User not authenticated on FB!");
+                    return;
+                }
 
-        final DatabaseReference channelReference = FirebaseDatabase.getInstance().getReference()
-                .child("channels").child(channelId);
+                final DatabaseReference channelReference = FirebaseDatabase.getInstance().getReference()
+                        .child("channels").child(channelId);
 
-        channelReference.keepSynced(true);
+                channelReference.keepSynced(true);
 
-        ValueEventListener channelListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                Channel channel = dataSnapshot.getValue(Channel.class);
-
-                //Check if channel exists
-                if(channel == null) return;
-                //Check if channel is active
-                if(!channel.isActive()) return;
-
-                //Check if channel has content and whether a story or not
-                final Integer iteration;
-                if(channel.isNew_alarms_start_at_first_iteration() && deviceAlarmTableManager.getChannelStoryIteration(channelId) != null) iteration = deviceAlarmTableManager.getChannelStoryIteration(channelId);
-                    //If iteration is null, this means no entry in db - set to 1 and process from there
-                else if (channel.isNew_alarms_start_at_first_iteration()) iteration = 1;
-                else if (channel.getCurrent_rooster_cycle_iteration() < 1) return;
-                else iteration = channel.getCurrent_rooster_cycle_iteration();
-
-                final DatabaseReference channelRoosterUploadsReference = FirebaseDatabase.getInstance().getReference()
-                        .child("channel_rooster_uploads").child(channelId);
-
-                //Ensure latest data is pulled
-                channelRoosterUploadsReference.keepSynced(true);
-
-                ValueEventListener channelRoosterUploadsListener = new ValueEventListener() {
+                ValueEventListener channelListener = new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        TreeMap<Integer,ChannelRooster> channelIterationMap = new TreeMap<>();
-                        //Check if node has children i.e. channelId content exists
-                        if(dataSnapshot.getChildrenCount() == 0) return;
-                        //Iterate over all content children
-                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                            ChannelRooster channelRooster = postSnapshot.getValue(ChannelRooster.class);
-                            if(channelRooster.isActive() && (channelRooster.getRooster_cycle_iteration() != iteration)) {
-                                channelIterationMap.put(channelRooster.getRooster_cycle_iteration(), channelRooster);
-                            } else if(channelRooster.isActive()) {
-                                retrieveChannelContentAudio(channelRooster, context);
-                                return;
-                            }
-                        }
 
-                        //Check head and tail of naturally sorted TreeMap for next valid channel content
-                        SortedMap<Integer,ChannelRooster> tailMap = channelIterationMap.tailMap(iteration);
-                        SortedMap<Integer,ChannelRooster> headMap = channelIterationMap.headMap(iteration);
-                        if(!tailMap.isEmpty()) {
-                            //User is starting story at next valid entry
-                            //Set SQL entry for iteration to current valid story iteration, to be incremented on play
-                            deviceAlarmTableManager.setChannelStoryIteration(channelId, tailMap.firstKey());
-                            //Retrieve channel audio
-                            retrieveChannelContentAudio(channelIterationMap.get(tailMap.firstKey()), context);
-                        } else if(!headMap.isEmpty()) {
-                            //User is starting story from beginning again, at valid entry
-                            //Set SQL entry for iteration to current valid story iteration, to be incremented on play
-                            deviceAlarmTableManager.setChannelStoryIteration(channelId, headMap.firstKey());
-                            //Retrieve channel audio
-                            retrieveChannelContentAudio(channelIterationMap.get(headMap.firstKey()), context);
+                        Channel channel = dataSnapshot.getValue(Channel.class);
+
+                        //Check if channel exists
+                        if(channel == null) return;
+                        //Check if channel is active
+                        if(!channel.isActive()) return;
+
+                        //Check if channel has content and whether a story or not
+                        final Integer iteration;
+                        if(channel.isNew_alarms_start_at_first_iteration() && deviceAlarmTableManager.getChannelStoryIteration(channelId) != null) iteration = deviceAlarmTableManager.getChannelStoryIteration(channelId);
+                            //If iteration is null, this means no entry in db - set to 1 and process from there
+                        else if (channel.isNew_alarms_start_at_first_iteration()) iteration = 1;
+                        else if (channel.getCurrent_rooster_cycle_iteration() < 1) return;
+                        else iteration = channel.getCurrent_rooster_cycle_iteration();
+
+                        final DatabaseReference channelRoosterUploadsReference = FirebaseDatabase.getInstance().getReference()
+                                .child("channel_rooster_uploads").child(channelId);
+
+                        //Ensure latest data is pulled
+                        channelRoosterUploadsReference.keepSynced(true);
+
+                        ValueEventListener channelRoosterUploadsListener = new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                TreeMap<Integer,ChannelRooster> channelIterationMap = new TreeMap<>();
+                                //Check if node has children i.e. channelId content exists
+                                if(dataSnapshot.getChildrenCount() == 0) return;
+                                //Iterate over all content children
+                                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                    ChannelRooster channelRooster = postSnapshot.getValue(ChannelRooster.class);
+                                    if(channelRooster.isActive() && (channelRooster.getRooster_cycle_iteration() != iteration)) {
+                                        channelIterationMap.put(channelRooster.getRooster_cycle_iteration(), channelRooster);
+                                    } else if(channelRooster.isActive()) {
+                                        retrieveChannelContentAudio(channelRooster, context);
+                                        return;
+                                    }
+                                }
+
+                                //Check head and tail of naturally sorted TreeMap for next valid channel content
+                                SortedMap<Integer,ChannelRooster> tailMap = channelIterationMap.tailMap(iteration);
+                                SortedMap<Integer,ChannelRooster> headMap = channelIterationMap.headMap(iteration);
+                                if(!tailMap.isEmpty()) {
+                                    //User is starting story at next valid entry
+                                    //Set SQL entry for iteration to current valid story iteration, to be incremented on play
+                                    deviceAlarmTableManager.setChannelStoryIteration(channelId, tailMap.firstKey());
+                                    //Retrieve channel audio
+                                    retrieveChannelContentAudio(channelIterationMap.get(tailMap.firstKey()), context);
+                                } else if(!headMap.isEmpty()) {
+                                    //User is starting story from beginning again, at valid entry
+                                    //Set SQL entry for iteration to current valid story iteration, to be incremented on play
+                                    deviceAlarmTableManager.setChannelStoryIteration(channelId, headMap.firstKey());
+                                    //Retrieve channel audio
+                                    retrieveChannelContentAudio(channelIterationMap.get(headMap.firstKey()), context);
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+                                //Show that an attempted download has occurred - this is used when "streaming" alarm content in AudioService
+                                deviceAlarmTableManager.updateAlarmLabel(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED);
+                            }
+                        };
+                        channelRoosterUploadsReference.addListenerForSingleValueEvent(channelRoosterUploadsListener);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+                        //Show that an attempted download has occurred - this is used when "streaming" alarm content in AudioService
+                        deviceAlarmTableManager.updateAlarmLabel(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED);
+                    }
+                };
+                channelReference.addListenerForSingleValueEvent(channelListener);
+            }
+        }
+        executor.execute(new oneInstanceTask());
+    }
+
+    public void retrieveSocialRoosterData(final Context context) {
+        //The oneInstanceTask creates a new thread, only if one doesn't exist already
+        Executor executor = Executors.newSingleThreadExecutor();
+        class oneInstanceTask implements Runnable {
+            public void run() {
+                //Retrieve firebase audio files and cache to be played for next alarm
+                mAuth = FirebaseAuth.getInstance();
+                mStorageRef = FirebaseStorage.getInstance().getReference();
+                mDatabase = FirebaseDatabase.getInstance().getReference();
+
+                if (mAuth.getCurrentUser() == null || mAuth.getCurrentUser() == null) {
+                    Log.d(TAG, "User not authenticated on FB!");
+                    return;
+                }
+
+                final DatabaseReference queueReference = FirebaseDatabase.getInstance().getReference()
+                        .child("social_rooster_queue").child(mAuth.getCurrentUser().getUid());
+
+                //Ensure latest data is pulled
+                queueReference.keepSynced(true);
+
+                ValueEventListener socialQueueListener = new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+
+                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                            SocialRooster socialRooster = postSnapshot.getValue(SocialRooster.class);
+                            retrieveSocialRoosterAudio(socialRooster, context);
                         }
                     }
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
-                        //Show that an attempted download has occurred - this is used when "streaming" alarm content in AudioService
-                        deviceAlarmTableManager.updateAlarmLabel(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED);
+                        Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
                     }
                 };
-                channelRoosterUploadsReference.addListenerForSingleValueEvent(channelRoosterUploadsListener);
+                queueReference.addListenerForSingleValueEvent(socialQueueListener);
             }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                //Show that an attempted download has occurred - this is used when "streaming" alarm content in AudioService
-                deviceAlarmTableManager.updateAlarmLabel(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED);
-            }
-        };
-        channelReference.addListenerForSingleValueEvent(channelListener);
-    }
-
-    public void retrieveSocialRoosterData(final Context context) {
-        //Retrieve firebase audio files and cache to be played for next alarm
-        mAuth = FirebaseAuth.getInstance();
-        mStorageRef = FirebaseStorage.getInstance().getReference();
-        mDatabase = FirebaseDatabase.getInstance().getReference();
-
-        if (mAuth.getCurrentUser() == null || mAuth.getCurrentUser() == null) {
-            Log.d(TAG, "User not authenticated on FB!");
-            return;
         }
-
-        final DatabaseReference queueReference = FirebaseDatabase.getInstance().getReference()
-                .child("social_rooster_queue").child(mAuth.getCurrentUser().getUid());
-
-        //Ensure latest data is pulled
-        queueReference.keepSynced(true);
-
-        ValueEventListener socialQueueListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    SocialRooster socialRooster = postSnapshot.getValue(SocialRooster.class);
-                    retrieveSocialRoosterAudio(socialRooster, context);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-            }
-        };
-        queueReference.addListenerForSingleValueEvent(socialQueueListener);
+        executor.execute(new oneInstanceTask());
     }
 
     private void retrieveChannelContentAudio(final ChannelRooster channelRooster, final Context context) {
@@ -288,8 +306,6 @@ public class BackgroundTaskIntentService extends IntentService {
             final StorageReference audioFileRef = mStorageRef.getStorage().getReferenceFromUrl(channelRooster.getAudio_file_url());
             final String audioFileUniqueName = Constants.FILENAME_PREFIX_ROOSTER_CONTENT + RoosterUtils.createRandomFileName(5) + ".3gp";
 
-            final long FIVE_MEGABYTE = 5 * 1024 * 1024;
-
             //Create new object for storing in SQL db
             DeviceAudioQueueItem deviceAudioQueueItem = new DeviceAudioQueueItem();
             deviceAudioQueueItem.fromChannelRooster(channelRooster, audioFileUniqueName);
@@ -297,12 +313,12 @@ public class BackgroundTaskIntentService extends IntentService {
             deviceAudioQueueItem.setDate_created(System.currentTimeMillis());
 
             //Pre-cache image to display on alarm screen, in case no internet connection
-            Picasso.with(AppContext).load(channelRooster.getPhoto()).fetch();
+            if(!channelRooster.getPhoto().isEmpty()) Picasso.with(AppContext).load(channelRooster.getPhoto()).fetch();
 
             //store in local SQLLite database and check if successful
             if(audioTableManager.insertChannelAudioFile(deviceAudioQueueItem)) {
 
-                audioFileRef.getBytes(FIVE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                audioFileRef.getBytes(Constants.MAX_ROOSTER_FILE_SIZE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                     @Override
                     public void onSuccess(byte[] bytes) {
 
@@ -351,6 +367,8 @@ public class BackgroundTaskIntentService extends IntentService {
 
         if(socialRooster == null) return;
 
+        if(audioTableManager.isChannelAudioInDatabase(socialRooster.getQueue_id())) return;
+
         try {
 
             StorageReference audioFileRef = mStorageRef.child("social_rooster_uploads/" + socialRooster.getAudio_file_url());
@@ -358,8 +376,7 @@ public class BackgroundTaskIntentService extends IntentService {
             final DatabaseReference queueRecordReference = FirebaseDatabase.getInstance().getReference()
                     .child("social_rooster_queue").child(mAuth.getCurrentUser().getUid()).child(socialRooster.getQueue_id());
 
-            final long FIVE_MEGABYTE = 5 * 1024 * 1024;
-            audioFileRef.getBytes(FIVE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            audioFileRef.getBytes(Constants.MAX_ROOSTER_FILE_SIZE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                 @Override
                 public void onSuccess(byte[] bytes) {
 
@@ -376,13 +393,13 @@ public class BackgroundTaskIntentService extends IntentService {
                         deviceAudioQueueItem.fromSocialRooster(socialRooster, audioFileUniqueName);
 
                         //store in local SQLLite database
-                        audioTableManager.insertSocialAudioFile(deviceAudioQueueItem);
+                        if(audioTableManager.insertSocialAudioFile(deviceAudioQueueItem)) {
+                            //remove record of queue from FB database
+                            queueRecordReference.removeValue();
+                        }
 
                         //Pre-cache image to display on alarm screen, in case no internet connection
-                        Picasso.with(AppContext).load(socialRooster.getProfile_pic()).fetch();
-
-                        //remove record of queue from FB database
-                        queueRecordReference.removeValue();
+                        if(!socialRooster.getProfile_pic().isEmpty()) Picasso.with(AppContext).load(socialRooster.getProfile_pic()).fetch();
 
                     } catch (Exception e) {
                         e.printStackTrace();
