@@ -5,6 +5,7 @@
 
 package com.roostermornings.android;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
