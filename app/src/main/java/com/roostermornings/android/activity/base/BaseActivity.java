@@ -44,9 +44,11 @@ import com.mobsandgeeks.saripaar.ValidationError;
 import com.mobsandgeeks.saripaar.Validator;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
+import com.roostermornings.android.activity.DiscoverFragmentActivity;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.activity.MessageStatusActivity;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
+import com.roostermornings.android.activity.NewAlarmFragmentActivity;
 import com.roostermornings.android.activity.NewAudioRecordActivity;
 import com.roostermornings.android.activity.SplashActivity;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
@@ -67,6 +69,8 @@ import java.util.List;
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
+import butterknife.OnClick;
+import butterknife.Optional;
 
 public abstract class BaseActivity extends AppCompatActivity implements Validator.ValidationListener, BaseFragment.BaseActivityListener, UploadService.BaseActivityListener {
 
@@ -433,6 +437,37 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
         }
     }
 
+    @Optional
+    @OnClick(R.id.home_my_alarms)
+    public void manageMyAlarm() {
+        startHomeActivity();
+    }
+
+    @Optional
+    @OnClick(R.id.home_record_audio)
+    public void recordNewAudio() {
+        if (!checkInternetConnection()) return;
+        startActivity(new Intent(this, NewAudioRecordActivity.class));
+    }
+
+    @Optional
+    @OnClick(R.id.home_discover)
+    public void onClickDiscover() {
+        startActivity(new Intent(this, DiscoverFragmentActivity.class));
+    }
+
+    @Optional
+    @OnClick(R.id.home_friends)
+    public void manageFriends() {
+        startActivity(new Intent(this, FriendsFragmentActivity.class));
+    }
+
+    @Optional
+    @OnClick(R.id.home_my_uploads)
+    public void manageUploads() {
+        startActivity(new Intent(this, MessageStatusActivity.class));
+    }
+
     public boolean setButtonBarSelection() {
         try {
             if (this instanceof MyAlarmsFragmentActivity)
@@ -441,6 +476,8 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
                 findViewById(R.id.home_my_uploads).setSelected(true);
             else if (this instanceof NewAudioRecordActivity)
                 findViewById(R.id.home_record_audio).setSelected(true);
+            else if (this instanceof DiscoverFragmentActivity)
+                findViewById(R.id.home_discover).setSelected(true);
             else if (this instanceof FriendsFragmentActivity)
                 findViewById(R.id.home_friends).setSelected(true);
             else

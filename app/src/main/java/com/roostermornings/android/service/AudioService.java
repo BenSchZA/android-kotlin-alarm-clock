@@ -449,7 +449,7 @@ public class AudioService extends Service {
         if(audioFileNames != null) {
             for (File file :
                     files) {
-                if (audioFileNames.contains(file.getName()))
+                if (!audioFileNames.contains(file.getName()))
                     file.delete();
             }
         }

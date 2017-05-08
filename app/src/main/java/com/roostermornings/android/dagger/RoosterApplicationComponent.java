@@ -13,6 +13,7 @@ import dagger.Component;
 
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
+import com.roostermornings.android.activity.DiscoverFragmentActivity;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.activity.IntroFragmentActivity;
 import com.roostermornings.android.activity.MessageStatusActivity;
@@ -60,6 +61,7 @@ public interface RoosterApplicationComponent {
     void inject(FriendsFragmentActivity activity);
     void inject(IntroFragmentActivity activity);
     void inject(MessageStatusActivity activity);
+    void inject(DiscoverFragmentActivity activity);
     void inject(MyAlarmsFragmentActivity activity);
     void inject(NewAlarmFragmentActivity activity);
     void inject(NewAudioFriendsActivity activity);

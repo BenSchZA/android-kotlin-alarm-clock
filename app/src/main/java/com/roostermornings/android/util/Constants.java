@@ -112,6 +112,7 @@ public class Constants {
     //Filenames
     public final static String FILENAME_PREFIX_ROOSTER_TEMP_RECORDING = "RoosterRecording";
     public final static String FILENAME_PREFIX_ROOSTER_CONTENT = "audio";
+    public final static String FILENAME_PREFIX_ROOSTER_EXAMPLE_CONTENT = "example_clip";
 
     public final static long MAX_ROOSTER_FILE_SIZE = 5 * 1024 * 1024;
 }

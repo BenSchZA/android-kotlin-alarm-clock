@@ -6,53 +6,80 @@
 package com.roostermornings.android.adapter;
 
 import android.app.Activity;
+import android.content.Context;
+import android.media.MediaPlayer;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.R;
+import com.roostermornings.android.activity.DiscoverFragmentActivity;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.AlarmChannel;
 import com.roostermornings.android.domain.ChannelRooster;
 import com.roostermornings.android.fragment.IAlarmSetListener;
 import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment2;
+import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
+import com.roostermornings.android.util.Constants;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 import static com.roostermornings.android.BaseApplication.AppContext;
 
-public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapter.ViewHolder> implements NewAlarmFragment2.ChannelInterface {
+public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapter.ViewHolder> {
     private ArrayList<ChannelRooster> mDataset;
     private Activity mActivity;
+
+    private DiscoverAudioSampleInterface discoverAudioSampleInterface;
+    public interface DiscoverAudioSampleInterface {
+        void streamChannelRooster(final ChannelRooster channelRooster);
+    }
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
     public class ViewHolder extends RecyclerView.ViewHolder {
-        // each data item is just a string in this case
-        public TextView txtChannelName;
-        public TextView imgInfo;
-        public ImageView imgChannelImage;
-        public ImageView imgChannelSelected;
-        public CardView cardViewChannel;
-        public ProgressBar progressBar;
 
-        public ViewHolder(View v) {
-            super(v);
-            cardViewChannel = (CardView) v.findViewById(R.id.card_view_alarms);
-            txtChannelName = (TextView) v.findViewById(R.id.cardview_channel_name);
-            imgInfo = (TextView) v.findViewById(R.id.cardview_channel_info);
-            imgChannelImage = (ImageView) v.findViewById(R.id.card_view_channel_image);
-            imgChannelSelected = (ImageView) v.findViewById(R.id.cardview_channel_selected);
-            progressBar = (ProgressBar) v.findViewById(R.id.progressBar);
+        @BindView(R.id.cardview_channel_name)
+        TextView txtChannelName;
+        @BindView(R.id.card_view_channel_image)
+        ImageView imgChannelImage;
+        @BindView(R.id.card_view_discover)
+        CardView cardViewChannel;
+        @BindView(R.id.progressBar)
+        ProgressBar progressBar;
+        @BindView(R.id.new_audio_listen)
+        ImageButton listenImageButton;
+        @BindView(R.id.cardview_channel_info)
+        TextView channelInfo;
+
+        public ViewHolder(View view) {
+            super(view);
+            ButterKnife.bind(this, view);
         }
     }
 
@@ -71,6 +98,9 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
     public DiscoverListAdapter(ArrayList<ChannelRooster> mDataset, Activity mActivity) {
         this.mDataset = mDataset;
         this.mActivity = mActivity;
+        if(mActivity instanceof DiscoverFragmentActivity) {
+            discoverAudioSampleInterface = (DiscoverAudioSampleInterface) mActivity;
+        }
     }
 
     public DiscoverListAdapter() {
@@ -82,57 +112,54 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
     public DiscoverListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                              int viewType) {
         // create a new view
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.cardview_channels, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.cardview_discover, parent, false);
         // set the view's size, margins, paddings and layout parameters
-        ViewHolder vh = new ViewHolder(v);
-        return vh;
+        return new ViewHolder(v);
     }
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         // - get element from your dataset at this position
+        final ChannelRooster channelRooster = mDataset.get(position);
         // - replace the contents of the view with that element
+        if (channelRooster.isPlaying()) {
+            holder.listenImageButton.setBackgroundResource(R.drawable.rooster_new_audio_pause_button);
+        } else {
+            holder.listenImageButton.setBackgroundResource(R.drawable.rooster_new_audio_play_button);
+        }
+
         holder.cardViewChannel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                toggleChannelSelection(mDataset.get(position));
+                discoverAudioSampleInterface.streamChannelRooster(channelRooster);
+            }
+        });
 
-                if (mDataset.get(position).isSelected()) {
-                    setSelectedChannel(mDataset.get(position));
-                } else {
-                    clearSelectedChannel();
-                }
-
-                holder.imgChannelSelected.setVisibility(View.VISIBLE);
-                notifyDataSetChanged();
+        holder.listenImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                discoverAudioSampleInterface.streamChannelRooster(channelRooster);
             }
         });
 
         holder.txtChannelName.setText(mDataset.get(position).getName());
-        if (mDataset.get(position).isSelected()) {
-            holder.imgChannelSelected.setVisibility(View.VISIBLE);
-        } else {
-            holder.imgChannelSelected.setVisibility(View.INVISIBLE);
-        }
 
-        holder.imgInfo.setOnClickListener(new View.OnClickListener() {
+        holder.channelInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 new MaterialDialog.Builder(mActivity)
                         .title(mDataset.get(position).getName())
-                        .content(mDataset.get(position).getChannel_description())
+                        .content(mDataset.get(position).getDescription())
                         .positiveText(R.string.ok)
                         .negativeText("")
                         .show();
-                
-
             }
         });
 
         try {
-            Picasso.with(AppContext).load(mDataset.get(position).getChannel_photo())
+            Picasso.with(AppContext).load(mDataset.get(position).getPhoto())
                     .fit()
                     .centerCrop()
                     .into(holder.imgChannelImage, new Callback() {
@@ -140,6 +167,12 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
                 public void onSuccess() {
                     holder.progressBar.setVisibility(View.GONE);
                     holder.imgChannelImage.setVisibility(View.VISIBLE);
+
+                    if(channelRooster.isDownloading()) {
+                        holder.progressBar.setVisibility(View.VISIBLE);
+                    } else {
+                        holder.progressBar.setVisibility(View.GONE);
+                    }
                 }
 
                 @Override
@@ -149,35 +182,6 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
             });
         } catch(IllegalArgumentException e) {
             e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void setSelectedChannel(ChannelRooster channelRooster) {
-        IAlarmSetListener mListener = (IAlarmSetListener) mActivity;
-        Alarm alarm = mListener.getAlarmDetails();
-        alarm.setChannel(new AlarmChannel(channelRooster.getName(), channelRooster.getChannel_uid()));
-        mListener.setAlarmDetails(alarm);
-    }
-
-    @Override
-    public void clearSelectedChannel() {
-        IAlarmSetListener mListener = (IAlarmSetListener) mActivity;
-        Alarm alarm = mListener.getAlarmDetails();
-        alarm.setChannel(new AlarmChannel());
-        mListener.setAlarmDetails(alarm);
-    }
-
-    private void toggleChannelSelection(ChannelRooster channelSelection) {
-        //Clear all channels except selected
-        for (ChannelRooster channel : mDataset) {
-            if (!(channel == channelSelection)) channel.setSelected(false);
-        }
-        //Toggle selected channel
-        if (channelSelection.isSelected()) {
-            channelSelection.setSelected(false);
-        } else {
-            channelSelection.setSelected(true);
         }
     }
 

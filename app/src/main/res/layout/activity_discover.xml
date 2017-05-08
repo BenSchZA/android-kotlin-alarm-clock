@@ -4,11 +4,16 @@
   ~ Copyright (c)  2017 Roosta Media. All rights reserved.
   -->
 
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.roostermornings.android.activity.DiscoverActivity">
+    android:fitsSystemWindows="true"
+    tools:context="com.roostermornings.android.activity.DiscoverFragmentActivity">
 
-</android.support.constraint.ConstraintLayout>
+    <include layout="@layout/custom_toolbar"/>
+    <include layout="@layout/content_discover"/>
+
+</android.support.design.widget.CoordinatorLayout>

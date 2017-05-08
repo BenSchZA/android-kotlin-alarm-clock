@@ -200,7 +200,11 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <activity android:name=".activity.DiscoverActivity"></activity>
+        <activity
+            android:name=".activity.DiscoverFragmentActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppThemeDay.NoActionBar" />
     </application>
 
 </manifest>

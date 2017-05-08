@@ -185,22 +185,6 @@ public class MessageStatusActivity extends BaseActivity {
         mAdapter.notifyDataSetChanged();
     }
 
-    @OnClick(R.id.home_record_audio)
-    public void recordNewAudio() {
-        if (!checkInternetConnection()) return;
-        startActivity(new Intent(MessageStatusActivity.this, NewAudioRecordActivity.class));
-    }
-
-    @OnClick(R.id.home_friends)
-    public void manageFriends() {
-        startActivity(new Intent(MessageStatusActivity.this, FriendsFragmentActivity.class));
-    }
-
-    @OnClick(R.id.home_my_alarms)
-    public void manageAlarms() {
-        startHomeActivity();
-    }
-
     private void sortMessages(ArrayList<SocialRooster> socialRoosters){
         //Take arraylist and sort by date
         Collections.sort(socialRoosters, new Comparator<SocialRooster>() {
