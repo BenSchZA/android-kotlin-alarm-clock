@@ -44,7 +44,6 @@ apply plugin: 'io.fabric'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
-    jcenter()
 }
 
 def support_lib_version = "25.3.1"
@@ -72,8 +71,6 @@ dependencies {
     //Ben Android Deps
     // Stetho core
     //If you want to add a network helper
-    compile 'com.google.android.exoplayer:exoplayer-core:r2.4.0'
-    compile 'com.google.android.exoplayer:exoplayer-smoothstreaming:r2.4.0'
 
     compile 'me.grantland:autofittextview:0.2.+'
     compile 'com.afollestad.material-dialogs:core:0.8.5.9'

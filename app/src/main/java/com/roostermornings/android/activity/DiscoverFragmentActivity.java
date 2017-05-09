@@ -28,6 +28,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.roostermornings.android.BaseApplication;
@@ -84,7 +85,8 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
     private ArrayList<ChannelRooster> channelRoosters = new ArrayList<>();
     private Map<Integer, List<ChannelRooster>> channelRoosterMap = new TreeMap<>(Collections.reverseOrder());
 
-    private final MediaPlayer mediaPlayer = new MediaPlayer();
+    private MediaPlayer mediaPlayer = new MediaPlayer();
+    Future oneInstanceTaskFuture;
 
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
@@ -104,6 +106,9 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
         initialize(R.layout.activity_discover);
 
         inject(((BaseApplication)getApplication()).getRoosterApplicationComponent());
+
+        //Notify user of no internet connection
+        checkInternetConnection();
 
         //Final context to be used in threads
         final Context context = this;
@@ -170,23 +175,33 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-        //Delete all files not contained in SQL db
-        File[] files = getCacheDir().listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.contains(Constants.FILENAME_PREFIX_ROOSTER_EXAMPLE_CONTENT);
-            }
-        });
-        ArrayList<String> audioFileNames = audioTableManager.extractAllAudioFileNames();
-        if(audioFileNames != null) {
-            for (File file :
-                    files) {
-                if (!audioFileNames.contains(file.getName()))
-                    file.delete();
-            }
+    public void onPause() {
+        super.onPause();
+//        //Delete all files not contained in SQL db
+//        File[] files = getCacheDir().listFiles(new FilenameFilter() {
+//            @Override
+//            public boolean accept(File dir, String name) {
+//                return name.contains(Constants.FILENAME_PREFIX_ROOSTER_EXAMPLE_CONTENT);
+//            }
+//        });
+//        ArrayList<String> audioFileNames = audioTableManager.extractAllAudioFileNames();
+//        if(audioFileNames != null) {
+//            for (File file :
+//                    files) {
+//                if (!audioFileNames.contains(file.getName()))
+//                    file.delete();
+//            }
+//        }
+        if(mediaPlayer != null) {
+            mediaPlayer.release();
         }
+        if(oneInstanceTaskFuture != null) oneInstanceTaskFuture.cancel(true);
+        for (ChannelRooster rooster :
+                channelRoosters) {
+            rooster.setDownloading(false);
+            rooster.setPlaying(false);
+        }
+        mAdapter.notifyDataSetChanged();
     }
 
     private void getChannelRoosterData(final Channel channel, final Integer iteration) {
@@ -314,11 +329,15 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
     public void streamChannelRooster(final ChannelRooster channelRooster) {
         //The oneInstanceTask creates a new thread, only if one doesn't exist already
         ExecutorService executor = new ThreadPoolExecutor(1, 1, 1, TimeUnit.MINUTES,
-                new SynchronousQueue<Runnable>(),
-                new ThreadPoolExecutor.DiscardPolicy());
-        Future oneInstanceTaskFuture;
+                    new SynchronousQueue<Runnable>(),
+                    new ThreadPoolExecutor.DiscardPolicy());
 
-        if(!checkInternetConnection()) return;
+        //Check for an active internet connection - displays toast if none
+        if(!checkInternetConnection()) {
+            mediaPlayer.release();
+            return;
+        }
+        //Do not proceed if active download in progress on current channelrooster
         if(channelRooster.isDownloading()) return;
 
         class oneInstanceTask implements Runnable {
@@ -330,16 +349,25 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                 channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
                 notifyDataSetChangedFromUIThread();
 
+                mediaPlayer = new MediaPlayer();
+
                 audioFileRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>()
                 {
                     @Override
                     public void onSuccess(Uri downloadUrl)
                     {
-                        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                        //The asynchronous nature of this task meant that even after reset, the download task would return and start the mediaplayer...
+                        //Now by releasing the mediaplayer and initialising it before the async call we avoid this
+                        if(mediaPlayer == null) return;
                         try {
+                            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                             mediaPlayer.setDataSource(downloadUrl.toString());
                         } catch (IOException e) {
                             e.printStackTrace();
+                            return;
+                        } catch (IllegalStateException e) {
+                            e.printStackTrace();
+                            return;
                         }
                         mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                             @Override
@@ -389,7 +417,6 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                         mAdapter.notifyDataSetChanged();
                     }
                 });
-
 //                audioFileRef.getBytes(Constants.MAX_ROOSTER_FILE_SIZE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
 //                    @Override
 //                    public void onSuccess(byte[] bytes) {
@@ -463,12 +490,17 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
 //                });
             }
         }
-        oneInstanceTaskFuture = executor.submit(new oneInstanceTask());
 
-        //Reset GUI playing/downloading
+        //Check if playing or not playing and handle threading + mediaplayer appropriately
         if(channelRooster.isPlaying()) {
-            oneInstanceTaskFuture.cancel(true);
-            mediaPlayer.reset();
+            try {
+                mediaPlayer.release();
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            }
+            //If a previous task exists, kill it
+            if(oneInstanceTaskFuture != null) oneInstanceTaskFuture.cancel(true);
+            //Clear all audio load spinners and set to not playing
             for (ChannelRooster rooster :
                     channelRoosters) {
                 rooster.setDownloading(false);
@@ -476,15 +508,22 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
             }
             mAdapter.notifyDataSetChanged();
         } else {
-            oneInstanceTaskFuture.cancel(true);
-            mediaPlayer.reset();
+            try {
+                mediaPlayer.release();
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            }
+            //If a previous task exists, kill it
+            if(oneInstanceTaskFuture != null) oneInstanceTaskFuture.cancel(true);
+            //Clear all audio load spinners and set to not playing
             for (ChannelRooster rooster :
                     channelRoosters) {
                 rooster.setDownloading(false);
                 rooster.setPlaying(false);
             }
             mAdapter.notifyDataSetChanged();
-            executor.submit(new oneInstanceTask());
+            //Start a new task thread
+            oneInstanceTaskFuture = executor.submit(new oneInstanceTask());
         }
     }
 }
