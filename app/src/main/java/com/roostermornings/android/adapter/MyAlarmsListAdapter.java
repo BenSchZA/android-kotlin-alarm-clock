@@ -22,6 +22,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -66,8 +67,10 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
         TextView txtAlarmChannel;
         @BindView(R.id.cardview_alarm_person)
         ImageView roosterNotificationPerson;
-        @BindView(R.id.rooster_notification)
-        TextView roosterNotification;
+        @BindView(R.id.rooster_notification_text)
+        TextView roosterNotificationText;
+        @BindView(R.id.rooster_notification_parent)
+        RelativeLayout roosterNotificationParent;
         @BindView(R.id.switch_enable)
         SwitchCompat switchEnable;
 
@@ -134,14 +137,14 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
             holder.roosterNotificationPerson.setVisibility(View.VISIBLE);
             //Show notification of number of waiting Roosters for next pending alarm
             if(alarm.getUnseen_roosters() != null && alarm.getUnseen_roosters() > 0) {
-                holder.roosterNotification.setVisibility(View.VISIBLE);
-                holder.roosterNotification.setText(String.valueOf(alarm.getUnseen_roosters()));
+                holder.roosterNotificationParent.setVisibility(View.VISIBLE);
+                holder.roosterNotificationText.setText(String.valueOf(alarm.getUnseen_roosters()));
                 holder.roosterNotificationPerson.setAnimation(AnimationUtils.loadAnimation(mActivity.getApplicationContext(), R.anim.pulse));
-                holder.roosterNotification.setAnimation(AnimationUtils.loadAnimation(mActivity.getApplicationContext(), R.anim.pulse));
+                holder.roosterNotificationParent.setAnimation(AnimationUtils.loadAnimation(mActivity.getApplicationContext(), R.anim.pulse));
             } else{
-                holder.roosterNotification.setVisibility(View.INVISIBLE);
+                holder.roosterNotificationParent.setVisibility(View.INVISIBLE);
                 holder.roosterNotificationPerson.clearAnimation();
-                holder.roosterNotification.clearAnimation();
+                holder.roosterNotificationParent.clearAnimation();
             }
         }
 
@@ -186,7 +189,7 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
             }
         });
 
-        holder.roosterNotification.setOnClickListener(new View.OnClickListener() {
+        holder.roosterNotificationParent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (mActivity instanceof MyAlarmsFragmentActivity) {

@@ -78,7 +78,6 @@
             <FrameLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center"
                 android:layout_gravity="center"
                 android:layout_marginLeft="@dimen/spacing_small">
 
@@ -89,18 +88,29 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/md_transparent"
                     android:src="@drawable/ic_person_white_24dp"
-                    android:visibility="invisible"/>
+                    android:visibility="invisible" />
 
-                <TextView
-                    android:id="@+id/rooster_notification"
-                    android:layout_gravity="top|right"
+                <RelativeLayout
+                    android:id="@+id/rooster_notification_parent"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/counter_circle_yellow"
-                    android:visibility="invisible"
-                    android:textAlignment="center"
-                    android:textSize="@dimen/text_xsmall"
-                    android:padding="@dimen/spacing_xsmall"/>
+                    android:layout_gravity="top|right"
+                    android:visibility="gone">
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/counter_circle_yellow"
+                        android:layout_centerInParent="true"
+                        android:scaleType="fitCenter">
+                    </ImageView>
+                    <TextView
+                        android:id="@+id/rooster_notification_text"
+                        android:layout_centerInParent="true"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:includeFontPadding="false"
+                        android:textSize="@dimen/text_normal" />
+                </RelativeLayout>
 
             </FrameLayout>
 
