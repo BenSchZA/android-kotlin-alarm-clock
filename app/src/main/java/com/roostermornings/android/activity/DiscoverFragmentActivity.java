@@ -6,7 +6,9 @@
 package com.roostermornings.android.activity;
 
 import android.content.Context;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -46,6 +48,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -315,6 +318,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                 new ThreadPoolExecutor.DiscardPolicy());
         Future oneInstanceTaskFuture;
 
+        if(!checkInternetConnection()) return;
         if(channelRooster.isDownloading()) return;
 
         class oneInstanceTask implements Runnable {
@@ -326,66 +330,54 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                 channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
                 notifyDataSetChangedFromUIThread();
 
-                audioFileRef.getBytes(Constants.MAX_ROOSTER_FILE_SIZE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                audioFileRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>()
+                {
                     @Override
-                    public void onSuccess(byte[] bytes) {
-
+                    public void onSuccess(Uri downloadUrl)
+                    {
+                        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                         try {
-                            File outputDir = getCacheDir(); // context being the Activity pointer
-                            File tempFile = new File(outputDir.getAbsolutePath() + Constants.FILENAME_PREFIX_ROOSTER_EXAMPLE_CONTENT + ".3gp");
-                            tempFile.deleteOnExit();
-                            FileOutputStream outputStream = new FileOutputStream(tempFile);
-                            outputStream.write(bytes);
-                            outputStream.close();
-
-                            if (BuildConfig.DEBUG)
-                                Toast.makeText(AppContext, "successfully downloaded", Toast.LENGTH_SHORT).show();
-
-                            FileInputStream inputStream = new FileInputStream(tempFile);
-
-                            mediaPlayer.reset();
-                            mediaPlayer.setDataSource(inputStream.getFD());
-                            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                                @Override
-                                public void onPrepared(MediaPlayer mp) {
-                                    mediaPlayer.start();
-
-                                    for (ChannelRooster rooster :
-                                            channelRoosters) {
-                                        rooster.setDownloading(false);
-                                        rooster.setPlaying(false);
-                                    }
-                                    channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
-                                    channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(true);
-                                    notifyDataSetChangedFromUIThread();
-
-                                    mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                        @Override
-                                        public void onCompletion(MediaPlayer mp) {
-                                            channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
-                                            channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
-                                            notifyDataSetChangedFromUIThread();
-                                        }
-                                    });
-                                }
-                            });
-
-                            mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-                                @Override
-                                public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
-                                    Toast.makeText(AppContext, "Content streaming failed.", Toast.LENGTH_SHORT).show();
-                                    channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
-                                    channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
-                                    notifyDataSetChangedFromUIThread();
-                                    return true;
-                                }
-                            });
-
-                            mediaPlayer.prepareAsync();
-
-                        } catch (Exception e) {
+                            mediaPlayer.setDataSource(downloadUrl.toString());
+                        } catch (IOException e) {
                             e.printStackTrace();
                         }
+                        mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                            @Override
+                            public void onPrepared(MediaPlayer mp) {
+                                mediaPlayer.start();
+
+                                for (ChannelRooster rooster :
+                                        channelRoosters) {
+                                    rooster.setDownloading(false);
+                                    rooster.setPlaying(false);
+                                }
+                                channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
+                                channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(true);
+                                notifyDataSetChangedFromUIThread();
+
+                                mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                    @Override
+                                    public void onCompletion(MediaPlayer mp) {
+                                        channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
+                                        channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
+                                        notifyDataSetChangedFromUIThread();
+                                    }
+                                });
+                            }
+                        });
+
+                        mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+                            @Override
+                            public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
+                                Toast.makeText(AppContext, "Content streaming failed.", Toast.LENGTH_SHORT).show();
+                                channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
+                                channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
+                                notifyDataSetChangedFromUIThread();
+                                return true;
+                            }
+                        });
+
+                        mediaPlayer.prepareAsync();
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
@@ -397,6 +389,78 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                         mAdapter.notifyDataSetChanged();
                     }
                 });
+
+//                audioFileRef.getBytes(Constants.MAX_ROOSTER_FILE_SIZE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+//                    @Override
+//                    public void onSuccess(byte[] bytes) {
+//
+//                        try {
+//                            File outputDir = getCacheDir(); // context being the Activity pointer
+//                            File tempFile = new File(outputDir.getAbsolutePath() + Constants.FILENAME_PREFIX_ROOSTER_EXAMPLE_CONTENT + ".3gp");
+//                            tempFile.deleteOnExit();
+//                            FileOutputStream outputStream = new FileOutputStream(tempFile);
+//                            outputStream.write(bytes);
+//                            outputStream.close();
+//
+//                            if (BuildConfig.DEBUG)
+//                                Toast.makeText(AppContext, "successfully downloaded", Toast.LENGTH_SHORT).show();
+//
+//                            FileInputStream inputStream = new FileInputStream(tempFile);
+//
+//                            mediaPlayer.reset();
+//                            mediaPlayer.setDataSource(inputStream.getFD());
+//                            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+//                                @Override
+//                                public void onPrepared(MediaPlayer mp) {
+//                                    mediaPlayer.start();
+//
+//                                    for (ChannelRooster rooster :
+//                                            channelRoosters) {
+//                                        rooster.setDownloading(false);
+//                                        rooster.setPlaying(false);
+//                                    }
+//                                    channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
+//                                    channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(true);
+//                                    notifyDataSetChangedFromUIThread();
+//
+//                                    mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+//                                        @Override
+//                                        public void onCompletion(MediaPlayer mp) {
+//                                            channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
+//                                            channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
+//                                            notifyDataSetChangedFromUIThread();
+//                                        }
+//                                    });
+//                                }
+//                            });
+//
+//                            mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+//                                @Override
+//                                public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
+//                                    Toast.makeText(AppContext, "Content streaming failed.", Toast.LENGTH_SHORT).show();
+//                                    channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
+//                                    channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
+//                                    notifyDataSetChangedFromUIThread();
+//                                    return true;
+//                                }
+//                            });
+//
+//                            mediaPlayer.prepareAsync();
+//
+//                        } catch (Exception e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                }).addOnFailureListener(new OnFailureListener() {
+//                    @Override
+//                    public void onFailure(@NonNull Exception exception) {
+//                        // Handle any errors
+//                        Toast.makeText(AppContext, "Content streaming failed.", Toast.LENGTH_SHORT).show();
+//                        channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
+//                        channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
+//                        mAdapter.notifyDataSetChanged();
+//                    }
+//                });
             }
         }
         oneInstanceTaskFuture = executor.submit(new oneInstanceTask());

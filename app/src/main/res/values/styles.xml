@@ -18,10 +18,10 @@
 
         <!--Actually overridden to Nunito-Bold-->
         <item name="android:typeface">monospace</item>
-        <!--Used for preference screen text colour-->
-        <item name="android:textColor">@color/white</item>
-        <item name="android:textColorPrimary">@color/white</item>
-        <item name="android:textColorSecondary">@color/white_30_percent_transparent</item>
+        <!--&lt;!&ndash;Used for preference screen text colour&ndash;&gt;-->
+        <!--<item name="android:textColor">@color/white</item>-->
+        <!--<item name="android:textColorPrimary">@color/white</item>-->
+        <!--<item name="android:textColorSecondary">@color/white_30_percent_transparent</item>-->
 
         <!--<item name="android:windowActivityTransitions">true</item>-->
 
