@@ -9,7 +9,7 @@
 
     <solid android:color="#fed100" />
     <size
-        android:width="10dp"
-        android:height="10dp" />
+        android:width="15dp"
+        android:height="15dp" />
 
 </shape>

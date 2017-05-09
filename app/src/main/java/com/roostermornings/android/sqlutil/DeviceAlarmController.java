@@ -249,7 +249,7 @@ public final class DeviceAlarmController {
         }
     }
 
-    private void deleteAlarmSetIntents(String setId) {
+    public void deleteAlarmSetIntents(String setId) {
         List<DeviceAlarm> deviceAlarmList = deviceAlarmTableManager.getAlarmSet(setId);
         deviceAlarmTableManager.deleteAlarmSet(setId);
         for (DeviceAlarm deviceAlarm :
