@@ -70,8 +70,10 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
         ImageView imgChannelImage;
         @BindView(R.id.card_view_discover)
         CardView cardViewChannel;
-        @BindView(R.id.progressBar)
-        ProgressBar progressBar;
+        @BindView(R.id.imageProgressBar)
+        ProgressBar imageProgressBar;
+        @BindView(R.id.audioProgressBar)
+        ProgressBar audioProgressBar;
         @BindView(R.id.new_audio_listen)
         ImageButton listenImageButton;
         @BindView(R.id.cardview_channel_info)
@@ -119,7 +121,7 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(final ViewHolder holder, final int position) {
+    public void onBindViewHolder(final ViewHolder holder, int position) {
         // - get element from your dataset at this position
         final ChannelRooster channelRooster = mDataset.get(position);
         // - replace the contents of the view with that element
@@ -127,6 +129,12 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
             holder.listenImageButton.setBackgroundResource(R.drawable.rooster_new_audio_pause_button);
         } else {
             holder.listenImageButton.setBackgroundResource(R.drawable.rooster_new_audio_play_button);
+        }
+
+        if(channelRooster.isDownloading()) {
+            holder.audioProgressBar.setVisibility(View.VISIBLE);
+        } else {
+            holder.audioProgressBar.setVisibility(View.GONE);
         }
 
         holder.cardViewChannel.setOnClickListener(new View.OnClickListener() {
@@ -143,15 +151,15 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
             }
         });
 
-        holder.txtChannelName.setText(mDataset.get(position).getName());
+        holder.txtChannelName.setText(channelRooster.getName());
 
         holder.channelInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 new MaterialDialog.Builder(mActivity)
-                        .title(mDataset.get(position).getName())
-                        .content(mDataset.get(position).getDescription())
+                        .title(channelRooster.getName())
+                        .content(channelRooster.getDescription())
                         .positiveText(R.string.ok)
                         .negativeText("")
                         .show();
@@ -159,20 +167,14 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
         });
 
         try {
-            Picasso.with(AppContext).load(mDataset.get(position).getPhoto())
+            Picasso.with(AppContext).load(channelRooster.getPhoto())
                     .fit()
                     .centerCrop()
                     .into(holder.imgChannelImage, new Callback() {
                 @Override
                 public void onSuccess() {
-                    holder.progressBar.setVisibility(View.GONE);
+                    holder.imageProgressBar.setVisibility(View.GONE);
                     holder.imgChannelImage.setVisibility(View.VISIBLE);
-
-                    if(channelRooster.isDownloading()) {
-                        holder.progressBar.setVisibility(View.VISIBLE);
-                    } else {
-                        holder.progressBar.setVisibility(View.GONE);
-                    }
                 }
 
                 @Override
