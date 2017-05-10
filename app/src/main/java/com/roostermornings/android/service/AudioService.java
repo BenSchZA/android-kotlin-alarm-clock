@@ -24,6 +24,7 @@ import android.os.IBinder;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
@@ -41,6 +42,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static com.roostermornings.android.service.BackgroundTaskIntentService.startActionBackgroundDownload;
 
@@ -53,6 +57,7 @@ public class AudioService extends Service {
     private static BroadcastReceiver receiver;
     private static final Timer timer = new Timer();
     private static final Timer downloadTimer = new Timer();
+    private static final Timer volumeSoftStartTimer = new Timer();
 
     private final MediaPlayer mediaPlayerDefault = new MediaPlayer();
     private final MediaPlayer mediaPlayerRooster = new MediaPlayer();
@@ -70,12 +75,12 @@ public class AudioService extends Service {
     private final DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(this);
 
     private static DeviceAlarm alarm;
-    private int alarmCycle;
+    private int alarmCycle = 1;
     private String alarmChannelUid;
     private String alarmUid;
     private int playDuration;
-    private int alarmCount;
-    private int alarmPosition;
+    private int alarmCount = 1;
+    private int alarmPosition = 1;
     private File file;
 
     private int currentPositionRooster;
@@ -143,7 +148,7 @@ public class AudioService extends Service {
         channelAudioItems = audioTableManager.extractAlarmChannelAudioFiles(mThis.alarmChannelUid);
         socialAudioItems = audioTableManager.extractSocialAudioFiles();
 
-        this.alarmCycle = 0;
+        this.alarmCycle = 1;
 
         //Check if old content exists
         if(audioItems.size() > 0) {
@@ -284,7 +289,7 @@ public class AudioService extends Service {
 
         //Increment alarmCycle, only loop rooster content 5 times
         //after which control handed to activity to endService and turn off screen
-        if(alarmCycle == 5) {
+        if(alarmCycle > 5) {
             notifyActivityTimesUp();
             return;
         }
@@ -309,7 +314,8 @@ public class AudioService extends Service {
                 @Override
                 public void onPrepared(MediaPlayer mediaPlayer) {
                     mediaPlayerRooster.start();
-                    //TODO: soft start
+                    //Slowly increase volume from low to current volume
+                    if(alarmPosition == 1 && alarmCycle == 1) softStartAudio();
 
                     mediaPlayerRooster.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                         @Override
@@ -320,8 +326,8 @@ public class AudioService extends Service {
                             audioTableManager.setListened(mThis.audioItem.getId());
                             //Check if at end of queue, else play next file
                             if (audioItems.size() == audioItems.indexOf(audioItem) + 1) {
-                                mThis.alarmCycle++;
                                 playRooster(audioItems.get(0));
+                                mThis.alarmCycle++;
                             } else{
                                 playRooster(getNextAudioItem());
                             }
@@ -609,6 +615,25 @@ public class AudioService extends Service {
         if(currentVolume < minVolume) {
             audio.setStreamVolume(AudioManager.STREAM_ALARM, minVolume, 0);
         }
+    }
+
+    private void softStartAudio() {
+        final AudioManager audio = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        final int currentVolume = audio.getStreamVolume(AudioManager.STREAM_ALARM);
+
+        final ScheduledExecutorService scheduler =
+                Executors.newSingleThreadScheduledExecutor();
+
+        scheduler.scheduleAtFixedRate
+                (new Runnable() {
+                    int volume = 1;
+                    public void run() {
+                        if(volume > currentVolume) scheduler.shutdown();
+                        audio.setStreamVolume(AudioManager.STREAM_ALARM, volume, 0);
+                        Log.d("Audio soft start: ", String.valueOf(volume));
+                        volume++;
+                    }
+                }, 0, 1, TimeUnit.SECONDS);
     }
 
     private void stopAlarmAudio() {
