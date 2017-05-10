@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,6 +53,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -74,6 +76,8 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
 
     @BindView(R.id.discoverListView)
     RecyclerView mRecyclerView;
+    @BindView(R.id.contentProgressBar)
+    ProgressBar contentProgressBar;
     @BindView(R.id.toolbar_title)
     TextView toolbarTitle;
     @BindView(R.id.button_bar)
@@ -84,6 +88,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
     private DatabaseReference mChannelsReference;
     private ArrayList<ChannelRooster> channelRoosters = new ArrayList<>();
     private Map<Integer, List<ChannelRooster>> channelRoosterMap = new TreeMap<>(Collections.reverseOrder());
+    private Channel lastChannel;
 
     private MediaPlayer mediaPlayer = new MediaPlayer();
     Future oneInstanceTaskFuture;
@@ -146,9 +151,9 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                 ValueEventListener channelsListener = new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
+                        Iterator iterator = dataSnapshot.getChildren().iterator();
                         for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                             final Channel channel = postSnapshot.getValue(Channel.class);
-
                             if (channel.isActive()) {
                                 if(channel.isNew_alarms_start_at_first_iteration()) {
                                     Integer iteration = deviceAlarmTableManager.getChannelStoryIteration(channel.getUid());
@@ -159,6 +164,11 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                                     if(iteration == null || iteration <= 0) iteration = 1;
                                     getChannelRoosterData(channel, iteration);
                                 }
+                            }
+                            //When the iterator is at it's last element, save the last channel so that we know when to refresh adapter list
+                            iterator.next();
+                            if(!iterator.hasNext()){
+                                lastChannel = channel;
                             }
                         }
                     }
@@ -177,21 +187,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
     @Override
     public void onPause() {
         super.onPause();
-//        //Delete all files not contained in SQL db
-//        File[] files = getCacheDir().listFiles(new FilenameFilter() {
-//            @Override
-//            public boolean accept(File dir, String name) {
-//                return name.contains(Constants.FILENAME_PREFIX_ROOSTER_EXAMPLE_CONTENT);
-//            }
-//        });
-//        ArrayList<String> audioFileNames = audioTableManager.extractAllAudioFileNames();
-//        if(audioFileNames != null) {
-//            for (File file :
-//                    files) {
-//                if (!audioFileNames.contains(file.getName()))
-//                    file.delete();
-//            }
-//        }
+
         if(mediaPlayer != null) {
             mediaPlayer.release();
         }
@@ -225,26 +221,16 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                     channelRooster.setChannel_photo(channel.getPhoto());
                     channelRooster.setChannel_description(channel.getDescription());
 
+                    //Only place non-current iterations into the map, to ensure we don't play current iteration in discover
                     if(channelRooster.isActive() && (channelRooster.getRooster_cycle_iteration() != iteration)) {
                         channelIterationMap.put(channelRooster.getRooster_cycle_iteration(), channelRooster);
-                    } else if(channelRooster.isActive()) {
-                        channelRooster.setSelected(false);
-                        //This method allows multiple objects per key
-                        if(channelRoosterMap.containsKey(channel.getPriority())) {
-                            channelRoosterMap.get(channel.getPriority()).add(channelRooster);
-                        } else {
-                            List<ChannelRooster> values = new ArrayList<>();
-                            values.add(channelRooster);
-                            channelRoosterMap.put(channel.getPriority(), values);
-                        }
-                        refreshChannelRoosters();
-                        return;
                     }
                 }
                 if(!channelIterationMap.isEmpty() && iteration != null) {
                     findNextValidChannelRooster(channelIterationMap, channel, iteration);
+                    //Only refresh on last item to ensure clean update
+                    if(channel.getUid().equals(lastChannel.getUid())) refreshChannelRoosters();
                 }
-                refreshChannelRoosters();
             }
 
             @Override
@@ -268,6 +254,8 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                 }
                 if(!values.isEmpty()) channelRoosters.addAll(values);
                 mAdapter.notifyDataSetChanged();
+                contentProgressBar.setVisibility(View.GONE);
+                mRecyclerView.setVisibility(View.VISIBLE);
             }
         }.run();
     }
@@ -279,12 +267,13 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                 //Check head and tail of naturally sorted TreeMap for next valid channel content
                 SortedMap<Integer,ChannelRooster> tailMap = channelIterationMap.tailMap(iteration);
                 SortedMap<Integer,ChannelRooster> headMap = channelIterationMap.headMap(iteration);
-                if(!tailMap.isEmpty()) {
-                    //User is starting story at next valid entry
-                    //Set SQL entry for iteration to current valid story iteration, to be incremented on play
-                    deviceAlarmTableManager.setChannelStoryIteration(channel.getUid(), tailMap.firstKey());
+                //        head               tail
+                //  00000000000000[0]  x   00000000
+                // We want to select [] where x is the current iteration, !NOT! included in the channelIterationMap - this ensures best content for discover
+                // Or   x   0000000[0]  in the case of a story that is unstarted or a channel on first iteration
+                if(!headMap.isEmpty()) {
                     //Retrieve channel audio
-                    ChannelRooster channelRooster = channelIterationMap.get(tailMap.firstKey());
+                    ChannelRooster channelRooster = channelIterationMap.get(headMap.lastKey());
                     channelRooster.setSelected(false);
                     //This method allows multiple objects per key
                     if(channelRoosterMap.containsKey(channel.getPriority())) {
@@ -294,13 +283,9 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                         values.add(channelRooster);
                         channelRoosterMap.put(channel.getPriority(), values);
                     }
-                }
-                else if(!headMap.isEmpty()) {
-                    //User is starting story from beginning again, at valid entry
-                    //Set SQL entry for iteration to current valid story iteration, to be incremented on play
-                    deviceAlarmTableManager.setChannelStoryIteration(channel.getUid(), headMap.firstKey());
+                } else if(!tailMap.isEmpty()) {
                     //Retrieve channel audio
-                    ChannelRooster channelRooster = channelIterationMap.get(headMap.firstKey());
+                    ChannelRooster channelRooster = channelIterationMap.get(tailMap.lastKey());
                     channelRooster.setSelected(false);
                     //This method allows multiple objects per key
                     if(channelRoosterMap.containsKey(channel.getPriority())) {
@@ -417,77 +402,6 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                         mAdapter.notifyDataSetChanged();
                     }
                 });
-//                audioFileRef.getBytes(Constants.MAX_ROOSTER_FILE_SIZE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-//                    @Override
-//                    public void onSuccess(byte[] bytes) {
-//
-//                        try {
-//                            File outputDir = getCacheDir(); // context being the Activity pointer
-//                            File tempFile = new File(outputDir.getAbsolutePath() + Constants.FILENAME_PREFIX_ROOSTER_EXAMPLE_CONTENT + ".3gp");
-//                            tempFile.deleteOnExit();
-//                            FileOutputStream outputStream = new FileOutputStream(tempFile);
-//                            outputStream.write(bytes);
-//                            outputStream.close();
-//
-//                            if (BuildConfig.DEBUG)
-//                                Toast.makeText(AppContext, "successfully downloaded", Toast.LENGTH_SHORT).show();
-//
-//                            FileInputStream inputStream = new FileInputStream(tempFile);
-//
-//                            mediaPlayer.reset();
-//                            mediaPlayer.setDataSource(inputStream.getFD());
-//                            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-//                                @Override
-//                                public void onPrepared(MediaPlayer mp) {
-//                                    mediaPlayer.start();
-//
-//                                    for (ChannelRooster rooster :
-//                                            channelRoosters) {
-//                                        rooster.setDownloading(false);
-//                                        rooster.setPlaying(false);
-//                                    }
-//                                    channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
-//                                    channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(true);
-//                                    notifyDataSetChangedFromUIThread();
-//
-//                                    mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-//                                        @Override
-//                                        public void onCompletion(MediaPlayer mp) {
-//                                            channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
-//                                            channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
-//                                            notifyDataSetChangedFromUIThread();
-//                                        }
-//                                    });
-//                                }
-//                            });
-//
-//                            mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-//                                @Override
-//                                public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
-//                                    Toast.makeText(AppContext, "Content streaming failed.", Toast.LENGTH_SHORT).show();
-//                                    channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
-//                                    channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
-//                                    notifyDataSetChangedFromUIThread();
-//                                    return true;
-//                                }
-//                            });
-//
-//                            mediaPlayer.prepareAsync();
-//
-//                        } catch (Exception e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                }).addOnFailureListener(new OnFailureListener() {
-//                    @Override
-//                    public void onFailure(@NonNull Exception exception) {
-//                        // Handle any errors
-//                        Toast.makeText(AppContext, "Content streaming failed.", Toast.LENGTH_SHORT).show();
-//                        channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
-//                        channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
-//                        mAdapter.notifyDataSetChanged();
-//                    }
-//                });
             }
         }
 
