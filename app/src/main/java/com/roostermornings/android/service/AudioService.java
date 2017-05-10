@@ -309,6 +309,7 @@ public class AudioService extends Service {
                 @Override
                 public void onPrepared(MediaPlayer mediaPlayer) {
                     mediaPlayerRooster.start();
+                    //TODO: soft start
 
                     mediaPlayerRooster.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                         @Override
@@ -357,6 +358,9 @@ public class AudioService extends Service {
 
             //delete record from arraylist
             audioItems.remove(audioItem);
+
+            //If an error occurs on the last queue item, assume error on all and start default alarm tone as fail safe
+            startDefaultAlarmTone();
         }
     }
 

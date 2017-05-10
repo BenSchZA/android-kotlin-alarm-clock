@@ -23,14 +23,28 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     android:layout_above="@id/button_bar" >
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/discoverListView"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:clickable="true"
-        android:padding="@dimen/spacing_large"
-        android:clipToPadding="false" />
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/discoverListView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            android:clickable="true"
+            android:padding="@dimen/spacing_large"
+            android:clipToPadding="false"
+            android:visibility="gone"/>
+
+        <ProgressBar
+            android:id="@+id/contentProgressBar"
+            style="@style/Widget.AppCompat.ProgressBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="visible"/>
+    </FrameLayout>
 
 </android.support.design.widget.CoordinatorLayout>
 
