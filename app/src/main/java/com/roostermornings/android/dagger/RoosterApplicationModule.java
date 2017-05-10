@@ -14,6 +14,7 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
@@ -57,6 +58,12 @@ public class RoosterApplicationModule {
     @Singleton
     BaseApplication providesBaseApplication() {
         return baseApplication;
+    }
+
+    @Provides
+    @Singleton
+    FirebaseAnalytics provideFirebaseAnalytics() {
+        return FirebaseAnalytics.getInstance(baseApplication);
     }
 
     @Provides
