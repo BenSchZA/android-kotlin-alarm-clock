@@ -36,6 +36,7 @@ import com.roostermornings.android.fragment.intro.IntroFragment2;
 import com.roostermornings.android.fragment.intro.IntroFragment3;
 import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment1;
 import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment2;
+import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.service.UploadService;
 
 /**
@@ -81,6 +82,7 @@ public interface RoosterApplicationComponent {
     void inject(NewAlarmFragment1 fragment);
     void inject(NewAlarmFragment2 fragment);
 
+    void inject(AudioService service);
     void inject(UploadService service);
 
     //Provision methods have no parameters and return an injected or provided type.
