@@ -25,6 +25,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.analytics.FA;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.AlarmChannel;
@@ -107,8 +108,10 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
         }
         if (mEditAlarmId.length() == 0) {
             setupToolbar(toolbarTitle, getString(R.string.create_alarm));
+            FA.Log(FA.Event.Alarm_creation_begin.class, null, null);
         } else {
             setupToolbar(toolbarTitle, getString(R.string.edit_alarm));
+            FA.Log(FA.Event.Alarm_edit_begin.class, null, null);
         }
     }
 
@@ -243,6 +246,25 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
 
                 //Download any social or channel audio files
                 startActionBackgroundDownload(context);
+
+                FA.Log(FA.Event.Alarm_creation_completed.class,
+                        FA.Event.Alarm_creation_completed.Param.No_rooster_content,
+                        !mAlarm.isAllow_friend_audio_files()&"".equals(mAlarm.getChannel().getName()));
+                FA.Log(FA.Event.Alarm_creation_completed.class,
+                        FA.Event.Alarm_creation_completed.Param.Social_rooster_content,
+                        mAlarm.isAllow_friend_audio_files());
+                FA.Log(FA.Event.Alarm_creation_completed.class,
+                        FA.Event.Alarm_creation_completed.Param.Channel_rooster_content,
+                        !"".equals(mAlarm.getChannel().getName()));
+                FA.Log(FA.Event.Alarm_creation_completed.class,
+                        FA.Event.Alarm_creation_completed.Param.Social_channel_rooster_content,
+                        mAlarm.isAllow_friend_audio_files()&!"".equals(mAlarm.getChannel().getName()));
+
+                if(!"".equals(mAlarm.getChannel().getName())) {
+                    FA.Log(FA.Event.Channel_selected.class,
+                            FA.Event.Channel_selected.Param.Channel_title,
+                            mAlarm.getChannel().getName());
+                }
             }
         }.run();
     }

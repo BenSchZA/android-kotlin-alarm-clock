@@ -26,8 +26,11 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
+import com.roostermornings.android.analytics.FA;
 import com.roostermornings.android.sqlutil.AudioTableController;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
@@ -45,6 +48,8 @@ import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import javax.inject.Inject;
 
 import static com.roostermornings.android.service.BackgroundTaskIntentService.startActionBackgroundDownload;
 
@@ -101,6 +106,8 @@ public class AudioService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
+        BaseApplication baseApplication = new BaseApplication();
+        baseApplication.getRoosterApplicationComponent().inject(this);
         return mBinder;
     }
 
@@ -147,6 +154,9 @@ public class AudioService extends Service {
         //Check if Social and Channel alarm content exists, else startDefaultAlarmTone
         channelAudioItems = audioTableManager.extractAlarmChannelAudioFiles(mThis.alarmChannelUid);
         socialAudioItems = audioTableManager.extractSocialAudioFiles();
+
+        FA.Log(FA.Event.Alarm_activated.class, FA.Event.Alarm_activated.Param.Channel_content_received, channelAudioItems.size());
+        FA.Log(FA.Event.Alarm_activated.class, FA.Event.Alarm_activated.Param.Social_content_received, socialAudioItems.size());
 
         this.alarmCycle = 1;
 
@@ -202,12 +212,12 @@ public class AudioService extends Service {
                         }
                     }
                     if (audioItems.isEmpty()) {
-                        startDefaultAlarmTone();
+                        startDefaultAlarmTone(false);
                         return;
                     }
                 } catch (NullPointerException e){
                     e.printStackTrace();
-                    startDefaultAlarmTone();
+                    startDefaultAlarmTone(true);
                     return;
                 }
                 playAlarmRoosters();
@@ -219,6 +229,9 @@ public class AudioService extends Service {
             if (!"".equals(mThis.alarmChannelUid)
                     && !Constants.ALARM_CHANNEL_DOWNLOAD_FAILED.equals(alarm.getLabel())
                     && channelAudioItems == null) {
+
+                FA.Log(FA.Event.Alarm_activated.class, FA.Event.Alarm_activated.Param.Alarm_content_stream, true);
+
                 if (!InternetHelper.noInternetConnection(this)) {
                     //Download any social or channel audio files
                     startActionBackgroundDownload(mThis);
@@ -230,6 +243,8 @@ public class AudioService extends Service {
                     sendBroadcast(intent);
                 }
             } else {
+                FA.Log(FA.Event.Alarm_activated.class, FA.Event.Alarm_activated.Param.Alarm_content_downloaded, true);
+
                 //Send broadcast message to notify all receivers of download finished
                 Intent intent = new Intent(Constants.ACTION_CHANNEL_DOWNLOAD_FINISHED);
                 sendBroadcast(intent);
@@ -262,7 +277,7 @@ public class AudioService extends Service {
 
         //Check conditions for playing default tone: people must wake up!
         if (audioItems == null || audioItems.isEmpty()) {
-            startDefaultAlarmTone();
+            startDefaultAlarmTone(true);
             return;
         }
 
@@ -344,7 +359,7 @@ public class AudioService extends Service {
                     //Check if at end of queue, else play next file
                     if (audioItems.size() == audioItems.indexOf(audioItem) + 1) {
                         //If an error occurs on the last queue item, assume error on all and start default alarm tone as fail safe
-                        startDefaultAlarmTone();
+                        startDefaultAlarmTone(true);
                     } else{
                         playRooster(getNextAudioItem());
                     }
@@ -366,7 +381,7 @@ public class AudioService extends Service {
             audioItems.remove(audioItem);
 
             //If an error occurs on the last queue item, assume error on all and start default alarm tone as fail safe
-            startDefaultAlarmTone();
+            startDefaultAlarmTone(true);
         }
     }
 
@@ -437,7 +452,25 @@ public class AudioService extends Service {
         }
     }
 
-    public void endService(ServiceConnection conn) {
+    public void dismissAlarm(ServiceConnection conn) {
+        try {
+            FA.Log(FA.Event.Alarm_dismissed.class,
+                    FA.Event.Alarm_dismissed.Param.Alarm_activation_cycle_count,
+                    alarmCycle);
+            FA.Log(FA.Event.Alarm_dismissed.class,
+                    FA.Event.Alarm_dismissed.Param.Alarm_activation_index,
+                    audioItems.indexOf(audioItem) + 1);
+            FA.Log(FA.Event.Alarm_dismissed.class,
+                    FA.Event.Alarm_dismissed.Param.Alarm_activation_total_roosters,
+                    channelAudioItems.size() + socialAudioItems.size());
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+
+        endService(conn);
+    }
+
+    private void endService(ServiceConnection conn) {
         processListenedChannels();
         //Delete record of all listened audio files
         for (DeviceAudioQueueItem audioItem :
@@ -549,10 +582,23 @@ public class AudioService extends Service {
         if (vibrator != null && vibrator.hasVibrator()) {
             vibrator.cancel();
         }
+
+        try {
+            FA.Log(FA.Event.Alarm_snoozed.class,
+                    FA.Event.Alarm_snoozed.Param.Alarm_activation_cycle_count,
+                    alarmCycle);
+            FA.Log(FA.Event.Alarm_snoozed.class,
+                    FA.Event.Alarm_snoozed.Param.Alarm_activation_index,
+                    audioItems.indexOf(audioItem) + 1);
+            FA.Log(FA.Event.Alarm_snoozed.class,
+                    FA.Event.Alarm_snoozed.Param.Alarm_activation_total_roosters,
+                    channelAudioItems.size() + socialAudioItems.size());
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
     }
 
-    private void startDefaultAlarmTone() {
-
+    private void startDefaultAlarmTone(Boolean failure) {
         //Check that another alarm isn't already playing
         if(mediaPlayerRooster != null && mediaPlayerRooster.isPlaying()) return;
         if(mediaPlayerDefault != null && mediaPlayerDefault.isPlaying()) return;
@@ -601,6 +647,12 @@ public class AudioService extends Service {
             e.printStackTrace();
             //If audio fails, vibrate instead - if that fails... well enjoy your sleep.
             startVibrate();
+        }
+
+        if(failure) {
+            FA.Log(FA.Event.Alarm_activated.class, FA.Event.Alarm_activated.Param.Default_alarm_fail_safe, true);
+        } else {
+            FA.Log(FA.Event.Alarm_activated.class, FA.Event.Alarm_activated.Param.Default_alarm, true);
         }
     }
 

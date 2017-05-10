@@ -139,7 +139,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
     @OnClick(R.id.alarm_dismiss)
     protected void onAlarmDismissButtonClicked() {
-        mAudioService.endService(mAudioServiceConnection);
+        mAudioService.dismissAlarm(mAudioServiceConnection);
         if(mBound) unbindService(mAudioServiceConnection);
         mBound = false;
         finish();
@@ -211,7 +211,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
                                 +WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
                                 +WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 
-                        mAudioService.endService(mAudioServiceConnection);
+                        mAudioService.dismissAlarm(mAudioServiceConnection);
                         break;
                     default:
                         break;
