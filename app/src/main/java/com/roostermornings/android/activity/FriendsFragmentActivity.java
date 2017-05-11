@@ -389,9 +389,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
+                    friendsInviteFragment3.executeNodeMyContactsTask();
 
                 } else {
                     //TODO: add button to ask for permission again, display blank fragment with explainer

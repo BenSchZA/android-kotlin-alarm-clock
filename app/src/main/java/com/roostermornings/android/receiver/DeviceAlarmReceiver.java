@@ -12,12 +12,17 @@ import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.content.WakefulBroadcastReceiver;
 
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.util.Constants;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 
 import static android.content.Context.VIBRATOR_SERVICE;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -25,29 +30,29 @@ import static com.facebook.FacebookSdk.getApplicationContext;
 
 public class DeviceAlarmReceiver extends WakefulBroadcastReceiver {
 
-    private Context context;
-    private DeviceAlarmController alarmController;
-    private DeviceAlarmTableManager alarmTableManager;
-    private SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+    @Inject DeviceAlarmController alarmController;
+    @Inject DeviceAlarmTableManager alarmTableManager;
+    @Inject @Named("default") SharedPreferences sharedPreferences;
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        this.context = context;
+        BaseApplication baseApplication = (BaseApplication) getApplicationContext();
+        baseApplication.getRoosterApplicationComponent().inject(this);
 
-        //instantiate new alarm controller
-        //alarm controller provides interface for synchronising pending intents with SQLLite database on device
-        alarmController = new DeviceAlarmController(context);
+        //Reschedule alarm intents for recurring weekly
+        rescheduleAlarmIntents(intent);
+        //Check if vibrator enabled in user settings
+        setVibrate(context);
 
-        //instantiate new alarm table manager
-        //this interfaces directly with database
-        alarmTableManager = new DeviceAlarmTableManager(context);
+        //Start audio service with alarm UID
+        Intent audioServiceIntent = new Intent(context, AudioService.class);
+        audioServiceIntent.putExtra(Constants.EXTRA_ALARMID, intent.getStringExtra(Constants.EXTRA_UID));
+        //Include intent to enable finishing wakeful intent later in AudioService
+        audioServiceIntent.putExtra(Constants.DEVICE_ALARM_RECEIVER_WAKEFUL_INTENT, new Intent(context, DeviceAlarmReceiver.class));
+        context.startService(audioServiceIntent);
+    }
 
-        Intent intentAlarmFullscreen = new Intent(context, DeviceAlarmFullScreenActivity.class);
-        intentAlarmFullscreen.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-
-        //Append alarm UID to intent for alarm activation
-        intentAlarmFullscreen.putExtra(Constants.EXTRA_UID, intent.getStringExtra(Constants.EXTRA_UID));
-
+    private void rescheduleAlarmIntents(Intent intent) {
         //if this is a recurring alarm, set another pending intent for next week same time
         if (intent.getBooleanExtra(Constants.EXTRA_RECURRING, false)) {
             //make record that this alarm has been changed, refresh as necessary
@@ -58,8 +63,9 @@ public class DeviceAlarmReceiver extends WakefulBroadcastReceiver {
             //Set alarm to disabled if fired and not recurring - once all alarms in set are disabled, then toggle enabled in GUI
             alarmTableManager.setAlarmEnabled(intent.getIntExtra(Constants.EXTRA_REQUESTCODE, 0), false);
         }
+    }
 
-
+    private void setVibrate(Context context) {
         if (sharedPreferences.getBoolean(Constants.USER_SETTINGS_VIBRATE, false)) {
             Vibrator vibrator = (Vibrator) context.getSystemService(VIBRATOR_SERVICE);
             long[] vibratePattern = Constants.VIBRATE_PATTERN;
@@ -72,10 +78,5 @@ public class DeviceAlarmReceiver extends WakefulBroadcastReceiver {
                 vibrator.cancel();
             }
         }
-
-        //Include intent to allow completeWakefulIntent from activity
-        intentAlarmFullscreen.putExtra(Constants.DEVICE_ALARM_RECEIVER_WAKEFUL_INTENT, new Intent(context, DeviceAlarmReceiver.class));
-
-        context.startActivity(intentAlarmFullscreen);
     }
 }

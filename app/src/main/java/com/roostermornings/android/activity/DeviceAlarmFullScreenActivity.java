@@ -48,14 +48,12 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     public static final String TAG = DeviceAlarmFullScreenActivity.class.getSimpleName();
 
     AudioService mAudioService;
-    private boolean mBound;
+    private boolean mBound = false;
     private BroadcastReceiver receiver;
-    DeviceAudioQueueItem audioItem;
+    DeviceAudioQueueItem audioItem = new DeviceAudioQueueItem();
 
-    private int alarmCount;
-    private int alarmPosition;
-
-    private String alarmUid;
+    private int alarmCount = 1;
+    private int alarmPosition = 1;
 
     @BindView(R.id.alarm_sender_pic)
     ImageView imgSenderPic;
@@ -99,16 +97,10 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
         setDayNightTheme();
 
-        //Get alarm UID for relating current alarm to channel content
-        alarmUid = getIntent().getStringExtra(Constants.EXTRA_UID);
-
         //Bind to audio service to allow playback and pausing of alarms in background
         Intent intent = new Intent(this, AudioService.class);
-        startService(intent);
         //0 indicates that service should not be restarted
         bindService(intent, mAudioServiceConnection, 0);
-        //Attach broadcast receiver which updates alarm display UI using serializable extra
-        attachAudioServiceBroadCastReceiver();
     }
 
     @Override
@@ -121,7 +113,6 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
-        deviceAlarmController.snoozeAlarm(alarmUid, false);
         mAudioService.snoozeAudioState();
         if(mBound) unbindService(mAudioServiceConnection);
         mBound = false;
@@ -130,7 +121,6 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
     @OnClick(R.id.alarm_snooze_button)
     protected void onAlarmSnoozeButtonClicked() {
-        deviceAlarmController.snoozeAlarm(alarmUid, false);
         mAudioService.snoozeAudioState();
         if(mBound) unbindService(mAudioServiceConnection);
         mBound = false;
@@ -165,9 +155,11 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
             mAudioService = binder.getService();
             mBound = true;
 
+            //Attach broadcast receiver which updates alarm display UI using serializable extra
+            attachAudioServiceBroadCastReceiver();
+
             //Replace image and name with message if no Roosters etc.
             setDefaultDisplayProfile();
-            mAudioService.startAlarmContent(alarmUid);
         }
 
         // Called when the connection with the service disconnects unexpectedly
@@ -204,14 +196,10 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
                         setAlarmUI();
                         break;
                     case Constants.ACTION_ALARMTIMESUP:
-                        Intent wakefulIntent = getIntent().getParcelableExtra(Constants.DEVICE_ALARM_RECEIVER_WAKEFUL_INTENT);
-                        DeviceAlarmReceiver.completeWakefulIntent(wakefulIntent);
-
                         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                                 +WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
                                 +WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
-
-                        mAudioService.dismissAlarm(mAudioServiceConnection);
+                        finish();
                         break;
                     default:
                         break;
@@ -219,16 +207,18 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
             }
         };
         registerReceiver(receiver, intentFilter);
+        //Once receiver is registered, try update UI from service
+        mAudioService.updateAlarmUI(false);
     }
 
     protected void setAlarmUI() {
 
-        if (audioItem.getPicture() != null && audioItem.getPicture().length() != 0) {
+        if (audioItem != null && !audioItem.getPicture().isEmpty()) {
             setProfilePic(audioItem.getPicture());
+            txtSenderName.setText(audioItem.getName());
         } else {
             setDefaultDisplayProfile();
         }
-        txtSenderName.setText(audioItem.getName());
         txtAlarmCount.setText(String.format("%s of %s", alarmPosition, alarmCount));
     }
 

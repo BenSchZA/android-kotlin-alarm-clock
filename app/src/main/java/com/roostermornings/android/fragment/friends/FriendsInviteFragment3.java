@@ -207,7 +207,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
         else  baseActivity.requestPermissionReadContacts();
     }
 
-    private void executeNodeMyContactsTask() {
+    public void executeNodeMyContactsTask() {
         //Check if node response already exists
         if(statusCode == 200) {
             progressBar.setVisibility(View.GONE);
@@ -248,8 +248,10 @@ public class FriendsInviteFragment3 extends BaseFragment {
                 if (statusCode == 200) {
 
                     mUsers = new ArrayList<>();
-                    mUsers.addAll(apiResponse.users.get(0));
-                    while(mUsers.remove(null));
+                    for (Friend user:
+                         apiResponse.users.get(0)) {
+                        if(user != null && !user.getUser_name().isEmpty()) mUsers.add(user);
+                    }
                     //Sort names alphabetically before notifying adapter
                     sortNamesFriends(mUsers);
 
