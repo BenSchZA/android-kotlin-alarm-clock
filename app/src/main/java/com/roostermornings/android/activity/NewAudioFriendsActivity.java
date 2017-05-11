@@ -39,6 +39,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+import javax.inject.Inject;
+
 import butterknife.BindView;
 import butterknife.OnClick;
 import retrofit.Call;
@@ -68,6 +70,8 @@ public class NewAudioFriendsActivity extends BaseActivity {
     @BindView(R.id.new_audio_friendsListView)
     RecyclerView mRecyclerView;
 
+    @Inject FirebaseUser firebaseUser;
+
     @Override
     protected void inject(RoosterApplicationComponent component) {
         component.inject(this);
@@ -82,7 +86,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
         setupToolbar(null, null);
         setDayNightTheme();
 
-        getFirebaseUser().getToken(true)
+        firebaseUser.getToken(true)
                 .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
                     public void onComplete(@NonNull Task<GetTokenResult> task) {
                         if (task.isSuccessful()) {
@@ -167,7 +171,6 @@ public class NewAudioFriendsActivity extends BaseActivity {
             mBound = true;
 
             //Start upload service thread task
-            mUploadService.setBaseActivityListener(NewAudioFriendsActivity.this);
             mUploadService.processAudioFile(firebaseIdToken, localFileString, mFriendsSelected);
         }
 
@@ -197,15 +200,17 @@ public class NewAudioFriendsActivity extends BaseActivity {
         //0 indicates that service should not be restarted
         bindService(intent, mUploadServiceConnection, 0);
 
-        //Switch to home activity - alarms
-        startHomeActivity();
+        //Switch to message status activity
+        Intent roostersSentIntent = new Intent(this, MessageStatusActivity.class);
+        startActivity(roostersSentIntent);
+
+        Intent finishRecordActivityIntent = new Intent(Constants.FINISH_AUDIO_RECORD_ACTIVITY);
+        sendBroadcast(finishRecordActivityIntent);
     }
 
     private void retrieveMyFriends() {
 
         if (!checkInternetConnection()) return;
-
-        FirebaseUser firebaseUser = getFirebaseUser();
 
         if (firebaseUser == null) {
             if(BuildConfig.DEBUG) Log.d(TAG, "User not authenticated on FB!");

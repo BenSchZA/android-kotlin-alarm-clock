@@ -5,7 +5,6 @@
 
 package com.roostermornings.android.adapter;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
@@ -23,10 +22,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
-import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.util.RoosterUtils;
 import com.squareup.picasso.Callback;
@@ -36,8 +33,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import static com.roostermornings.android.BaseApplication.AppContext;
 import static com.roostermornings.android.BaseApplication.mCurrentUser;
 import static com.roostermornings.android.BaseApplication.mDatabase;
@@ -46,7 +41,7 @@ import static com.roostermornings.android.BaseApplication.mDatabase;
  * Created by bscholtz on 08/03/17.
  */
 
-public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsRequestListAdapter.ViewHolder> implements Filterable, FriendsFragmentActivity.FriendsRequestInterface {
+public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsRequestListAdapter.ViewHolder> implements Filterable, FriendsFragmentActivity.FriendsRequestListAdapterInterface {
     private ArrayList<Friend> mDataset;
 
     // Provide a reference to the views for each data item

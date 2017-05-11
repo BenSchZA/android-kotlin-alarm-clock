@@ -40,8 +40,8 @@ public class RoosterFirebaseInstanceIdService extends FirebaseInstanceIdService 
 
         FirebaseAuth auth = FirebaseAuth.getInstance();
         if (auth == null) return;
-
         FirebaseUser user = auth.getCurrentUser();
+
 
         try {
             String deviceToken = FirebaseInstanceId.getInstance().getToken();

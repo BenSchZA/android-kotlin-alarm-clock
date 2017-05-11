@@ -24,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -73,6 +74,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     @Inject DeviceAlarmTableManager deviceAlarmTableManager;
     @Inject AudioTableManager audioTableManager;
     @Inject BaseApplication baseApplication;
+    @Inject FirebaseUser firebaseUser;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -146,7 +148,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
             @Override
             public void run() {
                 DatabaseReference mMyAlarmsReference = FirebaseDatabase.getInstance().getReference()
-                        .child("alarms").child(getFirebaseUser().getUid());
+                        .child("alarms").child(firebaseUser.getUid());
                 //Keep local and Firebase alarm dbs synced
                 mMyAlarmsReference.keepSynced(true);
 

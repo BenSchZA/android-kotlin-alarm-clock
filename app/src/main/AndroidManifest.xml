@@ -112,6 +112,7 @@
             android:name=".activity.NewAudioFriendsActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="Select Recipients"
+            android:noHistory="true"
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeDay.NoActionBar" />
         <activity

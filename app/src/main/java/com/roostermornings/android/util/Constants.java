@@ -11,6 +11,12 @@ public class Constants {
 
     public final static String FACEBOOK_APP_ID = "190341188110134";
 
+    //Broadcast receiver filters
+    public final static String FINISH_AUDIO_RECORD_ACTIVITY = "rooster.android.broadcast.filter.FINISH_AUDIO_RECORD_ACTIVITY";
+
+    //Intent actions
+    public final static String ACTION_CANCEL_SNOOZE = "rooster.android.intent.action.CANCEL_SNOOZE";
+
     //User settings
     //These are used in application_user_settings, but ensure strings are correct
     public final static String USER_SETTINGS_DAY_NIGHT_THEME  = "pref_key_day_night_theme";
@@ -39,9 +45,6 @@ public class Constants {
     public final static String EXTRA_REQUESTCODE = "requestCode";
     // > alarm set flag to remove alarm icon later
     public final static String EXTRA_ALARMSET = "alarmSet";
-
-    //DeviceAlarmController config constants
-    public final static String ACTION_CANCEL_SNOOZE = "android.intent.action.CANCEL_SNOOZE";
 
     //DeviceAlarm extras
     public static final String EXTRA_RECURRING = "extra_recurring";
