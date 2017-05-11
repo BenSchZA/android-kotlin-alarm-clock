@@ -15,12 +15,12 @@ import java.lang.reflect.Type;
 
 public abstract class FA {
 
-    public static NoParam NoParam = new NoParam();
-    private static class NoParam{
-        NoParam NoParam(){
-            return this;
-        }
-    }
+//    public static NoParam NoParam = new NoParam();
+//    private static class NoParam{
+//        NoParam NoParam(){
+//            return this;
+//        }
+//    }
 
     public abstract static class Event {
         public abstract class Alarm_creation_begin {

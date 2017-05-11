@@ -200,9 +200,8 @@ public class AudioTableManager {
         String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_TYPE + " = " + TRUE + " AND " + AudioTableEntry.COLUMN_QUEUE_ID + " = " + "'" + channelQueueId + "'" + ";";
 
         Cursor cursor = db.rawQuery(selectQuery, null);
-        ArrayList<DeviceAudioQueueItem> deviceAudioQueueItems = extractAudioFiles(cursor);
 
-        return deviceAudioQueueItems;
+        return extractAudioFiles(cursor);
     }
 
     public ArrayList<DeviceAudioQueueItem> extractAllChannelAudioFiles() {
@@ -211,9 +210,8 @@ public class AudioTableManager {
         String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_TYPE + " = " + TRUE + ";";
 
         Cursor cursor = db.rawQuery(selectQuery, null);
-        ArrayList<DeviceAudioQueueItem> deviceAudioQueueItems = extractAudioFiles(cursor);
 
-        return deviceAudioQueueItems;
+        return extractAudioFiles(cursor);
     }
 
     public ArrayList<String> extractAllAudioFileNames() {
