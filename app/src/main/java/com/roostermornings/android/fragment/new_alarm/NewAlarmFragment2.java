@@ -270,6 +270,9 @@ public class NewAlarmFragment2 extends BaseFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+
+        inject(((BaseApplication)getActivity().getApplication()).getRoosterApplicationComponent());
+
         if (context instanceof IAlarmSetListener) {
             mListener = (IAlarmSetListener) context;
         } else {

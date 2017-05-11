@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.service.notification.NotificationListenerService;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.BuildConfig;
@@ -22,9 +23,9 @@ import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.sqldata.AudioTableHelper;
 import com.roostermornings.android.sqldata.DeviceAlarmTableHelper;
 
-public class SplashActivity extends BaseActivity {
+import javax.inject.Inject;
 
-    FirebaseUser mFBUser;
+public class SplashActivity extends BaseActivity {
 
     //TODO: implement and check auth
 //    @Override
@@ -45,12 +46,10 @@ public class SplashActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        inject(((BaseApplication)getApplication()).getRoosterApplicationComponent());
 
-        mFBUser = getFirebaseUser();
         //All users go through intro activity upon sign out -
         // this ensures cell number is entered and if old user they are on-boarded, no harm done
-        if (mFBUser == null || mFBUser.getUid() == null) {
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             navigateToActivity(IntroFragmentActivity.class);
         } else {
             //TODO: go to alarm creation for new user?

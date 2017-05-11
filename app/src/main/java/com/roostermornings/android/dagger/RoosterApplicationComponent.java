@@ -72,7 +72,6 @@ public interface RoosterApplicationComponent {
     void inject(SettingsActivity activity);
     void inject(SignInActivity activity);
     void inject(SignupEmailActivity activity);
-    void inject(SplashActivity activity);
 
     void inject(FriendsInviteFragment3 fragment);
     void inject(FriendsMyFragment1 fragment);

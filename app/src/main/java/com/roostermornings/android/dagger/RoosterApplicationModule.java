@@ -8,6 +8,7 @@ package com.roostermornings.android.dagger;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -17,6 +18,8 @@ import dagger.Module;
 import dagger.Provides;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
@@ -66,6 +69,13 @@ public class RoosterApplicationModule {
     @Singleton
     FirebaseAnalytics provideFirebaseAnalytics() {
         return FirebaseAnalytics.getInstance(baseApplication);
+    }
+
+    @Provides
+    @Singleton
+    FirebaseUser provideFirebaseUser() {
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        return mAuth.getCurrentUser();
     }
 
     @Provides

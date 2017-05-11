@@ -5,7 +5,6 @@
 
 package com.roostermornings.android.adapter;
 
-import android.content.Context;
 import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -18,16 +17,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
-import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.util.RoosterUtils;
 
 import java.util.ArrayList;
-
-import javax.inject.Inject;
 
 import static com.roostermornings.android.BaseApplication.AppContext;
 import static com.roostermornings.android.BaseApplication.mCurrentUser;
@@ -37,7 +32,7 @@ import static com.roostermornings.android.BaseApplication.mDatabase;
  * Created by bscholtz on 06/03/17.
  */
 
-public class FriendsInviteListAdapter extends RecyclerView.Adapter<FriendsInviteListAdapter.ViewHolder> implements Filterable, FriendsFragmentActivity.FriendsInviteInterface {
+public class FriendsInviteListAdapter extends RecyclerView.Adapter<FriendsInviteListAdapter.ViewHolder> implements Filterable, FriendsFragmentActivity.FriendsInviteListAdapterInterface {
     private ArrayList<Friend> mDataset;
 
     // Provide a reference to the views for each data item

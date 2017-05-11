@@ -81,6 +81,7 @@ public class FriendsMyFragment1 extends BaseFragment {
     private OnFragmentInteractionListener mListener;
 
     @Inject Context AppContext;
+    @Inject FirebaseUser firebaseUser;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -106,7 +107,6 @@ public class FriendsMyFragment1 extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        inject(((BaseApplication)getActivity().getApplication()).getRoosterApplicationComponent());
 
         //Ensure check for Node complete reset
         statusCode = -1;
@@ -129,7 +129,7 @@ public class FriendsMyFragment1 extends BaseFragment {
             } else {
                 progressBar.setVisibility(View.VISIBLE);
                 mRecyclerView.setVisibility(View.GONE);
-                getFirebaseUser().getToken(true)
+                firebaseUser.getToken(true)
                         .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
                             public void onComplete(@NonNull Task<GetTokenResult> task) {
                                 if (task.isSuccessful()) {
@@ -161,8 +161,6 @@ public class FriendsMyFragment1 extends BaseFragment {
     private void retrieveMyFriends() {
 
         if (!checkInternetConnection()) return;
-
-        FirebaseUser firebaseUser = getFirebaseUser();
 
         if (firebaseUser == null) {
             if(BuildConfig.DEBUG) Log.d(TAG, "User not authenticated on FB!");
@@ -211,7 +209,7 @@ public class FriendsMyFragment1 extends BaseFragment {
 //    //Retrieve list of friends from Firebase for current user
 //    private void getFriends() {
 //        mFriendsReference = mDatabase
-//                .child("users").child(getFirebaseUser().getUid()).child("friends");
+//                .child("users").child(firebaseUser.getUid()).child("friends");
 //        mFriendsReference.keepSynced(true);
 //
 //        ChildEventListener friendsListener = new ChildEventListener() {
@@ -266,6 +264,8 @@ public class FriendsMyFragment1 extends BaseFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+
+        inject(((BaseApplication)getActivity().getApplication()).getRoosterApplicationComponent());
 
         getDatabaseReference();
 

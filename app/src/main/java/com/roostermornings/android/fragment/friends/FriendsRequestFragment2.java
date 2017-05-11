@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -59,6 +60,7 @@ public class FriendsRequestFragment2 extends BaseFragment {
     private OnFragmentInteractionListener mListener;
 
     @Inject Context AppContext;
+    @Inject FirebaseUser firebaseUser;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -84,7 +86,6 @@ public class FriendsRequestFragment2 extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        inject(((BaseApplication)getActivity().getApplication()).getRoosterApplicationComponent());
 
         if (getArguments() != null) {
         }
@@ -111,7 +112,7 @@ public class FriendsRequestFragment2 extends BaseFragment {
 
     private void getRequests() {
         mRequestsReference = mDatabase
-                .child("friend_requests_received").child(getFirebaseUser().getUid());
+                .child("friend_requests_received").child(firebaseUser.getUid());
 
         ValueEventListener friendsListener = new ValueEventListener() {
             @Override
@@ -144,6 +145,8 @@ public class FriendsRequestFragment2 extends BaseFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+
+        inject(((BaseApplication)getActivity().getApplication()).getRoosterApplicationComponent());
 
         getDatabaseReference();
         getRequests();
