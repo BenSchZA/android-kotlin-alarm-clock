@@ -45,6 +45,8 @@ import java.io.FilenameFilter;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+
 import retrofit.Call;
 import retrofit.Callback;
 import retrofit.Response;
@@ -67,19 +69,7 @@ public class UploadService extends Service {
     ArrayList<User> friendsList = new ArrayList<>();
     String firebaseIdToken;
 
-    private BaseActivityListener baseActivityListener;
-
-    public void setBaseActivityListener(Activity activity) {
-        baseActivityListener = (BaseActivityListener) activity;
-    }
-
-    public interface BaseActivityListener {
-        FirebaseUser getFirebaseUser();
-    }
-
-    public FirebaseUser getFirebaseUser() {
-        return baseActivityListener.getFirebaseUser();
-    }
+    @Inject FirebaseUser firebaseUser;
 
     public UploadService() {
     }
@@ -102,6 +92,9 @@ public class UploadService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        BaseApplication baseApplication = (BaseApplication) getApplication();
+        baseApplication.getRoosterApplicationComponent().inject(this);
+
         foregroundNotification("Audio upload in progress");
 
         // Create a new background thread for processing messages or runnables sequentially
@@ -179,7 +172,7 @@ public class UploadService extends Service {
     private void sendRoosterToUser(User friend, String firebaseStorageURL) {
 
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-        FirebaseUser currentUser = getFirebaseUser();
+        FirebaseUser currentUser = firebaseUser;
         //get reference to Firebase database
         DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
 

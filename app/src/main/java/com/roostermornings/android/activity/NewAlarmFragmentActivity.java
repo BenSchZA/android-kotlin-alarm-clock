@@ -21,6 +21,7 @@ import android.widget.TextView;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.Theme;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
@@ -64,6 +65,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
 
     @Inject DeviceAlarmController deviceAlarmController;
     @Inject DeviceAlarmTableManager deviceAlarmTableManager;
+    @Inject FirebaseUser firebaseUser;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -292,10 +294,10 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
 
             switch (position) {
                 case 0:
-                    mFragment1 = NewAlarmFragment1.newInstance(getFirebaseUser().getUid());
+                    mFragment1 = NewAlarmFragment1.newInstance(firebaseUser.getUid());
                     return mFragment1;
                 case 1:
-                    mFragment2 = NewAlarmFragment2.newInstance(getFirebaseUser().getUid());
+                    mFragment2 = NewAlarmFragment2.newInstance(firebaseUser.getUid());
                     return mFragment2;
             }
 

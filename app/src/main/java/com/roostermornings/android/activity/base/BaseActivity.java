@@ -54,6 +54,7 @@ import com.roostermornings.android.activity.SplashActivity;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.fragment.base.BaseFragment;
+import com.roostermornings.android.fragment.friends.FriendsInviteFragment3;
 import com.roostermornings.android.node_api.IHTTPClient;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.service.UploadService;
@@ -71,7 +72,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Optional;
 
-public abstract class BaseActivity extends AppCompatActivity implements Validator.ValidationListener, BaseFragment.BaseActivityListener, UploadService.BaseActivityListener {
+public abstract class BaseActivity extends AppCompatActivity implements Validator.ValidationListener, BaseFragment.BaseActivityListener {
 
     private Dialog progressDialog;
     public FirebaseAuth mAuth;
@@ -202,12 +203,6 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
         BaseApplication baseApplication = (BaseApplication) getApplication();
 
         return baseApplication.getAPIService();
-    }
-
-    @Override
-    public FirebaseUser getFirebaseUser() {
-        if (mAuth == null) mAuth = FirebaseAuth.getInstance();
-        return mAuth.getCurrentUser();
     }
 
     @Override
@@ -364,35 +359,6 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
             }
         }
         return null;
-    }
-
-    public void requestPermissionReadContacts() {
-        // Here, thisActivity is the current activity
-        if (ContextCompat.checkSelfPermission(this,
-                android.Manifest.permission.READ_CONTACTS)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    android.Manifest.permission.READ_CONTACTS)) {
-
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-
-            } else {
-
-                // No explanation needed, we can request the permission.
-
-                ActivityCompat.requestPermissions(this,
-                        new String[]{android.Manifest.permission.READ_CONTACTS},
-                        Constants.MY_PERMISSIONS_REQUEST_READ_CONTACTS);
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
-            }
-        }
     }
 
     public void requestPermissionIgnoreBatteryOptimization(Context context) {
