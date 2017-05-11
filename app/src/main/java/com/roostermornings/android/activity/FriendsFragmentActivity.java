@@ -13,6 +13,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -32,6 +33,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.roostermornings.android.BaseApplication;
@@ -40,6 +42,7 @@ import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.User;
+import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.fragment.friends.FriendsInviteFragment3;
 import com.roostermornings.android.fragment.friends.FriendsMyFragment1;
 import com.roostermornings.android.fragment.friends.FriendsRequestFragment2;
@@ -54,13 +57,11 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import butterknife.BindView;
-import butterknife.OnClick;
 
 //Responsible for managing friends: 1) my friends, 2) addable friends, 3) friend invites
 public class FriendsFragmentActivity extends BaseActivity implements
         FriendsMyFragment1.OnFragmentInteractionListener,
-        FriendsRequestFragment2.OnFragmentInteractionListener,
-        FriendsInviteFragment3.OnFragmentInteractionListener {
+        FriendsRequestFragment2.OnFragmentInteractionListener {
 
     public static final String TAG = FriendsFragmentActivity.class.getSimpleName();
     @BindView(R.id.toolbar)
@@ -73,6 +74,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
     ImageButton buttonMyFriends;
     @BindView(R.id.button_bar)
     LinearLayout buttonBarLayout;
+
     /**
      * The {@link ViewPager} that will host the section contents.
      */
@@ -100,6 +102,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
     FriendsInviteFragment3 friendsInviteFragment3;
 
     @Inject BaseApplication baseApplication;
+    @Inject FirebaseUser firebaseUser;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -110,12 +113,12 @@ public class FriendsFragmentActivity extends BaseActivity implements
 
     }
 
-    public interface FriendsInviteInterface {
+    public interface FriendsInviteListAdapterInterface {
         //Send invite to Rooster user from contact list
         void inviteUser(Friend inviteFriend);
     }
 
-    public interface FriendsRequestInterface {
+    public interface FriendsRequestListAdapterInterface {
         //Accept friend request and update Firebase DB
         void acceptFriendRequest(Friend acceptFriend);
         void rejectFriendRequest(Friend rejectFriend);
@@ -135,13 +138,13 @@ public class FriendsFragmentActivity extends BaseActivity implements
 
         //Keep local and Firebase alarm dbs synced, and enable offline persistence
         mFriendRequestsReceivedReference = FirebaseDatabase.getInstance().getReference()
-                .child("friend_requests_received").child(getFirebaseUser().getUid());
+                .child("friend_requests_received").child(firebaseUser.getUid());
 
         mFriendRequestsSentReference = FirebaseDatabase.getInstance().getReference()
-                .child("friend_requests_sent").child(getFirebaseUser().getUid());
+                .child("friend_requests_sent").child(firebaseUser.getUid());
 
         mCurrentUserReference = FirebaseDatabase.getInstance().getReference()
-                .child("users").child(getFirebaseUser().getUid());
+                .child("users").child(firebaseUser.getUid());
 
         mFriendRequestsReceivedReference.keepSynced(true);
         mFriendRequestsSentReference.keepSynced(true);
@@ -383,18 +386,15 @@ public class FriendsFragmentActivity extends BaseActivity implements
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+                                           @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
             case Constants.MY_PERMISSIONS_REQUEST_READ_CONTACTS: {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    friendsInviteFragment3.executeNodeMyContactsTask();
-
+                    friendsInviteFragment3.requestGetContacts();
                 } else {
-                    //TODO: add button to ask for permission again, display blank fragment with explainer
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
+                    friendsInviteFragment3.displayRequestPermissionExplainer(true);
                 }
                 return;
             }

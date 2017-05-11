@@ -5,7 +5,10 @@
 
 package com.roostermornings.android.activity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.media.MediaMetadataRetriever;
@@ -47,8 +50,8 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class NewAudioRecordActivity extends BaseActivity {
 
-    private long startTime;
-    private long countDownTime;
+    private long startTime = 0;
+    private long countDownTime = 0;
     //NB: this refresh rate has a direct influence on performance as well as tuning of record time/amplitude calculations
     private final int REFRESH_RATE = 100;
     private final int MAX_RECORDING_TIME = 60000;
@@ -58,18 +61,18 @@ public class NewAudioRecordActivity extends BaseActivity {
     //Ambient music: 300
     private final int AUDIO_MIN_AMPLITUDE = 250;
     private final int MIN_CUMULATIVE_TIME = 5000;
-    private int maxAmplitude;
-    private double averageAmplitude;
-    private long timeSinceAcceptableAmplitudeStart;
-    private long cumulativeAcceptableAmplitudeTime;
-    private long timeOfUnsuccessfulAmplitude;
-    private long timeOfSuccessfulAmplitude;
+    private int maxAmplitude = 0;
+    private double averageAmplitude = 0;
+    private long timeSinceAcceptableAmplitudeStart = 0;
+    private long cumulativeAcceptableAmplitudeTime = 0;
+    private long timeOfUnsuccessfulAmplitude = 0;
+    private long timeOfSuccessfulAmplitude = 0;
 
     private final Handler mHandler = new Handler();
 
-    private String mAudioSavePathInDevice = null;
-    private MediaRecorder mediaRecorder;
-    private MediaPlayer mediaPlayer;
+    private String mAudioSavePathInDevice = "";
+    private MediaRecorder mediaRecorder = new MediaRecorder();
+    private MediaPlayer mediaPlayer = new MediaPlayer();
     private int audioLength = 0;
 
     private String randomAudioFileName = "";
@@ -116,6 +119,17 @@ public class NewAudioRecordActivity extends BaseActivity {
         setButtonBarSelection();
 
         setNewAudioStatus(NEW_AUDIO_READY_RECORD);
+
+        //Finish this activity when audio process complete - this ensures recreated on backstack
+        registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if(action.equals(Constants.FINISH_AUDIO_RECORD_ACTIVITY)) {
+                    finish();
+                }
+            }
+        }, new IntentFilter(Constants.FINISH_AUDIO_RECORD_ACTIVITY));
     }
 
     @Override
@@ -323,8 +337,12 @@ public class NewAudioRecordActivity extends BaseActivity {
             mediaPlayer.release();
             mediaRecorderReady();
         }
-        File file = new File(mAudioSavePathInDevice);
-        return file.delete();
+        if(!mAudioSavePathInDevice.isEmpty()) {
+            File file = new File(mAudioSavePathInDevice);
+            return file.delete();
+        } else {
+            return false;
+        }
     }
 
     @OnClick(R.id.new_audio_listen)
@@ -333,7 +351,6 @@ public class NewAudioRecordActivity extends BaseActivity {
         try {
             switch (newAudioStatus) {
                 case NEW_AUDIO_READY_LISTEN:
-
                     mediaPlayer = new MediaPlayer();
                     try {
                         mediaPlayer.setDataSource(mAudioSavePathInDevice);
@@ -503,10 +520,11 @@ public class NewAudioRecordActivity extends BaseActivity {
                             PackageManager.PERMISSION_GRANTED;
 
                     if (StoragePermission && RecordPermission) {
-                        setNewAudioStatus(NEW_AUDIO_READY_LISTEN);
+                        setNewAudioStatus(NEW_AUDIO_RECORDING);
                         startStopAudioRecording();
                     } else {
                         Toast.makeText(NewAudioRecordActivity.this, "Permission Denied", Toast.LENGTH_LONG).show();
+                        setNewAudioStatus(NEW_AUDIO_READY_RECORD);
                     }
                 }
                 break;

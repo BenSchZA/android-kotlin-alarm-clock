@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -38,6 +40,7 @@ import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.LocalContacts;
 import com.roostermornings.android.domain.NodeUsers;
 import com.roostermornings.android.fragment.base.BaseFragment;
+import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.MyContactsController;
 
 import java.util.ArrayList;
@@ -83,9 +86,13 @@ public class FriendsInviteFragment3 extends BaseFragment {
     @BindView(R.id.share_button)
     Button shareButton;
 
+    @BindView(R.id.retrieve_contacts_permission_text)
+    TextView retrieveContactsPermissionText;
+
     private OnFragmentInteractionListener mListener;
 
     @Inject Context AppContext;
+    @Inject FirebaseUser firebaseUser;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -136,18 +143,6 @@ public class FriendsInviteFragment3 extends BaseFragment {
         mAdapter = new FriendsInviteListAdapter(mUsers);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(AppContext));
         mRecyclerView.setAdapter(mAdapter);
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
     }
 
     @Override
@@ -204,10 +199,44 @@ public class FriendsInviteFragment3 extends BaseFragment {
         if (ContextCompat.checkSelfPermission(AppContext,
                 android.Manifest.permission.READ_CONTACTS)
                 == PackageManager.PERMISSION_GRANTED) executeNodeMyContactsTask();
-        else  baseActivity.requestPermissionReadContacts();
+        else  {
+            requestPermissionReadContacts();
+        }
     }
 
-    public void executeNodeMyContactsTask() {
+    private void requestPermissionReadContacts() {
+        // Here, thisActivity is the current activity
+        if (ContextCompat.checkSelfPermission(getActivity(),
+                android.Manifest.permission.READ_CONTACTS)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+                    android.Manifest.permission.READ_CONTACTS)) {
+
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+
+                displayRequestPermissionExplainer(true);
+
+            } else {
+
+                // No explanation needed, we can request the permission.
+
+                ActivityCompat.requestPermissions(getActivity(),
+                        new String[]{android.Manifest.permission.READ_CONTACTS},
+                        Constants.MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+                displayRequestPermissionExplainer(false);
+            }
+        }
+    }
+
+    private void executeNodeMyContactsTask() {
         //Check if node response already exists
         if(statusCode == 200) {
             progressBar.setVisibility(View.GONE);
@@ -218,7 +247,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
             } else {
                 progressBar.setVisibility(View.VISIBLE);
                 mRecyclerView.setVisibility(View.GONE);
-                getFirebaseUser().getToken(true)
+                firebaseUser.getToken(true)
                         .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
                             public void onComplete(@NonNull Task<GetTokenResult> task) {
                                 if (task.isSuccessful()) {
@@ -272,5 +301,22 @@ public class FriendsInviteFragment3 extends BaseFragment {
                 progressBar.setVisibility(View.GONE);
             }
         });
+    }
+
+    @OnClick(R.id.retrieve_contacts_permission_text)
+    public void retrieveContactsPermissionRetry() {
+        ActivityCompat.requestPermissions(getActivity(),
+                new String[]{android.Manifest.permission.READ_CONTACTS},
+                Constants.MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+    }
+
+    public void displayRequestPermissionExplainer(Boolean display) {
+        if(display) {
+            retrieveContactsPermissionText.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.GONE);
+        } else {
+            retrieveContactsPermissionText.setVisibility(View.GONE);
+            progressBar.setVisibility(View.GONE);
+        }
     }
 }

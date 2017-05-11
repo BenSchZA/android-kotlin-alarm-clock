@@ -62,6 +62,7 @@
     <string name="invite_contacts">Invite contacts who have Rooster</string>
     <string name="friends_search_title">Search...</string>
     <string name="search_hint_friends">Search...</string>
+    <string name="retrieve_contacts_permission">We need your permission to retrieve addable contacts, click me to try again.</string>
 
     <string name="message_status_activity_title">Sent Roosters</string>
     <string name="status_sent">Sent</string>

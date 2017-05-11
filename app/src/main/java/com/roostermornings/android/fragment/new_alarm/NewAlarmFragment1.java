@@ -130,7 +130,6 @@ public class NewAlarmFragment1 extends BaseFragment{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        inject(((BaseApplication)getActivity().getApplication()).getRoosterApplicationComponent());
 
         try {
             newAlarmInterface = (NewAlarmInterface) getActivity();
@@ -171,6 +170,9 @@ public class NewAlarmFragment1 extends BaseFragment{
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+
+        inject(((BaseApplication)getActivity().getApplication()).getRoosterApplicationComponent());
+
         if (context instanceof IAlarmSetListener) {
             mListener = (IAlarmSetListener) context;
         } else {

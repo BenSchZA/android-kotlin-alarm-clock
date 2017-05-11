@@ -16,7 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.mobsandgeeks.saripaar.ValidationError;
@@ -57,7 +56,6 @@ public abstract class BaseFragment extends Fragment implements Validator.Validat
         void onValidationFailed(List<ValidationError> errors);
         boolean checkInternetConnection();
         IHTTPClient apiService();
-        FirebaseUser getFirebaseUser();
     }
 
     public boolean checkInternetConnection() {
@@ -66,10 +64,6 @@ public abstract class BaseFragment extends Fragment implements Validator.Validat
 
     public IHTTPClient apiService() {
         return baseActivityListener.apiService();
-    }
-
-    public FirebaseUser getFirebaseUser() {
-        return baseActivityListener.getFirebaseUser();
     }
 
     @Override
