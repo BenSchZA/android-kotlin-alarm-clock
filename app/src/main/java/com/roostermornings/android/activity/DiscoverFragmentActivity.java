@@ -192,11 +192,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
             mediaPlayer.release();
         }
         if(oneInstanceTaskFuture != null) oneInstanceTaskFuture.cancel(true);
-        for (ChannelRooster rooster :
-                channelRoosters) {
-            rooster.setDownloading(false);
-            rooster.setPlaying(false);
-        }
+        clearChannelRoosterMediaChecks();
         mAdapter.notifyDataSetChanged();
     }
 
@@ -359,11 +355,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                             public void onPrepared(MediaPlayer mp) {
                                 mediaPlayer.start();
 
-                                for (ChannelRooster rooster :
-                                        channelRoosters) {
-                                    rooster.setDownloading(false);
-                                    rooster.setPlaying(false);
-                                }
+                                clearChannelRoosterMediaChecks();
                                 channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
                                 channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(true);
                                 notifyDataSetChangedFromUIThread();
@@ -408,19 +400,29 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
         //Check if playing or not playing and handle threading + mediaplayer appropriately
         if(channelRooster.isPlaying()) {
             try {
-                mediaPlayer.release();
+                mediaPlayer.pause();
             } catch (IllegalStateException e) {
                 e.printStackTrace();
             }
             //If a previous task exists, kill it
             if(oneInstanceTaskFuture != null) oneInstanceTaskFuture.cancel(true);
-            //Clear all audio load spinners and set to not playing
-            for (ChannelRooster rooster :
-                    channelRoosters) {
-                rooster.setDownloading(false);
-                rooster.setPlaying(false);
-            }
+            clearChannelRoosterMediaChecks();
+            channelRooster.setPaused(true);
             mAdapter.notifyDataSetChanged();
+        } else if(channelRooster.isPaused() && mediaPlayer.getCurrentPosition() > 0) {
+            clearChannelRoosterMediaChecks();
+            try {
+                mediaPlayer.seekTo(mediaPlayer.getCurrentPosition());
+                mediaPlayer.start();
+                channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
+                channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(true);
+                mAdapter.notifyDataSetChanged();
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+                channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
+                channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
+                mAdapter.notifyDataSetChanged();
+            }
         } else {
             try {
                 mediaPlayer.release();
@@ -429,15 +431,20 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
             }
             //If a previous task exists, kill it
             if(oneInstanceTaskFuture != null) oneInstanceTaskFuture.cancel(true);
-            //Clear all audio load spinners and set to not playing
-            for (ChannelRooster rooster :
-                    channelRoosters) {
-                rooster.setDownloading(false);
-                rooster.setPlaying(false);
-            }
+            clearChannelRoosterMediaChecks();
             mAdapter.notifyDataSetChanged();
             //Start a new task thread
             oneInstanceTaskFuture = executor.submit(new oneInstanceTask());
+        }
+    }
+
+    private void clearChannelRoosterMediaChecks() {
+        //Clear all audio load spinners and set to not playing
+        for (ChannelRooster rooster :
+                channelRoosters) {
+            rooster.setDownloading(false);
+            rooster.setPlaying(false);
+            rooster.setPaused(false);
         }
     }
 }
