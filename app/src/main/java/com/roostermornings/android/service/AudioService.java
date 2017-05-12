@@ -320,11 +320,13 @@ public class AudioService extends Service {
             try {
                 mediaPlayerRooster.seekTo(currentPositionRooster);
                 mediaPlayerRooster.start();
-                this.audioItem = audioItems.get(0);
+                //Slowly increase volume from low to current volume
+                softStartAudio();
                 //Send broadcast to DeviceAlarmFullScreenActivity with UI data
                 updateAlarmUI(false);
             } catch(NullPointerException e){
                 e.printStackTrace();
+                playRooster(audioItems.get(0));
             }
         }
     }

@@ -10,27 +10,29 @@ import com.google.firebase.database.IgnoreExtraProperties;
 
 @IgnoreExtraProperties
 public class ChannelRooster {
-    private String name;
-    private boolean active;
-    private String audio_file_name;
-    private String audio_file_url;
-    private String channel_uid;
-    private String description;
-    private String photo;
-    private int rooster_cycle_iteration;
-    private long upload_date;
+    private String name = "";
+    private boolean active = false;
+    private String audio_file_name = "";
+    private String audio_file_url = "";
+    private String channel_uid = "";
+    private String description = "";
+    private String photo = "";
+    private int rooster_cycle_iteration = -1;
+    private long upload_date = -1;
 
     @Exclude
     private Boolean selected = false;
     @Exclude
-    private String channel_description;
+    private String channel_description = "";
     @Exclude
-    private String channel_photo;
+    private String channel_photo = "";
 
     @Exclude
     private boolean downloading = false;
     @Exclude
     private boolean playing = false;
+    @Exclude
+    private boolean paused = false;
 
     // Required default constructor for Firebase object mapping
     @SuppressWarnings("unused")
@@ -47,6 +49,16 @@ public class ChannelRooster {
         this.photo = photo;
         this.rooster_cycle_iteration = rooster_cycle_iteration;
         this.upload_date = upload_date;
+    }
+
+    @Exclude
+    public boolean isPaused() {
+        return paused;
+    }
+
+    @Exclude
+    public void setPaused(boolean paused) {
+        this.paused = paused;
     }
 
     @Exclude
