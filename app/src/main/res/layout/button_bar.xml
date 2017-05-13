@@ -1,31 +1,20 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Rooster Mornings Android.
   ~ Copyright (c)  2017 Roosta Media. All rights reserved.
   -->
 
-<!--<android.support.design.widget.BottomNavigationView android:id="@+id/bottom_navigation"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_alignParentBottom="true"-->
-    <!--app:itemBackground="@color/rooster_light_blue"-->
-    <!--app:itemIconTint="@color/white"-->
-    <!--app:itemTextColor="@color/white"-->
-    <!--app:menu="@menu/menu_bottom_navigation"-->
-    <!--xmlns:android="http://schemas.android.com/apk/res/android"-->
-    <!--xmlns:app="http://schemas.android.com/apk/res-auto" />-->
+<!--<android.support.design.widget.BottomNavigationView android:id="@+id/bottom_navigation"--><!--android:layout_width="match_parent"--><!--android:layout_height="wrap_content"--><!--android:layout_alignParentBottom="true"--><!--app:itemBackground="@color/rooster_light_blue"--><!--app:itemIconTint="@color/white"--><!--app:itemTextColor="@color/white"--><!--app:menu="@menu/menu_bottom_navigation"--><!--xmlns:android="http://schemas.android.com/apk/res/android"--><!--xmlns:app="http://schemas.android.com/apk/res-auto" />-->
 
-    <LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/button_bar"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:layout_centerHorizontal="true"
     android:layout_gravity="bottom"
     android:background="@color/grey_transparent"
-    android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:layout_alignParentBottom="true"
-    android:layout_centerHorizontal="true" >
+    android:orientation="horizontal">
 
     <FrameLayout
         android:layout_width="wrap_content"
@@ -40,12 +29,12 @@
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:layout_margin="@dimen/spacing_small"
-            android:src="@drawable/rooster_button_bar_add_alarm"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
+            android:contentDescription="My alarms"
             android:padding="@dimen/spacing_normal_large"
             android:soundEffectsEnabled="true"
-            android:contentDescription="My alarms"/>
+            android:src="@drawable/rooster_button_bar_add_alarm" />
 
     </FrameLayout>
 
@@ -61,12 +50,12 @@
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:layout_margin="@dimen/spacing_small"
-            android:src="@drawable/rooster_button_bar_chat"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
+            android:contentDescription="My social roosters"
             android:padding="@dimen/spacing_normal_large"
             android:soundEffectsEnabled="true"
-            android:contentDescription="My social roosters"/>
+            android:src="@drawable/rooster_button_bar_chat" />
 
     </FrameLayout>
 
@@ -82,12 +71,12 @@
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:layout_margin="@dimen/spacing_small"
-            android:src="@drawable/rooster_button_bar_record_audio"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
+            android:contentDescription="Record audio"
             android:padding="@dimen/spacing_normal_large"
             android:soundEffectsEnabled="true"
-            android:contentDescription="Record audio"/>
+            android:src="@drawable/rooster_button_bar_record_audio" />
 
     </FrameLayout>
 
@@ -103,12 +92,12 @@
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:layout_margin="@dimen/spacing_small"
-            android:src="@drawable/rooster_button_bar_discover"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
+            android:contentDescription="Discover"
             android:padding="@dimen/spacing_normal_large"
             android:soundEffectsEnabled="true"
-            android:contentDescription="Discover"/>
+            android:src="@drawable/rooster_button_bar_discover" />
 
     </FrameLayout>
 
@@ -130,20 +119,20 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="@drawable/rooster_button_bar_friends"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
+                android:contentDescription="My friends"
                 android:padding="@dimen/spacing_normal_large"
                 android:soundEffectsEnabled="true"
-                android:contentDescription="My friends"/>
+                android:src="@drawable/rooster_button_bar_friends" />
 
             <ImageView
                 android:id="@+id/notification"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/counter_circle_yellow"
                 android:layout_alignRight="@id/home_friends"
                 android:layout_alignTop="@id/home_friends"
+                android:background="@drawable/counter_circle_yellow"
                 android:visibility="gone" />
 
         </RelativeLayout>

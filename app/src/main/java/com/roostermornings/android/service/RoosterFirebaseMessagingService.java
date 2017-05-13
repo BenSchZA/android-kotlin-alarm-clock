@@ -7,20 +7,29 @@ package com.roostermornings.android.service;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Bundle;
+import android.support.v4.app.BundleCompat;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
+import com.roostermornings.android.sync.DownloadSyncAdapter;
 
 import org.json.JSONObject;
+
+import static com.roostermornings.android.BaseApplication.mAccount;
+import static com.roostermornings.android.util.Constants.ACCOUNT;
+import static com.roostermornings.android.util.Constants.AUTHORITY;
 
 public class RoosterFirebaseMessagingService extends FirebaseMessagingService {
 
@@ -44,6 +53,14 @@ public class RoosterFirebaseMessagingService extends FirebaseMessagingService {
         // messages. For more see: https://firebase.google.com/docs/cloud-messaging/concept-options
         // [END_EXCLUDE]
 
+        //Retrieve new social rooster data
+        /*
+         * Ask the framework to run your sync adapter.
+         * To maintain backward compatibility, assume that
+         * changeUri is null.
+         */
+        ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
+
         // TODO(developer): Handle FCM messages here.
         // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
         Log.d(TAG, "From: " + remoteMessage.getFrom());
@@ -62,9 +79,6 @@ public class RoosterFirebaseMessagingService extends FirebaseMessagingService {
             Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
             sendNotification(remoteMessage.getNotification().getBody());
         }
-
-        // Also if you intend on generating your own notifications as a result of a received FCM
-        // message, here is where that should be initiated. See sendNotification method below.
     }
 // [END receive_message]
 

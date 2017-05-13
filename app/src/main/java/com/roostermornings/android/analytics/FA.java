@@ -13,14 +13,9 @@ import com.roostermornings.android.activity.IntroFragmentActivity;
 
 import java.lang.reflect.Type;
 
-public abstract class FA {
 
-//    public static NoParam NoParam = new NoParam();
-//    private static class NoParam{
-//        NoParam NoParam(){
-//            return this;
-//        }
-//    }
+//FA stands for Firebase Analytics - defines relationship between Event and Param, handles analytic logging in background thread
+public abstract class FA {
 
     public abstract static class Event {
         public abstract class Alarm_creation_begin {
@@ -30,10 +25,8 @@ public abstract class FA {
         public abstract class Alarm_creation_completed {
             public abstract class Param {
                 //Bool
-                public final static String No_rooster_content = "No_rooster_content";
-                public final static String Social_rooster_content = "Social_rooster_content";
-                public final static String Channel_rooster_content = "Channel_rooster_content";
-                public final static String Social_channel_rooster_content = "Social_channel_rooster_content";
+                public final static String Social_roosters_enabled = "Social_roosters_enabled";
+                public final static String Channel_selected = "Channel_selected";
             }
         }
         public abstract class Channel_selected {
@@ -45,13 +38,7 @@ public abstract class FA {
         public abstract class Alarm_activated {
             public abstract class Param {
                 //Bool
-                public final static String Default_alarm_fail_safe = "Default_alarm_fail_safe";
-                //Bool
-                public final static String Alarm_content_stream = "Alarm_content_stream";
-                //Bool
-                public final static String Alarm_content_downloaded = "Alarm_content_downloaded";
-                //Bool
-                public final static String Default_alarm = "Default_alarm";
+                public final static String Data_loaded = "Data_loaded";
                 //Number
                 public final static String Social_content_received = "Social_content_received";
                 //Number
@@ -82,6 +69,8 @@ public abstract class FA {
         }
         public abstract class Social_rooster_recorded {
         }
+        public abstract class Social_rooster_recording_error {
+        }
         public abstract class Social_rooster_recording_deleted {
         }
         public abstract class Social_rooster_sent {
@@ -96,49 +85,58 @@ public abstract class FA {
                 public final static String Download_link_share_medium = "Download_link_share_medium";
             }
         }
-        public abstract class Channel_previewed extends Channel_selected {
+        public abstract class Channel_info_viewed extends Channel_selected {
         }
-        public abstract class Discover_channel_audio_played extends Channel_selected {
+        public abstract class Explore_channel_rooster_played extends Channel_selected {
         }
         public abstract class Default_alarm_play {
+            public abstract class Param {
+                //Bool
+                public final static String Fatal_failure = "Fatal_failure";
+                //Bool
+                public final static String Attempt_to_play = "Attempt_to_play";
+            }
+        }
+        public abstract class Memory_warning {
+            public abstract class Param {
+                //Long
+                public final static String Memory_in_use = "Memory_in_use";
+            }
         }
     }
     
-    public static Boolean Log(Class<?> Event, String Param, Object entry) {
-        Bundle bundle = new Bundle();
-        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(BaseApplication.AppContext);
+    public static void Log(final Class<?> Event, final String Param, final Object entry) {
+        new Thread() {
+            @Override
+            public void run() {
 
-        String eventString;
+                Bundle bundle = new Bundle();
+                FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(BaseApplication.AppContext);
 
-        if(Event == null) {
-            throw new NullPointerException();
-        } else {
-            eventString = Event.toString();
-            int eventStringPosition = eventString.lastIndexOf("$") + 1;
-            eventString = eventString.substring(eventStringPosition);
-        }
+                String eventString;
 
-        if(Param == null || entry == null) {
-            firebaseAnalytics.logEvent(eventString, null);
-            return true;
-        }
-        else if(entry.getClass().isInstance(String.class)) {
-            bundle.putString(Param, (String) entry);
-            firebaseAnalytics.logEvent(eventString, bundle);
-            return true;
-        }
-        else if(entry.getClass().isInstance(Integer.class)) {
-            bundle.putInt(Param, (Integer) entry);
-            firebaseAnalytics.logEvent(eventString, bundle);
-            return true;
-        }
-        else if (entry.getClass().isInstance(Boolean.class)) {
-            bundle.putBoolean(Param, (Boolean) entry);
-            firebaseAnalytics.logEvent(eventString, bundle);
-            return true;
-        }
-        else {
-            return false;
-        }
+                if (Event == null) {
+                    throw new NullPointerException();
+                } else {
+                    eventString = Event.toString();
+                    int eventStringPosition = eventString.lastIndexOf("$") + 1;
+                    eventString = eventString.substring(eventStringPosition);
+                }
+
+                if (Param == null || entry == null) {
+                    firebaseAnalytics.logEvent(eventString, null);
+                } else if (entry.getClass().isInstance(String.class)) {
+                    bundle.putString(Param, (String) entry);
+                    firebaseAnalytics.logEvent(eventString, bundle);
+                } else if (entry.getClass().isInstance(Integer.class)) {
+                    bundle.putInt(Param, (Integer) entry);
+                    firebaseAnalytics.logEvent(eventString, bundle);
+                } else if (entry.getClass().isInstance(Boolean.class)) {
+                    bundle.putBoolean(Param, (Boolean) entry);
+                    firebaseAnalytics.logEvent(eventString, bundle);
+                } else {
+                }
+            }
+        }.run();
     }
 }

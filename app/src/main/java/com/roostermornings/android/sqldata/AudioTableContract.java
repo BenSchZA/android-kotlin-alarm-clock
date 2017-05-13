@@ -19,6 +19,7 @@ public final class AudioTableContract {
     public static class AudioTableEntry implements BaseColumns {
         public static final String TABLE_NAME = "audiofiles";
 
+        //type 1 is channel type 0 is social
         public static final String COLUMN_TYPE = "type";
 
         public static final String COLUMN_ID = "id";

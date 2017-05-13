@@ -5,6 +5,7 @@
 
 package com.roostermornings.android.activity;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -36,6 +37,7 @@ import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment2;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
+import com.roostermornings.android.sync.DownloadSyncAdapter;
 import com.roostermornings.android.util.Constants;
 
 import java.util.Calendar;
@@ -45,7 +47,8 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 
-import static com.roostermornings.android.service.BackgroundTaskIntentService.startActionBackgroundDownload;
+import static com.roostermornings.android.BaseApplication.mAccount;
+import static com.roostermornings.android.util.Constants.AUTHORITY;
 import static com.roostermornings.android.util.RoosterUtils.hasGingerbread;
 
 public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetListener, NewAlarmFragment1.NewAlarmInterface {
@@ -247,20 +250,15 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 database.getReference(String.format("alarms/%s/%s", mCurrentUser.getUid(), alarmKey)).setValue(mAlarm);
 
                 //Download any social or channel audio files
-                startActionBackgroundDownload(context);
+                ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
+
 
                 FA.Log(FA.Event.Alarm_creation_completed.class,
-                        FA.Event.Alarm_creation_completed.Param.No_rooster_content,
-                        !mAlarm.isAllow_friend_audio_files()&"".equals(mAlarm.getChannel().getName()));
-                FA.Log(FA.Event.Alarm_creation_completed.class,
-                        FA.Event.Alarm_creation_completed.Param.Social_rooster_content,
+                        FA.Event.Alarm_creation_completed.Param.Social_roosters_enabled,
                         mAlarm.isAllow_friend_audio_files());
                 FA.Log(FA.Event.Alarm_creation_completed.class,
-                        FA.Event.Alarm_creation_completed.Param.Channel_rooster_content,
+                        FA.Event.Alarm_creation_completed.Param.Channel_selected,
                         !"".equals(mAlarm.getChannel().getName()));
-                FA.Log(FA.Event.Alarm_creation_completed.class,
-                        FA.Event.Alarm_creation_completed.Param.Social_channel_rooster_content,
-                        mAlarm.isAllow_friend_audio_files()&!"".equals(mAlarm.getChannel().getName()));
 
                 if(!"".equals(mAlarm.getChannel().getName())) {
                     FA.Log(FA.Event.Channel_selected.class,

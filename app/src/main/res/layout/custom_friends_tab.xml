@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Rooster Mornings Android.
   ~ Copyright (c)  2017 Roosta Media. All rights reserved.
   -->
@@ -25,11 +24,11 @@
         android:id="@+id/notification"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="top|right"
         android:layout_marginRight="-2dp"
         android:layout_marginTop="-2dp"
-        android:layout_gravity="top|right"
         android:background="@drawable/counter_circle_yellow"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
 </FrameLayout>
 

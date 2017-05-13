@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Rooster Mornings Android.
   ~ Copyright (c)  2017 Roosta Media. All rights reserved.
   -->
@@ -11,19 +10,21 @@
     android:padding="@dimen/spacing_normal">
 
     <RelativeLayout
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content">
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
         <TextView
             android:id="@+id/txtInitials"
-            android:text="@string/text_name_initials"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/message_status_friend_profile_pic"
-            android:layout_alignTop="@+id/message_status_friend_profile_pic"
-            android:layout_alignRight="@+id/message_status_friend_profile_pic"
             android:layout_alignBottom="@+id/message_status_friend_profile_pic"
+            android:layout_alignLeft="@+id/message_status_friend_profile_pic"
+            android:layout_alignRight="@+id/message_status_friend_profile_pic"
+            android:layout_alignTop="@+id/message_status_friend_profile_pic"
             android:gravity="center"
+            android:text="@string/text_name_initials"
             android:textColor="@color/white" />
+
         <ImageView
             android:id="@+id/message_status_friend_profile_pic"
             android:layout_width="wrap_content"
@@ -34,11 +35,11 @@
     <TextView
         android:id="@+id/message_status_friend_profile_name"
         android:layout_width="0dp"
-        android:layout_weight="1"
         android:layout_height="wrap_content"
-        android:text="Name"
         android:layout_gravity="center_vertical"
+        android:layout_weight="1"
         android:paddingLeft="@dimen/spacing_large"
+        android:text="Name"
         android:textColor="@color/white"
         android:textSize="@dimen/text_xlarge" />
 
@@ -46,8 +47,8 @@
         android:id="@+id/message_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Status"
         android:layout_gravity="center_vertical|right"
+        android:text="Status"
         android:textAlignment="textEnd"
         android:textColor="@color/white_30_percent_transparent"
         android:textSize="@dimen/text_xlarge" />

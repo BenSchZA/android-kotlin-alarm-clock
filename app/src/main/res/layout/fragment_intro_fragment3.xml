@@ -1,11 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Rooster Mornings Android.
   ~ Copyright (c)  2017 Roosta Media. All rights reserved.
   -->
 
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -49,9 +47,9 @@
                 android:layout_width="@dimen/input_width_large"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:textAlignment="center"
                 android:hint="@string/intro_mobile_hint"
-                android:inputType="phone" />
+                android:inputType="phone"
+                android:textAlignment="center" />
 
             <Button
                 android:id="@+id/intro_post_registration_next_button"

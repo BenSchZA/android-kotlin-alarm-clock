@@ -46,6 +46,7 @@ public class AudioTableManager {
         ContentValues values = new ContentValues();
 
         //Type defines whether the audio file is a channel or social Rooster
+        values.put(AudioTableEntry.COLUMN_TYPE, Constants.AUDIO_TYPE_SOCIAL);
         values.put(AudioTableEntry.COLUMN_FILENAME, queue.getFilename());
         values.put(AudioTableEntry.COLUMN_QUEUE_ID, queue.getQueue_id());
 
@@ -72,7 +73,7 @@ public class AudioTableManager {
         ContentValues values = new ContentValues();
 
         //Type defines whether the audio file is a channel or social Rooster
-        values.put(AudioTableEntry.COLUMN_TYPE, 1);
+        values.put(AudioTableEntry.COLUMN_TYPE, Constants.AUDIO_TYPE_CHANNEL);
         values.put(AudioTableEntry.COLUMN_FILENAME, queue.getFilename());
         values.put(AudioTableEntry.COLUMN_QUEUE_ID, queue.getQueue_id());
 
