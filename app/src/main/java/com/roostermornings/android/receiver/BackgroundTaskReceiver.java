@@ -40,19 +40,6 @@ public class BackgroundTaskReceiver extends BroadcastReceiver {
         context.startService(intentService);
     }
 
-    public void scheduleBackgroundCacheFirebaseData(Context context, Boolean start) {
-        alarmMgrBackgroundTask = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(context, BackgroundTaskReceiver.class);
-        intent.setAction(Constants.ACTION_BACKGROUNDDOWNLOAD);
-        //starts a inexact repeating background task that runs every 10 seconds
-        //the task runs the 'retrieveFirebaseData' method in BackgroundTaskIntentService
-        PendingIntent backgroundIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
-
-        if(start) alarmMgrBackgroundTask.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 10 * 1000,
-                    Constants.TIME_MILLIS_1_MINUTE, backgroundIntent);
-        else alarmMgrBackgroundTask.cancel(backgroundIntent);
-    }
-
     public void scheduleBackgroundDailyTask(Context context, Boolean start) {
         alarmMgrBackgroundTask = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(context, BackgroundTaskReceiver.class);
@@ -63,19 +50,6 @@ public class BackgroundTaskReceiver extends BroadcastReceiver {
 
         if(start) alarmMgrBackgroundTask.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 10 * 1000,
                 Constants.TIME_MILLIS_1_DAY, backgroundIntent);
-        else alarmMgrBackgroundTask.cancel(backgroundIntent);
-    }
-
-    public void scheduleBackgroundUpdateNotificationsTask(Context context, Boolean start) {
-        alarmMgrBackgroundTask = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(context, BackgroundTaskReceiver.class);
-        intent.setAction(Constants.ACTION_MINUTETASK);
-        //starts a inexact repeating background task that runs every minute
-        //the task runs the 'dailyTasks' method in BackgroundTaskIntentService
-        PendingIntent backgroundIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
-
-        if(start) alarmMgrBackgroundTask.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 2 * 1000,
-                    Constants.TIME_MILLIS_1_MINUTE, backgroundIntent);
         else alarmMgrBackgroundTask.cancel(backgroundIntent);
     }
 }

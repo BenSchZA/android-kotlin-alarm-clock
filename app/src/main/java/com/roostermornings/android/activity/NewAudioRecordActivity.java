@@ -33,6 +33,7 @@ import android.widget.Toast;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.analytics.FA;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.util.Constants;
@@ -184,6 +185,8 @@ public class NewAudioRecordActivity extends BaseActivity {
         newAudioStatus = status;
         switch(status){
             case NEW_AUDIO_RECORD_ERROR:
+                FA.Log(FA.Event.Social_rooster_recording_error.class, null, null);
+
                 layoutRecordParent.setAnimation(AnimationUtils.loadAnimation(this, R.anim.pulse));
                 mHandler.removeCallbacks(startTimer);
                 layoutListenParent.setVisibility(View.INVISIBLE);
@@ -207,6 +210,8 @@ public class NewAudioRecordActivity extends BaseActivity {
                 txtAudioTime.setVisibility(View.VISIBLE);
                 break;
             case NEW_AUDIO_READY_LISTEN:
+                FA.Log(FA.Event.Social_rooster_recorded.class, null, null);
+
                 layoutRecordParent.clearAnimation();
                 mHandler.removeCallbacks(startTimer);
                 layoutRecordParent.setVisibility(View.INVISIBLE);
@@ -326,6 +331,8 @@ public class NewAudioRecordActivity extends BaseActivity {
 
     @OnClick(R.id.new_audio_delete)
     public void onDeleteAudioClick() {
+        FA.Log(FA.Event.Social_rooster_recording_deleted.class, null, null);
+
         setNewAudioStatus(NEW_AUDIO_READY_RECORD);
         txtMessage.setText(getResources().getString(R.string.new_audio_post_delete_instructions));
         deleteAudio();

@@ -151,6 +151,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                 ValueEventListener channelsListener = new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
+                        channelRoosters.clear();
                         Iterator iterator = dataSnapshot.getChildren().iterator();
                         for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                             final Channel channel = postSnapshot.getValue(Channel.class);

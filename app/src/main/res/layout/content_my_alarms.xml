@@ -1,11 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Rooster Mornings Android.
   ~ Copyright (c)  2017 Roosta Media. All rights reserved.
   -->
 
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_content"
@@ -26,22 +24,22 @@
             android:id="@+id/home_alarmsListView"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="@dimen/fab_bottom_padding"
             android:paddingLeft="@dimen/fab_margin"
             android:paddingRight="@dimen/fab_margin"
-            android:paddingTop="@dimen/fab_margin"
-            android:paddingBottom="@dimen/fab_bottom_padding"
-            android:clipToPadding="false" />
+            android:paddingTop="@dimen/fab_margin" />
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/add_alarm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/fab_margin"
             android:layout_gravity="end|bottom"
+            android:layout_margin="@dimen/fab_margin"
             android:background="@color/rooster_light_blue"
-            app:borderWidth="0dp"
+            android:clickable="true"
             android:src="@drawable/ic_add_white_24dp"
-            android:clickable="true" />
+            app:borderWidth="0dp" />
 
     </android.support.design.widget.CoordinatorLayout>
 

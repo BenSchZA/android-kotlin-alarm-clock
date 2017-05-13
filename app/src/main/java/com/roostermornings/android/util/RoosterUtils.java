@@ -43,15 +43,21 @@ public class RoosterUtils {
     }
 
     public static String getInitials(String displayName) {
-        String initials = "";
-        String tempStringArray[];
-        if (notNull(displayName) && !"".equals(displayName)) {
-            tempStringArray = displayName.split(" ", 2);
-            for (String s : tempStringArray) {
-                if(!s.isEmpty()) initials = initials.concat(String.valueOf(s.charAt(0)));
+        try {
+            String initials = "";
+            String tempStringArray[];
+            if (!"".equals(displayName)) {
+                tempStringArray = displayName.split(" ", 2);
+                for (String s : tempStringArray) {
+                    if (!s.isEmpty())
+                        initials = initials.concat(String.valueOf(s.charAt(0)).toUpperCase());
+                }
             }
+            return initials;
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            return "";
         }
-        return initials;
     }
 
     public static String setAlarmTimeFromHourAndMinute(Alarm alarm) {

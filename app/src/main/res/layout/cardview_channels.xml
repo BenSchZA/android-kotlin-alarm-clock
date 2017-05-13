@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Rooster Mornings Android.
   ~ Copyright (c)  2017 Roosta Media. All rights reserved.
   -->
@@ -16,62 +15,64 @@
         android:id="@+id/card_view_channels"
         android:layout_width="match_parent"
         android:layout_height="150dp"
+        android:clickable="true"
         app:cardBackgroundColor="@color/black"
         app:cardCornerRadius="6dp"
-        android:clickable="true"
         app:cardElevation="0dp">
 
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
             <ImageView
                 android:id="@+id/card_view_channel_image"
-                android:src="@drawable/landscape"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:foreground="@drawable/filter_channel_cardview"
                 android:maxHeight="500dp"
                 android:maxWidth="1000dp"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="invisible"/>
+                android:src="@drawable/landscape"
+                android:visibility="invisible" />
+
             <ProgressBar
                 android:id="@+id/progressBar"
                 style="@style/Widget.AppCompat.ProgressBar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:visibility="visible"/>
+                android:visibility="visible" />
         </FrameLayout>
 
         <TextView
-            android:text="Channel Name"
             android:id="@+id/cardview_channel_name"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textStyle="bold"
-            android:padding="@dimen/spacing_large"
-            android:textColor="@color/white"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:padding="@dimen/spacing_large"
+            android:text="Channel Name"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/white"
+            android:textStyle="bold" />
 
 
         <TextView
-            android:layout_margin="@dimen/spacing_normal"
             android:id="@+id/cardview_channel_info"
             style="@style/InfoCircle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|right"
+            android:layout_margin="@dimen/spacing_normal"
             android:clickable="true"
             android:tag="i"
             android:text="i" />
 
         <ImageView
-            android:layout_width="32dp"
             android:id="@+id/cardview_channel_selected"
+            android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_gravity="bottom|left"
             android:layout_margin="@dimen/spacing_small"
-            android:visibility="gone"
-            android:src="@drawable/ic_done_white_48dp"/>
+            android:src="@drawable/ic_done_white_48dp"
+            android:visibility="gone" />
 
     </android.support.v7.widget.CardView>
 

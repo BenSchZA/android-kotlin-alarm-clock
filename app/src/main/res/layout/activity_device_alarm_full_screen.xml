@@ -1,121 +1,166 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Rooster Mornings Android.
   ~ Copyright (c)  2017 Roosta Media. All rights reserved.
   -->
 
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/main_background_layer_list"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.roostermornings.android.activity.DeviceAlarmFullScreenActivity">
 
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/alarm_content"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="0dp"
+        android:keepScreenOn="true"
         android:orientation="vertical"
-        android:keepScreenOn="true">
+        app:layout_constraintBottom_toTopOf="@+id/alarm_dismiss"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_constraintLeft_creator="1"
+        tools:layout_constraintRight_creator="1"
+        tools:layout_constraintTop_creator="1">
 
 
         <ImageView
             android:id="@+id/alarm_sender_pic"
-            android:scaleType="fitCenter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginBottom="@dimen/spacing_xxlarge"
-            android:layout_marginTop="@dimen/spacing_xxxlarge"
-            android:background="@drawable/xlarge_profile_pic_circle" />
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="8dp"
+            android:adjustViewBounds="true"
+            android:background="@drawable/xlarge_profile_pic_circle"
+            android:scaleType="fitCenter"
+            app:layout_constraintBottom_toTopOf="@+id/alarm_sender_name"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/alarm_sender_name"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/spacing_xlarge"
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
             android:gravity="center"
             android:text="@string/alarm_default_name"
             android:textColor="@color/white"
-            android:textSize="@dimen/text_xxlarge" />
+            android:textSize="@dimen/text_xxlarge"
+            app:layout_constraintBottom_toTopOf="@+id/relativeLayout2"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent" />
 
         <RelativeLayout
-            android:layout_width="match_parent"
+            android:id="@+id/relativeLayout2"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:gravity="center_horizontal"
             android:orientation="horizontal"
-            android:gravity="center_horizontal">
+            app:layout_constraintBottom_toTopOf="@+id/alarm_snooze_button"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent">
 
             <Button
                 android:id="@+id/skip_previous"
-                android:visibility="invisible"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/ic_skip_previous_white_24dp"
                 android:layout_alignParentLeft="true"
-                android:clickable="true"/>
+                android:background="@drawable/ic_skip_previous_white_24dp"
+                android:clickable="true"
+                android:visibility="invisible" />
 
             <TextView
                 android:id="@+id/alarm_count"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
                 android:layout_marginBottom="@dimen/spacing_xlarge"
                 android:layout_marginLeft="@dimen/spacing_normal"
                 android:layout_marginRight="@dimen/spacing_normal"
-                android:layout_centerInParent="true"
                 android:text="@string/alarm_count"
                 android:textColor="@color/white"
                 android:textSize="@dimen/text_xlarge" />
 
             <Button
                 android:id="@+id/skip_next"
-                android:visibility="invisible"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:background="@drawable/ic_skip_next_white_24dp"
-                android:clickable="true" />
+                android:clickable="true"
+                android:visibility="invisible" />
 
         </RelativeLayout>
 
-            <Button
-                android:id="@+id/alarm_snooze_button"
-                style="@style/RoosterButtonLightBlueStyle"
-                android:layout_width="135dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_margin="@dimen/spacing_normal"
-                android:text="Snooze"/>
-
-
-    </LinearLayout>
-
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:orientation="vertical"
-        android:id="@+id/linearLayout">
-
-        <TextView
-            android:id="@+id/alarm_dismiss"
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/alarm_snooze_button"
+            style="@style/RoosterButtonLightBlueStyle"
+            android:layout_width="140dp"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:padding="@dimen/spacing_large"
-            android:background="?attr/selectableItemBackground"
+            android:layout_gravity="center"
+            android:layout_margin="@dimen/spacing_normal"
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:text="Snooze"
+            app:layout_constraintBottom_toTopOf="@+id/alarm_action_button"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent" />
+
+        <Button
+            android:id="@+id/alarm_action_button"
+            style="@style/RoosterButtonLightBlueStyle"
+            android:layout_width="140dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="@dimen/spacing_normal"
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
             android:clickable="true"
-            android:text="@string/alarm_dismiss"
-            android:textColor="@color/white"
-            android:textSize="@dimen/text_xxlarge" />
+            android:text="Action"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent" />
 
-    </LinearLayout>
+    </android.support.constraint.ConstraintLayout>
 
-</RelativeLayout>
+    <TextView
+        android:id="@+id/alarm_dismiss"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:gravity="center"
+        android:padding="@dimen/spacing_large"
+        android:text="@string/alarm_dismiss"
+        android:textColor="@color/white"
+        android:textSize="@dimen/text_xxlarge"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+</android.support.constraint.ConstraintLayout>

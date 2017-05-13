@@ -24,6 +24,7 @@ public class DeviceAudioQueueItem implements Serializable {
     private String name = "";
     private String picture = "";
     private String listened;
+    //Type 1 = , type 0 =
     private int type = -1;
 
     public void fromSocialRooster(SocialRooster socialRooster, String audioFileUrl) {
