@@ -8,9 +8,11 @@ package com.roostermornings.android.sqlutil;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
 
@@ -20,6 +22,7 @@ import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 import com.roostermornings.android.service.AudioService;
+import com.roostermornings.android.sync.DownloadSyncAdapter;
 import com.roostermornings.android.util.Constants;
 
 import java.util.ArrayList;
@@ -28,8 +31,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.roostermornings.android.BaseApplication.mAccount;
 import static com.roostermornings.android.activity.base.BaseActivity.mCurrentUser;
-import static com.roostermornings.android.service.BackgroundTaskIntentService.startActionBackgroundDownload;
+import static com.roostermornings.android.util.Constants.AUTHORITY;
 import static com.roostermornings.android.util.RoosterUtils.hasKitKat;
 import static com.roostermornings.android.util.RoosterUtils.hasLollipop;
 
@@ -300,7 +304,7 @@ public final class DeviceAlarmController {
             updateFirebaseAlarmEnabled(setId, enabled);
             //Trigger audio download
             //Download any social or channel audio files
-            startActionBackgroundDownload(context);
+            ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
             if(notifyUser) {
                 //Notify user of time until next alarm, once alarm millis has been updated in db
                 notifyUserAlarmTime(deviceAlarmTableManager.getAlarmSet(setId));

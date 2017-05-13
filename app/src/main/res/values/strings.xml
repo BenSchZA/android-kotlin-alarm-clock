@@ -106,4 +106,24 @@
         <item>USER_SETTINGS_DAY_NIGHT_THEME_AUTOMATIC</item>
     </string-array>
 
+    <string-array name="user_settings_alarm_volume_entries">
+        <item>Disabled</item>
+        <item>20%</item>
+        <item>40%</item>
+        <item>60%</item>
+        <item>80%</item>
+        <item>100%</item>
+    </string-array>
+    <string-array name="user_settings_alarm_volume_entry_values">
+        <item>USER_SETTINGS_ALARM_VOLUME_INACTIVE</item>
+        <item>USER_SETTINGS_ALARM_VOLUME_20</item>
+        <item>USER_SETTINGS_ALARM_VOLUME_40</item>
+        <item>USER_SETTINGS_ALARM_VOLUME_60</item>
+        <item>USER_SETTINGS_ALARM_VOLUME_80</item>
+        <item>USER_SETTINGS_ALARM_VOLUME_100</item>
+    </string-array>
+    <string-array name="user_settings_alarm_volume_default_values">
+        <item>USER_SETTINGS_ALARM_VOLUME_40</item>
+    </string-array>
+
 </resources>

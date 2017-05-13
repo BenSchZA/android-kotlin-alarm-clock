@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Rooster Mornings Android.
   ~ Copyright (c)  2017 Roosta Media. All rights reserved.
   -->
@@ -19,7 +18,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:padding="@dimen/spacing_normal"
-        android:clipToPadding="false"/>
+        android:clipToPadding="false"
+        android:padding="@dimen/spacing_normal" />
 
 </LinearLayout>

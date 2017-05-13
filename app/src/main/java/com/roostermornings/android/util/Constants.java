@@ -16,6 +16,14 @@ public class Constants {
 
     //Intent actions
     public final static String ACTION_CANCEL_SNOOZE = "rooster.android.intent.action.CANCEL_SNOOZE";
+    public final static String ACTION_SHARE_ROOSTER_CHOSEN = "rooster.android.intent.action.ACTION_SHARE_ROOSTER_CHOSEN";
+
+    //AudioTable
+    public final static int AUDIO_TYPE_SOCIAL = 0;
+    public final static int AUDIO_TYPE_CHANNEL = 1;
+
+    //Request codes
+    public final static int REQUEST_CODE_SHARE_ROOSTER = 1010;
 
     //User settings
     //These are used in application_user_settings, but ensure strings are correct
@@ -25,6 +33,7 @@ public class Constants {
     public final static String USER_SETTINGS_DOWNLOAD_ON_DATA = "pref_key_download_on_data";
     public final static String USER_SETTINGS_SNOOZE_TIME = "pref_key_alarm_snooze_time";
     public final static String USER_SETTINGS_ROOSTER_ORDER = "pref_key_rooster_order";
+    public final static String USER_SETTINGS_ALARM_VOLUME = "pref_key_failsafe_alarm_volume";
     public final static String ABOUT_APP_VERSION = "pref_key_static_field_version";
 
     public final static long[] VIBRATE_PATTERN = {0, 1000, 500, 1000, 500};
@@ -118,4 +127,13 @@ public class Constants {
     public final static String FILENAME_PREFIX_ROOSTER_EXAMPLE_CONTENT = "example_clip";
 
     public final static long MAX_ROOSTER_FILE_SIZE = 5 * 1024 * 1024;
+
+    //DownloadSyncService config
+    // The authority for the sync adapter's content provider
+    public static final String AUTHORITY = "com.roostermornings.android.datasync.provider";
+    // An account type, in the form of a domain name
+    public static final String ACCOUNT_TYPE = "roostermornings.com";
+    // The account name
+    public static final String ACCOUNT = "rooster.content";
+
 }

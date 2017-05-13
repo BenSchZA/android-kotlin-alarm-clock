@@ -7,6 +7,8 @@ package com.roostermornings.android.activity.base;
 
 import android.app.ActivityManager;
 import android.app.Dialog;
+import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -71,6 +73,9 @@ import javax.inject.Inject;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Optional;
+
+import static com.roostermornings.android.BaseApplication.mAccount;
+import static com.roostermornings.android.util.Constants.AUTHORITY;
 
 public abstract class BaseActivity extends AppCompatActivity implements Validator.ValidationListener, BaseFragment.BaseActivityListener {
 
@@ -290,9 +295,8 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
             //Ensure no alarms left from old user
             deviceAlarmController.deleteAllLocalAlarms();
             //Cancel background task intents
-            backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(this, false);
             backgroundTaskReceiver.scheduleBackgroundDailyTask(this, false);
-            backgroundTaskReceiver.scheduleBackgroundUpdateNotificationsTask(this, false);
+            ContentResolver.cancelSync(mAccount, AUTHORITY);
             //Set default application settings preferences - don't overwrite existing if false
             setPreferenceManagerDefaultSettings(true);
         } catch (NullPointerException e) {

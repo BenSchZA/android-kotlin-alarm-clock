@@ -5,17 +5,15 @@
 
 package com.roostermornings.android;
 
-import android.app.Activity;
+import android.accounts.Account;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.database.sqlite.SQLiteDatabase;
-import android.icu.util.Calendar;
-import android.preference.PreferenceManager;
-import android.service.notification.NotificationListenerService;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
@@ -30,9 +28,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.roostermornings.android.activity.SplashActivity;
-import com.roostermornings.android.activity.base.BaseActivity;
-import com.roostermornings.android.activity.base.BaseActivity_MembersInjector;
 import com.roostermornings.android.dagger.DaggerRoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationModule;
@@ -40,12 +35,6 @@ import com.roostermornings.android.domain.User;
 import com.roostermornings.android.node_api.IHTTPClient;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.service.FirebaseListenerService;
-import com.roostermornings.android.sqldata.AudioTableHelper;
-import com.roostermornings.android.sqldata.DeviceAlarmTableHelper;
-import com.roostermornings.android.sqlutil.AudioTableController;
-import com.roostermornings.android.sqlutil.AudioTableManager;
-import com.roostermornings.android.sqlutil.DeviceAlarmController;
-import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.FontsOverride;
 
@@ -55,7 +44,8 @@ import io.fabric.sdk.android.Fabric;
 import retrofit.GsonConverterFactory;
 import retrofit.Retrofit;
 
-import static com.roostermornings.android.util.Constants.FLAG_FRIENDREQUESTS;
+import static com.roostermornings.android.sync.DownloadSyncAdapter.CreateSyncAccount;
+import static com.roostermornings.android.util.Constants.AUTHORITY;
 
 public class BaseApplication extends android.app.Application {
 
@@ -79,12 +69,16 @@ public class BaseApplication extends android.app.Application {
     @Inject BackgroundTaskReceiver backgroundTaskReceiver;
     @Inject SharedPreferences sharedPreferences;
     public static Context AppContext;
+    public static Account mAccount;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
         AppContext = getBaseContext();
+
+        //Create sync account
+        mAccount = CreateSyncAccount(this);
 
         //Set database persistence to keep offline alarm edits synced
         //Calls to setPersistenceEnabled() must be made before any other usage of FirebaseDatabase instance
@@ -156,9 +150,12 @@ public class BaseApplication extends android.app.Application {
                     // User is signed in
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
 
+                    ContentResolver.setIsSyncable(mAccount, AUTHORITY, 1);
+                    ContentResolver.setSyncAutomatically(mAccount, AUTHORITY, true);
+                    ContentResolver.addPeriodicSync(mAccount, AUTHORITY, new Bundle(), 300);
+
                     //retrieve static User for current user
                     retrieveMyUserDetails();
-
                     startBackgroundServices();
                     // Start Firebase listeners applicable to all activities - primarily to update notifications
                     if(!isServiceRunning(FirebaseListenerService.class))
@@ -213,9 +210,7 @@ public class BaseApplication extends android.app.Application {
     }
 
     private void startBackgroundServices() {
-        backgroundTaskReceiver.scheduleBackgroundCacheFirebaseData(getApplicationContext(), true);
         backgroundTaskReceiver.scheduleBackgroundDailyTask(getApplicationContext(), true);
-        backgroundTaskReceiver.scheduleBackgroundUpdateNotificationsTask(getApplicationContext(), true);
     }
 
     private void updateNotification() {
