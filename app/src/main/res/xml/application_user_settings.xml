@@ -28,6 +28,15 @@ and no social roosters are received"
             android:showDefault="true"
             android:showSilent="false"
             android:defaultValue="android.intent.extra.ringtone.DEFAULT_URI" />
+        <ListPreference
+            android:title="Minimum alarm volume"
+            android:key="pref_key_failsafe_alarm_volume"
+            android:persistent="true"
+            android:summary="Ensure that your alarm volume is above a minimum percentage at alarm time"
+            android:dialogTitle="Select option"
+            android:entries="@array/user_settings_alarm_volume_entries"
+            android:entryValues="@array/user_settings_alarm_volume_entry_values"
+            android:defaultValue="@array/user_settings_alarm_volume_default_values" />
         <CheckBoxPreference
             android:key="pref_key_rooster_order"
             android:summary="Set channel rooster content to occur before social rooster content"

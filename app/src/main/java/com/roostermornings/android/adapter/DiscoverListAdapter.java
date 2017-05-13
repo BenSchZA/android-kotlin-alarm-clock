@@ -28,6 +28,7 @@ import com.google.firebase.storage.StorageReference;
 import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.DiscoverFragmentActivity;
+import com.roostermornings.android.analytics.FA;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.AlarmChannel;
 import com.roostermornings.android.domain.ChannelRooster;
@@ -141,6 +142,7 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
             @Override
             public void onClick(View view) {
                 discoverAudioSampleInterface.streamChannelRooster(channelRooster);
+                FA.Log(FA.Event.Explore_channel_rooster_played.class, FA.Event.Explore_channel_rooster_played.Param.Channel_title, channelRooster.getChannel_uid());
             }
         });
 
@@ -148,6 +150,7 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
             @Override
             public void onClick(View view) {
                 discoverAudioSampleInterface.streamChannelRooster(channelRooster);
+                FA.Log(FA.Event.Explore_channel_rooster_played.class, FA.Event.Explore_channel_rooster_played.Param.Channel_title, channelRooster.getChannel_uid());
             }
         });
 
@@ -163,6 +166,8 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
                         .positiveText(R.string.ok)
                         .negativeText("")
                         .show();
+
+                FA.Log(FA.Event.Channel_info_viewed.class, FA.Event.Channel_info_viewed.Param.Channel_title, channelRooster.getChannel_uid());
             }
         });
 

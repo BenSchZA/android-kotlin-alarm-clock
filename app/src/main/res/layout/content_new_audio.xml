@@ -3,11 +3,10 @@
   ~ Copyright (c)  2017 Roosta Media. All rights reserved.
   -->
 
-<LinearLayout
-    android:id="@+id/main_content"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/main_background_layer_list"
@@ -37,17 +36,17 @@
             android:id="@+id/new_audio_time"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_above="@+id/record_playback_layout"
             android:gravity="center"
             android:text="60"
             android:textColor="@color/white"
-            android:textSize="@dimen/text_huge"
-            android:layout_above="@+id/record_playback_layout" />
+            android:textSize="@dimen/text_huge" />
 
         <FrameLayout
-            android:layout_above="@id/button_bar"
             android:id="@+id/record_playback_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_above="@id/button_bar"
             android:layout_marginBottom="@dimen/spacing_xxxlarge">
 
 
@@ -55,16 +54,16 @@
                 android:id="@+id/new_audio_record_parent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="@dimen/spacing_large"
-                android:gravity="center"
                 android:layout_gravity="center"
+                android:gravity="center"
+                android:padding="@dimen/spacing_large"
                 android:visibility="visible">
 
                 <FrameLayout
                     android:id="@+id/new_audio_circle_outer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/rooster_record_audio_circle_outer" >
+                    android:background="@drawable/rooster_record_audio_circle_outer">
 
                     <ImageView
                         android:id="@+id/new_audio_start_stop"
@@ -82,11 +81,11 @@
                 android:id="@+id/new_audio_listen_parent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
                 android:orientation="horizontal"
                 android:padding="@dimen/spacing_large"
-                android:visibility="gone"
-                android:gravity="center"
-                android:layout_gravity="center" >
+                android:visibility="gone">
 
                 <ImageButton
                     android:id="@+id/new_audio_delete"
@@ -114,8 +113,8 @@
                             android:layout_width="50dp"
                             android:layout_height="50dp"
                             android:layout_margin="15dp"
-                            android:clickable="true"
-                            android:background="@drawable/rooster_new_audio_play_button" />
+                            android:background="@drawable/rooster_new_audio_play_button"
+                            android:clickable="true" />
 
                     </FrameLayout>
 

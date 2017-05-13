@@ -1,11 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Rooster Mornings Android.
   ~ Copyright (c)  2017 Roosta Media. All rights reserved.
   -->
 
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_layout"
     android:layout_width="match_parent"
@@ -13,7 +11,8 @@
     android:fitsSystemWindows="true"
     tools:context="com.roostermornings.android.activity.DiscoverFragmentActivity">
 
-    <include layout="@layout/custom_toolbar"/>
-    <include layout="@layout/content_discover"/>
+    <include layout="@layout/custom_toolbar" />
+
+    <include layout="@layout/content_discover" />
 
 </android.support.design.widget.CoordinatorLayout>

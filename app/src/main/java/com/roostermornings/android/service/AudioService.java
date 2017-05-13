@@ -9,6 +9,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -16,6 +17,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Binder;
@@ -27,6 +29,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.database.Exclude;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
@@ -39,6 +42,7 @@ import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.sqlutil.AudioTableManager;
+import com.roostermornings.android.sync.DownloadSyncAdapter;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.InternetHelper;
 
@@ -46,6 +50,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
@@ -54,7 +59,10 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import static com.roostermornings.android.service.BackgroundTaskIntentService.startActionBackgroundDownload;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static com.roostermornings.android.BaseApplication.AppContext;
+import static com.roostermornings.android.BaseApplication.mAccount;
+import static com.roostermornings.android.util.Constants.AUTHORITY;
 
 //Service to manage playing and pausing audio during Rooster alarm
 public class AudioService extends Service {
@@ -129,7 +137,7 @@ public class AudioService extends Service {
 
         //Start fullscreen alarm activation activity
         Intent intentAlarmFullscreen = new Intent(mThis, DeviceAlarmFullScreenActivity.class);
-        intentAlarmFullscreen.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intentAlarmFullscreen.addFlags(FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         mThis.startActivity(intentAlarmFullscreen);
 
         try {
@@ -221,6 +229,11 @@ public class AudioService extends Service {
                     playAlarmRoosters();
                     return;
                 }
+                //If no content exists to add to audioItems, then return now
+                if(mThis.socialAudioItems.isEmpty() && mThis.channelAudioItems.isEmpty()) {
+                    startDefaultAlarmTone(false);
+                    return;
+                }
 
                 //Try append new content to end of existing content, if it fails - fail safe and play default alarm tone
                 try {
@@ -262,11 +275,11 @@ public class AudioService extends Service {
                     && !Constants.ALARM_CHANNEL_DOWNLOAD_FAILED.equals(alarm.getLabel())
                     && channelAudioItems == null) {
 
-                FA.Log(FA.Event.Alarm_activated.class, FA.Event.Alarm_activated.Param.Alarm_content_stream, true);
+                FA.Log(FA.Event.Alarm_activated.class, FA.Event.Alarm_activated.Param.Data_loaded, false);
 
                 if (!InternetHelper.noInternetConnection(this)) {
                     //Download any social or channel audio files
-                    startActionBackgroundDownload(mThis);
+                    ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
                     //Start alarm after 30 seconds or after download finished
                     startDownloadTimer();
                 } else {
@@ -275,7 +288,7 @@ public class AudioService extends Service {
                     sendBroadcast(intent);
                 }
             } else {
-                FA.Log(FA.Event.Alarm_activated.class, FA.Event.Alarm_activated.Param.Alarm_content_downloaded, true);
+                FA.Log(FA.Event.Alarm_activated.class, FA.Event.Alarm_activated.Param.Data_loaded, true);
 
                 //Send broadcast message to notify all receivers of download finished
                 Intent intent = new Intent(Constants.ACTION_CHANNEL_DOWNLOAD_FINISHED);
@@ -363,8 +376,16 @@ public class AudioService extends Service {
                 @Override
                 public void onPrepared(MediaPlayer mediaPlayer) {
                     mediaPlayerRooster.start();
-                    //Slowly increase volume from low to current volume
-                    if(alarmPosition == 1 && alarmCycle == 1) softStartAudio();
+
+                    if(alarmPosition == 1 && alarmCycle == 1) {
+                        //Slowly increase volume from low to current volume
+                        softStartAudio();
+                        if(audioItem.getType() == Constants.AUDIO_TYPE_SOCIAL) FA.Log(FA.Event.Social_rooster_unique_play.class, null, null);
+                        if(audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) FA.Log(FA.Event.Channel_unique_play.class, null, null);
+                    } else {
+                        if(audioItem.getType() == Constants.AUDIO_TYPE_SOCIAL) FA.Log(FA.Event.Social_rooster_play.class, null, null);
+                        if(audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) FA.Log(FA.Event.Channel_play.class, null, null);
+                    }
 
                     mediaPlayerRooster.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                         @Override
@@ -553,6 +574,11 @@ public class AudioService extends Service {
         } catch(IllegalArgumentException e){
             e.printStackTrace();
         }
+        //Start Rooster to show on wakeup
+        Intent homeIntent = new Intent(this, MyAlarmsFragmentActivity.class);
+        homeIntent.setFlags(FLAG_ACTIVITY_NEW_TASK);
+        startActivity(homeIntent);
+        //Stop service
         this.stopSelf();
     }
 
@@ -626,90 +652,151 @@ public class AudioService extends Service {
         }
 
         try {
-            FA.Log(FA.Event.Alarm_snoozed.class,
-                    FA.Event.Alarm_snoozed.Param.Alarm_activation_cycle_count,
-                    alarmCycle);
-            FA.Log(FA.Event.Alarm_snoozed.class,
-                    FA.Event.Alarm_snoozed.Param.Alarm_activation_index,
-                    audioItems.indexOf(audioItem) + 1);
-            FA.Log(FA.Event.Alarm_snoozed.class,
-                    FA.Event.Alarm_snoozed.Param.Alarm_activation_total_roosters,
-                    channelAudioItems.size() + socialAudioItems.size());
+            if(!audioItems.isEmpty()) {
+                FA.Log(FA.Event.Alarm_snoozed.class,
+                        FA.Event.Alarm_snoozed.Param.Alarm_activation_cycle_count,
+                        alarmCycle);
+                FA.Log(FA.Event.Alarm_snoozed.class,
+                        FA.Event.Alarm_snoozed.Param.Alarm_activation_index,
+                        audioItems.indexOf(audioItem) + 1);
+                FA.Log(FA.Event.Alarm_snoozed.class,
+                        FA.Event.Alarm_snoozed.Param.Alarm_activation_total_roosters,
+                        channelAudioItems.size() + socialAudioItems.size());
+            }
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
     }
 
-    private void startDefaultAlarmTone(Boolean failure) {
-        //Check that another alarm isn't already playing
-        if(mediaPlayerRooster != null && mediaPlayerRooster.isPlaying()) return;
-        if(mediaPlayerDefault != null && mediaPlayerDefault.isPlaying()) return;
-        foregroundNotification("Alarm ringtone playing");
+    private void startDefaultAlarmTone(final Boolean failure) {
+        try {
+            //Check that another alarm isn't already playing
+            if (mediaPlayerRooster != null && mediaPlayerRooster.isPlaying()) return;
+            if (mediaPlayerDefault != null && mediaPlayerDefault.isPlaying()) return;
+            foregroundNotification("Alarm ringtone playing");
 
-        updateAlarmUI(true);
+            updateAlarmUI(true);
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String strRingtonePreference = sharedPreferences.getString(Constants.USER_SETTINGS_DEFAULT_TONE, "android.intent.extra.ringtone.DEFAULT_URI");
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            String strRingtonePreference = sharedPreferences.getString(Constants.USER_SETTINGS_DEFAULT_TONE, "android.intent.extra.ringtone.DEFAULT_URI");
 
-        RingtoneManager ringtoneManager = new RingtoneManager(this);
-        ringtoneManager.setType(RingtoneManager.TYPE_ALL);
+            RingtoneManager ringtoneManager = new RingtoneManager(this);
+            ringtoneManager.setType(RingtoneManager.TYPE_ALL);
 
-        Uri notification = Uri.parse(strRingtonePreference);
-        //In case alarm tone URI does not exist
-        //Ringtonemanager used to check if exists: from Android docs:
-        //If the given URI cannot be opened for any reason, this method will attempt to fallback on another sound.
-        //If it cannot find any, it will return null.
-        if(RingtoneManager.getRingtone(this, notification) == null || ringtoneManager.getRingtonePosition(notification) < 0) {
-            notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-            if (notification == null) {
-                notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            Uri notification = Uri.parse(strRingtonePreference);
+            //In case alarm tone URI does not exist
+            //Ringtonemanager used to check if exists: from Android docs:
+            //If the given URI cannot be opened for any reason, this method will attempt to fallback on another sound.
+            //If it cannot find any, it will return null.
+            if (RingtoneManager.getRingtone(this, notification) == null || ringtoneManager.getRingtonePosition(notification) < 0) {
+                notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
                 if (notification == null) {
-                    notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+                    notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                    if (notification == null) {
+                        notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+                    }
                 }
             }
-        }
 
-        //Check stream volume above minimum
-        checkStreamVolume();
+            //Check stream volume above minimum
+            checkStreamVolume();
 
-        //Start audio stream
-        try {
-            mediaPlayerDefault.setAudioStreamType(AudioManager.STREAM_ALARM);
-            mediaPlayerDefault.setDataSource(this, notification);
-            mediaPlayerDefault.setLooping(true);
-            mediaPlayerDefault.prepareAsync();
+            //Start audio stream
+            try {
+                mediaPlayerDefault.setAudioStreamType(AudioManager.STREAM_ALARM);
+                mediaPlayerDefault.setDataSource(this, notification);
+                mediaPlayerDefault.setLooping(true);
+                mediaPlayerDefault.prepareAsync();
 
-            mediaPlayerDefault.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mediaPlayer) {
-                    mediaPlayerDefault.start();
-                    //Start timer to kill after 5 minutes
-                    startTimer();
-                }});
+                mediaPlayerDefault.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                    @Override
+                    public void onPrepared(MediaPlayer mediaPlayer) {
+                        if (mediaPlayerRooster != null && mediaPlayerRooster.isPlaying()) return;
+                        mediaPlayerDefault.start();
+                        //Start timer to kill after 5 minutes
+                        startTimer();
+                    }
+                });
+                mediaPlayerDefault.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+                    @Override
+                    public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
+                        RingtoneManager.getRingtone(AppContext,
+                                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)).play();
+                        startVibrate();
+                        logDefaultRingtoneState(failure);
+                        return true;
+                    }
+                });
 
+            } catch (Exception e) {
+                e.printStackTrace();
+                RingtoneManager.getRingtone(AppContext,
+                        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)).play();
+                startVibrate();
+                logDefaultRingtoneState(failure);
+            }
+            logDefaultRingtoneState(failure);
         } catch (Exception e) {
             e.printStackTrace();
-            //If audio fails, vibrate instead - if that fails... well enjoy your sleep.
+            RingtoneManager.getRingtone(AppContext,
+                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)).play();
             startVibrate();
+            logDefaultRingtoneState(failure);
+        }
+    }
+
+    private void logDefaultRingtoneState(boolean failure) {
+        if (!socialAudioItems.isEmpty() || !channelAudioItems.isEmpty()) {
+            FA.Log(FA.Event.Alarm_activated.class, FA.Event.Default_alarm_play.Param.Attempt_to_play, true);
+        } else {
+            FA.Log(FA.Event.Alarm_activated.class, FA.Event.Default_alarm_play.Param.Attempt_to_play, false);
         }
 
-        if(failure) {
-            FA.Log(FA.Event.Alarm_activated.class, FA.Event.Alarm_activated.Param.Default_alarm_fail_safe, true);
+        if (failure) {
+            FA.Log(FA.Event.Alarm_activated.class, FA.Event.Default_alarm_play.Param.Fatal_failure, true);
         } else {
-            FA.Log(FA.Event.Alarm_activated.class, FA.Event.Alarm_activated.Param.Default_alarm, true);
+            FA.Log(FA.Event.Alarm_activated.class, FA.Event.Default_alarm_play.Param.Fatal_failure, false);
         }
     }
 
     private void checkStreamVolume() {
-        //Ensure audio volume is acceptable TODO: what is acceptable?
-        //Max volume seems to be 7
+        //Ensure audio volume is acceptable - as set in user settings
+        //Max volume seems to be integer 7
         AudioManager audio = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         int currentVolume = audio.getStreamVolume(AudioManager.STREAM_ALARM);
         int maxVolume = audio.getStreamMaxVolume(AudioManager.STREAM_ALARM);
-        float percent = 0.4f;
-        int minVolume = (int) (maxVolume*percent);
+        int minVolume = (int) (maxVolume*returnUserSettingAlarmMinimumVolume());
         if(currentVolume < minVolume) {
             audio.setStreamVolume(AudioManager.STREAM_ALARM, minVolume, 0);
+        }
+    }
+
+    private float returnUserSettingAlarmMinimumVolume() {
+        try {
+            String[] alarmVolumeArrayEntries = getResources().getStringArray(R.array.user_settings_alarm_volume_entry_values);
+            SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(AppContext);
+            float alarmMinimumVolume = 0.4f;
+
+            if (alarmVolumeArrayEntries[0].equals(defaultSharedPreferences.getString(Constants.USER_SETTINGS_ALARM_VOLUME, ""))) {
+                alarmMinimumVolume = 0.0f;
+            } else if (alarmVolumeArrayEntries[1].equals(defaultSharedPreferences.getString(Constants.USER_SETTINGS_ALARM_VOLUME, ""))) {
+                alarmMinimumVolume = 0.2f;
+            } else if (alarmVolumeArrayEntries[2].equals(defaultSharedPreferences.getString(Constants.USER_SETTINGS_ALARM_VOLUME, ""))) {
+                alarmMinimumVolume = 0.4f;
+            } else if (alarmVolumeArrayEntries[3].equals(defaultSharedPreferences.getString(Constants.USER_SETTINGS_ALARM_VOLUME, ""))) {
+                alarmMinimumVolume = 0.6f;
+            } else if (alarmVolumeArrayEntries[4].equals(defaultSharedPreferences.getString(Constants.USER_SETTINGS_ALARM_VOLUME, ""))) {
+                alarmMinimumVolume = 0.8f;
+            } else if (alarmVolumeArrayEntries[5].equals(defaultSharedPreferences.getString(Constants.USER_SETTINGS_ALARM_VOLUME, ""))) {
+                alarmMinimumVolume = 1.0f;
+            } else {
+                alarmMinimumVolume = 0.4f;
+            }
+
+            return alarmMinimumVolume;
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            return 0.4f;
         }
     }
 
@@ -724,9 +811,11 @@ public class AudioService extends Service {
                 (new Runnable() {
                     int volume = 1;
                     public void run() {
-                        if(volume > currentVolume) scheduler.shutdown();
+                        if(volume > currentVolume) {
+                            volume = currentVolume;
+                            scheduler.shutdown();
+                        }
                         audio.setStreamVolume(AudioManager.STREAM_ALARM, volume, 0);
-                        Log.d("Audio soft start: ", String.valueOf(volume));
                         volume++;
                     }
                 }, 0, 1, TimeUnit.SECONDS);

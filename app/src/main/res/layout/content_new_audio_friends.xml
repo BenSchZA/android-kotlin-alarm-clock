@@ -4,8 +4,8 @@
   -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -18,21 +18,23 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/button_bar">
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/new_audio_friendsListView"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:padding="@dimen/spacing_normal"
             android:clipToPadding="false"
-            android:visibility="gone"/>
+            android:padding="@dimen/spacing_normal"
+            android:visibility="gone" />
+
         <ProgressBar
             android:id="@+id/progressBar"
             style="@style/Widget.AppCompat.ProgressBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:visibility="visible"/>
+            android:visibility="visible" />
     </FrameLayout>
 
     <include

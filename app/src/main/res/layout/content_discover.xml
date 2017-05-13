@@ -1,11 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Rooster Mornings Android.
   ~ Copyright (c)  2017 Roosta Media. All rights reserved.
   -->
 
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_content"
@@ -17,39 +15,39 @@
     tools:context="com.roostermornings.android.activity.DiscoverFragmentActivity"
     tools:showIn="@layout/activity_my_alarms">
 
-<android.support.design.widget.CoordinatorLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    android:layout_above="@id/button_bar" >
-
-    <FrameLayout
+    <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_above="@id/button_bar"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/discoverListView"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            android:clickable="true"
-            android:padding="@dimen/spacing_large"
-            android:clipToPadding="false"
-            android:visibility="gone"/>
+            android:layout_height="match_parent">
 
-        <ProgressBar
-            android:id="@+id/contentProgressBar"
-            style="@style/Widget.AppCompat.ProgressBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:visibility="visible"/>
-    </FrameLayout>
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/discoverListView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clickable="true"
+                android:clipToPadding="false"
+                android:padding="@dimen/spacing_large"
+                android:visibility="gone"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-</android.support.design.widget.CoordinatorLayout>
+            <ProgressBar
+                android:id="@+id/contentProgressBar"
+                style="@style/Widget.AppCompat.ProgressBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="visible" />
+        </FrameLayout>
+
+    </android.support.design.widget.CoordinatorLayout>
 
     <include
         android:id="@+id/button_bar"
         layout="@layout/button_bar" />
 
-    </RelativeLayout>
+</RelativeLayout>

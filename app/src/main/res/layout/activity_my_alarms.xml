@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Rooster Mornings Android.
   ~ Copyright (c)  2017 Roosta Media. All rights reserved.
   -->
@@ -8,12 +7,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:fitsSystemWindows="true"
     tools:context="com.roostermornings.android.activity.MyAlarmsFragmentActivity">
 
-    <include layout="@layout/custom_toolbar"/>
-    <include layout="@layout/content_my_alarms"/>
+    <include layout="@layout/custom_toolbar" />
+
+    <include layout="@layout/content_my_alarms" />
 
 </android.support.design.widget.CoordinatorLayout>
 

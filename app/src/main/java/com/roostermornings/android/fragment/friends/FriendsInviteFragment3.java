@@ -5,9 +5,12 @@
 
 package com.roostermornings.android.fragment.friends;
 
+import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -16,6 +19,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +29,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.share.widget.AppInviteDialog;
+import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -35,6 +41,7 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.FriendsInviteListAdapter;
+import com.roostermornings.android.analytics.FA;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.LocalContacts;
@@ -44,6 +51,7 @@ import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.MyContactsController;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -169,9 +177,9 @@ public class FriendsInviteFragment3 extends BaseFragment {
         sendIntent.setAction(Intent.ACTION_SEND);
         sendIntent.putExtra(Intent.EXTRA_TEXT, getResources().getString(R.string.invite_to_rooster_message));
         sendIntent.setType("text/plain");
-
         sendIntent = Intent.createChooser(sendIntent, "Share Rooster");
         startActivity(sendIntent);
+        FA.Log(FA.Event.Invitation_to_join_rooster_sent.class, null, null);
     }
 
     /**

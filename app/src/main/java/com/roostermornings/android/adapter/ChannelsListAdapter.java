@@ -22,6 +22,7 @@ import com.afollestad.materialdialogs.Theme;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.analytics.FA;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.AlarmChannel;
 import com.roostermornings.android.domain.ChannelRooster;
@@ -97,16 +98,17 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(final ViewHolder holder, final int position) {
+    public void onBindViewHolder(final ViewHolder holder, int position) {
         // - get element from your dataset at this position
+        final ChannelRooster channelRooster = mDataset.get(position);
         // - replace the contents of the view with that element
         holder.cardViewChannel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                toggleChannelSelection(mDataset.get(position));
+                toggleChannelSelection(channelRooster);
 
-                if (mDataset.get(position).isSelected()) {
-                    setSelectedChannel(mDataset.get(position));
+                if (channelRooster.isSelected()) {
+                    setSelectedChannel(channelRooster);
                 } else {
                     clearSelectedChannel();
                 }
@@ -116,7 +118,7 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
             }
         });
 
-        holder.txtChannelName.setText(mDataset.get(position).getName());
+        holder.txtChannelName.setText(channelRooster.getName());
         if (mDataset.get(position).isSelected()) {
             holder.imgChannelSelected.setVisibility(View.VISIBLE);
         } else {
@@ -128,18 +130,19 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
             public void onClick(View view) {
 
                 new MaterialDialog.Builder(mActivity)
-                        .title(mDataset.get(position).getName())
-                        .content(mDataset.get(position).getChannel_description())
+                        .title(channelRooster.getName())
+                        .content(channelRooster.getChannel_description())
                         .positiveText(R.string.ok)
                         .negativeText("")
                         .show();
-                
+
+                FA.Log(FA.Event.Channel_info_viewed.class, FA.Event.Channel_info_viewed.Param.Channel_title, channelRooster.getChannel_uid());
 
             }
         });
 
         try {
-            Picasso.with(AppContext).load(mDataset.get(position).getChannel_photo())
+            Picasso.with(AppContext).load(channelRooster.getChannel_photo())
                     .fit()
                     .centerCrop()
                     .into(holder.imgChannelImage, new Callback() {

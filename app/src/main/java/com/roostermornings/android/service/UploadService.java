@@ -33,6 +33,7 @@ import com.google.firebase.storage.UploadTask;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.analytics.FA;
 import com.roostermornings.android.domain.FCMPayloadSocialRooster;
 import com.roostermornings.android.domain.NodeAPIResult;
 import com.roostermornings.android.domain.SocialRooster;
@@ -52,6 +53,8 @@ import retrofit.Callback;
 import retrofit.Response;
 import retrofit.Retrofit;
 
+import static com.roostermornings.android.BaseApplication.AppContext;
+
 //Service to offload the task of uploading a new Social Rooster to Firebase cloud storage, receive a link -> Firebase entries & Node post
 public class UploadService extends Service {
 
@@ -67,7 +70,7 @@ public class UploadService extends Service {
     private StorageReference mStorageRef;
     String mAudioSavePathInDevice = "";
     ArrayList<User> friendsList = new ArrayList<>();
-    String firebaseIdToken;
+    String firebaseIdToken = "";
 
     @Inject FirebaseUser firebaseUser;
 
@@ -108,8 +111,16 @@ public class UploadService extends Service {
                 // Process received messages here!
                 Bundle uploadData = msg.getData();
                 mAudioSavePathInDevice = uploadData.getString(Constants.EXTRA_LOCAL_FILE_STRING);
-                friendsList = (ArrayList<User>) uploadData.getSerializable(Constants.EXTRA_FRIENDS_LIST);
-                uploadAudioFile(mAudioSavePathInDevice, friendsList);
+                try {
+                    friendsList = (ArrayList<User>) uploadData.getSerializable(Constants.EXTRA_FRIENDS_LIST);
+                    if (friendsList != null && !friendsList.isEmpty()) {
+                        uploadAudioFile(mAudioSavePathInDevice, friendsList);
+                    }
+                } catch (ClassCastException e) {
+                    e.printStackTrace();
+                    Toast.makeText(AppContext, "Rooster upload failed.", Toast.LENGTH_SHORT).show();
+                    endService();
+                }
             }
         };
 
@@ -138,6 +149,9 @@ public class UploadService extends Service {
                                 sendRoosterToUser(friend, firebaseStorageURL);
                             }
                         }
+
+                        FA.Log(FA.Event.Social_rooster_sent.class, FA.Event.Social_rooster_sent.Param.Social_rooster_receivers, friendsList.size());
+
                         endService();
                     }
                 })
