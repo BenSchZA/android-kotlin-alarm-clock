@@ -5,6 +5,7 @@
 
 package com.roostermornings.android.service;
 
+import android.accounts.Account;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ContentResolver;
@@ -21,19 +22,23 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.sync.DownloadSyncAdapter;
 
 import org.json.JSONObject;
 
-import static com.roostermornings.android.BaseApplication.mAccount;
-import static com.roostermornings.android.util.Constants.ACCOUNT;
+import javax.inject.Inject;
+
 import static com.roostermornings.android.util.Constants.AUTHORITY;
 
 public class RoosterFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "MyFirebaseMsgService";
+
+    @Inject
+    Account mAccount;
 
     /**
      * Called when message is received.
@@ -43,6 +48,8 @@ public class RoosterFirebaseMessagingService extends FirebaseMessagingService {
 // [START receive_message]
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
+        BaseApplication baseApplication = (BaseApplication) getApplication();
+        baseApplication.getRoosterApplicationComponent().inject(this);
         // [START_EXCLUDE]
         // There are two types of messages data messages and notification messages. Data messages are handled
         // here in onMessageReceived whether the app is in the foreground or background. Data messages are the type

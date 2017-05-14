@@ -5,6 +5,7 @@
 
 package com.roostermornings.android.activity.base;
 
+import android.accounts.Account;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.ContentProvider;
@@ -74,7 +75,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Optional;
 
-import static com.roostermornings.android.BaseApplication.mAccount;
 import static com.roostermornings.android.util.Constants.AUTHORITY;
 
 public abstract class BaseActivity extends AppCompatActivity implements Validator.ValidationListener, BaseFragment.BaseActivityListener {
@@ -94,6 +94,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
     @Inject AudioTableManager audioTableManager;
     @Inject BackgroundTaskReceiver backgroundTaskReceiver;
     @Inject public DatabaseReference mDatabase;
+    @Inject Account mAccount;
 
     protected abstract void inject(RoosterApplicationComponent component);
 

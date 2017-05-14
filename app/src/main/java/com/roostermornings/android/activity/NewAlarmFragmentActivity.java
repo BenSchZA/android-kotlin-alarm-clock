@@ -5,6 +5,7 @@
 
 package com.roostermornings.android.activity;
 
+import android.accounts.Account;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Bundle;
@@ -47,7 +48,6 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 
-import static com.roostermornings.android.BaseApplication.mAccount;
 import static com.roostermornings.android.util.Constants.AUTHORITY;
 import static com.roostermornings.android.util.RoosterUtils.hasGingerbread;
 
@@ -69,6 +69,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
     @Inject DeviceAlarmController deviceAlarmController;
     @Inject DeviceAlarmTableManager deviceAlarmTableManager;
     @Inject FirebaseUser mCurrentUser;
+    @Inject Account mAccount;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
