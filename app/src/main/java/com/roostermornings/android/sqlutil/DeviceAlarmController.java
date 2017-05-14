@@ -5,6 +5,7 @@
 
 package com.roostermornings.android.sqlutil;
 
+import android.accounts.Account;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -18,6 +19,7 @@ import android.widget.Toast;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
@@ -31,7 +33,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.roostermornings.android.BaseApplication.mAccount;
+import javax.inject.Inject;
+
 import static com.roostermornings.android.activity.base.BaseActivity.mCurrentUser;
 import static com.roostermornings.android.util.Constants.AUTHORITY;
 import static com.roostermornings.android.util.RoosterUtils.hasKitKat;
@@ -51,7 +54,11 @@ public final class DeviceAlarmController {
     private DeviceAlarmTableManager deviceAlarmTableManager;
     private Context context;
 
+    @Inject
+    Account mAccount;
+
     public DeviceAlarmController(Context context) {
+        BaseApplication.getRoosterApplicationComponent().inject(this);
         this.context = context;
         deviceAlarmTableManager = new DeviceAlarmTableManager(context);
     }
