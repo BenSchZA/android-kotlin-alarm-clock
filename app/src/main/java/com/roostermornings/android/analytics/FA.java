@@ -13,6 +13,8 @@ import com.roostermornings.android.activity.IntroFragmentActivity;
 
 import java.lang.reflect.Type;
 
+import static com.roostermornings.android.BaseApplication.firebaseAnalytics;
+
 
 //FA stands for Firebase Analytics - defines relationship between Event and Param, handles analytic logging in background thread
 public abstract class FA {
@@ -111,7 +113,6 @@ public abstract class FA {
             public void run() {
 
                 Bundle bundle = new Bundle();
-                FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(BaseApplication.AppContext);
 
                 String eventString;
 

@@ -40,7 +40,7 @@ public class FirebaseListenerService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         running = true;
         //Reset flags - NB onChildChanged called once for each child when first called
-        ((BaseApplication)getApplication()).setNotificationFlag(0, Constants.FLAG_FRIENDREQUESTS);
+        BaseApplication.setNotificationFlag(0, Constants.FLAG_FRIENDREQUESTS);
         //Listen for changes to Firebase user friend requests, display notification
         if(getFirebaseUser() != null) {
             mDatabase = FirebaseDatabase.getInstance().getReference();

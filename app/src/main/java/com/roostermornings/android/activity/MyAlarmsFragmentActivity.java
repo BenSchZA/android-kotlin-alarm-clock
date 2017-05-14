@@ -104,7 +104,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                 setupToolbar(toolbarTitle, getString(R.string.my_alarms));
 
                 //Set up adapter for monitoring alarm objects
-                mAdapter = new MyAlarmsListAdapter(mAlarms, MyAlarmsFragmentActivity.this, getApplication());
+                mAdapter = new MyAlarmsListAdapter(mAlarms, MyAlarmsFragmentActivity.this);
                 //Use a linear layout manager
                 RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(context);
                 mRecyclerView.setLayoutManager(mLayoutManager);

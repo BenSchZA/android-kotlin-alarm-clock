@@ -317,7 +317,7 @@ public class DeviceAlarmTableManager {
     }
 
     private SQLiteDatabase initDB() {
-        DeviceAlarmTableHelper dbHelper = DeviceAlarmTableHelper.getInstance();
+        DeviceAlarmTableHelper dbHelper = DeviceAlarmTableHelper.getInstance(context);
         return dbHelper.getWritableDatabase();
     }
 

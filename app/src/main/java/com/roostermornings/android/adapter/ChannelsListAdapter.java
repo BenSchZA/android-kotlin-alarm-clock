@@ -35,11 +35,10 @@ import java.util.ArrayList;
 
 import javax.inject.Inject;
 
-import static com.roostermornings.android.BaseApplication.AppContext;
-
 public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapter.ViewHolder> implements NewAlarmFragment2.ChannelInterface {
     private ArrayList<ChannelRooster> mDataset;
     private Activity mActivity;
+    private Context context;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -89,6 +88,7 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
     @Override
     public ChannelsListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                              int viewType) {
+        context = parent.getContext();
         // create a new view
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.cardview_channels, parent, false);
         // set the view's size, margins, paddings and layout parameters
@@ -142,7 +142,7 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
         });
 
         try {
-            Picasso.with(AppContext).load(channelRooster.getChannel_photo())
+            Picasso.with(context).load(channelRooster.getChannel_photo())
                     .fit()
                     .centerCrop()
                     .into(holder.imgChannelImage, new Callback() {

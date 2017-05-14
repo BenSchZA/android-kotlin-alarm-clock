@@ -86,8 +86,6 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
 
     private static Calendar calendar = Calendar.getInstance();
 
-    public DatabaseReference mDatabase;
-
     public static User mCurrentUser;
 
     @Inject Context AppContext;
@@ -95,6 +93,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
     @Inject DeviceAlarmController deviceAlarmController;
     @Inject AudioTableManager audioTableManager;
     @Inject BackgroundTaskReceiver backgroundTaskReceiver;
+    @Inject public DatabaseReference mDatabase;
 
     protected abstract void inject(RoosterApplicationComponent component);
 
@@ -110,10 +109,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
         //Set default application settings preferences - don't overwrite existing if false
         setPreferenceManagerDefaultSettings(false);
 
-        mCurrentUser = baseApplication.mCurrentUser;
-
-        //get reference to Firebase database
-        mDatabase = baseApplication.mDatabase;
+        mCurrentUser = BaseApplication.mCurrentUser;
 
         // [START auth_state_listener]
         mAuthListener = new FirebaseAuth.AuthStateListener() {

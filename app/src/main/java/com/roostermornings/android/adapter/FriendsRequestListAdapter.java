@@ -5,6 +5,7 @@
 
 package com.roostermornings.android.adapter;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
@@ -22,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.domain.Friend;
@@ -33,9 +35,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.roostermornings.android.BaseApplication.AppContext;
 import static com.roostermornings.android.BaseApplication.mCurrentUser;
-import static com.roostermornings.android.BaseApplication.mDatabase;
 
 /**
  * Created by bscholtz on 08/03/17.
@@ -43,6 +43,7 @@ import static com.roostermornings.android.BaseApplication.mDatabase;
 
 public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsRequestListAdapter.ViewHolder> implements Filterable, FriendsFragmentActivity.FriendsRequestListAdapterInterface {
     private ArrayList<Friend> mDataset;
+    private Context context;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -93,6 +94,7 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
     @Override
     public FriendsRequestListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                                   int viewType) {
+        context = parent.getContext();
         // create a new view
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_layout_friends_request, parent, false);
         // set the view's size, margins, paddings and layout parameters
@@ -153,14 +155,14 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
     private void setProfilePic(String url, final FriendsRequestListAdapter.ViewHolder holder, final int position) {
 
         try{
-            Picasso.with(AppContext).load(url)
+            Picasso.with(context).load(url)
                     .resize(50, 50)
                     .centerCrop()
                     .into(holder.imgProfilePic, new Callback() {
                         @Override
                         public void onSuccess() {
                             Bitmap imageBitmap = ((BitmapDrawable) holder.imgProfilePic.getDrawable()).getBitmap();
-                            RoundedBitmapDrawable imageDrawable = RoundedBitmapDrawableFactory.create(AppContext.getResources(), imageBitmap);
+                            RoundedBitmapDrawable imageDrawable = RoundedBitmapDrawableFactory.create(context.getResources(), imageBitmap);
                             imageDrawable.setCircular(true);
                             imageDrawable.setCornerRadius(Math.max(imageBitmap.getWidth(), imageBitmap.getHeight()) / 2.0f);
                             //holder.imgProfilePic.setImageAlpha(0);
@@ -238,22 +240,22 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
         //Update current user and friend entry as: uid:boolean
         Map<String, Object> childUpdates = new HashMap<>();
         childUpdates.put(acceptFriend.getUid(), true);
-        mDatabase.getDatabase().getReference(currentUserUrl).updateChildren(childUpdates);
+        BaseApplication.getFbDbRef().getDatabase().getReference(currentUserUrl).updateChildren(childUpdates);
         childUpdates.clear();
 
         childUpdates.put(currentUserFriend.getUid(), true);
-        mDatabase.getDatabase().getReference(friendUserUrl).updateChildren(childUpdates);
+        BaseApplication.getFbDbRef().getDatabase().getReference(friendUserUrl).updateChildren(childUpdates);
         childUpdates.clear();
 
         String receivedUrl = String.format("friend_requests_received/%s/%s", mCurrentUser.getUid(), acceptFriend.getUid());
         String sentUrl = String.format("friend_requests_sent/%s/%s", acceptFriend.getUid(), mCurrentUser.getUid());
 
         //Clear received and sent request list
-        mDatabase.getDatabase().getReference(receivedUrl).setValue(null);
-        mDatabase.getDatabase().getReference(sentUrl).setValue(null);
+        BaseApplication.getFbDbRef().getDatabase().getReference(receivedUrl).setValue(null);
+        BaseApplication.getFbDbRef().getDatabase().getReference(sentUrl).setValue(null);
 
         //Notify user that friend request accepted
-        Toast.makeText(AppContext, acceptFriend.getUser_name() + "'s friend request accepted!", Toast.LENGTH_LONG).show();
+        Toast.makeText(context, acceptFriend.getUser_name() + "'s friend request accepted!", Toast.LENGTH_LONG).show();
     }
 
     public void rejectFriendRequest(Friend rejectFriend) {
@@ -262,10 +264,10 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
         String sentUrl = String.format("friend_requests_sent/%s/%s", rejectFriend.getUid(), mCurrentUser.getUid());
 
         //Clear received and sent request list
-        mDatabase.getDatabase().getReference(receivedUrl).setValue(null);
-        mDatabase.getDatabase().getReference(sentUrl).setValue(null);
+        BaseApplication.getFbDbRef().getDatabase().getReference(receivedUrl).setValue(null);
+        BaseApplication.getFbDbRef().getDatabase().getReference(sentUrl).setValue(null);
 
         //Notify user that friend request accepted
-        Toast.makeText(AppContext, rejectFriend.getUser_name() + "'s friend request rejected!", Toast.LENGTH_LONG).show();
+        Toast.makeText(context, rejectFriend.getUser_name() + "'s friend request rejected!", Toast.LENGTH_LONG).show();
     }
 }

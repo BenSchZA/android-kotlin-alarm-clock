@@ -68,7 +68,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
 
     @Inject DeviceAlarmController deviceAlarmController;
     @Inject DeviceAlarmTableManager deviceAlarmTableManager;
-    @Inject FirebaseUser firebaseUser;
+    @Inject FirebaseUser mCurrentUser;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -292,10 +292,10 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
 
             switch (position) {
                 case 0:
-                    mFragment1 = NewAlarmFragment1.newInstance(firebaseUser.getUid());
+                    mFragment1 = NewAlarmFragment1.newInstance(mCurrentUser.getUid());
                     return mFragment1;
                 case 1:
-                    mFragment2 = NewAlarmFragment2.newInstance(firebaseUser.getUid());
+                    mFragment2 = NewAlarmFragment2.newInstance(mCurrentUser.getUid());
                     return mFragment2;
             }
 
