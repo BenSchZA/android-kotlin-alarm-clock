@@ -134,6 +134,6 @@ public class Constants {
     // An account type, in the form of a domain name
     public static final String ACCOUNT_TYPE = "roostermornings.com";
     // The account name
-    public static final String ACCOUNT = "rooster.content";
+    public static final String ACCOUNT = "Rooster Content";
 
 }

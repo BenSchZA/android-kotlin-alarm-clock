@@ -51,7 +51,7 @@ import static com.roostermornings.android.util.Constants.AUTHORITY;
 public class BaseApplication extends android.app.Application {
 
     private static final String TAG = "BaseApplication";
-    RoosterApplicationComponent roosterApplicationComponent;
+    private static RoosterApplicationComponent roosterApplicationComponent;
     public Retrofit mRetrofit;
     public IHTTPClient mAPIService;
     protected FirebaseAuth mAuth;
@@ -69,15 +69,11 @@ public class BaseApplication extends android.app.Application {
     @Inject BackgroundTaskReceiver backgroundTaskReceiver;
     @Inject SharedPreferences sharedPreferences;
     @Inject DatabaseReference mDatabase;
-    public static Account mAccount;
     public static FirebaseAnalytics firebaseAnalytics;
 
     @Override
     public void onCreate() {
         super.onCreate();
-
-        //Create sync account
-        mAccount = CreateSyncAccount(this);
 
         //Get static FBAnalytics instance
         firebaseAnalytics = FirebaseAnalytics.getInstance(this);
@@ -148,10 +144,6 @@ public class BaseApplication extends android.app.Application {
                 if (user != null) {
                     // User is signed in
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-
-                    ContentResolver.setIsSyncable(mAccount, AUTHORITY, 1);
-                    ContentResolver.setSyncAutomatically(mAccount, AUTHORITY, true);
-                    ContentResolver.addPeriodicSync(mAccount, AUTHORITY, new Bundle(), 300);
 
                     //retrieve static User for current user
                     retrieveMyUserDetails();
@@ -243,7 +235,7 @@ public class BaseApplication extends android.app.Application {
         registerReceiver(receiver, firebaseListenerServiceFilter);
     }
 
-    public RoosterApplicationComponent getRoosterApplicationComponent() {
+    public static RoosterApplicationComponent getRoosterApplicationComponent() {
         return roosterApplicationComponent;
     }
 

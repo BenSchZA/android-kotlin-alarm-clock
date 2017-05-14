@@ -5,6 +5,7 @@
 
 package com.roostermornings.android.service;
 
+import android.accounts.Account;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -25,16 +26,29 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Exclude;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.analytics.FA;
+import com.roostermornings.android.domain.Channel;
+import com.roostermornings.android.domain.ChannelRooster;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 import com.roostermornings.android.sqlutil.AudioTableController;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
@@ -51,16 +65,21 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.SortedMap;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.TreeMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
+import static android.content.ContentValues.TAG;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static com.roostermornings.android.BaseApplication.mAccount;
 import static com.roostermornings.android.util.Constants.AUTHORITY;
 
 //Service to manage playing and pausing audio during Rooster alarm
@@ -69,9 +88,7 @@ public class AudioService extends Service {
     // Binder given to clients
     private final IBinder mBinder = new LocalBinder();
 
-    private static BroadcastReceiver receiver;
     private static final Timer timer = new Timer();
-    private static final Timer downloadTimer = new Timer();
 
     private final MediaPlayer mediaPlayerDefault = new MediaPlayer();
     private final MediaPlayer mediaPlayerRooster = new MediaPlayer();
@@ -81,6 +98,7 @@ public class AudioService extends Service {
     private final AudioService mThis = this;
 
     Intent wakefulIntent;
+    Intent intent;
 
     private ArrayList<DeviceAudioQueueItem> channelAudioItems = new ArrayList<>();
     private ArrayList<DeviceAudioQueueItem> socialAudioItems = new ArrayList<>();
@@ -100,6 +118,11 @@ public class AudioService extends Service {
     private int alarmPosition = 1;
 
     private int currentPositionRooster = 0;
+
+    @Inject
+    Account mAccount;
+
+    public static boolean mRunning;
 
     public AudioService() {
     }
@@ -127,29 +150,40 @@ public class AudioService extends Service {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public void onCreate() {
+        super.onCreate();
+        mRunning = false;
+
         BaseApplication baseApplication = (BaseApplication) getApplication();
         baseApplication.getRoosterApplicationComponent().inject(this);
-
-        //Get wakeful intent of DeviceAlarmReceiver to enable finishing it in endService()
-        wakefulIntent = intent.getParcelableExtra(Constants.DEVICE_ALARM_RECEIVER_WAKEFUL_INTENT);
 
         //Start fullscreen alarm activation activity
         Intent intentAlarmFullscreen = new Intent(mThis, DeviceAlarmFullScreenActivity.class);
         intentAlarmFullscreen.addFlags(FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         mThis.startActivity(intentAlarmFullscreen);
+    }
 
-        try {
-            if (!mediaPlayerRooster.isPlaying() && !mediaPlayerDefault.isPlaying()) {
-                if(!intent.getStringExtra(Constants.EXTRA_ALARMID).isEmpty()) {
-                    startAlarmContent(intent.getStringExtra(Constants.EXTRA_ALARMID));
-                } else {
-                    startDefaultAlarmTone(true);
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        //Only attempt to start alarm once, in case of multiple conflicting alarms
+        if (!mRunning) {
+            mRunning = true;
+            //Get wakeful intent of DeviceAlarmReceiver to enable finishing it in endService()
+            if(intent != null) wakefulIntent = intent.getParcelableExtra(Constants.DEVICE_ALARM_RECEIVER_WAKEFUL_INTENT);
+            mThis.intent = intent;
+
+            try {
+                if (!mediaPlayerRooster.isPlaying() && !mediaPlayerDefault.isPlaying()) {
+                    if(!intent.getStringExtra(Constants.EXTRA_ALARMID).isEmpty()) {
+                        startAlarmContent(intent.getStringExtra(Constants.EXTRA_ALARMID));
+                    } else {
+                        startDefaultAlarmTone(true);
+                    }
                 }
+            } catch(IllegalStateException e) {
+                e.printStackTrace();
+                startDefaultAlarmTone(true);
             }
-        } catch(IllegalStateException e) {
-            e.printStackTrace();
-            startDefaultAlarmTone(true);
         }
 
         return START_STICKY;
@@ -205,113 +239,228 @@ public class AudioService extends Service {
             return;
         }
 
-        //Broadcast receiver filter to receive download finished updates
-        IntentFilter audioServiceChannelDownloadFinishedFilter = new IntentFilter();
-        audioServiceChannelDownloadFinishedFilter.addAction(Constants.ACTION_CHANNEL_DOWNLOAD_FINISHED);
-        receiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-
-                //Cancel download attempt timer and ensure BroadcastReceiver not re-triggered
-                try {
-                    if (downloadTimer != null) downloadTimer.cancel();
-                } catch(IllegalArgumentException e) {
-                    e.printStackTrace();
-                } try {
-                    if (receiver != null) unregisterReceiver(receiver);
-                } catch(IllegalArgumentException e) {
-                    e.printStackTrace();
-                }
-
-                //Check if old content exists
-                if(audioItems.size() > 0) {
-                    playAlarmRoosters();
-                    return;
-                }
-                //If no content exists to add to audioItems, then return now
-                if(mThis.socialAudioItems.isEmpty() && mThis.channelAudioItems.isEmpty()) {
-                    startDefaultAlarmTone(false);
-                    return;
-                }
-
-                //Try append new content to end of existing content, if it fails - fail safe and play default alarm tone
-                try {
-                    //Reorder channel and social queue according to user preferences
-                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                    if(sharedPreferences.getBoolean(Constants.USER_SETTINGS_ROOSTER_ORDER, false)) {
-                        if (!mThis.channelAudioItems.isEmpty()) {
-                            audioItems.addAll(channelAudioItems);
-                        }
-                        //If this alarm does not allow social roosters, move on to channel content
-                        if (!mThis.socialAudioItems.isEmpty() && deviceAlarmTableManager.getAlarmSet(mThis.alarmUid).get(0).isSocial()) {
-                            audioItems.addAll(socialAudioItems);
-                        }
-                    } else {
-                        //If this alarm does not allow social roosters, move on to channel content
-                        if (!mThis.socialAudioItems.isEmpty() && deviceAlarmTableManager.getAlarmSet(mThis.alarmUid).get(0).isSocial()) {
-                            audioItems.addAll(socialAudioItems);
-                        }
-                        if (!mThis.channelAudioItems.isEmpty()) {
-                            audioItems.addAll(channelAudioItems);
-                        }
-                    }
-                    if (audioItems.isEmpty()) {
-                        startDefaultAlarmTone(false);
-                        return;
-                    }
-                } catch (NullPointerException e){
-                    e.printStackTrace();
-                    startDefaultAlarmTone(true);
-                    return;
-                }
-                playAlarmRoosters();
-            }
-        }; registerReceiver(receiver, audioServiceChannelDownloadFinishedFilter);
-
         //Try to fetch un-downloaded channel content for 30 seconds if it doesn't already exist
         try {
-            if (!"".equals(mThis.alarmChannelUid)
-                    && !Constants.ALARM_CHANNEL_DOWNLOAD_FAILED.equals(alarm.getLabel())
-                    && channelAudioItems == null) {
+            //If alarm channel is not empty and channel audioitems is empty, try download
+            if (!"".equals(mThis.alarmChannelUid) && channelAudioItems.isEmpty()) {
 
                 FA.Log(FA.Event.Alarm_activated.class, FA.Event.Alarm_activated.Param.Data_loaded, false);
 
                 if (!InternetHelper.noInternetConnection(this)) {
                     //Download any social or channel audio files
-                    ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
-                    //Start alarm after 30 seconds or after download finished
-                    startDownloadTimer();
+                    attemptContentUriRetrieval(alarm);
                 } else {
-                    //Send broadcast message to notify all receivers of download finished
-                    Intent intent = new Intent(Constants.ACTION_CHANNEL_DOWNLOAD_FINISHED);
-                    sendBroadcast(intent);
+                    compileAudioItemContent();
                 }
             } else {
                 FA.Log(FA.Event.Alarm_activated.class, FA.Event.Alarm_activated.Param.Data_loaded, true);
-
-                //Send broadcast message to notify all receivers of download finished
-                Intent intent = new Intent(Constants.ACTION_CHANNEL_DOWNLOAD_FINISHED);
-                sendBroadcast(intent);
+                compileAudioItemContent();
             }
         } catch(NullPointerException e) {
             e.printStackTrace();
-            //Send broadcast message to notify all receivers of download finished
-            Intent intent = new Intent(Constants.ACTION_CHANNEL_DOWNLOAD_FINISHED);
-            sendBroadcast(intent);
+            compileAudioItemContent();
         }
     }
 
-    //Set timer to kill alarm after 5 minutes
-    private void startDownloadTimer() {
-        downloadTimer.schedule(new timerDownloadTask(), Constants.AUDIOSERVICE_DOWNLOAD_TASK_LIMIT);
+    private void compileAudioItemContent() {
+        //Check if old content exists
+        if(audioItems.size() > 0) {
+            playAlarmRoosters();
+            return;
+        }
+        //If no content exists to add to audioItems, then return now
+        if(mThis.socialAudioItems.isEmpty() && mThis.channelAudioItems.isEmpty()) {
+            startDefaultAlarmTone(false);
+            return;
+        }
+
+        //Try append new content to end of existing content, if it fails - fail safe and play default alarm tone
+        try {
+            //Reorder channel and social queue according to user preferences
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            if(sharedPreferences.getBoolean(Constants.USER_SETTINGS_ROOSTER_ORDER, false)) {
+                if (!mThis.channelAudioItems.isEmpty()) {
+                    audioItems.addAll(channelAudioItems);
+                }
+                //If this alarm does not allow social roosters, move on to channel content
+                if (!mThis.socialAudioItems.isEmpty() && deviceAlarmTableManager.getAlarmSet(mThis.alarmUid).get(0).isSocial()) {
+                    audioItems.addAll(socialAudioItems);
+                }
+            } else {
+                //If this alarm does not allow social roosters, move on to channel content
+                if (!mThis.socialAudioItems.isEmpty() && deviceAlarmTableManager.getAlarmSet(mThis.alarmUid).get(0).isSocial()) {
+                    audioItems.addAll(socialAudioItems);
+                }
+                if (!mThis.channelAudioItems.isEmpty()) {
+                    audioItems.addAll(channelAudioItems);
+                }
+            }
+            if (audioItems.isEmpty()) {
+                startDefaultAlarmTone(false);
+                return;
+            }
+        } catch (NullPointerException e){
+            e.printStackTrace();
+            startDefaultAlarmTone(true);
+            return;
+        }
+        playAlarmRoosters();
     }
 
-    private class timerDownloadTask extends TimerTask {
-        public void run() {
-            //Send broadcast message to notify all receivers of download finished
-            Intent intent = new Intent(Constants.ACTION_CHANNEL_DOWNLOAD_FINISHED);
-            sendBroadcast(intent);
+    private void attemptContentUriRetrieval(final DeviceAlarm deviceAlarm) {
+        try {
+            //Check if channel has a valid ID, else next pending alarm has no channel
+            final String channelId = deviceAlarm.getChannel();
+            if ("".equals(channelId)) {
+                startDefaultAlarmTone(false);
+                return;
+            }
+
+            final DatabaseReference channelReference = FirebaseDatabase.getInstance().getReference()
+                    .child("channels").child(channelId);
+            channelReference.keepSynced(true);
+
+            ValueEventListener channelListener = new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    Channel channel = dataSnapshot.getValue(Channel.class);
+
+                    //Check if channel exists
+                    if (channel == null) {
+                        startDefaultAlarmTone(true);
+                        return;
+                    }
+                    //Check if channel is active
+                    if (!channel.isActive()) {
+                        startDefaultAlarmTone(true);
+                        return;
+                    }
+
+                    //Check if channel has content and whether a story or not
+                    final Integer iteration;
+                    if (channel.isNew_alarms_start_at_first_iteration() && deviceAlarmTableManager.getChannelStoryIteration(channelId) != null)
+                        iteration = deviceAlarmTableManager.getChannelStoryIteration(channelId);
+                        //If iteration is null, this means no entry in db - set to 1 and process from there
+                    else if (channel.isNew_alarms_start_at_first_iteration()) iteration = 1;
+                    else if (channel.getCurrent_rooster_cycle_iteration() < 1) return;
+                    else iteration = channel.getCurrent_rooster_cycle_iteration();
+
+                    final DatabaseReference channelRoosterUploadsReference = FirebaseDatabase.getInstance().getReference()
+                            .child("channel_rooster_uploads").child(channelId);
+
+                    //Ensure latest data is pulled
+                    channelRoosterUploadsReference.keepSynced(true);
+
+                    ValueEventListener channelRoosterUploadsListener = new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            TreeMap<Integer, ChannelRooster> channelIterationMap = new TreeMap<>();
+                            //Check if node has children i.e. channelId content exists
+                            if (dataSnapshot.getChildrenCount() == 0) return;
+                            //Iterate over all content children
+                            for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                ChannelRooster channelRooster = postSnapshot.getValue(ChannelRooster.class);
+                                if (channelRooster.isActive() && (channelRooster.getRooster_cycle_iteration() != iteration)) {
+                                    channelIterationMap.put(channelRooster.getRooster_cycle_iteration(), channelRooster);
+                                } else if (channelRooster.isActive()) {
+                                    streamChannelContent(channelRooster.getAudio_file_url());
+                                }
+                            }
+
+                            //Check head and tail of naturally sorted TreeMap for next valid channel content
+                            SortedMap<Integer, ChannelRooster> tailMap = channelIterationMap.tailMap(iteration);
+                            SortedMap<Integer, ChannelRooster> headMap = channelIterationMap.headMap(iteration);
+                            if (!tailMap.isEmpty()) {
+                                //User is starting story at next valid entry
+                                //Set SQL entry for iteration to current valid story iteration, to be incremented on play
+                                deviceAlarmTableManager.setChannelStoryIteration(channelId, tailMap.firstKey());
+                                //Retrieve channel audio
+                                streamChannelContent(channelIterationMap.get(tailMap.firstKey()).getAudio_file_url());
+                            } else if (!headMap.isEmpty()) {
+                                //User is starting story from beginning again, at valid entry
+                                //Set SQL entry for iteration to current valid story iteration, to be incremented on play
+                                deviceAlarmTableManager.setChannelStoryIteration(channelId, headMap.firstKey());
+                                //Retrieve channel audio
+                                streamChannelContent(channelIterationMap.get(headMap.firstKey()).getAudio_file_url());
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            startDefaultAlarmTone(true);
+                        }
+                    };
+                    channelRoosterUploadsReference.addListenerForSingleValueEvent(channelRoosterUploadsListener);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+                    startDefaultAlarmTone(true);
+                }
+            };
+            channelReference.addListenerForSingleValueEvent(channelListener);
+        } catch(Exception e) {
+            e.printStackTrace();
+            startDefaultAlarmTone(true);
         }
+    }
+
+    private void streamChannelContent(final String url) {
+        StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
+        final StorageReference audioFileRef = mStorageRef.getStorage().getReferenceFromUrl(url);
+
+        final MediaPlayer streamMediaPlayer = new MediaPlayer();
+
+        audioFileRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>()
+        {
+            @Override
+            public void onSuccess(Uri downloadUrl)
+            {
+                try {
+                    streamMediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
+                    streamMediaPlayer.setLooping(true);
+                    streamMediaPlayer.setDataSource(downloadUrl.toString());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    startDefaultAlarmTone(true);
+                    return;
+                }
+                streamMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                    @Override
+                    public void onPrepared(MediaPlayer mp) {
+                        if(streamMediaPlayer.isPlaying()) return;
+                        streamMediaPlayer.start();
+                        checkStreamVolume();
+                        softStartAudio();
+
+                        streamMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                            @Override
+                            public void onCompletion(MediaPlayer mp) {
+
+                            }
+                        });
+                    }
+                });
+
+                streamMediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+                    @Override
+                    public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
+                        startDefaultAlarmTone(true);
+                        return true;
+                    }
+                });
+
+                streamMediaPlayer.prepareAsync();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle any errors
+                startDefaultAlarmTone(true);
+            }
+        });
     }
 
     private void playAlarmRoosters() {
@@ -524,7 +673,7 @@ public class AudioService extends Service {
         endService(conn);
     }
 
-    private void endService(ServiceConnection conn) {
+    public void endService(ServiceConnection conn) {
         processListenedChannels();
         //Delete record of all listened audio files
         for (DeviceAudioQueueItem audioItem :

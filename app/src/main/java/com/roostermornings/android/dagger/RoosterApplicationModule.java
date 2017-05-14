@@ -5,8 +5,11 @@
 
 package com.roostermornings.android.dagger;
 
+import android.accounts.Account;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 
@@ -30,6 +33,9 @@ import com.roostermornings.android.sqlutil.AudioTableController;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
+
+import static com.roostermornings.android.sync.DownloadSyncAdapter.CreateSyncAccount;
+import static com.roostermornings.android.util.Constants.AUTHORITY;
 
 /**
  * Created by Abdul on 6/14/2016.
@@ -65,6 +71,16 @@ public class RoosterApplicationModule {
     @Singleton
     BaseApplication providesBaseApplication() {
         return baseApplication;
+    }
+
+    @Provides
+    Account provideSyncAdapterAccount(Context context) {
+        //Create sync account
+        Account mAccount = CreateSyncAccount(context);
+        ContentResolver.setIsSyncable(mAccount, AUTHORITY, 1);
+        ContentResolver.setSyncAutomatically(mAccount, AUTHORITY, true);
+        ContentResolver.addPeriodicSync(mAccount, AUTHORITY, new Bundle(), 300);
+        return mAccount;
     }
 
     @Provides
