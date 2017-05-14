@@ -55,7 +55,6 @@ import java.util.concurrent.TimeUnit;
 import static android.content.ContentValues.TAG;
 import static android.content.Context.ACCOUNT_SERVICE;
 import static com.facebook.FacebookSdk.getApplicationContext;
-import static com.roostermornings.android.BaseApplication.AppContext;
 import static com.roostermornings.android.util.Constants.ACCOUNT;
 import static com.roostermornings.android.util.Constants.ACCOUNT_TYPE;
 import static com.roostermornings.android.util.Constants.AUTHORITY;
@@ -70,8 +69,8 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
     private FirebaseAuth mAuth;
     private StorageReference mStorageRef;
 
-    private final AudioTableManager audioTableManager = new AudioTableManager(AppContext);
-    private final DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(AppContext);
+    private final AudioTableManager audioTableManager = new AudioTableManager(getApplicationContext());
+    private final DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(getApplicationContext());
 
     public static Bundle getForceBundle() {
         Bundle forceBundle = new Bundle();
@@ -132,13 +131,13 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
         Log.d("SyncAdapter: ", "onPerformSync()");
 
         if(FirebaseAuth.getInstance().getCurrentUser() != null) {
-            retrieveSocialRoosterData(AppContext);
-            retrieveChannelContentData(AppContext);
-            BaseActivity.setBadge(getApplicationContext(), ((BaseApplication)AppContext).getNotificationFlag(Constants.FLAG_ROOSTERCOUNT));
+            retrieveSocialRoosterData(getApplicationContext());
+            retrieveChannelContentData(getApplicationContext());
+            BaseActivity.setBadge(getApplicationContext(), BaseApplication.getNotificationFlag(Constants.FLAG_ROOSTERCOUNT));
             audioTableManager.updateRoosterCount();
             //Listen for requests from friends
-            Intent intent = new Intent(AppContext, FirebaseListenerService.class);
-            AppContext.startService(intent);
+            Intent intent = new Intent(getApplicationContext(), FirebaseListenerService.class);
+            getApplicationContext().startService(intent);
         }
     }
 
@@ -368,7 +367,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
             deviceAudioQueueItem.setDate_created(System.currentTimeMillis());
 
             //Pre-cache image to display on alarm screen, in case no internet connection
-            if(!channelRooster.getPhoto().isEmpty()) Picasso.with(AppContext).load(channelRooster.getPhoto()).fetch();
+            if(!channelRooster.getPhoto().isEmpty()) Picasso.with(getApplicationContext()).load(channelRooster.getPhoto()).fetch();
 
             //store in local SQLLite database and check if successful
             if(audioTableManager.insertChannelAudioFile(deviceAudioQueueItem)) {
@@ -388,7 +387,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
 
                             //Send broadcast message to notify all receivers of download finished
                             Intent intent = new Intent(Constants.ACTION_CHANNEL_DOWNLOAD_FINISHED);
-                            AppContext.sendBroadcast(intent);
+                            getApplicationContext().sendBroadcast(intent);
 
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -454,7 +453,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
                         }
 
                         //Pre-cache image to display on alarm screen, in case no internet connection
-                        if(!socialRooster.getProfile_pic().isEmpty()) Picasso.with(AppContext).load(socialRooster.getProfile_pic()).fetch();
+                        if(!socialRooster.getProfile_pic().isEmpty()) Picasso.with(getApplicationContext()).load(socialRooster.getProfile_pic()).fetch();
 
                     } catch (Exception e) {
                         e.printStackTrace();

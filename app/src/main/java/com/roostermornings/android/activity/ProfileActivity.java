@@ -29,6 +29,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
@@ -52,6 +53,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import butterknife.BindView;
 import butterknife.OnClick;
 import butterknife.OnTextChanged;
@@ -72,6 +75,8 @@ public class ProfileActivity extends BaseActivity {
     TextView toolbarTitle;
 
     String mCurrentPhotoPath;
+
+    @Inject FirebaseUser firebaseUser;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {

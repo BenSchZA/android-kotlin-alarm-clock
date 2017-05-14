@@ -102,7 +102,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
     FriendsInviteFragment3 friendsInviteFragment3;
 
     @Inject BaseApplication baseApplication;
-    @Inject FirebaseUser firebaseUser;
+    @Inject FirebaseUser mCurrentUser;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -138,13 +138,13 @@ public class FriendsFragmentActivity extends BaseActivity implements
 
         //Keep local and Firebase alarm dbs synced, and enable offline persistence
         mFriendRequestsReceivedReference = FirebaseDatabase.getInstance().getReference()
-                .child("friend_requests_received").child(firebaseUser.getUid());
+                .child("friend_requests_received").child(mCurrentUser.getUid());
 
         mFriendRequestsSentReference = FirebaseDatabase.getInstance().getReference()
-                .child("friend_requests_sent").child(firebaseUser.getUid());
+                .child("friend_requests_sent").child(mCurrentUser.getUid());
 
         mCurrentUserReference = FirebaseDatabase.getInstance().getReference()
-                .child("users").child(firebaseUser.getUid());
+                .child("users").child(mCurrentUser.getUid());
 
         mFriendRequestsReceivedReference.keepSynced(true);
         mFriendRequestsSentReference.keepSynced(true);
@@ -170,7 +170,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
                 if (position == 1) {
                     setTabNotification(position, false);
                     setButtonBarNotification(false);
-                    baseApplication.setNotificationFlag(0, Constants.FLAG_FRIENDREQUESTS);
+                    BaseApplication.setNotificationFlag(0, Constants.FLAG_FRIENDREQUESTS);
                 } else if(position == 2) {
                     friendsInviteFragment3.requestGetContacts();
                 }
@@ -343,7 +343,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
     private void updateNotifications() {
         //Flag check for UI changes on load, broadcastreceiver for changes while activity running
         //If notifications waiting, display new friend request notification
-        if (((BaseApplication) getApplication()).getNotificationFlag(Constants.FLAG_FRIENDREQUESTS) > 0) {
+        if (BaseApplication.getNotificationFlag(Constants.FLAG_FRIENDREQUESTS) > 0) {
             setButtonBarNotification(true);
             setTabNotification(1, true);
         }
@@ -356,7 +356,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
             @Override
             public void onReceive(Context context, Intent intent) {
                 //do something based on the intent's action
-                if (((BaseApplication) getApplication()).getNotificationFlag(Constants.FLAG_FRIENDREQUESTS) > 0) {
+                if (BaseApplication.getNotificationFlag(Constants.FLAG_FRIENDREQUESTS) > 0) {
                     setButtonBarNotification(true);
                     setTabNotification(1, true);
                 }

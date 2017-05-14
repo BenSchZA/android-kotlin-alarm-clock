@@ -5,6 +5,8 @@
 
 package com.roostermornings.android.adapter;
 
+import android.content.ContentResolver;
+import android.content.Context;
 import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -17,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.domain.Friend;
@@ -24,9 +27,7 @@ import com.roostermornings.android.util.RoosterUtils;
 
 import java.util.ArrayList;
 
-import static com.roostermornings.android.BaseApplication.AppContext;
 import static com.roostermornings.android.BaseApplication.mCurrentUser;
-import static com.roostermornings.android.BaseApplication.mDatabase;
 
 /**
  * Created by bscholtz on 06/03/17.
@@ -34,6 +35,7 @@ import static com.roostermornings.android.BaseApplication.mDatabase;
 
 public class FriendsInviteListAdapter extends RecyclerView.Adapter<FriendsInviteListAdapter.ViewHolder> implements Filterable, FriendsFragmentActivity.FriendsInviteListAdapterInterface {
     private ArrayList<Friend> mDataset;
+    private Context context;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -79,6 +81,7 @@ public class FriendsInviteListAdapter extends RecyclerView.Adapter<FriendsInvite
     @Override
     public FriendsInviteListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                                   int viewType) {
+        context = parent.getContext();
         // create a new view
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_layout_friends_invite, parent, false);
         // set the view's size, margins, paddings and layout parameters
@@ -169,9 +172,9 @@ public class FriendsInviteListAdapter extends RecyclerView.Adapter<FriendsInvite
         Friend currentUserFriend = new Friend(mCurrentUser.getUid(), mCurrentUser.getUser_name(), mCurrentUser.getProfile_pic(), mCurrentUser.getCell_number());
 
         //Append to received and sent request list
-        mDatabase.getDatabase().getReference(inviteUrl).setValue(currentUserFriend);
-        mDatabase.getDatabase().getReference(currentUserUrl).setValue(inviteFriend);
+        BaseApplication.getFbDbRef().getDatabase().getReference(inviteUrl).setValue(currentUserFriend);
+        BaseApplication.getFbDbRef().getDatabase().getReference(currentUserUrl).setValue(inviteFriend);
 
-        Toast.makeText(AppContext, inviteFriend.getUser_name() + " invited!", Toast.LENGTH_LONG).show();
+        Toast.makeText(context, inviteFriend.getUser_name() + " invited!", Toast.LENGTH_LONG).show();
     }
 }

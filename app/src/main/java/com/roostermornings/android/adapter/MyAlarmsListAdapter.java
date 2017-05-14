@@ -48,9 +48,9 @@ import butterknife.ButterKnife;
 public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapter.ViewHolder> {
     private ArrayList<Alarm> mDataset;
     private Activity mActivity;
-    private Application mApplication;
     private BroadcastReceiver receiver;
     private DeviceAlarmTableManager deviceAlarmTableManager;
+    private Context context;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -92,10 +92,9 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public MyAlarmsListAdapter(ArrayList<Alarm> myDataset, Activity activity, Application application) {
+    public MyAlarmsListAdapter(ArrayList<Alarm> myDataset, Activity activity) {
         mDataset = myDataset;
         mActivity = activity;
-        mApplication = application;
         setHasStableIds(true);
     }
 
@@ -108,6 +107,7 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
     @Override
     public MyAlarmsListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                              int viewType) {
+        context = parent.getContext();
         // create a new view
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.cardview_my_alarms, parent, false);
         // set the view's size, margins, paddings and layout parameters
@@ -139,8 +139,8 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
             if(alarm.getUnseen_roosters() != null && alarm.getUnseen_roosters() > 0) {
                 holder.roosterNotificationParent.setVisibility(View.VISIBLE);
                 holder.roosterNotificationText.setText(String.valueOf(alarm.getUnseen_roosters()));
-                holder.roosterNotificationPerson.setAnimation(AnimationUtils.loadAnimation(mActivity.getApplicationContext(), R.anim.pulse));
-                holder.roosterNotificationParent.setAnimation(AnimationUtils.loadAnimation(mActivity.getApplicationContext(), R.anim.pulse));
+                holder.roosterNotificationPerson.setAnimation(AnimationUtils.loadAnimation(context, R.anim.pulse));
+                holder.roosterNotificationParent.setAnimation(AnimationUtils.loadAnimation(context, R.anim.pulse));
             } else{
                 holder.roosterNotificationParent.setVisibility(View.INVISIBLE);
                 holder.roosterNotificationPerson.clearAnimation();
