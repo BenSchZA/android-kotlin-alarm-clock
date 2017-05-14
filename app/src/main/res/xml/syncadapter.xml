@@ -8,8 +8,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:contentAuthority="com.roostermornings.android.datasync.provider"
     android:accountType="roostermornings.com"
-    android:userVisible="false"
+    android:userVisible="true"
     android:supportsUploading="false"
     android:allowParallelSyncs="false"
-    android:isAlwaysSyncable="false" />
+    android:isAlwaysSyncable="true" />
 

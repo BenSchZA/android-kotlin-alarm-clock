@@ -106,14 +106,14 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mAudioService.processListenedChannels();
+        if(mAudioService!=null) mAudioService.processListenedChannels();
         if(mBound) unbindService(mAudioServiceConnection);
         unregisterReceiver(receiver);
     }
 
     @Override
     public void onBackPressed() {
-        mAudioService.snoozeAudioState();
+        if(mAudioService!=null) mAudioService.snoozeAudioState();
         if(mBound) unbindService(mAudioServiceConnection);
         mBound = false;
         finish();
@@ -121,7 +121,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
     @OnClick(R.id.alarm_snooze_button)
     protected void onAlarmSnoozeButtonClicked() {
-        mAudioService.snoozeAudioState();
+        if(mAudioService!=null) mAudioService.snoozeAudioState();
         if(mBound) unbindService(mAudioServiceConnection);
         mBound = false;
         finish();
@@ -129,7 +129,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
     @OnClick(R.id.alarm_dismiss)
     protected void onAlarmDismissButtonClicked() {
-        mAudioService.dismissAlarm(mAudioServiceConnection);
+        if(mAudioService!=null) mAudioService.dismissAlarm(mAudioServiceConnection);
         if(mBound) unbindService(mAudioServiceConnection);
         mBound = false;
         finish();
@@ -137,12 +137,12 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
     @OnClick(R.id.skip_previous)
     protected void onSkipPreviousButtonClicked() {
-        mAudioService.skipPrevious();
+        if(mAudioService!=null) mAudioService.skipPrevious();
     }
 
     @OnClick(R.id.skip_next)
     protected void onSkipNextButtonClicked() {
-        mAudioService.skipNext();
+        if(mAudioService!=null) mAudioService.skipNext();
     }
 
     private ServiceConnection mAudioServiceConnection = new ServiceConnection() {
