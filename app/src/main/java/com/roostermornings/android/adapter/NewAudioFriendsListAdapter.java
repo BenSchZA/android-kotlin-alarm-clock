@@ -14,9 +14,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
@@ -34,7 +32,7 @@ import java.util.ArrayList;
 
 public class NewAudioFriendsListAdapter extends RecyclerView.Adapter<NewAudioFriendsListAdapter.ViewHolder> {
     private ArrayList<User> mDataset;
-    private Context mContext;
+    private Context context;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -68,9 +66,8 @@ public class NewAudioFriendsListAdapter extends RecyclerView.Adapter<NewAudioFri
 
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public NewAudioFriendsListAdapter(ArrayList<User> myDataset, Context context) {
+    public NewAudioFriendsListAdapter(ArrayList<User> myDataset) {
         mDataset = myDataset;
-        mContext = context;
     }
 
 
@@ -79,6 +76,7 @@ public class NewAudioFriendsListAdapter extends RecyclerView.Adapter<NewAudioFri
     @Override
     public NewAudioFriendsListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                                     int viewType) {
+        context = parent.getContext();
         // create a new view
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_layout_new_audio_choose_friends, parent, false);
         // set the view's size, margins, paddings and layout parameters
@@ -111,13 +109,13 @@ public class NewAudioFriendsListAdapter extends RecyclerView.Adapter<NewAudioFri
     private void setProfilePic(String url, final NewAudioFriendsListAdapter.ViewHolder holder, final int position) {
 
         try{
-            Picasso.with(mContext).load(url)
+            Picasso.with(context).load(url)
                     .resize(50, 50)
                     .into(holder.imgProfilePic, new Callback() {
                         @Override
                         public void onSuccess() {
                             Bitmap imageBitmap = ((BitmapDrawable) holder.imgProfilePic.getDrawable()).getBitmap();
-                            RoundedBitmapDrawable imageDrawable = RoundedBitmapDrawableFactory.create(mContext.getResources(), imageBitmap);
+                            RoundedBitmapDrawable imageDrawable = RoundedBitmapDrawableFactory.create(context.getResources(), imageBitmap);
                             imageDrawable.setCircular(true);
                             imageDrawable.setCornerRadius(Math.max(imageBitmap.getWidth(), imageBitmap.getHeight()) / 2.0f);
                             //holder.imgProfilePic.setImageAlpha(0);

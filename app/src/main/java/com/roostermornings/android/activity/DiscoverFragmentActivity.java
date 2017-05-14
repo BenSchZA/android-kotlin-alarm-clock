@@ -70,8 +70,6 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 
-import static com.roostermornings.android.BaseApplication.AppContext;
-
 public class DiscoverFragmentActivity extends BaseActivity implements DiscoverListAdapter.DiscoverAudioSampleInterface {
 
     @BindView(R.id.discoverListView)

@@ -60,7 +60,6 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static com.roostermornings.android.BaseApplication.AppContext;
 import static com.roostermornings.android.BaseApplication.mAccount;
 import static com.roostermornings.android.util.Constants.AUTHORITY;
 
@@ -720,7 +719,7 @@ public class AudioService extends Service {
                 mediaPlayerDefault.setOnErrorListener(new MediaPlayer.OnErrorListener() {
                     @Override
                     public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
-                        RingtoneManager.getRingtone(AppContext,
+                        RingtoneManager.getRingtone(getBaseContext(),
                                 RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)).play();
                         startVibrate();
                         logDefaultRingtoneState(failure);
@@ -730,7 +729,7 @@ public class AudioService extends Service {
 
             } catch (Exception e) {
                 e.printStackTrace();
-                RingtoneManager.getRingtone(AppContext,
+                RingtoneManager.getRingtone(getBaseContext(),
                         RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)).play();
                 startVibrate();
                 logDefaultRingtoneState(failure);
@@ -738,7 +737,7 @@ public class AudioService extends Service {
             logDefaultRingtoneState(failure);
         } catch (Exception e) {
             e.printStackTrace();
-            RingtoneManager.getRingtone(AppContext,
+            RingtoneManager.getRingtone(getBaseContext(),
                     RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)).play();
             startVibrate();
             logDefaultRingtoneState(failure);
@@ -774,7 +773,7 @@ public class AudioService extends Service {
     private float returnUserSettingAlarmMinimumVolume() {
         try {
             String[] alarmVolumeArrayEntries = getResources().getStringArray(R.array.user_settings_alarm_volume_entry_values);
-            SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(AppContext);
+            SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
             float alarmMinimumVolume = 0.4f;
 
             if (alarmVolumeArrayEntries[0].equals(defaultSharedPreferences.getString(Constants.USER_SETTINGS_ALARM_VOLUME, ""))) {

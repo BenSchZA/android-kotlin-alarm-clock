@@ -20,6 +20,8 @@ import dagger.Provides;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
@@ -56,7 +58,7 @@ public class RoosterApplicationModule {
     @Provides
     @Singleton
     Context provideContext() {
-        return baseApplication;
+        return baseApplication.getBaseContext();
     }
 
     @Provides
@@ -76,6 +78,12 @@ public class RoosterApplicationModule {
     FirebaseUser provideFirebaseUser() {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         return mAuth.getCurrentUser();
+    }
+
+    @Provides
+    @Singleton
+    DatabaseReference provideFirebaseDatabaseReference() {
+        return FirebaseDatabase.getInstance().getReference();
     }
 
     @Provides

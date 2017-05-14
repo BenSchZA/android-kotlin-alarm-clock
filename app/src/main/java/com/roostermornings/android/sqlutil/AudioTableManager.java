@@ -311,7 +311,7 @@ public class AudioTableManager {
     }
 
     private SQLiteDatabase initDB() {
-        AudioTableHelper dbHelper = AudioTableHelper.getInstance();
+        AudioTableHelper dbHelper = AudioTableHelper.getInstance(context);
         return dbHelper.getWritableDatabase();
     }
 }

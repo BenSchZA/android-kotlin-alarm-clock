@@ -49,8 +49,6 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static com.roostermornings.android.BaseApplication.AppContext;
-
 public class BackgroundTaskIntentService extends IntentService {
     public static final String TAG = BackgroundTaskIntentService.class.getSimpleName();
     private static final String EXTRA_PARAM1 = "com.roostermornings.android.background.extra.PARAM1";
