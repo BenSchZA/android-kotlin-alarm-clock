@@ -49,11 +49,10 @@ import java.util.concurrent.Executors;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static com.roostermornings.android.BaseApplication.AppContext;
-
 public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapter.ViewHolder> {
     private ArrayList<ChannelRooster> mDataset;
     private Activity mActivity;
+    private Context context;
 
     private DiscoverAudioSampleInterface discoverAudioSampleInterface;
     public interface DiscoverAudioSampleInterface {
@@ -114,6 +113,7 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
     @Override
     public DiscoverListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                              int viewType) {
+        context = parent.getContext();
         // create a new view
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.cardview_discover, parent, false);
         // set the view's size, margins, paddings and layout parameters
@@ -172,7 +172,7 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
         });
 
         try {
-            Picasso.with(AppContext).load(channelRooster.getPhoto())
+            Picasso.with(context).load(channelRooster.getPhoto())
                     .fit()
                     .centerCrop()
                     .into(holder.imgChannelImage, new Callback() {

@@ -27,6 +27,7 @@ import com.roostermornings.android.activity.SignInActivity;
 import com.roostermornings.android.activity.SignupEmailActivity;
 import com.roostermornings.android.activity.SplashActivity;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.analytics.FA;
 import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.fragment.friends.FriendsInviteFragment3;
 import com.roostermornings.android.fragment.friends.FriendsMyFragment1;
@@ -85,6 +86,8 @@ public interface RoosterApplicationComponent {
     void inject(AudioService service);
     void inject(UploadService service);
     void inject(DeviceAlarmReceiver service);
+
+    void inject(FA roosterClass);
 
     //Provision methods have no parameters and return an injected or provided type.
     //Each method may have a Qualifier annotation as well.

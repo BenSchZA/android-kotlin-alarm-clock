@@ -21,6 +21,7 @@ import android.widget.Toast;
 import com.crashlytics.android.Crashlytics;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.stetho.Stetho;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -64,28 +65,26 @@ public class BaseApplication extends android.app.Application {
     private static int friendRequests = 0;
 
     public static User mCurrentUser;
-    public static DatabaseReference mDatabase;
 
     @Inject BackgroundTaskReceiver backgroundTaskReceiver;
     @Inject SharedPreferences sharedPreferences;
-    public static Context AppContext;
+    @Inject DatabaseReference mDatabase;
     public static Account mAccount;
+    public static FirebaseAnalytics firebaseAnalytics;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        AppContext = getBaseContext();
-
         //Create sync account
         mAccount = CreateSyncAccount(this);
+
+        //Get static FBAnalytics instance
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         //Set database persistence to keep offline alarm edits synced
         //Calls to setPersistenceEnabled() must be made before any other usage of FirebaseDatabase instance
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-
-        //Database reference to be used everywhere
-        mDatabase = FirebaseDatabase.getInstance().getReference();
 
         Fabric.with(this, new Crashlytics());
 
@@ -194,6 +193,10 @@ public class BaseApplication extends android.app.Application {
         }
     }
 
+    public static DatabaseReference getFbDbRef() {
+        return FirebaseDatabase.getInstance().getReference();
+    }
+
     private FirebaseUser getFirebaseUser() {
         if (mAuth == null) mAuth = FirebaseAuth.getInstance();
         return mAuth.getCurrentUser();
@@ -248,7 +251,7 @@ public class BaseApplication extends android.app.Application {
         return mAPIService;
     }
 
-    public int getNotificationFlag(String flag) {
+    public static int getNotificationFlag(String flag) {
         if(flag.contentEquals(Constants.FLAG_ROOSTERCOUNT)){
             notificationFlag = roosterCount;
         }
@@ -258,7 +261,7 @@ public class BaseApplication extends android.app.Application {
         return notificationFlag;
     }
 
-    public void setNotificationFlag(int value, String flag) {
+    public static void setNotificationFlag(int value, String flag) {
         if(flag.contentEquals(Constants.FLAG_ROOSTERCOUNT)){
             roosterCount = value;
         }

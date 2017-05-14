@@ -53,8 +53,6 @@ import retrofit.Callback;
 import retrofit.Response;
 import retrofit.Retrofit;
 
-import static com.roostermornings.android.BaseApplication.AppContext;
-
 //Service to offload the task of uploading a new Social Rooster to Firebase cloud storage, receive a link -> Firebase entries & Node post
 public class UploadService extends Service {
 
@@ -118,7 +116,7 @@ public class UploadService extends Service {
                     }
                 } catch (ClassCastException e) {
                     e.printStackTrace();
-                    Toast.makeText(AppContext, "Rooster upload failed.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getBaseContext(), "Rooster upload failed.", Toast.LENGTH_SHORT).show();
                     endService();
                 }
             }

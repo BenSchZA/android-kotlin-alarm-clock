@@ -45,8 +45,6 @@ import java.util.ArrayList;
 
 import javax.inject.Inject;
 
-import static com.roostermornings.android.BaseApplication.AppContext;
-
 /**
  * Created by bscholtz on 08/03/17.
  */
@@ -54,6 +52,7 @@ import static com.roostermornings.android.BaseApplication.AppContext;
 public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdapter.ViewHolder> implements Filterable {
     private ArrayList<User> mDataset;
     private Activity mActivity;
+    private Context context;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -102,6 +101,7 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
     @Override
     public FriendsMyListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                                   int viewType) {
+        context = parent.getContext();
         // create a new view
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_layout_friends_my, parent, false);
         // set the view's size, margins, paddings and layout parameters
@@ -183,14 +183,14 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
     private void setProfilePic(String url, final FriendsMyListAdapter.ViewHolder holder, final int position) {
 
         try{
-            Picasso.with(AppContext).load(url)
+            Picasso.with(context).load(url)
                     .resize(50, 50)
                     .centerCrop()
                     .into(holder.imgProfilePic, new Callback() {
                         @Override
                         public void onSuccess() {
                             Bitmap imageBitmap = ((BitmapDrawable) holder.imgProfilePic.getDrawable()).getBitmap();
-                            RoundedBitmapDrawable imageDrawable = RoundedBitmapDrawableFactory.create(AppContext.getResources(), imageBitmap);
+                            RoundedBitmapDrawable imageDrawable = RoundedBitmapDrawableFactory.create(context.getResources(), imageBitmap);
                             imageDrawable.setCircular(true);
                             imageDrawable.setCornerRadius(Math.max(imageBitmap.getWidth(), imageBitmap.getHeight()) / 2.0f);
                             //holder.imgProfilePic.setImageAlpha(0);
@@ -209,8 +209,8 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
     }
 
     private void setButtonBackground(Button addButton, Boolean focused) {
-        if (focused) addButton.setBackground(AppContext.getResources().getDrawable(R.drawable.rooster_button_light_blue));
-        else addButton.setBackground(AppContext.getResources().getDrawable(R.drawable.rooster_button_semi_transparent));
+        if (focused) addButton.setBackground(context.getResources().getDrawable(R.drawable.rooster_button_light_blue));
+        else addButton.setBackground(context.getResources().getDrawable(R.drawable.rooster_button_semi_transparent));
     }
 
     // Return the size of your dataset (invoked by the layout manager)

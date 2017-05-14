@@ -103,7 +103,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
         localFileString = extras.getString(Constants.EXTRA_LOCAL_FILE_STRING);
 
         if(checkInternetConnection()) {
-            mAdapter = new NewAudioFriendsListAdapter(mFriends, NewAudioFriendsActivity.this);
+            mAdapter = new NewAudioFriendsListAdapter(mFriends);
             mRecyclerView.setLayoutManager(new LinearLayoutManager(NewAudioFriendsActivity.this));
             mRecyclerView.setAdapter(mAdapter);
 
