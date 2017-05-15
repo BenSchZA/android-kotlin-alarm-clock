@@ -27,7 +27,7 @@
         android:layout_gravity="top|right"
         android:layout_marginRight="-2dp"
         android:layout_marginTop="-2dp"
-        android:background="@drawable/counter_circle_yellow"
+        android:background="@drawable/notification_circle_yellow"
         android:visibility="gone" />
 
 </FrameLayout>
