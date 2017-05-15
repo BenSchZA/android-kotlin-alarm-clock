@@ -73,41 +73,42 @@ dependencies {
     //If you want to add a network helper
 
     //Firebase
+    
+
+    //UI/UX
+    
+
+    //Architecture & System
+    
+    //Facebook
+    
+    //Google
+    
+    
     compile 'com.google.firebase:firebase-storage:10.2.0'
     compile 'com.google.firebase:firebase-auth:10.2.0'
     compile 'com.google.firebase:firebase-database:10.2.0'
     compile 'com.google.firebase:firebase-messaging:10.2.0'
     compile 'com.google.firebase:firebase-crash:10.2.0'
     compile 'com.google.firebase:firebase-core:10.2.0'
-
-    //UI/UX
     compile 'me.grantland:autofittextview:0.2.+'
     compile 'com.afollestad.material-dialogs:core:0.8.5.9'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.jakewharton:butterknife:8.0.1'
-
-
-    //Architecture & System
     compile 'com.google.dagger:dagger:2.2'
     compile 'com.mobsandgeeks:android-saripaar:2.0.3'
     compile 'com.squareup.retrofit:retrofit:2.0.0-beta2'
     compile 'com.squareup.retrofit:converter-gson:2.0.0-beta2'
     compile 'com.squareup.retrofit2:converter-scalars:2.1.0'
-
-    //Facebook
     compile 'com.facebook.android:facebook-android-sdk:[4,5)'
     compile 'com.facebook.stetho:stetho:1.4.2'
     compile 'com.facebook.stetho:stetho-okhttp:1.4.2'
-
-    //Google
     compile 'com.google.android.gms:play-services-auth:10.2.0'
     compile 'com.google.code.gson:gson:2.7'
-
     compile 'com.squareup.okhttp:okhttp:2.4.0'
     compile 'com.android.support:support-v4:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     testCompile 'junit:junit:4.12'
-
     apt 'com.google.dagger:dagger-compiler:2.2'
     apt 'com.jakewharton:butterknife-compiler:8.0.1'
 }
