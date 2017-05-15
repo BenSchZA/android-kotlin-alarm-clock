@@ -71,7 +71,7 @@
                 android:drawablePadding="@dimen/spacing_normal"
                 android:paddingLeft="@dimen/spacing_normal_large"
                 android:paddingRight="@dimen/spacing_normal_large"
-                android:text="@string/signup_google"></Button>
+                android:text="@string/signup_google"/>
 
             <LinearLayout
                 android:layout_width="wrap_content"

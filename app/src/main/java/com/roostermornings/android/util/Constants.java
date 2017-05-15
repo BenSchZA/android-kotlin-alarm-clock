@@ -136,4 +136,7 @@ public class Constants {
     // The account name
     public static final String ACCOUNT = "Rooster Content";
 
+    public static final String FORCE_UPDATE_DESCRIPTION = "forceUpdateDescription";
+    public static final String FORCE_UPDATE_TITLE = "forceUpdateTitle";
+
 }

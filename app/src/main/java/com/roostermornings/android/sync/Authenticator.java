@@ -8,6 +8,7 @@ package com.roostermornings.android.sync;
 import android.accounts.AbstractAccountAuthenticator;
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorResponse;
+import android.accounts.AccountManager;
 import android.accounts.NetworkErrorException;
 import android.content.Context;
 import android.os.Bundle;
@@ -73,6 +74,14 @@ public class Authenticator extends AbstractAccountAuthenticator {
             AccountAuthenticatorResponse r,
             Account account, String[] strings) throws NetworkErrorException {
         throw new UnsupportedOperationException();
+    }
+    //Ensure user can't remove account
+    @Override
+    public Bundle getAccountRemovalAllowed(AccountAuthenticatorResponse response, Account account) {
+        Bundle result = new Bundle();
+        boolean allowed = false;
+        result.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, allowed);
+        return result;
     }
 }
 
