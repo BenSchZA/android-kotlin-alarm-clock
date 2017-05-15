@@ -59,6 +59,7 @@ import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sync.DownloadSyncAdapter;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.InternetHelper;
+import com.roostermornings.android.util.JSONPersistence;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -355,10 +356,7 @@ public class AudioService extends Service {
 
                     //Check if channel has content and whether a story or not
                     final Integer iteration;
-                    if (channel.isNew_alarms_start_at_first_iteration() && deviceAlarmTableManager.getChannelStoryIteration(channelId) != null)
-                        iteration = deviceAlarmTableManager.getChannelStoryIteration(channelId);
-                        //If iteration is null, this means no entry in db - set to 1 and process from there
-                    else if (channel.isNew_alarms_start_at_first_iteration()) iteration = 1;
+                    if (channel.isNew_alarms_start_at_first_iteration()) iteration = new JSONPersistence(getApplicationContext()).getStoryIteration(channelId);
                     else if (channel.getCurrent_rooster_cycle_iteration() < 1) return;
                     else iteration = channel.getCurrent_rooster_cycle_iteration();
 
@@ -389,14 +387,14 @@ public class AudioService extends Service {
                             SortedMap<Integer, ChannelRooster> headMap = channelIterationMap.headMap(iteration);
                             if (!tailMap.isEmpty()) {
                                 //User is starting story at next valid entry
-                                //Set SQL entry for iteration to current valid story iteration, to be incremented on play
-                                deviceAlarmTableManager.setChannelStoryIteration(channelId, tailMap.firstKey());
+                                //Set entry for iteration to current valid story iteration, to be incremented on play
+                                new JSONPersistence(getApplicationContext()).setStoryIteration(channelId, tailMap.firstKey());
                                 //Retrieve channel audio
                                 streamChannelContent(channelIterationMap.get(tailMap.firstKey()).getAudio_file_url());
                             } else if (!headMap.isEmpty()) {
                                 //User is starting story from beginning again, at valid entry
-                                //Set SQL entry for iteration to current valid story iteration, to be incremented on play
-                                deviceAlarmTableManager.setChannelStoryIteration(channelId, headMap.firstKey());
+                                //Set entry for iteration to current valid story iteration, to be incremented on play
+                                new JSONPersistence(getApplicationContext()).setStoryIteration(channelId, headMap.firstKey());
                                 //Retrieve channel audio
                                 streamChannelContent(channelIterationMap.get(headMap.firstKey()).getAudio_file_url());
                             }
@@ -662,9 +660,9 @@ public class AudioService extends Service {
             try {
                 if (audioItem.getType() == 1) {
                     //increment the current story iteration if it is a story
-                    Integer currentStoryIteration = deviceAlarmTableManager.getChannelStoryIteration(audioItem.getQueue_id());
+                    Integer currentStoryIteration = new JSONPersistence(getApplicationContext()).getStoryIteration(audioItem.getQueue_id());
                     if (currentStoryIteration != null && currentStoryIteration > 0)
-                        deviceAlarmTableManager.setChannelStoryIteration(audioItem.getQueue_id(), currentStoryIteration + 1);
+                        new JSONPersistence(getApplicationContext()).setStoryIteration(audioItem.getQueue_id(), currentStoryIteration + 1);
                 }
             } catch (NullPointerException e) {
                 e.printStackTrace();
@@ -694,9 +692,10 @@ public class AudioService extends Service {
         processListenedChannels();
         //Delete record of all listened audio files
         for (DeviceAudioQueueItem audioItem :
-             audioTableManager.selectListened()) {
+                audioTableManager.selectListened()) {
             //Set the listened flag in firebase
-            if(audioItem.getType() != 1) audioTableController.setListened(audioItem.getSender_id(), audioItem.getQueue_id());
+            if (audioItem.getType() != 1)
+                audioTableController.setListened(audioItem.getSender_id(), audioItem.getQueue_id());
             //Remove entry from SQL db
             audioTableManager.removeAudioEntry(audioItem);
         }
@@ -709,7 +708,7 @@ public class AudioService extends Service {
             }
         });
         ArrayList<String> audioFileNames = audioTableManager.extractAllAudioFileNames();
-        if(audioFileNames != null) {
+        if (audioFileNames != null) {
             for (File file :
                     files) {
                 if (!audioFileNames.contains(file.getName()))
@@ -729,12 +728,17 @@ public class AudioService extends Service {
         stopAlarmAudio();
         //unbind from and kill service
         stopForeground(true);
-        if(wakefulIntent != null) {
+        if (wakefulIntent != null) {
             //Complete DeviceAlarmReceiver wakeful intent
             DeviceAlarmReceiver.completeWakefulIntent(wakefulIntent);
         }
         //unregister all broadcastreceivers
-        if(endAudioServiceBroadcastReceiver != null) unregisterReceiver(endAudioServiceBroadcastReceiver);
+        try {
+            if (endAudioServiceBroadcastReceiver != null)
+                unregisterReceiver(endAudioServiceBroadcastReceiver);
+        } catch(IllegalArgumentException e) {
+            e.printStackTrace();
+        }
         //unbind service from activation activity
         try {
             this.unbindService(conn);

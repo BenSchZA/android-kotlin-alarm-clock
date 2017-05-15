@@ -45,6 +45,7 @@ import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment2;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.JSONPersistence;
 import com.roostermornings.android.util.Toaster;
 
 import java.io.File;
@@ -156,7 +157,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                             final Channel channel = postSnapshot.getValue(Channel.class);
                             if (channel.isActive()) {
                                 if(channel.isNew_alarms_start_at_first_iteration()) {
-                                    Integer iteration = deviceAlarmTableManager.getChannelStoryIteration(channel.getUid());
+                                    Integer iteration = new JSONPersistence(getApplicationContext()).getStoryIteration(channel.getUid());
                                     if(iteration == null || iteration <= 0) iteration = 1;
                                     getChannelRoosterData(channel, iteration);
                                 } else {
@@ -176,7 +177,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
                         Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                        Toaster.makeToast(AppContext, "Failed to load channel.", Toast.LENGTH_SHORT);
+                        Toaster.makeToast(AppContext, "Failed to load channel.", Toast.LENGTH_SHORT).checkTastyToast();
                     }
                 };
                 mChannelsReference.addValueEventListener(channelsListener);
@@ -374,7 +375,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                         mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
                             @Override
                             public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
-                                Toaster.makeToast(AppContext, "Content streaming failed.", Toast.LENGTH_SHORT);
+                                Toaster.makeToast(AppContext, "Content streaming failed.", Toast.LENGTH_SHORT).checkTastyToast();
                                 channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
                                 channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
                                 notifyDataSetChangedFromUIThread();
@@ -388,7 +389,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                     @Override
                     public void onFailure(@NonNull Exception exception) {
                         // Handle any errors
-                        Toaster.makeToast(AppContext, "Content streaming failed.", Toast.LENGTH_SHORT);
+                        Toaster.makeToast(AppContext, "Content streaming failed.", Toast.LENGTH_SHORT).checkTastyToast();
                         channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
                         channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
                         mAdapter.notifyDataSetChanged();

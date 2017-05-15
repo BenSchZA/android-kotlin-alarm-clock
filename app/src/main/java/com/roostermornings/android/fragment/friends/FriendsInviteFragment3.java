@@ -306,7 +306,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
             @Override
             public void onFailure(Throwable t) {
                 Log.i(TAG, t.getLocalizedMessage()==null?"":t.getLocalizedMessage());
-                Toaster.makeToast(getApplicationContext(), "Loading contacts failed, please try again.", Toast.LENGTH_LONG);
+                Toaster.makeToast(getApplicationContext(), "Loading contacts failed, please try again.", Toast.LENGTH_LONG).checkTastyToast();
                 progressBar.setVisibility(View.GONE);
             }
         });

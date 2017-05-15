@@ -176,6 +176,6 @@ public class FriendsInviteListAdapter extends RecyclerView.Adapter<FriendsInvite
         BaseApplication.getFbDbRef().getDatabase().getReference(inviteUrl).setValue(currentUserFriend);
         BaseApplication.getFbDbRef().getDatabase().getReference(currentUserUrl).setValue(inviteFriend);
 
-        Toaster.makeToast(context, inviteFriend.getUser_name() + " invited!", Toast.LENGTH_LONG);
+        Toaster.makeToast(context, inviteFriend.getUser_name() + " invited!", Toast.LENGTH_LONG).checkTastyToast();
     }
 }

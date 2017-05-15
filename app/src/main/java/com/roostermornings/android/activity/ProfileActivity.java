@@ -123,7 +123,7 @@ public class ProfileActivity extends BaseActivity {
             } catch (IOException e) {
                 // Error occurred while creating the File
                 e.printStackTrace();
-                Toaster.makeToast(this, "Image capture failed.", Toast.LENGTH_SHORT);
+                Toaster.makeToast(this, "Image capture failed.", Toast.LENGTH_SHORT).checkTastyToast();
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
@@ -190,7 +190,7 @@ public class ProfileActivity extends BaseActivity {
                         File file = new File(mCurrentPhotoPath);
                         returnedImageURI = Uri.fromFile(file);
                     } else{
-                        Toaster.makeToast(this, "Load image failed.", Toast.LENGTH_SHORT);
+                        Toaster.makeToast(this, "Load image failed.", Toast.LENGTH_SHORT).checkTastyToast();
                         return;
                     }
                     if(returnedImageURI != null) {
@@ -259,11 +259,11 @@ public class ProfileActivity extends BaseActivity {
             //Upload to firebase with putBytes
         } catch(NullPointerException e) {
             e.printStackTrace();
-            Toaster.makeToast(this, "Image upload failed.", Toast.LENGTH_SHORT);
+            Toaster.makeToast(this, "Image upload failed.", Toast.LENGTH_SHORT).checkTastyToast();
             return;
         } catch(FileNotFoundException e) {
             e.printStackTrace();
-            Toaster.makeToast(this, "Image upload failed.", Toast.LENGTH_SHORT);
+            Toaster.makeToast(this, "Image upload failed.", Toast.LENGTH_SHORT).checkTastyToast();
             return;
         }
 
@@ -285,7 +285,7 @@ public class ProfileActivity extends BaseActivity {
                     @Override
                     public void onFailure(@NonNull Exception exception) {
                         // Handle unsuccessful upload
-                        Toaster.makeToast(getApplicationContext(), "Error uploading!", Toast.LENGTH_LONG);
+                        Toaster.makeToast(getApplicationContext(), "Error uploading.", Toast.LENGTH_LONG).checkTastyToast();
                     }
                 });
     }
@@ -323,7 +323,7 @@ public class ProfileActivity extends BaseActivity {
                     });
         } catch(NullPointerException e){
             e.printStackTrace();
-            Toaster.makeToast(this, "Load image failed.", Toast.LENGTH_SHORT);
+            Toaster.makeToast(this, "Load image failed.", Toast.LENGTH_SHORT).checkTastyToast();
         }
     }
 
@@ -350,7 +350,7 @@ public class ProfileActivity extends BaseActivity {
                 });
     } catch(NullPointerException e){
         e.printStackTrace();
-            Toaster.makeToast(this, "Load image failed.", Toast.LENGTH_SHORT);
+            Toaster.makeToast(this, "Load image failed.", Toast.LENGTH_SHORT).checkTastyToast();
     }
     }
 
@@ -371,7 +371,7 @@ public class ProfileActivity extends BaseActivity {
                             PackageManager.PERMISSION_GRANTED;
                     if (ReadPermission && WritePermission) {
                     } else {
-                        Toaster.makeToast(this, "Permission denied", Toast.LENGTH_LONG);
+                        Toaster.makeToast(this, "Permission denied. Please reconsider?", Toast.LENGTH_LONG).checkTastyToast();
                     }
                 }
                 break;

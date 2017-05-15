@@ -124,7 +124,6 @@ public class NewAudioFriendsActivity extends BaseActivity {
                 }
             }
         } else {
-            Toaster.makeToast(this, "Do you have any Rooster friends? Or an internet connection?", Toast.LENGTH_LONG);
             startHomeActivity();
         }
     }
@@ -219,7 +218,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
         }
 
         if("".equals(firebaseIdToken)) {
-            Toaster.makeToast(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG);
+            Toaster.makeToast(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG).checkTastyToast();
             return;
         }
         Call<Users> call = apiService().retrieveUserFriends(firebaseIdToken);
@@ -251,7 +250,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
             @Override
             public void onFailure(Throwable t) {
                 Log.i(TAG, t.getLocalizedMessage());
-                Toaster.makeToast(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG);
+                Toaster.makeToast(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG).checkTastyToast();
                 startHomeActivity();
             }
         });

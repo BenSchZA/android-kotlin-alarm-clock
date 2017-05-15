@@ -200,8 +200,8 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
                         Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                        if(BuildConfig.DEBUG) Toaster.makeToast(MyAlarmsFragmentActivity.this, "Failed to load mAlarms.",
-                                Toast.LENGTH_SHORT);
+                        Toaster.makeToast(MyAlarmsFragmentActivity.this, "Failed to load alarms.",
+                                Toast.LENGTH_SHORT).checkTastyToast();
                     }
                 }; mMyAlarmsReference.addListenerForSingleValueEvent(alarmsListener);
             }

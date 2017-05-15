@@ -117,7 +117,7 @@ public class UploadService extends Service {
                     }
                 } catch (ClassCastException e) {
                     e.printStackTrace();
-                    Toaster.makeToast(getBaseContext(), "Rooster upload failed.", Toast.LENGTH_SHORT);
+                    Toaster.makeToast(getBaseContext(), "Rooster upload failed.", Toast.LENGTH_SHORT).checkTastyToast();
                     endService();
                 }
             }
@@ -158,7 +158,7 @@ public class UploadService extends Service {
                     @Override
                     public void onFailure(@NonNull Exception exception) {
                         // Handle unsuccessful upload
-                        Toaster.makeToast(getApplicationContext(), "Error uploading!", Toast.LENGTH_LONG);
+                        Toaster.makeToast(getApplicationContext(), "Error uploading!", Toast.LENGTH_LONG).checkTastyToast();
                         endService();
                     }
                 });
@@ -212,7 +212,7 @@ public class UploadService extends Service {
         mDatabase.getDatabase().getReference(uploadUrl + "/" + uploadKey).setValue(socialRoosterUploaded);
         mDatabase.getDatabase().getReference(queueUrl + "/" + uploadKey).setValue(socialRoosterQueue);
         socialRoosterNotifyUserFCMMessage(friend.getUid());
-        Toaster.makeToast(getApplicationContext(), "Social rooster sent to " + friend.getUser_name() + "!", Toast.LENGTH_LONG);
+        Toaster.makeToast(getApplicationContext(), "Social rooster sent to " + friend.getUser_name() + "!", Toast.LENGTH_LONG).checkTastyToast();
     }
 
     private void socialRoosterNotifyUserFCMMessage(String recipientUserId) {

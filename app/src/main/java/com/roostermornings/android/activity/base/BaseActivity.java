@@ -281,10 +281,6 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
         }
     }
 
-    public void hideSoftKeyboard() {
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-    }
-
     public void signOut() {
         try {
             //Ensure no audio remaining from old user
