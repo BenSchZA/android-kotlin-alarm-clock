@@ -264,6 +264,9 @@ public class SignInActivity extends BaseActivity {
                             childUpdates.put(String.format("users/%s/%s",
                                     mAuth.getCurrentUser().getUid(), "unseen_roosters"), user.getUnseen_roosters());
 
+                            //Add user as a friend of theirs
+                            childUpdates.put(String.format("users/%s/%s/%s", mAuth.getCurrentUser().getUid(), "friends", mAuth.getCurrentUser().getUid()), true);
+
                             mDatabase.updateChildren(childUpdates);
 
                             proceedToMyAlarmsActivity();
@@ -343,6 +346,9 @@ public class SignInActivity extends BaseActivity {
                                     mAuth.getCurrentUser().getUid(), "user_name"), user.getUser_name());
                             childUpdates.put(String.format("users/%s/%s",
                                     mAuth.getCurrentUser().getUid(), "unseen_roosters"), user.getUnseen_roosters());
+
+                            //Add user as a friend of theirs
+                            childUpdates.put(String.format("users/%s/%s/%s", mAuth.getCurrentUser().getUid(), "friends", mAuth.getCurrentUser().getUid()), true);
 
                             mDatabase.updateChildren(childUpdates);
 
