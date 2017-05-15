@@ -36,6 +36,7 @@ import com.roostermornings.android.domain.User;
 import com.roostermornings.android.domain.Users;
 import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -168,7 +169,7 @@ public class FriendsMyFragment1 extends BaseFragment {
         }
 
         if("".equals(firebaseIdToken)) {
-            Toast.makeText(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG).show();
+            Toaster.makeToast(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG);
             return;
         }
         Call<Users> call = apiService().retrieveUserFriends(firebaseIdToken);
@@ -200,7 +201,7 @@ public class FriendsMyFragment1 extends BaseFragment {
             @Override
             public void onFailure(Throwable t) {
                 Log.i(TAG, t.getLocalizedMessage()==null?"":t.getLocalizedMessage());
-                Toast.makeText(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG).show();
+                Toaster.makeToast(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG);
                 progressBar.setVisibility(View.GONE);
             }
         });

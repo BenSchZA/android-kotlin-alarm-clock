@@ -18,6 +18,7 @@ import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.service.BackgroundTaskIntentService;
 import com.roostermornings.android.service.FirebaseListenerService;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.Toaster;
 
 public class BackgroundTaskReceiver extends BroadcastReceiver {
 
@@ -33,7 +34,7 @@ public class BackgroundTaskReceiver extends BroadcastReceiver {
         // an Intent broadcast.
 
         Log.d("Background Message:", "BackgroundTaskReceiver");
-        if(BuildConfig.DEBUG) Toast.makeText(context, "BackgroundTaskReceiver!", Toast.LENGTH_LONG).show();
+        if(BuildConfig.DEBUG) Toaster.makeToast(context, "BackgroundTaskReceiver!", Toast.LENGTH_LONG);
 
         Intent intentService = new Intent(context, BackgroundTaskIntentService.class);
         intentService.setAction(intent.getAction());

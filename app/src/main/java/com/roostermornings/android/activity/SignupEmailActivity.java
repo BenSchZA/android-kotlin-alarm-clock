@@ -27,6 +27,7 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.User;
+import com.roostermornings.android.util.Toaster;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -138,8 +139,8 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
                             Log.d(TAG, "createUserWithEmail:onComplete:" + task.isSuccessful());
 
                             if (!task.isSuccessful()) {
-                                Toast.makeText(SignupEmailActivity.this, task.getException().getMessage(),
-                                        Toast.LENGTH_LONG).show();
+                                Toaster.makeToast(SignupEmailActivity.this, task.getException().getMessage(),
+                                        Toast.LENGTH_LONG);
                             } else {
 
                                 String deviceToken = FirebaseInstanceId.getInstance().getToken();

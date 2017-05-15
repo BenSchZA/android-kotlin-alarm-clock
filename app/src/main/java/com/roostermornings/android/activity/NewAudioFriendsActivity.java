@@ -34,6 +34,7 @@ import com.roostermornings.android.service.UploadService;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.domain.Users;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -123,8 +124,8 @@ public class NewAudioFriendsActivity extends BaseActivity {
                 }
             }
         } else {
-                Toast.makeText(this, "Do you have any Rooster friends? Or an internet connection?", Toast.LENGTH_LONG).show();
-                startHomeActivity();
+            Toaster.makeToast(this, "Do you have any Rooster friends? Or an internet connection?", Toast.LENGTH_LONG);
+            startHomeActivity();
         }
     }
 
@@ -218,7 +219,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
         }
 
         if("".equals(firebaseIdToken)) {
-            Toast.makeText(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG).show();
+            Toaster.makeToast(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG);
             return;
         }
         Call<Users> call = apiService().retrieveUserFriends(firebaseIdToken);
@@ -250,7 +251,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
             @Override
             public void onFailure(Throwable t) {
                 Log.i(TAG, t.getLocalizedMessage());
-                Toast.makeText(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG).show();
+                Toaster.makeToast(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG);
                 startHomeActivity();
             }
         });

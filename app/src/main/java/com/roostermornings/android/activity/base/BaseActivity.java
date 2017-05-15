@@ -65,6 +65,7 @@ import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.InternetHelper;
+import com.roostermornings.android.util.Toaster;
 
 import java.util.Calendar;
 import java.util.List;
@@ -133,13 +134,13 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
     @Override
     public boolean checkInternetConnection() {
         if(!checkMobileDataConnection()) {
-            Toast.makeText(getApplicationContext(), "'Download/upload on mobile data' is disabled in Settings, " +
-                    "please enable this and try again.", Toast.LENGTH_LONG).show();
+            Toaster.makeToast(getApplicationContext(), "'Download/upload on mobile data' is disabled in Settings, " +
+                    "please enable this and try again.", Toast.LENGTH_LONG);
         }
 
         if (this.noInternetConnection()) {
-            Toast.makeText(getApplicationContext(), "No internet connection was found, please " +
-                    "connect and try again.", Toast.LENGTH_LONG).show();
+            Toaster.makeToast(getApplicationContext(), "No internet connection was found, please " +
+                    "connect and try again.", Toast.LENGTH_LONG);
             return false;
         }
 
@@ -161,9 +162,9 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
                             Log.i(TAG, "Firebase CONNECTED");
                         } else {
                             Log.i(TAG, "Firebase NOT CONNECTED");
-                            Toast.makeText(AppContext, "The application could not connect to the " +
+                            Toaster.makeToast(AppContext, "The application could not connect to the " +
                                     "Rooster backend, please check your internet connection and try again.",
-                                    Toast.LENGTH_LONG).show();
+                                    Toast.LENGTH_LONG);
                         }
                     }
 
@@ -275,7 +276,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
                 parent.setError(message);
 
             } else {
-                Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+                Toaster.makeToast(this, message, Toast.LENGTH_LONG);
             }
         }
     }

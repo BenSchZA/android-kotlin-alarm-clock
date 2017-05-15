@@ -24,8 +24,10 @@ public class DeviceAudioQueueItem implements Serializable {
     private String name = "";
     private String picture = "";
     private String listened;
-    //Type 1 = , type 0 =
+    //Type 1 = channel, type 0 = social
     private int type = -1;
+    private String action_title = "";
+    private String action_url = "";
 
     public void fromSocialRooster(SocialRooster socialRooster, String audioFileUrl) {
         this.queue_id = socialRooster.getQueue_id();
@@ -45,6 +47,24 @@ public class DeviceAudioQueueItem implements Serializable {
         this.name = channelRooster.getName();
         this.picture = channelRooster.getPhoto();
         this.type = 1;
+        this.action_title = channelRooster.getAction_title();
+        this.action_url = channelRooster.getAction_url();
+    }
+
+    public String getAction_title() {
+        return action_title;
+    }
+
+    public void setAction_title(String action_title) {
+        this.action_title = action_title;
+    }
+
+    public String getAction_url() {
+        return action_url;
+    }
+
+    public void setAction_url(String action_url) {
+        this.action_url = action_url;
     }
 
     public int getType() {
