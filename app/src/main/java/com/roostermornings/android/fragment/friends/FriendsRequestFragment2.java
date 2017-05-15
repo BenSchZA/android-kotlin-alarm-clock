@@ -29,6 +29,7 @@ import com.roostermornings.android.adapter.FriendsRequestListAdapter;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.fragment.base.BaseFragment;
+import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
 
@@ -128,7 +129,7 @@ public class FriendsRequestFragment2 extends BaseFragment {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                showToast(AppContext, "Failed to load user.", Toast.LENGTH_SHORT);
+                Toaster.makeToast(AppContext, "Failed to load user.", Toast.LENGTH_SHORT).checkTastyToast();
             }
         };
         mRequestsReference.addValueEventListener(friendsListener);

@@ -117,7 +117,12 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         super.onDestroy();
         if(mAudioService!=null) mAudioService.processListenedChannels();
         if(mBound) unbindService(mAudioServiceConnection);
-        unregisterReceiver(receiver);
+        try {
+            if (receiver != null)
+                unregisterReceiver(receiver);
+        } catch(IllegalArgumentException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

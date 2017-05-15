@@ -32,6 +32,8 @@ import com.roostermornings.android.fragment.IAlarmSetListener;
 import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
+import com.roostermornings.android.util.JSONPersistence;
+import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,6 +46,8 @@ import java.util.TreeMap;
 import javax.inject.Inject;
 
 import butterknife.BindView;
+
+import static com.facebook.FacebookSdk.getApplicationContext;
 
 public class NewAlarmFragment2 extends BaseFragment {
 
@@ -129,7 +133,7 @@ public class NewAlarmFragment2 extends BaseFragment {
 
                             if (channel.isActive()) {
                                 if(channel.isNew_alarms_start_at_first_iteration()) {
-                                    Integer iteration = deviceAlarmTableManager.getChannelStoryIteration(channel.getUid());
+                                    Integer iteration = new JSONPersistence(getApplicationContext()).getStoryIteration(channel.getUid());
                                     if(iteration == null || iteration <= 0) iteration = 1;
                                     getChannelRoosterData(channel, iteration);
                                 } else {
@@ -144,7 +148,7 @@ public class NewAlarmFragment2 extends BaseFragment {
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
                         Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                        showToast(AppContext, "Failed to load channel.", Toast.LENGTH_SHORT);
+                        Toaster.makeToast(AppContext, "Failed to load channel.", Toast.LENGTH_SHORT).checkTastyToast();
                     }
                 };
                 mChannelsReference.addValueEventListener(channelsListener);
@@ -233,8 +237,8 @@ public class NewAlarmFragment2 extends BaseFragment {
                 SortedMap<Integer,ChannelRooster> headMap = channelIterationMap.headMap(iteration);
                 if(!tailMap.isEmpty()) {
                     //User is starting story at next valid entry
-                    //Set SQL entry for iteration to current valid story iteration, to be incremented on play
-                    deviceAlarmTableManager.setChannelStoryIteration(channel.getUid(), tailMap.firstKey());
+                    //Set entry for iteration to current valid story iteration, to be incremented on play
+                    new JSONPersistence(getContext()).setStoryIteration(channel.getUid(), tailMap.firstKey());
                     //Retrieve channel audio
                     ChannelRooster channelRooster = channelIterationMap.get(tailMap.firstKey());
                     channelRooster.setSelected(false);
@@ -249,8 +253,8 @@ public class NewAlarmFragment2 extends BaseFragment {
                 }
                 else if(!headMap.isEmpty()) {
                     //User is starting story from beginning again, at valid entry
-                    //Set SQL entry for iteration to current valid story iteration, to be incremented on play
-                    deviceAlarmTableManager.setChannelStoryIteration(channel.getUid(), headMap.firstKey());
+                    //Set entry for iteration to current valid story iteration, to be incremented on play
+                    new JSONPersistence(getContext()).setStoryIteration(channel.getUid(), headMap.firstKey());
                     //Retrieve channel audio
                     ChannelRooster channelRooster = channelIterationMap.get(headMap.firstKey());
                     channelRooster.setSelected(false);

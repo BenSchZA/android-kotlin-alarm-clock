@@ -228,7 +228,7 @@ public class NewAlarmFragment1 extends BaseFragment{
             myAlarmsListAdapter.notifyDataSetChanged();
 
             startHomeActivity();
-            Toaster.makeToast(AppContext, "Alarm deleted.", Toast.LENGTH_SHORT);
+            Toaster.makeToast(AppContext, "Alarm deleted.", Toast.LENGTH_SHORT).checkTastyToast();
         } catch (NullPointerException e) {
             e.printStackTrace();
             if(BuildConfig.DEBUG) Toaster.makeToast(AppContext, "Oi! Don't delete me. Delete alarm failed!", Toast.LENGTH_SHORT);

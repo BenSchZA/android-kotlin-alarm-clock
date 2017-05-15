@@ -175,7 +175,7 @@ public class MessageStatusActivity extends BaseActivity {
                         Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
                         if (BuildConfig.DEBUG)
                             Toaster.makeToast(MessageStatusActivity.this, "Failed to load message status.",
-                                    Toast.LENGTH_SHORT);
+                                    Toast.LENGTH_SHORT).checkTastyToast();
                     }
                 };
                 mSocialRoosterQueueReference.addValueEventListener(socialRoosterQueueListener);

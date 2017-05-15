@@ -40,6 +40,7 @@ import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sync.DownloadSyncAdapter;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.JSONPersistence;
 
 import java.util.Calendar;
 import java.util.List;
@@ -232,8 +233,6 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 String alarmChannelUID = "";
                 if(alarmChannel != null) alarmChannelUID = alarmChannel.getId();
 
-                //Get current iteration so that not overwritten on refresh/sync
-                Integer iteration = deviceAlarmTableManager.getChannelStoryIteration(alarmChannelUID);
                 //if this is an existing alarm, delete from local storage before inserting another record
                 if (mEditAlarmId.length() != 0
                         && mAlarm.getUid().length() > 0) {
@@ -244,8 +243,6 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 mAlarm.setEnabled(true);
 
                 deviceAlarmController.registerAlarmSet(mAlarm.isEnabled(), alarmKey, mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring(), alarmChannelUID, mAlarm.isAllow_friend_audio_files());
-                //Ensure iteration is not overwritten
-                if(iteration != null) deviceAlarmTableManager.setChannelStoryIteration(alarmChannelUID, iteration);
 
                 //Update firebase
                 database.getReference(String.format("alarms/%s/%s", mCurrentUser.getUid(), alarmKey)).setValue(mAlarm);

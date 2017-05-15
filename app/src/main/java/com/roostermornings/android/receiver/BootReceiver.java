@@ -35,11 +35,11 @@ public class BootReceiver extends BroadcastReceiver {
         BackgroundTaskReceiver backgroundTaskReceiver = new BackgroundTaskReceiver();
 
         if (auth != null && auth.getCurrentUser().getUid() != null) {
-            Toaster.makeToast(context, "Tasks started, valid user!", Toast.LENGTH_LONG);
+            if(BuildConfig.DEBUG) Toaster.makeToast(context, "Tasks started, valid user!", Toast.LENGTH_LONG);
             alarmController.rebootAlarms();
             backgroundTaskReceiver.scheduleBackgroundDailyTask(context, true);
         } else {
-            Toaster.makeToast(context, "Tasks not started, invalid user!", Toast.LENGTH_LONG);
+            if(BuildConfig.DEBUG) Toaster.makeToast(context, "Tasks not started, invalid user!", Toast.LENGTH_LONG);
         }
     }
 }

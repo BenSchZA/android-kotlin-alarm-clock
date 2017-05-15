@@ -256,7 +256,7 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
         BaseApplication.getFbDbRef().getDatabase().getReference(sentUrl).setValue(null);
 
         //Notify user that friend request accepted
-        Toaster.makeToast(context, acceptFriend.getUser_name() + "'s friend request accepted!", Toast.LENGTH_LONG);
+        Toaster.makeToast(context, acceptFriend.getUser_name() + "'s friend request accepted!", Toast.LENGTH_LONG).checkTastyToast();
     }
 
     public void rejectFriendRequest(Friend rejectFriend) {
@@ -269,6 +269,6 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
         BaseApplication.getFbDbRef().getDatabase().getReference(sentUrl).setValue(null);
 
         //Notify user that friend request accepted
-        Toaster.makeToast(context, rejectFriend.getUser_name() + "'s friend request rejected!", Toast.LENGTH_LONG);
+        Toaster.makeToast(context, rejectFriend.getUser_name() + "'s friend request rejected!", Toast.LENGTH_LONG).checkTastyToast();
     }
 }

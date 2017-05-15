@@ -107,15 +107,6 @@ public abstract class BaseFragment extends Fragment implements Validator.Validat
         return mDatabase;
     }
 
-    public void showToast(Context c, String message, int toastLength) {
-        try{
-            Toaster.makeToast(c, message,
-                    toastLength);
-        }catch(NullPointerException e){
-            e.printStackTrace();
-        }
-    }
-
     public void sortNamesFriends(ArrayList<Friend> mUsers){
         //Take arraylist and sort alphabetically
         Collections.sort(mUsers, new Comparator<Friend>() {

@@ -249,7 +249,7 @@ public final class DeviceAlarmController {
         else nextAlarmTimeString = String.format("%s days, %s hours, and %s minutes", days, hours, minutes);
 
         //Ensure alarm time accurate before notice
-        if(minutes >= 0 && hours >= 0 && days >= 0) Toaster.makeToast(context, "Alarm set for " + nextAlarmTimeString + " from now.", Toast.LENGTH_LONG);
+        if(minutes >= 0 && hours >= 0 && days >= 0) Toaster.makeToast(context, "Alarm set for " + nextAlarmTimeString + " from now.", Toast.LENGTH_LONG).checkTastyToast();
     }
 
     public void deleteAllLocalAlarms() {

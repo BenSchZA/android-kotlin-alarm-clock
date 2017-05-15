@@ -41,6 +41,7 @@ import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.JSONPersistence;
 import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.Toaster;
 import com.squareup.picasso.Picasso;
@@ -227,9 +228,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
 
                         //Check if channel has content and whether a story or not
                         final Integer iteration;
-                        if(channel.isNew_alarms_start_at_first_iteration() && deviceAlarmTableManager.getChannelStoryIteration(channelId) != null) iteration = deviceAlarmTableManager.getChannelStoryIteration(channelId);
-                            //If iteration is null, this means no entry in db - set to 1 and process from there
-                        else if (channel.isNew_alarms_start_at_first_iteration()) iteration = 1;
+                        if(channel.isNew_alarms_start_at_first_iteration()) iteration = new JSONPersistence(getApplicationContext()).getStoryIteration(channelId);
                         else if (channel.getCurrent_rooster_cycle_iteration() < 1) return;
                         else iteration = channel.getCurrent_rooster_cycle_iteration();
 
@@ -261,14 +260,14 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
                                 SortedMap<Integer,ChannelRooster> headMap = channelIterationMap.headMap(iteration);
                                 if(!tailMap.isEmpty()) {
                                     //User is starting story at next valid entry
-                                    //Set SQL entry for iteration to current valid story iteration, to be incremented on play
-                                    deviceAlarmTableManager.setChannelStoryIteration(channelId, tailMap.firstKey());
+                                    //Set entry for iteration to current valid story iteration, to be incremented on play
+                                    new JSONPersistence(getApplicationContext()).setStoryIteration(channelId, tailMap.firstKey());
                                     //Retrieve channel audio
                                     retrieveChannelContentAudio(channelIterationMap.get(tailMap.firstKey()), context);
                                 } else if(!headMap.isEmpty()) {
                                     //User is starting story from beginning again, at valid entry
-                                    //Set SQL entry for iteration to current valid story iteration, to be incremented on play
-                                    deviceAlarmTableManager.setChannelStoryIteration(channelId, headMap.firstKey());
+                                    //Set entry for iteration to current valid story iteration, to be incremented on play
+                                    new JSONPersistence(getApplicationContext()).setStoryIteration(channelId, headMap.firstKey());
                                     //Retrieve channel audio
                                     retrieveChannelContentAudio(channelIterationMap.get(headMap.firstKey()), context);
                                 }
