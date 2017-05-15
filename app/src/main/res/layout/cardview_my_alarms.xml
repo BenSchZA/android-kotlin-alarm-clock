@@ -25,7 +25,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:clipChildren="false"
+            android:clipToPadding="false">
 
             <TextView
                 android:id="@+id/cardview_alarm_time_textview"
@@ -73,13 +75,17 @@
 
             <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:clipChildren="false"
+                android:clipToPadding="false" >
 
                 <FrameLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_marginLeft="@dimen/spacing_small">
+                    android:layout_marginLeft="@dimen/spacing_small"
+                    android:clipChildren="false"
+                    android:clipToPadding="false">
 
                     <ImageView
                         android:id="@+id/cardview_alarm_person"
@@ -95,14 +101,17 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="top|right"
-                        android:visibility="gone">
+                        android:layout_marginRight="-8dp"
+                        android:visibility="gone"
+                        android:clipChildren="false"
+                        android:clipToPadding="false" >
 
                         <ImageView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_centerInParent="true"
                             android:background="@drawable/counter_circle_yellow"
-                            android:scaleType="fitCenter"></ImageView>
+                            android:scaleType="fitCenter"/>
 
                         <TextView
                             android:id="@+id/rooster_notification_text"
@@ -110,7 +119,7 @@
                             android:layout_height="wrap_content"
                             android:layout_centerInParent="true"
                             android:includeFontPadding="false"
-                            android:textSize="@dimen/text_normal" />
+                            android:textSize="@dimen/text_small" />
                     </RelativeLayout>
 
                 </FrameLayout>
