@@ -81,6 +81,8 @@ public class AudioTableManager {
         values.put(AudioTableEntry.COLUMN_NAME, queue.getName());
         values.put(AudioTableEntry.COLUMN_PICTURE, queue.getPicture());
         values.put(AudioTableEntry.COLUMN_DATE_UPLOADED, queue.getDate_created());
+        values.put(AudioTableEntry.COLUMN_ACTION_TITLE, queue.getAction_title());
+        values.put(AudioTableEntry.COLUMN_ACTION_URL, queue.getAction_url());
 
         try {
             // Inserting Row
@@ -300,6 +302,8 @@ public class AudioTableManager {
                 audioFile.setSender_id(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_SENDER_ID)));
                 audioFile.setName(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_NAME)));
                 audioFile.setPicture(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_PICTURE)));
+                audioFile.setAction_title(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_ACTION_TITLE)));
+                audioFile.setAction_url(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_ACTION_URL)));
 
                 audioList.add(audioFile);
 

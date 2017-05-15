@@ -28,6 +28,7 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.util.RoosterUtils;
+import com.roostermornings.android.util.Toaster;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -255,7 +256,7 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
         BaseApplication.getFbDbRef().getDatabase().getReference(sentUrl).setValue(null);
 
         //Notify user that friend request accepted
-        Toast.makeText(context, acceptFriend.getUser_name() + "'s friend request accepted!", Toast.LENGTH_LONG).show();
+        Toaster.makeToast(context, acceptFriend.getUser_name() + "'s friend request accepted!", Toast.LENGTH_LONG);
     }
 
     public void rejectFriendRequest(Friend rejectFriend) {
@@ -268,6 +269,6 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
         BaseApplication.getFbDbRef().getDatabase().getReference(sentUrl).setValue(null);
 
         //Notify user that friend request accepted
-        Toast.makeText(context, rejectFriend.getUser_name() + "'s friend request rejected!", Toast.LENGTH_LONG).show();
+        Toaster.makeToast(context, rejectFriend.getUser_name() + "'s friend request rejected!", Toast.LENGTH_LONG);
     }
 }

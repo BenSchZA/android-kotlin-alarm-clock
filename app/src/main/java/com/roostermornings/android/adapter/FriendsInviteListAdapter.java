@@ -24,6 +24,7 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.util.RoosterUtils;
+import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
 
@@ -175,6 +176,6 @@ public class FriendsInviteListAdapter extends RecyclerView.Adapter<FriendsInvite
         BaseApplication.getFbDbRef().getDatabase().getReference(inviteUrl).setValue(currentUserFriend);
         BaseApplication.getFbDbRef().getDatabase().getReference(currentUserUrl).setValue(inviteFriend);
 
-        Toast.makeText(context, inviteFriend.getUser_name() + " invited!", Toast.LENGTH_LONG).show();
+        Toaster.makeToast(context, inviteFriend.getUser_name() + " invited!", Toast.LENGTH_LONG);
     }
 }

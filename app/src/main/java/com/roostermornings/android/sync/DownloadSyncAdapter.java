@@ -42,6 +42,7 @@ import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
+import com.roostermornings.android.util.Toaster;
 import com.squareup.picasso.Picasso;
 
 import java.io.FileOutputStream;
@@ -383,7 +384,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
                             outputStream.close();
 
                             if (BuildConfig.DEBUG)
-                                Toast.makeText(context, "successfully downloaded", Toast.LENGTH_SHORT).show();
+                                Toaster.makeToast(context, "successfully downloaded", Toast.LENGTH_SHORT);
 
                             //Send broadcast message to notify all receivers of download finished
                             Intent intent = new Intent(Constants.ACTION_CHANNEL_DOWNLOAD_FINISHED);
@@ -408,7 +409,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
             }
 
 
-            if(BuildConfig.DEBUG) Toast.makeText(context, "I'm running", Toast.LENGTH_SHORT).show();
+            if(BuildConfig.DEBUG) Toaster.makeToast(context, "I'm running", Toast.LENGTH_SHORT);
 
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
@@ -440,7 +441,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
                         outputStream.write(bytes);
                         outputStream.close();
 
-                        if(BuildConfig.DEBUG) Toast.makeText(context, "successfully downloaded", Toast.LENGTH_SHORT).show();
+                        if(BuildConfig.DEBUG) Toaster.makeToast(context, "successfully downloaded", Toast.LENGTH_SHORT);
 
                         //Create new object for storing in SQL db
                         DeviceAudioQueueItem deviceAudioQueueItem = new DeviceAudioQueueItem();
@@ -470,7 +471,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
 
 
             // For our recurring task, we'll just display a message
-            if(BuildConfig.DEBUG) Toast.makeText(context, "I'm running", Toast.LENGTH_SHORT).show();
+            if(BuildConfig.DEBUG) Toaster.makeToast(context, "I'm running", Toast.LENGTH_SHORT);
 
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());

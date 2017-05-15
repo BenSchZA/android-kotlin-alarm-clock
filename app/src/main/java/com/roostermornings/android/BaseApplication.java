@@ -38,6 +38,7 @@ import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.service.FirebaseListenerService;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.FontsOverride;
+import com.roostermornings.android.util.Toaster;
 
 import javax.inject.Inject;
 
@@ -172,8 +173,7 @@ public class BaseApplication extends android.app.Application {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                Toast.makeText(getApplicationContext(), "Failed to load user.",
-                        Toast.LENGTH_SHORT).show();
+                Toaster.makeToast(getApplicationContext(), "Failed to load user.", Toast.LENGTH_SHORT);
             }
         };
 

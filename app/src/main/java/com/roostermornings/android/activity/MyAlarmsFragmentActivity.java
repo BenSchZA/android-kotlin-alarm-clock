@@ -47,6 +47,7 @@ import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
 
@@ -93,6 +94,10 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
         //Final context to be used in threads
         final Context context = this;
+
+        //End running audioservice
+        Intent broadcastIntent = new Intent(Constants.ACTION_END_AUDIO_SERVICE);
+        sendBroadcast(broadcastIntent);
 
         //UI setup thread
         new Thread() {
@@ -195,8 +200,8 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
                         Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                        if(BuildConfig.DEBUG) Toast.makeText(MyAlarmsFragmentActivity.this, "Failed to load mAlarms.",
-                                Toast.LENGTH_SHORT).show();
+                        if(BuildConfig.DEBUG) Toaster.makeToast(MyAlarmsFragmentActivity.this, "Failed to load mAlarms.",
+                                Toast.LENGTH_SHORT);
                     }
                 }; mMyAlarmsReference.addListenerForSingleValueEvent(alarmsListener);
             }

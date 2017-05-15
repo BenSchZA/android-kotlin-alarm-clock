@@ -38,6 +38,7 @@ import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
+import com.roostermornings.android.util.Toaster;
 
 import java.io.File;
 import java.io.IOException;
@@ -530,7 +531,7 @@ public class NewAudioRecordActivity extends BaseActivity {
                         setNewAudioStatus(NEW_AUDIO_RECORDING);
                         startStopAudioRecording();
                     } else {
-                        Toast.makeText(NewAudioRecordActivity.this, "Permission Denied", Toast.LENGTH_LONG).show();
+                        Toaster.makeToast(NewAudioRecordActivity.this, "Permission Denied", Toast.LENGTH_LONG);
                         setNewAudioStatus(NEW_AUDIO_READY_RECORD);
                     }
                 }

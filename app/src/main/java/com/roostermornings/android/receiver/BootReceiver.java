@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
+import com.roostermornings.android.util.Toaster;
 
 
 /**
@@ -25,7 +26,7 @@ public class BootReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if(BuildConfig.DEBUG) Toast.makeText(context, "BootReceiver!", Toast.LENGTH_LONG).show();
+        if(BuildConfig.DEBUG) Toaster.makeToast(context, "BootReceiver!", Toast.LENGTH_LONG);
 
         this.context = context;
 
@@ -34,11 +35,11 @@ public class BootReceiver extends BroadcastReceiver {
         BackgroundTaskReceiver backgroundTaskReceiver = new BackgroundTaskReceiver();
 
         if (auth != null && auth.getCurrentUser().getUid() != null) {
-            Toast.makeText(context, "Tasks started, valid user!", Toast.LENGTH_LONG).show();
+            Toaster.makeToast(context, "Tasks started, valid user!", Toast.LENGTH_LONG);
             alarmController.rebootAlarms();
             backgroundTaskReceiver.scheduleBackgroundDailyTask(context, true);
         } else {
-            Toast.makeText(context, "Tasks not started, invalid user!", Toast.LENGTH_LONG).show();
+            Toaster.makeToast(context, "Tasks not started, invalid user!", Toast.LENGTH_LONG);
         }
     }
 }
