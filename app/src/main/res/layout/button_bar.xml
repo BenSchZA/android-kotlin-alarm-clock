@@ -132,7 +132,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignRight="@id/home_friends"
                 android:layout_alignTop="@id/home_friends"
-                android:background="@drawable/counter_circle_yellow"
+                android:background="@drawable/notification_circle_yellow"
                 android:visibility="gone" />
 
         </RelativeLayout>
