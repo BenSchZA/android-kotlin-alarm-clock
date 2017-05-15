@@ -37,6 +37,7 @@ import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.node_api.IHTTPClient;
+import com.roostermornings.android.util.Toaster;
 
 import butterknife.ButterKnife;
 
@@ -108,8 +109,8 @@ public abstract class BaseFragment extends Fragment implements Validator.Validat
 
     public void showToast(Context c, String message, int toastLength) {
         try{
-            Toast.makeText(c, message,
-                    toastLength).show();
+            Toaster.makeToast(c, message,
+                    toastLength);
         }catch(NullPointerException e){
             e.printStackTrace();
         }

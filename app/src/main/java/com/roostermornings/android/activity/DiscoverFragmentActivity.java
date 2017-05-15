@@ -45,6 +45,7 @@ import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment2;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.Toaster;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -175,7 +176,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
                         Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                        Toast.makeText(AppContext, "Failed to load channel.", Toast.LENGTH_SHORT).show();
+                        Toaster.makeToast(AppContext, "Failed to load channel.", Toast.LENGTH_SHORT);
                     }
                 };
                 mChannelsReference.addValueEventListener(channelsListener);
@@ -373,7 +374,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                         mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
                             @Override
                             public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
-                                Toast.makeText(AppContext, "Content streaming failed.", Toast.LENGTH_SHORT).show();
+                                Toaster.makeToast(AppContext, "Content streaming failed.", Toast.LENGTH_SHORT);
                                 channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
                                 channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
                                 notifyDataSetChangedFromUIThread();
@@ -387,7 +388,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                     @Override
                     public void onFailure(@NonNull Exception exception) {
                         // Handle any errors
-                        Toast.makeText(AppContext, "Content streaming failed.", Toast.LENGTH_SHORT).show();
+                        Toaster.makeToast(AppContext, "Content streaming failed.", Toast.LENGTH_SHORT);
                         channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
                         channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
                         mAdapter.notifyDataSetChanged();

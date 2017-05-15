@@ -26,6 +26,7 @@ import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.sync.DownloadSyncAdapter;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -248,7 +249,7 @@ public final class DeviceAlarmController {
         else nextAlarmTimeString = String.format("%s days, %s hours, and %s minutes", days, hours, minutes);
 
         //Ensure alarm time accurate before notice
-        if(minutes >= 0 && hours >= 0 && days >= 0) Toast.makeText(context, "Alarm set for " + nextAlarmTimeString + " from now.", Toast.LENGTH_LONG).show();
+        if(minutes >= 0 && hours >= 0 && days >= 0) Toaster.makeToast(context, "Alarm set for " + nextAlarmTimeString + " from now.", Toast.LENGTH_LONG);
     }
 
     public void deleteAllLocalAlarms() {

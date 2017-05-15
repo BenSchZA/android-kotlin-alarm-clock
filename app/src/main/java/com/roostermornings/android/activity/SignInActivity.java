@@ -51,6 +51,7 @@ import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.util.RoosterUtils;
+import com.roostermornings.android.util.Toaster;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -276,8 +277,8 @@ public class SignInActivity extends BaseActivity {
                             progressBar.setVisibility(View.GONE);
 
                             Log.w(TAG, "Facebook: signInWithCredential", task.getException());
-                            Toast.makeText(SignInActivity.this, notNull(task.getException().getMessage()) ? task.getException().getMessage():"Facebook sign-in failed.",
-                                    Toast.LENGTH_LONG).show();
+                            Toaster.makeToast(SignInActivity.this, notNull(task.getException().getMessage()) ? task.getException().getMessage():"Facebook sign-in failed.",
+                                    Toast.LENGTH_LONG);
                         }
                     }
                 });
@@ -291,8 +292,8 @@ public class SignInActivity extends BaseActivity {
             firebaseAuthWithGoogle(result);
         } else {
             // Signed out, show unauthenticated UI.
-            Toast.makeText(SignInActivity.this, "Google sign-in failed.",
-            Toast.LENGTH_LONG).show();
+            Toaster.makeToast(SignInActivity.this, "Google sign-in failed.",
+            Toast.LENGTH_LONG);
         }
     }
 
@@ -359,8 +360,8 @@ public class SignInActivity extends BaseActivity {
                             progressBar.setVisibility(View.GONE);
 
                             Log.w(TAG, "Google: signInWithCredential", task.getException());
-                            Toast.makeText(SignInActivity.this, notNull(task.getException().getMessage()) ? task.getException().getMessage():"Google sign-in failed.",
-                                    Toast.LENGTH_LONG).show();
+                            Toaster.makeToast(SignInActivity.this, notNull(task.getException().getMessage()) ? task.getException().getMessage():"Google sign-in failed.",
+                                    Toast.LENGTH_LONG);
                         }
                     }
                 });

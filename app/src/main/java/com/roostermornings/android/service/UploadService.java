@@ -40,6 +40,7 @@ import com.roostermornings.android.domain.SocialRooster;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.node_api.IHTTPClient;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.Toaster;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -116,7 +117,7 @@ public class UploadService extends Service {
                     }
                 } catch (ClassCastException e) {
                     e.printStackTrace();
-                    Toast.makeText(getBaseContext(), "Rooster upload failed.", Toast.LENGTH_SHORT).show();
+                    Toaster.makeToast(getBaseContext(), "Rooster upload failed.", Toast.LENGTH_SHORT);
                     endService();
                 }
             }
@@ -157,7 +158,7 @@ public class UploadService extends Service {
                     @Override
                     public void onFailure(@NonNull Exception exception) {
                         // Handle unsuccessful upload
-                        Toast.makeText(getApplicationContext(), "Error uploading!", Toast.LENGTH_LONG).show();
+                        Toaster.makeToast(getApplicationContext(), "Error uploading!", Toast.LENGTH_LONG);
                         endService();
                     }
                 });
@@ -211,7 +212,7 @@ public class UploadService extends Service {
         mDatabase.getDatabase().getReference(uploadUrl + "/" + uploadKey).setValue(socialRoosterUploaded);
         mDatabase.getDatabase().getReference(queueUrl + "/" + uploadKey).setValue(socialRoosterQueue);
         socialRoosterNotifyUserFCMMessage(friend.getUid());
-        Toast.makeText(getApplicationContext(), "Social rooster sent to " + friend.getUser_name() + "!", Toast.LENGTH_LONG).show();
+        Toaster.makeToast(getApplicationContext(), "Social rooster sent to " + friend.getUser_name() + "!", Toast.LENGTH_LONG);
     }
 
     private void socialRoosterNotifyUserFCMMessage(String recipientUserId) {

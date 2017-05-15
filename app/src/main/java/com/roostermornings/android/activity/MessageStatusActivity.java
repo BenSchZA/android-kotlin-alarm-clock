@@ -29,6 +29,7 @@ import com.roostermornings.android.adapter.MessageStatusListAdapter;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.SocialRooster;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -173,8 +174,8 @@ public class MessageStatusActivity extends BaseActivity {
                     public void onCancelled(DatabaseError databaseError) {
                         Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
                         if (BuildConfig.DEBUG)
-                            Toast.makeText(MessageStatusActivity.this, "Failed to load message status.",
-                                    Toast.LENGTH_SHORT).show();
+                            Toaster.makeToast(MessageStatusActivity.this, "Failed to load message status.",
+                                    Toast.LENGTH_SHORT);
                     }
                 };
                 mSocialRoosterQueueReference.addValueEventListener(socialRoosterQueueListener);

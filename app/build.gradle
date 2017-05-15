@@ -14,7 +14,8 @@ android {
         minSdkVersion 18
         targetSdkVersion 25
         versionCode 2
-        versionName "2.0"
+//        Formatting of version name very important for invalidation, must have 3 components
+        versionName "2.0.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
