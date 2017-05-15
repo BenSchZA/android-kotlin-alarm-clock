@@ -169,7 +169,7 @@ public class FriendsMyFragment1 extends BaseFragment {
         }
 
         if("".equals(firebaseIdToken)) {
-            Toaster.makeToast(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG);
+            Toaster.makeToast(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG).checkTastyToast();
             return;
         }
         Call<Users> call = apiService().retrieveUserFriends(firebaseIdToken);
@@ -201,7 +201,7 @@ public class FriendsMyFragment1 extends BaseFragment {
             @Override
             public void onFailure(Throwable t) {
                 Log.i(TAG, t.getLocalizedMessage()==null?"":t.getLocalizedMessage());
-                Toaster.makeToast(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG);
+                Toaster.makeToast(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG).checkTastyToast();
                 progressBar.setVisibility(View.GONE);
             }
         });

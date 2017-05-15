@@ -173,7 +173,7 @@ public class BaseApplication extends android.app.Application {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                Toaster.makeToast(getApplicationContext(), "Failed to load user.", Toast.LENGTH_SHORT);
+                Toaster.makeToast(getApplicationContext(), "Failed to load user.", Toast.LENGTH_SHORT).checkTastyToast();
             }
         };
 

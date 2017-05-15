@@ -120,8 +120,12 @@ public class DeviceAlarmTableManager {
 
     public void updateAlarmLabel(String label) {
         //Update the label of the next occuring alarm to show whether a download has failed, or other notices
-        String setId = getNextPendingAlarm().getSetId();
-        if(setId == null) return;
+        DeviceAlarm deviceAlarm = getNextPendingAlarm();
+        String setId = "";
+        if(deviceAlarm != null) {
+            setId = deviceAlarm.getSetId();
+            if(setId == null) return;
+        }
 
         SQLiteDatabase db = initDB();
         String updateQuery = "UPDATE " + AlarmTableEntry.TABLE_NAME + " SET " + AlarmTableEntry.COLUMN_LABEL + " = '" + label + "' WHERE " + AlarmTableEntry.COLUMN_SET_ID + " LIKE \"%" + setId + "%\";";
