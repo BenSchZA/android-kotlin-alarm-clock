@@ -76,6 +76,7 @@ public class Constants {
     public final static String ACTION_ALARMDISPLAY = "rooster.update.ALARMDISPLAY";
     public final static String ACTION_ALARMTIMESUP = "rooster.update.ALARMTIMESUP";
     public final static String ACTION_CHANNEL_DOWNLOAD_FINISHED = "rooster.notify.CHANNEL_DOWNLOAD_FINISHED";
+    public final static String ACTION_END_AUDIO_SERVICE = "EndAudioServiceBroadcastReceiver";
 
     //AudioService timers
     public final static int ALARM_DEFAULTTIME = 5 * 60 * 1000;

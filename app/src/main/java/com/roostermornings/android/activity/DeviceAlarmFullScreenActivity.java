@@ -5,6 +5,7 @@
 
 package com.roostermornings.android.activity;
 
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -15,6 +16,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
@@ -30,6 +32,7 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
+import com.roostermornings.android.domain.ChannelRooster;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
@@ -43,6 +46,8 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.OnClick;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+
 public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
     public static final String TAG = DeviceAlarmFullScreenActivity.class.getSimpleName();
@@ -51,6 +56,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     private boolean mBound = false;
     private BroadcastReceiver receiver;
     DeviceAudioQueueItem audioItem = new DeviceAudioQueueItem();
+    ChannelRooster channelRooster = new ChannelRooster();
 
     private int alarmCount = 1;
     private int alarmPosition = 1;
@@ -75,6 +81,9 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
     @BindView(R.id.skip_previous)
     Button skipPrevious;
+
+    @BindView(R.id.alarm_action_button)
+    Button alarmActionButton;
 
     @Inject DeviceAlarmController deviceAlarmController;
 
@@ -117,6 +126,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         if(mBound) unbindService(mAudioServiceConnection);
         mBound = false;
         finish();
+        startActivity(new Intent(this, MyAlarmsFragmentActivity.class));
     }
 
     @OnClick(R.id.alarm_snooze_button)
@@ -125,6 +135,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         if(mBound) unbindService(mAudioServiceConnection);
         mBound = false;
         finish();
+        startActivity(new Intent(this, MyAlarmsFragmentActivity.class));
     }
 
     @OnClick(R.id.alarm_dismiss)
@@ -133,6 +144,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         if(mBound) unbindService(mAudioServiceConnection);
         mBound = false;
         finish();
+        startActivity(new Intent(this, MyAlarmsFragmentActivity.class));
     }
 
     @OnClick(R.id.skip_previous)
@@ -212,6 +224,12 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     }
 
     protected void setAlarmUI() {
+        if(audioItem != null) {
+            if(!audioItem.getAction_title().isEmpty() && !audioItem.getAction_url().isEmpty()) {
+                alarmActionButton.setText(audioItem.getAction_title());
+                alarmActionButton.setVisibility(View.VISIBLE);
+            }
+        }
 
         if (audioItem != null && !audioItem.getPicture().isEmpty()) {
             setProfilePic(audioItem.getPicture());
@@ -220,6 +238,20 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
             setDefaultDisplayProfile();
         }
         txtAlarmCount.setText(String.format("%s of %s", alarmPosition, alarmCount));
+    }
+
+    @OnClick(R.id.alarm_action_button)
+    public void onActionButtonClicked() {
+        if(!audioItem.getAction_url().isEmpty()) {
+            try {
+                Uri uri = Uri.parse(audioItem.getAction_url());
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(intent);
+            } catch (Exception e) {
+                e.printStackTrace();
+                alarmActionButton.setVisibility(View.GONE);
+            }
+        }
     }
 
     protected void setProfilePic(String url) {

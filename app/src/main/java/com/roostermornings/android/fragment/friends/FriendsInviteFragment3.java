@@ -49,6 +49,7 @@ import com.roostermornings.android.domain.NodeUsers;
 import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.MyContactsController;
+import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -305,7 +306,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
             @Override
             public void onFailure(Throwable t) {
                 Log.i(TAG, t.getLocalizedMessage()==null?"":t.getLocalizedMessage());
-                Toast.makeText(getApplicationContext(), "Loading contacts failed, please try again.", Toast.LENGTH_LONG).show();
+                Toaster.makeToast(getApplicationContext(), "Loading contacts failed, please try again.", Toast.LENGTH_LONG);
                 progressBar.setVisibility(View.GONE);
             }
         });

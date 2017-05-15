@@ -35,6 +35,7 @@ import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.util.RoosterUtils;
+import com.roostermornings.android.util.Toaster;
 
 import java.util.Calendar;
 
@@ -227,10 +228,10 @@ public class NewAlarmFragment1 extends BaseFragment{
             myAlarmsListAdapter.notifyDataSetChanged();
 
             startHomeActivity();
-            Toast.makeText(AppContext, "Alarm deleted.", Toast.LENGTH_SHORT).show();
+            Toaster.makeToast(AppContext, "Alarm deleted.", Toast.LENGTH_SHORT);
         } catch (NullPointerException e) {
             e.printStackTrace();
-            if(BuildConfig.DEBUG) Toast.makeText(AppContext, "Oi! Don't delete me. Delete alarm failed!", Toast.LENGTH_SHORT);
+            if(BuildConfig.DEBUG) Toaster.makeToast(AppContext, "Oi! Don't delete me. Delete alarm failed!", Toast.LENGTH_SHORT);
         }
     }
 

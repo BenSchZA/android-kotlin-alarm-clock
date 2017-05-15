@@ -88,6 +88,8 @@ public class AudioService extends Service {
     // Binder given to clients
     private final IBinder mBinder = new LocalBinder();
 
+    BroadcastReceiver endAudioServiceBroadcastReceiver;
+
     private static final Timer timer = new Timer();
 
     private final MediaPlayer mediaPlayerDefault = new MediaPlayer();
@@ -156,6 +158,20 @@ public class AudioService extends Service {
 
         BaseApplication baseApplication = (BaseApplication) getApplication();
         baseApplication.getRoosterApplicationComponent().inject(this);
+
+        endAudioServiceBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                endService(null);
+                //Start Rooster to show on wakeup
+                Intent homeIntent = new Intent(mThis, MyAlarmsFragmentActivity.class);
+                homeIntent.setFlags(FLAG_ACTIVITY_NEW_TASK);
+                startActivity(homeIntent);
+            }
+        };
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Constants.ACTION_END_AUDIO_SERVICE);
+        registerReceiver(endAudioServiceBroadcastReceiver, intentFilter);
 
         //Start fullscreen alarm activation activity
         Intent intentAlarmFullscreen = new Intent(mThis, DeviceAlarmFullScreenActivity.class);
@@ -408,6 +424,7 @@ public class AudioService extends Service {
     }
 
     private void streamChannelContent(final String url) {
+        foregroundNotification("Alarm content streaming");
         StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
         final StorageReference audioFileRef = mStorageRef.getStorage().getReferenceFromUrl(url);
 
@@ -716,16 +733,14 @@ public class AudioService extends Service {
             //Complete DeviceAlarmReceiver wakeful intent
             DeviceAlarmReceiver.completeWakefulIntent(wakefulIntent);
         }
+        //unregister all broadcastreceivers
+        if(endAudioServiceBroadcastReceiver != null) unregisterReceiver(endAudioServiceBroadcastReceiver);
         //unbind service from activation activity
         try {
             this.unbindService(conn);
         } catch(IllegalArgumentException e){
             e.printStackTrace();
         }
-        //Start Rooster to show on wakeup
-        Intent homeIntent = new Intent(this, MyAlarmsFragmentActivity.class);
-        homeIntent.setFlags(FLAG_ACTIVITY_NEW_TASK);
-        startActivity(homeIntent);
         //Stop service
         this.stopSelf();
     }
@@ -993,15 +1008,22 @@ public class AudioService extends Service {
 
     private void foregroundNotification(String state) {
 
-        Intent notificationIntent = new Intent(this, AudioService.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
-                notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        Intent launchIntent = new Intent(this, MyAlarmsFragmentActivity.class);
+        launchIntent.putExtra(Constants.EXTRA_ALARMID, alarmUid);
+        launchIntent.setAction(Constants.ACTION_CANCEL_SNOOZE);
 
-        Notification notification=new NotificationCompat.Builder(this)
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
+                launchIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        Intent broadcastIntent = new Intent(Constants.ACTION_END_AUDIO_SERVICE);
+        PendingIntent broadcastPendingIntent = PendingIntent.getBroadcast(this, 0, broadcastIntent, 0);
+
+        Notification notification = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.logo)
                 .setContentTitle("Rooster Mornings")
                 .setContentText(state)
-                .setContentIntent(pendingIntent).build();
+                .setContentIntent(pendingIntent)
+                .setDeleteIntent(broadcastPendingIntent).build();
 
         startForeground(Constants.AUDIOSERVICE_NOTIFICATION_ID, notification);
     }
@@ -1019,7 +1041,8 @@ public class AudioService extends Service {
                 .setContentTitle("Rooster Mornings")
                 .setContentText(state)
                 .setAutoCancel(true)
-                .setContentIntent(pendingIntent).build();
+                .setContentIntent(pendingIntent)
+                .setDeleteIntent(pendingIntent).build();
         //Above not working
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
 

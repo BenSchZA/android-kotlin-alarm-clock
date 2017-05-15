@@ -19,6 +19,8 @@ public class ChannelRooster {
     private String photo = "";
     private int rooster_cycle_iteration = -1;
     private long upload_date = -1;
+    private String action_title = "";
+    private String action_url = "";
 
     @Exclude
     private Boolean selected = false;
@@ -39,7 +41,7 @@ public class ChannelRooster {
     public ChannelRooster() {
     }
 
-    public ChannelRooster(String name, boolean active, String audio_file_name, String audio_file_url, String channel_uid, String description, String photo, int rooster_cycle_iteration, long upload_date) {
+    public ChannelRooster(String name, boolean active, String audio_file_name, String audio_file_url, String channel_uid, String description, String photo, int rooster_cycle_iteration, long upload_date, String action_title, String action_url) {
         this.name = name;
         this.active = active;
         this.audio_file_name = audio_file_name;
@@ -49,6 +51,24 @@ public class ChannelRooster {
         this.photo = photo;
         this.rooster_cycle_iteration = rooster_cycle_iteration;
         this.upload_date = upload_date;
+        this.action_title = action_title;
+        this.action_url = action_url;
+    }
+
+    public String getAction_title() {
+        return action_title;
+    }
+
+    public void setAction_title(String action_title) {
+        this.action_title = action_title;
+    }
+
+    public String getAction_url() {
+        return action_url;
+    }
+
+    public void setAction_url(String action_url) {
+        this.action_url = action_url;
     }
 
     @Exclude
