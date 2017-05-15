@@ -212,30 +212,36 @@
 
         <service
             android:name=".sync.DownloadSyncService"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
-                <action android:name="android.content.SyncAdapter"/>
+                <action android:name="android.content.SyncAdapter" />
             </intent-filter>
-            <meta-data android:name="android.content.SyncAdapter"
+
+            <meta-data
+                android:name="android.content.SyncAdapter"
                 android:resource="@xml/syncadapter" />
         </service>
-
-        <service
-            android:name=".sync.AuthenticatorService">
+        <service android:name=".sync.AuthenticatorService">
             <intent-filter>
-                <action android:name="android.accounts.AccountAuthenticator"/>
+                <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
+
             <meta-data
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
         </service>
 
         <provider
-            android:name="com.roostermornings.android.sync.StubProvider"
+            android:name=".sync.StubProvider"
             android:authorities="com.roostermornings.android.datasync.provider"
             android:exported="false"
-            android:syncable="true"/>
+            android:syncable="true" />
 
+        <activity android:name=".activity.InvalidateVersion"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/SplashTheme"/>
     </application>
 
 </manifest>
