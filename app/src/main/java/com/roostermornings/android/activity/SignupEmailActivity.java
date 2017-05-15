@@ -119,6 +119,9 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
                                 database.getReference(String.format("users/%s/cell_number", mAuth.getCurrentUser().getUid())).setValue(mMobileNumber);
                                 database.getReference(String.format("users/%s/unseen_roosters", mAuth.getCurrentUser().getUid())).setValue(0);
 
+                                //Add user as a friend of theirs
+                                database.getReference(String.format("users/%s/%s/%s", mAuth.getCurrentUser().getUid(), "friends", mAuth.getCurrentUser().getUid())).setValue(true);
+
                                 proceedToMyAlarmsActivity();
                             }
                         }
@@ -168,6 +171,9 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
                                         mAuth.getCurrentUser().getUid(), "user_name"), user.getUser_name());
                                 childUpdates.put(String.format("users/%s/%s",
                                         mAuth.getCurrentUser().getUid(), "unseen_roosters"), user.getUnseen_roosters());
+
+                                //Add user as a friend of theirs
+                                childUpdates.put(String.format("users/%s/%s/%s", mAuth.getCurrentUser().getUid(), "friends", mAuth.getCurrentUser().getUid()), true);
 
                                 mDatabase.updateChildren(childUpdates);
 
