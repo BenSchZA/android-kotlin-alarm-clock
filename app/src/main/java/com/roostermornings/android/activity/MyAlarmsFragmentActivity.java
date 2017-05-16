@@ -27,6 +27,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.crashlytics.android.Crashlytics;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -120,6 +122,14 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                 mRecyclerView.setAdapter(mAdapter);
                 //Check for new Firebase datachange notifications and register broadcast receiver
                 updateRequestNotification();
+
+                //Log new crashlytics user
+                if(firebaseUser != null) {
+                    // You can call any combination of these three methods
+                    Crashlytics.setUserIdentifier(firebaseUser.getUid());
+                    Crashlytics.setUserEmail(firebaseUser.getEmail());
+                    Crashlytics.setUserName(firebaseUser.getDisplayName());
+                }
             }
         }.run();
 

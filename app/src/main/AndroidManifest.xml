@@ -33,7 +33,7 @@
             android:value="@string/facebook_app_id" />
         <meta-data
             android:name="io.fabric.ApiKey"
-            android:value="207f8c17b3eb2499afa66f49b1502cae676c5ca2" />
+            android:value="ee6fca3fad50fdd435d89f9ed6c33257e984faa5" />
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_stat_ic_notification" />
