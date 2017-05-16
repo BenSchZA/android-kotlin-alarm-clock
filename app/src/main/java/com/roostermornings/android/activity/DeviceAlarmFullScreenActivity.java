@@ -38,6 +38,7 @@ import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.StrUtils;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -197,29 +198,33 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 //do something based on the intent's action
-                switch(intent.getAction()){
-                    case Constants.ACTION_ALARMDISPLAY:
-                        //Update alarm UI based on audio service broadcast
-                        audioItem = (DeviceAudioQueueItem) intent.getExtras().getSerializable("audioItem");
-                        alarmPosition = intent.getIntExtra("alarmPosition", alarmPosition);
-                        alarmCount = intent.getIntExtra("alarmCount", alarmCount);
-                        if(intent.getBooleanExtra("multipleAudioFiles", false)) {
-                            skipNext.setVisibility(View.VISIBLE);
-                            skipPrevious.setVisibility(View.VISIBLE);
-                        } else {
-                            skipNext.setVisibility(View.INVISIBLE);
-                            skipPrevious.setVisibility(View.INVISIBLE);
-                        }
-                        setAlarmUI();
-                        break;
-                    case Constants.ACTION_ALARMTIMESUP:
-                        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                                +WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
-                                +WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
-                        finish();
-                        break;
-                    default:
-                        break;
+                try {
+                    switch(intent.getAction()){
+                        case Constants.ACTION_ALARMDISPLAY:
+                            //Update alarm UI based on audio service broadcast
+                            audioItem = (DeviceAudioQueueItem) intent.getExtras().getSerializable("audioItem");
+                            alarmPosition = intent.getIntExtra("alarmPosition", alarmPosition);
+                            alarmCount = intent.getIntExtra("alarmCount", alarmCount);
+                            if (intent.getBooleanExtra("multipleAudioFiles", false)) {
+                                skipNext.setVisibility(View.VISIBLE);
+                                skipPrevious.setVisibility(View.VISIBLE);
+                            } else {
+                                skipNext.setVisibility(View.INVISIBLE);
+                                skipPrevious.setVisibility(View.INVISIBLE);
+                            }
+                            setAlarmUI();
+                            break;
+                        case Constants.ACTION_ALARMTIMESUP:
+                            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                                    + WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
+                                    +WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+                            finish();
+                            break;
+                        default:
+                            break;
+                    }
+                } catch (RuntimeException e) {
+                    e.printStackTrace();
                 }
             }
         };
@@ -230,13 +235,13 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
     protected void setAlarmUI() {
         if(audioItem != null) {
-            if(!audioItem.getAction_title().isEmpty() && !audioItem.getAction_url().isEmpty()) {
+            if(StrUtils.notNullOrEmpty(audioItem.getAction_title()) && StrUtils.notNullOrEmpty(audioItem.getAction_url())) {
                 alarmActionButton.setText(audioItem.getAction_title());
                 alarmActionButton.setVisibility(View.VISIBLE);
             }
         }
 
-        if (audioItem != null && !audioItem.getPicture().isEmpty()) {
+        if (audioItem != null && StrUtils.notNullOrEmpty(audioItem.getPicture()) && StrUtils.notNullOrEmpty(audioItem.getName())) {
             setProfilePic(audioItem.getPicture());
             txtSenderName.setText(audioItem.getName());
         } else {
@@ -247,7 +252,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
     @OnClick(R.id.alarm_action_button)
     public void onActionButtonClicked() {
-        if(!audioItem.getAction_url().isEmpty()) {
+        if(StrUtils.notNullOrEmpty(audioItem.getAction_url())) {
             try {
                 Uri uri = Uri.parse(audioItem.getAction_url());
                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
