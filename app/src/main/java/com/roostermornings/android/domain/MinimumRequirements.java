@@ -9,11 +9,11 @@ import com.google.firebase.database.IgnoreExtraProperties;
 
 @IgnoreExtraProperties
 public class MinimumRequirements {
-    private String app_version = "0.0.0";
-    private boolean invalidate_user = false;
-    private String update_title = "";
-    private String update_description = "";
-    private String update_link = "";
+    public String app_version = "0.0.0";
+    public boolean invalidate_user = false;
+    public String update_title = "";
+    public String update_description = "";
+    public String update_link = "";
 
     @SuppressWarnings("unused")
     public MinimumRequirements() {

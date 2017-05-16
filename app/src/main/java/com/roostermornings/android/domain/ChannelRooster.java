@@ -10,17 +10,17 @@ import com.google.firebase.database.IgnoreExtraProperties;
 
 @IgnoreExtraProperties
 public class ChannelRooster {
-    private String name = "";
-    private boolean active = false;
-    private String audio_file_name = "";
-    private String audio_file_url = "";
-    private String channel_uid = "";
-    private String description = "";
-    private String photo = "";
-    private int rooster_cycle_iteration = -1;
-    private long upload_date = -1;
-    private String action_title = "";
-    private String action_url = "";
+    public String name = "";
+    public boolean active = false;
+    public String audio_file_name = "";
+    public String audio_file_url = "";
+    public String channel_uid = "";
+    public String description = "";
+    public String photo = "";
+    public int rooster_cycle_iteration = -1;
+    public long upload_date = -1;
+    public String action_title = "";
+    public String action_url = "";
 
     @Exclude
     private Boolean selected = false;
