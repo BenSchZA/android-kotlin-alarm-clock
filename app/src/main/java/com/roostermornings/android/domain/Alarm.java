@@ -20,20 +20,20 @@ import java.util.List;
 @IgnoreExtraProperties
 public class Alarm {
 
-    private boolean enabled = true;
-    private AlarmChannel channel = new AlarmChannel();
-    private boolean monday = false;
-    private boolean tuesday = false;
-    private boolean wednesday = false;
-    private boolean thursday = false;
-    private boolean friday = false;
-    private boolean saturday = false;
-    private boolean sunday = false;
-    private int hour = -1;
-    private int minute = -1;
-    private boolean recurring = false;
-    private boolean allow_friend_audio_files = true;
-    private String uid = "";
+    public boolean enabled = true;
+    public AlarmChannel channel = new AlarmChannel();
+    public boolean monday = false;
+    public boolean tuesday = false;
+    public boolean wednesday = false;
+    public boolean thursday = false;
+    public boolean friday = false;
+    public boolean saturday = false;
+    public boolean sunday = false;
+    public int hour = -1;
+    public int minute = -1;
+    public boolean recurring = false;
+    public boolean allow_friend_audio_files = true;
+    public String uid = "";
 
     @Exclude
     private Integer unseen_roosters = 0;

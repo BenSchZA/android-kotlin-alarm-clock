@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "roosta-media",
+  "private_key_id": "ce8f6db0046d6c0f072a8c3101d880539a4e6840",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDJh5U4lO2vWTfL\nL4PdQGSFaEzctsc9N8GyAiMYjXCx0ZP73/0qSncW79EDRl7PfsVDrDnIa4stctEI\nsHCsl1rm5nZPkibBnCr3jvkmQeCMqL06H1vXh++40+Gj0esohI0ke5OsAA2ncUOQ\nE8jqSTFWqfsntR1ljVNq4wjXkGRFpWsn+/Hc8yjUoAbjr6unlIFBIAwwNlyZRPTU\n/hT5iAvmZLMHlrjjyH/BFqlrK3IsYHpCnSMrtbvl5KFsUlkQ1BvzmuWKv7ByPzj5\n3+tDsuxajBl9lTvx4vfu1wdRGlXI5mLmFjfVdDzW8+aEt5loSvoqxVMRUkNVkdwc\nj0X8MNSBAgMBAAECggEAPLkYslLVh2dHk3Z+shTr9PKnbj24rO52848HSiecFEhE\n4bjtDGghmAysmuMCQF0/TRPA2W3mIsycxZR8btSwNDCu52zvNpk6rRssYWWqJlfV\npIS8ZKX2Cmf1biobRDskWCDQLxxZAOH07J25hTaGoklXfvBoqie6QdOk32cHf6A9\n6EELsR0zSnA4t8dPf6ImNzo7JyOfBq+pnU/tD4R6uE/V4HXI6i6OZsLc32fPrwgJ\nZEzWAAGsGFZmhD9F0TIp7meX9R+MT7/wlcn2WO6sR2PSM40ylxBVzs4hCbYtY9wz\nV9NRJv5jBAx2FRL0ITmg/RE9NqiaXbC73TUhY38STQKBgQD18ADV/Juy3buEThwN\nir4K+JP2rBTAl0ITG8xN5gD7zGaECj9VGhFXXC4xlN6Jhst0YT7Mc+VNQsuLWxVF\n90P/9SWSb8XsZv6LQ4DUvnCe0pgZ6VyMmpX71RzK83RLI3yOFzcQX2rnsXG+aUYC\nvFubZs0poRyvffoYB+ANyugstwKBgQDRxnFd/ZpPlS0lNGKcMdgO/o5PFZ28zYLY\nbbYIDxzie+PJUnejrMlj/ExVonYlZeto19ZHGTQ2+DaRdpSyibb19pUU67cgDvun\nZwZSXRv3MKb8DEabPlHwTStf5vXfXzFYMqWiGLBPCOqoYQVgHeeWyW/uvRni10fI\nq7pfr4jAhwKBgQCr4+Phq91ypVEDRsiKmnb7GgPoextCBDX1Pw+LPn9ffdwE21iq\ndT67jTzoAIGNI34dyD3pDfOtDUtQCggTT5/iTIfHEoIGGXI9CaAIkVYLW2tdaOH7\nj6vWSHwISSH1xkau1QDyW45Pg5DZIaECFn38Xlx0hRuUeHsMwqxRV4jwfwKBgBpW\nM719LXZ4YCafoRHDIEEhrHQ5XohptNe/Tm9Mlm/I5hxMgkDGXLJ05pCJyROA7EFJ\nd9mNTITqPM+ed6TCrXnL74Ok5GTd/LJTuPN2RSCPtydF00eCV3838Q4lTREyPlu4\nYBstxlTl5bAmHiqnFoBT4f2zOCDGrnh/NvL0ctLZAoGBAN6XDQGta1PYQcmz1VTc\n0S1IOVwJn2UCdGr+ZxuZPnjbvOTAvjdqADyonR3EDQVn32eks1eFX9Ww2XARnJEX\nLJ0gKGvaTP+i4+PDANcY7O1H6Z2jdrykvzQi6Ie2N/5MCedw0ugwhwOrLTp5YWHs\nUSTPtTd6qg+hwYfo9bVt35/O\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-crashreporting-qeewh@roosta-media.iam.gserviceaccount.com",
+  "client_id": "117369300946060469822",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://accounts.google.com/o/oauth2/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-crashreporting-qeewh%40roosta-media.iam.gserviceaccount.com"
+}

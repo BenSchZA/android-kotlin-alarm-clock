@@ -12,10 +12,10 @@ import java.io.Serializable;
 
 @IgnoreExtraProperties
 public class Friend implements Serializable {
-    private String uid = "";
-    private String user_name = "";
-    private String profile_pic = "";
-    private String cell_number = "";
+    public String uid = "";
+    public String user_name = "";
+    public String profile_pic = "";
+    public String cell_number = "";
 
     //Using Firebase @Exclude annotation ensures that property is not UPLOADED to db - include above getter/setter for proper operation
     @Exclude

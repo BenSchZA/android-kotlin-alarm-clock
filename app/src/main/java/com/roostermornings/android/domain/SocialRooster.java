@@ -15,14 +15,14 @@ import com.roostermornings.android.util.Constants;
 @IgnoreExtraProperties
 public class SocialRooster {
 
-    private String audio_file_url;
-    private String user_name;
-    private Boolean listened;
-    private String profile_pic;
-    private Long date_uploaded;
-    private String receiver_id;
-    private String queue_id;
-    private String sender_id;
+    public String audio_file_url;
+    public String user_name;
+    public Boolean listened;
+    public String profile_pic;
+    public Long date_uploaded;
+    public String receiver_id;
+    public String queue_id;
+    public String sender_id;
 
     @Exclude
     private Integer status = -1;

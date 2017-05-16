@@ -208,11 +208,6 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
         }
     }
 
-    private void setButtonBackground(Button addButton, Boolean focused) {
-        if (focused) addButton.setBackground(context.getResources().getDrawable(R.drawable.rooster_button_light_blue));
-        else addButton.setBackground(context.getResources().getDrawable(R.drawable.rooster_button_semi_transparent));
-    }
-
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {

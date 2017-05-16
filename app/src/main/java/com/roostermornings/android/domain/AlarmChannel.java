@@ -16,8 +16,8 @@ import static com.roostermornings.android.util.RoosterUtils.notNull;
 @IgnoreExtraProperties
 public class AlarmChannel {
 
-    private String id = "";
-    private String name = "";
+    public String id = "";
+    public String name = "";
 
     // Required default constructor for Firebase object mapping
     @SuppressWarnings("unused")
