@@ -79,7 +79,7 @@ public class RoosterApplicationModule {
         Account mAccount = CreateSyncAccount(context);
         ContentResolver.setIsSyncable(mAccount, AUTHORITY, 1);
         ContentResolver.setSyncAutomatically(mAccount, AUTHORITY, true);
-        ContentResolver.addPeriodicSync(mAccount, AUTHORITY, new Bundle(), 300);
+        ContentResolver.addPeriodicSync(mAccount, AUTHORITY, new Bundle(), 900);
         return mAccount;
     }
 
