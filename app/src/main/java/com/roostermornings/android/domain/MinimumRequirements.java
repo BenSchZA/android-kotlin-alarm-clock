@@ -9,7 +9,7 @@ import com.google.firebase.database.IgnoreExtraProperties;
 
 @IgnoreExtraProperties
 public class MinimumRequirements {
-    private String app_version_string = "0.0.0";
+    private String app_version = "0.0.0";
     private boolean invalidate_user = false;
     private String update_title = "";
     private String update_description = "";
@@ -20,19 +20,19 @@ public class MinimumRequirements {
     }
 
     public MinimumRequirements(String app_version, boolean invalidate_user, String update_title, String update_description, String update_link) {
-        this.app_version_string = app_version;
+        this.app_version = app_version;
         this.invalidate_user = invalidate_user;
         this.update_title = update_title;
         this.update_description = update_description;
         this.update_link = update_link;
     }
 
-    public String getApp_version_string() {
-        return app_version_string;
+    public String getApp_version() {
+        return app_version;
     }
 
-    public void setApp_version_string(String app_version_string) {
-        this.app_version_string = app_version_string;
+    public void setApp_version(String app_version) {
+        this.app_version = app_version;
     }
 
     public boolean isInvalidate_user() {

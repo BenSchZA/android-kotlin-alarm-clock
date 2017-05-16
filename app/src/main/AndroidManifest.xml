@@ -32,6 +32,9 @@
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
         <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="207f8c17b3eb2499afa66f49b1502cae676c5ca2" />
+        <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_stat_ic_notification" />
         <meta-data
@@ -70,10 +73,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="207f8c17b3eb2499afa66f49b1502cae676c5ca2" />
 
         <!-- windowSoftInputMode ensures that text entry for mobile number is always visible -->
         <activity

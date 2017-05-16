@@ -46,6 +46,7 @@ import io.fabric.sdk.android.Fabric;
 import retrofit.GsonConverterFactory;
 import retrofit.Retrofit;
 
+import static com.roostermornings.android.R.string.facebook_app_id;
 import static com.roostermornings.android.sync.DownloadSyncAdapter.CreateSyncAccount;
 import static com.roostermornings.android.util.Constants.AUTHORITY;
 
@@ -83,9 +84,11 @@ public class BaseApplication extends android.app.Application {
         //Calls to setPersistenceEnabled() must be made before any other usage of FirebaseDatabase instance
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
+        //Activate crashlytics instance
         Fabric.with(this, new Crashlytics());
 
-        AppEventsLogger.activateApp(this, Constants.FACEBOOK_APP_ID);
+        //Activate facebook app connection
+        AppEventsLogger.activateApp(this, getResources().getString(R.string.facebook_app_id));
 
         //Override monospace font with custom font
         FontsOverride.setDefaultFont(this, "MONOSPACE", Constants.APP_FONT);
@@ -115,27 +118,9 @@ public class BaseApplication extends android.app.Application {
                 .baseUrl(getResources().getString(R.string.node_api_url))
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
-
         mAPIService = mRetrofit.create(IHTTPClient.class);
 
         updateNotification();
-
-        //TODO: remove
-        if (BuildConfig.DEBUG) {
-
-//            AudioTableHelper dbAudioHelper = new AudioTableHelper(this);
-//            SQLiteDatabase dbAudio = dbAudioHelper.getWritableDatabase();
-//            DeviceAlarmTableHelper dbAlarmHelper = new DeviceAlarmTableHelper(this);
-//            SQLiteDatabase dbAlarm = dbAlarmHelper.getWritableDatabase();
-//
-//            AudioTableHelper audioTableHelper = new AudioTableHelper(this);
-//            DeviceAlarmTableHelper deviceAlarmTableHelper = new DeviceAlarmTableHelper(this);
-//            audioTableHelper.onUpgrade(dbAudio, 1, 2);
-//            deviceAlarmTableHelper.onUpgrade(dbAlarm, 1, 2);
-//
-//            dbAudio.close();
-//            dbAlarm.close();
-        }
 
         // Add Firebase auth state listener
         mAuthListener = new FirebaseAuth.AuthStateListener() {

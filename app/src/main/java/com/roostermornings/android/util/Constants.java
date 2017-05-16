@@ -5,13 +5,11 @@
 
 package com.roostermornings.android.util;
 
+import com.roostermornings.android.R;
+
 public class Constants {
 
-    public final static String ROOSTER_SHARED_PREFERENCES = "rooster_preferences";
-
     public final static String APP_FONT = "fonts/Nunito/Nunito-Bold.ttf";
-
-    public final static String FACEBOOK_APP_ID = "190341188110134";
 
     //Broadcast receiver filters
     public final static String FINISH_AUDIO_RECORD_ACTIVITY = "rooster.android.broadcast.filter.FINISH_AUDIO_RECORD_ACTIVITY";
