@@ -83,7 +83,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
 
     // Global variables
     // Define a variable to contain a content resolver instance
-    ContentResolver mContentResolver;
+    private ContentResolver mContentResolver;
 
     /**
      * Set up the sync adapter
