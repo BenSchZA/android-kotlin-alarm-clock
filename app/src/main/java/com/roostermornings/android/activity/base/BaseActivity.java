@@ -71,6 +71,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -91,6 +92,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
 
     @Inject Context AppContext;
     @Inject SharedPreferences sharedPreferences;
+    @Inject @Named("default") SharedPreferences defaultSharedPreferences;
     @Inject DeviceAlarmController deviceAlarmController;
     @Inject AudioTableManager audioTableManager;
     @Inject BackgroundTaskReceiver backgroundTaskReceiver;
@@ -149,7 +151,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
     }
 
     private boolean checkMobileDataConnection() {
-        return !(mobileDataConnection() && !sharedPreferences.getBoolean(Constants.USER_SETTINGS_DOWNLOAD_ON_DATA, true));
+        return !(mobileDataConnection() && !defaultSharedPreferences.getBoolean(Constants.USER_SETTINGS_DOWNLOAD_ON_DATA, true));
     }
 
     protected void checkFirebaseConnection() {
@@ -293,6 +295,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
             ContentResolver.cancelSync(mAccount, AUTHORITY);
             //Set default application settings preferences - don't overwrite existing if false
             setPreferenceManagerDefaultSettings(true);
+            sharedPreferences.edit().clear().apply();
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
@@ -314,7 +317,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
         // override any previous values with the defaults.
 
         if(overwrite) {
-            SharedPreferences.Editor editor = sharedPreferences.edit();
+            SharedPreferences.Editor editor = defaultSharedPreferences.edit();
             editor.remove("pref_key_user_settings").apply();
         }
         PreferenceManager.setDefaultValues(this, R.xml.application_user_settings, overwrite);
@@ -455,7 +458,6 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
     public boolean setDayNightTheme() {
         try {
             String[] dayNightThemeArrayEntries = getResources().getStringArray(R.array.user_settings_day_night_theme_entry_values);
-            SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(AppContext);
 
             if (dayNightThemeArrayEntries[0].equals(defaultSharedPreferences.getString(Constants.USER_SETTINGS_DAY_NIGHT_THEME, ""))) {
                 if (calendar.get(Calendar.HOUR_OF_DAY) >= 17) {
