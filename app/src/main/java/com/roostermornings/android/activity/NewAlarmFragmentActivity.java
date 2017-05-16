@@ -40,7 +40,6 @@ import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sync.DownloadSyncAdapter;
 import com.roostermornings.android.util.Constants;
-import com.roostermornings.android.util.JSONPersistence;
 
 import java.util.Calendar;
 import java.util.List;
@@ -115,10 +114,10 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
         }
         if (mEditAlarmId.length() == 0) {
             setupToolbar(toolbarTitle, getString(R.string.create_alarm));
-            FA.Log(FA.Event.Alarm_creation_begin.class, null, null);
+            FA.Log(FA.Event.alarm_creation_begin.class, null, null);
         } else {
             setupToolbar(toolbarTitle, getString(R.string.edit_alarm));
-            FA.Log(FA.Event.Alarm_edit_begin.class, null, null);
+            FA.Log(FA.Event.alarm_edit_begin.class, null, null);
         }
     }
 
@@ -251,16 +250,16 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
 
 
-                FA.Log(FA.Event.Alarm_creation_completed.class,
-                        FA.Event.Alarm_creation_completed.Param.Social_roosters_enabled,
+                FA.Log(FA.Event.alarm_creation_completed.class,
+                        FA.Event.alarm_creation_completed.Param.social_roosters_enabled,
                         mAlarm.isAllow_friend_audio_files());
-                FA.Log(FA.Event.Alarm_creation_completed.class,
-                        FA.Event.Alarm_creation_completed.Param.Channel_selected,
+                FA.Log(FA.Event.alarm_creation_completed.class,
+                        FA.Event.alarm_creation_completed.Param.channel_selected,
                         !"".equals(mAlarm.getChannel().getName()));
 
                 if(!"".equals(mAlarm.getChannel().getName())) {
-                    FA.Log(FA.Event.Channel_selected.class,
-                            FA.Event.Channel_selected.Param.Channel_title,
+                    FA.Log(FA.Event.channel_selected.class,
+                            FA.Event.channel_selected.Param.channel_title,
                             mAlarm.getChannel().getName());
                 }
             }

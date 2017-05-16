@@ -10,7 +10,6 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -18,7 +17,6 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Binder;
@@ -32,12 +30,9 @@ import android.util.Log;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.analytics.FirebaseAnalytics;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.Exclude;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
@@ -56,7 +51,6 @@ import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.sqlutil.AudioTableManager;
-import com.roostermornings.android.sync.DownloadSyncAdapter;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.InternetHelper;
 import com.roostermornings.android.util.JSONPersistence;
@@ -65,23 +59,18 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.SortedMap;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
 import static android.content.ContentValues.TAG;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static com.roostermornings.android.util.Constants.AUTHORITY;
 
 //Service to manage playing and pausing audio during Rooster alarm
 public class AudioService extends Service {
@@ -245,8 +234,8 @@ public class AudioService extends Service {
         channelAudioItems = audioTableManager.extractAlarmChannelAudioFiles(mThis.alarmChannelUid);
         socialAudioItems = audioTableManager.extractSocialAudioFiles();
 
-        FA.Log(FA.Event.Alarm_activated.class, FA.Event.Alarm_activated.Param.Channel_content_received, channelAudioItems.size());
-        FA.Log(FA.Event.Alarm_activated.class, FA.Event.Alarm_activated.Param.Social_content_received, socialAudioItems.size());
+        FA.Log(FA.Event.alarm_activated.class, FA.Event.alarm_activated.Param.channel_content_received, channelAudioItems.size());
+        FA.Log(FA.Event.alarm_activated.class, FA.Event.alarm_activated.Param.social_content_received, socialAudioItems.size());
 
         this.alarmCycle = 1;
 
@@ -261,7 +250,7 @@ public class AudioService extends Service {
             //If alarm channel is not empty and channel audioitems is empty, try download
             if (!"".equals(mThis.alarmChannelUid) && channelAudioItems.isEmpty()) {
 
-                FA.Log(FA.Event.Alarm_activated.class, FA.Event.Alarm_activated.Param.Data_loaded, false);
+                FA.Log(FA.Event.alarm_activated.class, FA.Event.alarm_activated.Param.data_loaded, false);
 
                 if (!InternetHelper.noInternetConnection(this)) {
                     //Download any social or channel audio files
@@ -270,7 +259,7 @@ public class AudioService extends Service {
                     compileAudioItemContent();
                 }
             } else {
-                FA.Log(FA.Event.Alarm_activated.class, FA.Event.Alarm_activated.Param.Data_loaded, true);
+                FA.Log(FA.Event.alarm_activated.class, FA.Event.alarm_activated.Param.data_loaded, true);
                 compileAudioItemContent();
             }
         } catch(NullPointerException e) {
@@ -543,11 +532,11 @@ public class AudioService extends Service {
                     if(alarmPosition == 1 && alarmCycle == 1) {
                         //Slowly increase volume from low to current volume
                         softStartAudio();
-                        if(audioItem.getType() == Constants.AUDIO_TYPE_SOCIAL) FA.Log(FA.Event.Social_rooster_unique_play.class, null, null);
-                        if(audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) FA.Log(FA.Event.Channel_unique_play.class, null, null);
+                        if(audioItem.getType() == Constants.AUDIO_TYPE_SOCIAL) FA.Log(FA.Event.social_rooster_unique_play.class, null, null);
+                        if(audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) FA.Log(FA.Event.channel_unique_play.class, null, null);
                     } else {
-                        if(audioItem.getType() == Constants.AUDIO_TYPE_SOCIAL) FA.Log(FA.Event.Social_rooster_play.class, null, null);
-                        if(audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) FA.Log(FA.Event.Channel_play.class, null, null);
+                        if(audioItem.getType() == Constants.AUDIO_TYPE_SOCIAL) FA.Log(FA.Event.social_rooster_play.class, null, null);
+                        if(audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) FA.Log(FA.Event.channel_play.class, null, null);
                     }
 
                     mediaPlayerRooster.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -672,14 +661,14 @@ public class AudioService extends Service {
 
     public void dismissAlarm(ServiceConnection conn) {
         try {
-            FA.Log(FA.Event.Alarm_dismissed.class,
-                    FA.Event.Alarm_dismissed.Param.Alarm_activation_cycle_count,
+            FA.Log(FA.Event.alarm_dismissed.class,
+                    FA.Event.alarm_dismissed.Param.alarm_activation_cycle_count,
                     alarmCycle);
-            FA.Log(FA.Event.Alarm_dismissed.class,
-                    FA.Event.Alarm_dismissed.Param.Alarm_activation_index,
+            FA.Log(FA.Event.alarm_dismissed.class,
+                    FA.Event.alarm_dismissed.Param.alarm_activation_index,
                     audioItems.indexOf(audioItem) + 1);
-            FA.Log(FA.Event.Alarm_dismissed.class,
-                    FA.Event.Alarm_dismissed.Param.Alarm_activation_total_roosters,
+            FA.Log(FA.Event.alarm_dismissed.class,
+                    FA.Event.alarm_dismissed.Param.alarm_activation_total_roosters,
                     channelAudioItems.size() + socialAudioItems.size());
         } catch (NullPointerException e) {
             e.printStackTrace();
@@ -820,14 +809,14 @@ public class AudioService extends Service {
 
         try {
             if(!audioItems.isEmpty()) {
-                FA.Log(FA.Event.Alarm_snoozed.class,
-                        FA.Event.Alarm_snoozed.Param.Alarm_activation_cycle_count,
+                FA.Log(FA.Event.alarm_snoozed.class,
+                        FA.Event.alarm_snoozed.Param.alarm_activation_cycle_count,
                         alarmCycle);
-                FA.Log(FA.Event.Alarm_snoozed.class,
-                        FA.Event.Alarm_snoozed.Param.Alarm_activation_index,
+                FA.Log(FA.Event.alarm_snoozed.class,
+                        FA.Event.alarm_snoozed.Param.alarm_activation_index,
                         audioItems.indexOf(audioItem) + 1);
-                FA.Log(FA.Event.Alarm_snoozed.class,
-                        FA.Event.Alarm_snoozed.Param.Alarm_activation_total_roosters,
+                FA.Log(FA.Event.alarm_snoozed.class,
+                        FA.Event.alarm_snoozed.Param.alarm_activation_total_roosters,
                         channelAudioItems.size() + socialAudioItems.size());
             }
         } catch (NullPointerException e) {
@@ -914,15 +903,15 @@ public class AudioService extends Service {
 
     private void logDefaultRingtoneState(boolean failure) {
         if (!socialAudioItems.isEmpty() || !channelAudioItems.isEmpty()) {
-            FA.Log(FA.Event.Alarm_activated.class, FA.Event.Default_alarm_play.Param.Attempt_to_play, true);
+            FA.Log(FA.Event.alarm_activated.class, FA.Event.default_alarm_play.Param.attempt_to_play, true);
         } else {
-            FA.Log(FA.Event.Alarm_activated.class, FA.Event.Default_alarm_play.Param.Attempt_to_play, false);
+            FA.Log(FA.Event.alarm_activated.class, FA.Event.default_alarm_play.Param.attempt_to_play, false);
         }
 
         if (failure) {
-            FA.Log(FA.Event.Alarm_activated.class, FA.Event.Default_alarm_play.Param.Fatal_failure, true);
+            FA.Log(FA.Event.alarm_activated.class, FA.Event.default_alarm_play.Param.fatal_failure, true);
         } else {
-            FA.Log(FA.Event.Alarm_activated.class, FA.Event.Default_alarm_play.Param.Fatal_failure, false);
+            FA.Log(FA.Event.alarm_activated.class, FA.Event.default_alarm_play.Param.fatal_failure, false);
         }
     }
 
