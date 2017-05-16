@@ -19,15 +19,15 @@ import static com.roostermornings.android.util.RoosterUtils.notNull;
 @IgnoreExtraProperties
 public class User implements Serializable {
 
-    private HashMap<String, Boolean> channels;
-    private String device_type = "";
-    private String device_token = "";
-    private String profile_pic = "";
-    private String user_name = "";
-    private String cell_number = "";
-    private HashMap<String, Object> friends;
-    private String uid = "";
-    private Integer unseen_roosters = 0;
+    public HashMap<String, Boolean> channels;
+    public String device_type = "";
+    public String device_token = "";
+    public String profile_pic = "";
+    public String user_name = "";
+    public String cell_number = "";
+    public HashMap<String, Object> friends;
+    public String uid = "";
+    public Integer unseen_roosters = 0;
 
     @Exclude
     private Boolean selected = false; //this is important for list of friends that need to be selected eg for creating a new alarm

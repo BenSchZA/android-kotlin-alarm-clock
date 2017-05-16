@@ -18,15 +18,15 @@ import java.util.HashMap;
 @IgnoreExtraProperties
 public class Channel implements Serializable {
 
-    private Integer current_rooster_cycle_iteration;
-    private Boolean new_alarms_start_at_first_iteration;
-    private Integer priority;
-    private String description;
-    private String name;
-    private String photo;
-    private Integer rooster_count;
-    private Boolean active;
-    private String uid;
+    public Integer current_rooster_cycle_iteration;
+    public Boolean new_alarms_start_at_first_iteration;
+    public Integer priority;
+    public String description;
+    public String name;
+    public String photo;
+    public Integer rooster_count;
+    public Boolean active;
+    public String uid;
 
     @Exclude
     private Boolean selected = false;

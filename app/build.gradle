@@ -28,8 +28,16 @@ android {
     }
     buildTypes {
         release {
+            debuggable true
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFile 'proguard-square-okio.pro'
+            proguardFile 'proguard-square-retrofit.pro'
+            proguardFile 'proguard-square-retrofit2.pro'
+            proguardFile 'proguard-square-dagger.pro'
+            proguardFile 'proguard-square-okhttp.pro'
+            proguardFile 'proguard-square-picasso.pro'
+            proguardFile 'proguard-support-v7-appcompat.pro'
             signingConfig signingConfigs.config
         }
     }
