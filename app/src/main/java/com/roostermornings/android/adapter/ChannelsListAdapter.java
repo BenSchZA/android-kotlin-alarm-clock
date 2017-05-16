@@ -7,7 +7,6 @@ package com.roostermornings.android.adapter;
 
 import android.app.Activity;
 import android.content.Context;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -18,10 +17,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.afollestad.materialdialogs.Theme;
-import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
-import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.analytics.FA;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.AlarmChannel;
@@ -32,8 +28,6 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-
-import javax.inject.Inject;
 
 public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapter.ViewHolder> implements NewAlarmFragment2.ChannelInterface {
     private ArrayList<ChannelRooster> mDataset;
@@ -136,7 +130,7 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
                         .negativeText("")
                         .show();
 
-                FA.Log(FA.Event.Channel_info_viewed.class, FA.Event.Channel_info_viewed.Param.Channel_title, channelRooster.getChannel_uid());
+                FA.Log(FA.Event.channel_info_viewed.class, FA.Event.channel_info_viewed.Param.channel_title, channelRooster.getChannel_uid());
 
             }
         });
