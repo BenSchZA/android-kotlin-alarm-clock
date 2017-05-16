@@ -6,10 +6,10 @@
 
 <resources>
     <string name="preferences_key">rooster_preferences</string>
-    <string name="preferences_intro_viewed">intro_viewed</string>
     <string name="extras_mobile_number">mobile_number</string>
     <string name="extras_already_user">already_user</string>
     <string name="node_api_url">http://rooster-node.appspot-preview.com/</string>
     <string name="rooster_website_t_and_c_url">http://www.roostermornings.com/</string>
     <string name="facebook_app_id">190341188110134</string>
+    <string name="fabric_api_key">207f8c17b3eb2499afa66f49b1502cae676c5ca2</string>
 </resources>
