@@ -1,0 +1,258 @@
+{
+  "project_info": {
+    "project_number": "653860500909",
+    "firebase_url": "https://roostermornings-f2396.firebaseio.com",
+    "project_id": "roostermornings-f2396",
+    "storage_bucket": "roostermornings-f2396.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:653860500909:android:2b00f5010291e9ef",
+        "android_client_info": {
+          "package_name": "com.roostermornings.roostermornings"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "653860500909-rjpquo0g7omvgf2947p88ud240drl1ba.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.roostermornings.roostermornings",
+            "certificate_hash": "6ec4c2419eb4a6ae9d3268df17a6e9f7b5e829c2"
+          }
+        },
+        {
+          "client_id": "653860500909-nnmd2sg9tj2ii28d1d8d81nd57gavp0k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYK_CtE6qluuh20aEGA-2Zg9hEmigecbE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "653860500909-1gjtosoh6aett1cpncnk50vkk6lac83k.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "RM.Rooster-Mornings-iOS",
+                "app_store_id": "1170418245"
+              }
+            },
+            {
+              "client_id": "653860500909-nnmd2sg9tj2ii28d1d8d81nd57gavp0k.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:653860500909:android:d15e4826286e3f02",
+        "android_client_info": {
+          "package_name": "com.example.steven.audiorecordtest"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "653860500909-bh756icnihq378dfa0fqimkivagd5d1u.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.steven.audiorecordtest",
+            "certificate_hash": "ecc68771b312441a0e9c0280445bd322bb8f55f9"
+          }
+        },
+        {
+          "client_id": "653860500909-nnmd2sg9tj2ii28d1d8d81nd57gavp0k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYK_CtE6qluuh20aEGA-2Zg9hEmigecbE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "653860500909-1gjtosoh6aett1cpncnk50vkk6lac83k.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "RM.Rooster-Mornings-iOS",
+                "app_store_id": "1170418245"
+              }
+            },
+            {
+              "client_id": "653860500909-nnmd2sg9tj2ii28d1d8d81nd57gavp0k.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:653860500909:android:c3134999e1f48238",
+        "android_client_info": {
+          "package_name": "com.example.steven.firebasetest"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "653860500909-nnmd2sg9tj2ii28d1d8d81nd57gavp0k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYK_CtE6qluuh20aEGA-2Zg9hEmigecbE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:653860500909:android:de986e51bd88b551",
+        "android_client_info": {
+          "package_name": "com.example.steven.alarmtest"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "653860500909-0qbohdfg9iiitbpqu0kplm4qeasvgv48.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.steven.alarmtest",
+            "certificate_hash": "ecc68771b312441a0e9c0280445bd322bb8f55f9"
+          }
+        },
+        {
+          "client_id": "653860500909-nnmd2sg9tj2ii28d1d8d81nd57gavp0k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYK_CtE6qluuh20aEGA-2Zg9hEmigecbE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "653860500909-1gjtosoh6aett1cpncnk50vkk6lac83k.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "RM.Rooster-Mornings-iOS",
+                "app_store_id": "1170418245"
+              }
+            },
+            {
+              "client_id": "653860500909-nnmd2sg9tj2ii28d1d8d81nd57gavp0k.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:653860500909:android:d7d3a546fd09890a",
+        "android_client_info": {
+          "package_name": "com.roostermornings.android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "653860500909-j2ogs5ivvjvqkaumbhcobmjvpu0nas7h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.roostermornings.android",
+            "certificate_hash": "aced97d933eeaeb83eae28b6894b59616a8e0da3"
+          }
+        },
+        {
+          "client_id": "653860500909-9etljcn5sathf39dg2bom89v44c7n3qm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.roostermornings.android",
+            "certificate_hash": "ecc68771b312441a0e9c0280445bd322bb8f55f9"
+          }
+        },
+        {
+          "client_id": "653860500909-nnmd2sg9tj2ii28d1d8d81nd57gavp0k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYK_CtE6qluuh20aEGA-2Zg9hEmigecbE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "653860500909-1gjtosoh6aett1cpncnk50vkk6lac83k.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "RM.Rooster-Mornings-iOS",
+                "app_store_id": "1170418245"
+              }
+            },
+            {
+              "client_id": "653860500909-nnmd2sg9tj2ii28d1d8d81nd57gavp0k.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
