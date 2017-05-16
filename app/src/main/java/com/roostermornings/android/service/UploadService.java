@@ -5,7 +5,6 @@
 
 package com.roostermornings.android.service;
 
-import android.app.Activity;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -149,7 +148,7 @@ public class UploadService extends Service {
                             }
                         }
 
-                        FA.Log(FA.Event.Social_rooster_sent.class, FA.Event.Social_rooster_sent.Param.Social_rooster_receivers, friendsList.size());
+                        FA.Log(FA.Event.social_rooster_sent.class, FA.Event.social_rooster_sent.Param.social_rooster_receivers, friendsList.size());
 
                         endService();
                     }

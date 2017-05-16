@@ -7,6 +7,14 @@ apply plugin: 'com.android.application'
 apply plugin: 'android-apt'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'RoosterMornings'
+            keyPassword 'RisenShine2017! MotherCluckers!'
+            storeFile file('/home/bscholtz/Rooster/workspace/rooster-android/apk-key-release/apk-key.jks')
+            storePassword 'RisenShine2017! MotherCluckers!'
+        }
+    }
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
     defaultConfig {
@@ -20,8 +28,9 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
         }
     }
 }
@@ -50,7 +59,7 @@ repositories {
 def support_lib_version = "25.3.1"
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
@@ -59,33 +68,22 @@ dependencies {
     compile "com.android.support:support-v4:${support_lib_version}"
     compile "com.android.support:recyclerview-v7:${support_lib_version}"
     compile "com.android.support:cardview-v7:${support_lib_version}"
-    compile('com.crashlytics.sdk.android:crashlytics:2.6.6@aar') {
+    compile('com.crashlytics.sdk.android:crashlytics:2.6.6@aar')
+    {
         transitive = true;
     }
-
     compile('com.crashlytics.sdk.android:crashlytics:2.6.0@aar') {
         transitive = true;
     }
-
     //compile 'com.wdullaer:materialdatetimepicker:3.1.1'
-
     //Ben Android Deps
     // Stetho core
     //If you want to add a network helper
-
     //Firebase
-    
-
     //UI/UX
-    
-
     //Architecture & System
-    
     //Facebook
-    
     //Google
-    
-    
     compile 'com.google.firebase:firebase-storage:10.2.0'
     compile 'com.google.firebase:firebase-auth:10.2.0'
     compile 'com.google.firebase:firebase-database:10.2.0'

@@ -7,8 +7,6 @@ package com.roostermornings.android.adapter;
 
 import android.app.Activity;
 import android.content.Context;
-import android.media.MediaPlayer;
-import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -18,33 +16,16 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.DiscoverFragmentActivity;
 import com.roostermornings.android.analytics.FA;
-import com.roostermornings.android.domain.Alarm;
-import com.roostermornings.android.domain.AlarmChannel;
 import com.roostermornings.android.domain.ChannelRooster;
-import com.roostermornings.android.fragment.IAlarmSetListener;
-import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment2;
-import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
-import com.roostermornings.android.util.Constants;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -142,7 +123,7 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
             @Override
             public void onClick(View view) {
                 discoverAudioSampleInterface.streamChannelRooster(channelRooster);
-                FA.Log(FA.Event.Explore_channel_rooster_played.class, FA.Event.Explore_channel_rooster_played.Param.Channel_title, channelRooster.getChannel_uid());
+                FA.Log(FA.Event.explore_channel_rooster_played.class, FA.Event.explore_channel_rooster_played.Param.channel_title, channelRooster.getChannel_uid());
             }
         });
 
@@ -150,7 +131,7 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
             @Override
             public void onClick(View view) {
                 discoverAudioSampleInterface.streamChannelRooster(channelRooster);
-                FA.Log(FA.Event.Explore_channel_rooster_played.class, FA.Event.Explore_channel_rooster_played.Param.Channel_title, channelRooster.getChannel_uid());
+                FA.Log(FA.Event.explore_channel_rooster_played.class, FA.Event.explore_channel_rooster_played.Param.channel_title, channelRooster.getChannel_uid());
             }
         });
 
@@ -167,7 +148,7 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
                         .negativeText("")
                         .show();
 
-                FA.Log(FA.Event.Channel_info_viewed.class, FA.Event.Channel_info_viewed.Param.Channel_title, channelRooster.getChannel_uid());
+                FA.Log(FA.Event.channel_info_viewed.class, FA.Event.channel_info_viewed.Param.channel_title, channelRooster.getChannel_uid());
             }
         });
 
