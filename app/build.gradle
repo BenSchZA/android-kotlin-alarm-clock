@@ -26,6 +26,9 @@ android {
         versionName "2.0.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+    defaultConfig {
+        consumerProguardFiles 'proguard-rules.txt'
+    }
     buildTypes {
         release {
             debuggable true
@@ -120,4 +123,5 @@ dependencies {
     apt 'com.jakewharton:butterknife-compiler:8.0.1'
 }
 
+setProperty("FirebaseServiceAccountFilePath", rootProject.rootDir.absolutePath + FirebaseServiceAccountFilePath)
 apply plugin: 'com.google.gms.google-services'
