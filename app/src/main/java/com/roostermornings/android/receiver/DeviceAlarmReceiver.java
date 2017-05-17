@@ -39,10 +39,20 @@ public class DeviceAlarmReceiver extends WakefulBroadcastReceiver {
         BaseApplication baseApplication = (BaseApplication) getApplicationContext();
         baseApplication.getRoosterApplicationComponent().inject(this);
 
-        //Reschedule alarm intents for recurring weekly
-        rescheduleAlarmIntents(intent);
         //Check if vibrator enabled in user settings
         setVibrate(context);
+
+        if(intent.getBooleanExtra(Constants.EXTR_SNOOZE_ACTIVATION, false)) {
+            //Activate snooze alarm
+            Intent broadcastIntent = new Intent(Constants.ACTION_SNOOZE_ACTIVATION);
+            broadcastIntent.putExtra(Constants.EXTRA_ALARMID, intent.getStringExtra(Constants.EXTRA_UID));
+            broadcastIntent.putExtra(Constants.DEVICE_ALARM_RECEIVER_WAKEFUL_INTENT, new Intent(context, DeviceAlarmReceiver.class));
+            context.sendBroadcast(broadcastIntent);
+            return;
+        }
+
+        //Reschedule alarm intents for recurring weekly
+        rescheduleAlarmIntents(intent);
 
         //Start audio service with alarm UID
         Intent audioServiceIntent = new Intent(context, AudioService.class);

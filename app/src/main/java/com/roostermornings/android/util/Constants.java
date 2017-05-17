@@ -60,6 +60,7 @@ public class Constants {
     public static final String EXTRA_VIBRATE = "extra_vibrate";
     public static final String EXTRA_TONE = "extra_tone";
     public static final String EXTRA_UID = "extra_uid";
+    public static final String EXTR_SNOOZE_ACTIVATION = "extra_snooze_activation";
 
     //DeviceAlarmTable constants
     public static final String ALARM_CHANNEL_DOWNLOAD_FAILED = "failed";
@@ -77,6 +78,7 @@ public class Constants {
     public final static String ACTION_ALARMTIMESUP = "rooster.update.ALARMTIMESUP";
     public final static String ACTION_CHANNEL_DOWNLOAD_FINISHED = "rooster.notify.CHANNEL_DOWNLOAD_FINISHED";
     public final static String ACTION_END_AUDIO_SERVICE = "EndAudioServiceBroadcastReceiver";
+    public final static String ACTION_SNOOZE_ACTIVATION = "ActionSnoozeActivation";
 
     //AudioService timers
     public final static int ALARM_DEFAULTTIME = 5 * 60 * 1000;

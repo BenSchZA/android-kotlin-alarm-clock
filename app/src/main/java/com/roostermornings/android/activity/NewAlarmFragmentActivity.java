@@ -40,6 +40,7 @@ import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sync.DownloadSyncAdapter;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.StrUtils;
 
 import java.util.Calendar;
 import java.util.List;
@@ -257,7 +258,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                         FA.Event.alarm_creation_completed.Param.channel_selected,
                         !"".equals(mAlarm.getChannel().getName()));
 
-                if(!"".equals(mAlarm.getChannel().getName())) {
+                if(StrUtils.notNullOrEmpty(mAlarm.getChannel().getName())) {
                     FA.Log(FA.Event.channel_selected.class,
                             FA.Event.channel_selected.Param.channel_title,
                             mAlarm.getChannel().getName());

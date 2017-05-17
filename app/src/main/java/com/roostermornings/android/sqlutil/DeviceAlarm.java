@@ -19,25 +19,23 @@ import java.util.List;
 public class DeviceAlarm {
 
     //##################################################################
-    private String setId;
-    private int piId;
+    private String setId = "";
+    private int piId = -1;
 
-    private int hour;
-    private int minute;
-    private int day;
-    private boolean recurring;
-    private boolean social;
-    private long alarmMillis;
+    private int hour = -1;
+    private int minute = -1;
+    private int day = -1;
+    private boolean recurring = false;
+    private boolean social = true;
+    private long alarmMillis = -1;
 
     private String channel = "";
     private String label = "";
-    private boolean enabled;
-    private boolean changed;
+    private boolean enabled = true;
+    private boolean changed = true;
 
     private String dateCreated;
 //##################################################################
-
-    private Calendar calendar = Calendar.getInstance();
 
     private List<Integer> alarmDays = new ArrayList<>();
 

@@ -27,13 +27,14 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     defaultConfig {
-        consumerProguardFiles 'proguard-rules.txt'
+        //consumerProguardFiles 'proguard-rules.txt'
     }
     buildTypes {
         release {
             debuggable true
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            consumerProguardFiles 'proguard-rules.txt'
             proguardFile 'proguard-square-okio.pro'
             proguardFile 'proguard-square-retrofit.pro'
             proguardFile 'proguard-square-retrofit2.pro'
