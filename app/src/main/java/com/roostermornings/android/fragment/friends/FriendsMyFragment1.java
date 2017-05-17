@@ -181,6 +181,10 @@ public class FriendsMyFragment1 extends BaseFragment {
 
                 statusCode = response.code();
                 Users apiResponse = response.body();
+                if(apiResponse.users == null) {
+                    progressBar.setVisibility(View.GONE);
+                    return;
+                }
 
                 if (statusCode == 200) {
 
