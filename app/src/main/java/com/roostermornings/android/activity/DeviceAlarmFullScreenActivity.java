@@ -128,7 +128,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
-        if(mAudioService!=null) mAudioService.snoozeAudioState();
+        if(mAudioService!=null) mAudioService.dismissAlarm(mAudioServiceConnection);
         if(mBound) unbindService(mAudioServiceConnection);
         mBound = false;
         finish();
@@ -141,7 +141,6 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         if(mBound) unbindService(mAudioServiceConnection);
         mBound = false;
         finish();
-        startActivity(new Intent(this, MyAlarmsFragmentActivity.class));
     }
 
     @OnClick(R.id.alarm_dismiss)

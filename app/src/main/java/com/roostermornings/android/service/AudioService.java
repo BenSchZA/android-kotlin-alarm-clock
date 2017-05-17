@@ -54,6 +54,7 @@ import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.InternetHelper;
 import com.roostermornings.android.util.JSONPersistence;
+import com.roostermornings.android.util.StrUtils;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -78,19 +79,22 @@ public class AudioService extends Service {
     // Binder given to clients
     private final IBinder mBinder = new LocalBinder();
 
-    BroadcastReceiver endAudioServiceBroadcastReceiver;
+    private BroadcastReceiver endAudioServiceBroadcastReceiver;
+    private BroadcastReceiver snoozeAudioServiceBroadcastReceiver;
 
     private static final Timer timer = new Timer();
+    private AlarmFinishTimerTask alarmFinishTimerTask = new AlarmFinishTimerTask();
 
     private final MediaPlayer mediaPlayerDefault = new MediaPlayer();
     private final MediaPlayer mediaPlayerRooster = new MediaPlayer();
+    private final MediaPlayer streamMediaPlayer = new MediaPlayer();
 
     private DeviceAudioQueueItem audioItem = new DeviceAudioQueueItem();
 
     private final AudioService mThis = this;
 
-    Intent wakefulIntent;
-    Intent intent;
+    Intent wakefulIntent = new Intent();
+    Intent intent = new Intent();
 
     private ArrayList<DeviceAudioQueueItem> channelAudioItems = new ArrayList<>();
     private ArrayList<DeviceAudioQueueItem> socialAudioItems = new ArrayList<>();
@@ -114,7 +118,7 @@ public class AudioService extends Service {
     @Inject
     Account mAccount;
 
-    public static boolean mRunning;
+    public static boolean mRunning = false;
 
     public AudioService() {
     }
@@ -149,6 +153,17 @@ public class AudioService extends Service {
         BaseApplication baseApplication = (BaseApplication) getApplication();
         baseApplication.getRoosterApplicationComponent().inject(this);
 
+        //Register broadcast receivers for external access
+        registerEndAudioServiceBroadcastReceiver();
+        registerSnoozeAudioServiceBroadcastReceiver();
+
+        //Start fullscreen alarm activation activity
+        Intent intentAlarmFullscreen = new Intent(mThis, DeviceAlarmFullScreenActivity.class);
+        intentAlarmFullscreen.addFlags(FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        mThis.startActivity(intentAlarmFullscreen);
+    }
+
+    private void registerEndAudioServiceBroadcastReceiver() {
         endAudioServiceBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -162,11 +177,23 @@ public class AudioService extends Service {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Constants.ACTION_END_AUDIO_SERVICE);
         registerReceiver(endAudioServiceBroadcastReceiver, intentFilter);
+    }
 
-        //Start fullscreen alarm activation activity
-        Intent intentAlarmFullscreen = new Intent(mThis, DeviceAlarmFullScreenActivity.class);
-        intentAlarmFullscreen.addFlags(FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        mThis.startActivity(intentAlarmFullscreen);
+    private void registerSnoozeAudioServiceBroadcastReceiver() {
+        snoozeAudioServiceBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                alarmCycle = 1;
+                startAlarmContent(intent.getStringExtra(Constants.EXTRA_ALARMID));
+                //Start fullscreen alarm activation activity
+                Intent intentAlarmFullscreen = new Intent(mThis, DeviceAlarmFullScreenActivity.class);
+                intentAlarmFullscreen.addFlags(FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                mThis.startActivity(intentAlarmFullscreen);
+            }
+        };
+        IntentFilter snoozeIntentFilter = new IntentFilter();
+        snoozeIntentFilter.addAction(Constants.ACTION_SNOOZE_ACTIVATION);
+        registerReceiver(snoozeAudioServiceBroadcastReceiver, snoozeIntentFilter);
     }
 
     @Override
@@ -179,8 +206,8 @@ public class AudioService extends Service {
             mThis.intent = intent;
 
             try {
-                if (!mediaPlayerRooster.isPlaying() && !mediaPlayerDefault.isPlaying()) {
-                    if(!intent.getStringExtra(Constants.EXTRA_ALARMID).isEmpty()) {
+                if (!mediaPlayerRooster.isPlaying() && !mediaPlayerDefault.isPlaying() && !streamMediaPlayer.isPlaying()) {
+                    if(StrUtils.notNullOrEmpty(intent.getStringExtra(Constants.EXTRA_ALARMID))) {
                         startAlarmContent(intent.getStringExtra(Constants.EXTRA_ALARMID));
                     } else {
                         startDefaultAlarmTone(true);
@@ -213,7 +240,7 @@ public class AudioService extends Service {
 
         //Check if audio already playing
         try {
-            if (mediaPlayerRooster.isPlaying() || mediaPlayerDefault.isPlaying()) {
+            if (mediaPlayerRooster.isPlaying() || mediaPlayerDefault.isPlaying() || streamMediaPlayer.isPlaying()) {
                 return;
             }
         } catch(IllegalStateException e) {
@@ -221,8 +248,14 @@ public class AudioService extends Service {
             startDefaultAlarmTone(true);
         }
 
+        //Check if old content exists
+        if(audioItems.size() > 0) {
+            playAlarmRoosters();
+            return;
+        }
+
         //Check if relevant alarm data exists
-        if(!alarmUid.isEmpty() && deviceAlarmTableManager.getAlarmSet(alarmUid) != null) {
+        if(StrUtils.notNullOrEmpty(alarmUid) && deviceAlarmTableManager.getAlarmSet(alarmUid) != null) {
             alarm = deviceAlarmTableManager.getAlarmSet(alarmUid).get(0);
             this.alarmChannelUid = deviceAlarmTableManager.getAlarmSet(alarmUid).get(0).getChannel();
             this.alarmUid = alarmUid;
@@ -234,21 +267,15 @@ public class AudioService extends Service {
         channelAudioItems = audioTableManager.extractAlarmChannelAudioFiles(mThis.alarmChannelUid);
         socialAudioItems = audioTableManager.extractSocialAudioFiles();
 
-        FA.Log(FA.Event.alarm_activated.class, FA.Event.alarm_activated.Param.channel_content_received, channelAudioItems.size());
-        FA.Log(FA.Event.alarm_activated.class, FA.Event.alarm_activated.Param.social_content_received, socialAudioItems.size());
+        if(channelAudioItems != null) FA.Log(FA.Event.alarm_activated.class, FA.Event.alarm_activated.Param.channel_content_received, channelAudioItems.size());
+        if(socialAudioItems != null) FA.Log(FA.Event.alarm_activated.class, FA.Event.alarm_activated.Param.social_content_received, socialAudioItems.size());
 
         this.alarmCycle = 1;
-
-        //Check if old content exists
-        if(audioItems.size() > 0) {
-            playAlarmRoosters();
-            return;
-        }
 
         //Try to fetch un-downloaded channel content for 30 seconds if it doesn't already exist
         try {
             //If alarm channel is not empty and channel audioitems is empty, try download
-            if (!"".equals(mThis.alarmChannelUid) && channelAudioItems.isEmpty()) {
+            if (StrUtils.notNullOrEmpty(mThis.alarmChannelUid) && channelAudioItems.isEmpty()) {
 
                 FA.Log(FA.Event.alarm_activated.class, FA.Event.alarm_activated.Param.data_loaded, false);
 
@@ -269,11 +296,6 @@ public class AudioService extends Service {
     }
 
     private void compileAudioItemContent() {
-        //Check if old content exists
-        if(audioItems.size() > 0) {
-            playAlarmRoosters();
-            return;
-        }
         //If no content exists to add to audioItems, then return now
         if(mThis.socialAudioItems.isEmpty() && mThis.channelAudioItems.isEmpty()) {
             startDefaultAlarmTone(false);
@@ -289,12 +311,12 @@ public class AudioService extends Service {
                     audioItems.addAll(channelAudioItems);
                 }
                 //If this alarm does not allow social roosters, move on to channel content
-                if (!mThis.socialAudioItems.isEmpty() && deviceAlarmTableManager.getAlarmSet(mThis.alarmUid).get(0).isSocial()) {
+                if (!mThis.socialAudioItems.isEmpty() && alarm.isSocial()) {
                     audioItems.addAll(socialAudioItems);
                 }
             } else {
                 //If this alarm does not allow social roosters, move on to channel content
-                if (!mThis.socialAudioItems.isEmpty() && deviceAlarmTableManager.getAlarmSet(mThis.alarmUid).get(0).isSocial()) {
+                if (!mThis.socialAudioItems.isEmpty() && alarm.isSocial()) {
                     audioItems.addAll(socialAudioItems);
                 }
                 if (!mThis.channelAudioItems.isEmpty()) {
@@ -317,7 +339,7 @@ public class AudioService extends Service {
         try {
             //Check if channel has a valid ID, else next pending alarm has no channel
             final String channelId = deviceAlarm.getChannel();
-            if ("".equals(channelId)) {
+            if (!StrUtils.notNullOrEmpty(channelId)) {
                 startDefaultAlarmTone(false);
                 return;
             }
@@ -412,10 +434,15 @@ public class AudioService extends Service {
 
     private void streamChannelContent(final String url) {
         foregroundNotification("Alarm content streaming");
+
+        //Check that URL is notNullOrEmpty
+        if(!StrUtils.notNullOrEmpty(url)) {
+            startDefaultAlarmTone(true);
+            return;
+        }
+
         StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
         final StorageReference audioFileRef = mStorageRef.getStorage().getReferenceFromUrl(url);
-
-        final MediaPlayer streamMediaPlayer = new MediaPlayer();
 
         audioFileRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>()
         {
@@ -500,6 +527,11 @@ public class AudioService extends Service {
         foregroundNotification("Alarm content playing");
 
         mThis.audioItem = audioItem;
+
+        if(audioItem == null) {
+            startDefaultAlarmTone(true);
+            return;
+        }
 
         //Increment alarmCycle, only loop rooster content 5 times
         //after which control handed to activity to endService and turn off screen
@@ -650,7 +682,7 @@ public class AudioService extends Service {
                 if (audioItem.getType() == 1) {
                     //increment the current story iteration if it is a story
                     Integer currentStoryIteration = new JSONPersistence(getApplicationContext()).getStoryIteration(audioItem.getQueue_id());
-                    if (currentStoryIteration != null && currentStoryIteration > 0)
+                    if (currentStoryIteration > 0)
                         new JSONPersistence(getApplicationContext()).setStoryIteration(audioItem.getQueue_id(), currentStoryIteration + 1);
                 }
             } catch (NullPointerException e) {
@@ -728,6 +760,12 @@ public class AudioService extends Service {
         } catch(IllegalArgumentException e) {
             e.printStackTrace();
         }
+        try {
+            if (snoozeAudioServiceBroadcastReceiver != null)
+                unregisterReceiver(snoozeAudioServiceBroadcastReceiver);
+        } catch(IllegalArgumentException e) {
+            e.printStackTrace();
+        }
         //unbind service from activation activity
         try {
             this.unbindService(conn);
@@ -740,10 +778,10 @@ public class AudioService extends Service {
 
     //Set timer to kill alarm after 5 minutes
     private void startTimer() {
-        timer.schedule(new timerTask(), Constants.ALARM_DEFAULTTIME);
+        timer.schedule(alarmFinishTimerTask, Constants.ALARM_DEFAULTTIME);
     }
 
-    private class timerTask extends TimerTask {
+    private class AlarmFinishTimerTask extends TimerTask {
         public void run() {
             notifyActivityTimesUp();
         }
@@ -781,6 +819,8 @@ public class AudioService extends Service {
     }
 
     public void snoozeAudioState(){
+        alarmFinishTimerTask.cancel();
+
         deviceAlarmController.snoozeAlarm(alarmUid, false);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
