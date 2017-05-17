@@ -159,6 +159,7 @@ public final class DeviceAlarmController {
         alarmIntent.setAction(Constants.ACTTION_ALARMRECEIVER);
         alarmIntent.putExtra(Constants.EXTRA_REQUESTCODE, 0);
         alarmIntent.putExtra(Constants.EXTRA_UID, setId);
+        alarmIntent.putExtra(Constants.EXTR_SNOOZE_ACTIVATION, true);
 
         PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(context,
                 0, alarmIntent,

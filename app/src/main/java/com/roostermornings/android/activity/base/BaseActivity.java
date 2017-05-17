@@ -15,6 +15,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -368,18 +369,40 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
 //        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 //        RoosterUtils.hasM() && pm.isIgnoringBatteryOptimizations(packageName) &&
 
-        if(!sharedPreferences.getBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false)) {
+        if(!sharedPreferences.getBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false)
+                && (Build.BRAND.toLowerCase().contains("huawei")
+                || Build.BRAND.toLowerCase().contains("sony"))) {
 
             new MaterialDialog.Builder(context)
                     .theme(Theme.LIGHT)
                     .content(R.string.dialog_permissions_explainer)
                     .neutralText(R.string.neutral)
+                    .positiveText(R.string.take_to_settings)
+                    .negativeText(R.string.later)
                     .negativeColorRes(R.color.grey)
                     .onNeutral(new MaterialDialog.SingleButtonCallback() {
                         @Override
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                             SharedPreferences.Editor editor = sharedPreferences.edit();
                             editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, true);
+                            editor.apply();
+                            startActivity(getIntent());
+                        }
+                    })
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, true);
+                            editor.apply();
+                            startActivity(getIntent());
+                        }
+                    })
+                    .onNegative(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false);
                             editor.apply();
                             startActivity(getIntent());
                         }
