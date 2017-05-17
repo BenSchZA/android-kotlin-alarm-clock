@@ -15,6 +15,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -372,30 +373,23 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
         if(!sharedPreferences.getBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false)
                 && (Build.BRAND.toLowerCase().contains("huawei")
                 || Build.BRAND.toLowerCase().contains("sony"))) {
+            Log.d("Brand: ", Build.BRAND);
+
+            String dialogContent = getResources().getString(R.string.dialog_background_settings_1)
+                    + Build.BRAND + getResources().getString(R.string.dialog_background_settings_2);
 
             new MaterialDialog.Builder(context)
                     .theme(Theme.LIGHT)
-                    .content(R.string.dialog_permissions_explainer)
-                    .neutralText(R.string.neutral)
+                    .content(dialogContent)
                     .positiveText(R.string.take_to_settings)
                     .negativeText(R.string.later)
-                    .negativeColorRes(R.color.grey)
-                    .onNeutral(new MaterialDialog.SingleButtonCallback() {
-                        @Override
-                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, true);
-                            editor.apply();
-                            startActivity(getIntent());
-                        }
-                    })
                     .onPositive(new MaterialDialog.SingleButtonCallback() {
                         @Override
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                             SharedPreferences.Editor editor = sharedPreferences.edit();
                             editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, true);
                             editor.apply();
-                            startActivity(getIntent());
+                            startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), 0);
                         }
                     })
                     .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -404,7 +398,6 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
                             SharedPreferences.Editor editor = sharedPreferences.edit();
                             editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false);
                             editor.apply();
-                            startActivity(getIntent());
                         }
                     })
                     .show();
