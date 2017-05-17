@@ -22,6 +22,8 @@
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
     <string name="neutral">Okay</string>
+    <string name="take_to_settings">Go to settings</string>
+    <string name="later">Later</string>
 
     <string name="signup_facebook">Continue with Facebook</string>
     <string name="signup_google">Continue with Google</string>

@@ -43,6 +43,7 @@ import com.roostermornings.android.adapter.MyAlarmsListAdapter;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.AlarmChannel;
+import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
@@ -58,6 +59,8 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.OnClick;
 import dagger.Provides;
+
+import static com.facebook.FacebookSdk.getApplicationContext;
 
 public class MyAlarmsFragmentActivity extends BaseActivity {
 

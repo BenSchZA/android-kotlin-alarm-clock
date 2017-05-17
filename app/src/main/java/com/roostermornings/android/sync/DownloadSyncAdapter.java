@@ -382,8 +382,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
                             outputStream.write(bytes);
                             outputStream.close();
 
-                            if (BuildConfig.DEBUG)
-                                Toaster.makeToast(context, "successfully downloaded", Toast.LENGTH_SHORT);
+                            Toaster.makeToast(context, "Successfully downloaded", Toast.LENGTH_SHORT);
 
                             //Send broadcast message to notify all receivers of download finished
                             Intent intent = new Intent(Constants.ACTION_CHANNEL_DOWNLOAD_FINISHED);
@@ -440,7 +439,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
                         outputStream.write(bytes);
                         outputStream.close();
 
-                        if(BuildConfig.DEBUG) Toaster.makeToast(context, "successfully downloaded", Toast.LENGTH_SHORT);
+                        Toaster.makeToast(context, "Successfully downloaded", Toast.LENGTH_SHORT);
 
                         //Create new object for storing in SQL db
                         DeviceAudioQueueItem deviceAudioQueueItem = new DeviceAudioQueueItem();
