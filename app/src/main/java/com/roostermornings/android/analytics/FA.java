@@ -25,6 +25,8 @@ public abstract class FA {
                 public final static String channel_selected = "channel_selected";
             }
         }
+        public abstract class alarm_deleted extends channel_selected {
+        }
         public abstract class channel_selected {
             public abstract class Param {
                 //String param

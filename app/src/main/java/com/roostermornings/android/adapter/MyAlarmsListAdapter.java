@@ -32,11 +32,13 @@ import com.afollestad.materialdialogs.Theme;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
+import com.roostermornings.android.analytics.FA;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
+import com.roostermornings.android.util.StrUtils;
 
 import org.w3c.dom.Text;
 
@@ -181,6 +183,11 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
                                     notifyItemRemoved(position);
                                     notifyItemRangeChanged(position, mDataset.size());
                                     ((MyAlarmsFragmentActivity) mActivity).deleteAlarm(alarm.getUid());
+                                    if(StrUtils.notNullOrEmpty(alarm.getChannel().getName())) {
+                                        FA.Log(FA.Event.alarm_deleted.class, FA.Event.alarm_deleted.Param.channel_title, alarm.getChannel().getName());
+                                    } else {
+                                        FA.Log(FA.Event.alarm_deleted.class, null, null);
+                                    }
                                 }
                             })
                             .show();
