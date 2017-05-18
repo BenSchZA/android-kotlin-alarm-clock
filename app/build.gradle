@@ -5,6 +5,7 @@
 
 apply plugin: 'com.android.application'
 apply plugin: 'android-apt'
+apply plugin: 'com.google.firebase.firebase-crash'
 
 android {
     signingConfigs {
@@ -124,5 +125,4 @@ dependencies {
     apt 'com.jakewharton:butterknife-compiler:8.0.1'
 }
 
-setProperty("FirebaseServiceAccountFilePath", rootProject.rootDir.absolutePath + FirebaseServiceAccountFilePath)
 apply plugin: 'com.google.gms.google-services'
