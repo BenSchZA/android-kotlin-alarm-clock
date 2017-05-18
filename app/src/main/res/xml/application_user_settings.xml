@@ -51,7 +51,8 @@ and no social roosters are received"
             android:hint="Time (minutes)"
             android:persistent="true"
             android:maxLines="1"
-            android:inputType="numberDecimal" />
+            android:inputType="numberDecimal"
+            android:maxLength="5"/>
     </PreferenceCategory>
     <PreferenceCategory
         android:title="User Interface"
