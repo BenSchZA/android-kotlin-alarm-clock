@@ -9,10 +9,10 @@ apply plugin: 'android-apt'
 android {
     signingConfigs {
         config {
-            keyAlias 'RoosterMornings'
-            keyPassword 'RisenShine2017! MotherCluckers!'
-            storeFile file('/home/bscholtz/Rooster/workspace/rooster-android/apk-key-release/apk-key.jks')
-            storePassword 'RisenShine2017! MotherCluckers!'
+            storeFile file(String.valueOf(System.getenv("KEYSTORE")))
+            storePassword System.getenv("KEYSTORE_PASSWORD")
+            keyAlias System.getenv("KEY_ALIAS")
+            keyPassword System.getenv("KEY_PASSWORD")
         }
     }
     compileSdkVersion 25
@@ -21,7 +21,7 @@ android {
         applicationId "com.roostermornings.android"
         minSdkVersion 18
         targetSdkVersion 25
-        versionCode 2
+        versionCode 3
 //        Formatting of version name very important for invalidation, must have 3 components
         versionName "2.0.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
