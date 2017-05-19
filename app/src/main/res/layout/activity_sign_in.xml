@@ -53,14 +53,15 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginBottom="@dimen/spacing_normal"
-                android:drawableLeft="@drawable/facebook_vector_drawable_selector"
+                android:drawableLeft="@drawable/com_facebook_button_icon"
                 android:drawablePadding="@dimen/spacing_normal"
                 android:paddingLeft="@dimen/spacing_normal_large"
                 android:paddingRight="@dimen/spacing_normal_large"
                 android:text="@string/signup_facebook" />
 
             <!-- Fix for fetching external vector drawable for facebook logo -->
-            <!--http://stackoverflow.com/questions/35622438/update-android-support-library-to-23-2-0-cause-error-xmlpullparserexception-bin-->
+            <!-- v2.0.1: http://stackoverflow.com/questions/35622438/update-android-support-library-to-23-2-0-cause-error-xmlpullparserexception-bin-->
+            <!-- v2.0.2: use icon instead of drawable -->
 
             <Button
                 android:id="@+id/signin_button_google"
