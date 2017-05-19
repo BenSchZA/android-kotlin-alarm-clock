@@ -375,8 +375,16 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
                 || Build.BRAND.toLowerCase().contains("sony"))) {
             Log.d("Brand: ", Build.BRAND);
 
+            String settingsNavigationString = "For example go to power, battery, or optimizations settings page.";
+            if(Build.BRAND.toLowerCase().contains("huawei")) {
+                settingsNavigationString = "Go to 'Battery manager'>'Protected apps'";
+            } else if(Build.BRAND.toLowerCase().contains("sony")) {
+                settingsNavigationString = "Go to 'STAMINA mode'>'Apps active in standby'>'Add applications'";
+            }
+
             String dialogContent = getResources().getString(R.string.dialog_background_settings_1)
-                    + Build.BRAND + getResources().getString(R.string.dialog_background_settings_2);
+                    + Build.BRAND + getResources().getString(R.string.dialog_background_settings_2)
+                    + settingsNavigationString;
 
             new MaterialDialog.Builder(context)
                     .theme(Theme.LIGHT)

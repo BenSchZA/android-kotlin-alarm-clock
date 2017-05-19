@@ -91,7 +91,7 @@
     <string name="dialog_confirm_alarm_delete">Are you sure you wish to delete this alarm?</string>
     <string name="dialog_confirm_friend_delete">Are you sure you wish to remove this friend?</string>
     <string name="dialog_background_settings_1">Your&#160;</string>
-    <string name="dialog_background_settings_2">&#160;phone may need to give Rooster permission to run in the background to wake you up. Go to settings to add Rooster to the protected list.</string>
+    <string name="dialog_background_settings_2">&#160;phone may need to give Rooster permission to run in the background to wake you up. Go to settings to add Rooster to the protected list. Try:&#160;</string>
     <!--Some Android phones have power usage optimisation that interferes with Rooster, please check your phone settings - sometimes called \'Protected Apps\'.-->
 
     <string name="invite_to_rooster_message">How cool would it be if you could wake up to surprise voice notes from me and other friends? \n\nYou can also wake up to different content channels such as inspiration, comedy, music, news, meditation, bird calls and more! \n\nLike the best things in life, it’s free :) \nhttp://www.onelink.to/rooster</string>
