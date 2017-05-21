@@ -39,4 +39,4 @@
 -keepclassmembers class com.roostermornings.android.domain.** {
   *;
 }
-
+-keep class com.roostermornings.android.analytics.** { *; }

@@ -6,13 +6,14 @@
 package com.roostermornings.android.analytics;
 
 import android.os.Bundle;
+import android.support.annotation.Keep;
 
 import static com.roostermornings.android.BaseApplication.firebaseAnalytics;
 
 
 //FA stands for Firebase Analytics - defines relationship between Event and Param, handles analytic logging in background thread
+@Keep
 public abstract class FA {
-
     public abstract static class Event {
         public abstract class alarm_creation_begin {
         }
