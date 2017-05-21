@@ -22,9 +22,9 @@ android {
         applicationId "com.roostermornings.android"
         minSdkVersion 18
         targetSdkVersion 25
-        versionCode 5
+        versionCode 6
         //Formatting of version name very important for invalidation, must have 3 components
-        versionName "2.0.1"
+        versionName "2.0.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     defaultConfig {

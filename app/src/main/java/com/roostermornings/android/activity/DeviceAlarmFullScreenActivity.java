@@ -28,6 +28,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.crashlytics.android.Crashlytics;
+import com.google.firebase.crash.FirebaseCrash;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
@@ -98,6 +100,18 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_device_alarm_full_screen);
         inject(((BaseApplication)getApplication()).getRoosterApplicationComponent());
+
+        //This activity is critical, so must not crash badly
+//        Thread.setDefaultUncaughtExceptionHandler(
+//                new Thread.UncaughtExceptionHandler() {
+//                    @Override
+//                    public void uncaughtException(Thread t, Throwable e) {
+//                        e.printStackTrace();
+//                        FirebaseCrash.report(e);
+//                        Crashlytics.logException(e);
+//                    }
+//                }
+//        );
 
         //Used to ensure alarm shows over lock-screen
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
