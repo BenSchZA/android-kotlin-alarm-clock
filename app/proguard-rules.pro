@@ -40,3 +40,6 @@
   *;
 }
 -keep class com.roostermornings.android.analytics.** { *; }
+
+# Preserve annotations, line numbers, and source file names
+-keepattributes *Annotation*,SourceFile,LineNumberTable

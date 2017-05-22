@@ -92,10 +92,10 @@ public class NewAudioFriendsListAdapter extends RecyclerView.Adapter<NewAudioFri
         final User user = mDataset.get(position);
         user.setSelected(false);
 
-        holder.txtName.setText(mDataset.get(position).getUser_name());
-        holder.txtInitials.setText(RoosterUtils.getInitials(mDataset.get(position).getUser_name()));
+        holder.txtName.setText(user.getUser_name());
+        holder.txtInitials.setText(RoosterUtils.getInitials(user.getUser_name()));
 
-        setProfilePic(user.getProfile_pic(), holder, position);
+        setProfilePic(user.getProfile_pic(), holder, user);
 
         holder.btnSelect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -106,7 +106,7 @@ public class NewAudioFriendsListAdapter extends RecyclerView.Adapter<NewAudioFri
         });
     }
 
-    private void setProfilePic(String url, final NewAudioFriendsListAdapter.ViewHolder holder, final int position) {
+    private void setProfilePic(String url, final NewAudioFriendsListAdapter.ViewHolder holder, final User user) {
 
         try{
             Picasso.with(context).load(url)
@@ -124,12 +124,12 @@ public class NewAudioFriendsListAdapter extends RecyclerView.Adapter<NewAudioFri
 
                         @Override
                         public void onError() {
-                            holder.txtInitials.setText(RoosterUtils.getInitials(mDataset.get(position).getUser_name()));
+                            holder.txtInitials.setText(RoosterUtils.getInitials(user.getUser_name()));
                         }
                     });
         } catch(IllegalArgumentException e){
             e.printStackTrace();
-            holder.txtInitials.setText(RoosterUtils.getInitials(mDataset.get(position).getUser_name()));
+            holder.txtInitials.setText(RoosterUtils.getInitials(user.getUser_name()));
         }
     }
 

@@ -96,8 +96,8 @@ public class FriendsInviteListAdapter extends RecyclerView.Adapter<FriendsInvite
         // - replace the contents of the view with that element
         final Friend user = mDataset.get(position);
         user.setSelected(false);
-        holder.txtName.setText(mDataset.get(position).getUser_name());
-        holder.txtInitials.setText(RoosterUtils.getInitials(mDataset.get(position).getUser_name()));
+        holder.txtName.setText(user.getUser_name());
+        holder.txtInitials.setText(RoosterUtils.getInitials(user.getUser_name()));
         holder.btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
