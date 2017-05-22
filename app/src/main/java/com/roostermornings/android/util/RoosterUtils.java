@@ -8,8 +8,10 @@ package com.roostermornings.android.util;
 import android.os.Build;
 
 import com.roostermornings.android.domain.Alarm;
+import com.roostermornings.android.domain.ChannelRooster;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.Random;
 
 /**
@@ -58,6 +60,20 @@ public class RoosterUtils {
             e.printStackTrace();
             return "";
         }
+    }
+
+    public static ArrayList<?> removeArrayListDuplicates(ArrayList<?> arrayList) {
+        try {
+            //LinkedHashSet preserves order
+            LinkedHashSet uniqueHashSet = new LinkedHashSet<>();
+            uniqueHashSet.addAll(arrayList);
+            arrayList.clear();
+            arrayList.addAll(uniqueHashSet);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return arrayList;
+        }
+        return arrayList;
     }
 
     public static String setAlarmTimeFromHourAndMinute(Alarm alarm) {

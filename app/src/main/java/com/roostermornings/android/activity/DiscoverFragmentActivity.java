@@ -46,6 +46,7 @@ import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.JSONPersistence;
+import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.Toaster;
 
 import java.io.File;
@@ -56,6 +57,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -194,7 +196,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
         }
         if(oneInstanceTaskFuture != null) oneInstanceTaskFuture.cancel(true);
         clearChannelRoosterMediaChecks();
-        mAdapter.notifyDataSetChanged();
+        notifyDataSetChangedRemoveDuplicates();
     }
 
     private void getChannelRoosterData(final Channel channel, final Integer iteration) {
@@ -250,7 +252,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                     values.addAll(channelRoosterList);
                 }
                 if(!values.isEmpty()) channelRoosters.addAll(values);
-                mAdapter.notifyDataSetChanged();
+                notifyDataSetChangedRemoveDuplicates();
                 contentProgressBar.setVisibility(View.GONE);
                 mRecyclerView.setVisibility(View.VISIBLE);
             }
@@ -302,10 +304,15 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                 new Runnable() {
                     @Override
                     public void run() {
-                        mAdapter.notifyDataSetChanged();
+                        notifyDataSetChangedRemoveDuplicates();
                     }
                 }
         );
+    }
+
+    private void notifyDataSetChangedRemoveDuplicates() {
+        RoosterUtils.removeArrayListDuplicates(channelRoosters);
+        mAdapter.notifyDataSetChanged();
     }
 
     public void streamChannelRooster(final ChannelRooster channelRooster) {
@@ -392,7 +399,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                         Toaster.makeToast(AppContext, "Content streaming failed.", Toast.LENGTH_SHORT).checkTastyToast();
                         channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
                         channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
-                        mAdapter.notifyDataSetChanged();
+                        notifyDataSetChangedRemoveDuplicates();
                     }
                 });
             }
@@ -409,7 +416,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
             if(oneInstanceTaskFuture != null) oneInstanceTaskFuture.cancel(true);
             clearChannelRoosterMediaChecks();
             channelRooster.setPaused(true);
-            mAdapter.notifyDataSetChanged();
+            notifyDataSetChangedRemoveDuplicates();
         } else if(channelRooster.isPaused() && mediaPlayer.getCurrentPosition() > 0) {
             clearChannelRoosterMediaChecks();
             try {
@@ -417,12 +424,12 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                 mediaPlayer.start();
                 channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
                 channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(true);
-                mAdapter.notifyDataSetChanged();
+                notifyDataSetChangedRemoveDuplicates();
             } catch (IllegalStateException e) {
                 e.printStackTrace();
                 channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
                 channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
-                mAdapter.notifyDataSetChanged();
+                notifyDataSetChangedRemoveDuplicates();
             }
         } else {
             try {
@@ -433,7 +440,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
             //If a previous task exists, kill it
             if(oneInstanceTaskFuture != null) oneInstanceTaskFuture.cancel(true);
             clearChannelRoosterMediaChecks();
-            mAdapter.notifyDataSetChanged();
+            notifyDataSetChangedRemoveDuplicates();
             //Start a new task thread
             oneInstanceTaskFuture = executor.submit(new oneInstanceTask());
         }

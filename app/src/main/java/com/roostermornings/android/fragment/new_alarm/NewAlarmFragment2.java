@@ -33,6 +33,7 @@ import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.util.JSONPersistence;
+import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
@@ -223,9 +224,14 @@ public class NewAlarmFragment2 extends BaseFragment {
                 if(!values.isEmpty()) channelRoosters.addAll(values);
                 if (mListener != null)
                     mListener.retrieveAlarmDetailsFromSQL(); //this is only relevant for alarms being edited
-                mAdapter.notifyDataSetChanged();
+                notifyDataSetChangedRemoveDuplicates();
             }
         }.run();
+    }
+
+    private void notifyDataSetChangedRemoveDuplicates() {
+        RoosterUtils.removeArrayListDuplicates(channelRoosters);
+        mAdapter.notifyDataSetChanged();
     }
 
     private void findNextValidChannelRooster(final TreeMap<Integer,ChannelRooster> channelIterationMap, final Channel channel, final Integer iteration) {
@@ -238,7 +244,7 @@ public class NewAlarmFragment2 extends BaseFragment {
                 if(!tailMap.isEmpty()) {
                     //User is starting story at next valid entry
                     //Set entry for iteration to current valid story iteration, to be incremented on play
-                    new JSONPersistence(getContext()).setStoryIteration(channel.getUid(), tailMap.firstKey());
+                    new JSONPersistence(getApplicationContext()).setStoryIteration(channel.getUid(), tailMap.firstKey());
                     //Retrieve channel audio
                     ChannelRooster channelRooster = channelIterationMap.get(tailMap.firstKey());
                     channelRooster.setSelected(false);
@@ -254,7 +260,7 @@ public class NewAlarmFragment2 extends BaseFragment {
                 else if(!headMap.isEmpty()) {
                     //User is starting story from beginning again, at valid entry
                     //Set entry for iteration to current valid story iteration, to be incremented on play
-                    new JSONPersistence(getContext()).setStoryIteration(channel.getUid(), headMap.firstKey());
+                    new JSONPersistence(getApplicationContext()).setStoryIteration(channel.getUid(), headMap.firstKey());
                     //Retrieve channel audio
                     ChannelRooster channelRooster = channelIterationMap.get(headMap.firstKey());
                     channelRooster.setSelected(false);
@@ -309,7 +315,7 @@ public class NewAlarmFragment2 extends BaseFragment {
             if (alarmChannel.getId().equals(channelRooster.getChannel_uid())) {
                 channelRooster.setSelected(true);
                 alarm.getChannel().setName(channelRooster.getName());
-                mAdapter.notifyDataSetChanged();
+                notifyDataSetChangedRemoveDuplicates();
             }
         }
     }
