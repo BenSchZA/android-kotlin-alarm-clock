@@ -109,10 +109,10 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
         // - replace the contents of the view with that element
         final Friend user = mDataset.get(position);
         user.setSelected(false);
-        holder.txtName.setText(mDataset.get(position).getUser_name());
-        holder.txtInitials.setText(RoosterUtils.getInitials(mDataset.get(position).getUser_name()));
+        holder.txtName.setText(user.getUser_name());
+        holder.txtInitials.setText(RoosterUtils.getInitials(user.getUser_name()));
 
-        setProfilePic(user.getProfile_pic(), holder, position);
+        setProfilePic(user.getProfile_pic(), holder, user);
 
         //Add button listener to accept request
         holder.btnAdd.setOnClickListener(new View.OnClickListener() {
@@ -153,7 +153,7 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
         });
     }
 
-    private void setProfilePic(String url, final FriendsRequestListAdapter.ViewHolder holder, final int position) {
+    private void setProfilePic(String url, final FriendsRequestListAdapter.ViewHolder holder, final Friend user) {
 
         try{
             Picasso.with(context).load(url)
@@ -172,12 +172,12 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
 
                         @Override
                         public void onError() {
-                            holder.txtInitials.setText(RoosterUtils.getInitials(mDataset.get(position).getUser_name()));
+                            holder.txtInitials.setText(RoosterUtils.getInitials(user.getUser_name()));
                         }
                     });
         } catch(IllegalArgumentException e){
             e.printStackTrace();
-            holder.txtInitials.setText(RoosterUtils.getInitials(mDataset.get(position).getUser_name()));
+            holder.txtInitials.setText(RoosterUtils.getInitials(user.getUser_name()));
         }
     }
 

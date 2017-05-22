@@ -124,10 +124,10 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
         // - replace the contents of the view with that element
         final Alarm alarm = mDataset.get(position);
         try {
-            holder.txtAlarmTime.setText(RoosterUtils.setAlarmTimeFromHourAndMinute(mDataset.get(position)));
-            holder.txtAlarmDays.setText(RoosterUtils.getAlarmDays(mDataset.get(position)));
-            if(mDataset.get(position).getChannel() != null) {
-                holder.txtAlarmChannel.setText(mDataset.get(position).getChannel().getName());
+            holder.txtAlarmTime.setText(RoosterUtils.setAlarmTimeFromHourAndMinute(alarm));
+            holder.txtAlarmDays.setText(RoosterUtils.getAlarmDays(alarm));
+            if(alarm.getChannel() != null) {
+                holder.txtAlarmChannel.setText(alarm.getChannel().getName());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -179,9 +179,9 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
                             .onPositive(new MaterialDialog.SingleButtonCallback() {
                                 @Override
                                 public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                    mDataset.remove(position);
-                                    notifyItemRemoved(position);
-                                    notifyItemRangeChanged(position, mDataset.size());
+                                    mDataset.remove(alarm);
+                                    notifyItemRemoved(mDataset.indexOf(alarm));
+                                    notifyItemRangeChanged(mDataset.indexOf(alarm), mDataset.size());
                                     ((MyAlarmsFragmentActivity) mActivity).deleteAlarm(alarm.getUid());
                                     if(StrUtils.notNullOrEmpty(alarm.getChannel().getName())) {
                                         FA.Log(FA.Event.alarm_deleted.class, FA.Event.alarm_deleted.Param.channel_title, alarm.getChannel().getName());
