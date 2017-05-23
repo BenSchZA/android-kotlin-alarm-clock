@@ -58,19 +58,10 @@ public class NewAudioFriendsListAdapter extends RecyclerView.Adapter<NewAudioFri
         notifyItemInserted(position);
     }
 
-    public void remove(String item) {
-        int position = mDataset.indexOf(item);
-        mDataset.remove(position);
-        notifyItemRemoved(position);
-    }
-
-
     // Provide a suitable constructor (depends on the kind of dataset)
     public NewAudioFriendsListAdapter(ArrayList<User> myDataset) {
         mDataset = myDataset;
     }
-
-
 
     // Create new views (invoked by the layout manager)
     @Override

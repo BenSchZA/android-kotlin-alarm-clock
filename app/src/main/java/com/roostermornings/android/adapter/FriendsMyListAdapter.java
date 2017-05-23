@@ -85,9 +85,8 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
         notifyDataSetChanged();
     }
 
-    public void remove(User item) {
-        int position = mDataset.indexOf(item);
-        mDataset.remove(position);
+    public void remove(int position, User item) {
+        mDataset.remove(item);
         notifyItemRemoved(position);
     }
 
@@ -138,7 +137,7 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
                                         @Override
                                         public void run() {
                                             //Do something after 200ms
-                                            remove(user);
+                                            remove(holder.getAdapterPosition(), user);
                                         }
                                     }, 200);
                                 }

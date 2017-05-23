@@ -66,12 +66,6 @@ public class MessageStatusListAdapter extends RecyclerView.Adapter<MessageStatus
         notifyItemInserted(position);
     }
 
-    public void remove(String item) {
-        int position = mDataset.indexOf(item);
-        mDataset.remove(position);
-        notifyItemRemoved(position);
-    }
-
     // Provide a suitable constructor (depends on the kind of dataset)
     public MessageStatusListAdapter(ArrayList<SocialRooster> myDataset, Activity activity) {
         mDataset = myDataset;

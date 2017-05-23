@@ -83,8 +83,8 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
 
     }
 
-    public void delete(int position) { //removes the row
-        mDataset.remove(position);
+    public void delete(int position, Alarm item) { //removes the row
+        mDataset.remove(item);
         notifyItemRemoved(position);
     }
 

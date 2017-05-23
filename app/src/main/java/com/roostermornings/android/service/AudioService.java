@@ -60,6 +60,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.SortedMap;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -72,6 +73,7 @@ import javax.inject.Inject;
 
 import static android.content.ContentValues.TAG;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static com.facebook.FacebookSdk.getApplicationContext;
 
 //Service to manage playing and pausing audio during Rooster alarm
 public class AudioService extends Service {
@@ -367,9 +369,11 @@ public class AudioService extends Service {
 
                     //Check if channel has content and whether a story or not
                     final Integer iteration;
-                    if (channel.isNew_alarms_start_at_first_iteration()) iteration = new JSONPersistence(getApplicationContext()).getStoryIteration(channelId);
-                    else if (channel.getCurrent_rooster_cycle_iteration() < 1) return;
-                    else iteration = channel.getCurrent_rooster_cycle_iteration();
+                    if(channel.isNew_alarms_start_at_first_iteration()) {
+                        iteration = new JSONPersistence(getApplicationContext()).getStoryIteration(channelId);
+                    } else {
+                        iteration = channel.getCurrent_rooster_cycle_iteration() > 0 ? channel.getCurrent_rooster_cycle_iteration() : 1;
+                    }
 
                     final DatabaseReference channelRoosterUploadsReference = FirebaseDatabase.getInstance().getReference()
                             .child("channel_rooster_uploads").child(channelId);
