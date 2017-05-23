@@ -77,9 +77,8 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
         notifyDataSetChanged();
     }
 
-    public void remove(Friend item) {
-        int position = mDataset.indexOf(item);
-        mDataset.remove(position);
+    public void remove(int position, Friend item) {
+        mDataset.remove(item);
         notifyItemRemoved(position);
     }
 
@@ -128,7 +127,7 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
                     @Override
                     public void run() {
                         //Do something after 200ms
-                        remove(user);
+                        remove(holder.getAdapterPosition(), user);
                     }
                 }, 200);
             }
@@ -146,7 +145,7 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
                     @Override
                     public void run() {
                         //Do something after 200ms
-                        remove(user);
+                        remove(holder.getAdapterPosition(), user);
                     }
                 }, 200);
             }

@@ -34,7 +34,7 @@ public class BootReceiver extends BroadcastReceiver {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         BackgroundTaskReceiver backgroundTaskReceiver = new BackgroundTaskReceiver();
 
-        if (auth != null && auth.getCurrentUser().getUid() != null) {
+        if (auth != null && auth.getCurrentUser() != null && auth.getCurrentUser().getUid() != null) {
             if(BuildConfig.DEBUG) Toaster.makeToast(context, "Tasks started, valid user!", Toast.LENGTH_LONG);
             alarmController.rebootAlarms();
             backgroundTaskReceiver.scheduleBackgroundDailyTask(context, true);

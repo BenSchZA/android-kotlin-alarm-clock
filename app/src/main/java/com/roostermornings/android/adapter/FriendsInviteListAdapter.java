@@ -67,9 +67,8 @@ public class FriendsInviteListAdapter extends RecyclerView.Adapter<FriendsInvite
         notifyDataSetChanged();
     }
 
-    public void remove(Friend item) {
-        int position = mDataset.indexOf(item);
-        mDataset.remove(position);
+    public void remove(int position, Friend item) {
+        mDataset.remove(item);
         notifyItemRemoved(position);
     }
 
@@ -111,7 +110,7 @@ public class FriendsInviteListAdapter extends RecyclerView.Adapter<FriendsInvite
                     @Override
                     public void run() {
                         //Do something after 200ms
-                        remove(user);
+                        remove(holder.getAdapterPosition(), user);
                         notifyDataSetChanged();
                     }
                 }, 200);

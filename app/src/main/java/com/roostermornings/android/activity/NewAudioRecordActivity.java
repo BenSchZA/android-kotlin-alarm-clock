@@ -159,6 +159,8 @@ public class NewAudioRecordActivity extends BaseActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if(mediaPlayer != null) mediaPlayer.release();
+        if(mediaRecorder != null) mediaRecorder.release();
     }
 
     @OnClick(R.id.home_friends)
@@ -411,6 +413,12 @@ public class NewAudioRecordActivity extends BaseActivity {
     @OnClick(R.id.new_audio_save)
     public void onSaveAudioFileClick() {
         if (!checkInternetConnection()) return;
+
+        //Stop audio if currently playing
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            mediaPlayer.stop();
+            setNewAudioStatus(NEW_AUDIO_READY_LISTEN);
+        }
 
         //Manage whether audio file is being sent direct to a user or a list of users needs to be shown
         Intent intent = new Intent(NewAudioRecordActivity.this, NewAudioFriendsActivity.class);

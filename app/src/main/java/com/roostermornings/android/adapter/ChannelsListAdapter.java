@@ -63,12 +63,6 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
         notifyItemInserted(position);
     }
 
-    public void remove(String item) {
-        int position = mDataset.indexOf(item);
-        mDataset.remove(position);
-        notifyItemRemoved(position);
-    }
-
     // Provide a suitable constructor (depends on the kind of dataset)
     public ChannelsListAdapter(ArrayList<ChannelRooster> mDataset, Activity mActivity) {
         this.mDataset = mDataset;
