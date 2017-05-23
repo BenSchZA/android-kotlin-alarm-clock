@@ -10,8 +10,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.roostermornings.android.fragment.friends.FriendsInviteFragment3">
+    <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/main.appbar"
@@ -79,13 +79,20 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <android.support.v4.widget.SwipeRefreshLayout
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/swiperefresh"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/friendsInviteListView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
-                android:padding="@dimen/spacing_normal"
-                android:visibility="gone" />
+                android:padding="@dimen/spacing_normal" />
+
+            </android.support.v4.widget.SwipeRefreshLayout>
 
             <TextView
                 android:id="@+id/retrieve_contacts_permission_text"
@@ -98,14 +105,6 @@
                 android:textColor="@color/white_30_percent_transparent"
                 android:textSize="@dimen/text_large"
                 android:visibility="gone" />
-
-            <ProgressBar
-                android:id="@+id/progressBar"
-                style="@style/Widget.AppCompat.ProgressBar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:visibility="visible" />
 
         </FrameLayout>
     </FrameLayout>

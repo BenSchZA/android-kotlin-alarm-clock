@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -73,11 +74,10 @@ public class FriendsMyFragment1 extends BaseFragment {
 
     private static int statusCode = -1;
 
-    @BindView(R.id.progressBar)
-    ProgressBar progressBar;
-
     @BindView(R.id.friendsMyListView)
     RecyclerView mRecyclerView;
+    @BindView(R.id.swiperefresh)
+    SwipeRefreshLayout swipeRefreshLayout;
 
     private OnFragmentInteractionListener mListener;
 
@@ -119,17 +119,33 @@ public class FriendsMyFragment1 extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
         View view = initiate(inflater, R.layout.fragment_friends_fragment1, container, false);
+
+        swipeRefreshLayout.setRefreshing(true);
+        /*
+        * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
+        * performs a swipe-to-refresh gesture.
+        */
+        swipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        // This method performs the actual data-refresh operation.
+                        // The method calls setRefreshing(false) when it's finished.
+                        retrieveMyFriends();
+                    }
+                }
+        );
+
         //Check if node response already exists
         if(statusCode == 200) {
-            progressBar.setVisibility(View.GONE);
-            mRecyclerView.setVisibility(View.VISIBLE);
+            swipeRefreshLayout.setRefreshing(false);
         } else {
             if (!checkInternetConnection()) {
-                progressBar.setVisibility(View.GONE);
+                swipeRefreshLayout.setRefreshing(false);
             } else {
-                progressBar.setVisibility(View.VISIBLE);
-                mRecyclerView.setVisibility(View.GONE);
+                swipeRefreshLayout.setRefreshing(true);
                 firebaseUser.getToken(true)
                         .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
                             public void onComplete(@NonNull Task<GetTokenResult> task) {
@@ -138,13 +154,13 @@ public class FriendsMyFragment1 extends BaseFragment {
                                     retrieveMyFriends();
                                 } else {
                                     // Handle error -> task.getException();
-                                    progressBar.setVisibility(View.GONE);
+                                    swipeRefreshLayout.setRefreshing(false);
                                 }
                             }
                         });
             }
         }
-        // Inflate the layout for this fragment
+
         return view;
     }
 
@@ -182,14 +198,13 @@ public class FriendsMyFragment1 extends BaseFragment {
                 statusCode = response.code();
                 Users apiResponse = response.body();
                 if(apiResponse.users == null) {
-                    progressBar.setVisibility(View.GONE);
+                    swipeRefreshLayout.setRefreshing(false);
                     return;
                 }
 
                 if (statusCode == 200) {
 
-                    progressBar.setVisibility(View.GONE);
-                    mRecyclerView.setVisibility(View.VISIBLE);
+                    swipeRefreshLayout.setRefreshing(false);
 
                     mUsers.clear();
                     mUsers.addAll(apiResponse.users);
@@ -206,7 +221,7 @@ public class FriendsMyFragment1 extends BaseFragment {
             public void onFailure(Throwable t) {
                 Log.i(TAG, t.getLocalizedMessage()==null?"":t.getLocalizedMessage());
                 Toaster.makeToast(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG).checkTastyToast();
-                progressBar.setVisibility(View.GONE);
+                swipeRefreshLayout.setRefreshing(false);
             }
         });
     }

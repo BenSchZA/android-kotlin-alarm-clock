@@ -152,6 +152,8 @@ public class FriendsFragmentActivity extends BaseActivity implements
 
         //Create a viewpager with fragments controlled by SectionsPagerAdapter
         createViewPager(mViewPager);
+        //This makes sure view is not recreated when scrolling, as we have 3 fragment pages
+        mViewPager.setOffscreenPageLimit(2);
         tabLayout.setupWithViewPager(mViewPager);
         //Generate custom tab for tab layout
         createTabIcons();
@@ -171,8 +173,6 @@ public class FriendsFragmentActivity extends BaseActivity implements
                     setTabNotification(position, false);
                     setButtonBarNotification(false);
                     BaseApplication.setNotificationFlag(0, Constants.FLAG_FRIENDREQUESTS);
-                } else if(position == 2) {
-                    friendsInviteFragment3.requestGetContacts();
                 }
             }
 
@@ -396,7 +396,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
                 } else {
                     friendsInviteFragment3.displayRequestPermissionExplainer(true);
                 }
-                return;
+                break;
             }
 
             // other 'case' lines to check for other

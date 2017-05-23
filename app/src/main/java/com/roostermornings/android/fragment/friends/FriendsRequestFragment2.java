@@ -9,6 +9,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -32,6 +33,7 @@ import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import javax.inject.Inject;
 
@@ -57,6 +59,8 @@ public class FriendsRequestFragment2 extends BaseFragment {
 
     @BindView(R.id.friendsRequestListView)
     RecyclerView mRecyclerView;
+    @BindView(R.id.swiperefresh)
+    SwipeRefreshLayout swipeRefreshLayout;
 
     private OnFragmentInteractionListener mListener;
 
@@ -95,9 +99,27 @@ public class FriendsRequestFragment2 extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         // Inflate the layout for this fragment
-        return initiate(inflater, R.layout.fragment_friends_fragment2, container, false);
+        View view = initiate(inflater, R.layout.fragment_friends_fragment2, container, false);
+
+        swipeRefreshLayout.setRefreshing(true);
+        /*
+        * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
+        * performs a swipe-to-refresh gesture.
+        */
+        swipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        // This method performs the actual data-refresh operation.
+                        // The method calls setRefreshing(false) when it's finished.
+                        getDatabaseReference();
+                        getRequests();
+                    }
+                }
+        );
+
+        return view;
     }
 
     //NB: bind ButterKnife to view and then initialise UI elements
@@ -114,17 +136,25 @@ public class FriendsRequestFragment2 extends BaseFragment {
     private void getRequests() {
         mRequestsReference = mDatabase
                 .child("friend_requests_received").child(firebaseUser.getUid());
+        mRequestsReference.keepSynced(true);
 
         ValueEventListener friendsListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 //Clear before repopulating
                 mUsers.clear();
+                Iterator iterator = dataSnapshot.getChildren().iterator();
+                if(dataSnapshot.getChildrenCount() == 0) swipeRefreshLayout.setRefreshing(false);
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     mUsers.add(postSnapshot.getValue(Friend.class));
                     //Sort names alphabetically before notifying adapter
                     sortNamesFriends(mUsers);
                     mAdapter.notifyDataSetChanged();
+                    //When the iterator is at it's last element, set data as loaded
+                    iterator.next();
+                    if(!iterator.hasNext()){
+                        swipeRefreshLayout.setRefreshing(false);
+                    }
                 }
             }
 
@@ -134,8 +164,7 @@ public class FriendsRequestFragment2 extends BaseFragment {
                 Toaster.makeToast(AppContext, "Failed to load user.", Toast.LENGTH_SHORT).checkTastyToast();
             }
         };
-        mRequestsReference.addValueEventListener(friendsListener);
-
+        mRequestsReference.addListenerForSingleValueEvent(friendsListener);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
