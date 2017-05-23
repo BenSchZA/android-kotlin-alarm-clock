@@ -10,9 +10,12 @@ import android.os.Build;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.ChannelRooster;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * Created by steven on 2017/02/15.
@@ -65,13 +68,12 @@ public class RoosterUtils {
     public static ArrayList<?> removeArrayListDuplicates(ArrayList<?> arrayList) {
         try {
             //LinkedHashSet preserves order
-            LinkedHashSet uniqueHashSet = new LinkedHashSet<>();
-            uniqueHashSet.addAll(arrayList);
+            Set uniqueHashSet = new LinkedHashSet(arrayList);
             arrayList.clear();
             arrayList.addAll(uniqueHashSet);
         } catch (Exception e) {
             e.printStackTrace();
-            return arrayList;
+            return new ArrayList<>(Collections.EMPTY_LIST);
         }
         return arrayList;
     }

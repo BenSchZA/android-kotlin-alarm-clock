@@ -25,6 +25,7 @@ import com.roostermornings.android.domain.SocialRooster;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
+import com.roostermornings.android.util.StrUtils;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -94,8 +95,15 @@ public class MessageStatusListAdapter extends RecyclerView.Adapter<MessageStatus
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         final SocialRooster socialRooster = mDataset.get(position);
-        holder.txtName.setText(mDataset.get(position).getUser_name());
-        setProfilePic(socialRooster.getProfile_pic(), holder, position);
+        holder.txtName.setText(socialRooster.getUser_name());
+        //Check if image is null, else previous images reused
+        if(StrUtils.notNullOrEmpty(socialRooster.getProfile_pic())) {
+            setProfilePic(socialRooster.getProfile_pic(), holder, socialRooster);
+        } else {
+            holder.imgProfilePic.setImageDrawable(null);
+            holder.imgProfilePic.setAlpha(0.3f);
+            holder.txtInitials.setText(RoosterUtils.getInitials(socialRooster.getUser_name()));
+        }
         switch(socialRooster.getStatus()) {
             case Constants.MESSAGE_STATUS_SENT:
                 holder.txtStatus.setText(context.getResources().getText(R.string.status_sent));
@@ -111,8 +119,7 @@ public class MessageStatusListAdapter extends RecyclerView.Adapter<MessageStatus
         }
     }
 
-    private void setProfilePic(String url, final MessageStatusListAdapter.ViewHolder holder, final int position) {
-
+    private void setProfilePic(String url, final MessageStatusListAdapter.ViewHolder holder, final SocialRooster socialRooster) {
         try{
             Picasso.with(context).load(url)
                     .resize(50, 50)
@@ -132,12 +139,12 @@ public class MessageStatusListAdapter extends RecyclerView.Adapter<MessageStatus
                         @Override
                         public void onError() {
                             holder.imgProfilePic.setAlpha(0.3f);
-                            holder.txtInitials.setText(RoosterUtils.getInitials(mDataset.get(position).getUser_name()));
+                            holder.txtInitials.setText(RoosterUtils.getInitials(socialRooster.getUser_name()));
                         }
                     });
         } catch(IllegalArgumentException e){
             e.printStackTrace();
-            holder.txtInitials.setText(RoosterUtils.getInitials(mDataset.get(position).getUser_name()));
+            holder.txtInitials.setText(RoosterUtils.getInitials(socialRooster.getUser_name()));
         }
     }
 

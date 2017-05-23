@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SyncResult;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
@@ -47,6 +48,7 @@ import com.roostermornings.android.util.Toaster;
 import com.squareup.picasso.Picasso;
 
 import java.io.FileOutputStream;
+import java.util.Calendar;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
@@ -227,10 +229,17 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
                         if(!channel.isActive()) return;
 
                         //Check if channel has content and whether a story or not
+                        //For time dependant channels, iteration should be the iteration for the day of alarm
                         final Integer iteration;
-                        if(channel.isNew_alarms_start_at_first_iteration()) iteration = new JSONPersistence(getApplicationContext()).getStoryIteration(channelId);
-                        else if (channel.getCurrent_rooster_cycle_iteration() < 1) return;
-                        else iteration = channel.getCurrent_rooster_cycle_iteration();
+                        Integer tempIteration;
+                        if(channel.isNew_alarms_start_at_first_iteration()) {
+                            iteration = new JSONPersistence(getApplicationContext()).getStoryIteration(channelId);
+                        } else {
+                            Calendar calendar = Calendar.getInstance();
+                            tempIteration = channel.getCurrent_rooster_cycle_iteration() > 0 ? channel.getCurrent_rooster_cycle_iteration() : 1;
+                            Integer daysUntilAlarm = (int)((deviceAlarm.getMillis() - calendar.getTimeInMillis()) / (1000*60*60*24));
+                            iteration = daysUntilAlarm > 0 ? tempIteration + daysUntilAlarm : tempIteration;
+                        }
 
                         final DatabaseReference channelRoosterUploadsReference = FirebaseDatabase.getInstance().getReference()
                                 .child("channel_rooster_uploads").child(channelId);
