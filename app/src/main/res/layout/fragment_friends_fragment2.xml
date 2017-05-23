@@ -13,6 +13,12 @@
 
     <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
 
+    <android.support.v4.widget.SwipeRefreshLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/swiperefresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/friendsRequestListView"
         android:layout_width="fill_parent"
@@ -20,5 +26,7 @@
         android:layout_weight="1"
         android:clipToPadding="false"
         android:padding="@dimen/spacing_normal" />
+
+    </android.support.v4.widget.SwipeRefreshLayout>
 
 </LinearLayout>

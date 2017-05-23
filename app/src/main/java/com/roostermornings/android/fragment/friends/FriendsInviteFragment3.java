@@ -14,6 +14,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -73,16 +74,14 @@ public class FriendsInviteFragment3 extends BaseFragment {
 
     private BaseActivity baseActivity;
 
-    private static int statusCode = -1;
-
     ArrayList<Friend> mUsers = new ArrayList<>();
     private RecyclerView.Adapter mAdapter;
 
     @BindView(R.id.friendsInviteListView)
     RecyclerView mRecyclerView;
 
-    @BindView(R.id.progressBar)
-    ProgressBar progressBar;
+    @BindView(R.id.swiperefresh)
+    SwipeRefreshLayout swipeRefreshLayout;
 
     @BindView(R.id.share_button)
     Button shareButton;
@@ -121,11 +120,6 @@ public class FriendsInviteFragment3 extends BaseFragment {
         super.onCreate(savedInstanceState);
         inject(((BaseApplication)getActivity().getApplication()).getRoosterApplicationComponent());
 
-        //Ensure check for Node complete reset
-        statusCode = -1;
-
-        if (getArguments() != null) {
-        }
         myContactsController = new MyContactsController(AppContext);
     }
 
@@ -133,7 +127,27 @@ public class FriendsInviteFragment3 extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return initiate(inflater, R.layout.fragment_friends_fragment3, container, false);
+        View view = initiate(inflater, R.layout.fragment_friends_fragment3, container, false);
+
+        swipeRefreshLayout.setRefreshing(true);
+        /*
+        * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
+        * performs a swipe-to-refresh gesture.
+        */
+        swipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        // This method performs the actual data-refresh operation.
+                        // The method calls setRefreshing(false) when it's finished.
+                        requestGetContacts();
+                    }
+                }
+        );
+
+        requestGetContacts();
+
+        return view;
     }
 
     //NB: bind ButterKnife to view and then initialise UI elements
@@ -238,29 +252,22 @@ public class FriendsInviteFragment3 extends BaseFragment {
     }
 
     private void executeNodeMyContactsTask() {
-        //Check if node response already exists
-        if(statusCode == 200) {
-            progressBar.setVisibility(View.GONE);
-            mRecyclerView.setVisibility(View.VISIBLE);
+        if (!checkInternetConnection()) {
+            swipeRefreshLayout.setRefreshing(false);
         } else {
-            if (!checkInternetConnection()) {
-                progressBar.setVisibility(View.GONE);
-            } else {
-                progressBar.setVisibility(View.VISIBLE);
-                mRecyclerView.setVisibility(View.GONE);
-                firebaseUser.getToken(true)
-                        .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
-                            public void onComplete(@NonNull Task<GetTokenResult> task) {
-                                if (task.isSuccessful()) {
-                                    String idToken = task.getResult().getToken();
-                                    checkLocalContactsNode(idToken);
-                                } else {
-                                    // Handle error -> task.getException();
-                                    progressBar.setVisibility(View.GONE);
-                                }
+            swipeRefreshLayout.setRefreshing(true);
+            firebaseUser.getToken(true)
+                    .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+                        public void onComplete(@NonNull Task<GetTokenResult> task) {
+                            if (task.isSuccessful()) {
+                                String idToken = task.getResult().getToken();
+                                checkLocalContactsNode(idToken);
+                            } else {
+                                // Handle error -> task.getException();
+                                swipeRefreshLayout.setRefreshing(false);
                             }
-                        });
-            }
+                        }
+                    });
         }
     }
 
@@ -272,7 +279,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
             public void onResponse(Response<NodeUsers> response,
                                    Retrofit retrofit) {
 
-                statusCode = response.code();
+                Integer statusCode = response.code();
                 NodeUsers apiResponse = response.body();
 
                 if (statusCode == 200) {
@@ -288,8 +295,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
                     notifyAdapter();
 
                     //Make load spinner GONE and recyclerview VISIBLE
-                    progressBar.setVisibility(View.GONE);
-                    mRecyclerView.setVisibility(View.VISIBLE);
+                    swipeRefreshLayout.setRefreshing(false);
 
                     Log.d("apiResponse", apiResponse.toString());
                 }
@@ -299,7 +305,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
             public void onFailure(Throwable t) {
                 Log.i(TAG, t.getLocalizedMessage()==null?"":t.getLocalizedMessage());
                 Toaster.makeToast(getApplicationContext(), "Loading contacts failed, please try again.", Toast.LENGTH_LONG).checkTastyToast();
-                progressBar.setVisibility(View.GONE);
+                swipeRefreshLayout.setRefreshing(false);
             }
         });
     }
@@ -314,10 +320,10 @@ public class FriendsInviteFragment3 extends BaseFragment {
     public void displayRequestPermissionExplainer(Boolean display) {
         if(display) {
             retrieveContactsPermissionText.setVisibility(View.VISIBLE);
-            progressBar.setVisibility(View.GONE);
+            swipeRefreshLayout.setRefreshing(false);
         } else {
             retrieveContactsPermissionText.setVisibility(View.GONE);
-            progressBar.setVisibility(View.GONE);
+            swipeRefreshLayout.setRefreshing(false);
         }
     }
 }
