@@ -118,6 +118,8 @@ public class FriendsRequestFragment2 extends BaseFragment {
         ValueEventListener friendsListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                //Clear before repopulating
+                mUsers.clear();
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     mUsers.add(postSnapshot.getValue(Friend.class));
                     //Sort names alphabetically before notifying adapter

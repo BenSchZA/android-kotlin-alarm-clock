@@ -8,6 +8,7 @@ package com.roostermornings.android.activity.base;
 import android.accounts.Account;
 import android.app.ActivityManager;
 import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -365,7 +366,6 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
     }
 
     public void requestPermissionIgnoreBatteryOptimization(Context context) {
-        //Google wasn't happy with us programatically requesting this permission, so a dialog will have to do
 //        String packageName = getPackageName();
 //        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 //        RoosterUtils.hasM() && pm.isIgnoringBatteryOptimizations(packageName) &&
@@ -375,13 +375,22 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
                 || Build.BRAND.toLowerCase().contains("sony"))) {
             Log.d("Brand: ", Build.BRAND);
 
-            String settingsNavigationString = "For example go to power, battery, or optimizations settings page.";
+            //Set instructions and settings intent
+            String settingsNavigationString = "Try: For example go to power, battery, or optimizations settings page.";
+            final Intent intent = new Intent();
             if(Build.BRAND.toLowerCase().contains("huawei")) {
-                settingsNavigationString = "Go to 'Battery manager'>'Protected apps'";
+                settingsNavigationString = "";
+                intent.setComponent(new ComponentName("com.huawei.systemmanager", "com.huawei.systemmanager.optimize.process.ProtectActivity"));
+                if(!isCallable(intent)) {
+                    settingsNavigationString = "Try: Go to 'Battery manager'>'Protected apps'";
+                    intent.setComponent(null);
+                    intent.setAction(android.provider.Settings.ACTION_SETTINGS);
+                }
             } else if(Build.BRAND.toLowerCase().contains("sony")) {
-                settingsNavigationString = "Go to 'STAMINA mode'>'Apps active in standby'>'Add applications'";
+                settingsNavigationString = "Try: Go to 'STAMINA mode'>'Apps active in standby'>'Add applications'";
             }
 
+            //Build content string
             String dialogContent = getResources().getString(R.string.dialog_background_settings_1)
                     + Build.BRAND + getResources().getString(R.string.dialog_background_settings_2)
                     + settingsNavigationString;
@@ -394,10 +403,17 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
                     .onPositive(new MaterialDialog.SingleButtonCallback() {
                         @Override
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, true);
-                            editor.apply();
-                            startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), 0);
+                            if(Build.BRAND.toLowerCase().contains("huawei")) {
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, true);
+                                editor.apply();
+                                startActivityForResult(intent, 0);
+                            } else {
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, true);
+                                editor.apply();
+                                startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), 0);
+                            }
                         }
                     })
                     .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -406,10 +422,18 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
                             SharedPreferences.Editor editor = sharedPreferences.edit();
                             editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false);
                             editor.apply();
+                            startHomeActivity();
                         }
                     })
+                    .canceledOnTouchOutside(false)
                     .show();
         }
+    }
+
+    private boolean isCallable(Intent intent) {
+        List<ResolveInfo> list = getPackageManager().queryIntentActivities(intent,
+                PackageManager.MATCH_DEFAULT_ONLY);
+        return list.size() > 0;
     }
 
     public boolean setupToolbar(TextView toolbarTitle, String title) {

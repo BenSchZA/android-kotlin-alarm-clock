@@ -528,7 +528,7 @@ public class NewAudioRecordActivity extends BaseActivity {
                             PackageManager.PERMISSION_GRANTED;
 
                     if (StoragePermission && RecordPermission) {
-                        setNewAudioStatus(NEW_AUDIO_RECORDING);
+                        setNewAudioStatus(NEW_AUDIO_READY_RECORD);
                         startStopAudioRecording();
                     } else {
                         Toaster.makeToast(NewAudioRecordActivity.this, "Permission denied. Please reconsider?", Toast.LENGTH_LONG).checkTastyToast();

@@ -38,6 +38,7 @@ import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -152,7 +153,7 @@ public class NewAlarmFragment2 extends BaseFragment {
                         Toaster.makeToast(AppContext, "Failed to load channel.", Toast.LENGTH_SHORT).checkTastyToast();
                     }
                 };
-                mChannelsReference.addValueEventListener(channelsListener);
+                mChannelsReference.addListenerForSingleValueEvent(channelsListener);
             }
         }.run();
 
@@ -224,14 +225,9 @@ public class NewAlarmFragment2 extends BaseFragment {
                 if(!values.isEmpty()) channelRoosters.addAll(values);
                 if (mListener != null)
                     mListener.retrieveAlarmDetailsFromSQL(); //this is only relevant for alarms being edited
-                notifyDataSetChangedRemoveDuplicates();
+                if(mAdapter != null) mAdapter.notifyDataSetChanged();
             }
         }.run();
-    }
-
-    private void notifyDataSetChangedRemoveDuplicates() {
-        RoosterUtils.removeArrayListDuplicates(channelRoosters);
-        mAdapter.notifyDataSetChanged();
     }
 
     private void findNextValidChannelRooster(final TreeMap<Integer,ChannelRooster> channelIterationMap, final Channel channel, final Integer iteration) {
@@ -315,7 +311,7 @@ public class NewAlarmFragment2 extends BaseFragment {
             if (alarmChannel.getId().equals(channelRooster.getChannel_uid())) {
                 channelRooster.setSelected(true);
                 alarm.getChannel().setName(channelRooster.getName());
-                notifyDataSetChangedRemoveDuplicates();
+                return;
             }
         }
     }
