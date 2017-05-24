@@ -86,7 +86,7 @@ public class MyContactsController {
         String NSNNumber;
         NSNNumber = null;
 
-        if (contactNumber == null) return "";
+        if (!StrUtils.notNullOrEmpty(contactNumber)) return "";
 
         if (countryCodesArray != null
                 && countryCodes != null
