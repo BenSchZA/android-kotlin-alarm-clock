@@ -284,13 +284,15 @@ public class FriendsInviteFragment3 extends BaseFragment {
 
                 if (statusCode == 200) {
 
-                    mUsers = new ArrayList<>();
-                    for (Friend user:
-                         apiResponse.users.get(0)) {
-                        if(user != null && !user.getUser_name().isEmpty()) mUsers.add(user);
+                    if(apiResponse.users != null) {
+                        mUsers = new ArrayList<>();
+                        for (Friend user :
+                                apiResponse.users.get(0)) {
+                            if (user != null && !user.getUser_name().isEmpty()) mUsers.add(user);
+                        }
+                        //Sort names alphabetically before notifying adapter
+                        sortNamesFriends(mUsers);
                     }
-                    //Sort names alphabetically before notifying adapter
-                    sortNamesFriends(mUsers);
 
                     notifyAdapter();
 

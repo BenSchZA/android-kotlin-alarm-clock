@@ -89,8 +89,6 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
     private FirebaseAuth.AuthStateListener mAuthListener;
     private static final String TAG = BaseActivity.class.getSimpleName();
 
-    private static Calendar calendar = Calendar.getInstance();
-
     public static User mCurrentUser;
 
     @Inject Context AppContext;
@@ -504,6 +502,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
     }
 
     public boolean setDayNightTheme() {
+        Calendar calendar = Calendar.getInstance();
         try {
             String[] dayNightThemeArrayEntries = getResources().getStringArray(R.array.user_settings_day_night_theme_entry_values);
 

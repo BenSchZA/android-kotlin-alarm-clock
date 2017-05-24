@@ -93,8 +93,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
     private DatabaseReference mFriendRequestsSentReference;
     private DatabaseReference mCurrentUserReference;
     private BroadcastReceiver receiver;
-
-    private int position;
+    
     protected FriendsFragmentActivity mThis = this;
 
     FriendsMyFragment1 friendsInviteFragment1;
