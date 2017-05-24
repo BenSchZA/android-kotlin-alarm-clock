@@ -385,7 +385,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
                     intent.setAction(android.provider.Settings.ACTION_SETTINGS);
                 }
             } else if(Build.BRAND.toLowerCase().contains("sony")) {
-                settingsNavigationString = "Try: Go to 'STAMINA mode'>'Apps active in standby'>'Add applications'";
+                settingsNavigationString = "Try: Go to 'Battery'>Settings menu>'Battery optimization'>Select Rooster app checkbox";
             }
 
             //Build content string

@@ -94,7 +94,7 @@
     <string name="dialog_background_settings_2">&#160;phone needs to give Rooster permission to wake you up.\n\nGo to settings to add Rooster to the protected list.\n \n</string>
     <!--Some Android phones have power usage optimisation that interferes with Rooster, please check your phone settings - sometimes called \'Protected Apps\'.-->
 
-    <string name="invite_to_rooster_message">How cool would it be if you could wake up to surprise voice notes from me and other friends? \n\nYou can also wake up to different content channels such as inspiration, comedy, music, news, meditation, bird calls and more! \n\nLike the best things in life, it’s free :) \nhttp://www.onelink.to/rooster</string>
+    <string name="invite_to_rooster_message">How cool would it be if you could wake up to surprise voice notes from me and other friends? \n\nYou can also wake up to different content channels such as inspiration, comedy, music, news, meditation, bird calls and more! \n\nLike the best things in life, it’s free :) \nhttp://www.onelink.to/awesome_mornings</string>
 
     <string-array name="user_settings_day_night_theme_entries">
         <item>Automatically set by timezone</item>

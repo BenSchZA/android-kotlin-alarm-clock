@@ -60,7 +60,7 @@ public class SplashActivity extends BaseActivity {
 
     private void checkMinimumRequirements() {
         DatabaseReference minReqRef = FirebaseDatabase.getInstance().getReference()
-                .child("minimum_requirements");
+                .child("minimum_requirements_android");
         minReqRef.keepSynced(true);
 
         ValueEventListener minReqListener = new ValueEventListener() {
