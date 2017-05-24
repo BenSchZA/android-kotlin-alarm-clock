@@ -81,10 +81,17 @@ public class SplashActivity extends BaseActivity {
                                 minVersionComponents) {
                             if (!component.isEmpty()) {
                                 Integer componentInteger = Integer.valueOf(component);
-                                if (position >= buildVersionComponents.length) return;
+                                if (position >= buildVersionComponents.length) break;
                                 Integer buildComponentInteger = Integer.valueOf(buildVersionComponents[position]);
-                                aboveMinReq = aboveMinReq && (buildComponentInteger >= componentInteger);
-                                position++;
+                                if(buildComponentInteger < componentInteger) {
+                                    aboveMinReq = false;
+                                    break;
+                                } else if(buildComponentInteger > componentInteger) {
+                                    aboveMinReq = true;
+                                    break;
+                                } else {
+                                    position++;
+                                }
                             }
                         }
                     } catch (NullPointerException e) {

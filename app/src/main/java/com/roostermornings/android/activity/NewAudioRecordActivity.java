@@ -344,7 +344,6 @@ public class NewAudioRecordActivity extends BaseActivity {
     private boolean deleteAudio() {
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.stop();
-            mediaPlayer.release();
             mediaRecorderReady();
         }
         if(!mAudioSavePathInDevice.isEmpty()) {
