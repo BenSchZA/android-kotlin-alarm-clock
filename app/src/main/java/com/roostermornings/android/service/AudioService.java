@@ -20,6 +20,7 @@ import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Vibrator;
@@ -119,6 +120,7 @@ public class AudioService extends Service {
 
     @Inject
     Account mAccount;
+    @Inject SharedPreferences sharedPreferences;
 
     public static boolean mRunning = false;
 
@@ -955,6 +957,13 @@ public class AudioService extends Service {
         }
 
         if (failure) {
+            if (Build.BRAND.toLowerCase().contains("sony")) {
+                //Show dialog explainer again
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false);
+                editor.apply();
+            }
+
             FA.Log(FA.Event.alarm_activated.class, FA.Event.default_alarm_play.Param.fatal_failure, true);
         } else {
             FA.Log(FA.Event.alarm_activated.class, FA.Event.default_alarm_play.Param.fatal_failure, false);
