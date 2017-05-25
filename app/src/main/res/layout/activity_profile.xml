@@ -75,11 +75,11 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="@dimen/spacing_normal_large"
-            android:inputType="numberDecimal"
+            android:inputType="numberSigned"
             android:maxLines="1"
             android:text=""
             android:textAlignment="center"
-            android:maxLength="20"/>
+            android:maxLength="20" />
 
         <!--<Button-->
         <!--android:clickable="true"-->

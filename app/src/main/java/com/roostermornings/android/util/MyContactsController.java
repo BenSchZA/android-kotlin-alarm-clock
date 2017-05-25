@@ -74,7 +74,7 @@ public class MyContactsController {
             try {
                 contactNumber = contactNumber.replaceAll("[^0-9+]", "");
                 NSNNumber = processContactCountry(contactNumber);
-                if (NSNNumber.length() > 0) processedContactsArray.add(NSNNumber);
+                if (StrUtils.notNullOrEmpty(NSNNumber)) processedContactsArray.add(NSNNumber);
             } catch (NullPointerException e){
                 e.printStackTrace();
             }
@@ -82,7 +82,30 @@ public class MyContactsController {
         return processedContactsArray;
     }
 
-    public String processContactCountry(String contactNumber) {
+    public String processUserContactNumber(String contactNumber) {
+        try {
+            countryCodesArray = new JSONArray(loadJSONFromAsset("CountryCodes.json"));
+            countryCodes = countryCodesArray.getJSONObject(0);
+        } catch (org.json.JSONException e) {
+            e.printStackTrace();
+        }
+
+        String NSNNumber;
+        try {
+            contactNumber = contactNumber.replaceAll("[^0-9+]", "");
+            NSNNumber = processContactCountry(contactNumber);
+            if(StrUtils.notNullOrEmpty(NSNNumber)) {
+                return NSNNumber;
+            } else {
+                return "";
+            }
+        } catch (NullPointerException e){
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    private String processContactCountry(String contactNumber) {
         String NSNNumber;
         NSNNumber = null;
 

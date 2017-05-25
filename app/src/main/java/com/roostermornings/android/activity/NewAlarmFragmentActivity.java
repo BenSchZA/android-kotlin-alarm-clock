@@ -221,11 +221,11 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
 
                 //only do the push to create the new alarm if this is NOT an existing alarm
                 String alarmKey = "";
-                if (mEditAlarmId.length() == 0) {
+                if(StrUtils.notNullOrEmpty(mEditAlarmId)) {
+                    alarmKey = mEditAlarmId;
+                } else {
                     alarmKey = mDatabase.child("alarms").push().getKey();
                     mAlarm.setUid(alarmKey);
-                } else {
-                    alarmKey = mEditAlarmId;
                 }
 
                 //Extract data from Alarm mAlarm and create new alarm set DeviceAlarm

@@ -43,6 +43,7 @@ import com.roostermornings.android.adapter.MyAlarmsListAdapter;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.AlarmChannel;
+import com.roostermornings.android.firebase.FirebaseNetwork;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.sqlutil.AudioTableManager;
@@ -132,6 +133,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                     Crashlytics.setUserIdentifier(firebaseUser.getUid());
                     Crashlytics.setUserEmail(firebaseUser.getEmail());
                     Crashlytics.setUserName(firebaseUser.getDisplayName());
+                    FirebaseNetwork.updateLastSeen();
                 }
             }
         }.run();

@@ -118,7 +118,7 @@ public class IntroFragmentActivity extends BaseActivity implements IIntroFragmen
     @Override
     public void onMobileNumberSet(String mobileNumber) {
         MyContactsController myContactsController = new MyContactsController(this);
-        String NSNNumber = myContactsController.processContactCountry(mobileNumber);
+        String NSNNumber = myContactsController.processUserContactNumber(mobileNumber);
 
         Intent intent = new Intent(IntroFragmentActivity.this, SignInActivity.class);
         intent.putExtra(getApplicationContext().getString(R.string.extras_mobile_number), NSNNumber);
