@@ -13,7 +13,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
 
@@ -159,7 +158,7 @@ public final class DeviceAlarmController {
         alarmIntent.setAction(Constants.ACTTION_ALARMRECEIVER);
         alarmIntent.putExtra(Constants.EXTRA_REQUESTCODE, 0);
         alarmIntent.putExtra(Constants.EXTRA_UID, setId);
-        alarmIntent.putExtra(Constants.EXTR_SNOOZE_ACTIVATION, true);
+        alarmIntent.putExtra(Constants.EXTRA_SNOOZE_ACTIVATION, true);
 
         PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(context,
                 0, alarmIntent,

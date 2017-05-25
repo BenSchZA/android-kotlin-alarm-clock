@@ -5,34 +5,34 @@
 
 package com.roostermornings.android.receiver;
 
+import android.accounts.Account;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Vibrator;
-import android.preference.PreferenceManager;
 import android.support.v4.content.WakefulBroadcastReceiver;
 
 import com.roostermornings.android.BaseApplication;
-import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
-import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
-import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
+import com.roostermornings.android.sync.DownloadSyncAdapter;
 import com.roostermornings.android.util.Constants;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import static android.content.Context.VIBRATOR_SERVICE;
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static com.facebook.FacebookSdk.getApplicationContext;
+import static com.roostermornings.android.util.Constants.AUTHORITY;
 
 public class DeviceAlarmReceiver extends WakefulBroadcastReceiver {
 
     @Inject DeviceAlarmController alarmController;
     @Inject DeviceAlarmTableManager alarmTableManager;
     @Inject @Named("default") SharedPreferences sharedPreferences;
+    @Inject Account mAccount;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -42,7 +42,7 @@ public class DeviceAlarmReceiver extends WakefulBroadcastReceiver {
         //Check if vibrator enabled in user settings
         setVibrate(context);
 
-        if(intent.getBooleanExtra(Constants.EXTR_SNOOZE_ACTIVATION, false)) {
+        if(intent.getBooleanExtra(Constants.EXTRA_SNOOZE_ACTIVATION, false)) {
             //Activate snooze alarm
             Intent broadcastIntent = new Intent(Constants.ACTION_SNOOZE_ACTIVATION);
             broadcastIntent.putExtra(Constants.EXTRA_ALARMID, intent.getStringExtra(Constants.EXTRA_UID));
@@ -68,7 +68,8 @@ public class DeviceAlarmReceiver extends WakefulBroadcastReceiver {
             //make record that this alarm has been changed, refresh as necessary
             alarmTableManager.setAlarmChanged(intent.getIntExtra(Constants.EXTRA_REQUESTCODE, 0));
             alarmController.refreshAlarms(alarmTableManager.selectChanged());
-
+            //Download any social or channel audio files
+            ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
         } else {
             //Set alarm to disabled if fired and not recurring - once all alarms in set are disabled, then toggle enabled in GUI
             alarmTableManager.setAlarmEnabled(intent.getIntExtra(Constants.EXTRA_REQUESTCODE, 0), false);

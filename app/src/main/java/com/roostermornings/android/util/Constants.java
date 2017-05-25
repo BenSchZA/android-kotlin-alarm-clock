@@ -60,7 +60,7 @@ public class Constants {
     public static final String EXTRA_VIBRATE = "extra_vibrate";
     public static final String EXTRA_TONE = "extra_tone";
     public static final String EXTRA_UID = "extra_uid";
-    public static final String EXTR_SNOOZE_ACTIVATION = "extra_snooze_activation";
+    public static final String EXTRA_SNOOZE_ACTIVATION = "extra_snooze_activation";
 
     //DeviceAlarmTable constants
     public static final String ALARM_CHANNEL_DOWNLOAD_FAILED = "failed";
@@ -69,9 +69,7 @@ public class Constants {
     public static final String DEVICE_ALARM_RECEIVER_WAKEFUL_INTENT = "DeviceAlarmReceiver.WAKEFUL_INTENT";
 
     //Background task service intent actions
-    public static final String ACTION_BACKGROUNDDOWNLOAD = "service.action.BACKGROUND_DOWNLOAD";
     public static final String ACTION_DAILYTASK = "service.action.DAILY_TASK";
-    public static final String ACTION_MINUTETASK = "service.action.MINUTETASK";
 
     //AudioService intent actions
     public final static String ACTION_ALARMDISPLAY = "rooster.update.ALARMDISPLAY";

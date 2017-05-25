@@ -29,11 +29,13 @@ import android.widget.TextView;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.Theme;
+import com.gelitenight.waveview.library.WaveView;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.analytics.FA;
 import com.roostermornings.android.domain.Alarm;
+import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.util.Constants;
@@ -47,11 +49,12 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+
 public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapter.ViewHolder> {
     private ArrayList<Alarm> mDataset;
     private Activity mActivity;
     private BroadcastReceiver receiver;
-    private DeviceAlarmTableManager deviceAlarmTableManager;
     private Context context;
 
     // Provide a reference to the views for each data item
@@ -104,12 +107,12 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
 
     }
 
-
     // Create new views (invoked by the layout manager)
     @Override
     public MyAlarmsListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                              int viewType) {
         context = parent.getContext();
+
         // create a new view
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.cardview_my_alarms, parent, false);
         // set the view's size, margins, paddings and layout parameters
@@ -123,6 +126,7 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         final Alarm alarm = mDataset.get(position);
+
         try {
             holder.txtAlarmTime.setText(RoosterUtils.setAlarmTimeFromHourAndMinute(alarm));
             holder.txtAlarmDays.setText(RoosterUtils.getAlarmDays(alarm));

@@ -45,9 +45,9 @@ public abstract class FA {
             }
         }
         //First play of rooster
-        public abstract class channel_unique_play {
+        public abstract class channel_unique_play extends channel_selected {
         }
-        public abstract class channel_play {
+        public abstract class channel_play extends channel_selected {
         }
         //First play of rooster
         public abstract class social_rooster_unique_play {
@@ -110,7 +110,6 @@ public abstract class FA {
             public void run() {
 
                 Bundle bundle = new Bundle();
-
                 String eventString;
 
                 if (Event == null) {
@@ -123,16 +122,15 @@ public abstract class FA {
 
                 if (Param == null || entry == null) {
                     firebaseAnalytics.logEvent(eventString, null);
-                } else if (entry.getClass().isInstance(String.class)) {
+                } else if (entry instanceof String) {
                     bundle.putString(Param, (String) entry);
                     firebaseAnalytics.logEvent(eventString, bundle);
-                } else if (entry.getClass().isInstance(Integer.class)) {
+                } else if (entry instanceof Integer) {
                     bundle.putInt(Param, (Integer) entry);
                     firebaseAnalytics.logEvent(eventString, bundle);
-                } else if (entry.getClass().isInstance(Boolean.class)) {
+                } else if (entry instanceof Boolean) {
                     bundle.putBoolean(Param, (Boolean) entry);
                     firebaseAnalytics.logEvent(eventString, bundle);
-                } else {
                 }
             }
         }.run();

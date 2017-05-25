@@ -39,6 +39,7 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
+import com.roostermornings.android.firebase.FirebaseNetwork;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.MyContactsController;
 import com.roostermornings.android.util.Toaster;
@@ -147,34 +148,13 @@ public class ProfileActivity extends BaseActivity {
     @OnTextChanged(R.id.settings_profile_name)
     public void onTextChangedProfileName() {
         String profileNameText = profileName.getText().toString();
-
-        DatabaseReference profileReference = FirebaseDatabase.getInstance().getReference()
-                .child("users").child(mCurrentUser.getUid());
-
-        Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put("user_name", profileNameText);
-
-        profileReference.updateChildren(childUpdates);
+        FirebaseNetwork.updateProfileUserName(profileNameText);
     }
 
     @OnTextChanged(R.id.settings_profile_mobile_number)
     public void onTextChangedProfileMobileNumber() {
         String profileMobileNumberText = profileMobileNumber.getText().toString();
-        MyContactsController myContactsController = new MyContactsController(this);
-        String NSNNumber;
-        if(profileMobileNumberText.length() > 0) {
-            NSNNumber = myContactsController.processContactCountry(profileMobileNumberText);
-        } else{
-            NSNNumber = profileMobileNumberText;
-        }
-
-        DatabaseReference profileReference = FirebaseDatabase.getInstance().getReference()
-                .child("users").child(mCurrentUser.getUid());
-
-        Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put("cell_number", NSNNumber);
-
-        profileReference.updateChildren(childUpdates);
+        FirebaseNetwork.updateProfileCellNumber(this, profileMobileNumberText);
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
@@ -278,7 +258,7 @@ public class ProfileActivity extends BaseActivity {
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                         // Get a URL to the uploaded content
                         Uri firebaseStorageURL = taskSnapshot.getDownloadUrl();
-                        updateProfilePictureEntry(firebaseStorageURL);
+                        FirebaseNetwork.updateProfileProfilePic(firebaseStorageURL);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -288,16 +268,6 @@ public class ProfileActivity extends BaseActivity {
                         Toaster.makeToast(getApplicationContext(), "Error uploading.", Toast.LENGTH_LONG).checkTastyToast();
                     }
                 });
-    }
-
-    private void updateProfilePictureEntry(Uri url) {
-        DatabaseReference profileReference = FirebaseDatabase.getInstance().getReference()
-                .child("users").child(mCurrentUser.getUid());
-
-        Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put("profile_pic", url.toString());
-
-        profileReference.updateChildren(childUpdates);
     }
 
     protected void setProfilePicFromURI(Uri uri) {
