@@ -364,10 +364,6 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
     }
 
     public void requestPermissionIgnoreBatteryOptimization(Context context) {
-//        String packageName = getPackageName();
-//        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-//        RoosterUtils.hasM() && pm.isIgnoringBatteryOptimizations(packageName) &&
-
         if(!sharedPreferences.getBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false)
                 && (Build.BRAND.toLowerCase().contains("huawei")
                 || Build.BRAND.toLowerCase().contains("sony"))) {
@@ -384,47 +380,59 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
                     intent.setComponent(null);
                     intent.setAction(android.provider.Settings.ACTION_SETTINGS);
                 }
-            } else if(Build.BRAND.toLowerCase().contains("sony")) {
-                settingsNavigationString = "Try: Go to 'Battery'>Settings menu>'Battery optimization'>Select Rooster app checkbox";
-            }
 
-            //Build content string
-            String dialogContent = getResources().getString(R.string.dialog_background_settings_1)
-                    + Build.BRAND + getResources().getString(R.string.dialog_background_settings_2)
-                    + settingsNavigationString;
+                //Build content string
+                String dialogContent = getResources().getString(R.string.dialog_background_settings_1)
+                        + Build.BRAND + getResources().getString(R.string.dialog_background_settings_2)
+                        + settingsNavigationString;
 
-            new MaterialDialog.Builder(context)
-                    .theme(Theme.LIGHT)
-                    .content(dialogContent)
-                    .positiveText(R.string.take_to_settings)
-                    .negativeText(R.string.later)
-                    .onPositive(new MaterialDialog.SingleButtonCallback() {
-                        @Override
-                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            if(Build.BRAND.toLowerCase().contains("huawei")) {
+                new MaterialDialog.Builder(context)
+                        .theme(Theme.LIGHT)
+                        .content(dialogContent)
+                        .positiveText(R.string.take_to_settings)
+                        .negativeText(R.string.later)
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                 SharedPreferences.Editor editor = sharedPreferences.edit();
                                 editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, true);
                                 editor.apply();
                                 startActivityForResult(intent, 0);
-                            } else {
-                                SharedPreferences.Editor editor = sharedPreferences.edit();
-                                editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, true);
-                                editor.apply();
-                                startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), 0);
                             }
-                        }
-                    })
-                    .onNegative(new MaterialDialog.SingleButtonCallback() {
-                        @Override
-                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false);
-                            editor.apply();
-                            startHomeActivity();
-                        }
-                    })
-                    .canceledOnTouchOutside(false)
-                    .show();
+                        })
+                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false);
+                                editor.apply();
+                                startHomeActivity();
+                            }
+                        })
+                        .canceledOnTouchOutside(false)
+                        .show();
+            } else if(Build.BRAND.toLowerCase().contains("sony")) {
+                settingsNavigationString = "Try: Go to 'Battery'>Settings menu>'Battery optimization'>Select Rooster app checkbox";
+
+                //Build content string
+                String dialogContent = getResources().getString(R.string.dialog_background_settings_sony_1)
+                        + Build.BRAND + getResources().getString(R.string.dialog_background_settings_sony_2);
+
+                new MaterialDialog.Builder(context)
+                        .theme(Theme.LIGHT)
+                        .content(dialogContent)
+                        .positiveText("Got it")
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                                    editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, true);
+                                    editor.apply();
+                            }
+                        })
+                        .canceledOnTouchOutside(false)
+                        .show();
+            }
         }
     }
 
