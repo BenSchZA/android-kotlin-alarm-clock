@@ -19,6 +19,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -44,9 +45,11 @@ import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.JSONPersistence;
 import com.roostermornings.android.util.RoosterUtils;
+import com.roostermornings.android.util.StrUtils;
 import com.roostermornings.android.util.Toaster;
 import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Calendar;
 import java.util.SortedMap;
@@ -375,8 +378,10 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
             //Could use channelRooster.getUpload_date(), but then can't use for purging files
             deviceAudioQueueItem.setDate_created(System.currentTimeMillis());
 
+            Crashlytics.log("Channel pre-download UID: " + channelRooster.getChannel_uid());
+
             //Pre-cache image to display on alarm screen, in case no internet connection
-            if(!channelRooster.getPhoto().isEmpty()) Picasso.with(getApplicationContext()).load(channelRooster.getPhoto()).fetch();
+            if(StrUtils.notNullOrEmpty(channelRooster.getPhoto())) Picasso.with(getApplicationContext()).load(channelRooster.getPhoto()).fetch();
 
             //store in local SQLLite database and check if successful
             if(audioTableManager.insertChannelAudioFile(deviceAudioQueueItem)) {
@@ -390,6 +395,13 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
                             outputStream = context.openFileOutput(audioFileUniqueName, Context.MODE_PRIVATE);
                             outputStream.write(bytes);
                             outputStream.close();
+
+                            //AudioService report logging
+                            File file = new File(context.getFilesDir() + "/" + audioFileUniqueName);
+                            Crashlytics.log("Rooster file path: " + file.getPath());
+                            Crashlytics.log("Rooster is file?: " + String.valueOf(file.isFile()));
+                            Crashlytics.log("Rooster channel source: " + channelRooster.getName());
+                            Crashlytics.log("Rooster file size (kb): " + String.valueOf(file.length()/1024));
 
                             Toaster.makeToast(context, "Successfully downloaded", Toast.LENGTH_SHORT);
 

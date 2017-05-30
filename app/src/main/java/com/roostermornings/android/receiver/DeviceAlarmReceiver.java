@@ -32,7 +32,6 @@ public class DeviceAlarmReceiver extends WakefulBroadcastReceiver {
     @Inject DeviceAlarmController alarmController;
     @Inject DeviceAlarmTableManager alarmTableManager;
     @Inject @Named("default") SharedPreferences sharedPreferences;
-    @Inject Account mAccount;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -68,8 +67,6 @@ public class DeviceAlarmReceiver extends WakefulBroadcastReceiver {
             //make record that this alarm has been changed, refresh as necessary
             alarmTableManager.setAlarmChanged(intent.getIntExtra(Constants.EXTRA_REQUESTCODE, 0));
             alarmController.refreshAlarms(alarmTableManager.selectChanged());
-            //Download any social or channel audio files
-            ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
         } else {
             //Set alarm to disabled if fired and not recurring - once all alarms in set are disabled, then toggle enabled in GUI
             alarmTableManager.setAlarmEnabled(intent.getIntExtra(Constants.EXTRA_REQUESTCODE, 0), false);
