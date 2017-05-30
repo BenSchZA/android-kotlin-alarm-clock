@@ -5,8 +5,10 @@
 
 package com.roostermornings.android.activity;
 
+import android.accounts.Account;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -50,6 +52,7 @@ import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
+import com.roostermornings.android.sync.DownloadSyncAdapter;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.Toaster;
 
@@ -62,6 +65,7 @@ import butterknife.OnClick;
 import dagger.Provides;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
+import static com.roostermornings.android.util.Constants.AUTHORITY;
 
 public class MyAlarmsFragmentActivity extends BaseActivity {
 
@@ -86,6 +90,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     @Inject AudioTableManager audioTableManager;
     @Inject BaseApplication baseApplication;
     @Inject FirebaseUser firebaseUser;
+    @Inject Account mAccount;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -104,6 +109,9 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         //End running audioservice
         Intent broadcastIntent = new Intent(Constants.ACTION_END_AUDIO_SERVICE);
         sendBroadcast(broadcastIntent);
+
+        //Download any social or channel audio files
+        ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
 
         //UI setup thread
         new Thread() {
