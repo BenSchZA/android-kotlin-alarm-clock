@@ -29,8 +29,11 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.core.CrashlyticsCore;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.crash.FirebaseCrash;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -157,6 +160,18 @@ public class AudioService extends Service {
         BaseApplication baseApplication = (BaseApplication) getApplication();
         baseApplication.getRoosterApplicationComponent().inject(this);
 
+        //Catch all uncaught exceptions
+        Thread.setDefaultUncaughtExceptionHandler(
+                new Thread.UncaughtExceptionHandler() {
+                    @Override
+                    public void uncaughtException(Thread t, Throwable e) {
+                        e.printStackTrace();
+                        FirebaseCrash.report(e);
+                        Crashlytics.logException(e);
+                    }
+                }
+        );
+
         //Register broadcast receivers for external access
         registerEndAudioServiceBroadcastReceiver();
         registerSnoozeAudioServiceBroadcastReceiver();
@@ -202,6 +217,9 @@ public class AudioService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+        if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
+
         //Only attempt to start alarm once, in case of multiple conflicting alarms
         if (!mRunning) {
             mRunning = true;
@@ -209,9 +227,10 @@ public class AudioService extends Service {
             if(intent != null) wakefulIntent = intent.getParcelableExtra(Constants.DEVICE_ALARM_RECEIVER_WAKEFUL_INTENT);
             mThis.intent = intent;
 
+            //If no audio playing already, start audio content, or default alarm tone
             try {
                 if (!mediaPlayerRooster.isPlaying() && !mediaPlayerDefault.isPlaying() && !streamMediaPlayer.isPlaying()) {
-                    if(StrUtils.notNullOrEmpty(intent.getStringExtra(Constants.EXTRA_ALARMID))) {
+                    if(intent != null && StrUtils.notNullOrEmpty(intent.getStringExtra(Constants.EXTRA_ALARMID))) {
                         startAlarmContent(intent.getStringExtra(Constants.EXTRA_ALARMID));
                     } else {
                         startDefaultAlarmTone(true);
@@ -227,6 +246,9 @@ public class AudioService extends Service {
     }
 
     public void updateAlarmUI(Boolean defaultAlarm) {
+        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+        if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
+
         //Send broadcast message to notify all receivers of new data, in this case UI data
         Intent intent = new Intent(Constants.ACTION_ALARMDISPLAY);
         if(!defaultAlarm) {
@@ -241,6 +263,8 @@ public class AudioService extends Service {
     }
 
     private void startAlarmContent(String alarmUid) {
+        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+        if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
 
         //Check if audio already playing
         try {
@@ -261,7 +285,7 @@ public class AudioService extends Service {
         //Check if relevant alarm data exists
         if(StrUtils.notNullOrEmpty(alarmUid) && deviceAlarmTableManager.getAlarmSet(alarmUid) != null) {
             alarm = deviceAlarmTableManager.getAlarmSet(alarmUid).get(0);
-            this.alarmChannelUid = deviceAlarmTableManager.getAlarmSet(alarmUid).get(0).getChannel();
+            this.alarmChannelUid = alarm.getChannel();
             this.alarmUid = alarmUid;
         } else {
             startDefaultAlarmTone(true);
@@ -300,6 +324,9 @@ public class AudioService extends Service {
     }
 
     private void compileAudioItemContent() {
+        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+        if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
+
         //If no content exists to add to audioItems, then return now
         if(mThis.socialAudioItems.isEmpty() && mThis.channelAudioItems.isEmpty()) {
             startDefaultAlarmTone(false);
@@ -340,6 +367,9 @@ public class AudioService extends Service {
     }
 
     private void attemptContentUriRetrieval(final DeviceAlarm deviceAlarm) {
+        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+        if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
+
         try {
             //Check if channel has a valid ID, else next pending alarm has no channel
             final String channelId = deviceAlarm.getChannel();
@@ -439,6 +469,9 @@ public class AudioService extends Service {
     }
 
     private void streamChannelContent(final String url) {
+        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+        if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
+
         foregroundNotification("Alarm content streaming");
 
         //Check that URL is notNullOrEmpty
@@ -501,6 +534,8 @@ public class AudioService extends Service {
     }
 
     private void playAlarmRoosters() {
+        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+        if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
 
         //Show the number of social and channel roosters combined
         this.alarmCount = audioItems.size();
@@ -530,6 +565,9 @@ public class AudioService extends Service {
     }
 
     private void playRooster(final DeviceAudioQueueItem audioItem) {
+        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+        if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
+
         foregroundNotification("Alarm content playing");
 
         mThis.audioItem = audioItem;
@@ -561,6 +599,13 @@ public class AudioService extends Service {
         try {
             mediaPlayerRooster.reset();
             mediaPlayerRooster.setDataSource(file.getPath());
+
+            //AudioService report logging
+            Crashlytics.log("Rooster file path: " + file.getPath());
+            Crashlytics.log("Rooster is file?: " + String.valueOf(file.isFile()));
+            Crashlytics.log("Rooster type: " + String.valueOf(audioItem.getType()));
+            if(audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL && StrUtils.notNullOrEmpty(alarm.getChannel())) Crashlytics.log("Rooster channel source: " + alarm.getChannel());
+            Crashlytics.log("Rooster file size (kb): " + String.valueOf(file.length()/1024));
 
             mediaPlayerRooster.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
@@ -700,6 +745,9 @@ public class AudioService extends Service {
     }
 
     public void dismissAlarm(ServiceConnection conn) {
+        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+        if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
+
         try {
             FA.Log(FA.Event.alarm_dismissed.class,
                     FA.Event.alarm_dismissed.Param.alarm_activation_cycle_count,
@@ -718,6 +766,11 @@ public class AudioService extends Service {
     }
 
     public void endService(ServiceConnection conn) {
+        //AudioService report logging
+        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+        if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
+        Crashlytics.logException(new Throwable("AudioService Report"));
+
         processListenedChannels();
         //Delete record of all listened audio files
         for (DeviceAudioQueueItem audioItem :
@@ -796,6 +849,9 @@ public class AudioService extends Service {
     }
 
     private void notifyActivityTimesUp() {
+        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+        if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
+
         //Send broadcast message to notify receiver of end of alarm to clear window hold
         Intent intent = new Intent(Constants.ACTION_ALARMTIMESUP);
         sendBroadcast(intent);
@@ -827,6 +883,9 @@ public class AudioService extends Service {
     }
 
     public void snoozeAudioState(){
+        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+        if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
+
         alarmFinishTimerTask.cancel();
 
         deviceAlarmController.snoozeAlarm(alarmUid, false);
@@ -873,10 +932,14 @@ public class AudioService extends Service {
     }
 
     private void startDefaultAlarmTone(final Boolean failure) {
+        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+        if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
+
         try {
             //Check that another alarm isn't already playing
             if (mediaPlayerRooster != null && mediaPlayerRooster.isPlaying()) return;
             if (mediaPlayerDefault != null && mediaPlayerDefault.isPlaying()) return;
+            if (streamMediaPlayer != null && streamMediaPlayer.isPlaying()) return;
             foregroundNotification("Alarm ringtone playing");
 
             updateAlarmUI(true);
@@ -910,7 +973,6 @@ public class AudioService extends Service {
                 mediaPlayerDefault.setAudioStreamType(AudioManager.STREAM_ALARM);
                 mediaPlayerDefault.setDataSource(this, notification);
                 mediaPlayerDefault.setLooping(true);
-                mediaPlayerDefault.prepareAsync();
 
                 mediaPlayerDefault.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                     @Override
@@ -932,6 +994,9 @@ public class AudioService extends Service {
                     }
                 });
 
+                //Must be called after listeners created
+                mediaPlayerDefault.prepareAsync();
+
             } catch (Exception e) {
                 e.printStackTrace();
                 RingtoneManager.getRingtone(getBaseContext(),
@@ -950,6 +1015,9 @@ public class AudioService extends Service {
     }
 
     private void logDefaultRingtoneState(boolean failure) {
+        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+        if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method + " Failure:" + String.valueOf(true));
+
         if (!socialAudioItems.isEmpty() || !channelAudioItems.isEmpty()) {
             FA.Log(FA.Event.alarm_activated.class, FA.Event.default_alarm_play.Param.attempt_to_play, true);
         } else {
