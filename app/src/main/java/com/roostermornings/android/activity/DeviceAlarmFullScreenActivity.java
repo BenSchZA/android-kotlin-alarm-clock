@@ -101,18 +101,6 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         initialize(R.layout.activity_device_alarm_full_screen);
         inject(((BaseApplication)getApplication()).getRoosterApplicationComponent());
 
-        //This activity is critical, so must not crash badly
-//        Thread.setDefaultUncaughtExceptionHandler(
-//                new Thread.UncaughtExceptionHandler() {
-//                    @Override
-//                    public void uncaughtException(Thread t, Throwable e) {
-//                        e.printStackTrace();
-//                        FirebaseCrash.report(e);
-//                        Crashlytics.logException(e);
-//                    }
-//                }
-//        );
-
         //Used to ensure alarm shows over lock-screen
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                 +WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
