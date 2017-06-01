@@ -129,8 +129,21 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     }
 
     @Override
+    protected void onUserLeaveHint()
+    {
+        //Detect when user elects to leave activity (home button, etc.)
+        super.onUserLeaveHint();
+
+        if(mAudioService!=null) mAudioService.snoozeAudioState();
+        if(mBound) unbindService(mAudioServiceConnection);
+        mBound = false;
+        finish();
+        startActivity(new Intent(this, MyAlarmsFragmentActivity.class));
+    }
+
+    @Override
     public void onBackPressed() {
-        if(mAudioService!=null) mAudioService.dismissAlarm(mAudioServiceConnection);
+        if(mAudioService!=null) mAudioService.snoozeAudioState();
         if(mBound) unbindService(mAudioServiceConnection);
         mBound = false;
         finish();
@@ -143,11 +156,12 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         if(mBound) unbindService(mAudioServiceConnection);
         mBound = false;
         finish();
+        startActivity(new Intent(this, MyAlarmsFragmentActivity.class));
     }
 
     @OnClick(R.id.alarm_dismiss)
     protected void onAlarmDismissButtonClicked() {
-        if(mAudioService!=null) mAudioService.dismissAlarm(mAudioServiceConnection);
+        if(mAudioService!=null) mAudioService.dismissAlarm();
         if(mBound) unbindService(mAudioServiceConnection);
         mBound = false;
         finish();

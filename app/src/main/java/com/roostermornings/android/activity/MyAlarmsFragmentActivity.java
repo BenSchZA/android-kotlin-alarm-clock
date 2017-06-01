@@ -54,6 +54,7 @@ import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sync.DownloadSyncAdapter;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.StrUtils;
 import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
@@ -105,10 +106,6 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
         //Final context to be used in threads
         final Context context = this;
-
-        //End running audioservice
-        Intent broadcastIntent = new Intent(Constants.ACTION_END_AUDIO_SERVICE);
-        sendBroadcast(broadcastIntent);
 
         //Download any social or channel audio files
         ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
@@ -167,7 +164,9 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                 //Clear snooze if action
                 if(Constants.ACTION_CANCEL_SNOOZE.equals(getIntent().getAction())) {
                     try {
-                        deviceAlarmController.snoozeAlarm(extras.getString(Constants.EXTRA_ALARMID), true);
+                        if(extras != null && StrUtils.notNullOrEmpty(extras.getString(Constants.EXTRA_ALARMID))) {
+                            deviceAlarmController.snoozeAlarm(extras.getString(Constants.EXTRA_ALARMID), true);
+                        }
                     } catch(NullPointerException e) {
                         e.printStackTrace();
                     }

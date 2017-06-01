@@ -366,7 +366,8 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
     public void requestPermissionIgnoreBatteryOptimization(Context context) {
         if(!sharedPreferences.getBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false)
                 && (Build.BRAND.toLowerCase().contains("huawei")
-                || Build.BRAND.toLowerCase().contains("sony"))) {
+                || Build.BRAND.toLowerCase().contains("sony")
+                || Build.BRAND.toLowerCase().contains("xiaomi"))) {
             Log.d("Brand: ", Build.BRAND);
 
             //Set instructions and settings intent
@@ -428,6 +429,38 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
                                     SharedPreferences.Editor editor = sharedPreferences.edit();
                                     editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, true);
                                     editor.apply();
+                            }
+                        })
+                        .canceledOnTouchOutside(false)
+                        .show();
+            } else if(Build.BRAND.toLowerCase().contains("xiaomi")) {
+                intent.setAction(android.provider.Settings.ACTION_SETTINGS);
+
+                //Build content string
+                String dialogContent = getResources().getString(R.string.dialog_background_settings_xiaomi_1)
+                        + Build.BRAND + getResources().getString(R.string.dialog_background_settings_xiaomi_2);
+
+                new MaterialDialog.Builder(context)
+                        .theme(Theme.LIGHT)
+                        .content(dialogContent)
+                        .positiveText(R.string.take_to_settings)
+                        .negativeText(R.string.later)
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, true);
+                                editor.apply();
+                                startActivityForResult(intent, 0);
+                            }
+                        })
+                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false);
+                                editor.apply();
+                                startHomeActivity();
                             }
                         })
                         .canceledOnTouchOutside(false)
