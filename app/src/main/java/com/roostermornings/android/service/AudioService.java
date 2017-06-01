@@ -148,7 +148,11 @@ public class AudioService extends Service {
 
     @Override
     public void onDestroy() {
-        endService(null);
+        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+        if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method + ": From destroy.");
+
+        finishTransaction();
+
         super.onDestroy();
     }
 
@@ -186,7 +190,10 @@ public class AudioService extends Service {
         endAudioServiceBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                endService(null);
+                String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+                if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method + ": From receiver.");
+
+                endService();
                 //Start Rooster to show on wakeup
                 Intent homeIntent = new Intent(mThis, MyAlarmsFragmentActivity.class);
                 homeIntent.setFlags(FLAG_ACTIVITY_NEW_TASK);
@@ -229,7 +236,7 @@ public class AudioService extends Service {
 
             //If no audio playing already, start audio content, or default alarm tone
             try {
-                if (!mediaPlayerRooster.isPlaying() && !mediaPlayerDefault.isPlaying() && !streamMediaPlayer.isPlaying()) {
+                if (!isAudioPlaying()) {
                     if(intent != null && StrUtils.notNullOrEmpty(intent.getStringExtra(Constants.EXTRA_ALARMID))) {
                         startAlarmContent(intent.getStringExtra(Constants.EXTRA_ALARMID));
                     } else {
@@ -262,19 +269,31 @@ public class AudioService extends Service {
         sendBroadcast(intent);
     }
 
+    private Boolean isAudioPlaying() {
+        try {
+            if(mediaPlayerRooster.isPlaying()) return true;
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+        }
+        try {
+            if(mediaPlayerDefault.isPlaying()) return true;
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+        }
+        try {
+            if(streamMediaPlayer.isPlaying()) return true;
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     private void startAlarmContent(String alarmUid) {
         String method = Thread.currentThread().getStackTrace()[2].getMethodName();
         if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
 
         //Check if audio already playing
-        try {
-            if (mediaPlayerRooster.isPlaying() || mediaPlayerDefault.isPlaying() || streamMediaPlayer.isPlaying()) {
-                return;
-            }
-        } catch(IllegalStateException e) {
-            e.printStackTrace();
-            startDefaultAlarmTone(true);
-        }
+        if(isAudioPlaying()) return;
 
         //Check if old content exists
         if(audioItems.size() > 0) {
@@ -289,6 +308,7 @@ public class AudioService extends Service {
             this.alarmUid = alarmUid;
         } else {
             startDefaultAlarmTone(true);
+            return;
         }
 
         //Check if Social and Channel alarm content exists, else startDefaultAlarmTone
@@ -426,6 +446,7 @@ public class AudioService extends Service {
                                     channelIterationMap.put(channelRooster.getRooster_cycle_iteration(), channelRooster);
                                 } else if (channelRooster.isActive()) {
                                     streamChannelContent(channelRooster.getAudio_file_url());
+                                    return;
                                 }
                             }
 
@@ -479,6 +500,9 @@ public class AudioService extends Service {
             startDefaultAlarmTone(true);
             return;
         }
+
+        //Check if audio already playing
+        if(isAudioPlaying()) return;
 
         StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
         final StorageReference audioFileRef = mStorageRef.getStorage().getReferenceFromUrl(url);
@@ -536,6 +560,9 @@ public class AudioService extends Service {
     private void playAlarmRoosters() {
         String method = Thread.currentThread().getStackTrace()[2].getMethodName();
         if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
+
+        //Check if audio already playing
+        if(isAudioPlaying()) return;
 
         //Show the number of social and channel roosters combined
         this.alarmCount = audioItems.size();
@@ -744,7 +771,7 @@ public class AudioService extends Service {
         }
     }
 
-    public void dismissAlarm(ServiceConnection conn) {
+    public void dismissAlarm() {
         String method = Thread.currentThread().getStackTrace()[2].getMethodName();
         if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
 
@@ -762,10 +789,10 @@ public class AudioService extends Service {
             e.printStackTrace();
         }
 
-        endService(conn);
+        endService();
     }
 
-    public void endService(ServiceConnection conn) {
+    private void finishTransaction() {
         //AudioService report logging
         String method = Thread.currentThread().getStackTrace()[2].getMethodName();
         if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
@@ -798,22 +825,6 @@ public class AudioService extends Service {
             }
         }
 
-        //delete record from arraylist
-        audioItems.clear();
-        //clear variables
-        playDuration = 0;
-        alarmCount = 0;
-        alarmPosition = 0;
-        currentPositionRooster = 0;
-        //ensure no alarms still playing...
-        stopVibrate();
-        stopAlarmAudio();
-        //unbind from and kill service
-        stopForeground(true);
-        if (wakefulIntent != null) {
-            //Complete DeviceAlarmReceiver wakeful intent
-            DeviceAlarmReceiver.completeWakefulIntent(wakefulIntent);
-        }
         //unregister all broadcastreceivers
         try {
             if (endAudioServiceBroadcastReceiver != null)
@@ -827,12 +838,33 @@ public class AudioService extends Service {
         } catch(IllegalArgumentException e) {
             e.printStackTrace();
         }
-        //unbind service from activation activity
-        try {
-            this.unbindService(conn);
-        } catch(IllegalArgumentException e){
-            e.printStackTrace();
+
+        //delete record from arraylist
+        audioItems.clear();
+        //clear variables
+        playDuration = 0;
+        alarmCount = 0;
+        alarmPosition = 0;
+        currentPositionRooster = 0;
+    }
+
+    public void endService() {
+        //https://stackoverflow.com/questions/17146822/when-is-a-started-and-bound-service-destroyed
+
+        //AudioService report logging
+        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+        if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
+
+        //ensure no alarms still playing...
+        stopVibrate();
+        stopAlarmAudio();
+
+        stopForeground(true);
+        if (wakefulIntent != null) {
+            //Complete DeviceAlarmReceiver wakeful intent
+            DeviceAlarmReceiver.completeWakefulIntent(wakefulIntent);
         }
+
         //Stop service
         this.stopSelf();
     }
@@ -855,16 +887,7 @@ public class AudioService extends Service {
         //Send broadcast message to notify receiver of end of alarm to clear window hold
         Intent intent = new Intent(Constants.ACTION_ALARMTIMESUP);
         sendBroadcast(intent);
-        dismissAlarm(null);
-    }
-
-    private void pauseRooster() {
-        mediaPlayerRooster.pause();
-        currentPositionRooster = mediaPlayerRooster.getCurrentPosition();
-    }
-
-    private void pauseDefaultAlarmTone() {
-        mediaPlayerDefault.stop();
+        dismissAlarm();
     }
 
     private void startVibrate() {
@@ -895,14 +918,28 @@ public class AudioService extends Service {
 
         snoozeNotification("Alarm snoozed " + strSnoozeTime + " minutes - touch to dismiss");
         try {
-            if (mediaPlayerRooster != null && mediaPlayerRooster.isPlaying()) pauseRooster();
+            if (mediaPlayerRooster != null && mediaPlayerRooster.isPlaying()) {
+                mediaPlayerRooster.pause();
+                currentPositionRooster = mediaPlayerRooster.getCurrentPosition();
+            }
         } catch(Exception e){
             e.printStackTrace();
             stopAlarmAudio();
         }
 
         try {
-            if (mediaPlayerDefault != null && mediaPlayerDefault.isPlaying()) pauseDefaultAlarmTone();
+            if (streamMediaPlayer != null && streamMediaPlayer.isPlaying()) {
+                streamMediaPlayer.stop();
+            }
+        } catch(Exception e){
+            e.printStackTrace();
+            stopAlarmAudio();
+        }
+
+        try {
+            if (mediaPlayerDefault != null && mediaPlayerDefault.isPlaying()) {
+                mediaPlayerDefault.stop();
+            }
         } catch(Exception e){
             e.printStackTrace();
             stopAlarmAudio();
@@ -936,10 +973,9 @@ public class AudioService extends Service {
         if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
 
         try {
-            //Check that another alarm isn't already playing
-            if (mediaPlayerRooster != null && mediaPlayerRooster.isPlaying()) return;
-            if (mediaPlayerDefault != null && mediaPlayerDefault.isPlaying()) return;
-            if (streamMediaPlayer != null && streamMediaPlayer.isPlaying()) return;
+            //Check if audio already playing
+            if(isAudioPlaying()) return;
+
             foregroundNotification("Alarm ringtone playing");
 
             updateAlarmUI(true);
@@ -1116,6 +1152,14 @@ public class AudioService extends Service {
                 mediaPlayerRooster.stop();
                 mediaPlayerRooster.release();
                 currentPositionRooster = 0;
+            }
+        } catch(IllegalStateException e) {
+            e.printStackTrace();
+        }
+        try {
+            if (streamMediaPlayer != null && streamMediaPlayer.isPlaying()) {
+                streamMediaPlayer.stop();
+                streamMediaPlayer.release();
             }
         } catch(IllegalStateException e) {
             e.printStackTrace();
