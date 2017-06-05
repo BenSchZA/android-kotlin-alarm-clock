@@ -238,9 +238,12 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
                         if(channel.isNew_alarms_start_at_first_iteration()) {
                             iteration = new JSONPersistence(getApplicationContext()).getStoryIteration(channelId);
                         } else {
-                            Calendar calendar = Calendar.getInstance();
+                            Calendar currentCalendar = Calendar.getInstance();
+                            Calendar nextPendingCalendar = Calendar.getInstance();
+                            nextPendingCalendar.setTimeInMillis(deviceAlarm.getMillis());
+
                             tempIteration = channel.getCurrent_rooster_cycle_iteration() > 0 ? channel.getCurrent_rooster_cycle_iteration() : 1;
-                            Integer daysUntilAlarm = (int)((deviceAlarm.getMillis() - calendar.getTimeInMillis()) / (1000*60*60*24));
+                            Integer daysUntilAlarm = nextPendingCalendar.get(Calendar.DAY_OF_MONTH) - currentCalendar.get(Calendar.DAY_OF_MONTH);
                             iteration = daysUntilAlarm > 0 ? tempIteration + daysUntilAlarm : tempIteration;
                         }
 
