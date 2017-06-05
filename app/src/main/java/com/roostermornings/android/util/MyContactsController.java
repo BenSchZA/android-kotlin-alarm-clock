@@ -115,13 +115,13 @@ public class MyContactsController {
                 && countryCodes != null
                 && contactNumber.charAt(0) == '+') {
 
-            if (inJSONNode(countryCodes, "kThreeDigitCodes", contactNumber.substring(1, 4))) {
+            if (contactNumber.length() > 4 && inJSONNode(countryCodes, "kThreeDigitCodes", contactNumber.substring(1, 4))) {
                 if (contactNumber.charAt(4) == 0) NSNNumber = contactNumber.substring(5);
                 else NSNNumber = contactNumber.substring(4);
-            } else if (inJSONNode(countryCodes, "kTwoDigitCodes", contactNumber.substring(1, 3))) {
+            } else if (contactNumber.length() > 3 && inJSONNode(countryCodes, "kTwoDigitCodes", contactNumber.substring(1, 3))) {
                 if (contactNumber.charAt(3) == 0) NSNNumber = contactNumber.substring(4);
                 else NSNNumber = contactNumber.substring(3);
-            } else if (inJSONNode(countryCodes, "kOneDigitCodes", contactNumber.substring(1, 2))) {
+            } else if (contactNumber.length() > 2 && inJSONNode(countryCodes, "kOneDigitCodes", contactNumber.substring(1, 2))) {
                 if (contactNumber.charAt(2) == 0) NSNNumber = contactNumber.substring(3);
                 else NSNNumber = contactNumber.substring(2);
             }

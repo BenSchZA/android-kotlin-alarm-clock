@@ -13,7 +13,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -22,6 +21,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
@@ -30,7 +30,6 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
-import com.crashlytics.android.core.CrashlyticsCore;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.crash.FirebaseCrash;
@@ -64,10 +63,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.SortedMap;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -77,7 +73,6 @@ import javax.inject.Inject;
 
 import static android.content.ContentValues.TAG;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static com.facebook.FacebookSdk.getApplicationContext;
 
 //Service to manage playing and pausing audio during Rooster alarm
 public class AudioService extends Service {
@@ -88,8 +83,7 @@ public class AudioService extends Service {
     private BroadcastReceiver endAudioServiceBroadcastReceiver;
     private BroadcastReceiver snoozeAudioServiceBroadcastReceiver;
 
-    private static final Timer timer = new Timer();
-    private AlarmFinishTimerTask alarmFinishTimerTask = new AlarmFinishTimerTask();
+    private Handler alarmFinishTimerHandler = new Handler();
 
     private final MediaPlayer mediaPlayerDefault = new MediaPlayer();
     private final MediaPlayer mediaPlayerRooster = new MediaPlayer();
@@ -624,15 +618,15 @@ public class AudioService extends Service {
         File file = new File(getFilesDir() + "/" + audioItem.getFilename());
 
         try {
-            mediaPlayerRooster.reset();
-            mediaPlayerRooster.setDataSource(file.getPath());
-
             //AudioService report logging
             Crashlytics.log("Rooster file path: " + file.getPath());
             Crashlytics.log("Rooster is file?: " + String.valueOf(file.isFile()));
             Crashlytics.log("Rooster type: " + String.valueOf(audioItem.getType()));
             if(audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL && StrUtils.notNullOrEmpty(alarm.getChannel())) Crashlytics.log("Rooster channel source: " + alarm.getChannel());
             Crashlytics.log("Rooster file size (kb): " + String.valueOf(file.length()/1024));
+
+            mediaPlayerRooster.reset();
+            mediaPlayerRooster.setDataSource(file.getPath());
 
             mediaPlayerRooster.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
@@ -659,6 +653,10 @@ public class AudioService extends Service {
                             //set audio file entry in SQL db as listened; to be removed when AudioService ends
                             audioTableManager.setListened(mThis.audioItem.getId());
                             //Check if at end of queue, else play next file
+                            if(audioItems.isEmpty()) {
+                                startDefaultAlarmTone(true);
+                                return;
+                            }
                             if (audioItems.size() == audioItems.indexOf(audioItem) + 1) {
                                 playRooster(audioItems.get(0));
                                 mThis.alarmCycle++;
@@ -676,6 +674,10 @@ public class AudioService extends Service {
                     //set audio file entry in SQL db as listened; to be removed when AudioService ends
                     audioTableManager.setListened(mThis.audioItem.getId());
                     //Check if at end of queue, else play next file
+                    if(audioItems.isEmpty()) {
+                        startDefaultAlarmTone(true);
+                        return true;
+                    }
                     if (audioItems.size() == audioItems.indexOf(audioItem) + 1) {
                         //If an error occurs on the last queue item, assume error on all and start default alarm tone as fail safe
                         startDefaultAlarmTone(true);
@@ -721,6 +723,10 @@ public class AudioService extends Service {
     }
 
     public void skipNext() {
+        if(audioItems.isEmpty()) {
+            startDefaultAlarmTone(true);
+            return;
+        }
         try {
             if(mediaPlayerRooster != null && mediaPlayerRooster.isPlaying()) mediaPlayerRooster.stop();
             currentPositionRooster = 0;
@@ -734,6 +740,10 @@ public class AudioService extends Service {
     }
 
     public void skipPrevious() {
+        if(audioItems.isEmpty()) {
+            startDefaultAlarmTone(true);
+            return;
+        }
         try {
             if(mediaPlayerRooster != null && mediaPlayerRooster.isPlaying()) mediaPlayerRooster.stop();
             currentPositionRooster = 0;
@@ -859,6 +869,9 @@ public class AudioService extends Service {
         stopVibrate();
         stopAlarmAudio();
 
+        //clear timer callbacks
+        alarmFinishTimerHandler.removeCallbacks(alarmFinishTimerRunnable);
+
         stopForeground(true);
         if (wakefulIntent != null) {
             //Complete DeviceAlarmReceiver wakeful intent
@@ -871,14 +884,16 @@ public class AudioService extends Service {
 
     //Set timer to kill alarm after 5 minutes
     private void startTimer() {
-        timer.schedule(alarmFinishTimerTask, Constants.ALARM_DEFAULTTIME);
+        alarmFinishTimerHandler.postDelayed(alarmFinishTimerRunnable, Constants.ALARM_DEFAULTTIME);
     }
 
-    private class AlarmFinishTimerTask extends TimerTask {
+    //Set timer to kill alarm after 5 minutes
+    private Runnable alarmFinishTimerRunnable = new Runnable() {
+        @Override
         public void run() {
             notifyActivityTimesUp();
         }
-    }
+    };
 
     private void notifyActivityTimesUp() {
         String method = Thread.currentThread().getStackTrace()[2].getMethodName();
@@ -909,7 +924,7 @@ public class AudioService extends Service {
         String method = Thread.currentThread().getStackTrace()[2].getMethodName();
         if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
 
-        alarmFinishTimerTask.cancel();
+        alarmFinishTimerHandler.removeCallbacks(alarmFinishTimerRunnable);
 
         deviceAlarmController.snoozeAlarm(alarmUid, false);
 
@@ -944,6 +959,10 @@ public class AudioService extends Service {
             e.printStackTrace();
             stopAlarmAudio();
         }
+
+        //Stop default audio fail-safe
+        RingtoneManager.getRingtone(getBaseContext(),
+                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)).stop();
 
         //If vibrating then cancel
         Vibrator vibrator = (Vibrator) getApplicationContext().getSystemService(VIBRATOR_SERVICE);
@@ -1139,6 +1158,9 @@ public class AudioService extends Service {
     private void stopAlarmAudio() {
         stopForeground(true);
         //If default tone or media playing then stop
+        RingtoneManager.getRingtone(getBaseContext(),
+                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)).stop();
+
         try {
             if (mediaPlayerDefault != null && mediaPlayerDefault.isPlaying()) {
                 mediaPlayerDefault.stop();
