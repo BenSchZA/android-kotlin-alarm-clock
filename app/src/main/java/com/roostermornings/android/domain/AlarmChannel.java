@@ -6,6 +6,7 @@
 package com.roostermornings.android.domain;
 
 import com.google.firebase.database.IgnoreExtraProperties;
+import com.roostermornings.android.util.StrUtils;
 
 import static com.roostermornings.android.util.RoosterUtils.notNull;
 
@@ -17,7 +18,7 @@ import static com.roostermornings.android.util.RoosterUtils.notNull;
 public class AlarmChannel {
 
     public String id = "";
-    public String name = "";
+    public String name = "Default tone";
 
     // Required default constructor for Firebase object mapping
     @SuppressWarnings("unused")
@@ -25,8 +26,8 @@ public class AlarmChannel {
     }
 
     public AlarmChannel(String name, String uid) {
-        if(notNull(name)) this.name = name;
-        if(notNull(uid)) this.id = uid;
+        if(StrUtils.notNullOrEmpty(name)) this.name = name;
+        if(StrUtils.notNullOrEmpty(uid)) this.id = uid;
     }
 
     public String getId() {
