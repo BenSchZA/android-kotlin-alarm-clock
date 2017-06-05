@@ -16,6 +16,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Binder;
@@ -88,6 +89,7 @@ public class AudioService extends Service {
     private final MediaPlayer mediaPlayerDefault = new MediaPlayer();
     private final MediaPlayer mediaPlayerRooster = new MediaPlayer();
     private final MediaPlayer streamMediaPlayer = new MediaPlayer();
+    private Ringtone failsafeRingtone;
 
     private DeviceAudioQueueItem audioItem = new DeviceAudioQueueItem();
 
@@ -163,12 +165,13 @@ public class AudioService extends Service {
                 new Thread.UncaughtExceptionHandler() {
                     @Override
                     public void uncaughtException(Thread t, Throwable e) {
-                        e.printStackTrace();
-                        FirebaseCrash.report(e);
-                        Crashlytics.logException(e);
+                        logError(e);
                     }
                 }
         );
+
+        failsafeRingtone = RingtoneManager.getRingtone(getBaseContext(),
+                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM));
 
         //Register broadcast receivers for external access
         registerEndAudioServiceBroadcastReceiver();
@@ -178,6 +181,13 @@ public class AudioService extends Service {
         Intent intentAlarmFullscreen = new Intent(mThis, DeviceAlarmFullScreenActivity.class);
         intentAlarmFullscreen.addFlags(FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         mThis.startActivity(intentAlarmFullscreen);
+    }
+
+    private void logError(Throwable e) {
+        //Log an error, that will be appended to AudioService Report throwable during finishTransaction
+        e.printStackTrace();
+        FirebaseCrash.log(e.toString());
+        Crashlytics.log(e.toString());
     }
 
     private void registerEndAudioServiceBroadcastReceiver() {
@@ -238,7 +248,7 @@ public class AudioService extends Service {
                     }
                 }
             } catch(IllegalStateException e) {
-                e.printStackTrace();
+                logError(e);
                 startDefaultAlarmTone(true);
             }
         }
@@ -267,17 +277,17 @@ public class AudioService extends Service {
         try {
             if(mediaPlayerRooster.isPlaying()) return true;
         } catch (IllegalStateException e) {
-            e.printStackTrace();
+            logError(e);
         }
         try {
             if(mediaPlayerDefault.isPlaying()) return true;
         } catch (IllegalStateException e) {
-            e.printStackTrace();
+            logError(e);
         }
         try {
             if(streamMediaPlayer.isPlaying()) return true;
         } catch (IllegalStateException e) {
-            e.printStackTrace();
+            logError(e);
         }
         return false;
     }
@@ -332,7 +342,7 @@ public class AudioService extends Service {
                 compileAudioItemContent();
             }
         } catch(NullPointerException e) {
-            e.printStackTrace();
+            logError(e);
             compileAudioItemContent();
         }
     }
@@ -373,7 +383,7 @@ public class AudioService extends Service {
                 return;
             }
         } catch (NullPointerException e){
-            e.printStackTrace();
+            logError(e);
             startDefaultAlarmTone(true);
             return;
         }
@@ -478,7 +488,7 @@ public class AudioService extends Service {
             };
             channelReference.addListenerForSingleValueEvent(channelListener);
         } catch(Exception e) {
-            e.printStackTrace();
+            logError(e);
             startDefaultAlarmTone(true);
         }
     }
@@ -507,11 +517,12 @@ public class AudioService extends Service {
             public void onSuccess(Uri downloadUrl)
             {
                 try {
+                    streamMediaPlayer.reset();
                     streamMediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
                     streamMediaPlayer.setLooping(true);
                     streamMediaPlayer.setDataSource(downloadUrl.toString());
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logError(e);
                     startDefaultAlarmTone(true);
                     return;
                 }
@@ -520,7 +531,7 @@ public class AudioService extends Service {
                     public void onPrepared(MediaPlayer mp) {
                         if(streamMediaPlayer.isPlaying()) return;
                         streamMediaPlayer.start();
-                        checkStreamVolume();
+                        checkStreamVolume(AudioManager.STREAM_ALARM);
                         softStartAudio();
 
                         streamMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -579,7 +590,7 @@ public class AudioService extends Service {
                 //Send broadcast to DeviceAlarmFullScreenActivity with UI data
                 updateAlarmUI(false);
             } catch(NullPointerException e){
-                e.printStackTrace();
+                logError(e);
                 playRooster(audioItems.get(0));
             }
         }
@@ -608,7 +619,7 @@ public class AudioService extends Service {
         //Set media player to alarm volume
         mediaPlayerRooster.setAudioStreamType(AudioManager.STREAM_ALARM);
         //Check stream volume above minimum
-        checkStreamVolume();
+        checkStreamVolume(AudioManager.STREAM_ALARM);
 
         //Set alarm count display
         alarmPosition = audioItems.indexOf(mThis.audioItem) + 1;
@@ -692,7 +703,7 @@ public class AudioService extends Service {
             mediaPlayerRooster.prepareAsync();
 
         } catch (IOException e) {
-            e.printStackTrace();
+            logError(e);
             //Social rooster will never play... let's not go here
             //delete file
             //delete record from AudioTable SQL DB
@@ -735,7 +746,7 @@ public class AudioService extends Service {
             // play next rooster
             playRooster(getNextAudioItem());
         } catch (NullPointerException e) {
-            e.printStackTrace();
+            logError(e);
         }
     }
 
@@ -752,7 +763,7 @@ public class AudioService extends Service {
             // play previous rooster
             playRooster(getPreviousAudioItem());
         } catch (NullPointerException e) {
-            e.printStackTrace();
+            logError(e);
         }
     }
 
@@ -763,7 +774,7 @@ public class AudioService extends Service {
                 audioTableManager.setListened(mThis.audioItem.getId());
             }
         } catch (NullPointerException e) {
-            e.printStackTrace();
+            logError(e);
         }
         //For all listened channels
         for (DeviceAudioQueueItem audioItem :
@@ -776,7 +787,7 @@ public class AudioService extends Service {
                         new JSONPersistence(getApplicationContext()).setStoryIteration(audioItem.getQueue_id(), currentStoryIteration + 1);
                 }
             } catch (NullPointerException e) {
-                e.printStackTrace();
+                logError(e);
             }
         }
     }
@@ -796,7 +807,7 @@ public class AudioService extends Service {
                     FA.Event.alarm_dismissed.Param.alarm_activation_total_roosters,
                     channelAudioItems.size() + socialAudioItems.size());
         } catch (NullPointerException e) {
-            e.printStackTrace();
+            logError(e);
         }
 
         endService();
@@ -840,13 +851,13 @@ public class AudioService extends Service {
             if (endAudioServiceBroadcastReceiver != null)
                 unregisterReceiver(endAudioServiceBroadcastReceiver);
         } catch(IllegalArgumentException e) {
-            e.printStackTrace();
+            logError(e);
         }
         try {
             if (snoozeAudioServiceBroadcastReceiver != null)
                 unregisterReceiver(snoozeAudioServiceBroadcastReceiver);
         } catch(IllegalArgumentException e) {
-            e.printStackTrace();
+            logError(e);
         }
 
         //delete record from arraylist
@@ -856,6 +867,8 @@ public class AudioService extends Service {
         alarmCount = 0;
         alarmPosition = 0;
         currentPositionRooster = 0;
+
+        releaseMediaPlayers();
     }
 
     public void endService() {
@@ -938,7 +951,7 @@ public class AudioService extends Service {
                 currentPositionRooster = mediaPlayerRooster.getCurrentPosition();
             }
         } catch(Exception e){
-            e.printStackTrace();
+            logError(e);
             stopAlarmAudio();
         }
 
@@ -947,7 +960,7 @@ public class AudioService extends Service {
                 streamMediaPlayer.stop();
             }
         } catch(Exception e){
-            e.printStackTrace();
+            logError(e);
             stopAlarmAudio();
         }
 
@@ -956,13 +969,12 @@ public class AudioService extends Service {
                 mediaPlayerDefault.stop();
             }
         } catch(Exception e){
-            e.printStackTrace();
+            logError(e);
             stopAlarmAudio();
         }
 
         //Stop default audio fail-safe
-        RingtoneManager.getRingtone(getBaseContext(),
-                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)).stop();
+        stopFailsafe();
 
         //If vibrating then cancel
         Vibrator vibrator = (Vibrator) getApplicationContext().getSystemService(VIBRATOR_SERVICE);
@@ -983,7 +995,7 @@ public class AudioService extends Service {
                         channelAudioItems.size() + socialAudioItems.size());
             }
         } catch (NullPointerException e) {
-            e.printStackTrace();
+            logError(e);
         }
     }
 
@@ -1021,10 +1033,11 @@ public class AudioService extends Service {
             }
 
             //Check stream volume above minimum
-            checkStreamVolume();
+            checkStreamVolume(AudioManager.STREAM_ALARM);
 
             //Start audio stream
             try {
+                mediaPlayerDefault.reset();
                 mediaPlayerDefault.setAudioStreamType(AudioManager.STREAM_ALARM);
                 mediaPlayerDefault.setDataSource(this, notification);
                 mediaPlayerDefault.setLooping(true);
@@ -1032,6 +1045,9 @@ public class AudioService extends Service {
                 mediaPlayerDefault.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                     @Override
                     public void onPrepared(MediaPlayer mediaPlayer) {
+                        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+                        if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method + " prepared listener");
+
                         if (mediaPlayerRooster != null && mediaPlayerRooster.isPlaying()) return;
                         mediaPlayerDefault.start();
                         //Start timer to kill after 5 minutes
@@ -1041,9 +1057,10 @@ public class AudioService extends Service {
                 mediaPlayerDefault.setOnErrorListener(new MediaPlayer.OnErrorListener() {
                     @Override
                     public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
-                        RingtoneManager.getRingtone(getBaseContext(),
-                                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)).play();
-                        startVibrate();
+                        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+                        if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method + " error listener");
+
+                        startFailsafe();
                         logDefaultRingtoneState(failure);
                         return true;
                     }
@@ -1053,20 +1070,44 @@ public class AudioService extends Service {
                 mediaPlayerDefault.prepareAsync();
 
             } catch (Exception e) {
-                e.printStackTrace();
-                RingtoneManager.getRingtone(getBaseContext(),
-                        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)).play();
-                startVibrate();
-                logDefaultRingtoneState(failure);
+                method = Thread.currentThread().getStackTrace()[2].getMethodName();
+                if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method + " catch 1");
+                logError(e);
+
+                startFailsafe();
             }
-            logDefaultRingtoneState(failure);
         } catch (Exception e) {
-            e.printStackTrace();
-            RingtoneManager.getRingtone(getBaseContext(),
-                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)).play();
-            startVibrate();
-            logDefaultRingtoneState(failure);
+            method = Thread.currentThread().getStackTrace()[2].getMethodName();
+            if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method + " catch 2");
+            logError(e);
+
+            startFailsafe();
         }
+        logDefaultRingtoneState(failure);
+    }
+
+    private void startFailsafe() {
+        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+        if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
+
+        checkStreamVolume(AudioManager.STREAM_RING);
+        startVibrate();
+
+        if(failsafeRingtone == null) {
+            Crashlytics.log("Is null");
+            failsafeRingtone = RingtoneManager.getRingtone(getBaseContext(),
+                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM));
+            Crashlytics.log(failsafeRingtone.getTitle(getBaseContext()));
+            failsafeRingtone.play();
+        }
+        if(failsafeRingtone != null && !failsafeRingtone.isPlaying()) {
+            Crashlytics.log("Not null and not playing" + failsafeRingtone.getTitle(getBaseContext()));
+            failsafeRingtone.play();
+        }
+    }
+
+    private void stopFailsafe() {
+        if(failsafeRingtone != null && failsafeRingtone.isPlaying()) failsafeRingtone.stop();
     }
 
     private void logDefaultRingtoneState(boolean failure) {
@@ -1093,15 +1134,18 @@ public class AudioService extends Service {
         }
     }
 
-    private void checkStreamVolume() {
+    private void checkStreamVolume(int streamType) {
+        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+        if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
+
         //Ensure audio volume is acceptable - as set in user settings
         //Max volume seems to be integer 7
         AudioManager audio = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        int currentVolume = audio.getStreamVolume(AudioManager.STREAM_ALARM);
-        int maxVolume = audio.getStreamMaxVolume(AudioManager.STREAM_ALARM);
+        int currentVolume = audio.getStreamVolume(streamType);
+        int maxVolume = audio.getStreamMaxVolume(streamType);
         int minVolume = (int) (maxVolume*returnUserSettingAlarmMinimumVolume());
         if(currentVolume < minVolume) {
-            audio.setStreamVolume(AudioManager.STREAM_ALARM, minVolume, 0);
+            audio.setStreamVolume(streamType, minVolume, 0);
         }
     }
 
@@ -1129,12 +1173,15 @@ public class AudioService extends Service {
 
             return alarmMinimumVolume;
         } catch (NullPointerException e) {
-            e.printStackTrace();
+            logError(e);
             return 0.4f;
         }
     }
 
     private void softStartAudio() {
+        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+        if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
+
         final AudioManager audio = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         final int currentVolume = audio.getStreamVolume(AudioManager.STREAM_ALARM);
 
@@ -1156,36 +1203,46 @@ public class AudioService extends Service {
     }
 
     private void stopAlarmAudio() {
+        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+        if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
+
         stopForeground(true);
         //If default tone or media playing then stop
-        RingtoneManager.getRingtone(getBaseContext(),
-                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)).stop();
+
+        //Stop default audio fail-safe
+        stopFailsafe();
 
         try {
             if (mediaPlayerDefault != null && mediaPlayerDefault.isPlaying()) {
                 mediaPlayerDefault.stop();
-                mediaPlayerDefault.release();
             }
         } catch(IllegalStateException e) {
-                e.printStackTrace();
+            logError(e);
         }
         try {
             if (mediaPlayerRooster != null && mediaPlayerRooster.isPlaying()) {
                 mediaPlayerRooster.stop();
-                mediaPlayerRooster.release();
                 currentPositionRooster = 0;
             }
         } catch(IllegalStateException e) {
-            e.printStackTrace();
+            logError(e);
         }
         try {
             if (streamMediaPlayer != null && streamMediaPlayer.isPlaying()) {
                 streamMediaPlayer.stop();
-                streamMediaPlayer.release();
             }
         } catch(IllegalStateException e) {
-            e.printStackTrace();
+            logError(e);
         }
+    }
+
+    private void releaseMediaPlayers() {
+        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+        if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
+
+        mediaPlayerDefault.release();
+        mediaPlayerRooster.release();
+        streamMediaPlayer.release();
     }
 
     private void foregroundNotification(String state) {
