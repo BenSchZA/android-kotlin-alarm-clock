@@ -120,6 +120,13 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
                 user.setSelected(!user.getSelected());
                 holder.btnAdd.setSelected(user.getSelected());
 
+                //Manually refresh friends list when new friend added, use catch in case detached
+                try {
+                    ((FriendsFragmentActivity) context).manualSwipeRefreshFriends();
+                } catch(Exception e) {
+                    e.printStackTrace();
+                }
+
                 acceptFriendRequest(user);
 
                 final Handler handler = new Handler();

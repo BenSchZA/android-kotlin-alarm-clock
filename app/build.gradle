@@ -22,9 +22,9 @@ android {
         applicationId "com.roostermornings.android"
         minSdkVersion 18
         targetSdkVersion 25
-        versionCode 16
+        versionCode 17
         //Formatting of version name very important for invalidation, must have 3 components
-        versionName "2.1.1"
+        versionName "2.1.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         //http://stackoverflow.com/questions/35663413/xmlpullparserexception-binary-xml-file-line-17vector-tag-requires-viewportwid
         vectorDrawables.useSupportLibrary = true

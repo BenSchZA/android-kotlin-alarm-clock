@@ -220,13 +220,13 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
                             audioItem = (DeviceAudioQueueItem) intent.getExtras().getSerializable("audioItem");
                             alarmPosition = intent.getIntExtra("alarmPosition", alarmPosition);
                             alarmCount = intent.getIntExtra("alarmCount", alarmCount);
-                            if (intent.getBooleanExtra("multipleAudioFiles", false)) {
-                                skipNext.setVisibility(View.VISIBLE);
-                                skipPrevious.setVisibility(View.VISIBLE);
-                            } else {
-                                skipNext.setVisibility(View.INVISIBLE);
-                                skipPrevious.setVisibility(View.INVISIBLE);
-                            }
+//                            if (intent.getBooleanExtra("multipleAudioFiles", false)) {
+//                                skipNext.setVisibility(View.VISIBLE);
+//                                skipPrevious.setVisibility(View.VISIBLE);
+//                            } else {
+//                                skipNext.setVisibility(View.INVISIBLE);
+//                                skipPrevious.setVisibility(View.INVISIBLE);
+//                            }
                             setAlarmUI();
                             break;
                         case Constants.ACTION_ALARMTIMESUP:

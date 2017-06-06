@@ -10,17 +10,20 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
 import com.roostermornings.android.R;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.util.RoosterUtils;
+import com.roostermornings.android.util.StrUtils;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -43,6 +46,7 @@ public class NewAudioFriendsListAdapter extends RecyclerView.Adapter<NewAudioFri
         public TextView txtName;
         public TextView txtInitials;
         public RadioButton btnSelect;
+        public LinearLayout roosterFriendSelectLayout;
 
         public ViewHolder(View v) {
             super(v);
@@ -50,6 +54,7 @@ public class NewAudioFriendsListAdapter extends RecyclerView.Adapter<NewAudioFri
             txtName = (TextView) itemView.findViewById(R.id.new_audio_friend_profile_name);
             txtInitials = (TextView) itemView.findViewById(R.id.txtInitials);
             btnSelect = (RadioButton) itemView.findViewById(R.id.new_audio_friend_select);
+            roosterFriendSelectLayout = (LinearLayout) itemView.findViewById(R.id.roosterFriendSelectLayout);
         }
     }
 
@@ -81,14 +86,31 @@ public class NewAudioFriendsListAdapter extends RecyclerView.Adapter<NewAudioFri
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         final User user = mDataset.get(position);
-        user.setSelected(false);
 
         holder.txtName.setText(user.getUser_name());
-        holder.txtInitials.setText(RoosterUtils.getInitials(user.getUser_name()));
 
-        setProfilePic(user.getProfile_pic(), holder, user);
+        //Check if image is null, else previous images reused
+        if(StrUtils.notNullOrEmpty(user.getProfile_pic())) {
+            holder.imgProfilePic.setImageDrawable(null);
+            holder.imgProfilePic.setAlpha(1f);
+            holder.txtInitials.setText("");
+            setProfilePic(user.getProfile_pic(), holder, user);
+        } else {
+            holder.imgProfilePic.setImageDrawable(null);
+            holder.imgProfilePic.setAlpha(0.3f);
+            holder.txtInitials.setText(RoosterUtils.getInitials(user.getUser_name()));
+        }
 
+        holder.btnSelect.setChecked(user.getSelected());
         holder.btnSelect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                user.setSelected(!user.getSelected());
+                holder.btnSelect.setChecked(user.getSelected());
+            }
+        });
+
+        holder.roosterFriendSelectLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 user.setSelected(!user.getSelected());
