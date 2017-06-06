@@ -86,8 +86,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:background="@drawable/ic_skip_previous_white_24dp"
-                android:clickable="true"
-                android:visibility="invisible" />
+                android:clickable="true" />
 
             <TextView
                 android:id="@+id/alarm_count"
@@ -107,8 +106,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:background="@drawable/ic_skip_next_white_24dp"
-                android:clickable="true"
-                android:visibility="invisible" />
+                android:clickable="true" />
 
         </RelativeLayout>
 

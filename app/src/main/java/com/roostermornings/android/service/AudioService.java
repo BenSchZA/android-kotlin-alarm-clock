@@ -824,7 +824,7 @@ public class AudioService extends Service {
         for (DeviceAudioQueueItem audioItem :
                 audioTableManager.selectListened()) {
             //Set the listened flag in firebase
-            if (audioItem.getType() != 1)
+            if (audioItem.getType() != Constants.AUDIO_TYPE_SOCIAL)
                 audioTableController.setListened(audioItem.getSender_id(), audioItem.getQueue_id());
             //Remove entry from SQL db
             audioTableManager.removeAudioEntry(audioItem);

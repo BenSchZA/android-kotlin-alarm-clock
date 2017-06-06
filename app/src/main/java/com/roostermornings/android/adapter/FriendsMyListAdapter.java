@@ -38,6 +38,7 @@ import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
+import com.roostermornings.android.util.StrUtils;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -116,7 +117,17 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
         user.setSelected(false);
         holder.txtName.setText(user.getUser_name());
 
-        setProfilePic(user.getProfile_pic(), holder, user);
+        //Check if image is null, else previous images reused
+        if(StrUtils.notNullOrEmpty(user.getProfile_pic())) {
+            holder.imgProfilePic.setImageDrawable(null);
+            holder.imgProfilePic.setAlpha(1f);
+            holder.txtInitials.setText("");
+            setProfilePic(user.getProfile_pic(), holder, user);
+        } else {
+            holder.imgProfilePic.setImageDrawable(null);
+            holder.imgProfilePic.setAlpha(0.3f);
+            holder.txtInitials.setText(RoosterUtils.getInitials(user.getUser_name()));
+        }
 
         holder.linearLayout.setOnLongClickListener(new View.OnLongClickListener() {
             @Override

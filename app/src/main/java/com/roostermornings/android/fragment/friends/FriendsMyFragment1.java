@@ -164,6 +164,11 @@ public class FriendsMyFragment1 extends BaseFragment {
         return view;
     }
 
+    public void manualSwipeRefresh() {
+        swipeRefreshLayout.setRefreshing(true);
+        retrieveMyFriends();
+    }
+
     //NB: bind ButterKnife to view and then initialise UI elements
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {

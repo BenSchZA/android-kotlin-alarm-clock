@@ -133,6 +133,12 @@ public class FriendsRequestFragment2 extends BaseFragment {
         mRecyclerView.setAdapter(mAdapter);
     }
 
+    public void manualSwipeRefresh() {
+        swipeRefreshLayout.setRefreshing(true);
+        getDatabaseReference();
+        getRequests();
+    }
+
     private void getRequests() {
         mRequestsReference = mDatabase
                 .child("friend_requests_received").child(firebaseUser.getUid());

@@ -92,6 +92,9 @@ public class MessageStatusListAdapter extends RecyclerView.Adapter<MessageStatus
         holder.txtName.setText(socialRooster.getUser_name());
         //Check if image is null, else previous images reused
         if(StrUtils.notNullOrEmpty(socialRooster.getProfile_pic())) {
+            holder.imgProfilePic.setImageDrawable(null);
+            holder.imgProfilePic.setAlpha(1f);
+            holder.txtInitials.setText("");
             setProfilePic(socialRooster.getProfile_pic(), holder, socialRooster);
         } else {
             holder.imgProfilePic.setImageDrawable(null);

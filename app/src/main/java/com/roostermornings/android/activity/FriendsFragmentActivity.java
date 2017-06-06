@@ -169,6 +169,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
             @Override
             public void onPageSelected(int position) {
                 if (position == 1) {
+                    //Clear request notification badge
                     setTabNotification(position, false);
                     setButtonBarNotification(false);
                     BaseApplication.setNotificationFlag(0, Constants.FLAG_FRIENDREQUESTS);
@@ -358,10 +359,19 @@ public class FriendsFragmentActivity extends BaseActivity implements
                 if (BaseApplication.getNotificationFlag(Constants.FLAG_FRIENDREQUESTS) > 0) {
                     setButtonBarNotification(true);
                     setTabNotification(1, true);
+                    manualSwipeRefreshRequests();
                 }
             }
         };
         registerReceiver(receiver, firebaseListenerServiceFilter);
+    }
+
+    public void manualSwipeRefreshFriends() {
+        friendsInviteFragment1.manualSwipeRefresh();
+    }
+
+    public void manualSwipeRefreshRequests() {
+        friendsInviteFragment2.manualSwipeRefresh();
     }
 
     @Override

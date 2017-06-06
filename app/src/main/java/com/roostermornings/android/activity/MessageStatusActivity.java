@@ -107,6 +107,7 @@ public class MessageStatusActivity extends BaseActivity {
                     break;
                 }
                 processSocialRoosterUploadsItem(socialRoosterU);
+                notifyAdapter();
             }
 
             @Override
@@ -117,6 +118,7 @@ public class MessageStatusActivity extends BaseActivity {
                     break;
                 }
                 processSocialRoosterUploadsItem(socialRoosterU);
+                notifyAdapter();
             }
 
             @Override
@@ -124,13 +126,14 @@ public class MessageStatusActivity extends BaseActivity {
                 final SocialRooster socialRoosterU = dataSnapshot.getValue(SocialRooster.class);
                 for (SocialRooster item: mRoosters) if(item.getQueue_id().equals(socialRoosterU.getQueue_id())) {
                     mRoosters.remove(item);
-                    return;
+                    break;
                 }
+                notifyAdapter();
             }
 
             @Override
             public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
+                notifyAdapter();
             }
 
             @Override
