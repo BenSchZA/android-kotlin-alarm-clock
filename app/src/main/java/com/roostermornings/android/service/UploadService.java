@@ -9,6 +9,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -71,6 +72,8 @@ public class UploadService extends Service {
     String firebaseIdToken = "";
 
     @Inject FirebaseUser firebaseUser;
+    @Inject
+    SharedPreferences sharedPreferences;
 
     public UploadService() {
     }
@@ -134,6 +137,23 @@ public class UploadService extends Service {
         final File localFile = new File(mAudioSavePathInDevice);
         final Uri file = Uri.fromFile(localFile);
         StorageReference audioFileRef = mStorageRef.child("social_rooster_uploads/" + file.getLastPathSegment());
+
+        //Log Firebase user prop: social rooster sender
+        if(!friendsList.isEmpty()) {
+            int averageSentRoosters = 0;
+            if (sharedPreferences.contains(FA.UserProp.social_rooster_sender.shared_pref_average_sent_roosters)) {
+                averageSentRoosters = (friendsList.size() +
+                        sharedPreferences.getInt(FA.UserProp.social_rooster_sender.shared_pref_average_sent_roosters, 0)) / 2;
+            } else {
+                averageSentRoosters = friendsList.size();
+            }
+            sharedPreferences.edit()
+                    .putInt(FA.UserProp.social_rooster_sender.shared_pref_average_sent_roosters, averageSentRoosters)
+                    .apply();
+            FA.SetUserProp(FA.UserProp.social_rooster_sender.class, FA.UserProp.social_rooster_sender.shared_pref_average_sent_roosters);
+        }
+
+
 
         audioFileRef.putFile(file)
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {

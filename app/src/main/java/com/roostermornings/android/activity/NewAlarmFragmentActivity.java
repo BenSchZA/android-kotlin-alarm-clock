@@ -340,7 +340,9 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
 
     @Override
     public void setNextButtonCaption(String text) {
-        MenuItem itemNext = menu.findItem(R.id.action_next);
-        itemNext.setTitle(text);
+        if(menu != null) {
+            MenuItem itemNext = menu.findItem(R.id.action_next);
+            itemNext.setTitle(text);
+        }
     }
 }

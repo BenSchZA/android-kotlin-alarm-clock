@@ -6,6 +6,7 @@
 package com.roostermornings.android.activity;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -24,6 +25,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -38,6 +40,7 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.DiscoverListAdapter;
 import com.roostermornings.android.adapter.MyAlarmsListAdapter;
+import com.roostermornings.android.analytics.FA;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Channel;
 import com.roostermornings.android.domain.ChannelRooster;
@@ -101,6 +104,8 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
     @Inject DeviceAlarmTableManager deviceAlarmTableManager;
     @Inject AudioTableManager audioTableManager;
     @Inject BaseApplication AppContext;
+    @Inject
+    SharedPreferences sharedPreferences;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -140,6 +145,17 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                 RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(context);
                 mRecyclerView.setLayoutManager(mLayoutManager);
                 mRecyclerView.setAdapter(mAdapter);
+
+                //Check if uses explor user prop has been set, and if not then create shared pref with default no
+                String sharedPrefUsesExplore = sharedPreferences.getString(
+                        FA.UserProp.uses_explore.shared_pref_uses_explore, "null");
+                if(!sharedPrefUsesExplore.contains(FA.UserProp.uses_explore.no)
+                && !sharedPrefUsesExplore.contains(FA.UserProp.uses_explore.started_explore_playback)
+                && !sharedPrefUsesExplore.contains(FA.UserProp.uses_explore.completed_explore_playback)) {
+                    sharedPreferences.edit().putString(FA.UserProp.uses_explore.shared_pref_uses_explore,
+                            FA.UserProp.uses_explore.no).apply();
+                    FA.SetUserProp(FA.UserProp.uses_explore.class, FA.UserProp.uses_explore.no);
+                }
             }
         }.run();
 
@@ -363,12 +379,26 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                                 channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(true);
                                 notifyDataSetChangedFromUIThread();
 
+                                //Set Firebase user prop for uses_explore
+                                String sharedPrefUsesExplore = sharedPreferences.getString(
+                                        FA.UserProp.uses_explore.shared_pref_uses_explore, "no");
+                                if(sharedPrefUsesExplore.contains(FA.UserProp.uses_explore.no)) {
+                                    sharedPreferences.edit().putString(FA.UserProp.uses_explore.shared_pref_uses_explore,
+                                            FA.UserProp.uses_explore.started_explore_playback).apply();
+                                    FA.SetUserProp(FA.UserProp.uses_explore.class, FA.UserProp.uses_explore.started_explore_playback);
+                                }
+
                                 mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                                     @Override
                                     public void onCompletion(MediaPlayer mp) {
                                         channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
                                         channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
                                         notifyDataSetChangedFromUIThread();
+
+                                        //Set Firebase user prop for uses_explore
+                                        FA.SetUserProp(FA.UserProp.uses_explore.class, FA.UserProp.uses_explore.completed_explore_playback);
+                                        sharedPreferences.edit().putString(FA.UserProp.uses_explore.shared_pref_uses_explore,
+                                                FA.UserProp.uses_explore.completed_explore_playback).apply();
                                     }
                                 });
                             }

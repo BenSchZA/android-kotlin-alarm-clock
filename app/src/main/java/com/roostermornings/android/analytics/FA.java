@@ -14,10 +14,30 @@ import static com.roostermornings.android.BaseApplication.firebaseAnalytics;
 //FA stands for Firebase Analytics - defines relationship between Event and Param, handles analytic logging in background thread
 @Keep
 public abstract class FA {
+    public abstract static class UserProp {
+        public abstract class sign_in_method {
+            public final static String Google = "Google";
+            public final static String Facebook = "Facebook";
+            public final static String Email = "Email";
+            public final static String Unknown = "Unknown";
+        }
+        public abstract class social_rooster_sender {
+            //Integer of average number of roosters sent, as shared pref
+            public final static String shared_pref_average_sent_roosters = "shared_pref_average_sent_roosters";
+        }
+        public abstract class uses_explore {
+            public final static String shared_pref_uses_explore = "shared_pref_uses_explore";
+
+            public final static String completed_explore_playback = "completed_explore_playback";
+            public final static String started_explore_playback = "started_explore_playback";
+            public final static String no = "no";
+        }
+    }
+
     public abstract static class Event {
         public abstract class alarm_creation_begin {
         }
-        public abstract static class alarm_edit_begin {
+        public abstract class alarm_edit_begin {
         }
         public abstract class alarm_creation_completed {
             public abstract class Param {
@@ -102,6 +122,28 @@ public abstract class FA {
                 public final static String memory_in_use = "memory_in_use";
             }
         }
+    }
+
+    public static void SetUserProp(final Class<?> UserProp, final String Prop) {
+        new Thread() {
+            @Override
+            public void run() {
+
+                String eventString;
+
+                if (UserProp == null) {
+                    throw new NullPointerException();
+                } else {
+                    eventString = UserProp.toString();
+                    int eventStringPosition = eventString.lastIndexOf("$") + 1;
+                    eventString = eventString.substring(eventStringPosition);
+                }
+
+                if (Prop != null) {
+                    firebaseAnalytics.setUserProperty(eventString, Prop);
+                }
+            }
+        }.run();
     }
     
     public static void Log(final Class<?> Event, final String Param, final Object entry) {
