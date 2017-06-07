@@ -30,8 +30,10 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.crashlytics.android.Crashlytics;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserInfo;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -42,6 +44,7 @@ import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.MyAlarmsListAdapter;
+import com.roostermornings.android.analytics.FA;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.AlarmChannel;
@@ -134,6 +137,21 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
                 //Log new crashlytics user
                 if(firebaseUser != null) {
+                    //Check user sign in method and set Firebase user prop
+                    for (UserInfo user: firebaseUser.getProviderData()) {
+                        if(user == null) break;
+                        if(user.getProviderId() == null) break;
+                        if (user.getProviderId().toLowerCase().contains(FA.UserProp.sign_in_method.Google.toLowerCase())) {
+                            FA.SetUserProp(FA.UserProp.sign_in_method.class, FA.UserProp.sign_in_method.Google);
+                        } else if (user.getProviderId().toLowerCase().contains(FA.UserProp.sign_in_method.Facebook.toLowerCase())) {
+                            FA.SetUserProp(FA.UserProp.sign_in_method.class, FA.UserProp.sign_in_method.Facebook);
+                        } else if (user.getProviderId().toLowerCase().contains(FA.UserProp.sign_in_method.Email.toLowerCase())) {
+                            FA.SetUserProp(FA.UserProp.sign_in_method.class, FA.UserProp.sign_in_method.Email);
+                        } else {
+                            FA.SetUserProp(FA.UserProp.sign_in_method.class, FA.UserProp.sign_in_method.Unknown);
+                        }
+                    }
+
                     // You can call any combination of these three methods
                     Crashlytics.setUserIdentifier(firebaseUser.getUid());
                     Crashlytics.setUserEmail(firebaseUser.getEmail());
