@@ -23,7 +23,7 @@ public abstract class FA {
         }
         public abstract class social_rooster_sender {
             //Integer of average number of roosters sent, as shared pref
-            public final static String shared_pref_average_sent_roosters = "shared_pref_average_sent_roosters";
+            public final static String shared_pref_sent_roosters = "shared_pref_sent_roosters";
         }
         public abstract class uses_explore {
             public final static String shared_pref_uses_explore = "shared_pref_uses_explore";

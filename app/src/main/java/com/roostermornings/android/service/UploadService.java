@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -140,20 +141,18 @@ public class UploadService extends Service {
 
         //Log Firebase user prop: social rooster sender
         if(!friendsList.isEmpty()) {
-            int averageSentRoosters = 0;
-            if (sharedPreferences.contains(FA.UserProp.social_rooster_sender.shared_pref_average_sent_roosters)) {
-                averageSentRoosters = (friendsList.size() +
-                        sharedPreferences.getInt(FA.UserProp.social_rooster_sender.shared_pref_average_sent_roosters, 0)) / 2;
+            int sentRoosters = 0;
+            if (sharedPreferences.contains(FA.UserProp.social_rooster_sender.shared_pref_sent_roosters)) {
+                sentRoosters = friendsList.size() +
+                        sharedPreferences.getInt(FA.UserProp.social_rooster_sender.shared_pref_sent_roosters, 0);
             } else {
-                averageSentRoosters = friendsList.size();
+                sentRoosters = friendsList.size();
             }
             sharedPreferences.edit()
-                    .putInt(FA.UserProp.social_rooster_sender.shared_pref_average_sent_roosters, averageSentRoosters)
+                    .putInt(FA.UserProp.social_rooster_sender.shared_pref_sent_roosters, sentRoosters)
                     .apply();
-            FA.SetUserProp(FA.UserProp.social_rooster_sender.class, FA.UserProp.social_rooster_sender.shared_pref_average_sent_roosters);
+            FA.SetUserProp(FA.UserProp.social_rooster_sender.class, String.valueOf(sentRoosters));
         }
-
-
 
         audioFileRef.putFile(file)
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
