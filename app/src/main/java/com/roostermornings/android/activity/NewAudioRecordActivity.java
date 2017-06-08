@@ -509,11 +509,14 @@ public class NewAudioRecordActivity extends BaseActivity {
     }
 
     private void mediaRecorderReady() {
-
         mediaRecorder = new MediaRecorder();
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+        mediaRecorder.setAudioChannels(2);
+        //Calculated for a 60 second audio clip file size of just over 500kb
+        mediaRecorder.setAudioEncodingBitRate(70000);
+        mediaRecorder.setAudioSamplingRate(48000);
         mediaRecorder.setOutputFile(mAudioSavePathInDevice);
     }
 

@@ -48,6 +48,7 @@ import com.roostermornings.android.analytics.FA;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.AlarmChannel;
+import com.roostermornings.android.domain.SocialRooster;
 import com.roostermornings.android.firebase.FirebaseNetwork;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 import com.roostermornings.android.service.AudioService;
@@ -61,6 +62,8 @@ import com.roostermornings.android.util.StrUtils;
 import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import javax.inject.Inject;
 
@@ -225,12 +228,22 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                             //Set set enabled flag and don't notify user
                             deviceAlarmController.setSetEnabled(alarm.getUid(), alarm.isEnabled(), false);
 
+                            //Set alarm element millis to allow sorting
+                            Long alarmSetPendingMillis = deviceAlarmTableManager.getMillisOfNextPendingAlarmInSet(alarm.getUid());
+                            if(alarmSetPendingMillis != null) {
+                                alarm.setMillis(alarmSetPendingMillis);
+                            }
+
                             //Add alarm to adapter display arraylist and notify adapter of change
                             mAlarms.add(alarm);
                             mAdapter.notifyItemInserted(mAlarms.size() - 1);
                             //Notify adapter of new data to be displayed
                             updateRoosterNotification();
                         }
+                        //Sort alarms according to time
+                        sortAlarms(mAlarms);
+                        mAdapter.notifyDataSetChanged();
+
                         //Recreate all enabled alarms as failsafe
                         deviceAlarmController.rebootAlarms();
                         //Case: local has an alarm that firebase doesn't Result: delete local alarm
@@ -251,6 +264,16 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         moveTaskToBack(true);
+    }
+
+    private void sortAlarms(ArrayList<Alarm> alarms){
+        //Take arraylist and sort by date
+        Collections.sort(alarms, new Comparator<Alarm>() {
+            @Override
+            public int compare(Alarm lhs, Alarm rhs) {
+                return lhs.getMillis().compareTo(rhs.getMillis());
+            }
+        });
     }
 
     private void updateRoosterNotification() {

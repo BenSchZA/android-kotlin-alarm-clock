@@ -537,7 +537,13 @@ public class AudioService extends Service {
                         streamMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                             @Override
                             public void onCompletion(MediaPlayer mp) {
-
+                                mThis.alarmCycle++;
+                                //Increment alarmCycle, only loop rooster content 5 times
+                                //after which control handed to activity to endService and turn off screen
+                                if(alarmCycle > 5) {
+                                    notifyActivityTimesUp();
+                                    streamMediaPlayer.stop();
+                                }
                             }
                         });
                     }
@@ -824,7 +830,7 @@ public class AudioService extends Service {
         for (DeviceAudioQueueItem audioItem :
                 audioTableManager.selectListened()) {
             //Set the listened flag in firebase for social roosters! NB
-            if (audioItem.getType() != Constants.AUDIO_TYPE_CHANNEL) {
+            if (audioItem.getType() == Constants.AUDIO_TYPE_SOCIAL) {
                 audioTableController.setListened(audioItem.getSender_id(), audioItem.getQueue_id());
             }
             //Remove entry from SQL db
@@ -898,6 +904,9 @@ public class AudioService extends Service {
 
     //Set timer to kill alarm after 5 minutes
     private void startTimer() {
+        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+        if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
+
         alarmFinishTimerHandler.postDelayed(alarmFinishTimerRunnable, Constants.ALARM_DEFAULTTIME);
     }
 
