@@ -23,6 +23,7 @@ public final class AudioTableController {
         this.context = context;
     }
 
+    //Ensure used on social roosters
     public void setListened(String senderId, String queueId) {
         DatabaseReference socialRoosterUploadsReference = FirebaseDatabase.getInstance().getReference()
                 .child("social_rooster_uploads").child(senderId).child(queueId);

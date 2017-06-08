@@ -770,7 +770,7 @@ public class AudioService extends Service {
     public void processListenedChannels() {
         //Ensure partially listened channels are removed and incremented
         try {
-            if (mThis.audioItem.getType() == 1) {
+            if (mThis.audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) {
                 audioTableManager.setListened(mThis.audioItem.getId());
             }
         } catch (NullPointerException e) {
@@ -780,7 +780,7 @@ public class AudioService extends Service {
         for (DeviceAudioQueueItem audioItem :
                 audioTableManager.selectListened()) {
             try {
-                if (audioItem.getType() == 1) {
+                if (audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) {
                     //increment the current story iteration if it is a story
                     Integer currentStoryIteration = new JSONPersistence(getApplicationContext()).getStoryIteration(audioItem.getQueue_id());
                     if (currentStoryIteration > 0)
@@ -823,9 +823,10 @@ public class AudioService extends Service {
         //Delete record of all listened audio files
         for (DeviceAudioQueueItem audioItem :
                 audioTableManager.selectListened()) {
-            //Set the listened flag in firebase
-            if (audioItem.getType() != Constants.AUDIO_TYPE_SOCIAL)
+            //Set the listened flag in firebase for social roosters! NB
+            if (audioItem.getType() != Constants.AUDIO_TYPE_CHANNEL) {
                 audioTableController.setListened(audioItem.getSender_id(), audioItem.getQueue_id());
+            }
             //Remove entry from SQL db
             audioTableManager.removeAudioEntry(audioItem);
         }
