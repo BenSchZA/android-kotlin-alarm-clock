@@ -66,6 +66,8 @@
     <string name="search_hint_friends">Search...</string>
     <string name="retrieve_contacts_permission">We need your permission to retrieve addable contacts, click me or swipe to try again.</string>
 
+    <string name="select_all_button">Select all friends</string>
+
     <string name="message_status_activity_title">Sent Roosters</string>
     <string name="status_sent">Sent</string>
     <string name="status_delivered">Delivered</string>
@@ -98,7 +100,6 @@
     <string name="dialog_background_settings_sony_2">&#160;phone has STAMINA mode enabled, you will: \n\n1) Have to wait for your channel content to download before closing the app. \n2) Not receive roosters from your friends.</string>
     <string name="dialog_background_settings_xiaomi_1">Your&#160;</string>
     <string name="dialog_background_settings_xiaomi_2">&#160;phone may need to give Rooster permission to wake you up.\n\nGo to Rooster\'s background settings and select \'No restrictions\'.\n\n</string>
-
 
     <string name="invite_to_rooster_message">How cool would it be if you could wake up to surprise voice notes from me and other friends? \n\nYou can also wake up to different content channels such as inspiration, comedy, music, news, meditation, bird calls and more! \n\nLike the best things in life, it’s free :) \nhttp://www.onelink.to/awesome_mornings</string>
 

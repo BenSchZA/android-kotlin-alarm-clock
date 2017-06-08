@@ -158,23 +158,6 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
             }
         });
 
-//        holder.btnDelete.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//
-//                ((FriendsFragmentActivity)appContext).deleteFriend(user);
-//
-//                final Handler handler = new Handler();
-//                handler.postDelayed(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        //Do something after 200ms
-//                        remove(user);
-//                    }
-//                }, 200);
-//            }
-//        });
-
         holder.btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

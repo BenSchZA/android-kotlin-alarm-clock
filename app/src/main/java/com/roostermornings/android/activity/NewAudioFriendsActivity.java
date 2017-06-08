@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -71,6 +72,9 @@ public class NewAudioFriendsActivity extends BaseActivity {
     @BindView(R.id.new_audio_friendsListView)
     RecyclerView mRecyclerView;
 
+    @BindView(R.id.select_all_button)
+    Button selectAllButton;
+
     @Inject FirebaseUser firebaseUser;
 
     @Override
@@ -86,6 +90,8 @@ public class NewAudioFriendsActivity extends BaseActivity {
 
         setupToolbar(null, null);
         setDayNightTheme();
+
+        selectAllButton.setSelected(false);
 
         firebaseUser.getToken(true)
                 .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
@@ -158,6 +164,15 @@ public class NewAudioFriendsActivity extends BaseActivity {
     public void onDestroy() {
         super.onDestroy();
         if(mBound) unbindService(mUploadServiceConnection);
+    }
+
+    @OnClick(R.id.select_all_button)
+    public void onClickSelectAll() {
+        selectAllButton.setSelected(!selectAllButton.isSelected());
+        for (User friend : mFriends) {
+            friend.setSelected(selectAllButton.isSelected());
+        }
+        mAdapter.notifyDataSetChanged();
     }
 
     private ServiceConnection mUploadServiceConnection = new ServiceConnection() {

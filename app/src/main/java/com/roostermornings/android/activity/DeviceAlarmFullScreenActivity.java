@@ -5,7 +5,6 @@
 
 package com.roostermornings.android.activity;
 
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -28,14 +27,11 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.crashlytics.android.Crashlytics;
-import com.google.firebase.crash.FirebaseCrash;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.ChannelRooster;
-import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
@@ -48,8 +44,6 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.OnClick;
-
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
@@ -192,7 +186,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
             attachAudioServiceBroadCastReceiver();
 
             //Replace image and name with message if no Roosters etc.
-            setDefaultDisplayProfile();
+            setDefaultDisplayProfile(true);
         }
 
         // Called when the connection with the service disconnects unexpectedly
@@ -257,10 +251,16 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         }
 
         if (audioItem != null && StrUtils.notNullOrEmpty(audioItem.getPicture()) && StrUtils.notNullOrEmpty(audioItem.getName())) {
+            //Both image and title are valid
             setProfilePic(audioItem.getPicture());
             txtSenderName.setText(audioItem.getName());
+        } else if(audioItem != null && StrUtils.notNullOrEmpty(audioItem.getName())) {
+            //Set default image, keep title
+            setDefaultDisplayProfile(false);
+            txtSenderName.setText(audioItem.getName());
         } else {
-            setDefaultDisplayProfile();
+            //Set default image and title
+            setDefaultDisplayProfile(true);
         }
         txtAlarmCount.setText(String.format("%s of %s", alarmPosition, alarmCount));
     }
@@ -296,16 +296,18 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
                     @Override
                     public void onError() {
-                        setDefaultDisplayProfile();
+                        setDefaultDisplayProfile(false);
                     }
                 });
     }
 
-    protected void setDefaultDisplayProfile() {
+    protected void setDefaultDisplayProfile(boolean overwriteTitle) {
         Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.logo);
         Drawable d = new BitmapDrawable(getResources(), bm);
-        txtSenderName.setText(R.string.alarm_default_name);
         imgSenderPic.setImageDrawable(d);
         imgSenderPic.setBackground(null);
+        if(overwriteTitle) {
+            txtSenderName.setText(R.string.alarm_default_name);
+        }
     }
 }

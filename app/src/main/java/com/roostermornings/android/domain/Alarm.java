@@ -38,6 +38,9 @@ public class Alarm {
     @Exclude
     private Integer unseen_roosters = 0;
 
+    @Exclude
+    private Long millis = 0L;
+
     // Required default constructor for Firebase object mapping
     @SuppressWarnings("unused")
     public Alarm() {
@@ -71,6 +74,16 @@ public class Alarm {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    @Exclude
+    public Long getMillis() {
+        return millis;
+    }
+
+    @Exclude
+    public void setMillis(Long millis) {
+        this.millis = millis;
     }
 
     @Exclude //NB: exclude needs to be used even for methods, so that Firebase doesn't include in db object mapping

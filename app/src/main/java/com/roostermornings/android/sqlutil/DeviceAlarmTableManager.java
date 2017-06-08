@@ -261,6 +261,20 @@ public class DeviceAlarmTableManager {
         return alarmList.get(0);
     }
 
+    public Long getMillisOfNextPendingAlarmInSet(String setId) {
+        SQLiteDatabase db = initDB();
+
+        String selectQuery = "SELECT * FROM " + AlarmTableEntry.TABLE_NAME +
+                " WHERE " + AlarmTableEntry.COLUMN_SET_ID + " LIKE \"%" + setId + "%\"" + " ORDER BY " + AlarmTableEntry.COLUMN_MILLIS + " ASC LIMIT 1;";
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        if(!checkValidCursor(cursor)) return null;
+        List<DeviceAlarm> alarmList = extractAlarms(cursor);
+
+        cursor.close();
+        return alarmList.get(0).getMillis();
+    }
+
     List<DeviceAlarm> getAlarmSets() {
         SQLiteDatabase db = initDB();
 
