@@ -48,8 +48,8 @@ import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.analytics.FA;
 import com.roostermornings.android.domain.Channel;
 import com.roostermornings.android.domain.ChannelRooster;
+import com.roostermornings.android.firebase.FirebaseNetwork;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
-import com.roostermornings.android.sqlutil.AudioTableController;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
@@ -103,7 +103,6 @@ public class AudioService extends Service {
 
     private static ArrayList<DeviceAudioQueueItem> audioItems = new ArrayList<>();
     private final AudioTableManager audioTableManager = new AudioTableManager(this);
-    private final AudioTableController audioTableController = new AudioTableController(this);
     private final DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(this);
     private final DeviceAlarmController deviceAlarmController = new DeviceAlarmController(this);
 
@@ -831,7 +830,7 @@ public class AudioService extends Service {
                 audioTableManager.selectListened()) {
             //Set the listened flag in firebase for social roosters! NB
             if (audioItem.getType() == Constants.AUDIO_TYPE_SOCIAL) {
-                audioTableController.setListened(audioItem.getSender_id(), audioItem.getQueue_id());
+                FirebaseNetwork.setListened(audioItem.getSender_id(), audioItem.getQueue_id());
             }
             //Remove entry from SQL db
             audioTableManager.removeAudioEntry(audioItem);

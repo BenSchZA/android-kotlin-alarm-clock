@@ -37,7 +37,6 @@ import com.roostermornings.android.domain.Channel;
 import com.roostermornings.android.domain.ChannelRooster;
 import com.roostermornings.android.domain.SocialRooster;
 import com.roostermornings.android.service.FirebaseListenerService;
-import com.roostermornings.android.sqlutil.AudioTableController;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
