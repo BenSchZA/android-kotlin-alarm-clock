@@ -53,7 +53,6 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     private boolean mBound = false;
     private BroadcastReceiver receiver;
     DeviceAudioQueueItem audioItem = new DeviceAudioQueueItem();
-    ChannelRooster channelRooster = new ChannelRooster();
 
     private int alarmCount = 1;
     private int alarmPosition = 1;

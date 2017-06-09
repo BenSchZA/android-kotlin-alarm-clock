@@ -65,19 +65,6 @@ public class RoosterUtils {
         }
     }
 
-    public static ArrayList<?> removeArrayListDuplicates(ArrayList<?> arrayList) {
-        try {
-            //LinkedHashSet preserves order
-            Set uniqueHashSet = new LinkedHashSet(arrayList);
-            arrayList.clear();
-            arrayList.addAll(uniqueHashSet);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ArrayList<>(Collections.EMPTY_LIST);
-        }
-        return arrayList;
-    }
-
     public static String setAlarmTimeFromHourAndMinute(Alarm alarm) {
 
         String alarmHour = (alarm.getHour() < 10 ? "0" : "") + alarm.getHour();
@@ -123,6 +110,5 @@ public class RoosterUtils {
         }
 
         return returnString;
-
     }
 }

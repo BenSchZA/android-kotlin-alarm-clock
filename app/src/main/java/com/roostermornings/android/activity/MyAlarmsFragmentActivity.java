@@ -30,6 +30,7 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.crashlytics.android.Crashlytics;
+import com.google.firebase.FirebaseException;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -218,7 +219,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                             if(alarmChannel != null) alarmChannelUID = alarmChannel.getId();
 
                             //If alarm from firebase does not exist locally, create it
-                            if(!deviceAlarmTableManager.isSetInDB(alarm.getUid())) {
+                            if(StrUtils.notNullOrEmpty(alarm.getUid()) && !deviceAlarmTableManager.isSetInDB(alarm.getUid())) {
                                 deviceAlarmController.registerAlarmSet(alarm.isEnabled(), alarm.getUid(), alarm.getHour(), alarm.getMinute(),
                                         alarm.getDays(), alarm.isRecurring(), alarmChannelUID, alarm.isAllow_friend_audio_files());
                             }
@@ -237,12 +238,12 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                             //Add alarm to adapter display arraylist and notify adapter of change
                             mAlarms.add(alarm);
                             mAdapter.notifyItemInserted(mAlarms.size() - 1);
-                            //Notify adapter of new data to be displayed
+
+                            //Notify adapter of new rooster count data to be displayed
                             updateRoosterNotification();
                         }
                         //Sort alarms according to time
                         sortAlarms(mAlarms);
-                        mAdapter.notifyDataSetChanged();
 
                         //Recreate all enabled alarms as failsafe
                         deviceAlarmController.rebootAlarms();
@@ -274,6 +275,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                 return lhs.getMillis().compareTo(rhs.getMillis());
             }
         });
+        mAdapter.notifyDataSetChanged();
     }
 
     private void updateRoosterNotification() {

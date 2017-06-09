@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
+import static com.roostermornings.android.activity.base.BaseActivity.mCurrentUser;
+
 public class FirebaseNetwork {
 
     public static void updateLastSeen() {
@@ -76,6 +78,41 @@ public class FirebaseNetwork {
         if(fUser != null && StrUtils.notNullOrEmpty(fUser.getUid())) {
             childUpdates.put(String.format("users/%s/%s",
                     fUser.getUid(), "profile_pic"), url.toString());
+            fDB.updateChildren(childUpdates);
+        }
+    }
+
+    public static void updateFirebaseAlarmEnabled(String setId, boolean enabled) {
+        DatabaseReference fDB = FirebaseDatabase.getInstance().getReference();
+        FirebaseUser fUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        Map<String, Object> childUpdates = new HashMap<>();
+
+        if(fUser != null && StrUtils.notNullOrEmpty(fUser.getUid()) && StrUtils.notNullOrEmpty(setId)) {
+            childUpdates.put(String.format("alarms/%s/%s/%s",
+                    fUser.getUid(), setId, "enabled"), enabled);
+            fDB.updateChildren(childUpdates);
+        }
+    }
+
+    public static void removeFirebaseAlarm(String setId) {
+        DatabaseReference fDB = FirebaseDatabase.getInstance().getReference();
+        FirebaseUser fUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        if(fUser != null && StrUtils.notNullOrEmpty(fUser.getUid()) && StrUtils.notNullOrEmpty(setId)) {
+            fDB.child("alarms").child(fUser.getUid()).child(setId).removeValue();
+        }
+    }
+
+    //Ensure used on social roosters
+    public static void setListened(String senderId, String queueId) {
+        DatabaseReference fDB = FirebaseDatabase.getInstance().getReference();
+
+        Map<String, Object> childUpdates = new HashMap<>();
+
+        if(StrUtils.notNullOrEmpty(senderId) && StrUtils.notNullOrEmpty(queueId)) {
+            childUpdates.put(String.format("social_rooster_uploads/%s/%s/%s",
+                    senderId, queueId, "listened"), true);
             fDB.updateChildren(childUpdates);
         }
     }

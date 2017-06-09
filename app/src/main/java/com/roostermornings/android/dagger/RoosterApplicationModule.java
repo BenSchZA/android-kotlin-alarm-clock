@@ -29,7 +29,6 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
-import com.roostermornings.android.sqlutil.AudioTableController;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
@@ -132,12 +131,6 @@ public class RoosterApplicationModule {
     @Singleton
     AudioTableManager provideAudioTableManager(BaseApplication baseApplication) {
         return new AudioTableManager(baseApplication);
-    }
-
-    @Provides
-    @Singleton
-    AudioTableController provideAudioTableController(BaseApplication baseApplication) {
-        return new AudioTableController(baseApplication);
     }
 
     @Provides

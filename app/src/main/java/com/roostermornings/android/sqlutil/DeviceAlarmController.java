@@ -21,10 +21,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
 import com.roostermornings.android.domain.Alarm;
+import com.roostermornings.android.firebase.FirebaseNetwork;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.sync.DownloadSyncAdapter;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.StrUtils;
 import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
@@ -275,7 +277,7 @@ public final class DeviceAlarmController {
         List<DeviceAlarm> deviceAlarmList = deviceAlarmTableManager.getAlarmSet(setId);
         if(deviceAlarmList != null) removeSetChannelAudio(deviceAlarmList);
         deleteAlarmSetIntents(setId);
-        removeFirebaseAlarm(setId);
+        FirebaseNetwork.removeFirebaseAlarm(setId);
     }
 
     private void removeSetChannelAudio(List<DeviceAlarm> deviceAlarmList) {
@@ -309,7 +311,8 @@ public final class DeviceAlarmController {
             deviceAlarmTableManager.setSetEnabled(setId, enabled);
             deviceAlarmTableManager.setSetChanged(setId, true);
             refreshAlarms(deviceAlarmTableManager.selectChanged());
-            updateFirebaseAlarmEnabled(setId, enabled);
+
+            FirebaseNetwork.updateFirebaseAlarmEnabled(setId, enabled);
             //Trigger audio download
             //Download any social or channel audio files
             ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
@@ -326,26 +329,8 @@ public final class DeviceAlarmController {
             deviceAlarmTableManager.setSetEnabled(setId, enabled);
             //TODO: fresh data or less data usage?
             //removeSetChannelAudio(deviceAlarmList);
-            updateFirebaseAlarmEnabled(setId, enabled);
+            FirebaseNetwork.updateFirebaseAlarmEnabled(setId, enabled);
         }
-    }
-
-    private void removeFirebaseAlarm(String setId) {
-        if(mCurrentUser == null) return;
-        DatabaseReference alarmReference = FirebaseDatabase.getInstance().getReference()
-                .child("alarms").child(mCurrentUser.getUid()).child(setId);
-        alarmReference.removeValue();
-    }
-
-    private void updateFirebaseAlarmEnabled(String setId, boolean enabled) {
-        if(mCurrentUser == null) return;
-        DatabaseReference alarmReference = FirebaseDatabase.getInstance().getReference()
-                .child("alarms").child(mCurrentUser.getUid()).child(setId);
-
-        Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put("enabled", enabled);
-
-        alarmReference.updateChildren(childUpdates);
     }
 
     private void cancelAlarm(DeviceAlarm deviceAlarm) {
