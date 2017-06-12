@@ -25,7 +25,10 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.R;
@@ -41,6 +44,7 @@ import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Objects;
 
 import javax.inject.Inject;
@@ -161,12 +165,41 @@ public class FriendsMyFragment1 extends BaseFragment {
             }
         }
 
+        //Listen for changes to friends node and refresh on change
+        registerFriendsListener();
+
         return view;
     }
 
     public void manualSwipeRefresh() {
         swipeRefreshLayout.setRefreshing(true);
         retrieveMyFriends();
+    }
+
+    private void registerFriendsListener() {
+        //Listen for changes to friends node
+
+        DatabaseReference mFriendsReference = mDatabase
+                .child("users").child(firebaseUser.getUid()).child("friends");
+        mFriendsReference.keepSynced(true);
+
+        ValueEventListener friendsListener = new ValueEventListener() {
+            Boolean firstRun;
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(firstRun == null) firstRun = true;
+                if(!firstRun) {
+                    manualSwipeRefresh();
+                }
+                firstRun = false;
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+            }
+        };
+        mFriendsReference.addValueEventListener(friendsListener);
     }
 
     //NB: bind ButterKnife to view and then initialise UI elements

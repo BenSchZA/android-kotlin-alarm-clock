@@ -263,7 +263,7 @@ public final class DeviceAlarmController {
         }
     }
 
-    public void deleteAlarmSetIntents(String setId) {
+    private void deleteAlarmSetIntents(String setId) {
         List<DeviceAlarm> deviceAlarmList = deviceAlarmTableManager.getAlarmSet(setId);
         deviceAlarmTableManager.deleteAlarmSet(setId);
         for (DeviceAlarm deviceAlarm :
@@ -327,8 +327,8 @@ public final class DeviceAlarmController {
                 cancelAlarm(deviceAlarm);
             }
             deviceAlarmTableManager.setSetEnabled(setId, enabled);
-            //TODO: fresh data or less data usage?
-            //removeSetChannelAudio(deviceAlarmList);
+            //TODO: alternatives for keeping data fresh?
+            removeSetChannelAudio(deviceAlarmList);
             FirebaseNetwork.updateFirebaseAlarmEnabled(setId, enabled);
         }
     }

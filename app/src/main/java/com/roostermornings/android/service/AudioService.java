@@ -243,12 +243,12 @@ public class AudioService extends Service {
                     if(intent != null && StrUtils.notNullOrEmpty(intent.getStringExtra(Constants.EXTRA_ALARMID))) {
                         startAlarmContent(intent.getStringExtra(Constants.EXTRA_ALARMID));
                     } else {
-                        startDefaultAlarmTone(true);
+                        startDefaultAlarmTone();
                     }
                 }
             } catch(IllegalStateException e) {
                 logError(e);
-                startDefaultAlarmTone(true);
+                startDefaultAlarmTone();
             }
         }
 
@@ -310,7 +310,7 @@ public class AudioService extends Service {
             this.alarmChannelUid = alarm.getChannel();
             this.alarmUid = alarmUid;
         } else {
-            startDefaultAlarmTone(true);
+            startDefaultAlarmTone();
             return;
         }
 
@@ -352,7 +352,7 @@ public class AudioService extends Service {
 
         //If no content exists to add to audioItems, then return now
         if(mThis.socialAudioItems.isEmpty() && mThis.channelAudioItems.isEmpty()) {
-            startDefaultAlarmTone(false);
+            startDefaultAlarmTone();
             return;
         }
 
@@ -378,12 +378,12 @@ public class AudioService extends Service {
                 }
             }
             if (audioItems.isEmpty()) {
-                startDefaultAlarmTone(false);
+                startDefaultAlarmTone();
                 return;
             }
         } catch (NullPointerException e){
             logError(e);
-            startDefaultAlarmTone(true);
+            startDefaultAlarmTone();
             return;
         }
         playAlarmRoosters();
@@ -397,7 +397,7 @@ public class AudioService extends Service {
             //Check if channel has a valid ID, else next pending alarm has no channel
             final String channelId = deviceAlarm.getChannel();
             if (!StrUtils.notNullOrEmpty(channelId)) {
-                startDefaultAlarmTone(false);
+                startDefaultAlarmTone();
                 return;
             }
 
@@ -413,12 +413,12 @@ public class AudioService extends Service {
 
                     //Check if channel exists
                     if (channel == null) {
-                        startDefaultAlarmTone(true);
+                        startDefaultAlarmTone();
                         return;
                     }
                     //Check if channel is active
                     if (!channel.isActive()) {
-                        startDefaultAlarmTone(true);
+                        startDefaultAlarmTone();
                         return;
                     }
 
@@ -473,7 +473,7 @@ public class AudioService extends Service {
 
                         @Override
                         public void onCancelled(DatabaseError databaseError) {
-                            startDefaultAlarmTone(true);
+                            startDefaultAlarmTone();
                         }
                     };
                     channelRoosterUploadsReference.addListenerForSingleValueEvent(channelRoosterUploadsListener);
@@ -482,13 +482,13 @@ public class AudioService extends Service {
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
                     Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                    startDefaultAlarmTone(true);
+                    startDefaultAlarmTone();
                 }
             };
             channelReference.addListenerForSingleValueEvent(channelListener);
         } catch(Exception e) {
             logError(e);
-            startDefaultAlarmTone(true);
+            startDefaultAlarmTone();
         }
     }
 
@@ -500,7 +500,7 @@ public class AudioService extends Service {
 
         //Check that URL is notNullOrEmpty
         if(!StrUtils.notNullOrEmpty(url)) {
-            startDefaultAlarmTone(true);
+            startDefaultAlarmTone();
             return;
         }
 
@@ -522,7 +522,7 @@ public class AudioService extends Service {
                     streamMediaPlayer.setDataSource(downloadUrl.toString());
                 } catch (Exception e) {
                     logError(e);
-                    startDefaultAlarmTone(true);
+                    startDefaultAlarmTone();
                     return;
                 }
                 streamMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
@@ -551,7 +551,7 @@ public class AudioService extends Service {
                 streamMediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
                     @Override
                     public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
-                        startDefaultAlarmTone(true);
+                        startDefaultAlarmTone();
                         return true;
                     }
                 });
@@ -562,7 +562,7 @@ public class AudioService extends Service {
             @Override
             public void onFailure(@NonNull Exception exception) {
                 // Handle any errors
-                startDefaultAlarmTone(true);
+                startDefaultAlarmTone();
             }
         });
     }
@@ -579,7 +579,7 @@ public class AudioService extends Service {
 
         //Check conditions for playing default tone: people must wake up!
         if (audioItems == null || audioItems.isEmpty()) {
-            startDefaultAlarmTone(true);
+            startDefaultAlarmTone();
             return;
         }
 
@@ -610,7 +610,7 @@ public class AudioService extends Service {
         mThis.audioItem = audioItem;
 
         if(audioItem == null) {
-            startDefaultAlarmTone(true);
+            startDefaultAlarmTone();
             return;
         }
 
@@ -670,7 +670,7 @@ public class AudioService extends Service {
                             audioTableManager.setListened(mThis.audioItem.getId());
                             //Check if at end of queue, else play next file
                             if(audioItems.isEmpty()) {
-                                startDefaultAlarmTone(true);
+                                startDefaultAlarmTone();
                                 return;
                             }
                             if (audioItems.size() == audioItems.indexOf(audioItem) + 1) {
@@ -691,12 +691,12 @@ public class AudioService extends Service {
                     audioTableManager.setListened(mThis.audioItem.getId());
                     //Check if at end of queue, else play next file
                     if(audioItems.isEmpty()) {
-                        startDefaultAlarmTone(true);
+                        startDefaultAlarmTone();
                         return true;
                     }
                     if (audioItems.size() == audioItems.indexOf(audioItem) + 1) {
                         //If an error occurs on the last queue item, assume error on all and start default alarm tone as fail safe
-                        startDefaultAlarmTone(true);
+                        startDefaultAlarmTone();
                     } else{
                         playRooster(getNextAudioItem());
                     }
@@ -718,7 +718,7 @@ public class AudioService extends Service {
             audioItems.remove(audioItem);
 
             //If an error occurs on the last queue item, assume error on all and start default alarm tone as fail safe
-            startDefaultAlarmTone(true);
+            startDefaultAlarmTone();
         }
     }
 
@@ -740,7 +740,7 @@ public class AudioService extends Service {
 
     public void skipNext() {
         if(audioItems.isEmpty()) {
-            startDefaultAlarmTone(true);
+            startDefaultAlarmTone();
             return;
         }
         try {
@@ -757,7 +757,7 @@ public class AudioService extends Service {
 
     public void skipPrevious() {
         if(audioItems.isEmpty()) {
-            startDefaultAlarmTone(true);
+            startDefaultAlarmTone();
             return;
         }
         try {
@@ -1008,9 +1008,12 @@ public class AudioService extends Service {
         }
     }
 
-    private void startDefaultAlarmTone(final Boolean failure) {
+    private void startDefaultAlarmTone() {
         String method = Thread.currentThread().getStackTrace()[2].getMethodName();
         if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
+
+        //If channel UID attached to alarm, content should have played
+        final Boolean failure = StrUtils.notNullOrEmpty(alarm.getChannel());
 
         try {
             //Check if audio already playing
@@ -1061,6 +1064,7 @@ public class AudioService extends Service {
                         mediaPlayerDefault.start();
                         //Start timer to kill after 5 minutes
                         startTimer();
+                        logDefaultRingtoneState(failure);
                     }
                 });
                 mediaPlayerDefault.setOnErrorListener(new MediaPlayer.OnErrorListener() {
@@ -1070,7 +1074,6 @@ public class AudioService extends Service {
                         if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method + " error listener");
 
                         startFailsafe();
-                        logDefaultRingtoneState(failure);
                         return true;
                     }
                 });
@@ -1092,12 +1095,13 @@ public class AudioService extends Service {
 
             startFailsafe();
         }
-        logDefaultRingtoneState(failure);
     }
 
     private void startFailsafe() {
         String method = Thread.currentThread().getStackTrace()[2].getMethodName();
         if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
+
+        logDefaultRingtoneState(true);
 
         checkStreamVolume(AudioManager.STREAM_RING);
         startVibrate();
@@ -1130,12 +1134,10 @@ public class AudioService extends Service {
         }
 
         if (failure) {
-            if (Build.BRAND.toLowerCase().contains("sony")) {
-                //Show dialog explainer again
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false);
-                editor.apply();
-            }
+            //Show dialog explainer again
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false);
+            editor.apply();
 
             FA.Log(FA.Event.alarm_activated.class, FA.Event.default_alarm_play.Param.fatal_failure, true);
         } else {
