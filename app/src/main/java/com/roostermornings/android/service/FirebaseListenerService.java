@@ -25,7 +25,7 @@ import com.roostermornings.android.util.Constants;
 public class FirebaseListenerService extends Service {
     protected DatabaseReference mDatabase;
     protected FirebaseAuth mAuth;
-    static boolean running = false;
+    public static boolean mRunning = false;
 
     public FirebaseListenerService() {
     }
@@ -38,47 +38,48 @@ public class FirebaseListenerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        running = true;
-        //Reset flags - NB onChildChanged called once for each child when first called
-        BaseApplication.setNotificationFlag(0, Constants.FLAG_FRIENDREQUESTS);
-        //Listen for changes to Firebase user friend requests, display notification
-        if(getFirebaseUser() != null) {
-            mDatabase = FirebaseDatabase.getInstance().getReference();
+        if (!mRunning) {
+            mRunning = true;
+            //Reset flags - NB onChildChanged called once for each child when first called
+            BaseApplication.setNotificationFlag(0, Constants.FLAG_FRIENDREQUESTS);
+            //Listen for changes to Firebase user friend requests, display notification
+            if (getFirebaseUser() != null) {
+                mDatabase = FirebaseDatabase.getInstance().getReference();
 
-            DatabaseReference mRequestsReference = mDatabase
-                    .child("friend_requests_received").child(getFirebaseUser().getUid());
+                DatabaseReference mRequestsReference = mDatabase
+                        .child("friend_requests_received").child(getFirebaseUser().getUid());
 
-            ChildEventListener friendRequestListener = new ChildEventListener() {
-                @Override
-                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    //Send broadcast message to notify all receivers of new notification
-                    Intent intent = new Intent(Constants.ACTION_REQUESTNOTIFICATION);
-                    sendBroadcast(intent);
-                }
+                ChildEventListener friendRequestListener = new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                        //Send broadcast message to notify all receivers of new notification
+                        Intent intent = new Intent(Constants.ACTION_REQUESTNOTIFICATION);
+                        sendBroadcast(intent);
+                    }
 
-                @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
-                }
+                    }
 
-                @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot) {
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {
 
-                }
+                    }
 
-                @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
 
-                }
+                    }
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
 
-                }
-            };
-            mRequestsReference.addChildEventListener(friendRequestListener);
+                    }
+                };
+                mRequestsReference.addChildEventListener(friendRequestListener);
 
-            //TODO: implement badge count
+                //TODO: implement badge count
 //            DatabaseReference mRoosterReference = mDatabase
 //                    .child("social_rooster_queue").child(getFirebaseUser().getUid());
 //
@@ -109,6 +110,7 @@ public class FirebaseListenerService extends Service {
 //                }
 //            };
 //            mRoosterReference.addChildEventListener(roosterListener);
+            }
         }
 
         return START_STICKY;
