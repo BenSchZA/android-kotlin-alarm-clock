@@ -243,9 +243,9 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                 }
                 if(!channelIterationMap.isEmpty() && iteration != null) {
                     findNextValidChannelRooster(channelIterationMap, channel, iteration);
-                    //Only refresh on last item to ensure clean update
-                    if(channel.getUid().equals(lastChannel.getUid())) refreshChannelRoosters();
                 }
+                //Only refresh on last item to ensure clean update
+                if(channel.getUid().equals(lastChannel.getUid())) refreshChannelRoosters();
             }
 
             @Override
