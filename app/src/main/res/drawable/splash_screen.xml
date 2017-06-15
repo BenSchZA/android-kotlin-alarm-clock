@@ -7,12 +7,13 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:drawable="@color/rooster_light_blue"/>
+        android:drawable="@color/rooster_splash"/>
 
     <item>
         <bitmap
             android:gravity="center"
-            android:src="@drawable/logo" />
+            android:src="@drawable/splash_logo"
+            android:dither="true"/>
     </item>
 
 </layer-list>

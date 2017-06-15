@@ -5,6 +5,7 @@
 
 package com.roostermornings.android.activity;
 
+import android.app.ActionBar;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -36,6 +37,7 @@ import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.StrUtils;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
@@ -91,7 +93,6 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        initialize(R.layout.activity_device_alarm_full_screen);
         inject(((BaseApplication)getApplication()).getRoosterApplicationComponent());
 
         //Used to ensure alarm shows over lock-screen
@@ -99,6 +100,20 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
                 +WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
                 +WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
                 +WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+
+        if(RoosterUtils.hasJellyBean()) {
+            View decorView = getWindow().getDecorView();
+            // Hide the status bar.
+            int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+            decorView.setSystemUiVisibility(uiOptions);
+            // Remember that you should never show the action bar if the
+            // status bar is hidden, so hide that too if necessary.
+            ActionBar actionBar = getActionBar();
+            if(actionBar != null) actionBar.hide();
+        } else {
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        }
+        initialize(R.layout.activity_device_alarm_full_screen);
 
         setDayNightTheme();
 
@@ -290,6 +305,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
                         RoundedBitmapDrawable imageDrawable = RoundedBitmapDrawableFactory.create(getResources(), imageBitmap);
                         imageDrawable.setCircular(true);
                         imageDrawable.setCornerRadius(Math.max(imageBitmap.getWidth(), imageBitmap.getHeight()) / 2.0f);
+                        imgSenderPic.setScaleType(ImageView.ScaleType.FIT_CENTER);
                         imgSenderPic.setImageDrawable(imageDrawable);
                     }
 
@@ -301,9 +317,11 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     }
 
     protected void setDefaultDisplayProfile(boolean overwriteTitle) {
-        Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.logo);
-        Drawable d = new BitmapDrawable(getResources(), bm);
-        imgSenderPic.setImageDrawable(d);
+        //Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.logo_icon);
+        //Drawable d = new BitmapDrawable(getResources(), bm);
+        imgSenderPic.setMaxWidth(300);
+        imgSenderPic.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        imgSenderPic.setImageResource(R.drawable.logo_icon);
         imgSenderPic.setBackground(null);
         if(overwriteTitle) {
             txtSenderName.setText(R.string.alarm_default_name);
