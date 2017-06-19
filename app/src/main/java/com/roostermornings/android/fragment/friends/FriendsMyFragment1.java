@@ -172,7 +172,7 @@ public class FriendsMyFragment1 extends BaseFragment {
     }
 
     public void manualSwipeRefresh() {
-        swipeRefreshLayout.setRefreshing(true);
+        if(swipeRefreshLayout != null) swipeRefreshLayout.setRefreshing(true);
         retrieveMyFriends();
     }
 

@@ -99,13 +99,11 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
     Future oneInstanceTaskFuture;
 
     private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
 
     @Inject DeviceAlarmTableManager deviceAlarmTableManager;
     @Inject AudioTableManager audioTableManager;
     @Inject BaseApplication AppContext;
-    @Inject
-    SharedPreferences sharedPreferences;
+    @Inject SharedPreferences sharedPreferences;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -159,6 +157,23 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
             }
         }.run();
 
+        //Fetch content from Firebase
+        getChannelData();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        if(mediaPlayer != null) {
+            mediaPlayer.release();
+        }
+        if(oneInstanceTaskFuture != null) oneInstanceTaskFuture.cancel(true);
+        clearChannelRoosterMediaChecks();
+        mAdapter.notifyDataSetChanged();
+    }
+
+    private void getChannelData() {
         mChannelsReference = FirebaseDatabase.getInstance().getReference()
                 .child("channels");
         mChannelsReference.keepSynced(true);
@@ -188,6 +203,9 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                             iterator.next();
                             if(!iterator.hasNext()){
                                 lastChannel = channel;
+                                //Show content after last channel load
+                                contentProgressBar.setVisibility(View.GONE);
+                                mRecyclerView.setVisibility(View.VISIBLE);
                             }
                         }
                     }
@@ -201,18 +219,6 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                 mChannelsReference.addListenerForSingleValueEvent(channelsListener);
             }
         }.run();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        if(mediaPlayer != null) {
-            mediaPlayer.release();
-        }
-        if(oneInstanceTaskFuture != null) oneInstanceTaskFuture.cancel(true);
-        clearChannelRoosterMediaChecks();
-        mAdapter.notifyDataSetChanged();
     }
 
     private void getChannelRoosterData(final Channel channel, final Integer iteration) {
@@ -245,7 +251,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                     findNextValidChannelRooster(channelIterationMap, channel, iteration);
                 }
                 //Only refresh on last item to ensure clean update
-                if(channel.getUid().equals(lastChannel.getUid())) refreshChannelRoosters();
+                //if(channel.getUid().equals(lastChannel.getUid())) refreshChannelRoosters();
             }
 
             @Override
@@ -254,25 +260,6 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
             }
         };
         channelRoosterUploadsReference.addListenerForSingleValueEvent(channelRoosterUploadsListener);
-    }
-
-    private void refreshChannelRoosters() {
-        new Thread() {
-            @Override
-            public void run() {
-                //TreeMap ensures unique and allows sorting by priority! How cool is that?
-                channelRoosters.clear();
-                //This method allows us to have multiple objects per priority key
-                List<ChannelRooster> values = new ArrayList<>();
-                for(List<ChannelRooster> channelRoosterList : channelRoosterMap.values()) {
-                    values.addAll(channelRoosterList);
-                }
-                if(!values.isEmpty()) channelRoosters.addAll(values);
-                mAdapter.notifyDataSetChanged();
-                contentProgressBar.setVisibility(View.GONE);
-                mRecyclerView.setVisibility(View.VISIBLE);
-            }
-        }.run();
     }
 
     private void findNextValidChannelRooster(final TreeMap<Integer,ChannelRooster> channelIterationMap, final Channel channel, final Integer iteration) {
@@ -311,6 +298,25 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                         channelRoosterMap.put(channel.getPriority(), values);
                     }
                 }
+                //For each channel rooster fetched, refresh the display list
+                refreshChannelRoosters();
+            }
+        }.run();
+    }
+
+    private void refreshChannelRoosters() {
+        new Thread() {
+            @Override
+            public void run() {
+                //TreeMap ensures unique and allows sorting by priority! How cool is that?
+                channelRoosters.clear();
+                //This method allows us to have multiple objects per priority key
+                List<ChannelRooster> values = new ArrayList<>();
+                for(List<ChannelRooster> channelRoosterList : channelRoosterMap.values()) {
+                    values.addAll(channelRoosterList);
+                }
+                if(!values.isEmpty()) channelRoosters.addAll(values);
+                mAdapter.notifyDataSetChanged();
             }
         }.run();
     }
