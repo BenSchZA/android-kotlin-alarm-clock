@@ -294,6 +294,8 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     }
 
     protected void setProfilePic(String url) {
+        //Reset scale type
+        imgSenderPic.setScaleType(ImageView.ScaleType.FIT_CENTER);
 
         Picasso.with(DeviceAlarmFullScreenActivity.this).load(url)
                 .resize(600, 600)
@@ -305,7 +307,6 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
                         RoundedBitmapDrawable imageDrawable = RoundedBitmapDrawableFactory.create(getResources(), imageBitmap);
                         imageDrawable.setCircular(true);
                         imageDrawable.setCornerRadius(Math.max(imageBitmap.getWidth(), imageBitmap.getHeight()) / 2.0f);
-                        imgSenderPic.setScaleType(ImageView.ScaleType.FIT_CENTER);
                         imgSenderPic.setImageDrawable(imageDrawable);
                     }
 
@@ -319,10 +320,15 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     protected void setDefaultDisplayProfile(boolean overwriteTitle) {
         //Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.logo_icon);
         //Drawable d = new BitmapDrawable(getResources(), bm);
-        imgSenderPic.setMaxWidth(300);
+        //Set max width to 600 pixels, as with channel image
+        imgSenderPic.setMaxWidth(600);
+        //Set center inside to ensure logo scaled to fit inside 600 px max width
         imgSenderPic.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        //Set logo as default image
         imgSenderPic.setImageResource(R.drawable.logo_icon);
+        //Clear background (grey circle)
         imgSenderPic.setBackground(null);
+        //Only overwrite title if it is not available
         if(overwriteTitle) {
             txtSenderName.setText(R.string.alarm_default_name);
         }

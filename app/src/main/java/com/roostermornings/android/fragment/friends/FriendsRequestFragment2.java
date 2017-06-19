@@ -134,7 +134,7 @@ public class FriendsRequestFragment2 extends BaseFragment {
     }
 
     public void manualSwipeRefresh() {
-        swipeRefreshLayout.setRefreshing(true);
+        if(swipeRefreshLayout != null) swipeRefreshLayout.setRefreshing(true);
         getDatabaseReference();
         getRequests();
     }
