@@ -140,12 +140,19 @@ public class FriendsInviteFragment3 extends BaseFragment {
                     public void onRefresh() {
                         // This method performs the actual data-refresh operation.
                         // The method calls setRefreshing(false) when it's finished.
-                        requestGetContacts();
+
+                        //If pull to refresh and permission has been denied, retry, else request permission as per normal
+                        if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+                                android.Manifest.permission.READ_CONTACTS)) {
+                            retrieveContactsPermissionRetry();
+                        } else {
+                            requestPermissionReadContacts();
+                        }
                     }
                 }
         );
 
-        requestGetContacts();
+        requestPermissionReadContacts();
 
         return view;
     }
@@ -209,18 +216,10 @@ public class FriendsInviteFragment3 extends BaseFragment {
         super.onResume();
     }
 
-    public void requestGetContacts() {
-        baseActivity = (BaseActivity) getActivity();
-        if (ContextCompat.checkSelfPermission(AppContext,
-                android.Manifest.permission.READ_CONTACTS)
-                == PackageManager.PERMISSION_GRANTED) executeNodeMyContactsTask();
-        else  {
-            requestPermissionReadContacts();
-        }
-    }
+    public void requestPermissionReadContacts() {
+        //Clear explainer on entry, show if necessary i.e. permission previously denied
+        displayRequestPermissionExplainer(false);
 
-    private void requestPermissionReadContacts() {
-        // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(getActivity(),
                 android.Manifest.permission.READ_CONTACTS)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -234,20 +233,22 @@ public class FriendsInviteFragment3 extends BaseFragment {
                 // sees the explanation, try again to request the permission.
 
                 displayRequestPermissionExplainer(true);
-
             } else {
 
                 // No explanation needed, we can request the permission.
 
-                ActivityCompat.requestPermissions(getActivity(),
-                        new String[]{android.Manifest.permission.READ_CONTACTS},
-                        Constants.MY_PERMISSIONS_REQUEST_READ_CONTACTS);
-
                 // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
                 // app-defined int constant. The callback method gets the
                 // result of the request.
-                displayRequestPermissionExplainer(false);
+
+                ActivityCompat.requestPermissions(getActivity(),
+                        new String[]{android.Manifest.permission.READ_CONTACTS},
+                        Constants.MY_PERMISSIONS_REQUEST_READ_CONTACTS);
             }
+        } else if(ContextCompat.checkSelfPermission(AppContext,
+                android.Manifest.permission.READ_CONTACTS)
+                == PackageManager.PERMISSION_GRANTED) {
+            executeNodeMyContactsTask();
         }
     }
 

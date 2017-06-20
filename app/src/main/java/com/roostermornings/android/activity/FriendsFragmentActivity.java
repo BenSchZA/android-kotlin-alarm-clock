@@ -401,7 +401,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    friendsInviteFragment3.requestGetContacts();
+                    friendsInviteFragment3.requestPermissionReadContacts();
                 } else {
                     friendsInviteFragment3.displayRequestPermissionExplainer(true);
                 }
