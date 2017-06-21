@@ -270,8 +270,15 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
                                 }
 
                                 //Check head and tail of naturally sorted TreeMap for next valid channel content
-                                SortedMap<Integer,ChannelRooster> tailMap = channelIterationMap.tailMap(iteration);
-                                SortedMap<Integer,ChannelRooster> headMap = channelIterationMap.headMap(iteration);
+                                Integer actualIterationKey;
+                                //Check if iteration is valid in the context of channelIterationMap keys
+                                if(iteration > channelIterationMap.lastKey() || iteration < channelIterationMap.firstKey()) {
+                                    actualIterationKey = channelIterationMap.firstKey();
+                                } else {
+                                    actualIterationKey = iteration;
+                                }
+                                SortedMap<Integer,ChannelRooster> tailMap = channelIterationMap.tailMap(actualIterationKey);
+                                SortedMap<Integer,ChannelRooster> headMap = channelIterationMap.headMap(actualIterationKey);
                                 if(!tailMap.isEmpty()) {
                                     //User is starting story at next valid entry
                                     //Set entry for iteration to current valid story iteration, to be incremented on play
