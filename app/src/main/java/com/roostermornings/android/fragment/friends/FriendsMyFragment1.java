@@ -40,6 +40,7 @@ import com.roostermornings.android.domain.User;
 import com.roostermornings.android.domain.Users;
 import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.JSONPersistence;
 import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
@@ -87,6 +88,7 @@ public class FriendsMyFragment1 extends BaseFragment {
 
     @Inject Context AppContext;
     @Inject FirebaseUser firebaseUser;
+    @Inject JSONPersistence jsonPersistence;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -145,23 +147,14 @@ public class FriendsMyFragment1 extends BaseFragment {
         //Check if node response already exists
         if(statusCode == 200) {
             swipeRefreshLayout.setRefreshing(false);
+        } else if(!jsonPersistence.getFriends().isEmpty()) {
+            swipeRefreshLayout.setRefreshing(false);
+            mUsers = jsonPersistence.getFriends();
         } else {
             if (!checkInternetConnection()) {
                 swipeRefreshLayout.setRefreshing(false);
             } else {
                 if(!swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(true);
-                firebaseUser.getToken(true)
-                        .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
-                            public void onComplete(@NonNull Task<GetTokenResult> task) {
-                                if (task.isSuccessful()) {
-                                    firebaseIdToken = task.getResult().getToken();
-                                    retrieveMyFriends();
-                                } else {
-                                    // Handle error -> task.getException();
-                                    swipeRefreshLayout.setRefreshing(false);
-                                }
-                            }
-                        });
             }
         }
 
@@ -211,21 +204,45 @@ public class FriendsMyFragment1 extends BaseFragment {
         mAdapter = new FriendsMyListAdapter(mUsers, getActivity());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(AppContext));
         mRecyclerView.setAdapter(mAdapter);
+
+        retrieveMyFriends();
     }
 
     private void retrieveMyFriends() {
 
-        if (!checkInternetConnection()) return;
+        if (!checkInternetConnection()) {
+            swipeRefreshLayout.setRefreshing(false);
+            return;
+        }
 
         if (firebaseUser == null) {
-            if(BuildConfig.DEBUG) Log.d(TAG, "User not authenticated on FB!");
+            Toaster.makeToast(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG).checkTastyToast();
+            swipeRefreshLayout.setRefreshing(false);
             return;
         }
 
         if("".equals(firebaseIdToken)) {
-            Toaster.makeToast(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG).checkTastyToast();
-            return;
+            firebaseUser.getToken(true)
+                .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+                    public void onComplete(@NonNull Task<GetTokenResult> task) {
+                        if (task.isSuccessful()) {
+                            firebaseIdToken = task.getResult().getToken();
+
+                            callNodeMyFriendsAPI();
+
+                        } else {
+                            // Handle error -> task.getException();
+                            Toaster.makeToast(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG).checkTastyToast();
+                            swipeRefreshLayout.setRefreshing(false);
+                        }
+                    }
+                });
+        } else {
+            callNodeMyFriendsAPI();
         }
+    }
+
+    private void callNodeMyFriendsAPI() {
         Call<Users> call = apiService().retrieveUserFriends(firebaseIdToken);
 
         call.enqueue(new Callback<Users>() {
@@ -248,10 +265,9 @@ public class FriendsMyFragment1 extends BaseFragment {
                     mUsers.addAll(apiResponse.users);
                     while(mUsers.remove(null));
                     sortNamesUsers(mUsers);
+                    //Persist friends array to disk
+                    jsonPersistence.setFriends(mUsers);
                     mAdapter.notifyDataSetChanged();
-//TODO:
-//                    SharedPreferences.Editor editor =  sharedPreferences.edit();
-//                    editor
                 }
             }
 
