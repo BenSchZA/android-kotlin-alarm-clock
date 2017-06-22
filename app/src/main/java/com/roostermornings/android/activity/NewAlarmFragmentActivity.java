@@ -134,10 +134,15 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
             new MaterialDialog.Builder(this)
                     .theme(Theme.LIGHT)
                     .content(R.string.dialog_confirm_changes)
-                    .positiveText(R.string.neutral)
-                    .negativeText(R.string.cancel)
-                    .negativeColorRes(R.color.grey)
+                    .positiveText("Save")
+                    .negativeText("Discard")
                     .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            saveAndExit();
+                        }
+                    })
+                    .onNegative(new MaterialDialog.SingleButtonCallback() {
                         @Override
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                             NewAlarmFragmentActivity.super.onBackPressed();

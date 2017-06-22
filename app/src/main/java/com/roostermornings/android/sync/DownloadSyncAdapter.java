@@ -450,7 +450,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
 
         if(socialRooster == null) return;
 
-        if(audioTableManager.isChannelAudioInDatabase(socialRooster.getQueue_id())) return;
+        if(audioTableManager.isSocialAudioInDatabase(socialRooster.getQueue_id())) return;
 
         try {
 
