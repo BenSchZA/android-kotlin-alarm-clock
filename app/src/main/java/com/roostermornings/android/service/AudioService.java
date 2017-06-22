@@ -20,7 +20,6 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -110,7 +109,6 @@ public class AudioService extends Service {
     private int alarmCycle = 1;
     private String alarmChannelUid = "";
     private String alarmUid = "";
-    private int playDuration = 0;
     private int alarmCount = 1;
     private int alarmPosition = 1;
 
@@ -323,7 +321,6 @@ public class AudioService extends Service {
 
         this.alarmCycle = 1;
 
-        //Try to fetch un-downloaded channel content for 30 seconds if it doesn't already exist
         try {
             //If alarm channel is not empty and channel audioitems is empty, try download
             if (StrUtils.notNullOrEmpty(mThis.alarmChannelUid) && channelAudioItems.isEmpty()) {
@@ -676,8 +673,6 @@ public class AudioService extends Service {
                     mediaPlayerRooster.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                         @Override
                         public void onCompletion(MediaPlayer mp) {
-                            //playDuration used to check that audio has played and for specified period, otherwise set default alarm
-                            mThis.playDuration += mediaPlayerRooster.getDuration();
                             //set audio file entry in SQL db as listened; to be removed when AudioService ends
                             audioTableManager.setListened(mThis.audioItem.getId());
                             //Check if at end of queue, else play next file
@@ -735,6 +730,7 @@ public class AudioService extends Service {
     }
 
     private DeviceAudioQueueItem getNextAudioItem(){
+        //Return next valid audio item in array
         if (audioItems.size() == audioItems.indexOf(audioItem) + 1) {
             return audioItems.get(0);
         } else {
@@ -743,6 +739,7 @@ public class AudioService extends Service {
     }
 
     private DeviceAudioQueueItem getPreviousAudioItem() {
+        //Return previous valid audio item in array
         if (audioItems.indexOf(audioItem) - 1 < 0) {
             return audioItems.get(audioItems.size() - 1);
         } else{
@@ -784,7 +781,7 @@ public class AudioService extends Service {
         }
     }
 
-    public void processListenedChannels() {
+    public void processChannelAudio() {
         //Ensure partially listened channels are removed and incremented
         try {
             if (mThis.audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) {
@@ -807,12 +804,46 @@ public class AudioService extends Service {
                 logError(e);
             }
         }
+        //Remove all SQL channel audio entries, after iteration has been incremented for listened channels
+        audioTableManager.removeAllChannelAudioFiles();
+    }
+
+    private void processListenedAudio() {
+        //Delete record of all listened audio files
+        for (DeviceAudioQueueItem audioItem :
+                audioTableManager.selectListened()) {
+            //Set the listened flag in firebase for social roosters! NB
+            if (audioItem.getType() == Constants.AUDIO_TYPE_SOCIAL) {
+                FirebaseNetwork.setListened(audioItem.getSender_id(), audioItem.getQueue_id());
+            }
+            //Remove entry from SQL db
+            audioTableManager.removeAudioEntry(audioItem);
+        }
+    }
+
+    private void purgeAudioFiles() {
+        //Delete all files not contained in SQL db
+        File[] files = getFilesDir().listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.contains(Constants.FILENAME_PREFIX_ROOSTER_CONTENT);
+            }
+        });
+        ArrayList<String> audioFileNames = audioTableManager.extractAllAudioFileNames();
+        if (audioFileNames != null) {
+            for (File file :
+                    files) {
+                if (!audioFileNames.contains(file.getName()))
+                    file.delete();
+            }
+        }
     }
 
     public void dismissAlarm() {
         String method = Thread.currentThread().getStackTrace()[2].getMethodName();
         if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
 
+        //Log status of alarm activation to Firebase event
         try {
             FA.Log(FA.Event.alarm_dismissed.class,
                     FA.Event.alarm_dismissed.Param.alarm_activation_cycle_count,
@@ -836,35 +867,14 @@ public class AudioService extends Service {
         if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
         Crashlytics.logException(new Throwable("AudioService Report"));
 
-        processListenedChannels();
-        //Delete record of all listened audio files
-        for (DeviceAudioQueueItem audioItem :
-                audioTableManager.selectListened()) {
-            //Set the listened flag in firebase for social roosters! NB
-            if (audioItem.getType() == Constants.AUDIO_TYPE_SOCIAL) {
-                FirebaseNetwork.setListened(audioItem.getSender_id(), audioItem.getQueue_id());
-            }
-            //Remove entry from SQL db
-            audioTableManager.removeAudioEntry(audioItem);
-        }
+        //Process audio files - set channel persisted iterations,
+        // delete all channel audio files/SQL entries,
+        // remove files not contained in SQL db
+        processChannelAudio();
+        processListenedAudio();
+        purgeAudioFiles();
 
-        //Delete all files not contained in SQL db
-        File[] files = getFilesDir().listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.contains(Constants.FILENAME_PREFIX_ROOSTER_CONTENT);
-            }
-        });
-        ArrayList<String> audioFileNames = audioTableManager.extractAllAudioFileNames();
-        if (audioFileNames != null) {
-            for (File file :
-                    files) {
-                if (!audioFileNames.contains(file.getName()))
-                    file.delete();
-            }
-        }
-
-        //unregister all broadcastreceivers
+        //Unregister all broadcastreceivers
         try {
             if (endAudioServiceBroadcastReceiver != null)
                 unregisterReceiver(endAudioServiceBroadcastReceiver);
@@ -878,14 +888,14 @@ public class AudioService extends Service {
             logError(e);
         }
 
-        //delete record from arraylist
+        //Delete audio records from arraylist
         audioItems.clear();
-        //clear variables
-        playDuration = 0;
+        //Clear variables
         alarmCount = 0;
         alarmPosition = 0;
         currentPositionRooster = 0;
 
+        //Release media player instances
         releaseMediaPlayers();
     }
 
@@ -896,16 +906,18 @@ public class AudioService extends Service {
         String method = Thread.currentThread().getStackTrace()[2].getMethodName();
         if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
 
-        //ensure no alarms still playing...
+        //Ensure no alarms still playing...
         stopVibrate();
         stopAlarmAudio();
 
-        //clear timer callbacks
+        //Clear timer callbacks - this timer puts a limit on default or streamed audio duration, whereas normal operation is limited to 5 cycles
         alarmFinishTimerHandler.removeCallbacks(alarmFinishTimerRunnable);
 
+        //Clear forground notifications that attempt to keep service alive
         stopForeground(true);
+
+        //Complete DeviceAlarmReceiver wakeful intent
         if (wakefulIntent != null) {
-            //Complete DeviceAlarmReceiver wakeful intent
             DeviceAlarmReceiver.completeWakefulIntent(wakefulIntent);
         }
 
@@ -1076,6 +1088,7 @@ public class AudioService extends Service {
                         mediaPlayerDefault.start();
                         //Start timer to kill after 5 minutes
                         startTimer();
+                        //Log whether a failure or just default alarm tone selected
                         logDefaultRingtoneState(failure);
                     }
                 });
@@ -1113,11 +1126,14 @@ public class AudioService extends Service {
         String method = Thread.currentThread().getStackTrace()[2].getMethodName();
         if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
 
+        //If this method is called, we should log alarm as a failure
         logDefaultRingtoneState(true);
 
         checkStreamVolume(AudioManager.STREAM_RING);
+        //Do everything possible to wake user up at this stage
         startVibrate();
 
+        //Start failsafe ringtone
         if(failsafeRingtone == null) {
             Crashlytics.log("Is null");
             failsafeRingtone = RingtoneManager.getRingtone(getBaseContext(),
@@ -1125,6 +1141,7 @@ public class AudioService extends Service {
             Crashlytics.log(failsafeRingtone.getTitle(getBaseContext()));
             failsafeRingtone.play();
         }
+        //Check if playing, else try again
         if(failsafeRingtone != null && !failsafeRingtone.isPlaying()) {
             Crashlytics.log("Not null and not playing" + failsafeRingtone.getTitle(getBaseContext()));
             failsafeRingtone.play();
@@ -1139,6 +1156,7 @@ public class AudioService extends Service {
         String method = Thread.currentThread().getStackTrace()[2].getMethodName();
         if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method + " Failure:" + String.valueOf(true));
 
+        //Log a firebase analytics event indicating whether an attempt was/should have been made to play audio content
         if (!socialAudioItems.isEmpty() || !channelAudioItems.isEmpty()) {
             FA.Log(FA.Event.alarm_activated.class, FA.Event.default_alarm_play.Param.attempt_to_play, true);
         } else {
@@ -1146,7 +1164,7 @@ public class AudioService extends Service {
         }
 
         if (failure) {
-            //Show dialog explainer again
+            //Show dialog explainer again by clearing shared pref
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false);
             editor.apply();
@@ -1173,6 +1191,7 @@ public class AudioService extends Service {
     }
 
     private float returnUserSettingAlarmMinimumVolume() {
+        //Ensure alarm volume at least equal to user's minimum alarm volume setting
         try {
             String[] alarmVolumeArrayEntries = getResources().getStringArray(R.array.user_settings_alarm_volume_entry_values);
             SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
@@ -1204,6 +1223,12 @@ public class AudioService extends Service {
     private void softStartAudio() {
         String method = Thread.currentThread().getStackTrace()[2].getMethodName();
         if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
+
+        //Ramp up the audio linearly
+        // 3    /-------------------
+        // 2   /
+        // 1  /
+        // 0 /
 
         final AudioManager audio = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         final int currentVolume = audio.getStreamVolume(AudioManager.STREAM_ALARM);
@@ -1269,6 +1294,7 @@ public class AudioService extends Service {
     }
 
     private void foregroundNotification(String state) {
+        //Notification used to attempt to stop Android OS from killing service, and for user feedback
 
         Intent launchIntent = new Intent(this, MyAlarmsFragmentActivity.class);
         launchIntent.putExtra(Constants.EXTRA_ALARMID, alarmUid);
@@ -1291,6 +1317,8 @@ public class AudioService extends Service {
     }
 
     private void snoozeNotification(String state) {
+        //Notification used to display snooze state and clear snooze state
+
         Intent launchIntent = new Intent(this, MyAlarmsFragmentActivity.class);
         launchIntent.putExtra(Constants.EXTRA_ALARMID, alarmUid);
         launchIntent.setAction(Constants.ACTION_CANCEL_SNOOZE);

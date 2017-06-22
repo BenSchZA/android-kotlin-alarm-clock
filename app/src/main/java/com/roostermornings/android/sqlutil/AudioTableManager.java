@@ -98,7 +98,7 @@ public class AudioTableManager {
     public void removeAudioEntry(DeviceAudioQueueItem deviceAudioQueueItem){
         SQLiteDatabase db = initDB();
 
-        File file = new File(context.getFilesDir() + "/" + deviceAudioQueueItem.getFilename());
+        File file = new File(context.getFilesDir(), deviceAudioQueueItem.getFilename());
         file.delete();
 
         String execSql = "DELETE FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_ID + " = " + deviceAudioQueueItem.getId() + ";";
@@ -125,7 +125,7 @@ public class AudioTableManager {
             file.delete();
         }
 
-        String execSql = "DELETE FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_QUEUE_ID + " = '" + channelId + "' AND " + AudioTableEntry.COLUMN_TYPE + " = 1" + ";";
+        String execSql = "DELETE FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_QUEUE_ID + " = '" + channelId + "' AND " + AudioTableEntry.COLUMN_TYPE + " = " + TRUE + ";";
         db.execSQL(execSql);
     }
 
@@ -208,7 +208,7 @@ public class AudioTableManager {
         return extractAudioFiles(cursor);
     }
 
-    public ArrayList<DeviceAudioQueueItem> extractAllChannelAudioFiles() {
+    private ArrayList<DeviceAudioQueueItem> extractAllChannelAudioFiles() {
         SQLiteDatabase db = initDB();
 
         String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_TYPE + " = " + TRUE + ";";

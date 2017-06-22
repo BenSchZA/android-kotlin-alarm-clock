@@ -25,9 +25,10 @@
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
 
     <!-- <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" /> -->
+    <!--allowBackup set to false due to error where social roosters as well as SQL entries are restored after app reinstall, and play again-->
     <application
         android:name=".BaseApplication"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true">

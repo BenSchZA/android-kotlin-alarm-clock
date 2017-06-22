@@ -149,7 +149,7 @@ public class FriendsMyFragment1 extends BaseFragment {
             if (!checkInternetConnection()) {
                 swipeRefreshLayout.setRefreshing(false);
             } else {
-                swipeRefreshLayout.setRefreshing(true);
+                if(!swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(true);
                 firebaseUser.getToken(true)
                         .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
                             public void onComplete(@NonNull Task<GetTokenResult> task) {

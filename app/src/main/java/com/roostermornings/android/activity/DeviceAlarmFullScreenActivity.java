@@ -13,9 +13,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -32,7 +30,6 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
-import com.roostermornings.android.domain.ChannelRooster;
 import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
@@ -126,7 +123,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(mAudioService!=null) mAudioService.processListenedChannels();
+        if(mAudioService!=null) mAudioService.processChannelAudio();
         if(mBound) unbindService(mAudioServiceConnection);
         try {
             if (receiver != null)
