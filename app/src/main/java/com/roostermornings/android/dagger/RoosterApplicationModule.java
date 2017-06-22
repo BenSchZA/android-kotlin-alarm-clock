@@ -32,6 +32,7 @@ import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
+import com.roostermornings.android.util.JSONPersistence;
 
 import static com.roostermornings.android.sync.DownloadSyncAdapter.CreateSyncAccount;
 import static com.roostermornings.android.util.Constants.AUTHORITY;
@@ -113,6 +114,12 @@ public class RoosterApplicationModule {
     @Named("default")
     SharedPreferences provideDefaultSharedPreferences() {
         return PreferenceManager.getDefaultSharedPreferences(baseApplication);
+    }
+
+    @Provides
+    @Singleton
+    JSONPersistence providesJSONPersistence(BaseApplication baseApplication) {
+        return new JSONPersistence(baseApplication);
     }
 
     @Provides
