@@ -77,7 +77,11 @@ public class JSONPersistence {
         try {
             if(getJSONString(KEY_USER_FRIENDS_ARRAY) != null) {
                 Type type = new TypeToken<ArrayList<User>>(){}.getType();
-                return gson.fromJson(getJSONString(KEY_USER_FRIENDS_ARRAY), type);
+                if(gson.fromJson(getJSONString(KEY_USER_FRIENDS_ARRAY), type) != null) {
+                    return gson.fromJson(getJSONString(KEY_USER_FRIENDS_ARRAY), type);
+                } else {
+                    return returnArray;
+                }
             } else {
                 return returnArray;
             }
