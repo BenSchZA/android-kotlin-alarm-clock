@@ -11,6 +11,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -81,12 +82,12 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
 
     @BindView(R.id.discoverListView)
     RecyclerView mRecyclerView;
-    @BindView(R.id.contentProgressBar)
-    ProgressBar contentProgressBar;
     @BindView(R.id.toolbar_title)
     TextView toolbarTitle;
     @BindView(R.id.button_bar)
     LinearLayout buttonBarLayout;
+    @BindView(R.id.swiperefresh)
+    SwipeRefreshLayout swipeRefreshLayout;
 
     public static final String TAG = DiscoverFragmentActivity.class.getSimpleName();
 
@@ -157,6 +158,23 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
             }
         }.run();
 
+        swipeRefreshLayout.setRefreshing(true);
+        /*
+        * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
+        * performs a swipe-to-refresh gesture.
+        */
+        swipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        // This method performs the actual data-refresh operation.
+                        // The method calls setRefreshing(false) when it's finished.
+                        //Reload adapter data and set message status, set listener for new data
+                        getChannelData();
+                    }
+                }
+        );
+
         //Fetch content from Firebase
         getChannelData();
     }
@@ -178,13 +196,17 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                 .child("channels");
         mChannelsReference.keepSynced(true);
 
+        //Must be called outside thread, or use mThis context to access
+        channelRoosters.clear();
+        channelRoosterMap.clear();
+
         new Thread() {
             @Override
             public void run() {
+
                 ValueEventListener channelsListener = new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        channelRoosters.clear();
                         Iterator iterator = dataSnapshot.getChildren().iterator();
                         for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                             final Channel channel = postSnapshot.getValue(Channel.class);
@@ -203,9 +225,6 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                             iterator.next();
                             if(!iterator.hasNext()){
                                 lastChannel = channel;
-                                //Show content after last channel load
-                                contentProgressBar.setVisibility(View.GONE);
-                                mRecyclerView.setVisibility(View.VISIBLE);
                             }
                         }
                     }
@@ -217,6 +236,20 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                     }
                 };
                 mChannelsReference.addListenerForSingleValueEvent(channelsListener);
+
+                //https://stackoverflow.com/questions/34530566/find-out-if-child-event-listener-on-firebase-completely-load-all-data
+                //Value events are always triggered last and are guaranteed to contain updates from any other events which occurred before that snapshot was taken.
+                mChannelsReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        swipeRefreshLayout.setRefreshing(false);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
             }
         }.run();
     }

@@ -7,6 +7,8 @@ package com.roostermornings.android.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -50,6 +52,8 @@ public class MessageStatusActivity extends BaseActivity {
     TextView toolbarTitle;
     @BindView(R.id.button_bar)
     LinearLayout buttonBarLayout;
+    @BindView(R.id.swiperefresh)
+    SwipeRefreshLayout swipeRefreshLayout;
 
     private DatabaseReference mSocialRoosterUploadsReference;
     private DatabaseReference mSocialRoosterQueueReference;
@@ -85,6 +89,23 @@ public class MessageStatusActivity extends BaseActivity {
         mRecyclerView.setAdapter(mAdapter);
 
         calendar = Calendar.getInstance();
+
+        swipeRefreshLayout.setRefreshing(true);
+        /*
+        * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
+        * performs a swipe-to-refresh gesture.
+        */
+        swipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        // This method performs the actual data-refresh operation.
+                        // The method calls setRefreshing(false) when it's finished.
+                        //Reload adapter data and set message status, set listener for new data
+                        updateMessageStatus();
+                    }
+                }
+        );
 
         //Reload adapter data and set message status, set listener for new data
         updateMessageStatus();
@@ -142,6 +163,20 @@ public class MessageStatusActivity extends BaseActivity {
             }
         };
         mSocialRoosterUploadsReference.addChildEventListener(socialRoosterUploadsListener);
+
+        //https://stackoverflow.com/questions/34530566/find-out-if-child-event-listener-on-firebase-completely-load-all-data
+        //Value events are always triggered last and are guaranteed to contain updates from any other events which occurred before that snapshot was taken.
+        mSocialRoosterUploadsReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                swipeRefreshLayout.setRefreshing(false);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void processSocialRoosterUploadsItem(final SocialRooster socialRoosterU) {

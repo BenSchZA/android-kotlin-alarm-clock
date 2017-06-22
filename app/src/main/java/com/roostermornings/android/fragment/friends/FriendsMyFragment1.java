@@ -128,7 +128,6 @@ public class FriendsMyFragment1 extends BaseFragment {
         // Inflate the layout for this fragment
         View view = initiate(inflater, R.layout.fragment_friends_fragment1, container, false);
 
-        swipeRefreshLayout.setRefreshing(true);
         /*
         * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
         * performs a swipe-to-refresh gesture.
@@ -144,18 +143,10 @@ public class FriendsMyFragment1 extends BaseFragment {
                 }
         );
 
-        //Check if node response already exists
-        if(statusCode == 200) {
-            swipeRefreshLayout.setRefreshing(false);
-        } else if(!jsonPersistence.getFriends().isEmpty()) {
-            swipeRefreshLayout.setRefreshing(false);
+        if(!jsonPersistence.getFriends().isEmpty()) {
             mUsers = jsonPersistence.getFriends();
-        } else {
-            if (!checkInternetConnection()) {
-                swipeRefreshLayout.setRefreshing(false);
-            } else {
-                if(!swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(true);
-            }
+        } else if(checkInternetConnection()) {
+            if(!swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(true);
         }
 
         //Listen for changes to friends node and refresh on change
@@ -165,7 +156,7 @@ public class FriendsMyFragment1 extends BaseFragment {
     }
 
     public void manualSwipeRefresh() {
-        if(swipeRefreshLayout != null) swipeRefreshLayout.setRefreshing(true);
+        if(swipeRefreshLayout != null && !swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(true);
         retrieveMyFriends();
     }
 
