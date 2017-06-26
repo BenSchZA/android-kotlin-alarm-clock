@@ -114,6 +114,14 @@ public class MessageStatusActivity extends BaseActivity {
         setupToolbar(toolbarTitle, getString(R.string.message_status_activity_title));
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        //Display notifications
+        updateRoosterNotification();
+        updateRequestNotification();
+    }
+
     private void updateMessageStatus() {
         mSocialRoosterUploadsReference = FirebaseDatabase.getInstance().getReference()
                 .child("social_rooster_uploads").child(firebaseUser.getUid());

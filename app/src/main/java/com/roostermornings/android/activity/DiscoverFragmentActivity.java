@@ -180,6 +180,14 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        //Display notifications
+        updateRoosterNotification();
+        updateRequestNotification();
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
 

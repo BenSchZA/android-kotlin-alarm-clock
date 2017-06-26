@@ -40,7 +40,7 @@ public class DeviceAlarmTableManager {
         alarm = new DeviceAlarm();
     }
 
-    void insertAlarm(DeviceAlarm alarm, String setId) {
+    Boolean insertAlarm(DeviceAlarm alarm, String setId) {
 
         SQLiteDatabase db = initDB();
 
@@ -67,8 +67,10 @@ public class DeviceAlarmTableManager {
         try {
             // Inserting Row
             db.insertOrThrow(AlarmTableEntry.TABLE_NAME, null, values);
+            return true;
         } catch (SQLiteConstraintException e) {
             e.printStackTrace();
+            return false;
         }
     }
 

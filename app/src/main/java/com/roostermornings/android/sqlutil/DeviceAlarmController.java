@@ -204,7 +204,7 @@ public final class DeviceAlarmController {
         }
     }
 
-    public void registerAlarmSet(Boolean enabled, String setId, int alarmHour, int alarmMinute, List<Integer> alarmDays, boolean repeatWeekly, String channel, boolean social) {
+    public Boolean registerAlarmSet(Boolean enabled, String setId, int alarmHour, int alarmMinute, List<Integer> alarmDays, boolean repeatWeekly, String channel, boolean social) {
         List<DeviceAlarm> deviceAlarmList;
         DeviceAlarm deviceAlarmSet = new DeviceAlarm()
                 .initAlarmSet(enabled, alarmHour, alarmMinute, alarmDays, repeatWeekly, channel, social);
@@ -212,13 +212,15 @@ public final class DeviceAlarmController {
 
         for (DeviceAlarm deviceAlarm :
                 deviceAlarmList) {
-            deviceAlarmTableManager.insertAlarm(deviceAlarm, setId);
+            if(!deviceAlarmTableManager.insertAlarm(deviceAlarm, setId)) return false;
         }
 
         //Update alarm millis and setAlarm
         refreshAlarms(deviceAlarmTableManager.selectChanged());
         //Notify user of time until next alarm, once alarm millis has been updated in db
         notifyUserAlarmTime(deviceAlarmTableManager.getAlarmSet(setId));
+
+        return true;
     }
 
     private void notifyUserAlarmTime(List<DeviceAlarm> deviceAlarmList) {

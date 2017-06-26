@@ -7,14 +7,11 @@ package com.roostermornings.android.activity;
 
 import android.accounts.Account;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -22,7 +19,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -30,9 +30,6 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.crashlytics.android.Crashlytics;
-import com.google.firebase.FirebaseException;
-import com.google.firebase.analytics.FirebaseAnalytics;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
 import com.google.firebase.database.DataSnapshot;
@@ -41,7 +38,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.roostermornings.android.BaseApplication;
-import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.MyAlarmsListAdapter;
@@ -49,14 +45,12 @@ import com.roostermornings.android.analytics.FA;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.AlarmChannel;
-import com.roostermornings.android.domain.SocialRooster;
 import com.roostermornings.android.firebase.FirebaseNetwork;
-import com.roostermornings.android.receiver.DeviceAlarmReceiver;
-import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
+import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.sync.DownloadSyncAdapter;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.StrUtils;
@@ -70,9 +64,7 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.OnClick;
-import dagger.Provides;
 
-import static com.facebook.FacebookSdk.getApplicationContext;
 import static com.roostermornings.android.util.Constants.AUTHORITY;
 
 public class MyAlarmsFragmentActivity extends BaseActivity {
@@ -136,8 +128,6 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                 RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(context);
                 mRecyclerView.setLayoutManager(mLayoutManager);
                 mRecyclerView.setAdapter(mAdapter);
-                //Check for new Firebase datachange notifications and register broadcast receiver
-                updateRequestNotification();
 
                 //Log new crashlytics user
                 if(firebaseUser != null) {
@@ -218,26 +208,31 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                             String alarmChannelUID = "";
                             if(alarmChannel != null) alarmChannelUID = alarmChannel.getId();
 
-                            //If alarm from firebase does not exist locally, create it
-                            if(StrUtils.notNullOrEmpty(alarm.getUid()) && !deviceAlarmTableManager.isSetInDB(alarm.getUid())) {
-                                deviceAlarmController.registerAlarmSet(alarm.isEnabled(), alarm.getUid(), alarm.getHour(), alarm.getMinute(),
-                                        alarm.getDays(), alarm.isRecurring(), alarmChannelUID, alarm.isAllow_friend_audio_files());
+                            //Check for a valid Firebase entry, if invalid delete entry, else continue
+                            if(alarm.getHour() < 0 || alarm.getMinute() < 0 || alarm.getDays().isEmpty() || !StrUtils.notNullOrEmpty(alarm.getUid())) {
+                                FirebaseNetwork.removeFirebaseAlarm(postSnapshot.getKey());
+                            } else {
+                                Boolean successfulProcessing = false;
+                                //If alarm from firebase does not exist locally, create it
+                                if(StrUtils.notNullOrEmpty(alarm.getUid()) && !deviceAlarmTableManager.isSetInDB(alarm.getUid())) {
+                                    //Try to insert alarm into SQL db - if successful, configure new alarm set element and set successfulProcessing flag = true
+                                    if(deviceAlarmController.registerAlarmSet(alarm.isEnabled(), alarm.getUid(), alarm.getHour(), alarm.getMinute(),
+                                            alarm.getDays(), alarm.isRecurring(), alarmChannelUID, alarm.isAllow_friend_audio_files())) {
+                                        configureAlarmElement(alarm);
+                                        successfulProcessing = true;
+                                    }
+                                }
+                                //If alarm exists locally, AND in Firebase, just configure alarm UI element
+                                else if(StrUtils.notNullOrEmpty(alarm.getUid()) && deviceAlarmTableManager.isSetInDB(alarm.getUid())) {
+                                    configureAlarmElement(alarm);
+                                    successfulProcessing = true;
+                                }
+
+                                //If alarm exists in Firebase and couldn't be created locally, or is corrupt, delete Firebase entry
+                                if(!successfulProcessing) {
+                                    FirebaseNetwork.removeFirebaseAlarm(postSnapshot.getKey());
+                                }
                             }
-
-                            //Check SQL db to see if all alarms in set have fired
-                            alarm.setEnabled(deviceAlarmTableManager.isSetEnabled(alarm.getUid()));
-                            //Set set enabled flag and don't notify user
-                            deviceAlarmController.setSetEnabled(alarm.getUid(), alarm.isEnabled(), false);
-
-                            //Set alarm element millis to allow sorting
-                            Long alarmSetPendingMillis = deviceAlarmTableManager.getMillisOfNextPendingAlarmInSet(alarm.getUid());
-                            if(alarmSetPendingMillis != null) {
-                                alarm.setMillis(alarmSetPendingMillis);
-                            }
-
-                            //Add alarm to adapter display arraylist and notify adapter of change
-                            mAlarms.add(alarm);
-                            mAdapter.notifyItemInserted(mAlarms.size() - 1);
 
                             //Notify adapter of new rooster count data to be displayed
                             updateRoosterNotification();
@@ -263,6 +258,31 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        //Display notifications
+        updateRoosterNotification();
+        updateRequestNotification();
+    }
+
+    private void configureAlarmElement(Alarm alarm) {
+        //Check SQL db to see if all alarms in set have fired
+        alarm.setEnabled(deviceAlarmTableManager.isSetEnabled(alarm.getUid()));
+        //Set set enabled flag and don't notify user
+        deviceAlarmController.setSetEnabled(alarm.getUid(), alarm.isEnabled(), false);
+
+        //Set alarm element millis to allow sorting
+        Long alarmSetPendingMillis = deviceAlarmTableManager.getMillisOfNextPendingAlarmInSet(alarm.getUid());
+        if(alarmSetPendingMillis != null) {
+            alarm.setMillis(alarmSetPendingMillis);
+        }
+
+        //Add alarm to adapter display arraylist and notify adapter of change
+        mAlarms.add(alarm);
+        mAdapter.notifyItemInserted(mAlarms.size() - 1);
+    }
+
+    @Override
     public void onBackPressed() {
         moveTaskToBack(true);
     }
@@ -278,75 +298,34 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         mAdapter.notifyDataSetChanged();
     }
 
-    private void updateRoosterNotification() {
-
-        new Thread() {
-            @Override
-            public void run() {
-                Integer roosterCount = audioTableManager.countSocialAudioFiles();
-                if (roosterCount > 0) {
-                    DeviceAlarm deviceAlarm  = deviceAlarmTableManager.getNextPendingAlarm();
-
-                    if(deviceAlarm == null) for (Alarm alarm: mAlarms) alarm.setUnseen_roosters(0);
-                    else {
-                        for (Alarm alarm : mAlarms) {
-                            alarm.setUnseen_roosters(0);
-                            if (alarm.getUid().equals(deviceAlarm.getSetId()))
-                                alarm.setUnseen_roosters(roosterCount);
-                        }
-                    }
-                    mAdapter.notifyDataSetChanged();
-                }
-            }
-        }.run();
-
-        //Broadcast receiver filter to receive UI updates
-        IntentFilter firebaseListenerServiceFilter = new IntentFilter();
-        firebaseListenerServiceFilter.addAction(Constants.ACTION_ROOSTERNOTIFICATION);
-
-        receiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                //do something based on the intent's action
-                Integer roosterCount = baseApplication.getNotificationFlag(Constants.FLAG_ROOSTERCOUNT);
-
-                if(roosterCount > 0){
-                    DeviceAlarm deviceAlarm  = deviceAlarmTableManager.getNextPendingAlarm();
-
-                    if(deviceAlarm == null) return;
-                    for (Alarm alarm:
-                         mAlarms) {
-                        alarm.setUnseen_roosters(0);
-                        if(alarm.getUid().equals(deviceAlarm.getSetId())) {
-                            alarm.setUnseen_roosters(roosterCount);
-                            mAdapter.notifyDataSetChanged();
-                            return;
-                        }
-                    }
-                }
-            }
-        }; registerReceiver(receiver, firebaseListenerServiceFilter);
+    public void clearRoosterNotificationFlags() {
+        for (Alarm alarm: mAlarms) alarm.setUnseen_roosters(0);
+        mAdapter.notifyDataSetChanged();
     }
 
-    private void updateRequestNotification() {
-        //Flag check for UI changes on load, broadcastreceiver for changes while activity running
-        //If notifications waiting, display new friend request notification
-        if (((BaseApplication) getApplication()).getNotificationFlag(Constants.FLAG_FRIENDREQUESTS) > 0)
-            setButtonBarNotification(true);
-
-        //Broadcast receiver filter to receive UI updates
-        IntentFilter firebaseListenerServiceFilter = new IntentFilter();
-        firebaseListenerServiceFilter.addAction(Constants.ACTION_REQUESTNOTIFICATION);
-
-        receiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                //do something based on the intent's action
-                setButtonBarNotification(true);
+    public void allocateRoosterNotificationFlags(String alarmId, int roosterCount) {
+        for (Alarm alarm:
+                mAlarms) {
+            alarm.setUnseen_roosters(0);
+            if(alarm.getUid().equals(alarmId)) {
+                alarm.setUnseen_roosters(roosterCount);
             }
-        };
-        registerReceiver(receiver, firebaseListenerServiceFilter);
+        }
+        mAdapter.notifyDataSetChanged();
     }
+
+//    public Animation animateRoosterNotification(float xDest, float yDest) {
+//        ImageView buttonBarNotification = (ImageView) buttonBarLayout.findViewById(R.id.notification_roosters);
+//
+//        if(buttonBarNotification != null) {
+//            TranslateAnimation animation = new TranslateAnimation(buttonBarNotification.getX(), xDest, buttonBarNotification.getY(), yDest);
+//            animation.setDuration(1000);
+//            animation.setStartOffset(100);
+//            animation.start();
+//            return animation;
+//        }
+//        return null;
+//    }
 
     @Override
     protected void onDestroy() {
@@ -396,11 +375,10 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                 //Toggle alarm set enabled
                 deviceAlarmController.setSetEnabled(alarm.getUid(), enabled, true);
                 //Set adapter arraylist item to enabled
-                mAlarms.get(mAlarms.indexOf(alarm)).setEnabled(enabled);
+                int alarmIndex = mAlarms.indexOf(alarm);
+                if(alarmIndex > -1) mAlarms.get(alarmIndex).setEnabled(enabled);
                 //Update notification of pending social roosters
                 updateRoosterNotification();
-                //Notify adapter of new data to be displayed
-                mAdapter.notifyDataSetChanged();
             }
         }.run();
     }
@@ -432,11 +410,5 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         Intent intent = new Intent(MyAlarmsFragmentActivity.this, NewAlarmFragmentActivity.class);
         intent.putExtra(Constants.EXTRA_ALARMID, alarmId);
         startActivity(intent);
-    }
-
-    private void setButtonBarNotification(boolean notification) {
-        ImageView buttonBarNotification = (ImageView) buttonBarLayout.findViewById(R.id.notification);
-        if (notification) buttonBarNotification.setVisibility(View.VISIBLE);
-        else buttonBarNotification.setVisibility(View.GONE);
     }
 }
