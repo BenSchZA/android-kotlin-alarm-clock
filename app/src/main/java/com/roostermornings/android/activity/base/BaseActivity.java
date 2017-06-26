@@ -8,11 +8,13 @@ package com.roostermornings.android.activity.base;
 import android.accounts.Account;
 import android.app.ActivityManager;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -33,6 +35,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -65,7 +69,9 @@ import com.roostermornings.android.node_api.IHTTPClient;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.service.UploadService;
 import com.roostermornings.android.sqlutil.AudioTableManager;
+import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
+import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.InternetHelper;
 import com.roostermornings.android.util.Toaster;
@@ -89,6 +95,9 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
     private FirebaseAuth.AuthStateListener mAuthListener;
     private static final String TAG = BaseActivity.class.getSimpleName();
 
+    BroadcastReceiver roosterNotificationReceiver;
+    BroadcastReceiver requestNotificationReceiver;
+
     public static User mCurrentUser;
 
     @Inject Context AppContext;
@@ -96,6 +105,8 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
     @Inject @Named("default") SharedPreferences defaultSharedPreferences;
     @Inject DeviceAlarmController deviceAlarmController;
     @Inject AudioTableManager audioTableManager;
+    @Inject
+    DeviceAlarmTableManager deviceAlarmTableManager;
     @Inject BackgroundTaskReceiver backgroundTaskReceiver;
     @Inject public DatabaseReference mDatabase;
     @Inject Account mAccount;
@@ -551,6 +562,98 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
     @OnClick(R.id.home_my_uploads)
     public void manageUploads() {
         startActivity(new Intent(this, MessageStatusActivity.class));
+    }
+
+    public void updateRoosterNotification() {
+        setButtonBarNotification(R.id.notification_roosters, false);
+        Integer roosterCount = audioTableManager.countSocialAudioFiles();
+        if (roosterCount > 0) {
+            DeviceAlarm deviceAlarm  = deviceAlarmTableManager.getNextPendingAlarm();
+
+            if(deviceAlarm == null) {
+                if(this instanceof MyAlarmsFragmentActivity) {
+                    ((MyAlarmsFragmentActivity)this).clearRoosterNotificationFlags();
+                }
+                setButtonBarNotification(R.id.notification_roosters, true);
+            } else {
+                if(this instanceof MyAlarmsFragmentActivity) {
+                    ((MyAlarmsFragmentActivity)this).allocateRoosterNotificationFlags(deviceAlarm.getSetId(), roosterCount);
+                }
+            }
+        }
+
+        //Broadcast receiver filter to receive UI updates
+        IntentFilter firebaseListenerServiceFilter = new IntentFilter();
+        firebaseListenerServiceFilter.addAction(Constants.ACTION_ROOSTERNOTIFICATION);
+
+        roosterNotificationReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                //do something based on the intent's action
+                setButtonBarNotification(R.id.notification_roosters, false);
+                Integer roosterCount = audioTableManager.countSocialAudioFiles();
+                if(roosterCount > 0){
+                    DeviceAlarm deviceAlarm  = deviceAlarmTableManager.getNextPendingAlarm();
+                    if(deviceAlarm == null) {
+                        setButtonBarNotification(R.id.notification_roosters, true);
+                    }
+                }
+            }
+        }; registerReceiver(roosterNotificationReceiver, firebaseListenerServiceFilter);
+    }
+
+    public void updateRequestNotification() {
+        //Flag check for UI changes on load, broadcastreceiver for changes while activity running
+        //If notifications waiting, display new friend request notification
+        if (((BaseApplication) getApplication()).getNotificationFlag(Constants.FLAG_FRIENDREQUESTS) > 0)
+            setButtonBarNotification(R.id.notification_friends, true);
+
+        //Broadcast receiver filter to receive UI updates
+        IntentFilter firebaseListenerServiceFilter = new IntentFilter();
+        firebaseListenerServiceFilter.addAction(Constants.ACTION_REQUESTNOTIFICATION);
+
+        requestNotificationReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                //do something based on the intent's action
+                try {
+                    switch(intent.getAction()){
+                        case Constants.ACTION_REQUESTNOTIFICATION:
+                            setButtonBarNotification(R.id.notification_friends, true);
+                            break;
+                        default:
+                            break;
+                    }
+                } catch (RuntimeException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        registerReceiver(requestNotificationReceiver, firebaseListenerServiceFilter);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (roosterNotificationReceiver != null) {
+            unregisterReceiver(roosterNotificationReceiver);
+            roosterNotificationReceiver = null;
+        }
+        if(requestNotificationReceiver != null) {
+            unregisterReceiver(requestNotificationReceiver);
+            requestNotificationReceiver = null;
+        }
+        super.onDestroy();
+    }
+
+    public void setButtonBarNotification(int notificationId, boolean visible) {
+        LinearLayout buttonBarLayout = (LinearLayout) findViewById(R.id.button_bar);
+        if(buttonBarLayout != null) {
+            ImageView buttonBarNotification = (ImageView) buttonBarLayout.findViewById(notificationId);
+            if(buttonBarNotification != null) {
+                if (visible) buttonBarNotification.setVisibility(View.VISIBLE);
+                else buttonBarNotification.setVisibility(View.GONE);
+            }
+        }
     }
 
     public boolean setButtonBarSelection() {

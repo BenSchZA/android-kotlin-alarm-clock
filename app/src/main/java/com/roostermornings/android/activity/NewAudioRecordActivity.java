@@ -135,6 +135,14 @@ public class NewAudioRecordActivity extends BaseActivity {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        //Display notifications
+        updateRoosterNotification();
+        updateRequestNotification();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_new_audio, menu);
         return true;
