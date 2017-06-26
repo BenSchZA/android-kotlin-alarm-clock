@@ -153,6 +153,9 @@ public class FriendsFragmentActivity extends BaseActivity implements
         //Generate custom tab for tab layout
         createTabIcons();
 
+        //Check for new Firebase datachange notifications and register broadcast receiver
+        updateNotifications();
+
         //Listen for change to mViewPager page display - used for toggling notifications
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -164,7 +167,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
                 if (position == 1) {
                     //Clear request notification badge
                     setTabNotification(position, false);
-                    setButtonBarNotification(R.id.notification_friends, false);
+                    setButtonBarNotification(false);
                     BaseApplication.setNotificationFlag(0, Constants.FLAG_FRIENDREQUESTS);
                 }
             }
@@ -186,8 +189,6 @@ public class FriendsFragmentActivity extends BaseActivity implements
         //Display notifications
         updateRoosterNotification();
         //updateRequestNotification();
-        //Check for new Firebase datachange notifications and register broadcast receiver
-        updateNotifications();
     }
 
     @Override
@@ -337,11 +338,17 @@ public class FriendsFragmentActivity extends BaseActivity implements
         tab.setCustomView(frameLayout);
     }
 
+    public void setButtonBarNotification(boolean notification) {
+        ImageView buttonBarNotification = (ImageView) buttonBarLayout.findViewById(R.id.notification_friends);
+        if (notification) buttonBarNotification.setVisibility(View.VISIBLE);
+        else buttonBarNotification.setVisibility(View.GONE);
+    }
+
     private void updateNotifications() {
         //Flag check for UI changes on load, broadcastreceiver for changes while activity running
         //If notifications waiting, display new friend request notification
         if (BaseApplication.getNotificationFlag(Constants.FLAG_FRIENDREQUESTS) > 0) {
-            setButtonBarNotification(R.id.notification_friends, true);
+            setButtonBarNotification(true);
             setTabNotification(1, true);
         }
 
@@ -354,7 +361,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
             public void onReceive(Context context, Intent intent) {
                 //do something based on the intent's action
                 if (BaseApplication.getNotificationFlag(Constants.FLAG_FRIENDREQUESTS) > 0) {
-                    setButtonBarNotification(R.id.notification_friends, true);
+                    setButtonBarNotification(true);
                     setTabNotification(1, true);
                     manualSwipeRefreshRequests();
                 }

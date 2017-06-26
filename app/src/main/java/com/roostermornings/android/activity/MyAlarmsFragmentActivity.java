@@ -369,36 +369,26 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     }
 
     public void toggleAlarmSetEnable(final Alarm alarm, final boolean enabled) {
-        new Thread() {
-            @Override
-            public void run() {
-                //Toggle alarm set enabled
-                deviceAlarmController.setSetEnabled(alarm.getUid(), enabled, true);
-                //Set adapter arraylist item to enabled
-                int alarmIndex = mAlarms.indexOf(alarm);
-                if(alarmIndex > -1) mAlarms.get(alarmIndex).setEnabled(enabled);
-                //Update notification of pending social roosters
-                updateRoosterNotification();
-            }
-        }.run();
+        //Toggle alarm set enabled
+        deviceAlarmController.setSetEnabled(alarm.getUid(), enabled, true);
+        //Set adapter arraylist item to enabled
+        int alarmIndex = mAlarms.indexOf(alarm);
+        if(alarmIndex > -1) mAlarms.get(alarmIndex).setEnabled(enabled);
+        //Update notification of pending social roosters
+        updateRoosterNotification();
     }
 
     public void deleteAlarm(final String alarmId) {
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    //Remove alarm *set* from local SQL database using retrieved Uid from firebase && Remove alarm from firebase
-                    deviceAlarmController.deleteAlarmSetGlobal(alarmId);
-                    //Update notification of pending social roosters
-                    updateRoosterNotification();
-                    //Notify adapter of new data to be displayed
-                    mAdapter.notifyDataSetChanged();
-                } catch (NullPointerException e) {
-                    e.printStackTrace();
-                }
-            }
-        }.run();
+        try {
+            //Remove alarm *set* from local SQL database using retrieved Uid from firebase && Remove alarm from firebase
+            deviceAlarmController.deleteAlarmSetGlobal(alarmId);
+            //Update notification of pending social roosters
+            updateRoosterNotification();
+            //Notify adapter of new data to be displayed
+            mAdapter.notifyDataSetChanged();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
     }
 
     @OnClick(R.id.add_alarm)
