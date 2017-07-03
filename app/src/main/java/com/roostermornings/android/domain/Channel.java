@@ -9,11 +9,6 @@ import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 
 import java.io.Serializable;
-import java.util.HashMap;
-
-/**
- * Created by steven on 2017/02/15.
- */
 
 @IgnoreExtraProperties
 public class Channel implements Serializable {
@@ -25,7 +20,7 @@ public class Channel implements Serializable {
     public String name;
     public String photo;
     public Integer rooster_count;
-    public Boolean active;
+    public boolean active;
     public String uid;
 
     @Exclude

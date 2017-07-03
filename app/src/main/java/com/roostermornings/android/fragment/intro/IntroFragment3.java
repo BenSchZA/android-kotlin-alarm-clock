@@ -17,6 +17,7 @@ import com.mobsandgeeks.saripaar.Validator;
 import com.mobsandgeeks.saripaar.annotation.NotEmpty;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
+import com.roostermornings.android.analytics.FA;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.fragment.IIntroFragmentListener;
 import com.roostermornings.android.fragment.base.BaseFragment;
@@ -61,6 +62,8 @@ public class IntroFragment3 extends BaseFragment {
     public void onAttach(Context context) {
         inject(((BaseApplication)getActivity().getApplication()).getRoosterApplicationComponent());
 
+        FA.Log(FA.Event.onboarding_intro_viewed.class, null, null);
+
         super.onAttach(context);
         if (context instanceof IIntroFragmentListener) {
             mListener = (IIntroFragmentListener) context;
@@ -74,15 +77,12 @@ public class IntroFragment3 extends BaseFragment {
 
     @OnClick(R.id.intro_post_registration_next_button)
     public void onNextButtonClicked() {
-
         validator.validate();
-
     }
 
     @Override
     public void onValidationSucceeded() {
-
+        FA.Log(FA.Event.onboarding_number_provided.class, null, null);
         mListener.onMobileNumberSet(mobileNumber.getText().toString().trim());
-
     }
 }
