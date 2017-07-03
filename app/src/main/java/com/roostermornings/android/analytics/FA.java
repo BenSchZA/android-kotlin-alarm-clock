@@ -35,6 +35,12 @@ public abstract class FA {
     }
 
     public abstract static class Event {
+        public abstract class onboarding_intro_viewed {
+        }
+        public abstract class onboarding_number_provided {
+        }
+        public abstract class onboarding_first_entry {
+        }
         public abstract class alarm_creation_begin {
         }
         public abstract class alarm_edit_begin {

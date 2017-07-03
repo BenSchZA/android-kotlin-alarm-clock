@@ -35,6 +35,7 @@ import com.roostermornings.android.service.UploadService;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.domain.Users;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.StrUtils;
 import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
@@ -272,7 +273,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
 
             @Override
             public void onFailure(Throwable t) {
-                Log.i(TAG, t.getLocalizedMessage());
+                Log.i(TAG, StrUtils.notNullOrEmpty(t.getLocalizedMessage()) ? t.getLocalizedMessage() : " ");
                 Toaster.makeToast(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG).checkTastyToast();
                 startHomeActivity();
             }

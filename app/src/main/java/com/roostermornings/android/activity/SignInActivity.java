@@ -48,6 +48,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.analytics.FA;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.util.RoosterUtils;
@@ -376,6 +377,7 @@ public class SignInActivity extends BaseActivity {
         Intent intent = new Intent(SignInActivity.this, MyAlarmsFragmentActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
+        FA.Log(FA.Event.onboarding_first_entry.class, null, null);
         finish();
     }
 }

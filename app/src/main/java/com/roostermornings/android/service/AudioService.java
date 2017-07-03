@@ -560,6 +560,7 @@ public class AudioService extends Service {
                 streamMediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
                     @Override
                     public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
+                        streamMediaPlayer.reset();
                         startDefaultAlarmTone();
                         return true;
                     }
@@ -571,6 +572,7 @@ public class AudioService extends Service {
             @Override
             public void onFailure(@NonNull Exception exception) {
                 // Handle any errors
+                streamMediaPlayer.reset();
                 startDefaultAlarmTone();
             }
         });
@@ -1154,13 +1156,13 @@ public class AudioService extends Service {
 
     private void logDefaultRingtoneState(boolean failure) {
         String method = Thread.currentThread().getStackTrace()[2].getMethodName();
-        if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method + " Failure:" + String.valueOf(true));
+        if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method + " Failure:" + String.valueOf(failure));
 
         //Log a firebase analytics event indicating whether an attempt was/should have been made to play audio content
         if (!socialAudioItems.isEmpty() || !channelAudioItems.isEmpty()) {
-            FA.Log(FA.Event.alarm_activated.class, FA.Event.default_alarm_play.Param.attempt_to_play, true);
+            FA.Log(FA.Event.default_alarm_play.class, FA.Event.default_alarm_play.Param.attempt_to_play, true);
         } else {
-            FA.Log(FA.Event.alarm_activated.class, FA.Event.default_alarm_play.Param.attempt_to_play, false);
+            FA.Log(FA.Event.default_alarm_play.class, FA.Event.default_alarm_play.Param.attempt_to_play, false);
         }
 
         if (failure) {
@@ -1169,9 +1171,9 @@ public class AudioService extends Service {
             editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false);
             editor.apply();
 
-            FA.Log(FA.Event.alarm_activated.class, FA.Event.default_alarm_play.Param.fatal_failure, true);
+            FA.Log(FA.Event.default_alarm_play.class, FA.Event.default_alarm_play.Param.fatal_failure, true);
         } else {
-            FA.Log(FA.Event.alarm_activated.class, FA.Event.default_alarm_play.Param.fatal_failure, false);
+            FA.Log(FA.Event.default_alarm_play.class, FA.Event.default_alarm_play.Param.fatal_failure, false);
         }
     }
 
