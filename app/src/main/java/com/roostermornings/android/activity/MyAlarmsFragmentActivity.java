@@ -314,19 +314,6 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         mAdapter.notifyDataSetChanged();
     }
 
-//    public Animation animateRoosterNotification(float xDest, float yDest) {
-//        ImageView buttonBarNotification = (ImageView) buttonBarLayout.findViewById(R.id.notification_roosters);
-//
-//        if(buttonBarNotification != null) {
-//            TranslateAnimation animation = new TranslateAnimation(buttonBarNotification.getX(), xDest, buttonBarNotification.getY(), yDest);
-//            animation.setDuration(1000);
-//            animation.setStartOffset(100);
-//            animation.start();
-//            return animation;
-//        }
-//        return null;
-//    }
-
     @Override
     protected void onDestroy() {
         if (receiver != null) {
@@ -384,8 +371,6 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
             deviceAlarmController.deleteAlarmSetGlobal(alarmId);
             //Update notification of pending social roosters
             updateRoosterNotification();
-            //Notify adapter of new data to be displayed
-            mAdapter.notifyDataSetChanged();
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
