@@ -12,6 +12,7 @@ import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SyncInfo;
 import android.content.SyncResult;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -70,6 +71,8 @@ import static com.roostermornings.android.util.Constants.AUTHORITY;
  * app, using the Android sync adapter framework.
  */
 public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
+
+    private boolean channelSyncActive;
 
     //Firebase libraries
     private FirebaseAuth mAuth;
@@ -374,7 +377,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
         //Previous solution: inser into db and then download, updating filename on completion using:
         //mAudioTableManager.setChannelAudioFileName(channelRooster.getChannel_uid(), audioFileUniqueName);
 
-        if(audioTableManager.isChannelAudioInDatabase(channelRooster.getChannel_uid())) return;
+        if(audioTableManager.isChannelAudioInDatabase(channelRooster.getChannel_uid()) || channelSyncActive) return;
 
         try {
             //https://firebase.google.com/docs/storage/android/download-files
@@ -386,9 +389,10 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
             //Pre-cache image to display on alarm screen, in case no internet connection
             if(StrUtils.notNullOrEmpty(channelRooster.getPhoto())) Picasso.with(getApplicationContext()).load(channelRooster.getPhoto()).fetch();
 
-                audioFileRef.getBytes(Constants.MAX_ROOSTER_FILE_SIZE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                    @Override
-                    public void onSuccess(byte[] bytes) {
+            channelSyncActive = true;
+            audioFileRef.getBytes(Constants.MAX_ROOSTER_FILE_SIZE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                @Override
+                public void onSuccess(byte[] bytes) {
 
                     try {
                         FileOutputStream outputStream;
@@ -418,20 +422,23 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
                         Intent intent = new Intent(Constants.ACTION_CHANNEL_DOWNLOAD_FINISHED);
                         getApplicationContext().sendBroadcast(intent);
 
+                        channelSyncActive = false;
                     } catch (Exception e) {
                         e.printStackTrace();
                         //Show that an attempted download has occurred - this is used when "streaming" alarm content in AudioService
                         deviceAlarmTableManager.updateAlarmLabel(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED);
+                        channelSyncActive = false;
                     }
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        // Handle any errors
-                        //Show that an attempted download has occurred - this is used when "streaming" alarm content in AudioService
-                        deviceAlarmTableManager.updateAlarmLabel(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED);
-                    }
-                });
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    // Handle any errors
+                    //Show that an attempted download has occurred - this is used when "streaming" alarm content in AudioService
+                    deviceAlarmTableManager.updateAlarmLabel(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED);
+                    channelSyncActive = false;
+                }
+            });
 
             if(BuildConfig.DEBUG) Toaster.makeToast(context, "I'm running", Toast.LENGTH_SHORT);
 
@@ -439,6 +446,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
             Log.e(TAG, e.getMessage());
             //Show that an attempted download has occurred - this is used when "streaming" alarm content in AudioService
             deviceAlarmTableManager.updateAlarmLabel(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED);
+            channelSyncActive = false;
         }
     }
 

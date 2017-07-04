@@ -9,7 +9,8 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
+        <!--This was creating a shadow above actionbar-->
+        <!--<item name="android:statusBarColor">@android:color/transparent</item>-->
 
         <!--Actually overridden to Nunito-Bold-->
         <item name="android:typeface">monospace</item>
