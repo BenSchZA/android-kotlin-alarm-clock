@@ -797,15 +797,15 @@ public class AudioService extends Service {
                 audioTableManager.selectListened()) {
             try {
                 if (audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) {
-                    //increment the current story iteration if it is a story
                     Integer currentStoryIteration = new JSONPersistence(getApplicationContext()).getStoryIteration(audioItem.getQueue_id());
                     if (currentStoryIteration > 0)
                         new JSONPersistence(getApplicationContext()).setStoryIteration(audioItem.getQueue_id(), currentStoryIteration + 1);
+                    //Clear listened flag as we cache and reuse content when appropriate
+                    audioTableManager.clearListened(audioItem.getId());
                 }
             } catch (NullPointerException e) {
                 logError(e);
             }
-            audioTableManager.removeChannelAudioEntries(audioItem.getQueue_id());
         }
     }
 

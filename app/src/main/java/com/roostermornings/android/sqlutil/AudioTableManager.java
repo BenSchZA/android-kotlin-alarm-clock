@@ -321,6 +321,14 @@ public class AudioTableManager {
         db.execSQL(updateQuery);
     }
 
+    public void clearListened(int ID) {
+        SQLiteDatabase db = initDB();
+
+        String updateQuery = "UPDATE " + AudioTableEntry.TABLE_NAME + " SET " + AudioTableEntry.COLUMN_LISTENED + " = " + FALSE + " WHERE " + AudioTableEntry.COLUMN_ID + " = " + ID + ";";
+
+        db.execSQL(updateQuery);
+    }
+
     public ArrayList<DeviceAudioQueueItem> selectListened() {
         SQLiteDatabase db = initDB();
 
