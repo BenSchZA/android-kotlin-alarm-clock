@@ -123,7 +123,6 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(mAudioService!=null) mAudioService.processChannelAudio();
         if(mBound) unbindService(mAudioServiceConnection);
         try {
             if (receiver != null)
