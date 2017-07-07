@@ -438,8 +438,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                                 mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                                     @Override
                                     public void onCompletion(MediaPlayer mp) {
-                                        channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
-                                        channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
+                                        clearChannelRoosterMediaChecks();
                                         notifyDataSetChangedFromUIThread();
 
                                         //Set Firebase user prop for uses_explore
@@ -455,8 +454,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                             @Override
                             public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
                                 Toaster.makeToast(AppContext, "Content streaming failed.", Toast.LENGTH_SHORT).checkTastyToast();
-                                channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
-                                channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
+                                clearChannelRoosterMediaChecks();
                                 notifyDataSetChangedFromUIThread();
                                 return true;
                             }
@@ -469,8 +467,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                     public void onFailure(@NonNull Exception exception) {
                         // Handle any errors
                         Toaster.makeToast(AppContext, "Content streaming failed.", Toast.LENGTH_SHORT).checkTastyToast();
-                        channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
-                        channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
+                        clearChannelRoosterMediaChecks();
                         mAdapter.notifyDataSetChanged();
                     }
                 });

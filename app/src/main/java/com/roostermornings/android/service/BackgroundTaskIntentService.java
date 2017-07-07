@@ -45,8 +45,9 @@ public class BackgroundTaskIntentService extends IntentService {
     }
 
     private void handleActionDailyTask() {
-        //Purge audio files from SQL db that are older than two weeks
+        //Purge social audio files from SQL db that are older than two weeks
         audioTableManager.purgeSocialAudioFiles();
-        //TODO: update list adaptor
+        //Purge channel audio files that are stagnant: 1 week old and not present in alarm set
+        audioTableManager.purgeStagnantChannelAudio();
     }
 }

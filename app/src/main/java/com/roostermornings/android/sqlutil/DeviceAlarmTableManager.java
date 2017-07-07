@@ -94,9 +94,9 @@ public class DeviceAlarmTableManager {
         return isSet;
     }
 
-    public List<Integer> getAlarmClassDays(String setId) {
-        List<DeviceAlarm> deviceAlarms = getAlarmSet(setId);
-        List<Integer> alarmDays = new ArrayList<>();
+    public ArrayList<Integer> getAlarmClassDays(String setId) {
+        ArrayList<DeviceAlarm> deviceAlarms = getAlarmSet(setId);
+        ArrayList<Integer> alarmDays = new ArrayList<>();
         for (DeviceAlarm deviceAlarm:
              deviceAlarms) {
             alarmDays.add(deviceAlarm.getDay());
@@ -104,10 +104,10 @@ public class DeviceAlarmTableManager {
         return alarmDays;
     }
 
-    public List<DeviceAlarm> selectChanged() {
+    public ArrayList<DeviceAlarm> selectChanged() {
         SQLiteDatabase db = initDB();
 
-        List<DeviceAlarm> alarmList;
+        ArrayList<DeviceAlarm> alarmList;
 
         String selectQuery = "SELECT * FROM " + AlarmTableEntry.TABLE_NAME + " WHERE " + AlarmTableEntry.COLUMN_CHANGED + " = " + TRUE + ";";
 
@@ -135,10 +135,10 @@ public class DeviceAlarmTableManager {
         db.execSQL(updateQuery);
     }
 
-    List<DeviceAlarm> selectEnabled() {
+    ArrayList<DeviceAlarm> selectEnabled() {
         SQLiteDatabase db = initDB();
 
-        List<DeviceAlarm> alarmList;
+        ArrayList<DeviceAlarm> alarmList;
 
         String selectQuery = "SELECT * FROM " + AlarmTableEntry.TABLE_NAME + " WHERE " + AlarmTableEntry.COLUMN_ENABLED + " = " + TRUE + ";";
 
@@ -169,10 +169,10 @@ public class DeviceAlarmTableManager {
         db.execSQL(updateQuery);
     }
 
-    private List<DeviceAlarm> selectSetEnabled(String setId) {
+    private ArrayList<DeviceAlarm> selectSetEnabled(String setId) {
         SQLiteDatabase db = initDB();
 
-        List<DeviceAlarm> alarmList;
+        ArrayList<DeviceAlarm> alarmList;
 
         String selectQuery = "SELECT * FROM " + AlarmTableEntry.TABLE_NAME + " WHERE " + AlarmTableEntry.COLUMN_ENABLED + " = " + TRUE + " AND " + AlarmTableEntry.COLUMN_SET_ID + " LIKE \"%" + setId + "%\";";
 
@@ -257,7 +257,7 @@ public class DeviceAlarmTableManager {
         String selectQuery = "SELECT * FROM " + AlarmTableEntry.TABLE_NAME + " WHERE " + AlarmTableEntry.COLUMN_ENABLED + " = " + TRUE + " ORDER BY " + AlarmTableEntry.COLUMN_MILLIS + " ASC LIMIT 1;";
         Cursor cursor = db.rawQuery(selectQuery, null);
         if(!checkValidCursor(cursor)) return null;
-        List<DeviceAlarm> alarmList = extractAlarms(cursor);
+        ArrayList<DeviceAlarm> alarmList = extractAlarms(cursor);
 
         cursor.close();
         return alarmList.get(0);
@@ -271,30 +271,29 @@ public class DeviceAlarmTableManager {
 
         Cursor cursor = db.rawQuery(selectQuery, null);
         if(!checkValidCursor(cursor)) return null;
-        List<DeviceAlarm> alarmList = extractAlarms(cursor);
+        ArrayList<DeviceAlarm> alarmList = extractAlarms(cursor);
 
         cursor.close();
         return alarmList.get(0).getMillis();
     }
 
-    List<DeviceAlarm> getAlarmSets() {
+    ArrayList<DeviceAlarm> getAlarmSets() {
         SQLiteDatabase db = initDB();
 
         String selectQuery = "SELECT * FROM " + AlarmTableEntry.TABLE_NAME + " WHERE " + AlarmTableEntry.COLUMN_SET_ID + " IN (SELECT DISTINCT " + AlarmTableEntry.COLUMN_SET_ID + " AS id FROM " + AlarmTableEntry.TABLE_NAME + " ORDER BY " + AlarmTableEntry.COLUMN_SET_ID + " ASC);";
 
         Cursor cursor = db.rawQuery(selectQuery, null);
-        if(!checkValidCursor(cursor)) return null;
 
-        List<DeviceAlarm> alarmSets = extractAlarms(cursor);
+        ArrayList<DeviceAlarm> alarmSets = extractAlarms(cursor);
 
         cursor.close();
         return alarmSets;
     }
 
-    public List<DeviceAlarm> getAlarmSet(String setId) {
+    public ArrayList<DeviceAlarm> getAlarmSet(String setId) {
         SQLiteDatabase db = initDB();
 
-        List<DeviceAlarm> alarmList;
+        ArrayList<DeviceAlarm> alarmList;
 
         String selectQuery = "SELECT * FROM " + AlarmTableEntry.TABLE_NAME +
                 " WHERE " + AlarmTableEntry.COLUMN_SET_ID + " LIKE \"%" + setId + "%\";";
@@ -345,8 +344,8 @@ public class DeviceAlarmTableManager {
         return ((cursor != null) && (cursor.getCount() > 0));
     }
 
-    private List<DeviceAlarm> extractAlarms(Cursor cursor) {
-        List<DeviceAlarm> alarmList = new ArrayList<>();
+    private ArrayList<DeviceAlarm> extractAlarms(Cursor cursor) {
+        ArrayList<DeviceAlarm> alarmList = new ArrayList<>();
         if (cursor.moveToFirst()) {
             do {
                 alarm = new DeviceAlarm();

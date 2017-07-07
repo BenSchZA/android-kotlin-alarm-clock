@@ -239,8 +239,8 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 if(alarmChannel != null) alarmChannelUID = alarmChannel.getId();
 
                 //if this is an existing alarm, delete from local storage before inserting another record
-                if (mEditAlarmId.length() != 0
-                        && mAlarm.getUid().length() > 0) {
+                if (StrUtils.notNullOrEmpty(mEditAlarmId)
+                        && StrUtils.notNullOrEmpty(mAlarm.getUid())) {
                     deviceAlarmController.deleteAlarmSetGlobal(mAlarm.getUid());
                 }
 
@@ -254,7 +254,6 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
 
                 //Download any social or channel audio files
                 ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
-
 
                 FA.Log(FA.Event.alarm_creation_completed.class,
                         FA.Event.alarm_creation_completed.Param.social_roosters_enabled,

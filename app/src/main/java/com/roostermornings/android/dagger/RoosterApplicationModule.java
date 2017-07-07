@@ -25,6 +25,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
@@ -100,6 +102,12 @@ public class RoosterApplicationModule {
     @Singleton
     DatabaseReference provideFirebaseDatabaseReference() {
         return FirebaseDatabase.getInstance().getReference();
+    }
+
+    @Provides
+    @Singleton
+    StorageReference provideFirebaseStorageReference() {
+        return FirebaseStorage.getInstance().getReference();
     }
 
     @Provides
