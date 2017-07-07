@@ -42,6 +42,7 @@ import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.service.RoosterFirebaseMessagingService;
 import com.roostermornings.android.service.UploadService;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
+import com.roostermornings.android.sync.DownloadSyncAdapter;
 
 /**
  * Annotates an interface or abstract class for which a fully-formed, dependency-injected implementation
@@ -92,6 +93,8 @@ public interface RoosterApplicationComponent {
 
     void inject(FA roosterClass);
     void inject(DeviceAlarmController roosterClass);
+
+    void inject(DownloadSyncAdapter adapter);
 
     //Provision methods have no parameters and return an injected or provided type.
     //Each method may have a Qualifier annotation as well.

@@ -805,9 +805,8 @@ public class AudioService extends Service {
             } catch (NullPointerException e) {
                 logError(e);
             }
+            audioTableManager.removeChannelAudioEntries(audioItem.getQueue_id());
         }
-        //Remove all SQL channel audio entries, after iteration has been incremented for listened channels
-        audioTableManager.removeAllChannelAudioFiles();
     }
 
     private void processListenedAudio() {
