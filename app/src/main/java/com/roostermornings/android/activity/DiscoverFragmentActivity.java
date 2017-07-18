@@ -170,6 +170,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                         // This method performs the actual data-refresh operation.
                         // The method calls setRefreshing(false) when it's finished.
                         //Reload adapter data and set message status, set listener for new data
+                        onPause();
                         getChannelData();
                     }
                 }
@@ -392,8 +393,8 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                 StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
                 final StorageReference audioFileRef = mStorageRef.getStorage().getReferenceFromUrl(channelRooster.getAudio_file_url());
 
-                channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(true);
-                channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
+                channelRooster.setDownloading(true);
+                channelRooster.setPlaying(false);
                 notifyDataSetChangedFromUIThread();
 
                 mediaPlayer = new MediaPlayer();
@@ -422,8 +423,8 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                                 mediaPlayer.start();
 
                                 clearChannelRoosterMediaChecks();
-                                channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
-                                channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(true);
+                                channelRooster.setDownloading(false);
+                                channelRooster.setPlaying(true);
                                 notifyDataSetChangedFromUIThread();
 
                                 //Set Firebase user prop for uses_explore
@@ -491,13 +492,13 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
             try {
                 mediaPlayer.seekTo(mediaPlayer.getCurrentPosition());
                 mediaPlayer.start();
-                channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
-                channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(true);
+                channelRooster.setDownloading(false);
+                channelRooster.setPlaying(true);
                 mAdapter.notifyDataSetChanged();
             } catch (IllegalStateException e) {
                 e.printStackTrace();
-                channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
-                channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
+                channelRooster.setDownloading(false);
+                channelRooster.setPlaying(false);
                 mAdapter.notifyDataSetChanged();
             }
         } else {

@@ -263,6 +263,19 @@ public class DeviceAlarmTableManager {
         return alarmList.get(0);
     }
 
+    public DeviceAlarm getNextPendingSocialAlarm() {
+        SQLiteDatabase db = initDB();
+
+        //String selectQuery = "SELECT MIN(" + AlarmTableEntry.COLUMN_MILLIS + ") FROM " + AlarmTableEntry.TABLE_NAME + " WHERE " + AlarmTableEntry.COLUMN_ENABLED + " = " + TRUE + ";";
+        String selectQuery = "SELECT * FROM " + AlarmTableEntry.TABLE_NAME + " WHERE " + AlarmTableEntry.COLUMN_ENABLED + " = " + TRUE + " AND " + AlarmTableEntry.COLUMN_SOCIAL + " = " + TRUE + " ORDER BY " + AlarmTableEntry.COLUMN_MILLIS + " ASC LIMIT 1;";
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        if(!checkValidCursor(cursor)) return null;
+        ArrayList<DeviceAlarm> alarmList = extractAlarms(cursor);
+
+        cursor.close();
+        return alarmList.get(0);
+    }
+
     public Long getMillisOfNextPendingAlarmInSet(String setId) {
         SQLiteDatabase db = initDB();
 

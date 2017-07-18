@@ -1038,7 +1038,7 @@ public class AudioService extends Service {
         if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
 
         //If channel UID attached to alarm, content should have played
-        final Boolean failure = StrUtils.notNullOrEmpty(alarm.getChannel());
+        final Boolean failure = StrUtils.notNullOrEmpty(alarm.getChannel()) && !InternetHelper.noInternetConnection(this);
 
         try {
             //Check if audio already playing
