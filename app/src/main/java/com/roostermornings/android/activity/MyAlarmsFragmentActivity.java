@@ -11,6 +11,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
@@ -42,6 +43,7 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.MyAlarmsListAdapter;
 import com.roostermornings.android.analytics.FA;
+import com.roostermornings.android.custom_ui.SquareFrameLayout;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.AlarmChannel;
@@ -64,6 +66,7 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import me.grantland.widget.AutofitTextView;
 
 import static com.roostermornings.android.util.Constants.AUTHORITY;
 
@@ -79,6 +82,11 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     LinearLayout buttonBarLayout;
     @BindView(R.id.add_alarm)
     FloatingActionButton buttonAddAlarm;
+
+    @BindView(R.id.add_alarm_filler)
+    SquareFrameLayout addAlarmFiller;
+    @BindView(R.id.add_alarm_filler_text)
+    AutofitTextView addAlarmFillerText;
 
     private final ArrayList<Alarm> mAlarms = new ArrayList<>();
     private RecyclerView.Adapter mAdapter;
@@ -239,6 +247,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                         }
                         //Sort alarms according to time
                         sortAlarms(mAlarms);
+                        toggleAlarmFiller();
 
                         //Recreate all enabled alarms as failsafe
                         deviceAlarmController.rebootAlarms();
@@ -363,6 +372,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         if(alarmIndex > -1) mAlarms.get(alarmIndex).setEnabled(enabled);
         //Update notification of pending social roosters
         updateRoosterNotification();
+        toggleAlarmFiller();
     }
 
     public void deleteAlarm(final String alarmId) {
@@ -371,13 +381,34 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
             deviceAlarmController.deleteAlarmSetGlobal(alarmId);
             //Update notification of pending social roosters
             updateRoosterNotification();
+            toggleAlarmFiller();
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
     }
 
+    private void toggleAlarmFiller() {
+        if(mAlarms.isEmpty()) {
+            addAlarmFiller.setVisibility(View.VISIBLE);
+            addAlarmFillerText.setVisibility(View.VISIBLE);
+        } else {
+            addAlarmFiller.setVisibility(View.GONE);
+            addAlarmFillerText.setVisibility(View.GONE);
+        }
+    }
+
     @OnClick(R.id.add_alarm)
     public void onClickAddAlarm() {
+        startActivity(new Intent(this, NewAlarmFragmentActivity.class));
+    }
+
+    @OnClick(R.id.add_alarm_filler)
+    public void onClickAddAlarmFiller() {
+        startActivity(new Intent(this, NewAlarmFragmentActivity.class));
+    }
+
+    @OnClick(R.id.add_alarm_filler_text)
+    public void onClickAddAlarmFillerText() {
         startActivity(new Intent(this, NewAlarmFragmentActivity.class));
     }
 

@@ -568,7 +568,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
         setButtonBarNotification(R.id.notification_roosters, false);
         Integer roosterCount = audioTableManager.countSocialAudioFiles();
         if (roosterCount > 0) {
-            DeviceAlarm deviceAlarm  = deviceAlarmTableManager.getNextPendingAlarm();
+            DeviceAlarm deviceAlarm  = deviceAlarmTableManager.getNextPendingSocialAlarm();
 
             if(deviceAlarm == null) {
                 if(this instanceof MyAlarmsFragmentActivity) {
@@ -593,7 +593,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
                 setButtonBarNotification(R.id.notification_roosters, false);
                 Integer roosterCount = audioTableManager.countSocialAudioFiles();
                 if(roosterCount > 0){
-                    DeviceAlarm deviceAlarm  = deviceAlarmTableManager.getNextPendingAlarm();
+                    DeviceAlarm deviceAlarm  = deviceAlarmTableManager.getNextPendingSocialAlarm();
                     if(deviceAlarm == null) {
                         setButtonBarNotification(R.id.notification_roosters, true);
                     }
@@ -683,9 +683,9 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
             String[] dayNightThemeArrayEntries = getResources().getStringArray(R.array.user_settings_day_night_theme_entry_values);
 
             if (dayNightThemeArrayEntries[0].equals(defaultSharedPreferences.getString(Constants.USER_SETTINGS_DAY_NIGHT_THEME, ""))) {
-                if (calendar.get(Calendar.HOUR_OF_DAY) >= 17) {
+                if (calendar.get(Calendar.HOUR_OF_DAY) >= 17 || calendar.get(Calendar.HOUR_OF_DAY) < 7) {
                     return setThemeNight();
-                } else if (calendar.get(Calendar.HOUR_OF_DAY) > 7) {
+                } else if (calendar.get(Calendar.HOUR_OF_DAY) >= 7) {
                     return setThemeDay();
                 }
             } else if (dayNightThemeArrayEntries[1].equals(defaultSharedPreferences.getString(Constants.USER_SETTINGS_DAY_NIGHT_THEME, ""))) {
@@ -693,9 +693,9 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
             } else if (dayNightThemeArrayEntries[2].equals(defaultSharedPreferences.getString(Constants.USER_SETTINGS_DAY_NIGHT_THEME, ""))) {
                 return setThemeNight();
             } else {
-                if (calendar.get(Calendar.HOUR_OF_DAY) >= 17) {
+                if (calendar.get(Calendar.HOUR_OF_DAY) >= 17 || calendar.get(Calendar.HOUR_OF_DAY) < 7) {
                     return setThemeNight();
-                } else if (calendar.get(Calendar.HOUR_OF_DAY) > 7) {
+                } else if (calendar.get(Calendar.HOUR_OF_DAY) >= 7) {
                     return setThemeDay();
                 }
             }
