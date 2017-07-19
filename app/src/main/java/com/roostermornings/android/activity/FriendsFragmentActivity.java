@@ -7,6 +7,7 @@ package com.roostermornings.android.activity;
 
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -39,6 +40,7 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
+import com.roostermornings.android.domain.Contact;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.fragment.friends.FriendsInviteFragment3;
@@ -110,7 +112,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
 
     public interface FriendsInviteListAdapterInterface {
         //Send invite to Rooster user from contact list
-        void inviteUser(Friend inviteFriend);
+        void addUser(Friend inviteFriend);
     }
 
     public interface FriendsRequestListAdapterInterface {
@@ -426,5 +428,39 @@ public class FriendsFragmentActivity extends BaseActivity implements
         //Clear current user's and friend's friend list
         mDatabase.getDatabase().getReference(currentUserUrl).setValue(null);
         mDatabase.getDatabase().getReference(friendUserUrl).setValue(null);
+    }
+
+    //Invite contact via Whatsapp or fallback to SMS
+    public void inviteContact(Contact contact) {
+//        Uri uri = Uri.parse("smsto:" + contact.getPrimaryNumber());
+//        Intent intent = new Intent(Intent.ACTION_SENDTO, uri);
+//        intent.putExtra("sms_body", getResources().getString(R.string.invite_to_rooster_message));
+//        intent.setType("text/plain");
+//        intent.setPackage("com.whatsapp");
+//        startActivity(Intent.createChooser(intent, ""));
+//        Intent intent = new Intent(Intent.ACTION_SENDTO);
+//        intent.putExtra(Intent.EXTRA_PHONE_NUMBER, contact.getPrimaryNumber());
+//        intent.putExtra(Intent.EXTRA_TEXT, getResources().getString(R.string.invite_to_rooster_message));
+//        intent.setType("text/plain");
+//        intent.setPackage("com.whatsapp");
+//        startActivity(intent);
+//        Intent sendIntent = new Intent("android.intent.action.MAIN");
+//        //sendIntent.setComponent(new ComponentName("com.whatsapp", "com.whatsapp.Conversation"));
+//        sendIntent.setAction(Intent.ACTION_SEND);
+//        sendIntent.setType("text/plain");
+//        sendIntent.putExtra(Intent.EXTRA_TEXT, "This is my text to send.");
+//        sendIntent.putExtra("jid", contact.getPrimaryNumber() + "@s.whatsapp.net");
+//        sendIntent.setPackage("com.whatsapp");
+//        startActivity(sendIntent);
+//        Intent sendIntent = new Intent("android.intent.action.SEND");
+//        sendIntent.setComponent(new ComponentName("com.whatsapp","com.whatsapp.ContactPicker"));
+//        sendIntent.putExtra("jid", contact.getPrimaryNumber() + "@s.whatsapp.net");
+//        sendIntent.putExtra(Intent.EXTRA_TEXT,"sample text you want to send along with the image");
+//        startActivity(sendIntent);
+
+        Uri uri = Uri.parse("smsto:" + contact.getPrimaryNumber());
+        Intent intent = new Intent(Intent.ACTION_SENDTO, uri);
+        intent.putExtra("sms_body", getResources().getString(R.string.invite_to_rooster_message));
+        startActivity(intent);
     }
 }

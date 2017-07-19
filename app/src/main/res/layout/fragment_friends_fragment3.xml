@@ -28,43 +28,26 @@
             app:expandedTitleMarginStart="48dp"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <Button
-                    android:id="@+id/share_button"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginBottom="@dimen/activity_vertical_margin"
-                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                    android:layout_marginRight="@dimen/activity_horizontal_margin"
-                    android:layout_marginTop="@dimen/activity_vertical_margin"
-                    android:background="@drawable/rooster_share_button"
-                    android:drawableLeft="@drawable/ic_share_white_24dp"
-                    android:minHeight="48dp"
-                    android:paddingBottom="@dimen/spacing_large"
-                    android:paddingLeft="@dimen/spacing_large"
-                    android:paddingRight="@dimen/spacing_large"
-                    android:paddingTop="@dimen/spacing_large"
-                    android:text="@string/share_button"
-                    android:textAllCaps="false"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/text_large" />
-
-                <TextView
-                    android:id="@+id/channel_prompt_2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/share_button"
-                    android:layout_centerHorizontal="true"
-                    android:text="@string/invite_contacts"
-                    android:textAlignment="center"
-                    android:textColor="@color/white_30_percent_transparent"
-                    android:textSize="@dimen/text_large" />
-
-            </RelativeLayout>
+            <Button
+                android:id="@+id/share_button"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_marginRight="@dimen/activity_horizontal_margin"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                android:background="@drawable/rooster_share_button"
+                android:drawableLeft="@drawable/ic_share_white_24dp"
+                android:minHeight="48dp"
+                android:paddingBottom="@dimen/spacing_large"
+                android:paddingLeft="@dimen/spacing_large"
+                android:paddingRight="@dimen/spacing_large"
+                android:paddingTop="@dimen/spacing_large"
+                android:text="@string/share_button"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="@dimen/text_large" />
 
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>
@@ -74,38 +57,78 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <FrameLayout
+        <android.support.v4.widget.SwipeRefreshLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/swiperefresh"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <android.support.v4.widget.SwipeRefreshLayout
-                xmlns:android="http://schemas.android.com/apk/res/android"
-                android:id="@+id/swiperefresh"
+            <!--https://chris.banes.me/2017/06/09/carry-on-scrolling/-->
+            <android.support.v4.widget.NestedScrollView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent" >
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/friendsInviteListView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:clipToPadding="false"
-                android:padding="@dimen/spacing_normal" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
-            </android.support.v4.widget.SwipeRefreshLayout>
+                    <TextView
+                        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                        android:layout_marginRight="@dimen/activity_horizontal_margin"
+                        android:layout_gravity="start"
+                        android:id="@+id/list_header_add_friends"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/add_contacts"
+                        android:textColor="@color/white_30_percent_transparent"
+                        android:textSize="@dimen/text_xlarge"
+                        android:visibility="gone"/>
 
-            <TextView
-                android:id="@+id/retrieve_contacts_permission_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:clickable="true"
-                android:text="@string/retrieve_contacts_permission"
-                android:textAlignment="center"
-                android:textColor="@color/white_30_percent_transparent"
-                android:textSize="@dimen/text_large"
-                android:visibility="gone" />
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/friendsAddListView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clipToPadding="false"
+                        android:padding="@dimen/spacing_normal" />
 
-        </FrameLayout>
+                    <TextView
+                        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                        android:layout_marginRight="@dimen/activity_horizontal_margin"
+                        android:layout_gravity="start"
+                        android:id="@+id/list_header_invite_friends"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/invite_contacts"
+                        android:textColor="@color/white_30_percent_transparent"
+                        android:textSize="@dimen/text_xlarge"
+                        android:visibility="gone"/>
+
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/friendsInviteListView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clipToPadding="false"
+                        android:padding="@dimen/spacing_normal" />
+
+                </LinearLayout>
+
+            </android.support.v4.widget.NestedScrollView>
+
+        </android.support.v4.widget.SwipeRefreshLayout>
+
+        <TextView
+            android:id="@+id/retrieve_contacts_permission_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:clickable="true"
+            android:text="@string/retrieve_contacts_permission"
+            android:textAlignment="center"
+            android:textColor="@color/white_30_percent_transparent"
+            android:textSize="@dimen/text_large"
+            android:visibility="gone" />
+
     </FrameLayout>
 
 </android.support.design.widget.CoordinatorLayout>

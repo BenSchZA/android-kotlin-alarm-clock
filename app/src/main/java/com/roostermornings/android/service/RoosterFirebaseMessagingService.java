@@ -103,7 +103,7 @@ public class RoosterFirebaseMessagingService extends FirebaseMessagingService {
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-                .setContentTitle("Rooster Mornings")
+                .setContentTitle("Rooster")
                 .setSmallIcon(R.drawable.logo)
                 .setContentText(messageBody)
                 .setAutoCancel(true)
