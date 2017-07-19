@@ -80,7 +80,6 @@ dependencies {
     compile "com.android.support:support-v4:${support_lib_version}"
     compile "com.android.support:recyclerview-v7:${support_lib_version}"
     compile "com.android.support:cardview-v7:${support_lib_version}"
-    compile "com.android.support:support-v4:${support_lib_version}"
     compile('com.crashlytics.sdk.android:crashlytics:2.6.6@aar')
     {
         transitive = true;
