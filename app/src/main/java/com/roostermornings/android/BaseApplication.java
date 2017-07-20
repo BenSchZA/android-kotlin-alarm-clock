@@ -19,6 +19,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.core.CrashlyticsCore;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.stetho.Stetho;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -77,15 +78,19 @@ public class BaseApplication extends android.app.Application {
     public void onCreate() {
         super.onCreate();
 
-        //Get static FBAnalytics instance
-        firebaseAnalytics = FirebaseAnalytics.getInstance(this);
-
         //Set database persistence to keep offline alarm edits synced
         //Calls to setPersistenceEnabled() must be made before any other usage of FirebaseDatabase instance
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
+        //Get static FBAnalytics instance
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this);
         //Activate crashlytics instance
-        Fabric.with(this, new Crashlytics());
+        CrashlyticsCore core = new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build();
+        Fabric.with(this, new Crashlytics.Builder().core(core).build());
+//        Fabric.with(this, new Crashlytics());
+        if(BuildConfig.DEBUG) {
+            firebaseAnalytics.setAnalyticsCollectionEnabled(false);
+        }
 
         //Activate facebook app connection
         AppEventsLogger.activateApp(this, getResources().getString(R.string.facebook_app_id));

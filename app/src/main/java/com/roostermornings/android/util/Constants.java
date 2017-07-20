@@ -9,6 +9,13 @@ import com.roostermornings.android.R;
 
 public class Constants {
 
+    //Adapter view types
+    public static final int VIEW_TYPE_UNKNOWN = 99;
+    public static final int VIEW_TYPE_ADD = 1;
+    public static final int VIEW_TYPE_INVITE = 2;
+    public static final int VIEW_TYPE_HEADER = 0;
+
+    //Font resources
     public final static String APP_FONT = "fonts/Nunito/Nunito-Bold.ttf";
 
     //Broadcast receiver filters

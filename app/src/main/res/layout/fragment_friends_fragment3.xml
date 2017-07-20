@@ -10,7 +10,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="com.roostermornings.android.fragment.friends.FriendsInviteFragment3">
-    <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/main.appbar"
@@ -63,27 +63,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <!--https://chris.banes.me/2017/06/09/carry-on-scrolling/-->
-            <android.support.v4.widget.NestedScrollView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" >
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
-
-                    <TextView
-                        android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                        android:layout_marginRight="@dimen/activity_horizontal_margin"
-                        android:layout_gravity="start"
-                        android:id="@+id/list_header_add_friends"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/add_contacts"
-                        android:textColor="@color/white_30_percent_transparent"
-                        android:textSize="@dimen/text_xlarge"
-                        android:visibility="gone"/>
 
                     <android.support.v7.widget.RecyclerView
                         android:id="@+id/friendsAddListView"
@@ -92,28 +75,7 @@
                         android:clipToPadding="false"
                         android:padding="@dimen/spacing_normal" />
 
-                    <TextView
-                        android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                        android:layout_marginRight="@dimen/activity_horizontal_margin"
-                        android:layout_gravity="start"
-                        android:id="@+id/list_header_invite_friends"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/invite_contacts"
-                        android:textColor="@color/white_30_percent_transparent"
-                        android:textSize="@dimen/text_xlarge"
-                        android:visibility="gone"/>
-
-                    <android.support.v7.widget.RecyclerView
-                        android:id="@+id/friendsInviteListView"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:clipToPadding="false"
-                        android:padding="@dimen/spacing_normal" />
-
                 </LinearLayout>
-
-            </android.support.v4.widget.NestedScrollView>
 
         </android.support.v4.widget.SwipeRefreshLayout>
 
