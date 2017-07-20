@@ -7,10 +7,7 @@ package com.roostermornings.android.domain;
 
 import com.roostermornings.android.util.StrUtils;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 public class Contact {
     private String name = "";

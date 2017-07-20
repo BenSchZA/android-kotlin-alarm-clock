@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -32,8 +33,7 @@ import com.google.firebase.auth.GetTokenResult;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
-import com.roostermornings.android.adapter.add_invite_contacts.AddContactsListAdapter;
-import com.roostermornings.android.adapter.add_invite_contacts.InviteContactsListAdapter;
+import com.roostermornings.android.adapter.FriendsInviteListAdapter;
 import com.roostermornings.android.analytics.FA;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Contact;
@@ -41,7 +41,6 @@ import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.LocalContacts;
 import com.roostermornings.android.domain.NodeUsers;
 import com.roostermornings.android.domain.User;
-import com.roostermornings.android.domain.Users;
 import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.JSONPersistence;
@@ -75,23 +74,17 @@ public class FriendsInviteFragment3 extends BaseFragment {
 
     private MyContactsController myContactsController;
 
+    ArrayList<Object> mRecyclerViewElements = new ArrayList<>();
     ArrayList<Friend> mAddableContacts = new ArrayList<>();
+    ArrayList<Contact> mInvitableContacts = new ArrayList<>();
+
     private RecyclerView.Adapter mAddContactsAdapter;
 
-    ArrayList<Contact> mInvitableContacts = new ArrayList<>();
-    private RecyclerView.Adapter mInviteContactsAdapter;
-
-    @BindView(R.id.list_header_add_friends)
-    TextView listHeaderAddFriends;
-
-    @BindView(R.id.list_header_invite_friends)
-    TextView listHeaderInviteFriends;
+    String addableHeader = "";
+    String invitableHeader = "";
 
     @BindView(R.id.friendsAddListView)
     RecyclerView mAddContactsRecyclerView;
-
-    @BindView(R.id.friendsInviteListView)
-    RecyclerView mInviteContactsRecyclerView;
 
     @BindView(R.id.swiperefresh)
     SwipeRefreshLayout swipeRefreshLayout;
@@ -133,6 +126,9 @@ public class FriendsInviteFragment3 extends BaseFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         inject(((BaseApplication)getActivity().getApplication()).getRoosterApplicationComponent());
+
+        addableHeader = getResources().getString(R.string.add_contacts);
+        invitableHeader = getResources().getString(R.string.invite_contacts);
 
         myContactsController = new MyContactsController(AppContext);
     }
@@ -176,28 +172,15 @@ public class FriendsInviteFragment3 extends BaseFragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mAddContactsAdapter = new AddContactsListAdapter(mAddableContacts);
+        mAddContactsAdapter = new FriendsInviteListAdapter(mRecyclerViewElements);
         mAddContactsRecyclerView.setLayoutManager(new LinearLayoutManager(AppContext));
         mAddContactsRecyclerView.setAdapter(mAddContactsAdapter);
-
-        mInviteContactsAdapter = new InviteContactsListAdapter(mInvitableContacts);
-        mInviteContactsRecyclerView.setLayoutManager(new LinearLayoutManager(AppContext));
-        mInviteContactsRecyclerView.setAdapter(mInviteContactsAdapter);
-
 
         mAddContactsAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
             public void onItemRangeRemoved(int positionStart, int itemCount) {
                 super.onItemRangeRemoved(positionStart, itemCount);
-                setHeaderVisibility();
-            }
-        });
-
-        mInviteContactsAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-            @Override
-            public void onItemRangeRemoved(int positionStart, int itemCount) {
-                super.onItemRangeRemoved(positionStart, itemCount);
-                setHeaderVisibility();
+                notifyAdapter();
             }
         });
     }
@@ -211,29 +194,37 @@ public class FriendsInviteFragment3 extends BaseFragment {
     public void searchRecyclerViewAdapter(String query) {
         //Filter contacts by CharSequence
         //Get reference to list adapter to access getFilter method
-        ((AddContactsListAdapter) mAddContactsAdapter).refreshAll(mAddableContacts);
-        ((AddContactsListAdapter) mAddContactsAdapter).getFilter().filter(query);
-
-        ((InviteContactsListAdapter) mInviteContactsAdapter).refreshAll(mInvitableContacts);
-        ((InviteContactsListAdapter) mInviteContactsAdapter).getFilter().filter(query);
+        ((FriendsInviteListAdapter) mAddContactsAdapter).refreshAll(mRecyclerViewElements);
+        ((FriendsInviteListAdapter) mAddContactsAdapter).getFilter().filter(query);
     }
 
     public void notifyAdapter() {
         setHeaderVisibility();
 
-        ((AddContactsListAdapter) mAddContactsAdapter).refreshAll(mAddableContacts);
+        ((FriendsInviteListAdapter) mAddContactsAdapter).refreshAll(mRecyclerViewElements);
         mAddContactsAdapter.notifyDataSetChanged();
-
-        ((InviteContactsListAdapter) mInviteContactsAdapter).refreshAll(mInvitableContacts);
-        mInviteContactsAdapter.notifyDataSetChanged();
     }
 
     private void setHeaderVisibility() {
         //If list is empty, don't show header
-        if(!mAddableContacts.isEmpty()) listHeaderAddFriends.setVisibility(View.VISIBLE);
-        else listHeaderAddFriends.setVisibility(View.GONE);
-        if(!mInvitableContacts.isEmpty()) listHeaderInviteFriends.setVisibility(View.VISIBLE);
-        else listHeaderInviteFriends.setVisibility(View.GONE);
+        try {
+            if (mRecyclerViewElements.contains(addableHeader)
+                    && !(mRecyclerViewElements.get(
+                    mRecyclerViewElements.indexOf(addableHeader) + 1) instanceof Friend)) {
+                mRecyclerViewElements.remove(addableHeader);
+            }
+        } catch (IndexOutOfBoundsException e) {
+            e.printStackTrace();
+        }
+        try {
+            if (mRecyclerViewElements.contains(invitableHeader)
+                    && !(mRecyclerViewElements.get(
+                    mRecyclerViewElements.indexOf(invitableHeader) + 1) instanceof Contact)) {
+                mRecyclerViewElements.remove(invitableHeader);
+            }
+        } catch (IndexOutOfBoundsException e) {
+            e.printStackTrace();
+        }
     }
 
     @OnClick(R.id.share_button)
@@ -313,7 +304,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
                         public void onComplete(@NonNull Task<GetTokenResult> task) {
                             if (task.isSuccessful()) {
                                 String idToken = task.getResult().getToken();
-                                checkLocalContactsNode(idToken);
+                                new ProcessAddableBackground().execute(idToken);
                             } else {
                                 // Handle error -> task.getException();
                                 swipeRefreshLayout.setRefreshing(false);
@@ -323,93 +314,127 @@ public class FriendsInviteFragment3 extends BaseFragment {
         }
     }
 
-    private void checkLocalContactsNode(String idToken) {
-        Call<NodeUsers> call = apiService().checkLocalContacts(new LocalContacts(myContactsController.getNodeNumberList(), idToken));
+    private class ProcessAddableBackground extends AsyncTask<String, Void, String> {
+        @Override
+        protected void onPreExecute() {
+            mRecyclerViewElements.clear();
+        }
 
-        call.enqueue(new Callback<NodeUsers>() {
-            @Override
-            public void onResponse(Response<NodeUsers> response,
-                                   Retrofit retrofit) {
+        @Override
+        protected String doInBackground(String... params) {
+            String idToken = params[0];
 
-                Integer statusCode = response.code();
-                NodeUsers apiResponse = response.body();
+            Call<NodeUsers> call = apiService().checkLocalContacts(new LocalContacts(myContactsController.getNodeNumberList(), idToken));
 
-                if (statusCode == 200) {
+            call.enqueue(new Callback<NodeUsers>() {
+                @Override
+                public void onResponse(Response<NodeUsers> response,
+                                       Retrofit retrofit) {
 
-                    if(apiResponse.users != null) {
-                        mAddableContacts = new ArrayList<>();
-                        for (Friend user :
-                                apiResponse.users.get(0)) {
-                            if (user != null && !user.getUser_name().isEmpty()) mAddableContacts.add(user);
+                    Integer statusCode = response.code();
+                    NodeUsers apiResponse = response.body();
+
+                    if (statusCode == 200) {
+
+                        if(apiResponse.users != null) {
+                            mAddableContacts = new ArrayList<>();
+                            for (Friend user :
+                                    apiResponse.users.get(0)) {
+                                if (user != null && !user.getUser_name().isEmpty()) mAddableContacts.add(user);
+                            }
+                            //Sort names alphabetically before notifying adapter
+                            sortNamesFriends(mAddableContacts);
                         }
-                        //Sort names alphabetically before notifying adapter
-                        sortNamesFriends(mAddableContacts);
+
+                        new ProcessInvitableBackground().execute("");
+
+                        Log.d("apiResponse", apiResponse.toString());
                     }
+                }
 
-                    notifyAdapter();
+                @Override
+                public void onFailure(Throwable t) {
+                    Log.i(TAG, t.getLocalizedMessage()==null?"":t.getLocalizedMessage());
+                    Toaster.makeToast(getApplicationContext(), "Loading contacts failed, please try again.", Toast.LENGTH_LONG).checkTastyToast();
+                    new ProcessInvitableBackground().execute("");
+                }
+            });
 
-                    //Make load spinner GONE and recyclerview VISIBLE
-                    swipeRefreshLayout.setRefreshing(false);
+            return null;
+        }
 
-                    displayInvitableContacts();
+        protected void onPostExecute(String result) {
 
-                    Log.d("apiResponse", apiResponse.toString());
+        }
+    }
+
+    private class ProcessInvitableBackground extends AsyncTask<String, Void, String> {
+
+        private Boolean exit = false;
+
+        @Override
+        protected void onPreExecute() {
+            //If list is already populated, return
+            if(!mInvitableContacts.isEmpty()) exit = true;
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+            if(exit) return "";
+
+            //Get the list of all local contacts, C
+            ArrayList<Contact> contacts = myContactsController.getContacts();
+            //Temporarily set the invitable contacts, I, to all local contacts
+            mInvitableContacts.clear();
+            mInvitableContacts.addAll(contacts);
+            ArrayList<String> contactNumbersToRemove = new ArrayList<>();
+
+            //Check for current friends, F
+            ArrayList<User> currentFriends = new ArrayList<>();
+            if(!jsonPersistence.getFriends().isEmpty()) {
+                currentFriends = jsonPersistence.getFriends();
+            }
+
+            //Make a list of all addable contact numbers from mAddableContacts and currentFriends, A + F
+            for (Friend addableFriend:
+                    mAddableContacts) {
+                contactNumbersToRemove.add(addableFriend.cell_number);
+            }
+            for (User currentFriend:
+                    currentFriends) {
+                contactNumbersToRemove.add(currentFriend.cell_number);
+            }
+
+            //Perform the operation I = C - A - F
+            for (Contact contact:
+                    contacts) {
+                for (String number:
+                        contact.getNumbers().keySet()) {
+                    if(contactNumbersToRemove.contains(number)) {
+                        mInvitableContacts.remove(contact);
+                        break;
+                    }
                 }
             }
 
-            @Override
-            public void onFailure(Throwable t) {
-                Log.i(TAG, t.getLocalizedMessage()==null?"":t.getLocalizedMessage());
-                Toaster.makeToast(getApplicationContext(), "Loading contacts failed, please try again.", Toast.LENGTH_LONG).checkTastyToast();
-                swipeRefreshLayout.setRefreshing(false);
-            }
-        });
+            //Sort names alphabetically before notifying adapter
+            sortNamesContacts(mInvitableContacts);
+
+            return "";
+        }
+
+        protected void onPostExecute(String result) {
+            //Load new content into adapter
+            mRecyclerViewElements.add(addableHeader);
+            mRecyclerViewElements.addAll(mAddableContacts);
+            mRecyclerViewElements.add(invitableHeader);
+            mRecyclerViewElements.addAll(mInvitableContacts);
+            notifyAdapter();
+            //Make load spinner GONE and recyclerview VISIBLE
+            swipeRefreshLayout.setRefreshing(false);
+        }
     }
 
-    private void displayInvitableContacts() {
-        //If list is already populated, return
-        if(!mInvitableContacts.isEmpty()) return;
-
-        //Get the list of all local contacts, C
-        ArrayList<Contact> contacts = myContactsController.getContacts();
-        //Temporarily set the invitable contacts, I, to all local contacts
-        mInvitableContacts.clear();
-        mInvitableContacts.addAll(contacts);
-        ArrayList<String> contactNumbersToRemove = new ArrayList<>();
-
-        //Check for current friends, F
-        ArrayList<User> currentFriends = new ArrayList<>();
-        if(!jsonPersistence.getFriends().isEmpty()) {
-            currentFriends = jsonPersistence.getFriends();
-        }
-
-        //Make a list of all addable contact numbers from mAddableContacts and currentFriends, A + F
-        for (Friend addableFriend:
-             mAddableContacts) {
-            contactNumbersToRemove.add(addableFriend.cell_number);
-        }
-        for (User currentFriend:
-             currentFriends) {
-            contactNumbersToRemove.add(currentFriend.cell_number);
-        }
-
-        //Perform the operation I = C - A - F
-        for (Contact contact:
-             contacts) {
-            for (String number:
-                 contact.getNumbers().keySet()) {
-                if(contactNumbersToRemove.contains(number)) {
-                    mInvitableContacts.remove(contact);
-                    break;
-                }
-            }
-        }
-
-        //Sort names alphabetically before notifying adapter
-        sortNamesContacts(mInvitableContacts);
-        //Load new content into adapter
-        notifyAdapter();
-    }
 
     @OnClick(R.id.retrieve_contacts_permission_text)
     public void retrieveContactsPermissionRetry() {
