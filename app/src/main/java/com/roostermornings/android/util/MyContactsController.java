@@ -98,6 +98,18 @@ public class MyContactsController {
         return uniqueContactMap;
     }
 
+    public HashMap<String, String> getNumberNamePairs() {
+        HashMap<String, String> numberNamePairs = new HashMap<>();
+        for (Contact contact:
+                getContacts()) {
+            for (String number:
+                    contact.getNumbers().keySet()) {
+                numberNamePairs.put(number, contact.getName());
+            }
+        }
+        return numberNamePairs;
+    }
+
     private String getDefaultCountryCode() {
         TelephonyManager tm = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
 

@@ -30,9 +30,11 @@ import com.roostermornings.android.adapter.FriendsRequestListAdapter;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.fragment.base.BaseFragment;
+import com.roostermornings.android.util.MyContactsController;
 import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import javax.inject.Inject;
@@ -66,6 +68,7 @@ public class FriendsRequestFragment2 extends BaseFragment {
 
     @Inject Context AppContext;
     @Inject FirebaseUser firebaseUser;
+    @Inject MyContactsController myContactsController;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -149,19 +152,24 @@ public class FriendsRequestFragment2 extends BaseFragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 //Clear before repopulating
                 mUsers.clear();
-                Iterator iterator = dataSnapshot.getChildren().iterator();
-                if(dataSnapshot.getChildrenCount() == 0) swipeRefreshLayout.setRefreshing(false);
+
+                //Get a map of number name pairs from my contacts
+                HashMap<String, String> numberNamePairs = myContactsController.getNumberNamePairs();
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    mUsers.add(postSnapshot.getValue(Friend.class));
-                    //Sort names alphabetically before notifying adapter
-                    sortNamesFriends(mUsers);
-                    mAdapter.notifyDataSetChanged();
-                    //When the iterator is at it's last element, set data as loaded
-                    iterator.next();
-                    if(!iterator.hasNext()){
-                        swipeRefreshLayout.setRefreshing(false);
+                    Friend user = postSnapshot.getValue(Friend.class);
+
+                    //For each user, check if name appears in contacts, and allocate name
+                    if(numberNamePairs.containsKey(user.getCell_number())) {
+                        user.setUser_name(numberNamePairs.get(user.getCell_number()));
                     }
+
+                    mUsers.add(user);
                 }
+
+                //Sort names alphabetically before notifying adapter
+                sortNamesFriends(mUsers);
+                mAdapter.notifyDataSetChanged();
+                swipeRefreshLayout.setRefreshing(false);
             }
 
             @Override
