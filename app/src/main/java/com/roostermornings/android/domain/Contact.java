@@ -29,7 +29,7 @@ public class Contact {
              numbers.keySet()) {
             if(StrUtils.notNullOrEmpty(NSNNumber)) {
                 //Country code value + NSN number key = primary number
-                primaryNumber =  numbers.get(NSNNumber) + NSNNumber;
+                primaryNumber = numbers.get(NSNNumber) + NSNNumber;
                 break;
             }
         }

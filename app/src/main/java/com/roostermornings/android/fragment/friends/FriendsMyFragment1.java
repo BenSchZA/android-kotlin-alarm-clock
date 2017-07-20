@@ -35,16 +35,19 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.adapter.FriendsMyListAdapter;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
+import com.roostermornings.android.domain.Contact;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.domain.Users;
 import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.JSONPersistence;
+import com.roostermornings.android.util.MyContactsController;
 import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Objects;
 
@@ -89,6 +92,7 @@ public class FriendsMyFragment1 extends BaseFragment {
     @Inject Context AppContext;
     @Inject FirebaseUser firebaseUser;
     @Inject JSONPersistence jsonPersistence;
+    @Inject MyContactsController myContactsController;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -255,6 +259,17 @@ public class FriendsMyFragment1 extends BaseFragment {
                     mUsers.clear();
                     mUsers.addAll(apiResponse.users);
                     while(mUsers.remove(null));
+
+                    //Get a map of contact numbers to names
+                    HashMap<String, String> numberNamePairs = myContactsController.getNumberNamePairs();
+                    //For each user, check if name appears in contacts, and allocate name
+                    for (User user:
+                         mUsers) {
+                        if(numberNamePairs.containsKey(user.getCell_number())) {
+                            user.setUser_name(numberNamePairs.get(user.getCell_number()));
+                        }
+                    }
+
                     sortNamesUsers(mUsers);
                     //Persist friends array to disk
                     jsonPersistence.setFriends(mUsers);

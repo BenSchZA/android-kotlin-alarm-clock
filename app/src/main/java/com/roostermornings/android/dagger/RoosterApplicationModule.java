@@ -35,6 +35,7 @@ import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.util.JSONPersistence;
+import com.roostermornings.android.util.MyContactsController;
 
 import static com.roostermornings.android.sync.DownloadSyncAdapter.CreateSyncAccount;
 import static com.roostermornings.android.util.Constants.AUTHORITY;
@@ -128,6 +129,12 @@ public class RoosterApplicationModule {
     @Singleton
     JSONPersistence providesJSONPersistence(BaseApplication baseApplication) {
         return new JSONPersistence(baseApplication);
+    }
+
+    @Provides
+    @Singleton
+    MyContactsController providesMyContactsController(BaseApplication baseApplication) {
+        return new MyContactsController(baseApplication);
     }
 
     @Provides

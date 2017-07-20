@@ -48,6 +48,7 @@ import com.roostermornings.android.util.MyContactsController;
 import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.inject.Inject;
 
@@ -71,8 +72,6 @@ import static com.facebook.FacebookSdk.getApplicationContext;
 public class FriendsInviteFragment3 extends BaseFragment {
 
     protected static final String TAG = FriendsFragmentActivity.class.getSimpleName();
-
-    private MyContactsController myContactsController;
 
     ArrayList<Object> mRecyclerViewElements = new ArrayList<>();
     ArrayList<Friend> mAddableContacts = new ArrayList<>();
@@ -100,6 +99,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
     @Inject Context AppContext;
     @Inject FirebaseUser firebaseUser;
     @Inject JSONPersistence jsonPersistence;
+    @Inject MyContactsController myContactsController;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -338,10 +338,19 @@ public class FriendsInviteFragment3 extends BaseFragment {
 
                         if(apiResponse.users != null) {
                             mAddableContacts = new ArrayList<>();
+                            //Get a map of number name pairs from my contacts
+                            HashMap<String, String> numberNamePairs = myContactsController.getNumberNamePairs();
                             for (Friend user :
                                     apiResponse.users.get(0)) {
-                                if (user != null && !user.getUser_name().isEmpty()) mAddableContacts.add(user);
+                                if (user != null && !user.getUser_name().isEmpty()) {
+                                    //If user in my contacts, use that as user name
+                                    if(numberNamePairs.containsKey(user.getCell_number())) {
+                                        user.setUser_name(numberNamePairs.get(user.getCell_number()));
+                                    }
+                                    mAddableContacts.add(user);
+                                }
                             }
+
                             //Sort names alphabetically before notifying adapter
                             sortNamesFriends(mAddableContacts);
                         }
