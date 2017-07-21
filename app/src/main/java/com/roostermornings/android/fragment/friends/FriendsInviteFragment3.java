@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -97,7 +98,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
     private OnFragmentInteractionListener mListener;
 
     @Inject Context AppContext;
-    @Inject FirebaseUser firebaseUser;
+    @Inject @Nullable FirebaseUser firebaseUser;
     @Inject JSONPersistence jsonPersistence;
     @Inject MyContactsController myContactsController;
 
@@ -139,6 +140,26 @@ public class FriendsInviteFragment3 extends BaseFragment {
         // Inflate the layout for this fragment
         View view = initiate(inflater, R.layout.fragment_friends_fragment3, container, false);
 
+        return view;
+    }
+
+    //NB: bind ButterKnife to view and then initialise UI elements
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        mAddContactsAdapter = new FriendsInviteListAdapter(mRecyclerViewElements);
+        mAddContactsRecyclerView.setLayoutManager(new LinearLayoutManager(AppContext));
+        mAddContactsRecyclerView.setAdapter(mAddContactsAdapter);
+
+        mAddContactsAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onItemRangeRemoved(int positionStart, int itemCount) {
+                super.onItemRangeRemoved(positionStart, itemCount);
+                notifyAdapter();
+            }
+        });
+
         swipeRefreshLayout.setRefreshing(true);
         /*
         * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
@@ -163,26 +184,6 @@ public class FriendsInviteFragment3 extends BaseFragment {
         );
 
         requestPermissionReadContacts();
-
-        return view;
-    }
-
-    //NB: bind ButterKnife to view and then initialise UI elements
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        mAddContactsAdapter = new FriendsInviteListAdapter(mRecyclerViewElements);
-        mAddContactsRecyclerView.setLayoutManager(new LinearLayoutManager(AppContext));
-        mAddContactsRecyclerView.setAdapter(mAddContactsAdapter);
-
-        mAddContactsAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-            @Override
-            public void onItemRangeRemoved(int positionStart, int itemCount) {
-                super.onItemRangeRemoved(positionStart, itemCount);
-                notifyAdapter();
-            }
-        });
     }
 
     @Override
@@ -290,6 +291,16 @@ public class FriendsInviteFragment3 extends BaseFragment {
         } else if(ContextCompat.checkSelfPermission(AppContext,
                 android.Manifest.permission.READ_CONTACTS)
                 == PackageManager.PERMISSION_GRANTED) {
+
+            //If there is no internet connection, attempt to retrieve invitable contacts from persistence
+            if(!jsonPersistence.getInvitableContacts().isEmpty() && !checkInternetConnection()) {
+                mInvitableContacts = jsonPersistence.getInvitableContacts();
+                mRecyclerViewElements.add(invitableHeader);
+                mRecyclerViewElements.addAll(mInvitableContacts);
+                notifyAdapter();
+                swipeRefreshLayout.setRefreshing(false);
+            }
+
             executeNodeMyContactsTask();
         }
     }
@@ -433,6 +444,8 @@ public class FriendsInviteFragment3 extends BaseFragment {
         }
 
         protected void onPostExecute(String result) {
+            jsonPersistence.setInvitableContacts(mInvitableContacts);
+
             //Load new content into adapter
             mRecyclerViewElements.add(addableHeader);
             mRecyclerViewElements.addAll(mAddableContacts);

@@ -6,9 +6,12 @@
 package com.roostermornings.android.fragment.friends;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -30,6 +33,7 @@ import com.roostermornings.android.adapter.FriendsRequestListAdapter;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.fragment.base.BaseFragment;
+import com.roostermornings.android.util.JSONPersistence;
 import com.roostermornings.android.util.MyContactsController;
 import com.roostermornings.android.util.Toaster;
 
@@ -67,8 +71,9 @@ public class FriendsRequestFragment2 extends BaseFragment {
     private OnFragmentInteractionListener mListener;
 
     @Inject Context AppContext;
-    @Inject FirebaseUser firebaseUser;
+    @Inject @Nullable FirebaseUser firebaseUser;
     @Inject MyContactsController myContactsController;
+    @Inject JSONPersistence jsonPersistence;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -154,7 +159,15 @@ public class FriendsRequestFragment2 extends BaseFragment {
                 mUsers.clear();
 
                 //Get a map of number name pairs from my contacts
-                HashMap<String, String> numberNamePairs = myContactsController.getNumberNamePairs();
+                //For each user, check if name appears in contacts, and allocate name
+                HashMap<String, String> numberNamePairs = new HashMap<>();
+                if (ContextCompat.checkSelfPermission(getActivity(),
+                        android.Manifest.permission.READ_CONTACTS)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    //Get a map of contact numbers to names
+                    numberNamePairs = myContactsController.getNumberNamePairs();
+                }
+
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     Friend user = postSnapshot.getValue(Friend.class);
 

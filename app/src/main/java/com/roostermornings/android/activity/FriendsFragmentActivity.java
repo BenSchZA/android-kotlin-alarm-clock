@@ -15,6 +15,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -99,7 +100,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
     FriendsInviteFragment3 friendsInviteFragment3;
 
     @Inject BaseApplication baseApplication;
-    @Inject FirebaseUser mCurrentUser;
+    @Inject @Nullable FirebaseUser mCurrentUser;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
