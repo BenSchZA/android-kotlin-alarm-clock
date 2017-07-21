@@ -55,16 +55,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginLeft="100dp"
                 android:layout_marginRight="100dp"
-                android:background="@drawable/ic_alarm_add_white_24px"
-                android:visibility="gone">
-
-                <com.roostermornings.android.custom_ui.SquareImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    app:srcCompat="@drawable/ic_alarm_add_white_24px"
-                    android:visibility="gone"/>
-
-            </com.roostermornings.android.custom_ui.SquareFrameLayout>
+                android:visibility="gone" />
 
             <me.grantland.widget.AutofitTextView
                 android:id="@+id/add_alarm_filler_text"
