@@ -15,6 +15,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.graphics.drawable.VectorDrawableCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -390,6 +391,9 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
     private void toggleAlarmFiller() {
         if(mAlarms.isEmpty()) {
+            //For pre-Lollipop devices use VectorDrawableCompat to get your vector from resources
+            VectorDrawableCompat vectorDrawable = VectorDrawableCompat.create(this.getResources(), R.drawable.ic_alarm_add_white_24px, null);
+            addAlarmFiller.setBackground(vectorDrawable);
             addAlarmFiller.setVisibility(View.VISIBLE);
             addAlarmFillerText.setVisibility(View.VISIBLE);
         } else {
