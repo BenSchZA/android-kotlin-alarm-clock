@@ -29,8 +29,8 @@
     <application
         android:name=".BaseApplication"
         android:allowBackup="false"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher_beta"
+        android:label="@string/app_name_beta"
         android:supportsRtl="true">
         <meta-data android:name="android.max_aspect" android:value="2.1" />
         <meta-data
@@ -69,7 +69,7 @@
         <activity
             android:name=".activity.SplashActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/app_name"
+            android:label="@string/app_name_beta"
             android:screenOrientation="portrait"
             android:theme="@style/SplashTheme">
             <intent-filter>
@@ -89,13 +89,13 @@
         <activity
             android:name=".activity.SignInActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/app_name"
+            android:label="@string/app_name_beta"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBarIntro" />
         <activity
             android:name=".activity.SignupEmailActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/app_name"
+            android:label="@string/app_name_beta"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBarIntro" />
         <activity
@@ -126,7 +126,7 @@
             android:name=".activity.DeviceAlarmFullScreenActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:excludeFromRecents="true"
-            android:label="@string/app_name"
+            android:label="@string/app_name_beta"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:showOnLockScreen="true"
@@ -243,7 +243,7 @@
 
         <activity android:name=".activity.InvalidateVersion"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/app_name"
+            android:label="@string/app_name_beta"
             android:screenOrientation="portrait"
             android:theme="@style/SplashTheme"/>
     </application>
