@@ -15,6 +15,7 @@ import android.content.Intent;
 import android.content.SyncResult;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -75,7 +76,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
     private boolean channelSyncActive;
 
     //Firebase SDK
-    @Inject FirebaseUser firebaseUser;
+    @Inject @Nullable FirebaseUser firebaseUser;
     @Inject StorageReference mStorageRef;
     @Inject DatabaseReference mDatabaseRef;
     @Inject AudioTableManager audioTableManager;

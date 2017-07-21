@@ -93,7 +93,7 @@ public class RoosterApplicationModule {
     }
 
     @Provides
-    @Singleton
+    @Nullable
     FirebaseUser provideFirebaseUser() {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         return mAuth.getCurrentUser();

@@ -11,6 +11,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -69,7 +70,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
 
     @Inject DeviceAlarmController deviceAlarmController;
     @Inject DeviceAlarmTableManager deviceAlarmTableManager;
-    @Inject FirebaseUser mCurrentUser;
+    @Inject @Nullable FirebaseUser mCurrentUser;
     @Inject Account mAccount;
 
     @Override

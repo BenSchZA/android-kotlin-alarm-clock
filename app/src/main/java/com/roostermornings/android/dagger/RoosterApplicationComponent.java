@@ -6,6 +6,7 @@
 package com.roostermornings.android.dagger;
 
 import android.content.SharedPreferences;
+import android.support.annotation.Nullable;
 
 import javax.inject.Singleton;
 

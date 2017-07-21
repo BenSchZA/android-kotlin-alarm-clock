@@ -105,8 +105,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
     @Inject @Named("default") SharedPreferences defaultSharedPreferences;
     @Inject DeviceAlarmController deviceAlarmController;
     @Inject AudioTableManager audioTableManager;
-    @Inject
-    DeviceAlarmTableManager deviceAlarmTableManager;
+    @Inject DeviceAlarmTableManager deviceAlarmTableManager;
     @Inject BackgroundTaskReceiver backgroundTaskReceiver;
     @Inject public DatabaseReference mDatabase;
     @Inject Account mAccount;

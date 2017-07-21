@@ -182,7 +182,7 @@ public class MyContactsController {
         try {
             contactNumber = contactNumber.replaceAll("[^0-9+]", "");
             //Return NSN number
-            return  processContactCountry(contactNumber).getV();
+            return  processContactCountry(contactNumber).getK();
         } catch (NullPointerException e){
             e.printStackTrace();
             return "";
