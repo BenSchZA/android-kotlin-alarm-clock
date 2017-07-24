@@ -256,7 +256,7 @@ public class FriendsMyFragment1 extends BaseFragment {
 
                     //For each user, check if name appears in contacts, and allocate name
                     HashMap<String, String> numberNamePairs = new HashMap<>();
-                    if (ContextCompat.checkSelfPermission(getActivity(),
+                    if (ContextCompat.checkSelfPermission(getApplicationContext(),
                             android.Manifest.permission.READ_CONTACTS)
                             == PackageManager.PERMISSION_GRANTED) {
                         //Get a map of contact numbers to names
@@ -289,7 +289,7 @@ public class FriendsMyFragment1 extends BaseFragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        inject(((BaseApplication)getActivity().getApplication()).getRoosterApplicationComponent());
+        inject(((BaseApplication) AppContext).getRoosterApplicationComponent());
 
         getDatabaseReference();
 

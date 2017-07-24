@@ -59,7 +59,6 @@ public class FriendsRequestFragment2 extends BaseFragment {
 
     ArrayList<Friend> mUsers = new ArrayList<>();
     private DatabaseReference mRequestsReference;
-    private DatabaseReference mUserReference;
 
     private RecyclerView.Adapter mAdapter;
 
@@ -161,7 +160,7 @@ public class FriendsRequestFragment2 extends BaseFragment {
                 //Get a map of number name pairs from my contacts
                 //For each user, check if name appears in contacts, and allocate name
                 HashMap<String, String> numberNamePairs = new HashMap<>();
-                if (ContextCompat.checkSelfPermission(getActivity(),
+                if (ContextCompat.checkSelfPermission(AppContext,
                         android.Manifest.permission.READ_CONTACTS)
                         == PackageManager.PERMISSION_GRANTED) {
                     //Get a map of contact numbers to names
@@ -205,7 +204,7 @@ public class FriendsRequestFragment2 extends BaseFragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        inject(((BaseApplication)getActivity().getApplication()).getRoosterApplicationComponent());
+        inject(((BaseApplication) AppContext).getRoosterApplicationComponent());
 
         getDatabaseReference();
         getRequests();

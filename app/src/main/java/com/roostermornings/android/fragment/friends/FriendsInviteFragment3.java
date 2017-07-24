@@ -126,7 +126,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        inject(((BaseApplication)getActivity().getApplication()).getRoosterApplicationComponent());
+        inject(((BaseApplication) AppContext).getRoosterApplicationComponent());
 
         addableHeader = getResources().getString(R.string.add_contacts);
         invitableHeader = getResources().getString(R.string.invite_contacts);
@@ -263,7 +263,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
         //Clear explainer on entry, show if necessary i.e. permission previously denied
         displayRequestPermissionExplainer(false);
 
-        if (ContextCompat.checkSelfPermission(getActivity(),
+        if (ContextCompat.checkSelfPermission(AppContext,
                 android.Manifest.permission.READ_CONTACTS)
                 != PackageManager.PERMISSION_GRANTED) {
 
@@ -295,8 +295,10 @@ public class FriendsInviteFragment3 extends BaseFragment {
             //If there is no internet connection, attempt to retrieve invitable contacts from persistence
             if(!jsonPersistence.getInvitableContacts().isEmpty() && !checkInternetConnection()) {
                 mInvitableContacts = jsonPersistence.getInvitableContacts();
+                //Populate recycler view elements
                 mRecyclerViewElements.add(invitableHeader);
                 mRecyclerViewElements.addAll(mInvitableContacts);
+                //Display results
                 notifyAdapter();
                 swipeRefreshLayout.setRefreshing(false);
             }
@@ -349,6 +351,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
 
                         if(apiResponse.users != null) {
                             mAddableContacts = new ArrayList<>();
+
                             //Get a map of number name pairs from my contacts
                             HashMap<String, String> numberNamePairs = myContactsController.getNumberNamePairs();
                             for (Friend user :
@@ -415,7 +418,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
                 currentFriends = jsonPersistence.getFriends();
             }
 
-            //Make a list of all addable contact numbers from mAddableContacts and currentFriends, A + F
+            //Make a list of all contact numbers from mAddableContacts and currentFriends, A + F
             for (Friend addableFriend:
                     mAddableContacts) {
                 contactNumbersToRemove.add(addableFriend.cell_number);
@@ -425,7 +428,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
                 contactNumbersToRemove.add(currentFriend.cell_number);
             }
 
-            //Perform the operation I = C - A - F
+            //Perform the operation I = C - (A + F)
             for (Contact contact:
                     contacts) {
                 for (String number:
@@ -444,13 +447,15 @@ public class FriendsInviteFragment3 extends BaseFragment {
         }
 
         protected void onPostExecute(String result) {
+            //Persist invitable contacts for those times where user has no internet connection
             jsonPersistence.setInvitableContacts(mInvitableContacts);
 
-            //Load new content into adapter
+            //Load new content (including section headers) into adapter
             mRecyclerViewElements.add(addableHeader);
             mRecyclerViewElements.addAll(mAddableContacts);
             mRecyclerViewElements.add(invitableHeader);
             mRecyclerViewElements.addAll(mInvitableContacts);
+            //Display new content
             notifyAdapter();
             //Make load spinner GONE and recyclerview VISIBLE
             swipeRefreshLayout.setRefreshing(false);
