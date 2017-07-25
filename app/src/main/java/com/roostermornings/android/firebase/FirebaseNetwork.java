@@ -6,12 +6,18 @@
 package com.roostermornings.android.firebase;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.roostermornings.android.R;
+import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.MyContactsController;
 import com.roostermornings.android.util.StrUtils;
 
@@ -62,10 +68,69 @@ public class FirebaseNetwork {
 
         Map<String, Object> childUpdates = new HashMap<>();
 
-        if(fUser != null && StrUtils.notNullOrEmpty(fUser.getUid())) {
+        if (fUser != null && StrUtils.notNullOrEmpty(fUser.getUid())) {
             childUpdates.put(String.format("users/%s/%s",
                     fUser.getUid(), "cell_number"), NSNNumber);
             fDB.updateChildren(childUpdates);
+
+            if (StrUtils.notNullOrEmpty(NSNNumber)) {
+                SharedPreferences.Editor editor = context.getSharedPreferences(Constants.SHARED_PREFS_KEY, Context.MODE_PRIVATE).edit();
+                editor.putBoolean(Constants.MOBILE_NUMBER_VALIDATED, true);
+                editor.apply();
+            } else {
+                SharedPreferences.Editor editor = context.getSharedPreferences(Constants.SHARED_PREFS_KEY, Context.MODE_PRIVATE).edit();
+                editor.putBoolean(Constants.MOBILE_NUMBER_VALIDATED, false);
+                editor.apply();
+            }
+        }
+    }
+
+    private static OnFlagValidMobileNumberCompleteListener onFlagValidMobileNumberCompleteListener;
+
+    public interface OnFlagValidMobileNumberCompleteListener {
+        void onEvent(boolean valid);
+    }
+
+    public static void setOnFlagValidMobileNumberCompleteListener(OnFlagValidMobileNumberCompleteListener listener) {
+        onFlagValidMobileNumberCompleteListener = listener;
+    }
+
+    public static void flagValidMobileNumber(final Context context, final boolean notify) {
+        DatabaseReference fDB = FirebaseDatabase.getInstance().getReference();
+        FirebaseUser fUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        if(fUser != null && StrUtils.notNullOrEmpty(fUser.getUid())) {
+            DatabaseReference mMobileNumberReference = fDB
+                    .child("users").child(fUser.getUid()).child("cell_number");
+
+            mMobileNumberReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    String userCellNumber = dataSnapshot.getValue(String.class);
+
+                    boolean valid;
+                    SharedPreferences.Editor editor = context.getSharedPreferences(Constants.SHARED_PREFS_KEY, Context.MODE_PRIVATE).edit();
+                    if(!StrUtils.notNullOrEmpty(userCellNumber)) {
+                        editor.putBoolean(Constants.MOBILE_NUMBER_VALIDATED, false);
+                        editor.apply();
+                        valid = false;
+                    } else {
+                        editor.putBoolean(Constants.MOBILE_NUMBER_VALIDATED, true);
+                        editor.apply();
+                        valid = true;
+
+                        FA.Log(FA.Event.onboarding_number_provided.class, null, null);
+                    }
+
+                    if(notify && onFlagValidMobileNumberCompleteListener != null)
+                        onFlagValidMobileNumberCompleteListener.onEvent(valid);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
         }
     }
 

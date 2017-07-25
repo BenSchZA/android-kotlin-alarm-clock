@@ -34,6 +34,7 @@ import com.roostermornings.android.dagger.DaggerRoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationModule;
 import com.roostermornings.android.domain.User;
+import com.roostermornings.android.firebase.FirebaseNetwork;
 import com.roostermornings.android.node_api.IHTTPClient;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.service.FirebaseListenerService;
@@ -87,7 +88,7 @@ public class BaseApplication extends android.app.Application {
         //Activate crashlytics instance
         CrashlyticsCore core = new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build();
         Fabric.with(this, new Crashlytics.Builder().core(core).build());
-//        Fabric.with(this, new Crashlytics());
+        //If debug, disable Firebase analytics
         if(BuildConfig.DEBUG) {
             firebaseAnalytics.setAnalyticsCollectionEnabled(false);
         }
@@ -135,6 +136,9 @@ public class BaseApplication extends android.app.Application {
                 if (user != null) {
                     // User is signed in
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+
+                    //Set shared pref to indicate whether mobile number is valid
+                    FirebaseNetwork.flagValidMobileNumber(getApplicationContext(), false);
 
                     //retrieve static User for current user
                     retrieveMyUserDetails();

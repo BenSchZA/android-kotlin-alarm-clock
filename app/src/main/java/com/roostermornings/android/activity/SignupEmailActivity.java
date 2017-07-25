@@ -6,7 +6,6 @@
 package com.roostermornings.android.activity;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -25,7 +24,7 @@ import com.mobsandgeeks.saripaar.annotation.Password;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
-import com.roostermornings.android.analytics.FA;
+import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.util.Toaster;
@@ -52,7 +51,6 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
     EditText mPassword;
 
     Validator validator;
-    String mMobileNumber = "";
     boolean mAlreadyUser = false;
 
     @Override
@@ -72,16 +70,11 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
-            mMobileNumber = bundle.getString(getApplicationContext().getString(R.string.extras_mobile_number), "");
             mAlreadyUser = bundle.getBoolean(getApplicationContext().getString(R.string.extras_already_user), false);
-
             if (mAlreadyUser) {
                 mUserName.setVisibility(View.INVISIBLE);
-
             }
-
         }
-
     }
 
     @OnClick(R.id.signup_button_email)
@@ -109,16 +102,13 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
                             Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
 
                             if (!task.isSuccessful()) {
-
                                 Toast.makeText(SignupEmailActivity.this, R.string.signup_auth_failed,
                                         Toast.LENGTH_LONG).show();
-
                             } else {
                                 String deviceToken = FirebaseInstanceId.getInstance().getToken();
                                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                                 database.getReference(String.format("users/%s/device_type", mAuth.getCurrentUser().getUid())).setValue("android");
                                 database.getReference(String.format("users/%s/device_token", mAuth.getCurrentUser().getUid())).setValue(deviceToken);
-                                database.getReference(String.format("users/%s/cell_number", mAuth.getCurrentUser().getUid())).setValue(mMobileNumber);
                                 database.getReference(String.format("users/%s/unseen_roosters", mAuth.getCurrentUser().getUid())).setValue(0);
 
                                 //Add user as a friend of theirs
@@ -152,15 +142,13 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
                                         deviceToken,
                                         "",
                                         name,
-                                        mMobileNumber,
+                                        "",
                                         mAuth.getCurrentUser().getUid(),
                                         null,
                                         0);
 
-                                //Note: "friends" node not changed TODO: should profile pic be kept?
+                                //Note: "friends" and "cell_number" node not changed TODO: should profile pic be kept?
                                 Map<String, Object> childUpdates = new HashMap<>();
-                                childUpdates.put(String.format("users/%s/%s",
-                                        mAuth.getCurrentUser().getUid(), "cell_number"), user.getCell_number());
                                 childUpdates.put(String.format("users/%s/%s",
                                         mAuth.getCurrentUser().getUid(), "device_token"), user.getDevice_token());
                                 childUpdates.put(String.format("users/%s/%s",

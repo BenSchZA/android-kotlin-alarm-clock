@@ -289,7 +289,7 @@ public class FriendsMyFragment1 extends BaseFragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        inject(((BaseApplication) AppContext).getRoosterApplicationComponent());
+        inject(BaseApplication.getRoosterApplicationComponent());
 
         getDatabaseReference();
 

@@ -17,9 +17,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.google.firebase.storage.FirebaseStorage;
 import com.roostermornings.android.R;
-import com.roostermornings.android.analytics.FA;
+import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.AlarmChannel;
 import com.roostermornings.android.domain.ChannelRooster;

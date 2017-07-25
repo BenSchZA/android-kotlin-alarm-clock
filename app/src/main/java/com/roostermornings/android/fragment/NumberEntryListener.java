@@ -5,6 +5,6 @@
 
 package com.roostermornings.android.fragment;
 
-public interface IIntroFragmentListener {
-    void onMobileNumberSet(String mobileNumber);
+public interface NumberEntryListener {
+    void onMobileNumberValidated(String mobileNumber);
 }

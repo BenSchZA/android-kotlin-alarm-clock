@@ -34,6 +34,7 @@ import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
+import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.JSONPersistence;
 import com.roostermornings.android.util.MyContactsController;
 
@@ -114,7 +115,7 @@ public class RoosterApplicationModule {
     @Provides
     @Singleton
     SharedPreferences provideSharedPreferences() {
-        return baseApplication.getSharedPreferences(baseApplication.getString(R.string.preferences_key),
+        return baseApplication.getSharedPreferences(Constants.SHARED_PREFS_KEY,
                 Context.MODE_PRIVATE);
     }
 

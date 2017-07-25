@@ -10,23 +10,18 @@ import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.graphics.drawable.VectorDrawableCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
-import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.TranslateAnimation;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,17 +39,15 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.MyAlarmsListAdapter;
-import com.roostermornings.android.analytics.FA;
+import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.custom_ui.SquareFrameLayout;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.AlarmChannel;
 import com.roostermornings.android.firebase.FirebaseNetwork;
 import com.roostermornings.android.sqlutil.AudioTableManager;
-import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
-import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.sync.DownloadSyncAdapter;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.StrUtils;
@@ -90,6 +83,9 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     @BindView(R.id.add_alarm_filler_text)
     AutofitTextView addAlarmFillerText;
 
+    @BindView(R.id.swiperefresh)
+    SwipeRefreshLayout swipeRefreshLayout;
+
     private final ArrayList<Alarm> mAlarms = new ArrayList<>();
     private RecyclerView.Adapter mAdapter;
 
@@ -118,6 +114,22 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
         //Download any social or channel audio files
         ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
+
+        swipeRefreshLayout.setRefreshing(true);
+        /*
+        * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
+        * performs a swipe-to-refresh gesture.
+        */
+        swipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        // This method performs the actual data-refresh operation.
+                        // The method calls setRefreshing(false) when it's finished.
+                        refreshAlarms();
+                    }
+                }
+        );
 
         //UI setup thread
         new Thread() {
@@ -196,76 +208,82 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
             }
         }.run();
 
-        //Firebase listview setup thread
-        new Thread() {
+        //Refresh alarms list from background thread
+        refreshAlarms();
+    }
+
+    private void refreshAlarms() {
+
+        //Clear old content
+        mAlarms.clear();
+
+        DatabaseReference mMyAlarmsReference = FirebaseDatabase.getInstance().getReference()
+                .child("alarms").child(firebaseUser.getUid());
+        //Keep local and Firebase alarm dbs synced
+        mMyAlarmsReference.keepSynced(true);
+
+        ValueEventListener alarmsListener = new ValueEventListener() {
             @Override
-            public void run() {
-                DatabaseReference mMyAlarmsReference = FirebaseDatabase.getInstance().getReference()
-                        .child("alarms").child(firebaseUser.getUid());
-                //Keep local and Firebase alarm dbs synced
-                mMyAlarmsReference.keepSynced(true);
+            public void onDataChange(DataSnapshot dataSnapshot) {
 
-                ValueEventListener alarmsListener = new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                    Alarm alarm = postSnapshot.getValue(Alarm.class);
 
-                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                            Alarm alarm = postSnapshot.getValue(Alarm.class);
+                    //Register alarm sets on login
+                    //Extract data from Alarm "alarm" and create new alarm set DeviceAlarm
+                    AlarmChannel alarmChannel = alarm.getChannel();
+                    String alarmChannelUID = "";
+                    if(alarmChannel != null) alarmChannelUID = alarmChannel.getId();
 
-                            //Register alarm sets on login
-                            //Extract data from Alarm "alarm" and create new alarm set DeviceAlarm
-                            AlarmChannel alarmChannel = alarm.getChannel();
-                            String alarmChannelUID = "";
-                            if(alarmChannel != null) alarmChannelUID = alarmChannel.getId();
-
-                            //Check for a valid Firebase entry, if invalid delete entry, else continue
-                            if(alarm.getHour() < 0 || alarm.getMinute() < 0 || alarm.getDays().isEmpty() || !StrUtils.notNullOrEmpty(alarm.getUid())) {
-                                FirebaseNetwork.removeFirebaseAlarm(postSnapshot.getKey());
-                            } else {
-                                Boolean successfulProcessing = false;
-                                //If alarm from firebase does not exist locally, create it
-                                if(StrUtils.notNullOrEmpty(alarm.getUid()) && !deviceAlarmTableManager.isSetInDB(alarm.getUid())) {
-                                    //Try to insert alarm into SQL db - if successful, configure new alarm set element and set successfulProcessing flag = true
-                                    if(deviceAlarmController.registerAlarmSet(alarm.isEnabled(), alarm.getUid(), alarm.getHour(), alarm.getMinute(),
-                                            alarm.getDays(), alarm.isRecurring(), alarmChannelUID, alarm.isAllow_friend_audio_files())) {
-                                        configureAlarmElement(alarm);
-                                        successfulProcessing = true;
-                                    }
-                                }
-                                //If alarm exists locally, AND in Firebase, just configure alarm UI element
-                                else if(StrUtils.notNullOrEmpty(alarm.getUid()) && deviceAlarmTableManager.isSetInDB(alarm.getUid())) {
-                                    configureAlarmElement(alarm);
-                                    successfulProcessing = true;
-                                }
-
-                                //If alarm exists in Firebase and couldn't be created locally, or is corrupt, delete Firebase entry
-                                if(!successfulProcessing) {
-                                    FirebaseNetwork.removeFirebaseAlarm(postSnapshot.getKey());
-                                }
+                    //Check for a valid Firebase entry, if invalid delete entry, else continue
+                    if(alarm.getHour() < 0 || alarm.getMinute() < 0 || alarm.getDays().isEmpty() || !StrUtils.notNullOrEmpty(alarm.getUid())) {
+                        FirebaseNetwork.removeFirebaseAlarm(postSnapshot.getKey());
+                    } else {
+                        Boolean successfulProcessing = false;
+                        //If alarm from firebase does not exist locally, create it
+                        if(StrUtils.notNullOrEmpty(alarm.getUid()) && !deviceAlarmTableManager.isSetInDB(alarm.getUid())) {
+                            //Try to insert alarm into SQL db - if successful, configure new alarm set element and set successfulProcessing flag = true
+                            if(deviceAlarmController.registerAlarmSet(alarm.isEnabled(), alarm.getUid(), alarm.getHour(), alarm.getMinute(),
+                                    alarm.getDays(), alarm.isRecurring(), alarmChannelUID, alarm.isAllow_friend_audio_files())) {
+                                configureAlarmElement(alarm);
+                                successfulProcessing = true;
                             }
-
-                            //Notify adapter of new rooster count data to be displayed
-                            updateRoosterNotification();
                         }
-                        //Sort alarms according to time
-                        sortAlarms(mAlarms);
-                        toggleAlarmFiller();
+                        //If alarm exists locally, AND in Firebase, just configure alarm UI element
+                        else if(StrUtils.notNullOrEmpty(alarm.getUid()) && deviceAlarmTableManager.isSetInDB(alarm.getUid())) {
+                            configureAlarmElement(alarm);
+                            successfulProcessing = true;
+                        }
 
-                        //Recreate all enabled alarms as failsafe
-                        deviceAlarmController.rebootAlarms();
-                        //Case: local has an alarm that firebase doesn't Result: delete local alarm
-                        deviceAlarmController.syncAlarmSetGlobal(mAlarms);
+                        //If alarm exists in Firebase and couldn't be created locally, or is corrupt, delete Firebase entry
+                        if(!successfulProcessing) {
+                            FirebaseNetwork.removeFirebaseAlarm(postSnapshot.getKey());
+                        }
                     }
+                }
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                        Toaster.makeToast(MyAlarmsFragmentActivity.this, "Failed to load alarms.",
-                                Toast.LENGTH_SHORT).checkTastyToast();
-                    }
-                }; mMyAlarmsReference.addListenerForSingleValueEvent(alarmsListener);
+                //Sort alarms according to time
+                sortAlarms(mAlarms);
+                toggleAlarmFiller();
+
+                //Recreate all enabled alarms as failsafe
+                deviceAlarmController.rebootAlarms();
+                //Case: local has an alarm that firebase doesn't Result: delete local alarm
+                deviceAlarmController.syncAlarmSetGlobal(mAlarms);
+
+                //Load content and stop refresh indicator
+                swipeRefreshLayout.setRefreshing(false);
+                //Notify adapter of new rooster count data to be displayed
+                updateRoosterNotification();
             }
-        }.run();
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+                Toaster.makeToast(MyAlarmsFragmentActivity.this, "Failed to load alarms.",
+                        Toast.LENGTH_SHORT).checkTastyToast();
+            }
+        }; mMyAlarmsReference.addListenerForSingleValueEvent(alarmsListener);
     }
 
     @Override
