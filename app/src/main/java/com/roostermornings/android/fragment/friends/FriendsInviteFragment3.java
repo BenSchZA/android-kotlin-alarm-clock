@@ -35,7 +35,7 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.adapter.FriendsInviteListAdapter;
-import com.roostermornings.android.analytics.FA;
+import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Contact;
 import com.roostermornings.android.domain.Friend;
@@ -97,6 +97,8 @@ public class FriendsInviteFragment3 extends BaseFragment {
 
     private OnFragmentInteractionListener mListener;
 
+    ProcessAddableBackground processAddableBackground = new ProcessAddableBackground();
+
     @Inject Context AppContext;
     @Inject @Nullable FirebaseUser firebaseUser;
     @Inject JSONPersistence jsonPersistence;
@@ -126,7 +128,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        inject(((BaseApplication) AppContext).getRoosterApplicationComponent());
+        inject(BaseApplication.getRoosterApplicationComponent());
 
         addableHeader = getResources().getString(R.string.add_contacts);
         invitableHeader = getResources().getString(R.string.invite_contacts);
@@ -159,6 +161,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
                 notifyAdapter();
             }
         });
+
 
         swipeRefreshLayout.setRefreshing(true);
         /*
@@ -300,7 +303,6 @@ public class FriendsInviteFragment3 extends BaseFragment {
                 mRecyclerViewElements.addAll(mInvitableContacts);
                 //Display results
                 notifyAdapter();
-                swipeRefreshLayout.setRefreshing(false);
             }
 
             executeNodeMyContactsTask();
@@ -317,7 +319,16 @@ public class FriendsInviteFragment3 extends BaseFragment {
                         public void onComplete(@NonNull Task<GetTokenResult> task) {
                             if (task.isSuccessful()) {
                                 String idToken = task.getResult().getToken();
-                                new ProcessAddableBackground().execute(idToken);
+
+                                if(processAddableBackground.getStatus().equals(AsyncTask.Status.FINISHED)) {
+                                    processAddableBackground = null;
+                                    processAddableBackground = new ProcessAddableBackground();
+                                    processAddableBackground.execute(idToken);
+                                } else if(processAddableBackground.getStatus().equals(AsyncTask.Status.PENDING)) {
+                                    processAddableBackground.execute(idToken);
+                                } else if(!processAddableBackground.getStatus().equals(AsyncTask.Status.RUNNING)) {
+                                    swipeRefreshLayout.setRefreshing(false);
+                                }
                             } else {
                                 // Handle error -> task.getException();
                                 swipeRefreshLayout.setRefreshing(false);
@@ -369,8 +380,6 @@ public class FriendsInviteFragment3 extends BaseFragment {
                             sortNamesFriends(mAddableContacts);
                         }
 
-                        new ProcessInvitableBackground().execute("");
-
                         Log.d("apiResponse", apiResponse.toString());
                     }
                 }
@@ -387,7 +396,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
         }
 
         protected void onPostExecute(String result) {
-
+            new ProcessInvitableBackground().execute("");
         }
     }
 
@@ -476,7 +485,6 @@ public class FriendsInviteFragment3 extends BaseFragment {
             swipeRefreshLayout.setRefreshing(false);
         } else {
             retrieveContactsPermissionText.setVisibility(View.GONE);
-            swipeRefreshLayout.setRefreshing(false);
         }
     }
 }

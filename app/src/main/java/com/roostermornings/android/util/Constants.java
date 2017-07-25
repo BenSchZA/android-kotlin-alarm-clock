@@ -53,6 +53,8 @@ public class Constants {
     //FriendsFragmentActivity
     public final static String FRIENDS_ACTIVITY_CURRENT_FRAGMENT = "currentFriendsFragment";
 
+    public final static String ARG_SHOW_DISMISS = "ARG_SHOW_DISMISS";
+
     //DeviceAlarmController intent actions
     public final static String ACTTION_ALARMRECEIVER = "receiver.ALARM_RECEIVER";
     // > display alarm icon
@@ -112,8 +114,12 @@ public class Constants {
     //Intent extras
     public final static String EXTRA_ALARMID = "alarmId";
 
+    //Shared prefs
+    public final static String SHARED_PREFS_KEY = "SHARED_PREFS_KEY";
     //Dialog boolean to indicate viewed
     public final static String PERMISSIONS_DIALOG_OPTIMIZATION = "permissionsDialogOptimization";
+    public final static String MOBILE_NUMBER_VALIDATED = "mobileNumberValid";
+    public final static String MOBILE_NUMBER_ENTRY_DISMISSED = "mobileNumberEntryDismissed";
 
     //Calendar constants
     public final static long TIME_MILLIS_1_MINUTE = 60000;

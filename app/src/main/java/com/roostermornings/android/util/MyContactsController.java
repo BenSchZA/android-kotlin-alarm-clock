@@ -100,8 +100,10 @@ public class MyContactsController {
 
     public HashMap<String, String> getNumberNamePairs() {
         HashMap<String, String> numberNamePairs = new HashMap<>();
+        ArrayList<Contact> contactArray = getContacts();
+
         for (Contact contact:
-                getContacts()) {
+                contactArray) {
             for (String number:
                     contact.getNumbers().keySet()) {
                 numberNamePairs.put(number, contact.getName());
@@ -157,7 +159,7 @@ public class MyContactsController {
     }
 
     public ArrayList<String> getNodeNumberList() {
-        getContacts();
+        ArrayList<Contact> contactArray = getContacts();
 
         ArrayList<String> phoneNumberList = new ArrayList<>();
 

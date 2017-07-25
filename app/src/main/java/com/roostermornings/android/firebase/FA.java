@@ -3,7 +3,7 @@
  * Copyright (c)  2017 Roosta Media. All rights reserved.
  */
 
-package com.roostermornings.android.analytics;
+package com.roostermornings.android.firebase;
 
 import android.os.Bundle;
 import android.support.annotation.Keep;

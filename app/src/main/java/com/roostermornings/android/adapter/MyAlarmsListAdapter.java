@@ -6,58 +6,43 @@
 package com.roostermornings.android.adapter;
 
 import android.app.Activity;
-import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SwitchCompat;
-import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.CompoundButton;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.Theme;
-import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
-import com.roostermornings.android.analytics.FA;
+import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.domain.Alarm;
-import com.roostermornings.android.sqlutil.DeviceAlarm;
-import com.roostermornings.android.sqlutil.DeviceAlarmController;
-import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
-import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.StrUtils;
-
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-
 public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapter.ViewHolder> {
     private ArrayList<Alarm> mDataset;
     private Activity mActivity;
     private BroadcastReceiver receiver;
     private Context context;
+
+    boolean computingLayout;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -125,6 +110,9 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
+        //Set flag to show layout is being refreshed
+        computingLayout = true;
+
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         final Alarm alarm = mDataset.get(position);
@@ -138,8 +126,6 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        holder.switchEnable.setChecked(alarm.isEnabled());
 
         if(alarm.isAllow_friend_audio_files()) {
             holder.roosterNotificationPerson.setVisibility(View.VISIBLE);
@@ -160,9 +146,13 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
             {
-                ((MyAlarmsFragmentActivity) mActivity).toggleAlarmSetEnable(alarm, isChecked);
+                //Ensure that layout is not being computed: "IllegalStateException: Cannot call this method while RecyclerView is computing a layout or scrolling"
+                //If check changes during computation, crash occurs
+                if(!computingLayout) ((MyAlarmsFragmentActivity) mActivity).toggleAlarmSetEnable(alarm, isChecked);
             }
         });
+
+        holder.switchEnable.setChecked(alarm.isEnabled());
 
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -255,27 +245,8 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
             }
         });
 
-//        holder.txtAlarmTime.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                ((MyAlarmsFragmentActivity) mActivity).editAlarm(alarm.getUid());
-//            }
-//        });
-//
-//        holder.txtAlarmDays.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                ((MyAlarmsFragmentActivity) mActivity).editAlarm(alarm.getUid());
-//            }
-//        });
-//
-//        holder.txtAlarmChannel.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                ((MyAlarmsFragmentActivity) mActivity).editAlarm(alarm.getUid());
-//            }
-//        });
-
+        //Clear flag to show layout is being refreshed
+        computingLayout = false;
     }
 
     // Return the size of your dataset (invoked by the layout manager)

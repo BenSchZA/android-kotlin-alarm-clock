@@ -19,13 +19,8 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
-import com.roostermornings.android.fragment.IIntroFragmentListener;
 import com.roostermornings.android.fragment.intro.IntroFragment1;
 import com.roostermornings.android.fragment.intro.IntroFragment2;
-import com.roostermornings.android.fragment.intro.IntroFragment3;
-import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment1;
-import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment2;
-import com.roostermornings.android.util.MyContactsController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +28,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.OnClick;
 
-public class IntroFragmentActivity extends BaseActivity implements IIntroFragmentListener {
+public class IntroFragmentActivity extends BaseActivity  {
 
     /**
     * The pager widget, which handles animation and allows swiping horizontally to access previous
@@ -70,7 +65,7 @@ public class IntroFragmentActivity extends BaseActivity implements IIntroFragmen
 
         mSectionsPagerAdapter.addFrag(Fragment.instantiate(getApplicationContext(), IntroFragment1.class.getName()));
         mSectionsPagerAdapter.addFrag(Fragment.instantiate(getApplicationContext(), IntroFragment2.class.getName()));
-        mSectionsPagerAdapter.addFrag(Fragment.instantiate(getApplicationContext(), IntroFragment3.class.getName()));
+        //mSectionsPagerAdapter.addFrag(Fragment.instantiate(getApplicationContext(), IntroFragment3.class.getName()));
 
         // Set up the ViewPager with the sections adapter.
         mViewPager.setAdapter(mSectionsPagerAdapter);
@@ -89,9 +84,6 @@ public class IntroFragmentActivity extends BaseActivity implements IIntroFragmen
                         break;
                     case 1:
                         getStartedButton.setVisibility(View.VISIBLE);
-                        break;
-                    case 2:
-                        getStartedButton.setVisibility(View.GONE);
                         break;
                 }
             }
@@ -115,95 +107,12 @@ public class IntroFragmentActivity extends BaseActivity implements IIntroFragmen
         }
     }
 
-    @Override
-    public void onMobileNumberSet(String mobileNumber) {
-        MyContactsController myContactsController = new MyContactsController(this);
-        String NSNNumber = myContactsController.processUserContactNumber(mobileNumber);
-
-        Intent intent = new Intent(IntroFragmentActivity.this, SignInActivity.class);
-        intent.putExtra(getApplicationContext().getString(R.string.extras_mobile_number), NSNNumber);
-        finish();
-        startActivity(intent);
-    }
-
     @OnClick(R.id.intro_get_started_button)
     public void onGetStartedClick() {
-        mPager.setCurrentItem(2);
+        //mPager.setCurrentItem(2);
+        Intent intent = new Intent(IntroFragmentActivity.this, SignInActivity.class);
+        startActivity(intent);
     }
-
-//    /**
-//     * The number of pages (wizard steps) to show in this demo.
-//     */
-//    private static final int NUM_PAGES = 3;
-//
-//
-//
-//    /**
-//     * The pager adapter, which provides the pages to the view pager widget.
-//     */
-//    private PagerAdapter mPagerAdapter;
-//
-//    @Override
-//    protected void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//        setContentView(R.layout.fragmentactivity_intro);
-//
-//        // Instantiate a ViewPager and a PagerAdapter.
-//        mPager = (ViewPager) findViewById(R.id.pager);
-//        mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
-//        mPager.setAdapter(mPagerAdapter);
-//        mPager.setPageTransformer(true, new DepthPageTransformer());
-//    }
-//
-//    @Override
-//    public void onBackPressed() {
-//        if (mPager.getCurrentItem() == 0) {
-//            // If the user is currently looking at the first step, allow the system to handle the
-//            // Back button. This calls finish() on this activity and pops the back stack.
-//            super.onBackPressed();
-//        } else {
-//            // Otherwise, select the previous step.
-//            mPager.setCurrentItem(mPager.getCurrentItem() - 1);
-//        }
-//    }
-//
-
-//
-
-//
-//    private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
-//        public ScreenSlidePagerAdapter(FragmentManager fm) {
-//            super(fm);
-//        }
-//
-//        @Override
-//        public Fragment getItem(int position) {
-//
-//            Fragment fragment = null;
-//
-//            //Log.d(TAG, String.valueOf(position));
-//
-//            switch (position) {
-//                case 0:
-//                    fragment = new IntroFragment1();
-//                    break;
-//                case 1:
-//                    fragment = new IntroFragment2();
-//                    break;
-//                case 2:
-//                    fragment = new IntroFragment3();
-//                    break;
-//            }
-//
-//            return fragment;
-//
-//        }
-//
-//        @Override
-//        public int getCount() {
-//            return NUM_PAGES;
-//        }
-//    }
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
