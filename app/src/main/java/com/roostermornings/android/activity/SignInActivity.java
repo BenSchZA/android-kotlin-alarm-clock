@@ -139,6 +139,7 @@ public class SignInActivity extends BaseActivity {
     @OnClick(R.id.already_user_textview)
     public void onAlreadyUserClicked() {
         Intent intent = new Intent(SignInActivity.this, SignupEmailActivity.class);
+        intent.putExtra(getApplicationContext().getString(R.string.extras_already_user), true);
         startActivity(intent);
     }
 
