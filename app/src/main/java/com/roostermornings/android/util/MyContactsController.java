@@ -13,6 +13,7 @@ import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
 import android.util.Pair;
 
+import com.facebook.stetho.common.StringUtil;
 import com.roostermornings.android.R;
 import com.roostermornings.android.domain.Contact;
 
@@ -119,6 +120,36 @@ public class MyContactsController {
         String ISONumber;
         ISONumber = tm.getSimCountryIso().toUpperCase();
         return CountryISOToPrefix.prefixFor(ISONumber);
+    }
+
+    public static String clearInvalidCharacters(String entry) {
+        if(!StrUtils.notNullOrEmpty(entry)) return "";
+
+        entry = entry.replaceAll("[^0-9+]", "");
+
+        //Ensure only "+" char is at index 0
+        if(entry.contains("+")) {
+            int plusCount = entry.length() - entry.replace("+", "").length();
+
+            if(!(entry.indexOf("+") == 0)) {
+                entry = entry.replace("+", "");
+            } else if(plusCount > 1) {
+                StringBuilder entryString = new StringBuilder(entry);
+                while(entryString.lastIndexOf("+") > 0) {
+                    entryString.setCharAt(entryString.lastIndexOf("+"), Character.MIN_VALUE);
+                }
+                return entryString.toString();
+            }
+        }
+
+        return entry;
+    }
+
+    public static boolean containsInvalidCharacters(String entry) {
+        boolean entryContainsPlusInvalidPosition = entry.contains("+") && !entry.startsWith("+");
+        boolean entryContainsInvalidCharacters = !entry.equals(entry.replaceAll("[^0-9+]", ""));
+
+        return entryContainsInvalidCharacters || entryContainsPlusInvalidPosition;
     }
 
     public ArrayList<Contact> getContacts() {

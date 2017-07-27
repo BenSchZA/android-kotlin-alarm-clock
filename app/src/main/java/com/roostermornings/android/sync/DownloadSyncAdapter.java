@@ -99,8 +99,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
     public DownloadSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
 
-        BaseApplication baseApplication = (BaseApplication) getApplicationContext();
-        baseApplication.getRoosterApplicationComponent().inject(this);
+        BaseApplication.getRoosterApplicationComponent().inject(this);
 
         /*
          * If your app uses a content resolver, get an instance of it
@@ -139,9 +138,12 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
             String authority,
             ContentProviderClient provider,
             SyncResult syncResult) {
-    /*
-     * Put the data transfer code here.
-     */
+
+        BaseApplication.getRoosterApplicationComponent().inject(this);
+
+        /*
+         * Put the data transfer code here.
+         */
         Log.d("SyncAdapter: ", "onPerformSync()");
 
         if(firebaseUser != null) {

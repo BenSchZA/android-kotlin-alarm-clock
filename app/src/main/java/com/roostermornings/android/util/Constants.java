@@ -120,6 +120,7 @@ public class Constants {
     public final static String PERMISSIONS_DIALOG_OPTIMIZATION = "permissionsDialogOptimization";
     public final static String MOBILE_NUMBER_VALIDATED = "mobileNumberValid";
     public final static String MOBILE_NUMBER_ENTRY_DISMISSED = "mobileNumberEntryDismissed";
+    public final static String MOBILE_NUMBER_ENTRY = "mobileNumberEntry";
 
     //Calendar constants
     public final static long TIME_MILLIS_1_MINUTE = 60000;
