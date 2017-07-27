@@ -78,6 +78,7 @@ public class RoosterApplicationModule {
     }
 
     @Provides
+    @Singleton
     Account provideSyncAdapterAccount(Context context) {
         //Create sync account
         Account mAccount = CreateSyncAccount(context);

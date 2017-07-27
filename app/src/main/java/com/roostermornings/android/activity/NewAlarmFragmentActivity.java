@@ -203,7 +203,10 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                     Calendar currentTime = Calendar.getInstance();
                     Calendar alarmTime = Calendar.getInstance();
 
-                    alarmTime.clear(Calendar.HOUR);
+                    //Ensure both instances have same Millis time
+                    alarmTime.setTimeInMillis(currentTime.getTimeInMillis());
+
+                    alarmTime.clear(Calendar.HOUR_OF_DAY);
                     alarmTime.clear(Calendar.MINUTE);
 
                     alarmTime.set(Calendar.HOUR_OF_DAY, mAlarm.getHour());
@@ -213,8 +216,9 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                     Log.d(TAG, String.valueOf(alarmTime.get(Calendar.DAY_OF_WEEK)));
                     Log.d(TAG, String.valueOf(alarmTime.get(Calendar.HOUR_OF_DAY)));
 
-                    if (currentTime.compareTo(alarmTime) > 0) {
-                        alarmTime.add(Calendar.HOUR, 24);
+                    //Roll alarm time forward by one day until greater than current time
+                    if (currentTime.compareTo(alarmTime) >= 0) {
+                        alarmTime.roll(Calendar.DATE, true);
                     }
 
                     mAlarm.setAlarmDayFromCalendar(alarmTime);

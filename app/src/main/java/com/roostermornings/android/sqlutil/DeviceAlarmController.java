@@ -329,6 +329,9 @@ public final class DeviceAlarmController {
             deviceAlarmTableManager.setSetEnabled(setId, enabled);
             //removeSetChannelAudio(deviceAlarmList);
             FirebaseNetwork.updateFirebaseAlarmEnabled(setId, enabled);
+            //Trigger audio download
+            //Download any social or channel audio files
+            ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
         }
     }
 
