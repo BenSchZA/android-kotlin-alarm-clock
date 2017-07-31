@@ -6,11 +6,13 @@
 package com.roostermornings.android.fragment.friends;
 
 import android.content.Context;
-import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -18,7 +20,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -30,23 +31,19 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.roostermornings.android.BaseApplication;
-import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.adapter.FriendsMyListAdapter;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
-import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.domain.Users;
 import com.roostermornings.android.fragment.base.BaseFragment;
-import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.JSONPersistence;
+import com.roostermornings.android.util.MyContactsController;
 import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Objects;
+import java.util.HashMap;
 
 import javax.inject.Inject;
 
@@ -87,8 +84,9 @@ public class FriendsMyFragment1 extends BaseFragment {
     private OnFragmentInteractionListener mListener;
 
     @Inject Context AppContext;
-    @Inject FirebaseUser firebaseUser;
+    @Inject @Nullable FirebaseUser firebaseUser;
     @Inject JSONPersistence jsonPersistence;
+    @Inject MyContactsController myContactsController;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -255,6 +253,22 @@ public class FriendsMyFragment1 extends BaseFragment {
                     mUsers.clear();
                     mUsers.addAll(apiResponse.users);
                     while(mUsers.remove(null));
+
+                    //For each user, check if name appears in contacts, and allocate name
+                    HashMap<String, String> numberNamePairs = new HashMap<>();
+                    if (ContextCompat.checkSelfPermission(getApplicationContext(),
+                            android.Manifest.permission.READ_CONTACTS)
+                            == PackageManager.PERMISSION_GRANTED) {
+                        //Get a map of contact numbers to names
+                        numberNamePairs = myContactsController.getNumberNamePairs();
+                        for (User user :
+                                mUsers) {
+                            if (numberNamePairs.containsKey(user.getCell_number())) {
+                                user.setUser_name(numberNamePairs.get(user.getCell_number()));
+                            }
+                        }
+                    }
+
                     sortNamesUsers(mUsers);
                     //Persist friends array to disk
                     jsonPersistence.setFriends(mUsers);
@@ -271,66 +285,11 @@ public class FriendsMyFragment1 extends BaseFragment {
         });
     }
 
-//    //Retrieve list of friends from Firebase for current user
-//    private void getFriends() {
-//        mFriendsReference = mDatabase
-//                .child("users").child(firebaseUser.getUid()).child("friends");
-//        mFriendsReference.keepSynced(true);
-//
-//        ChildEventListener friendsListener = new ChildEventListener() {
-//            @Override
-//            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-//                mUsers.add(dataSnapshot.getValue(Friend.class));
-//                //Sort names alphabetically before notifying adapter
-//                sortNamesFriends(mUsers);
-//                mAdapter.notifyDataSetChanged();
-//            }
-//
-//            @Override
-//            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-//                Friend friend = dataSnapshot.getValue(Friend.class);
-//                Friend friendRemove = null;
-//                for (Friend oldUser:mUsers) {
-//                    if(oldUser.getUid().equals(friend.getUid())){
-//                        friendRemove = oldUser;
-//                    }
-//                }
-//                if(friendRemove != null) {
-//                    mUsers.remove(friendRemove);
-//                    mUsers.add(friend);
-//                    //Sort names alphabetically before notifying adapter
-//                    sortNamesFriends(mUsers);
-//                    mAdapter.notifyDataSetChanged();
-//                }
-//            }
-//
-//            @Override
-//            public void onChildRemoved(DataSnapshot dataSnapshot) {
-//                mUsers.remove(dataSnapshot.getValue(Friend.class));
-//                //Sort names alphabetically before notifying adapter
-//                sortNamesFriends(mUsers);
-//                mAdapter.notifyDataSetChanged();
-//            }
-//
-//            @Override
-//            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-//
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-//                showToast(getContext(), "Failed to load user.", Toast.LENGTH_SHORT);
-//            }
-//        };
-//        mFriendsReference.addChildEventListener(friendsListener);
-//    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        inject(((BaseApplication)getActivity().getApplication()).getRoosterApplicationComponent());
+        inject(BaseApplication.getRoosterApplicationComponent());
 
         getDatabaseReference();
 

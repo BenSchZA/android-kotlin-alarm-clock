@@ -9,6 +9,13 @@ import com.roostermornings.android.R;
 
 public class Constants {
 
+    //Adapter view types
+    public static final int VIEW_TYPE_UNKNOWN = 99;
+    public static final int VIEW_TYPE_ADD = 1;
+    public static final int VIEW_TYPE_INVITE = 2;
+    public static final int VIEW_TYPE_HEADER = 0;
+
+    //Font resources
     public final static String APP_FONT = "fonts/Nunito/Nunito-Bold.ttf";
 
     //Broadcast receiver filters
@@ -45,6 +52,8 @@ public class Constants {
 
     //FriendsFragmentActivity
     public final static String FRIENDS_ACTIVITY_CURRENT_FRAGMENT = "currentFriendsFragment";
+
+    public final static String ARG_SHOW_DISMISS = "ARG_SHOW_DISMISS";
 
     //DeviceAlarmController intent actions
     public final static String ACTTION_ALARMRECEIVER = "receiver.ALARM_RECEIVER";
@@ -105,8 +114,13 @@ public class Constants {
     //Intent extras
     public final static String EXTRA_ALARMID = "alarmId";
 
+    //Shared prefs
+    public final static String SHARED_PREFS_KEY = "SHARED_PREFS_KEY";
     //Dialog boolean to indicate viewed
     public final static String PERMISSIONS_DIALOG_OPTIMIZATION = "permissionsDialogOptimization";
+    public final static String MOBILE_NUMBER_VALIDATED = "mobileNumberValid";
+    public final static String MOBILE_NUMBER_ENTRY_DISMISSED = "mobileNumberEntryDismissed";
+    public final static String MOBILE_NUMBER_ENTRY = "mobileNumberEntry";
 
     //Calendar constants
     public final static long TIME_MILLIS_1_MINUTE = 60000;

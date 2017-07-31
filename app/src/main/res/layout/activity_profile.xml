@@ -75,7 +75,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="@dimen/spacing_normal_large"
-            android:inputType="numberSigned"
+            android:inputType="phone"
             android:maxLines="1"
             android:text=""
             android:textAlignment="center"

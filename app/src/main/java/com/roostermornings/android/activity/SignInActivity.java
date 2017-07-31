@@ -7,9 +7,7 @@ package com.roostermornings.android.activity;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -22,7 +20,6 @@ import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
-import com.facebook.FacebookSdk;
 import com.facebook.Profile;
 import com.facebook.internal.CallbackManagerImpl;
 import com.facebook.internal.ImageRequest;
@@ -39,19 +36,15 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
-import com.roostermornings.android.analytics.FA;
+import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.User;
-import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.Toaster;
 
 import java.util.Arrays;
@@ -59,7 +52,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import static com.roostermornings.android.util.RoosterUtils.notNull;
@@ -69,8 +61,6 @@ public class SignInActivity extends BaseActivity {
     public static final String TAG = SignInActivity.class.getSimpleName();
 
     private static final int RC_SIGN_IN = 007;
-
-    String mMobileNumber = "";
 
     CallbackManager facebookCallbackManager;
     GoogleApiClient mGoogleApiClient;
@@ -104,10 +94,7 @@ public class SignInActivity extends BaseActivity {
         initialize(R.layout.activity_sign_in);
         inject(((BaseApplication)getApplication()).getRoosterApplicationComponent());
 
-        Bundle bundle = getIntent().getExtras();
-        if (bundle != null) {
-            mMobileNumber = bundle.getString(getApplicationContext().getString(R.string.extras_mobile_number));
-        }
+        FA.Log(FA.Event.onboarding_intro_viewed.class, null, null);
 
         //Facebook
         facebookLoginButton.setReadPermissions("email", "public_profile");
@@ -152,7 +139,6 @@ public class SignInActivity extends BaseActivity {
     @OnClick(R.id.already_user_textview)
     public void onAlreadyUserClicked() {
         Intent intent = new Intent(SignInActivity.this, SignupEmailActivity.class);
-        intent.putExtra(getApplicationContext().getString(R.string.extras_mobile_number), mMobileNumber);
         intent.putExtra(getApplicationContext().getString(R.string.extras_already_user), true);
         startActivity(intent);
     }
@@ -160,7 +146,6 @@ public class SignInActivity extends BaseActivity {
     @OnClick(R.id.sign_up_email_textview)
     public void onSignUpEmailClicked() {
         Intent intent = new Intent(SignInActivity.this, SignupEmailActivity.class);
-        intent.putExtra(getApplicationContext().getString(R.string.extras_mobile_number), mMobileNumber);
         startActivity(intent);
     }
 
@@ -244,15 +229,13 @@ public class SignInActivity extends BaseActivity {
                                     deviceToken,
                                     photoURLString,
                                     notNull(mAuth.getCurrentUser().getDisplayName()) ? mAuth.getCurrentUser().getDisplayName():"",
-                                    mMobileNumber,
+                                    "",
                                     notNull(mAuth.getCurrentUser().getUid()) ? mAuth.getCurrentUser().getUid():null,
                                     null,
                                     0);
 
-                            //Note: "friends" node not changed TODO: should profile pic be kept?
+                            //Note: "friends" and "cell_number" node not changed TODO: should profile pic be kept?
                             Map<String, Object> childUpdates = new HashMap<>();
-                            childUpdates.put(String.format("users/%s/%s",
-                                    mAuth.getCurrentUser().getUid(), "cell_number"), user.getCell_number());
                             childUpdates.put(String.format("users/%s/%s",
                                     mAuth.getCurrentUser().getUid(), "device_token"), user.getDevice_token());
                             childUpdates.put(String.format("users/%s/%s",
@@ -327,15 +310,13 @@ public class SignInActivity extends BaseActivity {
                                     deviceToken,
                                     photoURLString,
                                     notNull(mAuth.getCurrentUser().getDisplayName()) ? mAuth.getCurrentUser().getDisplayName():"",
-                                    mMobileNumber,
+                                    "",
                                     notNull(mAuth.getCurrentUser().getUid()) ? mAuth.getCurrentUser().getUid():null,
                                     null,
                                     0);
 
-                            //Note: "friends" node not changed TODO: should profile pic be kept?
+                            //Note: "friends" and "cell_number" node not changed TODO: should profile pic be kept?
                             Map<String, Object> childUpdates = new HashMap<>();
-                            childUpdates.put(String.format("users/%s/%s",
-                                    mAuth.getCurrentUser().getUid(), "cell_number"), user.getCell_number());
                             childUpdates.put(String.format("users/%s/%s",
                                     mAuth.getCurrentUser().getUid(), "device_token"), user.getDevice_token());
                             childUpdates.put(String.format("users/%s/%s",

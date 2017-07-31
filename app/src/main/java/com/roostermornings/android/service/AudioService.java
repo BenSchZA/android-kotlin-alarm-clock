@@ -44,7 +44,7 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
-import com.roostermornings.android.analytics.FA;
+import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.domain.Channel;
 import com.roostermornings.android.domain.ChannelRooster;
 import com.roostermornings.android.firebase.FirebaseNetwork;
@@ -664,12 +664,12 @@ public class AudioService extends Service {
                         //Slowly increase volume from low to current volume
                         softStartAudio();
                         if(audioItem.getType() == Constants.AUDIO_TYPE_SOCIAL) FA.Log(FA.Event.social_rooster_unique_play.class, null, null);
-                        if(audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) FA.Log(FA.Event.channel_unique_play.class, FA.Event.channel_unique_play.Param.channel_title, audioItem.getSender_id());
+                        if(audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) FA.Log(FA.Event.channel_unique_play.class, FA.Event.channel_unique_play.Param.channel_title, audioItem.getQueue_id());
                         if(audioItem.getType() == Constants.AUDIO_TYPE_SOCIAL) FA.Log(FA.Event.social_rooster_play.class, null, null);
-                        if(audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) FA.Log(FA.Event.channel_play.class, FA.Event.channel_unique_play.Param.channel_title, audioItem.getSender_id());
+                        if(audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) FA.Log(FA.Event.channel_play.class, FA.Event.channel_unique_play.Param.channel_title, audioItem.getQueue_id());
                     } else {
                         if(audioItem.getType() == Constants.AUDIO_TYPE_SOCIAL) FA.Log(FA.Event.social_rooster_play.class, null, null);
-                        if(audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) FA.Log(FA.Event.channel_play.class, FA.Event.channel_unique_play.Param.channel_title, audioItem.getSender_id());
+                        if(audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) FA.Log(FA.Event.channel_play.class, FA.Event.channel_unique_play.Param.channel_title, audioItem.getQueue_id());
                     }
 
                     mediaPlayerRooster.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -797,17 +797,16 @@ public class AudioService extends Service {
                 audioTableManager.selectListened()) {
             try {
                 if (audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) {
-                    //increment the current story iteration if it is a story
                     Integer currentStoryIteration = new JSONPersistence(getApplicationContext()).getStoryIteration(audioItem.getQueue_id());
                     if (currentStoryIteration > 0)
                         new JSONPersistence(getApplicationContext()).setStoryIteration(audioItem.getQueue_id(), currentStoryIteration + 1);
+                    //Clear listened flag as we cache and reuse content when appropriate
+                    audioTableManager.clearListened(audioItem.getId());
                 }
             } catch (NullPointerException e) {
                 logError(e);
             }
         }
-        //Remove all SQL channel audio entries, after iteration has been incremented for listened channels
-        audioTableManager.removeAllChannelAudioFiles();
     }
 
     private void processListenedAudio() {
@@ -1039,7 +1038,7 @@ public class AudioService extends Service {
         if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
 
         //If channel UID attached to alarm, content should have played
-        final Boolean failure = StrUtils.notNullOrEmpty(alarm.getChannel());
+        final Boolean failure = StrUtils.notNullOrEmpty(alarm.getChannel()) && !InternetHelper.noInternetConnection(this);
 
         try {
             //Check if audio already playing

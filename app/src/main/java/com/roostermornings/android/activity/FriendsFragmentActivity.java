@@ -10,17 +10,23 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.EventLog;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -33,19 +39,29 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
+import com.roostermornings.android.domain.Alarm;
+import com.roostermornings.android.domain.Contact;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.User;
+import com.roostermornings.android.firebase.FirebaseNetwork;
+import com.roostermornings.android.fragment.NumberEntryDialogFragment;
+import com.roostermornings.android.fragment.NumberEntryListener;
+import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.fragment.friends.FriendsInviteFragment3;
 import com.roostermornings.android.fragment.friends.FriendsMyFragment1;
 import com.roostermornings.android.fragment.friends.FriendsRequestFragment2;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.FontsOverride;
+import com.roostermornings.android.util.StrUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +73,8 @@ import butterknife.BindView;
 //Responsible for managing friends: 1) my friends, 2) addable friends, 3) friend invites
 public class FriendsFragmentActivity extends BaseActivity implements
         FriendsMyFragment1.OnFragmentInteractionListener,
-        FriendsRequestFragment2.OnFragmentInteractionListener {
+        FriendsRequestFragment2.OnFragmentInteractionListener,
+        NumberEntryListener {
 
     public static final String TAG = FriendsFragmentActivity.class.getSimpleName();
     @BindView(R.id.toolbar)
@@ -92,12 +109,13 @@ public class FriendsFragmentActivity extends BaseActivity implements
 
     protected FriendsFragmentActivity mThis = this;
 
-    FriendsMyFragment1 friendsInviteFragment1;
-    FriendsRequestFragment2 friendsInviteFragment2;
-    FriendsInviteFragment3 friendsInviteFragment3;
+    FriendsMyFragment1 friendsFragment1;
+    FriendsRequestFragment2 friendsFragment2;
+    FriendsInviteFragment3 friendsFragment3;
 
     @Inject BaseApplication baseApplication;
-    @Inject FirebaseUser mCurrentUser;
+    @Inject @Nullable FirebaseUser mCurrentUser;
+    @Inject SharedPreferences sharedPreferences;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -110,7 +128,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
 
     public interface FriendsInviteListAdapterInterface {
         //Send invite to Rooster user from contact list
-        void inviteUser(Friend inviteFriend);
+        void addUser(Friend inviteFriend);
     }
 
     public interface FriendsRequestListAdapterInterface {
@@ -122,8 +140,12 @@ public class FriendsFragmentActivity extends BaseActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         initialize(R.layout.activity_friends);
         inject(((BaseApplication)getApplication()).getRoosterApplicationComponent());
+
+        //If number hasn't been provided
+        showNumberEntryDialog();
 
         setDayNightTheme();
         setButtonBarSelection();
@@ -183,6 +205,27 @@ public class FriendsFragmentActivity extends BaseActivity implements
         handleIntent(getIntent());
     }
 
+    private void showNumberEntryDialog() {
+        if(!sharedPreferences.getBoolean(Constants.MOBILE_NUMBER_ENTRY_DISMISSED, false) && !sharedPreferences.getBoolean(Constants.MOBILE_NUMBER_VALIDATED, false)) {
+            FragmentManager fm = getSupportFragmentManager();
+            DialogFragment newFragment = NumberEntryDialogFragment.newInstance(true);
+            newFragment.show(fm, "new frag");
+        }
+
+        FirebaseNetwork.setOnFlagValidMobileNumberCompleteListener(new FirebaseNetwork.OnFlagValidMobileNumberCompleteListener() {
+            @Override
+            public void onEvent(boolean valid) {
+                if(!valid) {
+                    //Refresh UI fragment to show number entry dialog
+                    if(mSectionsPagerAdapter != null) mSectionsPagerAdapter.notifyDataSetChanged();
+                }
+            }
+        });
+        FirebaseNetwork.flagValidMobileNumber(this, true);
+    }
+
+
+
     @Override
     public void onStart() {
         super.onStart();
@@ -206,12 +249,12 @@ public class FriendsFragmentActivity extends BaseActivity implements
     }
 
     private void handleSearch(String query) {
-        if(mViewPager.getCurrentItem() == 0) {
-            friendsInviteFragment1.searchRecyclerViewAdapter(query);
-        } else if(mViewPager.getCurrentItem() == 1) {
-            friendsInviteFragment2.searchRecyclerViewAdapter(query);
-        } else if(mViewPager.getCurrentItem() == 2) {
-            friendsInviteFragment3.searchRecyclerViewAdapter(query);
+        if (mViewPager.getCurrentItem() == 0) {
+            friendsFragment1.searchRecyclerViewAdapter(query);
+        } else if (mViewPager.getCurrentItem() == 1) {
+            if(friendsFragment2.isAdded()) friendsFragment2.searchRecyclerViewAdapter(query);
+        } else if (mViewPager.getCurrentItem() == 2) {
+            friendsFragment3.searchRecyclerViewAdapter(query);
         }
     }
 
@@ -235,11 +278,11 @@ public class FriendsFragmentActivity extends BaseActivity implements
             public void onViewDetachedFromWindow(View arg0) {
                 // search was detached/closed
                 if(mViewPager.getCurrentItem() == 0) {
-                    friendsInviteFragment1.notifyAdapter();
+                    friendsFragment1.notifyAdapter();
                 } else if(mViewPager.getCurrentItem() == 1) {
-                    friendsInviteFragment2.notifyAdapter();
+                    if(friendsFragment2.isAdded()) friendsFragment2.notifyAdapter();
                 } else if(mViewPager.getCurrentItem() == 2) {
-                    friendsInviteFragment3.notifyAdapter();
+                    friendsFragment3.notifyAdapter();
                 }
             }
 
@@ -258,13 +301,9 @@ public class FriendsFragmentActivity extends BaseActivity implements
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
-        mSectionsPagerAdapter.addFrag(Fragment.instantiate(getApplicationContext(), FriendsMyFragment1.class.getName()), "FRIENDS");
-        mSectionsPagerAdapter.addFrag(Fragment.instantiate(getApplicationContext(), FriendsRequestFragment2.class.getName()), "REQUESTS");
-        mSectionsPagerAdapter.addFrag(Fragment.instantiate(getApplicationContext(), FriendsInviteFragment3.class.getName()), "INVITE");
-
-        friendsInviteFragment1 = (FriendsMyFragment1) mSectionsPagerAdapter.getItem(0);
-        friendsInviteFragment2 = (FriendsRequestFragment2) mSectionsPagerAdapter.getItem(1);
-        friendsInviteFragment3 = (FriendsInviteFragment3) mSectionsPagerAdapter.getItem(2);
+        friendsFragment1 = (FriendsMyFragment1) Fragment.instantiate(getApplicationContext(), FriendsMyFragment1.class.getName());
+        friendsFragment2 = (FriendsRequestFragment2) Fragment.instantiate(getApplicationContext(), FriendsRequestFragment2.class.getName());
+        friendsFragment3 = (FriendsInviteFragment3) Fragment.instantiate(getApplicationContext(), FriendsInviteFragment3.class.getName());
 
         // Set up the ViewPager with the sections adapter.
         mViewPager.setAdapter(mSectionsPagerAdapter);
@@ -274,10 +313,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      */
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
-
-        private final List<Fragment> mFragmentList = new ArrayList<>();
-        private final List<String> mFragmentTitleList = new ArrayList<>();
+    public class SectionsPagerAdapter extends FragmentStatePagerAdapter {
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -285,23 +321,51 @@ public class FriendsFragmentActivity extends BaseActivity implements
 
         @Override
         public Fragment getItem(int position) {
-            return mFragmentList.get(position);
+
+            switch (position) {
+                case 0:
+                    return friendsFragment1;
+                case 1:
+                    if(sharedPreferences.getBoolean(Constants.MOBILE_NUMBER_VALIDATED, false)) {
+                        return friendsFragment2;
+                    } else {
+                        return new NumberEntryDialogFragment();
+                    }
+                case 2:
+                    return friendsFragment3;
+                default:
+                    return null;
+            }
+        }
+
+        @Override
+        public int getItemPosition(Object object) {
+            return POSITION_NONE;
         }
 
         @Override
         public int getCount() {
-            return mFragmentList.size();
-        }
-
-        public void addFrag(Fragment fragment, String title) {
-            mFragmentList.add(fragment);
-            mFragmentTitleList.add(title);
+            return 3;
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return mFragmentTitleList.get(position);
+            switch (position) {
+                case 0:
+                    return "FRIENDS";
+                case 1:
+                    return "REQUESTS";
+                case 2:
+                    return "INVITE";
+                default:
+                    return null;
+            }
         }
+    }
+
+    @Override
+    public void onMobileNumberValidated(String mobileNumber) {
+        mSectionsPagerAdapter.notifyDataSetChanged();
     }
 
     private void createTabIcons() {
@@ -331,11 +395,15 @@ public class FriendsFragmentActivity extends BaseActivity implements
     //Set current tab notification
     public void setTabNotification(int position, boolean notification) {
         TabLayout.Tab tab = tabLayout.getTabAt(position);
-        FrameLayout frameLayout = (FrameLayout) tab.getCustomView();
-        ImageView tabNotification = (ImageView) tab.getCustomView().findViewById(R.id.notification_friends);
-        if (notification) tabNotification.setVisibility(View.VISIBLE);
-        else tabNotification.setVisibility(View.GONE);
-        tab.setCustomView(frameLayout);
+        if(tab != null) {
+            FrameLayout frameLayout = (FrameLayout) tab.getCustomView();
+            if(frameLayout != null) {
+                ImageView tabNotification = (ImageView) frameLayout.findViewById(R.id.notification_friends);
+                if (notification) tabNotification.setVisibility(View.VISIBLE);
+                else tabNotification.setVisibility(View.GONE);
+                tab.setCustomView(frameLayout);
+            }
+        }
     }
 
     public void setButtonBarNotification(boolean notification) {
@@ -371,11 +439,11 @@ public class FriendsFragmentActivity extends BaseActivity implements
     }
 
     public void manualSwipeRefreshFriends() {
-        friendsInviteFragment1.manualSwipeRefresh();
+        friendsFragment1.manualSwipeRefresh();
     }
 
     public void manualSwipeRefreshRequests() {
-        friendsInviteFragment2.manualSwipeRefresh();
+        if(friendsFragment2.isAdded()) friendsFragment2.manualSwipeRefresh();
     }
 
     @Override
@@ -405,9 +473,9 @@ public class FriendsFragmentActivity extends BaseActivity implements
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    friendsInviteFragment3.requestPermissionReadContacts();
+                    friendsFragment3.requestPermissionReadContacts();
                 } else {
-                    friendsInviteFragment3.displayRequestPermissionExplainer(true);
+                    friendsFragment3.displayRequestPermissionExplainer(true);
                 }
                 break;
             }
@@ -426,5 +494,39 @@ public class FriendsFragmentActivity extends BaseActivity implements
         //Clear current user's and friend's friend list
         mDatabase.getDatabase().getReference(currentUserUrl).setValue(null);
         mDatabase.getDatabase().getReference(friendUserUrl).setValue(null);
+    }
+
+    //Invite contact via Whatsapp or fallback to SMS
+    public void inviteContact(Contact contact) {
+//        Uri uri = Uri.parse("smsto:" + contact.getPrimaryNumber());
+//        Intent intent = new Intent(Intent.ACTION_SENDTO, uri);
+//        intent.putExtra("sms_body", getResources().getString(R.string.invite_to_rooster_message));
+//        intent.setType("text/plain");
+//        intent.setPackage("com.whatsapp");
+//        startActivity(Intent.createChooser(intent, ""));
+//        Intent intent = new Intent(Intent.ACTION_SENDTO);
+//        intent.putExtra(Intent.EXTRA_PHONE_NUMBER, contact.getPrimaryNumber());
+//        intent.putExtra(Intent.EXTRA_TEXT, getResources().getString(R.string.invite_to_rooster_message));
+//        intent.setType("text/plain");
+//        intent.setPackage("com.whatsapp");
+//        startActivity(intent);
+//        Intent sendIntent = new Intent("android.intent.action.MAIN");
+//        //sendIntent.setComponent(new ComponentName("com.whatsapp", "com.whatsapp.Conversation"));
+//        sendIntent.setAction(Intent.ACTION_SEND);
+//        sendIntent.setType("text/plain");
+//        sendIntent.putExtra(Intent.EXTRA_TEXT, "This is my text to send.");
+//        sendIntent.putExtra("jid", contact.getPrimaryNumber() + "@s.whatsapp.net");
+//        sendIntent.setPackage("com.whatsapp");
+//        startActivity(sendIntent);
+//        Intent sendIntent = new Intent("android.intent.action.SEND");
+//        sendIntent.setComponent(new ComponentName("com.whatsapp","com.whatsapp.ContactPicker"));
+//        sendIntent.putExtra("jid", contact.getPrimaryNumber() + "@s.whatsapp.net");
+//        sendIntent.putExtra(Intent.EXTRA_TEXT,"sample text you want to send along with the image");
+//        startActivity(sendIntent);
+
+        Uri uri = Uri.parse("smsto:" + contact.getPrimaryNumber());
+        Intent intent = new Intent(Intent.ACTION_SENDTO, uri);
+        intent.putExtra("sms_body", getResources().getString(R.string.invite_to_rooster_message));
+        startActivity(intent);
     }
 }

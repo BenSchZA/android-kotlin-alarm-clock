@@ -12,6 +12,7 @@ import android.preference.PreferenceManager;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import com.roostermornings.android.domain.Contact;
 import com.roostermornings.android.domain.User;
 
 import org.json.JSONException;
@@ -19,12 +20,15 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class JSONPersistence {
     private static Gson gson = new Gson();
 
     private static final String KEY_CHANNEL_STORY_ITERATION = "KEY_CHANNEL_STORY_ITERATION";
     private static final String KEY_USER_FRIENDS_ARRAY = "KEY_USER_FRIENDS_ARRAY";
+    private static final String KEY_USER_INVITABLE_CONTACTS_ARRAY = "KEY_USER_INVITABLE_CONTACTS_ARRAY";
+    private static final String KEY_USER_CONTACTS_NUMBER_NAME_PAIRS_MAP = "KEY_USER_CONTACTS_NUMBER_NAME_PAIRS_MAP";
 
     private Context context;
 
@@ -69,6 +73,37 @@ public class JSONPersistence {
 
         if(sharedPreferences != null) {
             sharedPreferences.edit().putString(key, Json).apply();
+        }
+    }
+
+    public ArrayList<Contact> getInvitableContacts() {
+        ArrayList<Contact> returnArray = new ArrayList<>();
+        try {
+            if(getJSONString(KEY_USER_INVITABLE_CONTACTS_ARRAY) != null) {
+                Type type = new TypeToken<ArrayList<Contact>>(){}.getType();
+                if(gson.fromJson(getJSONString(KEY_USER_INVITABLE_CONTACTS_ARRAY), type) != null) {
+                    return gson.fromJson(getJSONString(KEY_USER_INVITABLE_CONTACTS_ARRAY), type);
+                } else {
+                    return returnArray;
+                }
+            } else {
+                return returnArray;
+            }
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+            return returnArray;
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return returnArray;
+        }
+    }
+
+    public void setInvitableContacts(ArrayList<Contact> contacts) {
+        if(contacts == null) return;
+        try {
+            putJSONString(KEY_USER_INVITABLE_CONTACTS_ARRAY, gson.toJson(contacts));
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
         }
     }
 

@@ -74,8 +74,8 @@ public class SplashActivity extends BaseActivity {
                 }
                 if(minimumRequirements.isInvalidate_user()) {
                     try {
-                        String buildVersionComponents[] = BuildConfig.VERSION_NAME.split("\\.");
-                        String minVersionComponents[] = minimumRequirements.getApp_version().split("\\.");
+                        String buildVersionComponents[] = BuildConfig.VERSION_NAME.replaceAll("[^\\d.]", "").split("\\.");
+                        String minVersionComponents[] = minimumRequirements.getApp_version().replaceAll("[^\\d.]", "").split("\\.");
                         int position = 0;
                         for (String component :
                                 minVersionComponents) {

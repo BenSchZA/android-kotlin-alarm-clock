@@ -14,14 +14,11 @@ import android.view.ViewGroup;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
-import com.roostermornings.android.fragment.IIntroFragmentListener;
 import com.roostermornings.android.fragment.base.BaseFragment;
 
 import butterknife.OnClick;
 
 public class IntroFragment1 extends BaseFragment {
-
-    IIntroFragmentListener mListener;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -33,7 +30,6 @@ public class IntroFragment1 extends BaseFragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return initiate(inflater, R.layout.fragment_intro_fragment1, container, false);
-
     }
 
     @Override
@@ -41,11 +37,5 @@ public class IntroFragment1 extends BaseFragment {
         inject(((BaseApplication)getActivity().getApplication()).getRoosterApplicationComponent());
 
         super.onAttach(context);
-        if (context instanceof IIntroFragmentListener) {
-            mListener = (IIntroFragmentListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
     }
 }

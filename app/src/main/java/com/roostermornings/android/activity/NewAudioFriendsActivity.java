@@ -11,6 +11,7 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -76,7 +77,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
     @BindView(R.id.select_all_button)
     Button selectAllButton;
 
-    @Inject FirebaseUser firebaseUser;
+    @Inject @Nullable FirebaseUser firebaseUser;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {

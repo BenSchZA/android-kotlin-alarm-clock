@@ -31,10 +31,14 @@ public final class AudioTableContract {
         public static final String COLUMN_NAME = "name";
         public static final String COLUMN_PICTURE = "picture";
 
-        public static final String COLUMN_DATE_UPLOADED = "date_created";
+        public static final String COLUMN_SOURCE_URL = "source_url";
+
+        public static final String COLUMN_DATE_UPLOADED = "date_uploaded";
 
         public static final String COLUMN_ACTION_TITLE = "action_title";
         public static final String COLUMN_ACTION_URL = "action_url";
+
+        public static final String COLUMN_DATE_CREATED = "date_created";
     }
 
     public static final String SQL_CREATE_ENTRIES =
@@ -53,8 +57,11 @@ public final class AudioTableContract {
 
                     + AudioTableEntry.COLUMN_DATE_UPLOADED + " INTEGER NOT NULL, "
 
+                    + AudioTableEntry.COLUMN_SOURCE_URL + " TEXT NULL, "
+
                     + AudioTableEntry.COLUMN_ACTION_TITLE + " TEXT NULL, "
                     + AudioTableEntry.COLUMN_ACTION_URL + " TEXT NULL, "
+                    + AudioTableEntry.COLUMN_DATE_CREATED + " INTEGER NOT NULL, "
 
                     //Ensure combination of IDs is unique
                     + "CONSTRAINT unique_id UNIQUE (" + AudioTableEntry.COLUMN_ID + "," + AudioTableEntry.COLUMN_QUEUE_ID + "), "

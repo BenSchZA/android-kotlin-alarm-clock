@@ -14,11 +14,11 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.roostermornings.android.sqldata.AudioTableHelper;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.StrUtils;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 
 import static com.roostermornings.android.sqldata.AudioTableContract.AudioTableEntry;
 
@@ -39,7 +39,6 @@ public class AudioTableManager {
         this.context = context;
     }
 
-
     public Boolean insertSocialAudioFile(DeviceAudioQueueItem queue) {
 
         SQLiteDatabase db = initDB();
@@ -54,7 +53,9 @@ public class AudioTableManager {
         values.put(AudioTableEntry.COLUMN_SENDER_ID, queue.getSender_id());
         values.put(AudioTableEntry.COLUMN_NAME, queue.getName());
         values.put(AudioTableEntry.COLUMN_PICTURE, queue.getPicture());
-        values.put(AudioTableEntry.COLUMN_DATE_UPLOADED, queue.getDate_created());
+        values.put(AudioTableEntry.COLUMN_DATE_UPLOADED, queue.getDate_uploaded());
+        values.put(AudioTableEntry.COLUMN_SOURCE_URL, queue.getSource_url());
+        values.put(AudioTableEntry.COLUMN_DATE_CREATED, calendar.getTimeInMillis());
 
         try {
             // Inserting Row
@@ -81,9 +82,11 @@ public class AudioTableManager {
         values.put(AudioTableEntry.COLUMN_SENDER_ID, queue.getSender_id());
         values.put(AudioTableEntry.COLUMN_NAME, queue.getName());
         values.put(AudioTableEntry.COLUMN_PICTURE, queue.getPicture());
-        values.put(AudioTableEntry.COLUMN_DATE_UPLOADED, queue.getDate_created());
+        values.put(AudioTableEntry.COLUMN_DATE_UPLOADED, queue.getDate_uploaded());
         values.put(AudioTableEntry.COLUMN_ACTION_TITLE, queue.getAction_title());
         values.put(AudioTableEntry.COLUMN_ACTION_URL, queue.getAction_url());
+        values.put(AudioTableEntry.COLUMN_SOURCE_URL, queue.getSource_url());
+        values.put(AudioTableEntry.COLUMN_DATE_CREATED, calendar.getTimeInMillis());
 
         try {
             // Inserting Row
@@ -143,7 +146,7 @@ public class AudioTableManager {
 
         for (DeviceAudioQueueItem deviceAudioQueueItem:
                 extractSocialAudioFiles()) {
-            if(deviceAudioQueueItem.getDate_created() < (calendar.getTimeInMillis() - 1209600000)) removeAudioEntry(deviceAudioQueueItem);
+            if(deviceAudioQueueItem.getDate_uploaded() < (calendar.getTimeInMillis() - Constants.TIME__MILLIS_1_WEEK*2)) removeAudioEntry(deviceAudioQueueItem);
         }
     }
 
@@ -253,6 +256,47 @@ public class AudioTableManager {
         }
     }
 
+    public boolean isChannelAudioURLFresh(String channelId, String URL) {
+        SQLiteDatabase db = initDB();
+
+        String selectQuery = "SELECT 1 FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_TYPE + " = " + Constants.AUDIO_TYPE_CHANNEL + " AND " + AudioTableEntry.COLUMN_QUEUE_ID + " LIKE \"%" + channelId + "%\"" + " AND " + AudioTableEntry.COLUMN_SOURCE_URL + " LIKE \"%" + URL + "%\";";
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if(cursor.getCount() > 0) {
+            cursor.close();
+            return true;
+        } else {
+            cursor.close();
+            removeChannelAudioEntries(channelId);
+            return false;
+        }
+    }
+
+    public void purgeStagnantChannelAudio() {
+        DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(context);
+
+        //Stagnant?
+        // -> date_created older than a week
+        // -> no alarms set with matching channel
+        SQLiteDatabase db = initDB();
+
+        String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_DATE_CREATED + " < " + (calendar.getTimeInMillis() - Constants.TIME__MILLIS_1_WEEK) + ";";
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        //Find lost children
+        ArrayList<String> alarmChannels = new ArrayList<>();
+        for (DeviceAlarm alarmSet:
+                deviceAlarmTableManager.getAlarmSets()) {
+            alarmChannels.add(alarmSet.getChannel());
+        }
+        for (DeviceAudioQueueItem oldChannelAudio:
+                extractAudioFiles(cursor)) {
+            String oldChannelAudioID = oldChannelAudio.getQueue_id();
+            if(!alarmChannels.contains(oldChannelAudioID)) removeChannelAudioEntries(oldChannelAudioID);
+        }
+    }
+
     public Boolean isSocialAudioInDatabase(String socialId) {
         SQLiteDatabase db = initDB();
 
@@ -277,6 +321,14 @@ public class AudioTableManager {
         db.execSQL(updateQuery);
     }
 
+    public void clearListened(int ID) {
+        SQLiteDatabase db = initDB();
+
+        String updateQuery = "UPDATE " + AudioTableEntry.TABLE_NAME + " SET " + AudioTableEntry.COLUMN_LISTENED + " = " + FALSE + " WHERE " + AudioTableEntry.COLUMN_ID + " = " + ID + ";";
+
+        db.execSQL(updateQuery);
+    }
+
     public ArrayList<DeviceAudioQueueItem> selectListened() {
         SQLiteDatabase db = initDB();
 
@@ -295,7 +347,7 @@ public class AudioTableManager {
                 DeviceAudioQueueItem audioFile = new DeviceAudioQueueItem();
 
                 audioFile.setType(cursor.getInt(cursor.getColumnIndex(AudioTableEntry.COLUMN_TYPE)));
-                audioFile.setDate_created(cursor.getLong(cursor.getColumnIndex(AudioTableEntry.COLUMN_DATE_UPLOADED)));
+                audioFile.setDate_uploaded(cursor.getLong(cursor.getColumnIndex(AudioTableEntry.COLUMN_DATE_UPLOADED)));
                 audioFile.setFilename(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_FILENAME)));
                 audioFile.setId(cursor.getInt(cursor.getColumnIndex(AudioTableEntry.COLUMN_ID)));
                 audioFile.setQueue_id(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_QUEUE_ID)));
@@ -305,6 +357,7 @@ public class AudioTableManager {
                 audioFile.setPicture(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_PICTURE)));
                 audioFile.setAction_title(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_ACTION_TITLE)));
                 audioFile.setAction_url(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_ACTION_URL)));
+                audioFile.setSource_url(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_SOURCE_URL)));
 
                 audioList.add(audioFile);
 

@@ -25,16 +25,15 @@ import com.roostermornings.android.activity.ProfileActivity;
 import com.roostermornings.android.activity.SettingsActivity;
 import com.roostermornings.android.activity.SignInActivity;
 import com.roostermornings.android.activity.SignupEmailActivity;
-import com.roostermornings.android.activity.SplashActivity;
 import com.roostermornings.android.activity.base.BaseActivity;
-import com.roostermornings.android.analytics.FA;
+import com.roostermornings.android.firebase.FA;
+import com.roostermornings.android.fragment.NumberEntryDialogFragment;
 import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.fragment.friends.FriendsInviteFragment3;
 import com.roostermornings.android.fragment.friends.FriendsMyFragment1;
 import com.roostermornings.android.fragment.friends.FriendsRequestFragment2;
 import com.roostermornings.android.fragment.intro.IntroFragment1;
 import com.roostermornings.android.fragment.intro.IntroFragment2;
-import com.roostermornings.android.fragment.intro.IntroFragment3;
 import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment1;
 import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment2;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
@@ -42,6 +41,7 @@ import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.service.RoosterFirebaseMessagingService;
 import com.roostermornings.android.service.UploadService;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
+import com.roostermornings.android.sync.DownloadSyncAdapter;
 
 /**
  * Annotates an interface or abstract class for which a fully-formed, dependency-injected implementation
@@ -81,9 +81,9 @@ public interface RoosterApplicationComponent {
     void inject(FriendsRequestFragment2 fragment);
     void inject(IntroFragment1 fragment);
     void inject(IntroFragment2 fragment);
-    void inject(IntroFragment3 fragment);
     void inject(NewAlarmFragment1 fragment);
     void inject(NewAlarmFragment2 fragment);
+    void inject(NumberEntryDialogFragment fragment);
 
     void inject(AudioService service);
     void inject(UploadService service);
@@ -92,6 +92,8 @@ public interface RoosterApplicationComponent {
 
     void inject(FA roosterClass);
     void inject(DeviceAlarmController roosterClass);
+
+    void inject(DownloadSyncAdapter adapter);
 
     //Provision methods have no parameters and return an injected or provided type.
     //Each method may have a Qualifier annotation as well.

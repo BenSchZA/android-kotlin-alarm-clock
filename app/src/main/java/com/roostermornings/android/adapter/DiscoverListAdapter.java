@@ -20,7 +20,7 @@ import android.widget.TextView;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.DiscoverFragmentActivity;
-import com.roostermornings.android.analytics.FA;
+import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.domain.ChannelRooster;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
