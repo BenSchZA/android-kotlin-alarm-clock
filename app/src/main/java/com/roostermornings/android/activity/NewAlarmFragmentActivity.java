@@ -11,6 +11,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -28,7 +29,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
-import com.roostermornings.android.analytics.FA;
+import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.AlarmChannel;
@@ -69,7 +70,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
 
     @Inject DeviceAlarmController deviceAlarmController;
     @Inject DeviceAlarmTableManager deviceAlarmTableManager;
-    @Inject FirebaseUser mCurrentUser;
+    @Inject @Nullable FirebaseUser mCurrentUser;
     @Inject Account mAccount;
 
     @Override
@@ -202,7 +203,10 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                     Calendar currentTime = Calendar.getInstance();
                     Calendar alarmTime = Calendar.getInstance();
 
-                    alarmTime.clear(Calendar.HOUR);
+                    //Ensure both instances have same Millis time
+                    alarmTime.setTimeInMillis(currentTime.getTimeInMillis());
+
+                    alarmTime.clear(Calendar.HOUR_OF_DAY);
                     alarmTime.clear(Calendar.MINUTE);
 
                     alarmTime.set(Calendar.HOUR_OF_DAY, mAlarm.getHour());
@@ -212,8 +216,9 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                     Log.d(TAG, String.valueOf(alarmTime.get(Calendar.DAY_OF_WEEK)));
                     Log.d(TAG, String.valueOf(alarmTime.get(Calendar.HOUR_OF_DAY)));
 
-                    if (currentTime.compareTo(alarmTime) > 0) {
-                        alarmTime.add(Calendar.HOUR, 24);
+                    //Roll alarm time forward by one day until greater than current time
+                    if (currentTime.compareTo(alarmTime) >= 0) {
+                        alarmTime.add(Calendar.DAY_OF_MONTH, 1);
                     }
 
                     mAlarm.setAlarmDayFromCalendar(alarmTime);
@@ -239,8 +244,8 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 if(alarmChannel != null) alarmChannelUID = alarmChannel.getId();
 
                 //if this is an existing alarm, delete from local storage before inserting another record
-                if (mEditAlarmId.length() != 0
-                        && mAlarm.getUid().length() > 0) {
+                if (StrUtils.notNullOrEmpty(mEditAlarmId)
+                        && StrUtils.notNullOrEmpty(mAlarm.getUid())) {
                     deviceAlarmController.deleteAlarmSetGlobal(mAlarm.getUid());
                 }
 
@@ -254,7 +259,6 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
 
                 //Download any social or channel audio files
                 ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
-
 
                 FA.Log(FA.Event.alarm_creation_completed.class,
                         FA.Event.alarm_creation_completed.Param.social_roosters_enabled,

@@ -3,7 +3,7 @@
  * Copyright (c)  2017 Roosta Media. All rights reserved.
  */
 
-package com.roostermornings.android.analytics;
+package com.roostermornings.android.firebase;
 
 import android.os.Bundle;
 import android.support.annotation.Keep;
@@ -120,6 +120,13 @@ public abstract class FA {
                 public final static String fatal_failure = "fatal_failure";
                 //Bool
                 public final static String attempt_to_play = "attempt_to_play";
+            }
+        }
+        public abstract class action_url_click {
+            public abstract class Param {
+                //String param
+                public final static String channel_title = "channel_title";
+                public final static String action_url = "action_url";
             }
         }
         public abstract class memory_warning {

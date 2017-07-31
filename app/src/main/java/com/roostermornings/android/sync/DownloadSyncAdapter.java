@@ -12,11 +12,10 @@ import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SyncInfo;
 import android.content.SyncResult;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -24,6 +23,7 @@ import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -59,12 +59,13 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import static android.content.ContentValues.TAG;
 import static android.content.Context.ACCOUNT_SERVICE;
 import static com.facebook.FacebookSdk.getApplicationContext;
 import static com.roostermornings.android.util.Constants.ACCOUNT;
 import static com.roostermornings.android.util.Constants.ACCOUNT_TYPE;
-import static com.roostermornings.android.util.Constants.AUTHORITY;
 
 /**
  * Handle the transfer of data between a server and an
@@ -74,12 +75,12 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
 
     private boolean channelSyncActive;
 
-    //Firebase libraries
-    private FirebaseAuth mAuth;
-    private StorageReference mStorageRef;
-
-    private final AudioTableManager audioTableManager = new AudioTableManager(getApplicationContext());
-    private final DeviceAlarmTableManager deviceAlarmTableManager = new DeviceAlarmTableManager(getApplicationContext());
+    //Firebase SDK
+    @Inject @Nullable FirebaseUser firebaseUser;
+    @Inject StorageReference mStorageRef;
+    @Inject DatabaseReference mDatabaseRef;
+    @Inject AudioTableManager audioTableManager;
+    @Inject DeviceAlarmTableManager deviceAlarmTableManager;
 
     public static Bundle getForceBundle() {
         Bundle forceBundle = new Bundle();
@@ -97,6 +98,9 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
      */
     public DownloadSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
+
+        BaseApplication.getRoosterApplicationComponent().inject(this);
+
         /*
          * If your app uses a content resolver, get an instance of it
          * from the incoming Context
@@ -134,12 +138,15 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
             String authority,
             ContentProviderClient provider,
             SyncResult syncResult) {
-    /*
-     * Put the data transfer code here.
-     */
+
+        BaseApplication.getRoosterApplicationComponent().inject(this);
+
+        /*
+         * Put the data transfer code here.
+         */
         Log.d("SyncAdapter: ", "onPerformSync()");
 
-        if(FirebaseAuth.getInstance().getCurrentUser() != null) {
+        if(firebaseUser != null) {
             retrieveSocialRoosterData(getApplicationContext());
             retrieveChannelContentData(getApplicationContext());
             BaseActivity.setBadge(getApplicationContext(), BaseApplication.getNotificationFlag(Constants.FLAG_ROOSTERCOUNT));
@@ -184,19 +191,28 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private void retrieveChannelContentData(final Context context) {
-        //The oneInstanceTask creates a new thread, only if one doesn't exist already - implements 1 minute time limit
-        ExecutorService executor = new ThreadPoolExecutor(1, 1, 1, TimeUnit.MINUTES,
+        //The oneInstanceTask creates a new thread, only if one doesn't exist already - implements 2 minute time limit
+        ExecutorService executor = new ThreadPoolExecutor(1, 1, 2, TimeUnit.MINUTES,
                 new SynchronousQueue<Runnable>(),
                 new ThreadPoolExecutor.DiscardPolicy());
 
         class oneInstanceTask implements Runnable {
             public void run() {
                 //Retrieve firebase audio files and cache to be played for next alarm
-                mAuth = FirebaseAuth.getInstance();
-                mStorageRef = FirebaseStorage.getInstance().getReference();
 
-                if (mAuth.getCurrentUser() == null || mAuth.getCurrentUser() == null) {
+                //Check Firebase auth
+                if (firebaseUser == null) {
                     Log.d(TAG, "User not authenticated on FB!");
+                    return;
+                }
+                //Check Firebase storage
+                if (mStorageRef == null) {
+                    Log.d(TAG, "FB storage reference invalid!");
+                    return;
+                }
+                //Check Firebase database
+                if (mDatabaseRef == null) {
+                    Log.d(TAG, "FB database reference invalid!");
                     return;
                 }
 
@@ -207,19 +223,10 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
                 if (deviceAlarm == null) return;
                 //Check if channel has a valid ID, else next pending alarm has no channel
                 final String channelId = deviceAlarm.getChannel();
-                if ("".equals(channelId)) return;
+                if (!StrUtils.notNullOrEmpty(channelId)) return;
 
-                //If the current ChannelRooster is in SQL db, then don't download
-                if(audioTableManager.isChannelAudioInDatabase(channelId)) return;
-                //Check firebase auth
-                if (mAuth.getCurrentUser() == null || mAuth.getCurrentUser() == null) {
-                    Log.d(TAG, "User not authenticated on FB!");
-                    return;
-                }
-
-                final DatabaseReference channelReference = FirebaseDatabase.getInstance().getReference()
+                final DatabaseReference channelReference = mDatabaseRef
                         .child("channels").child(channelId);
-
                 channelReference.keepSynced(true);
 
                 ValueEventListener channelListener = new ValueEventListener() {
@@ -249,7 +256,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
                             iteration = daysUntilAlarm > 0 ? tempIteration + daysUntilAlarm : tempIteration;
                         }
 
-                        final DatabaseReference channelRoosterUploadsReference = FirebaseDatabase.getInstance().getReference()
+                        final DatabaseReference channelRoosterUploadsReference = mDatabaseRef
                                 .child("channel_rooster_uploads").child(channelId);
 
                         //Ensure latest data is pulled
@@ -321,23 +328,32 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
 
     private void retrieveSocialRoosterData(final Context context) {
         //The oneInstanceTask creates a new thread, only if one doesn't exist already - implements 1 minute time limit
-        ExecutorService executor = new ThreadPoolExecutor(1, 1, 1, TimeUnit.MINUTES,
+        ExecutorService executor = new ThreadPoolExecutor(1, 1, 2, TimeUnit.MINUTES,
                 new SynchronousQueue<Runnable>(),
                 new ThreadPoolExecutor.DiscardPolicy());
 
         class oneInstanceTask implements Runnable {
             public void run() {
                 //Retrieve firebase audio files and cache to be played for next alarm
-                mAuth = FirebaseAuth.getInstance();
-                mStorageRef = FirebaseStorage.getInstance().getReference();
 
-                if (mAuth.getCurrentUser() == null || mAuth.getCurrentUser() == null) {
+                //Check Firebase auth
+                if (firebaseUser == null) {
                     Log.d(TAG, "User not authenticated on FB!");
                     return;
                 }
+                //Check Firebase storage
+                if (mStorageRef == null) {
+                    Log.d(TAG, "FB storage reference invalid!");
+                    return;
+                }
+                //Check Firebase database
+                if (mDatabaseRef == null) {
+                    Log.d(TAG, "FB database reference invalid!");
+                    return;
+                }
 
-                final DatabaseReference queueReference = FirebaseDatabase.getInstance().getReference()
-                        .child("social_rooster_queue").child(mAuth.getCurrentUser().getUid());
+                final DatabaseReference queueReference = mDatabaseRef
+                        .child("social_rooster_queue").child(firebaseUser.getUid());
 
                 //Ensure latest data is pulled
                 queueReference.keepSynced(true);
@@ -374,10 +390,11 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
         //but it is only entered on completion...
         //If download fails...? Remove db entry? but then could loop
         //New solution: ensure only one download task
-        //Previous solution: inser into db and then download, updating filename on completion using:
+        //Previous solution: insert into db and then download, updating filename on completion using:
         //mAudioTableManager.setChannelAudioFileName(channelRooster.getChannel_uid(), audioFileUniqueName);
 
-        if(audioTableManager.isChannelAudioInDatabase(channelRooster.getChannel_uid()) || channelSyncActive) return;
+        if(channelSyncActive) return;
+        if(audioTableManager.isChannelAudioURLFresh(channelRooster.getChannel_uid(), channelRooster.getAudio_file_url())) return;
 
         try {
             //https://firebase.google.com/docs/storage/android/download-files
@@ -412,7 +429,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
                         DeviceAudioQueueItem deviceAudioQueueItem = new DeviceAudioQueueItem();
                         deviceAudioQueueItem.fromChannelRooster(channelRooster, audioFileUniqueName);
                         //Could use channelRooster.getUpload_date(), but then can't use for purging files
-                        deviceAudioQueueItem.setDate_created(System.currentTimeMillis());
+                        deviceAudioQueueItem.setDate_uploaded(System.currentTimeMillis());
                         audioTableManager.insertChannelAudioFile(deviceAudioQueueItem);
                         Crashlytics.log("insertChannelAudioFile() completed");
 
@@ -460,8 +477,8 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
 
             StorageReference audioFileRef = mStorageRef.child("social_rooster_uploads/" + socialRooster.getAudio_file_url());
             final String audioFileUniqueName = Constants.FILENAME_PREFIX_ROOSTER_CONTENT + RoosterUtils.createRandomFileName(5) + ".3gp";
-            final DatabaseReference queueRecordReference = FirebaseDatabase.getInstance().getReference()
-                    .child("social_rooster_queue").child(mAuth.getCurrentUser().getUid()).child(socialRooster.getQueue_id());
+            final DatabaseReference queueRecordReference = mDatabaseRef
+                    .child("social_rooster_queue").child(firebaseUser.getUid()).child(socialRooster.getQueue_id());
 
             audioFileRef.getBytes(Constants.MAX_ROOSTER_FILE_SIZE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                 @Override

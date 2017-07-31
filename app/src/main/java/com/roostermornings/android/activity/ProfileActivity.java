@@ -6,6 +6,7 @@
 package com.roostermornings.android.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,6 +15,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
@@ -42,6 +44,7 @@ import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.firebase.FirebaseNetwork;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.MyContactsController;
+import com.roostermornings.android.util.StrUtils;
 import com.roostermornings.android.util.Toaster;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
@@ -76,9 +79,12 @@ public class ProfileActivity extends BaseActivity {
     @BindView(R.id.toolbar_title)
     TextView toolbarTitle;
 
-    String mCurrentPhotoPath;
+    String mCurrentPhotoPath = "";
+    String profileMobileNumberText = "";
 
-    @Inject FirebaseUser firebaseUser;
+    @Inject @Nullable FirebaseUser firebaseUser;
+    @Inject
+    SharedPreferences sharedPreferences;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -97,9 +103,27 @@ public class ProfileActivity extends BaseActivity {
         setupToolbar(toolbarTitle, "My Profile");
 
         profileName.setText(mCurrentUser.getUser_name());
-        profileMobileNumber.setText(mCurrentUser.getCell_number());
+
+        //Set mobile number to last valid persisted entry, or to current user's number if that fails
+        String mobileNumberEntry = sharedPreferences.getString(Constants.MOBILE_NUMBER_ENTRY, mCurrentUser.getCell_number());
+        profileMobileNumber.setText(mobileNumberEntry);
+
         if(!TextUtils.isEmpty(mCurrentUser.getProfile_pic()))
             setProfilePicFromURL(mCurrentUser.getProfile_pic());
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        if(StrUtils.notNullOrEmpty(profileMobileNumberText)) {
+            FirebaseNetwork.updateProfileCellNumber(this, profileMobileNumberText);
+            //Persist last valid mobile number entry
+            sharedPreferences
+                    .edit()
+                    .putString(Constants.MOBILE_NUMBER_ENTRY, profileMobileNumberText)
+                    .apply();
+        }
     }
 
     @OnClick(R.id.settings_profile_pic)
@@ -153,8 +177,17 @@ public class ProfileActivity extends BaseActivity {
 
     @OnTextChanged(R.id.settings_profile_mobile_number)
     public void onTextChangedProfileMobileNumber() {
-        String profileMobileNumberText = profileMobileNumber.getText().toString();
-        FirebaseNetwork.updateProfileCellNumber(this, profileMobileNumberText);
+        profileMobileNumberText = profileMobileNumber.getText().toString();
+
+        if(!StrUtils.notNullOrEmpty(profileMobileNumberText)) {
+            Toaster.makeToast(this, "Mobile number can't be empty.", Toast.LENGTH_SHORT).checkTastyToast();
+        } else if(MyContactsController.containsInvalidCharacters(profileMobileNumberText)) {
+            profileMobileNumberText = MyContactsController.clearInvalidCharacters(profileMobileNumberText);
+            profileMobileNumber.setText(profileMobileNumberText);
+            //Place cursor at end of EditText
+            profileMobileNumber.setSelection(profileMobileNumberText.length());
+            Toaster.makeToast(this, "Entry not valid.", Toast.LENGTH_SHORT).checkTastyToast();
+        }
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
@@ -165,7 +198,7 @@ public class ProfileActivity extends BaseActivity {
                     Uri returnedImageURI = null;
                     if(imageReturnedIntent != null) {
                         returnedImageURI = imageReturnedIntent.getData();
-                    } else if(mCurrentPhotoPath != null){
+                    } else if(StrUtils.notNullOrEmpty(mCurrentPhotoPath)){
                         galleryAddPic();
                         File file = new File(mCurrentPhotoPath);
                         returnedImageURI = Uri.fromFile(file);

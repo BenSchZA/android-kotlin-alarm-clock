@@ -276,13 +276,11 @@ public final class DeviceAlarmController {
 
     //Remove entire set of alarms, first recreate intent EXACTLY as before, then call alarmMgr.cancel(intent)
     public void deleteAlarmSetGlobal(String setId) {
-        List<DeviceAlarm> deviceAlarmList = deviceAlarmTableManager.getAlarmSet(setId);
-        if(deviceAlarmList != null) removeSetChannelAudio(deviceAlarmList);
         deleteAlarmSetIntents(setId);
         FirebaseNetwork.removeFirebaseAlarm(setId);
     }
 
-    private void removeSetChannelAudio(List<DeviceAlarm> deviceAlarmList) {
+    public void removeSetChannelAudio(List<DeviceAlarm> deviceAlarmList) {
         if (!deviceAlarmList.isEmpty()) {
             AudioTableManager audioTableManager = new AudioTableManager(context);
             String channelId = deviceAlarmList.get(0).getChannel();
@@ -329,9 +327,11 @@ public final class DeviceAlarmController {
                 cancelAlarm(deviceAlarm);
             }
             deviceAlarmTableManager.setSetEnabled(setId, enabled);
-            //TODO: alternatives for keeping data fresh?
-            removeSetChannelAudio(deviceAlarmList);
+            //removeSetChannelAudio(deviceAlarmList);
             FirebaseNetwork.updateFirebaseAlarmEnabled(setId, enabled);
+            //Trigger audio download
+            //Download any social or channel audio files
+            ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
         }
     }
 

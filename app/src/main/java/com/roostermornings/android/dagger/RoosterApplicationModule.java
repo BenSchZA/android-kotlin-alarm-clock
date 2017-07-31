@@ -25,6 +25,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
@@ -32,7 +34,9 @@ import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
+import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.JSONPersistence;
+import com.roostermornings.android.util.MyContactsController;
 
 import static com.roostermornings.android.sync.DownloadSyncAdapter.CreateSyncAccount;
 import static com.roostermornings.android.util.Constants.AUTHORITY;
@@ -74,6 +78,7 @@ public class RoosterApplicationModule {
     }
 
     @Provides
+    @Singleton
     Account provideSyncAdapterAccount(Context context) {
         //Create sync account
         Account mAccount = CreateSyncAccount(context);
@@ -90,7 +95,7 @@ public class RoosterApplicationModule {
     }
 
     @Provides
-    @Singleton
+    @Nullable
     FirebaseUser provideFirebaseUser() {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         return mAuth.getCurrentUser();
@@ -104,8 +109,14 @@ public class RoosterApplicationModule {
 
     @Provides
     @Singleton
+    StorageReference provideFirebaseStorageReference() {
+        return FirebaseStorage.getInstance().getReference();
+    }
+
+    @Provides
+    @Singleton
     SharedPreferences provideSharedPreferences() {
-        return baseApplication.getSharedPreferences(baseApplication.getString(R.string.preferences_key),
+        return baseApplication.getSharedPreferences(Constants.SHARED_PREFS_KEY,
                 Context.MODE_PRIVATE);
     }
 
@@ -120,6 +131,12 @@ public class RoosterApplicationModule {
     @Singleton
     JSONPersistence providesJSONPersistence(BaseApplication baseApplication) {
         return new JSONPersistence(baseApplication);
+    }
+
+    @Provides
+    @Singleton
+    MyContactsController providesMyContactsController(BaseApplication baseApplication) {
+        return new MyContactsController(baseApplication);
     }
 
     @Provides

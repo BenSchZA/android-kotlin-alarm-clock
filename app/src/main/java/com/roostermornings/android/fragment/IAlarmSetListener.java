@@ -13,8 +13,8 @@ import com.roostermornings.android.domain.Alarm;
 
 public interface IAlarmSetListener {
 
-    public void setAlarmDetails(Alarm alarm);
-    public Alarm getAlarmDetails();
-    public void retrieveAlarmDetailsFromSQL();
-    public void setNextButtonCaption(String text);
+    void setAlarmDetails(Alarm alarm);
+    Alarm getAlarmDetails();
+    void retrieveAlarmDetailsFromSQL();
+    void setNextButtonCaption(String text);
 }

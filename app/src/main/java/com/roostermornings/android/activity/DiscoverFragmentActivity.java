@@ -12,63 +12,45 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
-import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.roostermornings.android.BaseApplication;
-import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.DiscoverListAdapter;
-import com.roostermornings.android.adapter.MyAlarmsListAdapter;
-import com.roostermornings.android.analytics.FA;
+import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Channel;
 import com.roostermornings.android.domain.ChannelRooster;
-import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment2;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
-import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.JSONPersistence;
-import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.Toaster;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -170,6 +152,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                         // This method performs the actual data-refresh operation.
                         // The method calls setRefreshing(false) when it's finished.
                         //Reload adapter data and set message status, set listener for new data
+                        onPause();
                         getChannelData();
                     }
                 }
@@ -392,8 +375,8 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                 StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
                 final StorageReference audioFileRef = mStorageRef.getStorage().getReferenceFromUrl(channelRooster.getAudio_file_url());
 
-                channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(true);
-                channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
+                channelRooster.setDownloading(true);
+                channelRooster.setPlaying(false);
                 notifyDataSetChangedFromUIThread();
 
                 mediaPlayer = new MediaPlayer();
@@ -422,8 +405,8 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                                 mediaPlayer.start();
 
                                 clearChannelRoosterMediaChecks();
-                                channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
-                                channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(true);
+                                channelRooster.setDownloading(false);
+                                channelRooster.setPlaying(true);
                                 notifyDataSetChangedFromUIThread();
 
                                 //Set Firebase user prop for uses_explore
@@ -438,8 +421,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                                 mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                                     @Override
                                     public void onCompletion(MediaPlayer mp) {
-                                        channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
-                                        channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
+                                        clearChannelRoosterMediaChecks();
                                         notifyDataSetChangedFromUIThread();
 
                                         //Set Firebase user prop for uses_explore
@@ -455,8 +437,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                             @Override
                             public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
                                 Toaster.makeToast(AppContext, "Content streaming failed.", Toast.LENGTH_SHORT).checkTastyToast();
-                                channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
-                                channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
+                                clearChannelRoosterMediaChecks();
                                 notifyDataSetChangedFromUIThread();
                                 return true;
                             }
@@ -469,8 +450,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                     public void onFailure(@NonNull Exception exception) {
                         // Handle any errors
                         Toaster.makeToast(AppContext, "Content streaming failed.", Toast.LENGTH_SHORT).checkTastyToast();
-                        channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
-                        channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
+                        clearChannelRoosterMediaChecks();
                         mAdapter.notifyDataSetChanged();
                     }
                 });
@@ -494,13 +474,13 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
             try {
                 mediaPlayer.seekTo(mediaPlayer.getCurrentPosition());
                 mediaPlayer.start();
-                channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
-                channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(true);
+                channelRooster.setDownloading(false);
+                channelRooster.setPlaying(true);
                 mAdapter.notifyDataSetChanged();
             } catch (IllegalStateException e) {
                 e.printStackTrace();
-                channelRoosters.get(channelRoosters.indexOf(channelRooster)).setDownloading(false);
-                channelRoosters.get(channelRoosters.indexOf(channelRooster)).setPlaying(false);
+                channelRooster.setDownloading(false);
+                channelRooster.setPlaying(false);
                 mAdapter.notifyDataSetChanged();
             }
         } else {

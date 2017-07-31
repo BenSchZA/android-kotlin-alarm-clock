@@ -19,7 +19,7 @@ public class DeviceAudioQueueItem implements Serializable {
     //Queue id also acts as alarm id
     private String queue_id = "";
     private String filename = "";
-    private long date_created = 0;
+    private long date_uploaded = 0;
     private String sender_id = "";
     private String name = "";
     private String picture = "";
@@ -28,27 +28,38 @@ public class DeviceAudioQueueItem implements Serializable {
     private int type = -1;
     private String action_title = "";
     private String action_url = "";
+    private String source_url = "";
 
-    public void fromSocialRooster(SocialRooster socialRooster, String audioFileUrl) {
+    public void fromSocialRooster(SocialRooster socialRooster, String uniqueFileName) {
         this.queue_id = socialRooster.getQueue_id();
-        this.filename = audioFileUrl;
-        this.date_created = socialRooster.getDate_uploaded();
+        this.filename = uniqueFileName;
+        this.date_uploaded = socialRooster.getDate_uploaded();
         this.sender_id = socialRooster.getSender_id();
         this.name = socialRooster.getUser_name();
         this.picture = socialRooster.getProfile_pic();
         this.listened = String.valueOf(socialRooster.getListened());
         this.type = 0;
+        this.source_url = socialRooster.getAudio_file_url();
     }
 
-    public void fromChannelRooster(ChannelRooster channelRooster, String audioFileUrl) {
+    public void fromChannelRooster(ChannelRooster channelRooster, String uniqueFileName) {
         this.queue_id = channelRooster.getChannel_uid();
-        this.filename = audioFileUrl;
+        this.filename = uniqueFileName;
         // Channel doesn't send channel ID this.sender_id = ;
         this.name = channelRooster.getName();
         this.picture = channelRooster.getPhoto();
         this.type = 1;
         this.action_title = channelRooster.getAction_title();
         this.action_url = channelRooster.getAction_url();
+        this.source_url = channelRooster.getAudio_file_url();
+    }
+
+    public String getSource_url() {
+        return source_url;
+    }
+
+    public void setSource_url(String source_url) {
+        this.source_url = source_url;
     }
 
     public String getAction_title() {
@@ -83,12 +94,12 @@ public class DeviceAudioQueueItem implements Serializable {
         this.listened = listened;
     }
 
-    public long getDate_created() {
-        return date_created;
+    public long getDate_uploaded() {
+        return date_uploaded;
     }
 
-    public void setDate_created(long date_created) {
-        this.date_created = date_created;
+    public void setDate_uploaded(long date_uploaded) {
+        this.date_uploaded = date_uploaded;
     }
 
     public DeviceAudioQueueItem(){};

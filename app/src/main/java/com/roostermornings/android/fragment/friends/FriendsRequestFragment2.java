@@ -6,9 +6,12 @@
 package com.roostermornings.android.fragment.friends;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -30,9 +33,12 @@ import com.roostermornings.android.adapter.FriendsRequestListAdapter;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.fragment.base.BaseFragment;
+import com.roostermornings.android.util.JSONPersistence;
+import com.roostermornings.android.util.MyContactsController;
 import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import javax.inject.Inject;
@@ -53,7 +59,6 @@ public class FriendsRequestFragment2 extends BaseFragment {
 
     ArrayList<Friend> mUsers = new ArrayList<>();
     private DatabaseReference mRequestsReference;
-    private DatabaseReference mUserReference;
 
     private RecyclerView.Adapter mAdapter;
 
@@ -65,7 +70,9 @@ public class FriendsRequestFragment2 extends BaseFragment {
     private OnFragmentInteractionListener mListener;
 
     @Inject Context AppContext;
-    @Inject FirebaseUser firebaseUser;
+    @Inject @Nullable FirebaseUser firebaseUser;
+    @Inject MyContactsController myContactsController;
+    @Inject JSONPersistence jsonPersistence;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -149,19 +156,32 @@ public class FriendsRequestFragment2 extends BaseFragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 //Clear before repopulating
                 mUsers.clear();
-                Iterator iterator = dataSnapshot.getChildren().iterator();
-                if(dataSnapshot.getChildrenCount() == 0) swipeRefreshLayout.setRefreshing(false);
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    mUsers.add(postSnapshot.getValue(Friend.class));
-                    //Sort names alphabetically before notifying adapter
-                    sortNamesFriends(mUsers);
-                    mAdapter.notifyDataSetChanged();
-                    //When the iterator is at it's last element, set data as loaded
-                    iterator.next();
-                    if(!iterator.hasNext()){
-                        swipeRefreshLayout.setRefreshing(false);
-                    }
+
+                //Get a map of number name pairs from my contacts
+                //For each user, check if name appears in contacts, and allocate name
+                HashMap<String, String> numberNamePairs = new HashMap<>();
+                if (ContextCompat.checkSelfPermission(AppContext,
+                        android.Manifest.permission.READ_CONTACTS)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    //Get a map of contact numbers to names
+                    numberNamePairs = myContactsController.getNumberNamePairs();
                 }
+
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                    Friend user = postSnapshot.getValue(Friend.class);
+
+                    //For each user, check if name appears in contacts, and allocate name
+                    if(numberNamePairs.containsKey(user.getCell_number())) {
+                        user.setUser_name(numberNamePairs.get(user.getCell_number()));
+                    }
+
+                    mUsers.add(user);
+                }
+
+                //Sort names alphabetically before notifying adapter
+                sortNamesFriends(mUsers);
+                mAdapter.notifyDataSetChanged();
+                swipeRefreshLayout.setRefreshing(false);
             }
 
             @Override
@@ -184,7 +204,7 @@ public class FriendsRequestFragment2 extends BaseFragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        inject(((BaseApplication)getActivity().getApplication()).getRoosterApplicationComponent());
+        inject(BaseApplication.getRoosterApplicationComponent());
 
         getDatabaseReference();
         getRequests();

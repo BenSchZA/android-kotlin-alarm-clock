@@ -7,6 +7,7 @@ package com.roostermornings.android.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -65,7 +66,7 @@ public class MessageStatusActivity extends BaseActivity {
     private RecyclerView.LayoutManager mLayoutManager;
 
     @Inject BaseApplication baseApplication;
-    @Inject FirebaseUser firebaseUser;
+    @Inject @Nullable FirebaseUser firebaseUser;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {

@@ -9,8 +9,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -22,7 +24,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,19 +34,22 @@ import com.google.firebase.auth.GetTokenResult;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
-import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.FriendsInviteListAdapter;
-import com.roostermornings.android.analytics.FA;
+import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
+import com.roostermornings.android.domain.Contact;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.LocalContacts;
 import com.roostermornings.android.domain.NodeUsers;
+import com.roostermornings.android.domain.User;
 import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.JSONPersistence;
 import com.roostermornings.android.util.MyContactsController;
 import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.inject.Inject;
 
@@ -70,15 +74,17 @@ public class FriendsInviteFragment3 extends BaseFragment {
 
     protected static final String TAG = FriendsFragmentActivity.class.getSimpleName();
 
-    private MyContactsController myContactsController;
+    ArrayList<Object> mRecyclerViewElements = new ArrayList<>();
+    ArrayList<Friend> mAddableContacts = new ArrayList<>();
+    ArrayList<Contact> mInvitableContacts = new ArrayList<>();
 
-    private BaseActivity baseActivity;
+    private RecyclerView.Adapter mAddContactsAdapter;
 
-    ArrayList<Friend> mUsers = new ArrayList<>();
-    private RecyclerView.Adapter mAdapter;
+    String addableHeader = "";
+    String invitableHeader = "";
 
-    @BindView(R.id.friendsInviteListView)
-    RecyclerView mRecyclerView;
+    @BindView(R.id.friendsAddListView)
+    RecyclerView mAddContactsRecyclerView;
 
     @BindView(R.id.swiperefresh)
     SwipeRefreshLayout swipeRefreshLayout;
@@ -91,8 +97,12 @@ public class FriendsInviteFragment3 extends BaseFragment {
 
     private OnFragmentInteractionListener mListener;
 
+    ProcessAddableBackground processAddableBackground = new ProcessAddableBackground();
+
     @Inject Context AppContext;
-    @Inject FirebaseUser firebaseUser;
+    @Inject @Nullable FirebaseUser firebaseUser;
+    @Inject JSONPersistence jsonPersistence;
+    @Inject MyContactsController myContactsController;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -118,7 +128,10 @@ public class FriendsInviteFragment3 extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        inject(((BaseApplication)getActivity().getApplication()).getRoosterApplicationComponent());
+        inject(BaseApplication.getRoosterApplicationComponent());
+
+        addableHeader = getResources().getString(R.string.add_contacts);
+        invitableHeader = getResources().getString(R.string.invite_contacts);
 
         myContactsController = new MyContactsController(AppContext);
     }
@@ -128,6 +141,27 @@ public class FriendsInviteFragment3 extends BaseFragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = initiate(inflater, R.layout.fragment_friends_fragment3, container, false);
+
+        return view;
+    }
+
+    //NB: bind ButterKnife to view and then initialise UI elements
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        mAddContactsAdapter = new FriendsInviteListAdapter(mRecyclerViewElements);
+        mAddContactsRecyclerView.setLayoutManager(new LinearLayoutManager(AppContext));
+        mAddContactsRecyclerView.setAdapter(mAddContactsAdapter);
+
+        mAddContactsAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onItemRangeRemoved(int positionStart, int itemCount) {
+                super.onItemRangeRemoved(positionStart, itemCount);
+                notifyAdapter();
+            }
+        });
+
 
         swipeRefreshLayout.setRefreshing(true);
         /*
@@ -153,18 +187,6 @@ public class FriendsInviteFragment3 extends BaseFragment {
         );
 
         requestPermissionReadContacts();
-
-        return view;
-    }
-
-    //NB: bind ButterKnife to view and then initialise UI elements
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        mAdapter = new FriendsInviteListAdapter(mUsers);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(AppContext));
-        mRecyclerView.setAdapter(mAdapter);
     }
 
     @Override
@@ -176,13 +198,37 @@ public class FriendsInviteFragment3 extends BaseFragment {
     public void searchRecyclerViewAdapter(String query) {
         //Filter contacts by CharSequence
         //Get reference to list adapter to access getFilter method
-        ((FriendsInviteListAdapter)mAdapter).refreshAll(mUsers);
-        ((FriendsInviteListAdapter)mAdapter).getFilter().filter(query);
+        ((FriendsInviteListAdapter) mAddContactsAdapter).refreshAll(mRecyclerViewElements);
+        ((FriendsInviteListAdapter) mAddContactsAdapter).getFilter().filter(query);
     }
 
     public void notifyAdapter() {
-        ((FriendsInviteListAdapter)mAdapter).refreshAll(mUsers);
-        mAdapter.notifyDataSetChanged();
+        setHeaderVisibility();
+
+        ((FriendsInviteListAdapter) mAddContactsAdapter).refreshAll(mRecyclerViewElements);
+        mAddContactsAdapter.notifyDataSetChanged();
+    }
+
+    private void setHeaderVisibility() {
+        //If list is empty, don't show header
+        try {
+            if (mRecyclerViewElements.contains(addableHeader)
+                    && !(mRecyclerViewElements.get(
+                    mRecyclerViewElements.indexOf(addableHeader) + 1) instanceof Friend)) {
+                mRecyclerViewElements.remove(addableHeader);
+            }
+        } catch (IndexOutOfBoundsException e) {
+            e.printStackTrace();
+        }
+        try {
+            if (mRecyclerViewElements.contains(invitableHeader)
+                    && !(mRecyclerViewElements.get(
+                    mRecyclerViewElements.indexOf(invitableHeader) + 1) instanceof Contact)) {
+                mRecyclerViewElements.remove(invitableHeader);
+            }
+        } catch (IndexOutOfBoundsException e) {
+            e.printStackTrace();
+        }
     }
 
     @OnClick(R.id.share_button)
@@ -220,7 +266,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
         //Clear explainer on entry, show if necessary i.e. permission previously denied
         displayRequestPermissionExplainer(false);
 
-        if (ContextCompat.checkSelfPermission(getActivity(),
+        if (ContextCompat.checkSelfPermission(AppContext,
                 android.Manifest.permission.READ_CONTACTS)
                 != PackageManager.PERMISSION_GRANTED) {
 
@@ -248,6 +294,17 @@ public class FriendsInviteFragment3 extends BaseFragment {
         } else if(ContextCompat.checkSelfPermission(AppContext,
                 android.Manifest.permission.READ_CONTACTS)
                 == PackageManager.PERMISSION_GRANTED) {
+
+            //If there is no internet connection, attempt to retrieve invitable contacts from persistence
+            if(!jsonPersistence.getInvitableContacts().isEmpty() && !checkInternetConnection()) {
+                mInvitableContacts = jsonPersistence.getInvitableContacts();
+                //Populate recycler view elements
+                mRecyclerViewElements.add(invitableHeader);
+                mRecyclerViewElements.addAll(mInvitableContacts);
+                //Display results
+                notifyAdapter();
+            }
+
             executeNodeMyContactsTask();
         }
     }
@@ -262,7 +319,16 @@ public class FriendsInviteFragment3 extends BaseFragment {
                         public void onComplete(@NonNull Task<GetTokenResult> task) {
                             if (task.isSuccessful()) {
                                 String idToken = task.getResult().getToken();
-                                checkLocalContactsNode(idToken);
+
+                                if(processAddableBackground.getStatus().equals(AsyncTask.Status.FINISHED)) {
+                                    processAddableBackground = null;
+                                    processAddableBackground = new ProcessAddableBackground();
+                                    processAddableBackground.execute(idToken);
+                                } else if(processAddableBackground.getStatus().equals(AsyncTask.Status.PENDING)) {
+                                    processAddableBackground.execute(idToken);
+                                } else if(!processAddableBackground.getStatus().equals(AsyncTask.Status.RUNNING)) {
+                                    swipeRefreshLayout.setRefreshing(false);
+                                }
                             } else {
                                 // Handle error -> task.getException();
                                 swipeRefreshLayout.setRefreshing(false);
@@ -272,46 +338,139 @@ public class FriendsInviteFragment3 extends BaseFragment {
         }
     }
 
-    private void checkLocalContactsNode(String idToken) {
-        Call<NodeUsers> call = apiService().checkLocalContacts(new LocalContacts(myContactsController.processContacts(), idToken));
+    private class ProcessAddableBackground extends AsyncTask<String, Void, String> {
+        @Override
+        protected void onPreExecute() {
+            mRecyclerViewElements.clear();
+        }
 
-        call.enqueue(new Callback<NodeUsers>() {
-            @Override
-            public void onResponse(Response<NodeUsers> response,
-                                   Retrofit retrofit) {
+        @Override
+        protected String doInBackground(String... params) {
+            String idToken = params[0];
 
-                Integer statusCode = response.code();
-                NodeUsers apiResponse = response.body();
+            Call<NodeUsers> call = apiService().checkLocalContacts(new LocalContacts(myContactsController.getNodeNumberList(), idToken));
 
-                if (statusCode == 200) {
+            call.enqueue(new Callback<NodeUsers>() {
+                @Override
+                public void onResponse(Response<NodeUsers> response,
+                                       Retrofit retrofit) {
 
-                    if(apiResponse.users != null) {
-                        mUsers = new ArrayList<>();
-                        for (Friend user :
-                                apiResponse.users.get(0)) {
-                            if (user != null && !user.getUser_name().isEmpty()) mUsers.add(user);
+                    Integer statusCode = response.code();
+                    NodeUsers apiResponse = response.body();
+
+                    if (statusCode == 200) {
+
+                        if(apiResponse.users != null) {
+                            mAddableContacts = new ArrayList<>();
+
+                            //Get a map of number name pairs from my contacts
+                            HashMap<String, String> numberNamePairs = myContactsController.getNumberNamePairs();
+                            for (Friend user :
+                                    apiResponse.users.get(0)) {
+                                if (user != null && !user.getUser_name().isEmpty()) {
+                                    //If user in my contacts, use that as user name
+                                    if(numberNamePairs.containsKey(user.getCell_number())) {
+                                        user.setUser_name(numberNamePairs.get(user.getCell_number()));
+                                    }
+                                    mAddableContacts.add(user);
+                                }
+                            }
+
+                            //Sort names alphabetically before notifying adapter
+                            sortNamesFriends(mAddableContacts);
                         }
-                        //Sort names alphabetically before notifying adapter
-                        sortNamesFriends(mUsers);
+
+                        Log.d("apiResponse", apiResponse.toString());
                     }
+                }
 
-                    notifyAdapter();
+                @Override
+                public void onFailure(Throwable t) {
+                    Log.i(TAG, t.getLocalizedMessage()==null?"":t.getLocalizedMessage());
+                    Toaster.makeToast(getApplicationContext(), "Loading contacts failed, please try again.", Toast.LENGTH_LONG).checkTastyToast();
+                    new ProcessInvitableBackground().execute("");
+                }
+            });
 
-                    //Make load spinner GONE and recyclerview VISIBLE
-                    swipeRefreshLayout.setRefreshing(false);
+            return null;
+        }
 
-                    Log.d("apiResponse", apiResponse.toString());
+        protected void onPostExecute(String result) {
+            new ProcessInvitableBackground().execute("");
+        }
+    }
+
+    private class ProcessInvitableBackground extends AsyncTask<String, Void, String> {
+
+        private Boolean exit = false;
+
+        @Override
+        protected void onPreExecute() {
+            //If list is already populated, return
+            if(!mInvitableContacts.isEmpty()) exit = true;
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+            if(exit) return "";
+
+            //Get the list of all local contacts, C
+            ArrayList<Contact> contacts = myContactsController.getContacts();
+            //Temporarily set the invitable contacts, I, to all local contacts
+            mInvitableContacts.clear();
+            mInvitableContacts.addAll(contacts);
+            ArrayList<String> contactNumbersToRemove = new ArrayList<>();
+
+            //Check for current friends, F
+            ArrayList<User> currentFriends = new ArrayList<>();
+            if(!jsonPersistence.getFriends().isEmpty()) {
+                currentFriends = jsonPersistence.getFriends();
+            }
+
+            //Make a list of all contact numbers from mAddableContacts and currentFriends, A + F
+            for (Friend addableFriend:
+                    mAddableContacts) {
+                contactNumbersToRemove.add(addableFriend.cell_number);
+            }
+            for (User currentFriend:
+                    currentFriends) {
+                contactNumbersToRemove.add(currentFriend.cell_number);
+            }
+
+            //Perform the operation I = C - (A + F)
+            for (Contact contact:
+                    contacts) {
+                for (String number:
+                        contact.getNumbers().keySet()) {
+                    if(contactNumbersToRemove.contains(number)) {
+                        mInvitableContacts.remove(contact);
+                        break;
+                    }
                 }
             }
 
-            @Override
-            public void onFailure(Throwable t) {
-                Log.i(TAG, t.getLocalizedMessage()==null?"":t.getLocalizedMessage());
-                Toaster.makeToast(getApplicationContext(), "Loading contacts failed, please try again.", Toast.LENGTH_LONG).checkTastyToast();
-                swipeRefreshLayout.setRefreshing(false);
-            }
-        });
+            //Sort names alphabetically before notifying adapter
+            sortNamesContacts(mInvitableContacts);
+
+            return "";
+        }
+
+        protected void onPostExecute(String result) {
+            //Persist invitable contacts for those times where user has no internet connection
+            jsonPersistence.setInvitableContacts(mInvitableContacts);
+
+            //Load new content (including section headers) into adapter
+            mRecyclerViewElements.add(addableHeader);
+            mRecyclerViewElements.addAll(mAddableContacts);
+            mRecyclerViewElements.add(invitableHeader);
+            mRecyclerViewElements.addAll(mInvitableContacts);
+            //Display new content
+            notifyAdapter();
+            //Make load spinner GONE and recyclerview VISIBLE
+            swipeRefreshLayout.setRefreshing(false);
+        }
     }
+
 
     @OnClick(R.id.retrieve_contacts_permission_text)
     public void retrieveContactsPermissionRetry() {
@@ -326,7 +485,6 @@ public class FriendsInviteFragment3 extends BaseFragment {
             swipeRefreshLayout.setRefreshing(false);
         } else {
             retrieveContactsPermissionText.setVisibility(View.GONE);
-            swipeRefreshLayout.setRefreshing(false);
         }
     }
 }
