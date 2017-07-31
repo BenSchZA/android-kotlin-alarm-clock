@@ -30,6 +30,7 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
+import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
@@ -55,6 +56,8 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
     private int alarmCount = 1;
     private int alarmPosition = 1;
+
+    boolean actionUrlClicked;
 
     @BindView(R.id.alarm_sender_pic)
     ImageView imgSenderPic;
@@ -138,11 +141,16 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         //Detect when user elects to leave activity (home button, etc.)
         super.onUserLeaveHint();
 
-        if(mAudioService!=null) mAudioService.snoozeAudioState();
-        if(mBound) unbindService(mAudioServiceConnection);
-        mBound = false;
-        finish();
-        startActivity(new Intent(this, MyAlarmsFragmentActivity.class));
+        //Check if event as a result of action url click
+        if(!actionUrlClicked) {
+            if (mAudioService != null) mAudioService.snoozeAudioState();
+            if (mBound) unbindService(mAudioServiceConnection);
+            mBound = false;
+            finish();
+            startActivity(new Intent(this, MyAlarmsFragmentActivity.class));
+        }
+        //Clear flag
+        actionUrlClicked = false;
     }
 
     @Override
@@ -170,6 +178,24 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         mBound = false;
         finish();
         startActivity(new Intent(this, MyAlarmsFragmentActivity.class));
+    }
+
+    @OnClick(R.id.alarm_action_button)
+    public void onActionButtonClicked() {
+        actionUrlClicked = true;
+        if(StrUtils.notNullOrEmpty(audioItem.getAction_url())) {
+            try {
+                Uri uri = Uri.parse(audioItem.getAction_url());
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(intent);
+                FA.Log(FA.Event.action_url_click.class, FA.Event.action_url_click.Param.channel_title, audioItem.getName());
+                FA.Log(FA.Event.action_url_click.class, FA.Event.action_url_click.Param.action_url, audioItem.getAction_url());
+            } catch (Exception e) {
+                e.printStackTrace();
+                alarmActionButton.setVisibility(View.GONE);
+                actionUrlClicked = false;
+            }
+        }
     }
 
     @OnClick(R.id.skip_previous)
@@ -273,20 +299,6 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
             setDefaultDisplayProfile(true);
         }
         txtAlarmCount.setText(String.format("%s of %s", alarmPosition, alarmCount));
-    }
-
-    @OnClick(R.id.alarm_action_button)
-    public void onActionButtonClicked() {
-        if(StrUtils.notNullOrEmpty(audioItem.getAction_url())) {
-            try {
-                Uri uri = Uri.parse(audioItem.getAction_url());
-                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                startActivity(intent);
-            } catch (Exception e) {
-                e.printStackTrace();
-                alarmActionButton.setVisibility(View.GONE);
-            }
-        }
     }
 
     protected void setProfilePic(String url) {

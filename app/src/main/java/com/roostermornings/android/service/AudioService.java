@@ -664,12 +664,12 @@ public class AudioService extends Service {
                         //Slowly increase volume from low to current volume
                         softStartAudio();
                         if(audioItem.getType() == Constants.AUDIO_TYPE_SOCIAL) FA.Log(FA.Event.social_rooster_unique_play.class, null, null);
-                        if(audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) FA.Log(FA.Event.channel_unique_play.class, FA.Event.channel_unique_play.Param.channel_title, audioItem.getSender_id());
+                        if(audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) FA.Log(FA.Event.channel_unique_play.class, FA.Event.channel_unique_play.Param.channel_title, audioItem.getQueue_id());
                         if(audioItem.getType() == Constants.AUDIO_TYPE_SOCIAL) FA.Log(FA.Event.social_rooster_play.class, null, null);
-                        if(audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) FA.Log(FA.Event.channel_play.class, FA.Event.channel_unique_play.Param.channel_title, audioItem.getSender_id());
+                        if(audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) FA.Log(FA.Event.channel_play.class, FA.Event.channel_unique_play.Param.channel_title, audioItem.getQueue_id());
                     } else {
                         if(audioItem.getType() == Constants.AUDIO_TYPE_SOCIAL) FA.Log(FA.Event.social_rooster_play.class, null, null);
-                        if(audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) FA.Log(FA.Event.channel_play.class, FA.Event.channel_unique_play.Param.channel_title, audioItem.getSender_id());
+                        if(audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) FA.Log(FA.Event.channel_play.class, FA.Event.channel_unique_play.Param.channel_title, audioItem.getQueue_id());
                     }
 
                     mediaPlayerRooster.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {

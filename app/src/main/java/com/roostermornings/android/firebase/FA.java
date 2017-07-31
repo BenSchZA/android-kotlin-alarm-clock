@@ -122,6 +122,13 @@ public abstract class FA {
                 public final static String attempt_to_play = "attempt_to_play";
             }
         }
+        public abstract class action_url_click {
+            public abstract class Param {
+                //String param
+                public final static String channel_title = "channel_title";
+                public final static String action_url = "action_url";
+            }
+        }
         public abstract class memory_warning {
             public abstract class Param {
                 //Long

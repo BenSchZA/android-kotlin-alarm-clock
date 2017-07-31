@@ -59,8 +59,8 @@ android {
     buildTypes {
         release {
             //During debugging, enable debugging... and disable minify to get proper stacktraces
-            debuggable true
-            //minifyEnabled true
+            //debuggable true
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             consumerProguardFiles 'proguard-rules.txt'
             proguardFile 'proguard-square-okio.pro'
