@@ -218,7 +218,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
 
                     //Roll alarm time forward by one day until greater than current time
                     if (currentTime.compareTo(alarmTime) >= 0) {
-                        alarmTime.roll(Calendar.DATE, true);
+                        alarmTime.add(Calendar.DAY_OF_MONTH, 1);
                     }
 
                     mAlarm.setAlarmDayFromCalendar(alarmTime);

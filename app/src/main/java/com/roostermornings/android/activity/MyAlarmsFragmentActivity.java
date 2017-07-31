@@ -104,6 +104,16 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        //Display notifications
+        updateRoosterNotification();
+        updateRequestNotification();
+        //Setup day/night theme selection (based on settings, and time)
+        setDayNightTheme();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_my_alarms);
@@ -135,8 +145,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         new Thread() {
             @Override
             public void run() {
-                //Setup day/night theme selection (based on settings, and time)
-                setDayNightTheme();
+
                 //Set highlighting of button bar
                 setButtonBarSelection();
                 //Animate FAB with pulse
@@ -284,14 +293,6 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                         Toast.LENGTH_SHORT).checkTastyToast();
             }
         }; mMyAlarmsReference.addListenerForSingleValueEvent(alarmsListener);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        //Display notifications
-        updateRoosterNotification();
-        updateRequestNotification();
     }
 
     private void configureAlarmElement(Alarm alarm) {
