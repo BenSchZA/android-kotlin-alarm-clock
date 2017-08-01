@@ -101,18 +101,20 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
                 +WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
                 +WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 
-        if(RoosterUtils.hasJellyBean()) {
-            View decorView = getWindow().getDecorView();
-            // Hide the status bar.
-            int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
-            decorView.setSystemUiVisibility(uiOptions);
-            // Remember that you should never show the action bar if the
-            // status bar is hidden, so hide that too if necessary.
-            ActionBar actionBar = getActionBar();
-            if(actionBar != null) actionBar.hide();
-        } else {
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        }
+        //This method hides the status bar, in reality this isn't very practical, mainly visual, so removed
+//        if(RoosterUtils.hasJellyBean()) {
+//            View decorView = getWindow().getDecorView();
+//            // Hide the status bar.
+//            int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+//            decorView.setSystemUiVisibility(uiOptions);
+//            // Remember that you should never show the action bar if the
+//            // status bar is hidden, so hide that too if necessary.
+//            ActionBar actionBar = getActionBar();
+//            if(actionBar != null) actionBar.hide();
+//        } else {
+//            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+//        }
+
         initialize(R.layout.activity_device_alarm_full_screen);
 
         setDayNightTheme();
