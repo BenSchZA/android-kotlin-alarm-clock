@@ -1144,7 +1144,7 @@ public class AudioService extends Service {
         }
         //Check if playing, else try again
         if(failsafeRingtone != null && !failsafeRingtone.isPlaying()) {
-            Crashlytics.log("Not null and not playing" + failsafeRingtone.getTitle(getBaseContext()));
+            Crashlytics.log("Not null and not playing " + failsafeRingtone.getTitle(getBaseContext()));
             failsafeRingtone.play();
         }
     }
@@ -1309,7 +1309,7 @@ public class AudioService extends Service {
 
         Notification notification = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.logo)
-                .setContentTitle("Rooster Mornings")
+                .setContentTitle(getString(R.string.app_name))
                 .setContentText(state)
                 .setContentIntent(pendingIntent)
                 .setDeleteIntent(broadcastPendingIntent).build();
@@ -1329,7 +1329,7 @@ public class AudioService extends Service {
 
         Notification notification = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.logo)
-                .setContentTitle("Rooster Mornings")
+                .setContentTitle(getString(R.string.app_name))
                 .setContentText(state)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
