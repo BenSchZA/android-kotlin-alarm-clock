@@ -33,11 +33,13 @@ public final class AudioTableContract {
 
         public static final String COLUMN_SOURCE_URL = "source_url";
 
+        //Date rooster uploaded to database
         public static final String COLUMN_DATE_UPLOADED = "date_uploaded";
 
         public static final String COLUMN_ACTION_TITLE = "action_title";
         public static final String COLUMN_ACTION_URL = "action_url";
 
+        //Date SQL entry created
         public static final String COLUMN_DATE_CREATED = "date_created";
     }
 
