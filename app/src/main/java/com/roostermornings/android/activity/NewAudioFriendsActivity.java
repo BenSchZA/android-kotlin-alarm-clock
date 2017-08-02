@@ -8,10 +8,12 @@ package com.roostermornings.android.activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -36,12 +38,14 @@ import com.roostermornings.android.service.UploadService;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.domain.Users;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.MyContactsController;
 import com.roostermornings.android.util.StrUtils;
 import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 
 import javax.inject.Inject;
 
@@ -51,6 +55,8 @@ import retrofit.Call;
 import retrofit.Callback;
 import retrofit.Response;
 import retrofit.Retrofit;
+
+import static com.facebook.FacebookSdk.getApplicationContext;
 
 public class NewAudioFriendsActivity extends BaseActivity {
 
@@ -78,6 +84,8 @@ public class NewAudioFriendsActivity extends BaseActivity {
     Button selectAllButton;
 
     @Inject @Nullable FirebaseUser firebaseUser;
+    @Inject
+    MyContactsController myContactsController;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -95,7 +103,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
 
         selectAllButton.setSelected(false);
 
-        firebaseUser.getToken(true)
+        firebaseUser.getIdToken(true)
                 .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
                     public void onComplete(@NonNull Task<GetTokenResult> task) {
                         if (task.isSuccessful()) {
@@ -263,6 +271,21 @@ public class NewAudioFriendsActivity extends BaseActivity {
 
                     mFriends.clear();
                     mFriends.addAll(apiResponse.users);
+
+                    //For each user, check if name appears in contacts, and allocate name
+                    HashMap<String, String> numberNamePairs = new HashMap<>();
+                    if (ContextCompat.checkSelfPermission(getApplicationContext(),
+                            android.Manifest.permission.READ_CONTACTS)
+                            == PackageManager.PERMISSION_GRANTED) {
+                        //Get a map of contact numbers to names
+                        numberNamePairs = myContactsController.getNumberNamePairs();
+                        for (User user :
+                                mFriends) {
+                            if (numberNamePairs.containsKey(user.getCell_number())) {
+                                user.setUser_name(numberNamePairs.get(user.getCell_number()));
+                            }
+                        }
+                    }
 
                     sortNames(mFriends);
                     mAdapter.notifyDataSetChanged();

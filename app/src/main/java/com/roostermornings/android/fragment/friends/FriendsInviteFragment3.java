@@ -314,7 +314,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
             swipeRefreshLayout.setRefreshing(false);
         } else {
             if(!swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(true);
-            firebaseUser.getToken(true)
+            firebaseUser.getIdToken(true)
                     .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
                         public void onComplete(@NonNull Task<GetTokenResult> task) {
                             if (task.isSuccessful()) {

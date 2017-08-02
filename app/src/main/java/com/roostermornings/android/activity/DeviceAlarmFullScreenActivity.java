@@ -14,9 +14,11 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.util.Log;
@@ -44,6 +46,7 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import butterknife.OnLongClick;
 
 public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
@@ -97,7 +100,6 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
 
         //Used to ensure alarm shows over lock-screen
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                +WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
                 +WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
                 +WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 
@@ -123,6 +125,9 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         Intent intent = new Intent(this, AudioService.class);
         //0 indicates that service should not be restarted
         bindService(intent, mAudioServiceConnection, 0);
+
+        //Set volume rocker to alarm stream
+        setVolumeControlStream(AudioManager.STREAM_ALARM);
     }
 
     @Override
