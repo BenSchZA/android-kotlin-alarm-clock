@@ -48,7 +48,7 @@ android {
         BetaFlavour {
             //Beta
             versionCode 1000004
-            versionName "2.1.12b"
+            versionName "2.2.0b"
 
             manifestPlaceholders = [
                     app_icon: "@mipmap/ic_launcher_beta",
