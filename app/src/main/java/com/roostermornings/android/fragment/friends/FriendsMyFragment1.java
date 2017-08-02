@@ -211,7 +211,7 @@ public class FriendsMyFragment1 extends BaseFragment {
         }
 
         if("".equals(firebaseIdToken)) {
-            firebaseUser.getToken(true)
+            firebaseUser.getIdToken(true)
                 .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
                     public void onComplete(@NonNull Task<GetTokenResult> task) {
                         if (task.isSuccessful()) {

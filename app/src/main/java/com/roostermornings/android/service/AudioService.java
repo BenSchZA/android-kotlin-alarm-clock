@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.Ringtone;
@@ -27,6 +28,7 @@ import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.media.AudioAttributesCompat;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
@@ -57,6 +59,7 @@ import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.InternetHelper;
 import com.roostermornings.android.util.JSONPersistence;
+import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.StrUtils;
 
 import java.io.File;
@@ -73,6 +76,8 @@ import javax.inject.Inject;
 
 import static android.content.ContentValues.TAG;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.support.v4.media.AudioAttributesCompat.FLAG_AUDIBILITY_ENFORCED;
+import static android.support.v4.media.AudioAttributesCompat.USAGE_ALARM;
 
 //Service to manage playing and pausing audio during Rooster alarm
 public class AudioService extends Service {
@@ -527,6 +532,13 @@ public class AudioService extends Service {
                 try {
                     streamMediaPlayer.reset();
                     streamMediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
+//                        AudioAttributesCompat.Builder builder = new AudioAttributesCompat.Builder()
+//                                .setContentType(AudioAttributesCompat.CONTENT_TYPE_MUSIC)
+//                                .setFlags(FLAG_AUDIBILITY_ENFORCED)
+//                                .setUsage(USAGE_ALARM);
+//                    builder.build();
+//                    if()
+//                    streamMediaPlayer.setAudioAttributes();
                     streamMediaPlayer.setLooping(true);
                     streamMediaPlayer.setDataSource(downloadUrl.toString());
                 } catch (Exception e) {
@@ -1250,6 +1262,21 @@ public class AudioService extends Service {
                     }
                 }, 0, 1, TimeUnit.SECONDS);
     }
+
+//    public void stepAudioVolume(boolean increase) {
+//        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+//        if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
+//
+//        AudioManager audio = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+//        int currentVolume = audio.getStreamVolume(AudioManager.STREAM_ALARM);
+//        int maxVolume = audio.getStreamMaxVolume(AudioManager.STREAM_ALARM);
+//
+//        if((currentVolume < maxVolume) && increase) {
+//            audio.setStreamVolume(AudioManager.STREAM_ALARM, currentVolume + 1, 0);
+//        } else if((currentVolume > 0) && !increase) {
+//            audio.setStreamVolume(AudioManager.STREAM_ALARM, currentVolume - 1, 0);
+//        }
+//    }
 
     private void stopAlarmAudio() {
         String method = Thread.currentThread().getStackTrace()[2].getMethodName();
