@@ -85,9 +85,15 @@ public class BaseApplication extends android.app.Application {
 
         //Get static FBAnalytics instance
         firebaseAnalytics = FirebaseAnalytics.getInstance(this);
+
         //Activate crashlytics instance
         CrashlyticsCore core = new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build();
-        Fabric.with(this, new Crashlytics.Builder().core(core).build());
+        if("BetaFlavour".equals(BuildConfig.FLAVOR)) {
+            Fabric.with(new Fabric.Builder(this).kits(new Crashlytics.Builder().core(core).build()).appIdentifier("com.roostermornings.android.beta").build());
+        } else {
+            Fabric.with(this, new Crashlytics.Builder().core(core).build(), new Crashlytics());
+        }
+
         //If debug, disable Firebase analytics
         if(BuildConfig.DEBUG) {
             firebaseAnalytics.setAnalyticsCollectionEnabled(false);
