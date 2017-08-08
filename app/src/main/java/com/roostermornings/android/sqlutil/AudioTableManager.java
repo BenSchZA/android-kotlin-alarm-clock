@@ -12,6 +12,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.roostermornings.android.firebase.FirebaseNetwork;
 import com.roostermornings.android.sqldata.AudioTableHelper;
 import com.roostermornings.android.util.Constants;
 
@@ -112,7 +113,7 @@ public class AudioTableManager {
         updateRoosterCount();
     }
 
-    public void setChannelAudioFileName(String channelId, String channelAudioFileName) {
+    private void setChannelAudioFileName(String channelId, String channelAudioFileName) {
         SQLiteDatabase db = initDB();
 
         String updateQuery = "UPDATE " + AudioTableEntry.TABLE_NAME + " SET " + AudioTableEntry.COLUMN_FILENAME + " = '" + channelAudioFileName + "' WHERE " + AudioTableEntry.COLUMN_QUEUE_ID + " = '" + channelId + "';";
@@ -395,10 +396,13 @@ public class AudioTableManager {
         db.execSQL(updateQuery);
     }
 
-    public void setListened(int ID) {
+    public void setListened(DeviceAudioQueueItem audioItem) {
         SQLiteDatabase db = initDB();
 
-        String updateQuery = "UPDATE " + AudioTableEntry.TABLE_NAME + " SET " + AudioTableEntry.COLUMN_LISTENED + " = " + TRUE + " WHERE " + AudioTableEntry.COLUMN_ID + " = " + ID + ";";
+        FirebaseNetwork.setListened(audioItem.getSender_id(), audioItem.getQueue_id());
+        updateDateCreated(audioItem.getId());
+
+        String updateQuery = "UPDATE " + AudioTableEntry.TABLE_NAME + " SET " + AudioTableEntry.COLUMN_LISTENED + " = " + TRUE + " WHERE " + AudioTableEntry.COLUMN_ID + " = " + audioItem.getId() + ";";
 
         db.execSQL(updateQuery);
     }
