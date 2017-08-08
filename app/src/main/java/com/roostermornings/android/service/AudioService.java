@@ -688,7 +688,7 @@ public class AudioService extends Service {
                         @Override
                         public void onCompletion(MediaPlayer mp) {
                             //set audio file entry in SQL db as listened; to be removed when AudioService ends
-                            audioTableManager.setListened(mThis.audioItem.getId());
+                            audioTableManager.setListened(mThis.audioItem);
                             //Check if at end of queue, else play next file
                             if(audioItems.isEmpty()) {
                                 startDefaultAlarmTone();
@@ -709,7 +709,7 @@ public class AudioService extends Service {
                 @Override
                 public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
                     //set audio file entry in SQL db as listened; to be removed when AudioService ends
-                    audioTableManager.setListened(mThis.audioItem.getId());
+                    audioTableManager.setListened(mThis.audioItem);
                     //Check if at end of queue, else play next file
                     if(audioItems.isEmpty()) {
                         startDefaultAlarmTone();
@@ -733,7 +733,7 @@ public class AudioService extends Service {
             //Social rooster will never play... let's not go here
             //delete file
             //delete record from AudioTable SQL DB
-            audioTableManager.setListened(audioItem.getId());
+            audioTableManager.setListened(audioItem);
 
             //delete record from arraylist
             audioItems.remove(audioItem);
@@ -770,7 +770,7 @@ public class AudioService extends Service {
             if(mediaPlayerRooster != null && mediaPlayerRooster.isPlaying()) mediaPlayerRooster.stop();
             currentPositionRooster = 0;
             // set audio file entry in SQL db as listened; to be removed when AudioService ends
-            audioTableManager.setListened(mThis.audioItem.getId());
+            audioTableManager.setListened(mThis.audioItem);
             // play next rooster
             playRooster(getNextAudioItem());
         } catch (NullPointerException e) {
@@ -787,7 +787,7 @@ public class AudioService extends Service {
             if(mediaPlayerRooster != null && mediaPlayerRooster.isPlaying()) mediaPlayerRooster.stop();
             currentPositionRooster = 0;
             // set audio file entry in SQL db as listened; to be removed when AudioService ends
-            audioTableManager.setListened(mThis.audioItem.getId());
+            audioTableManager.setListened(mThis.audioItem);
             // play previous rooster
             playRooster(getPreviousAudioItem());
         } catch (NullPointerException e) {
@@ -799,9 +799,9 @@ public class AudioService extends Service {
         //Ensure partially listened channels and roosters are set as listened
         try {
             if (mThis.audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) {
-                audioTableManager.setListened(mThis.audioItem.getId());
+                audioTableManager.setListened(mThis.audioItem);
             } else if (mThis.audioItem.getType() == Constants.AUDIO_TYPE_SOCIAL) {
-                audioTableManager.setListened(mThis.audioItem.getId());
+                audioTableManager.setListened(mThis.audioItem);
             }
         } catch (NullPointerException e) {
             logError(e);
@@ -819,18 +819,6 @@ public class AudioService extends Service {
                 }
             } catch (NullPointerException e) {
                 logError(e);
-            }
-        }
-    }
-
-    private void processListenedAudio() {
-        //Delete record of all listened audio files
-        for (DeviceAudioQueueItem audioItem :
-                audioTableManager.selectListened()) {
-            //Set the listened flag in firebase for social roosters! NB
-            if (audioItem.getType() == Constants.AUDIO_TYPE_SOCIAL) {
-                FirebaseNetwork.setListened(audioItem.getSender_id(), audioItem.getQueue_id());
-                audioTableManager.updateDateCreated(audioItem.getId());
             }
         }
     }
@@ -885,7 +873,6 @@ public class AudioService extends Service {
         // delete all channel audio files/SQL entries,
         // remove files not contained in SQL db
         processChannelAudio();
-        processListenedAudio();
         purgeAudioFiles();
 
         //Unregister all broadcastreceivers
