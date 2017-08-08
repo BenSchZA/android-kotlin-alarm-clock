@@ -39,7 +39,6 @@ import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 
 import javax.inject.Inject;
 
@@ -107,7 +106,7 @@ public class FriendsRequestFragment2 extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = initiate(inflater, R.layout.fragment_friends_fragment2, container, false);
+        View view = initiate(inflater, R.layout.fragment_friends_2, container, false);
 
         swipeRefreshLayout.setRefreshing(true);
         /*

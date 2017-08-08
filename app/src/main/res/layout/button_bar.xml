@@ -93,7 +93,7 @@
             android:contentDescription="My social roosters"
             android:padding="@dimen/spacing_normal_large"
             android:soundEffectsEnabled="true"
-            android:src="@drawable/rooster_button_bar_chat" />
+            android:src="@drawable/rooster_button_bar_roosters" />
 
     </FrameLayout>
 

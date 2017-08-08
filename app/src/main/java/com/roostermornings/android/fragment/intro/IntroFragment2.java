@@ -16,8 +16,6 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.fragment.base.BaseFragment;
 
-import butterknife.OnClick;
-
 public class IntroFragment2 extends BaseFragment {
 
     @Override
@@ -29,7 +27,7 @@ public class IntroFragment2 extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return initiate(inflater, R.layout.fragment_intro_fragment2, container, false);
+        return initiate(inflater, R.layout.fragment_intro_2, container, false);
     }
 
     @Override

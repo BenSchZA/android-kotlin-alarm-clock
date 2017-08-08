@@ -32,25 +32,50 @@
             android:background="@drawable/small_profile_pic_circle" />
     </RelativeLayout>
 
-    <TextView
-        android:id="@+id/message_status_friend_profile_name"
+    <LinearLayout
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
         android:layout_weight="1"
-        android:paddingLeft="@dimen/spacing_large"
-        android:text="Name"
-        android:textColor="@color/white"
-        android:textSize="@dimen/text_xlarge" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center_vertical|left"
+        android:layout_marginRight="@dimen/spacing_normal"
+        android:layout_marginLeft="@dimen/spacing_large">
 
-    <TextView
-        android:id="@+id/message_status"
+        <me.grantland.widget.AutofitTextView
+            android:id="@+id/message_status_friend_profile_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:maxLines="1"
+            android:text="Name"
+            android:textColor="@color/white"
+            android:textSize="@dimen/text_xlarge" />
+
+        <SeekBar
+            android:id="@+id/seekbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="visible" />
+
+    </LinearLayout>
+
+    <ImageButton
+        android:layout_marginRight="@dimen/spacing_normal"
+        android:id="@+id/audio_listen"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|right"
-        android:text="Status"
-        android:textAlignment="textEnd"
-        android:textColor="@color/white_30_percent_transparent"
-        android:textSize="@dimen/text_xlarge" />
+        android:background="@drawable/rooster_audio_play_button"
+        android:clickable="true"
+        android:contentDescription="Play audio" />
+
+    <ImageButton
+        android:id="@+id/audio_favourite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical|right"
+        android:background="@drawable/rooster_audio_favourite_button"
+        android:clickable="true"
+        android:contentDescription="Favourite audio" />
 
 </LinearLayout>

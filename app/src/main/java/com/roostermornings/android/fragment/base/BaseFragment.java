@@ -36,8 +36,10 @@ import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Contact;
 import com.roostermornings.android.domain.Friend;
+import com.roostermornings.android.domain.SocialRooster;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.node_api.IHTTPClient;
+import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.util.Toaster;
 
 import butterknife.ButterKnife;
@@ -140,6 +142,30 @@ public abstract class BaseFragment extends Fragment implements Validator.Validat
                 //If null, pretend equal
                 if(lhs == null || rhs == null || lhs.getName() == null || rhs.getName() == null) return 0;
                 return lhs.getName().compareTo(rhs.getName());
+            }
+        });
+    }
+
+    public void sortSocialRoosters(ArrayList<SocialRooster> socialRoosters){
+        //Take arraylist and sort by date
+        Collections.sort(socialRoosters, new Comparator<SocialRooster>() {
+            @Override
+            public int compare(SocialRooster lhs, SocialRooster rhs) {
+                //If null, pretend equal
+                if(lhs == null || rhs == null || lhs.getDate_uploaded() == null || rhs.getDate_uploaded() == null) return 0;
+                return rhs.getDate_uploaded().compareTo(lhs.getDate_uploaded());
+            }
+        });
+    }
+
+    public void sortDeviceAudioQueueItems(ArrayList<DeviceAudioQueueItem> socialRoosters){
+        //Take arraylist and sort by date
+        Collections.sort(socialRoosters, new Comparator<DeviceAudioQueueItem>() {
+            @Override
+            public int compare(DeviceAudioQueueItem lhs, DeviceAudioQueueItem rhs) {
+                //If null, pretend equal
+                if(lhs == null || rhs == null || lhs.getDate_uploaded() == null || rhs.getDate_uploaded() == null) return 0;
+                return rhs.getDate_uploaded().compareTo(lhs.getDate_uploaded());
             }
         });
     }

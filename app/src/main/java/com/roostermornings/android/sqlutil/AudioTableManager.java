@@ -14,7 +14,6 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.roostermornings.android.sqldata.AudioTableHelper;
 import com.roostermornings.android.util.Constants;
-import com.roostermornings.android.util.StrUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -47,6 +46,7 @@ public class AudioTableManager {
 
         //Type defines whether the audio file is a channel or social Rooster
         values.put(AudioTableEntry.COLUMN_TYPE, Constants.AUDIO_TYPE_SOCIAL);
+        values.put(AudioTableEntry.COLUMN_FAVOURITE, Constants.AUDIO_TYPE_FAVOURITE_FALSE);
         values.put(AudioTableEntry.COLUMN_FILENAME, queue.getFilename());
         values.put(AudioTableEntry.COLUMN_QUEUE_ID, queue.getQueue_id());
 
@@ -76,6 +76,7 @@ public class AudioTableManager {
 
         //Type defines whether the audio file is a channel or social Rooster
         values.put(AudioTableEntry.COLUMN_TYPE, Constants.AUDIO_TYPE_CHANNEL);
+        values.put(AudioTableEntry.COLUMN_FAVOURITE, Constants.AUDIO_TYPE_FAVOURITE_FALSE);
         values.put(AudioTableEntry.COLUMN_FILENAME, queue.getFilename());
         values.put(AudioTableEntry.COLUMN_QUEUE_ID, queue.getQueue_id());
 
@@ -136,7 +137,7 @@ public class AudioTableManager {
         //Every time audio file is removed from or inserted in db, count number of social roosters for notification
         //Send broadcast message to notify all receivers of new notification
         Intent intent = new Intent("rooster.update.ROOSTER_NOTIFICATION");
-        intent.putExtra(Constants.EXTRA_SOCIAL_ROOSTERS, countSocialAudioFiles());
+        intent.putExtra(Constants.EXTRA_SOCIAL_ROOSTERS, countUnheardSocialAudioFiles());
         context.sendBroadcast(intent);
     }
 
@@ -181,14 +182,66 @@ public class AudioTableManager {
 
         Cursor cursor = db.rawQuery(selectQuery, null);
         ArrayList<DeviceAudioQueueItem> deviceAudioQueueItems = extractAudioFiles(cursor);
+        cursor.close();
 
         return deviceAudioQueueItems;
     }
 
-    public Integer countSocialAudioFiles() {
+    public ArrayList<DeviceAudioQueueItem> extractUnheardSocialAudioFiles() {
+
         SQLiteDatabase db = initDB();
 
-        String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_TYPE + " = " + FALSE + " OR " + AudioTableEntry.COLUMN_TYPE + " IS NULL;";
+        String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE (" + AudioTableEntry.COLUMN_TYPE + " = " + FALSE + " OR " + AudioTableEntry.COLUMN_TYPE + " IS NULL) AND "
+                + AudioTableEntry.COLUMN_LISTENED + " = " + FALSE + ";";
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        ArrayList<DeviceAudioQueueItem> deviceAudioQueueItems = extractAudioFiles(cursor);
+        cursor.close();
+
+        return deviceAudioQueueItems;
+    }
+
+    public ArrayList<DeviceAudioQueueItem> extractTodaySocialAudioFiles() {
+
+        SQLiteDatabase db = initDB();
+
+        String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE (" + AudioTableEntry.COLUMN_TYPE + " = " + Constants.AUDIO_TYPE_SOCIAL + " OR " + AudioTableEntry.COLUMN_TYPE + " IS NULL) AND "
+                + AudioTableEntry.COLUMN_DATE_CREATED + " > " + (calendar.getTimeInMillis() - Constants.TIME_MILLIS_1_DAY)
+                + " AND " + AudioTableEntry.COLUMN_LISTENED + " = " + TRUE + ";";
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        ArrayList<DeviceAudioQueueItem> deviceAudioQueueItems = extractAudioFiles(cursor);
+        cursor.close();
+
+        return deviceAudioQueueItems;
+    }
+
+    public ArrayList<DeviceAudioQueueItem> extractFavouriteSocialAudioFiles() {
+
+        SQLiteDatabase db = initDB();
+
+        String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE (" + AudioTableEntry.COLUMN_TYPE + " = " + Constants.AUDIO_TYPE_SOCIAL + " OR " + AudioTableEntry.COLUMN_TYPE + " IS NULL) AND "
+                + AudioTableEntry.COLUMN_FAVOURITE + " = " + Constants.AUDIO_TYPE_FAVOURITE_TRUE + ";";
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        ArrayList<DeviceAudioQueueItem> deviceAudioQueueItems = extractAudioFiles(cursor);
+        cursor.close();
+
+        return deviceAudioQueueItems;
+    }
+
+    public void updateDateCreated(int ID) {
+        SQLiteDatabase db = initDB();
+
+        String updateQuery = "UPDATE " + AudioTableEntry.TABLE_NAME + " SET " + AudioTableEntry.COLUMN_DATE_CREATED + " = " + calendar.getTimeInMillis() + " WHERE " + AudioTableEntry.COLUMN_ID + " = " + ID + ";";
+
+        db.execSQL(updateQuery);
+    }
+
+    public Integer countUnheardSocialAudioFiles() {
+        SQLiteDatabase db = initDB();
+
+        String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE (" + AudioTableEntry.COLUMN_TYPE + " = " + FALSE + " OR " + AudioTableEntry.COLUMN_TYPE + " IS NULL) AND " + AudioTableEntry.COLUMN_LISTENED + " = " + FALSE + ";";
 
         Cursor cursor = db.rawQuery(selectQuery, null);
         Integer count = cursor.getCount();
@@ -297,6 +350,23 @@ public class AudioTableManager {
         }
     }
 
+    public void purgeStagnantSocialAudio() {
+        SQLiteDatabase db = initDB();
+
+        String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE (" + AudioTableEntry.COLUMN_TYPE + " = " + Constants.AUDIO_TYPE_SOCIAL + " OR " + AudioTableEntry.COLUMN_TYPE + " IS NULL) AND "
+                + AudioTableEntry.COLUMN_DATE_CREATED + " < " + (calendar.getTimeInMillis() - Constants.TIME_MILLIS_1_DAY)
+                + " AND " + AudioTableEntry.COLUMN_FAVOURITE + " = " + FALSE + ";";
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        ArrayList<DeviceAudioQueueItem> deviceAudioQueueItems = extractAudioFiles(cursor);
+        cursor.close();
+
+        for (DeviceAudioQueueItem audioItem:
+                deviceAudioQueueItems) {
+            removeAudioEntry(audioItem);
+        }
+    }
+
     public Boolean isSocialAudioInDatabase(String socialId) {
         SQLiteDatabase db = initDB();
 
@@ -311,6 +381,18 @@ public class AudioTableManager {
             cursor.close();
             return false;
         }
+    }
+
+    public void setFavourite(int ID, boolean favourite) {
+        SQLiteDatabase db = initDB();
+
+        int booleanInt;
+        if(favourite) booleanInt = Constants.AUDIO_TYPE_FAVOURITE_TRUE;
+        else booleanInt = Constants.AUDIO_TYPE_FAVOURITE_FALSE;
+
+        String updateQuery = "UPDATE " + AudioTableEntry.TABLE_NAME + " SET " + AudioTableEntry.COLUMN_FAVOURITE + " = " + booleanInt + " WHERE " + AudioTableEntry.COLUMN_ID + " = " + ID + ";";
+
+        db.execSQL(updateQuery);
     }
 
     public void setListened(int ID) {
@@ -347,6 +429,7 @@ public class AudioTableManager {
                 DeviceAudioQueueItem audioFile = new DeviceAudioQueueItem();
 
                 audioFile.setType(cursor.getInt(cursor.getColumnIndex(AudioTableEntry.COLUMN_TYPE)));
+                audioFile.setFavourite(cursor.getInt(cursor.getColumnIndex(AudioTableEntry.COLUMN_FAVOURITE)));
                 audioFile.setDate_uploaded(cursor.getLong(cursor.getColumnIndex(AudioTableEntry.COLUMN_DATE_UPLOADED)));
                 audioFile.setFilename(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_FILENAME)));
                 audioFile.setId(cursor.getInt(cursor.getColumnIndex(AudioTableEntry.COLUMN_ID)));

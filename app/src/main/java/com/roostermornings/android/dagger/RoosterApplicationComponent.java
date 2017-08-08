@@ -16,7 +16,7 @@ import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
 import com.roostermornings.android.activity.DiscoverFragmentActivity;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.activity.IntroFragmentActivity;
-import com.roostermornings.android.activity.MessageStatusActivity;
+import com.roostermornings.android.activity.MessageStatusFragmentActivity;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.activity.NewAlarmFragmentActivity;
 import com.roostermornings.android.activity.NewAudioFriendsActivity;
@@ -34,6 +34,8 @@ import com.roostermornings.android.fragment.friends.FriendsMyFragment1;
 import com.roostermornings.android.fragment.friends.FriendsRequestFragment2;
 import com.roostermornings.android.fragment.intro.IntroFragment1;
 import com.roostermornings.android.fragment.intro.IntroFragment2;
+import com.roostermornings.android.fragment.message_status.MessageStatusReceivedFragment1;
+import com.roostermornings.android.fragment.message_status.MessageStatusSentFragment2;
 import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment1;
 import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment2;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
@@ -65,7 +67,7 @@ public interface RoosterApplicationComponent {
     void inject(DeviceAlarmFullScreenActivity activity);
     void inject(FriendsFragmentActivity activity);
     void inject(IntroFragmentActivity activity);
-    void inject(MessageStatusActivity activity);
+    void inject(MessageStatusFragmentActivity activity);
     void inject(DiscoverFragmentActivity activity);
     void inject(MyAlarmsFragmentActivity activity);
     void inject(NewAlarmFragmentActivity activity);
@@ -84,6 +86,8 @@ public interface RoosterApplicationComponent {
     void inject(NewAlarmFragment1 fragment);
     void inject(NewAlarmFragment2 fragment);
     void inject(NumberEntryDialogFragment fragment);
+    void inject (MessageStatusReceivedFragment1 fragment);
+    void inject(MessageStatusSentFragment2 fragment);
 
     void inject(AudioService service);
     void inject(UploadService service);

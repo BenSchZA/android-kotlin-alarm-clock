@@ -172,11 +172,22 @@
             </intent-filter>
         </service>
 
+        <!--Launch mode important for searchable activity, to avoid activity recreation-->
         <activity
-            android:name=".activity.MessageStatusActivity"
+            android:name=".activity.MessageStatusFragmentActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait"
-            android:theme="@style/AppThemeDay.NoActionBar" />
+            android:theme="@style/AppThemeDay.NoActionBar">
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable_roosters" />
+
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".activity.SettingsActivity"
             android:screenOrientation="portrait"

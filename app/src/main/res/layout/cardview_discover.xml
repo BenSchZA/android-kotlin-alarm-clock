@@ -80,11 +80,11 @@
             android:layout_margin="@dimen/spacing_normal">
 
             <ImageButton
-                android:id="@+id/new_audio_listen"
+                android:id="@+id/audio_listen"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
-                android:background="@drawable/rooster_new_audio_play_button"
+                android:background="@drawable/rooster_audio_play_button"
                 android:clickable="true"
                 android:contentDescription="Play audio" />
         </FrameLayout>

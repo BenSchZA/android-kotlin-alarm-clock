@@ -15,12 +15,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
-import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.SocialRooster;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.util.Constants;
@@ -31,12 +31,10 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
-import javax.inject.Inject;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MessageStatusListAdapter extends RecyclerView.Adapter<MessageStatusListAdapter.ViewHolder> {
+public class MessageStatusSentListAdapter extends RecyclerView.Adapter<MessageStatusSentListAdapter.ViewHolder> implements Filterable {
     private ArrayList<SocialRooster> mDataset = new ArrayList<>();
     private Activity mActivity;
     private Context context;
@@ -66,26 +64,36 @@ public class MessageStatusListAdapter extends RecyclerView.Adapter<MessageStatus
         notifyItemInserted(position);
     }
 
+    public void remove(int position, SocialRooster item) {
+        mDataset.remove(item);
+        notifyItemRemoved(position);
+    }
+
+    public void refreshAll(ArrayList<SocialRooster> myDataset) {
+        mDataset = myDataset;
+        notifyDataSetChanged();
+    }
+
     // Provide a suitable constructor (depends on the kind of dataset)
-    public MessageStatusListAdapter(ArrayList<SocialRooster> myDataset, Activity activity) {
+    public MessageStatusSentListAdapter(ArrayList<SocialRooster> myDataset, Activity activity) {
         mDataset = myDataset;
         mActivity = activity;
     }
 
     // Create new views (invoked by the layout manager)
     @Override
-    public MessageStatusListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
-                                                                    int viewType) {
+    public MessageStatusSentListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
+                                                                      int viewType) {
         context = parent.getContext();
         // create a new view
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_layout_message_status, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_layout_message_status_sent, parent, false);
         // set the view's size, margins, paddings and layout parameters
-        return new MessageStatusListAdapter.ViewHolder(view);
+        return new MessageStatusSentListAdapter.ViewHolder(view);
     }
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(final MessageStatusListAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(final MessageStatusSentListAdapter.ViewHolder holder, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         final SocialRooster socialRooster = mDataset.get(position);
@@ -116,7 +124,7 @@ public class MessageStatusListAdapter extends RecyclerView.Adapter<MessageStatus
         }
     }
 
-    private void setProfilePic(String url, final MessageStatusListAdapter.ViewHolder holder, final SocialRooster socialRooster) {
+    private void setProfilePic(String url, final MessageStatusSentListAdapter.ViewHolder holder, final SocialRooster socialRooster) {
         try{
             Picasso.with(context).load(url)
                     .resize(50, 50)
@@ -151,7 +159,41 @@ public class MessageStatusListAdapter extends RecyclerView.Adapter<MessageStatus
         return mDataset.size();
     }
 
-    public void updateList(){
-        notifyDataSetChanged();
+    @Override
+    public Filter getFilter() {
+
+        final Filter filter = new Filter() {
+
+            @SuppressWarnings("unchecked")
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+
+                mDataset = (ArrayList<SocialRooster>) results.values;
+                notifyDataSetChanged();
+            }
+
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+
+                FilterResults results = new FilterResults();
+                ArrayList<SocialRooster> filteredContacts = new ArrayList<>();
+
+                //Perform your search here using the search constraint string
+                constraint = constraint.toString().toLowerCase();
+                for (int i = 0; i < mDataset.size(); i++) {
+                    String contactData = mDataset.get(i).getUser_name();
+                    if (contactData.toLowerCase().contains(constraint.toString()))  {
+                        filteredContacts.add(mDataset.get(i));
+                    }
+                }
+
+                results.count = filteredContacts.size();
+                results.values = filteredContacts;
+
+                return results;
+            }
+        };
+
+        return filter;
     }
 }

@@ -56,8 +56,6 @@ import retrofit.Callback;
 import retrofit.Response;
 import retrofit.Retrofit;
 
-import static com.facebook.FacebookSdk.getApplicationContext;
-
 public class NewAudioFriendsActivity extends BaseActivity {
 
     protected static final String TAG = NewAudioFriendsActivity.class.getSimpleName();
@@ -234,7 +232,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
         bindService(intent, mUploadServiceConnection, 0);
 
         //Switch to message status activity
-        Intent roostersSentIntent = new Intent(this, MessageStatusActivity.class);
+        Intent roostersSentIntent = new Intent(this, MessageStatusFragmentActivity.class);
         startActivity(roostersSentIntent);
 
         Intent finishRecordActivityIntent = new Intent(Constants.FINISH_AUDIO_RECORD_ACTIVITY);

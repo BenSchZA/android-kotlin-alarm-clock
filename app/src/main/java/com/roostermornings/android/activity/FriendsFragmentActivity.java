@@ -22,11 +22,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.EventLog;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -39,32 +37,23 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
-import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.Contact;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.firebase.FirebaseNetwork;
 import com.roostermornings.android.fragment.NumberEntryDialogFragment;
 import com.roostermornings.android.fragment.NumberEntryListener;
-import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.fragment.friends.FriendsInviteFragment3;
 import com.roostermornings.android.fragment.friends.FriendsMyFragment1;
 import com.roostermornings.android.fragment.friends.FriendsRequestFragment2;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.FontsOverride;
-import com.roostermornings.android.util.StrUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -102,12 +91,11 @@ public class FriendsFragmentActivity extends BaseActivity implements
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
     private SectionsPagerAdapter mSectionsPagerAdapter;
+
     private DatabaseReference mFriendRequestsReceivedReference;
     private DatabaseReference mFriendRequestsSentReference;
     private DatabaseReference mCurrentUserReference;
     private BroadcastReceiver receiver;
-
-    protected FriendsFragmentActivity mThis = this;
 
     FriendsMyFragment1 friendsFragment1;
     FriendsRequestFragment2 friendsFragment2;
@@ -267,7 +255,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
         SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView =
-                (SearchView) menu.findItem(R.id.search).getActionView();
+                (SearchView) menu.findItem(R.id.search_friends).getActionView();
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getComponentName()));
 
@@ -313,9 +301,9 @@ public class FriendsFragmentActivity extends BaseActivity implements
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      */
-    public class SectionsPagerAdapter extends FragmentStatePagerAdapter {
+    private class SectionsPagerAdapter extends FragmentStatePagerAdapter {
 
-        public SectionsPagerAdapter(FragmentManager fm) {
+        SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
@@ -369,7 +357,6 @@ public class FriendsFragmentActivity extends BaseActivity implements
     }
 
     private void createTabIcons() {
-
         setTabLayout(0, "FRIENDS");
         setTabLayout(1, "REQUESTS");
         setTabLayout(2, "INVITE");

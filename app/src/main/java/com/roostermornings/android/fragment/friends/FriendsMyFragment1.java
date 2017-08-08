@@ -124,7 +124,7 @@ public class FriendsMyFragment1 extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = initiate(inflater, R.layout.fragment_friends_fragment1, container, false);
+        View view = initiate(inflater, R.layout.fragment_friends_1, container, false);
 
         /*
         * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user

@@ -55,7 +55,7 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
         ProgressBar imageProgressBar;
         @BindView(R.id.audioProgressBar)
         ProgressBar audioProgressBar;
-        @BindView(R.id.new_audio_listen)
+        @BindView(R.id.audio_listen)
         ImageButton listenImageButton;
         @BindView(R.id.cardview_channel_info)
         TextView channelInfo;
@@ -104,7 +104,7 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
         if (channelRooster.isPlaying()) {
             holder.listenImageButton.setBackgroundResource(R.drawable.rooster_new_audio_pause_button);
         } else {
-            holder.listenImageButton.setBackgroundResource(R.drawable.rooster_new_audio_play_button);
+            holder.listenImageButton.setBackgroundResource(R.drawable.rooster_audio_play_button);
         }
 
         if(channelRooster.isDownloading()) {
