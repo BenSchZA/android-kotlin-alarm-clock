@@ -5,6 +5,7 @@
 
 package com.roostermornings.android.sqlutil;
 
+import com.google.firebase.database.Exclude;
 import com.roostermornings.android.domain.ChannelRooster;
 import com.roostermornings.android.domain.SocialRooster;
 
@@ -19,16 +20,25 @@ public class DeviceAudioQueueItem implements Serializable {
     //Queue id also acts as alarm id
     private String queue_id = "";
     private String filename = "";
-    private long date_uploaded = 0;
+    private Long date_uploaded;
     private String sender_id = "";
     private String name = "";
     private String picture = "";
     private String listened;
     //Type 1 = channel, type 0 = social
     private int type = -1;
+    private int favourite = -1;
     private String action_title = "";
     private String action_url = "";
     private String source_url = "";
+
+    //For today and favourite roosters
+    @Exclude
+    private boolean downloading = false;
+    @Exclude
+    private boolean playing = false;
+    @Exclude
+    private boolean paused = false;
 
     public void fromSocialRooster(SocialRooster socialRooster, String uniqueFileName) {
         this.queue_id = socialRooster.getQueue_id();
@@ -39,6 +49,7 @@ public class DeviceAudioQueueItem implements Serializable {
         this.picture = socialRooster.getProfile_pic();
         this.listened = String.valueOf(socialRooster.getListened());
         this.type = 0;
+        this.favourite = 0;
         this.source_url = socialRooster.getAudio_file_url();
     }
 
@@ -49,9 +60,48 @@ public class DeviceAudioQueueItem implements Serializable {
         this.name = channelRooster.getName();
         this.picture = channelRooster.getPhoto();
         this.type = 1;
+        this.favourite = 0;
         this.action_title = channelRooster.getAction_title();
         this.action_url = channelRooster.getAction_url();
         this.source_url = channelRooster.getAudio_file_url();
+    }
+
+    @Exclude
+    public boolean isPaused() {
+        return paused;
+    }
+
+    @Exclude
+    public void setPaused(boolean paused) {
+        this.paused = paused;
+    }
+
+    @Exclude
+    public boolean isDownloading() {
+        return downloading;
+    }
+
+    @Exclude
+    public void setDownloading(boolean downloading) {
+        this.downloading = downloading;
+    }
+
+    @Exclude
+    public boolean isPlaying() {
+        return playing;
+    }
+
+    @Exclude
+    public void setPlaying(boolean playing) {
+        this.playing = playing;
+    }
+
+    public int getFavourite() {
+        return favourite;
+    }
+
+    public void setFavourite(int favourite) {
+        this.favourite = favourite;
     }
 
     public String getSource_url() {
@@ -94,15 +144,15 @@ public class DeviceAudioQueueItem implements Serializable {
         this.listened = listened;
     }
 
-    public long getDate_uploaded() {
+    public Long getDate_uploaded() {
         return date_uploaded;
     }
 
-    public void setDate_uploaded(long date_uploaded) {
+    public void setDate_uploaded(Long date_uploaded) {
         this.date_uploaded = date_uploaded;
     }
 
-    public DeviceAudioQueueItem(){};
+    public DeviceAudioQueueItem(){}
 
     public int getId() {
         return id;

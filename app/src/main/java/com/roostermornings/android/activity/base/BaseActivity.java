@@ -10,7 +10,6 @@ import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -18,7 +17,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -26,15 +24,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -43,7 +38,6 @@ import android.widget.Toast;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.Theme;
-import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -57,17 +51,15 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.DiscoverFragmentActivity;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
-import com.roostermornings.android.activity.MessageStatusActivity;
+import com.roostermornings.android.activity.MessageStatusFragmentActivity;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.activity.NewAudioRecordActivity;
 import com.roostermornings.android.activity.SplashActivity;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.fragment.base.BaseFragment;
-import com.roostermornings.android.fragment.friends.FriendsInviteFragment3;
 import com.roostermornings.android.node_api.IHTTPClient;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
-import com.roostermornings.android.service.UploadService;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
@@ -560,12 +552,12 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
     @Optional
     @OnClick(R.id.home_my_uploads)
     public void manageUploads() {
-        startActivity(new Intent(this, MessageStatusActivity.class));
+        startActivity(new Intent(this, MessageStatusFragmentActivity.class));
     }
 
     public void updateRoosterNotification() {
         setButtonBarNotification(R.id.notification_roosters, false);
-        Integer roosterCount = audioTableManager.countSocialAudioFiles();
+        Integer roosterCount = audioTableManager.countUnheardSocialAudioFiles();
         if (roosterCount > 0) {
             DeviceAlarm deviceAlarm  = deviceAlarmTableManager.getNextPendingSocialAlarm();
 
@@ -590,7 +582,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
             public void onReceive(Context context, Intent intent) {
                 //do something based on the intent's action
                 setButtonBarNotification(R.id.notification_roosters, false);
-                Integer roosterCount = audioTableManager.countSocialAudioFiles();
+                Integer roosterCount = audioTableManager.countUnheardSocialAudioFiles();
                 if(roosterCount > 0){
                     DeviceAlarm deviceAlarm  = deviceAlarmTableManager.getNextPendingSocialAlarm();
                     if(deviceAlarm == null) {
@@ -659,7 +651,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
         try {
             if (this instanceof MyAlarmsFragmentActivity)
                 findViewById(R.id.home_my_alarms).setSelected(true);
-            else if (this instanceof MessageStatusActivity)
+            else if (this instanceof MessageStatusFragmentActivity)
                 findViewById(R.id.home_my_uploads).setSelected(true);
             else if (this instanceof NewAudioRecordActivity)
                 findViewById(R.id.home_record_audio).setSelected(true);

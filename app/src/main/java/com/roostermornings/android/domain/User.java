@@ -30,7 +30,7 @@ public class User implements Serializable {
     public Integer unseen_roosters = 0;
 
     @Exclude
-    private Boolean selected = false; //this is important for list of friends that need to be selected eg for creating a new alarm
+    private boolean selected = false; //this is important for list of friends that need to be selected eg for creating a new alarm
 
     // Required default constructor for Firebase object mapping
     @SuppressWarnings("unused")
@@ -122,12 +122,12 @@ public class User implements Serializable {
     }
 
     @Exclude
-    public Boolean getSelected() {
+    public boolean getSelected() {
         return this.selected;
     }
 
     @Exclude
-    public void setSelected(Boolean selected) {
+    public void setSelected(boolean selected) {
         this.selected = selected;
     }
 

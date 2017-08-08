@@ -193,10 +193,6 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
         return mDataset.size();
     }
 
-    public void updateList(){
-        notifyDataSetChanged();
-    }
-
     @Override
     public Filter getFilter() {
 

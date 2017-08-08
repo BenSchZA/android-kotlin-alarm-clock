@@ -319,7 +319,7 @@ public class AudioService extends Service {
 
         //Check if Social and Channel alarm content exists, else startDefaultAlarmTone
         channelAudioItems = audioTableManager.extractAlarmChannelAudioFiles(mThis.alarmChannelUid);
-        socialAudioItems = audioTableManager.extractSocialAudioFiles();
+        socialAudioItems = audioTableManager.extractUnheardSocialAudioFiles();
 
         if(channelAudioItems != null) FA.Log(FA.Event.alarm_activated.class, FA.Event.alarm_activated.Param.channel_content_received, channelAudioItems.size());
         if(socialAudioItems != null) FA.Log(FA.Event.alarm_activated.class, FA.Event.alarm_activated.Param.social_content_received, socialAudioItems.size());
@@ -796,9 +796,11 @@ public class AudioService extends Service {
     }
 
     public void processChannelAudio() {
-        //Ensure partially listened channels are removed and incremented
+        //Ensure partially listened channels and roosters are set as listened
         try {
             if (mThis.audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) {
+                audioTableManager.setListened(mThis.audioItem.getId());
+            } else if (mThis.audioItem.getType() == Constants.AUDIO_TYPE_SOCIAL) {
                 audioTableManager.setListened(mThis.audioItem.getId());
             }
         } catch (NullPointerException e) {
@@ -828,9 +830,8 @@ public class AudioService extends Service {
             //Set the listened flag in firebase for social roosters! NB
             if (audioItem.getType() == Constants.AUDIO_TYPE_SOCIAL) {
                 FirebaseNetwork.setListened(audioItem.getSender_id(), audioItem.getQueue_id());
+                audioTableManager.updateDateCreated(audioItem.getId());
             }
-            //Remove entry from SQL db
-            audioTableManager.removeAudioEntry(audioItem);
         }
     }
 

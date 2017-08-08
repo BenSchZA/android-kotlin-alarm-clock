@@ -113,7 +113,7 @@
                             android:layout_width="50dp"
                             android:layout_height="50dp"
                             android:layout_margin="15dp"
-                            android:background="@drawable/rooster_new_audio_play_button"
+                            android:background="@drawable/rooster_audio_play_button"
                             android:clickable="true" />
 
                     </FrameLayout>

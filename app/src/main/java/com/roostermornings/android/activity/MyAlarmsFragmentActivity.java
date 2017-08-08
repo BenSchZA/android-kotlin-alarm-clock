@@ -282,7 +282,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
                 //Load content and stop refresh indicator
                 swipeRefreshLayout.setRefreshing(false);
-                //Notify adapter of new rooster count data to be displayed
+                //Configure rooster notification indicator
                 updateRoosterNotification();
             }
 

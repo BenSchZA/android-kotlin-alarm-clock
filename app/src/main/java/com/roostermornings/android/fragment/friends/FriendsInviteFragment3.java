@@ -140,7 +140,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = initiate(inflater, R.layout.fragment_friends_fragment3, container, false);
+        View view = initiate(inflater, R.layout.fragment_friends_3, container, false);
 
         return view;
     }
@@ -235,7 +235,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
     public void onShareButtonClicked() {
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
-        sendIntent.putExtra(Intent.EXTRA_TEXT, getResources().getString(R.string.invite_to_rooster_message));
+        sendIntent.putExtra(Intent.EXTRA_TEXT, getResources().getString(R.string.share_rooster_message));
         sendIntent.setType("text/plain");
         sendIntent = Intent.createChooser(sendIntent, "Share Rooster");
         startActivity(sendIntent);

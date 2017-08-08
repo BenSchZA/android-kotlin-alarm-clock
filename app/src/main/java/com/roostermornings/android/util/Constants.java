@@ -29,6 +29,9 @@ public class Constants {
     public final static int AUDIO_TYPE_SOCIAL = 0;
     public final static int AUDIO_TYPE_CHANNEL = 1;
 
+    public final static int AUDIO_TYPE_FAVOURITE_FALSE = 0;
+    public final static int AUDIO_TYPE_FAVOURITE_TRUE = 1;
+
     //Request codes
     public final static int REQUEST_CODE_SHARE_ROOSTER = 1010;
 
@@ -132,6 +135,10 @@ public class Constants {
     public final static int MESSAGE_STATUS_SENT = 1;
     public final static int MESSAGE_STATUS_DELIVERED = 2;
     public final static int MESSAGE_STATUS_RECEIVED = 3;
+
+    public final static String MESSAGE_STATUS_RECEIVED_FRAGMENT_TYPE = "MESSAGE_STATUS_RECEIVED_FRAGMENT_TYPE";
+    public final static String MESSAGE_STATUS_RECEIVED_FRAGMENT_TYPE_TODAY = "MESSAGE_STATUS_RECEIVED_FRAGMENT_TYPE_TODAY";
+    public final static String MESSAGE_STATUS_RECEIVED_FRAGMENT_TYPE_FAVOURITE = "MESSAGE_STATUS_RECEIVED_FRAGMENT_TYPE_FAVOURITE";
 
     //Storage
     public final static String STORAGE_USER_PROFILE_PICTURE = "users/profile_pictures/";

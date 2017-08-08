@@ -183,7 +183,7 @@ public class NewAudioRecordActivity extends BaseActivity {
 
     @OnClick(R.id.home_my_uploads)
     public void manageUploads() {
-        startActivity(new Intent(NewAudioRecordActivity.this, MessageStatusActivity.class));
+        startActivity(new Intent(NewAudioRecordActivity.this, MessageStatusFragmentActivity.class));
     }
 
     @OnClick(R.id.home_record_audio)
@@ -228,7 +228,7 @@ public class NewAudioRecordActivity extends BaseActivity {
                 layoutRecordParent.setVisibility(View.INVISIBLE);
                 //Clear red recording focus
                 imgAudioStartStop.setSelected(false);
-                imgNewAudioListen.setBackgroundResource(R.drawable.rooster_new_audio_play_button);
+                imgNewAudioListen.setBackgroundResource(R.drawable.rooster_audio_play_button);
                 layoutListenParent.setVisibility(View.VISIBLE);
                 txtMessage.setText(getResources().getText(R.string.new_audio_continue_instructions));
 
@@ -259,7 +259,7 @@ public class NewAudioRecordActivity extends BaseActivity {
                 break;
             case NEW_AUDIO_PAUSED:
                 layoutRecordParent.clearAnimation();
-                imgNewAudioListen.setBackgroundResource(R.drawable.rooster_new_audio_play_button);
+                imgNewAudioListen.setBackgroundResource(R.drawable.rooster_audio_play_button);
                 break;
             case NEW_AUDIO_LISTENING:
                 layoutRecordParent.clearAnimation();

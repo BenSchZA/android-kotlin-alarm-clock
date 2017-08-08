@@ -59,13 +59,13 @@
     <string name="share_button">Share Rooster</string>
     <string name="add_contacts">Add contacts who have Rooster</string>
     <string name="invite_contacts">Invite contacts to Rooster</string>
-    <string name="friends_search_title">Search...</string>
+    <string name="search_title">Search...</string>
     <string name="search_hint_friends">Search...</string>
     <string name="retrieve_contacts_permission">We need your permission to retrieve addable contacts, click me or swipe to try again.</string>
 
     <string name="select_all_button">Select all friends</string>
 
-    <string name="message_status_activity_title">Sent Roosters</string>
+    <string name="message_status_activity_title">Roosters</string>
     <string name="status_sent">Sent</string>
     <string name="status_delivered">Delivered</string>
     <string name="status_awake">Awake</string>
@@ -89,6 +89,7 @@
     <string name="dialog_confirm_changes">The alarm has not been set, are you sure you wish to discard changes?</string>
     <string name="dialog_confirm_alarm_delete">Are you sure you wish to delete this alarm?</string>
     <string name="dialog_confirm_friend_delete">Are you sure you wish to remove this friend?</string>
+    <string name="dialog_confirm_social_rooster_unfavourite">Are you sure you wish to remove the love?</string>
 
     <string name="dialog_background_settings_1">Your&#160;</string>
     <string name="dialog_background_settings_2">&#160;phone needs to give Rooster permission to wake you up.\n\nGo to settings to add Rooster to the protected list.\n\n</string>
@@ -101,6 +102,8 @@
     <string name="dialog_background_settings_zte_2">&#160;phone may need to give Rooster permission to wake you up on time.\n\nGo to \'Settings\'>\'Power Manager\'>\'Power management for apps\' and disable power saving for Rooster.\n\n</string>
 
     <string name="invite_to_rooster_message">How cool would it be if you could wake up to surprise voice notes from me and other friends? \n\nYou can also wake up to different content channels such as inspiration, comedy, music, news, meditation, bird calls and more! \n\nLike the best things in life, it’s free :) \nhttp://www.onelink.to/awesome_mornings</string>
+
+    <string name="share_rooster_message">Hey! Do you know if there’s another word for synonym? Or why it\'s called a boxing ring if it\'s actually a square? Where is Old Zealand? What’s the best way to wake up? I only know the answer to the last question, check out this awesome alarm:\n\nRooster wakes you up with a different kind of OOMPH! every day with inspiration, music, comedy etc. How cool would it be to wake up to surprise voice notes from friends as your alarm? Super cool, obviously. Rooster does that too! You can try it out here, or don’t ;)\n\nhttp://onelink.to/awesome_mornings\n\nOh and if you need some comic relief, watch their advert:\n\nwww.youtube.com/watch?v=1rphGpU9IZA&amp;t=4s</string>
 
     <string-array name="user_settings_day_night_theme_entries">
         <item>Automatically set by timezone</item>

@@ -158,6 +158,9 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                 }
         );
 
+        //Set volume rocker to alarm stream
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
         //Fetch content from Firebase
         getChannelData();
     }

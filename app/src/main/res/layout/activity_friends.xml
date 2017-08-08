@@ -11,12 +11,6 @@
     android:fitsSystemWindows="true"
     tools:context="com.roostermornings.android.activity.FriendsFragmentActivity">
 
-    <!--<android.support.design.widget.AppBarLayout-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:elevation="0dp"-->
-    <!--android:theme="@style/AppTheme.AppBarOverlay"-->
-    <!--app:elevation="0dp">-->
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -59,6 +53,5 @@
         </RelativeLayout>
 
     </RelativeLayout>
-
 
 </android.support.design.widget.CoordinatorLayout>

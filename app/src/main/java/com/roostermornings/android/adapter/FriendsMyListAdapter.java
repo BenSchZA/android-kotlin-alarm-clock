@@ -207,10 +207,6 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
         return mDataset.size();
     }
 
-    public void updateList(){
-        notifyDataSetChanged();
-    }
-
     @Override
     public Filter getFilter() {
 
