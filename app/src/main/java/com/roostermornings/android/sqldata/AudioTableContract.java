@@ -50,7 +50,7 @@ public final class AudioTableContract {
 
                     + AudioTableEntry.COLUMN_TYPE + " INTEGER NULL, "
 
-                    + AudioTableEntry.COLUMN_FAVOURITE + " INTEGER NULL, "
+                    + AudioTableEntry.COLUMN_FAVOURITE + " INTEGER DEFAULT 0, "
 
                     + AudioTableEntry.COLUMN_ID + " INTEGER PRIMARY KEY, "
                     + AudioTableEntry.COLUMN_QUEUE_ID + " INTEGER NOT NULL, "
