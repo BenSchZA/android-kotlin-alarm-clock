@@ -36,8 +36,8 @@ android {
             //Beta version name is release version name at point of diversion, with alpha b
 
             //Release
-            versionCode 29
-            versionName "2.2.0"
+            versionCode 30
+            versionName "2.2.1"
 
             manifestPlaceholders = [
                     app_icon: "@mipmap/ic_launcher",
@@ -47,8 +47,8 @@ android {
         }
         BetaFlavour {
             //Beta
-            versionName "2.2.0b"
-            versionCode 1000004
+            versionName "2.2.1b"
+            versionCode 1000005
 
             manifestPlaceholders = [
                     app_icon: "@mipmap/ic_launcher_beta",
@@ -61,8 +61,8 @@ android {
     buildTypes {
         release {
             //During debugging, enable debugging... and disable minify to get proper stacktraces
-            debuggable true
-            //minifyEnabled true
+            //debuggable true
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             consumerProguardFiles 'proguard-rules.txt'
             proguardFile 'proguard-square-okio.pro'
