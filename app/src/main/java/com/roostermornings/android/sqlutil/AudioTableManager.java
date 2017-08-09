@@ -445,6 +445,7 @@ public class AudioTableManager {
                 audioFile.setAction_title(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_ACTION_TITLE)));
                 audioFile.setAction_url(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_ACTION_URL)));
                 audioFile.setSource_url(cursor.getString(cursor.getColumnIndex(AudioTableEntry.COLUMN_SOURCE_URL)));
+                audioFile.setDate_created(cursor.getLong(cursor.getColumnIndex(AudioTableEntry.COLUMN_DATE_CREATED)));
 
                 audioList.add(audioFile);
 

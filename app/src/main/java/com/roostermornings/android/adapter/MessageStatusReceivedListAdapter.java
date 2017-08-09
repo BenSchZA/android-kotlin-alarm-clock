@@ -9,12 +9,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +27,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -37,12 +41,19 @@ import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.StrUtils;
+import com.roostermornings.android.util.Toaster;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -55,9 +66,11 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
     private String fragmentType = "";
 
     private MediaPlayer mediaPlayer = new MediaPlayer();
-    private final Handler mHandler = new Handler();
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
     private Runnable runnable;
     private int currentMediaPlayerSourceID = -1;
+
+    private ArrayList<SeekBar> seekBarArray = new ArrayList<>();
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -75,6 +88,9 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
 
         @BindView(R.id.audio_favourite)
         ImageButton favouriteImageButton;
+
+        @BindView(R.id.message_status_friend_date)
+        TextView date;
 
         @BindView(R.id.seekbar)
         SeekBar seekBar;
@@ -112,6 +128,24 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
         mDataset = myDataset;
         mActivity = activity;
         fragmentType = type;
+
+        //Update seekbar on UI thread
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+                SeekBar seekBar = getSeekBarByID(currentMediaPlayerSourceID);
+
+                if(seekBar != null && mediaPlayer.isPlaying()) {
+                    int mCurrentPosition = mediaPlayer.getCurrentPosition() / 1000;
+                    seekBar.setProgress(mCurrentPosition);
+
+                    if (seekBar.getMax() >= mCurrentPosition) {
+                        mHandler.removeCallbacks(runnable);
+                        mHandler.postDelayed(runnable, 1000);
+                    }
+                }
+            }
+        };
     }
 
     // Create new views (invoked by the layout manager)
@@ -131,7 +165,9 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         final DeviceAudioQueueItem audioItem = mDataset.get(position);
+
         holder.txtName.setText(audioItem.getName());
+
         //Check if image is null, else previous images reused
         if(StrUtils.notNullOrEmpty(audioItem.getPicture())) {
             holder.imgProfilePic.setImageDrawable(null);
@@ -144,11 +180,52 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
             holder.txtInitials.setText(RoosterUtils.getInitials(audioItem.getName()));
         }
 
+        //Remove padding so that seekbar thumb aligns with text view
+        holder.seekBar.setPadding(0, 0, 0, 0);
+        //"Attach" the seekbar to a unique audio item
+        holder.seekBar.setId(audioItem.getId());
+        //Set the maximum value to the audio item length
+        holder.seekBar.setMax(0);
+        holder.seekBar.setMax(getAudioItemLength(audioItem.getId()) / 1000);
+        //Listen for seekbar progress updates, and mediaPlayer.seekTo()
+        holder.seekBar.setOnSeekBarChangeListener(onSeekBarChangeListener);
+        //Add the seekbar to a unique ArrayList
+        addUniqueSeekBar(holder.seekBar);
+
+        //If audioitem is active, make seekbar visible
         if(audioItem.isPlaying() || audioItem.isPaused()) {
             holder.seekBar.setVisibility(View.VISIBLE);
         } else {
             holder.seekBar.setProgress(0);
             holder.seekBar.setVisibility(View.GONE);
+        }
+
+        if(fragmentType.equals(Constants.MESSAGE_STATUS_RECEIVED_FRAGMENT_TYPE_FAVOURITE)
+                && holder.seekBar.getVisibility() != View.VISIBLE) {
+
+            String dateString;
+
+            if(DateUtils.isToday(audioItem.getDate_created())) {
+
+                SimpleDateFormat parseFormat = new SimpleDateFormat(" - h a", Locale.getDefault());
+                Date date = new Date(audioItem.getDate_created());
+                dateString = "Today" + parseFormat.format(date);
+            } else if (audioItem.getDate_created() >
+                    (Calendar.getInstance().getTimeInMillis() - Constants.TIME__MILLIS_1_WEEK)) {
+
+                SimpleDateFormat parseFormat = new SimpleDateFormat("EEEE - h a", Locale.getDefault());
+                Date date = new Date(audioItem.getDate_created());
+                dateString = parseFormat.format(date);
+            } else {
+                SimpleDateFormat parseFormat = new SimpleDateFormat("EE, MMMM dd, yyyy - h a", Locale.getDefault());
+                Date date = new Date(audioItem.getDate_created());
+                dateString = parseFormat.format(date);
+            }
+
+            holder.date.setText(dateString);
+            holder.date.setVisibility(View.VISIBLE);
+        } else {
+            holder.date.setVisibility(View.GONE);
         }
 
         holder.listenImageButton.setSelected(audioItem.isPlaying());
@@ -163,12 +240,19 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
                     pauseSocialRooster(audioItem);
                 } else {
                     holder.listenImageButton.setSelected(true);
-                    playSocialRooster(audioItem, holder);
+                    playSocialRooster(audioItem);
                 }
             }
         });
 
         holder.txtName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                holder.listenImageButton.callOnClick();
+            }
+        });
+
+        holder.date.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 holder.listenImageButton.callOnClick();
@@ -206,6 +290,7 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
                                             public void run() {
                                                 //Do something after 200ms
                                                 remove(holder.getAdapterPosition(), audioItem);
+                                                resetMediaPlayer();
                                             }
                                         }, 200);
                                     }
@@ -312,13 +397,82 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
         return filter;
     }
 
-    private void playSocialRooster(final DeviceAudioQueueItem audioItem, final ViewHolder holder) {
+    private int getAudioItemLength(int ID) {
+        DeviceAudioQueueItem audioItem = getAudioItemByID(ID);
+        int durationInt = 0;
+
+        if(audioItem != null) {
+            File file = new File(mActivity.getFilesDir() + "/" + audioItem.getFilename());
+
+            MediaMetadataRetriever metadataRetriever = new MediaMetadataRetriever();
+            metadataRetriever.setDataSource(file.getPath());
+            String durationStr = metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+            durationInt = Integer.parseInt(durationStr);
+        }
+        return durationInt;
+    }
+
+    private DeviceAudioQueueItem getAudioItemByID(int ID) {
+        for (DeviceAudioQueueItem audioItem:
+             mDataset) {
+            if(audioItem.getId() == ID) return audioItem;
+        }
+        return null;
+    }
+
+    private void addUniqueSeekBar(SeekBar seekBar) {
+        for (SeekBar sb:
+             seekBarArray) {
+            if(sb.getId() == seekBar.getId()) {
+                seekBarArray.remove(sb);
+                seekBarArray.add(seekBar);
+                return;
+            }
+        }
+        seekBarArray.add(seekBar);
+    }
+
+    private SeekBar getSeekBarByID(int ID) {
+        for (SeekBar seekBar:
+                seekBarArray) {
+            if(seekBar.getId() == ID) return seekBar;
+        }
+        return null;
+    }
+
+    private SeekBar.OnSeekBarChangeListener onSeekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            DeviceAudioQueueItem audioItem = getAudioItemByID(currentMediaPlayerSourceID);
+
+            if(fromUser && audioItem != null) {
+                mediaPlayer.seekTo(progress * 1000);
+                mediaPlayer.start();
+                audioItem.setPaused(false);
+                audioItem.setPlaying(true);
+            }
+        }
+
+        @Override
+        public void onStartTrackingTouch(final SeekBar seekBar) {
+
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+
+        }
+    };
+
+    private void playSocialRooster(final DeviceAudioQueueItem audioItem) {
 
         Boolean isPaused = !mediaPlayer.isPlaying() && mediaPlayer.getCurrentPosition() > 1;
         if(isPaused && currentMediaPlayerSourceID == audioItem.getId()) {
             mediaPlayer.start();
             audioItem.setPaused(false);
             audioItem.setPlaying(true);
+            mHandler.removeCallbacks(runnable);
+            mHandler.postDelayed(runnable, 1000);
             return;
         } else {
             audioItem.setPaused(false);
@@ -334,45 +488,12 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
             mediaPlayer.setDataSource(file.getPath());
             currentMediaPlayerSourceID = audioItem.getId();
 
+            mHandler.removeCallbacks(runnable);
+            mHandler.postDelayed(runnable, 1000);
+
             mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(final MediaPlayer mediaPlayer) {
-
-                    holder.seekBar.setMax(mediaPlayer.getDuration()/1000);
-
-                    mediaPlayer.start();
-
-                    //Update seekbar on UI thread
-
-                    runnable = new Runnable() {
-                        @Override
-                        public void run() {
-                            int mCurrentPosition = mediaPlayer.getCurrentPosition() / 1000;
-                            holder.seekBar.setProgress(mCurrentPosition);
-
-                            if(holder.seekBar.getProgress() >= mCurrentPosition) {
-                                mHandler.postDelayed(this, 1000);
-                            }
-                        }
-                    };
-                    mActivity.runOnUiThread(runnable);
-
-                    holder.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                        @Override
-                        public void onStopTrackingTouch(SeekBar seekBar) {
-                        }
-                        @Override
-                        public void onStartTrackingTouch(SeekBar seekBar) {
-                        }
-
-                        @Override
-                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                            if(fromUser){
-                                mediaPlayer.seekTo(progress * 1000);
-                                mediaPlayer.start();
-                            }
-                        }
-                    });
 
                     mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                         @Override
@@ -380,8 +501,11 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
                             audioItem.setPaused(false);
                             audioItem.setPlaying(false);
                             clearAudioArtifacts(null);
+                            if(runnable != null) mHandler.removeCallbacks(runnable);
                         }
                     });
+
+                    mediaPlayer.start();
                 }
             });
 
@@ -403,6 +527,6 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
         mediaPlayer.pause();
         audioItem.setPaused(true);
         audioItem.setPlaying(false);
-        clearAudioArtifacts(audioItem);
+        if(runnable != null) mHandler.removeCallbacks(runnable);
     }
 }

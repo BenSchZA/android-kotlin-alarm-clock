@@ -7,7 +7,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="@dimen/spacing_normal">
+    android:padding="@dimen/spacing_normal"
+    android:clipChildren="false">
 
     <RelativeLayout
         android:layout_width="wrap_content"
@@ -39,7 +40,8 @@
         android:orientation="vertical"
         android:layout_gravity="center_vertical|left"
         android:layout_marginRight="@dimen/spacing_normal"
-        android:layout_marginLeft="@dimen/spacing_large">
+        android:layout_marginLeft="@dimen/spacing_large"
+        android:clipChildren="false">
 
         <me.grantland.widget.AutofitTextView
             android:id="@+id/message_status_friend_profile_name"
@@ -51,11 +53,22 @@
             android:textColor="@color/white"
             android:textSize="@dimen/text_xlarge" />
 
+        <me.grantland.widget.AutofitTextView
+            android:id="@+id/message_status_friend_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:maxLines="1"
+            android:text="Date"
+            android:textColor="@color/white_30_percent_transparent"
+            android:textSize="@dimen/text_normal_large"
+            android:visibility="gone"/>
+
         <SeekBar
             android:id="@+id/seekbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="visible" />
+            android:visibility="gone" />
 
     </LinearLayout>
 

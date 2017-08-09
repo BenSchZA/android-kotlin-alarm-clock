@@ -114,8 +114,6 @@ public class MessageStatusReceivedFragment1 extends BaseFragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        //Sort names alphabetically before notifying adapter
-        sortDeviceAudioQueueItems(mRoosters);
         mAdapter = new MessageStatusReceivedListAdapter(mRoosters, getActivity(), fragmentType);
         mAdapterClass = (MessageStatusReceivedListAdapter)mAdapter;
         mRecyclerView.setLayoutManager(new LinearLayoutManager(AppContext));
@@ -153,6 +151,7 @@ public class MessageStatusReceivedFragment1 extends BaseFragment {
                         // This method performs the actual data-refresh operation.
                         // The method calls setRefreshing(false) when it's finished.
                         retrieveSocialAudioItems();
+                        if(mAdapterClass != null) mAdapterClass.resetMediaPlayer();
                     }
                 }
         );
@@ -163,10 +162,14 @@ public class MessageStatusReceivedFragment1 extends BaseFragment {
     private void retrieveSocialAudioItems() {
         if(fragmentType.equals(Constants.MESSAGE_STATUS_RECEIVED_FRAGMENT_TYPE_TODAY)) {
             mRoosters = audioTableManager.extractTodaySocialAudioFiles();
+            //Sort names alphabetically before notifying adapter
+            sortDeviceAudioQueueItems(mRoosters);
             notifyAdapter();
             swipeRefreshLayout.setRefreshing(false);
         } else {
             mRoosters = audioTableManager.extractFavouriteSocialAudioFiles();
+            //Sort names alphabetically before notifying adapter
+            sortDeviceAudioQueueItems(mRoosters);
             notifyAdapter();
             swipeRefreshLayout.setRefreshing(false);
         }
