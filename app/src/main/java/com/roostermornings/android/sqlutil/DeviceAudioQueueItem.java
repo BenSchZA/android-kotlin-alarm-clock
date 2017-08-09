@@ -16,7 +16,7 @@ import java.io.Serializable;
  */
 
 public class DeviceAudioQueueItem implements Serializable {
-    private int id;
+    private int id = -1;
     //Queue id also acts as alarm id
     private String queue_id = "";
     private String filename = "";
@@ -31,6 +31,7 @@ public class DeviceAudioQueueItem implements Serializable {
     private String action_title = "";
     private String action_url = "";
     private String source_url = "";
+    private Long date_created;
 
     //For today and favourite roosters
     @Exclude
@@ -200,5 +201,13 @@ public class DeviceAudioQueueItem implements Serializable {
 
     public void setPicture(String picture) {
         this.picture = picture;
+    }
+
+    public Long getDate_created() {
+        return date_created;
+    }
+
+    public void setDate_created(Long date_created) {
+        this.date_created = date_created;
     }
 }

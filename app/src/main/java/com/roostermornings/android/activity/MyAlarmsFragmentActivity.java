@@ -125,6 +125,9 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         //Download any social or channel audio files
         ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
 
+        //Set shared pref to indicate whether mobile number is valid
+        FirebaseNetwork.flagValidMobileNumber(this, false);
+
         swipeRefreshLayout.setRefreshing(true);
         /*
         * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user

@@ -143,9 +143,6 @@ public class BaseApplication extends android.app.Application {
                     // User is signed in
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
 
-                    //Set shared pref to indicate whether mobile number is valid
-                    FirebaseNetwork.flagValidMobileNumber(getApplicationContext(), false);
-
                     //retrieve static User for current user
                     retrieveMyUserDetails();
                     startBackgroundServices();

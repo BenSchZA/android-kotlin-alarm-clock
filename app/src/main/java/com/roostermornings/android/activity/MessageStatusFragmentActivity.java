@@ -142,7 +142,9 @@ public class MessageStatusFragmentActivity extends BaseActivity implements
     public void onPause() {
         super.onPause();
 
-        if(messageStatusFragment1 != null && messageStatusFragment2 != null) {
+        if(messageStatusFragment1 != null && messageStatusFragment2 != null
+                && messageStatusFragment1.mAdapterClass != null
+                && messageStatusFragment2.mAdapterClass != null) {
             messageStatusFragment1.mAdapterClass.resetMediaPlayer();
             messageStatusFragment2.mAdapterClass.resetMediaPlayer();
         }
