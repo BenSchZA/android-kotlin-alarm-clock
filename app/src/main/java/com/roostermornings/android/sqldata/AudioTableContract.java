@@ -60,7 +60,7 @@ public final class AudioTableContract {
                     + AudioTableEntry.COLUMN_NAME + " TEXT NULL, "
                     + AudioTableEntry.COLUMN_PICTURE + " TEXT NULL, "
 
-                    + AudioTableEntry.COLUMN_DATE_UPLOADED + " INTEGER NOT NULL, "
+                    + AudioTableEntry.COLUMN_DATE_UPLOADED + " INTEGER NOT NULL DEFAULT 0, "
 
                     + AudioTableEntry.COLUMN_SOURCE_URL + " TEXT DEFAULT '', "
 
