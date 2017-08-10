@@ -60,6 +60,7 @@ import com.roostermornings.android.domain.User;
 import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.node_api.IHTTPClient;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
+import com.roostermornings.android.service.FirebaseListenerService;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
@@ -130,9 +131,18 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
                 }
             }
         };
+
+        startFirebaseListenerService();
     }
 
     public BaseActivity(){}
+
+    private void startFirebaseListenerService() {
+        // Start Firebase listeners applicable to all activities - primarily to update notifications
+        if(!isServiceRunning(FirebaseListenerService.class))
+            startService(new Intent(getApplicationContext(), FirebaseListenerService.class));
+
+    }
 
     @Override
     public boolean checkInternetConnection() {

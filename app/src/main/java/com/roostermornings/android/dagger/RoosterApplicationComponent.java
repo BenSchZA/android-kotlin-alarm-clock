@@ -38,6 +38,7 @@ import com.roostermornings.android.fragment.message_status.MessageStatusReceived
 import com.roostermornings.android.fragment.message_status.MessageStatusSentFragment2;
 import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment1;
 import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment2;
+import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.service.RoosterFirebaseMessagingService;
@@ -86,12 +87,13 @@ public interface RoosterApplicationComponent {
     void inject(NewAlarmFragment1 fragment);
     void inject(NewAlarmFragment2 fragment);
     void inject(NumberEntryDialogFragment fragment);
-    void inject (MessageStatusReceivedFragment1 fragment);
+    void inject(MessageStatusReceivedFragment1 fragment);
     void inject(MessageStatusSentFragment2 fragment);
 
     void inject(AudioService service);
     void inject(UploadService service);
     void inject(DeviceAlarmReceiver service);
+    void inject(BackgroundTaskReceiver service);
     void inject(RoosterFirebaseMessagingService service);
 
     void inject(FA roosterClass);
