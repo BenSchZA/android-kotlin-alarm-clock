@@ -18,6 +18,10 @@ import java.util.Random;
 
 public class RoosterUtils {
 
+    public static boolean hasO() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O;
+    }
+
     public static boolean hasM() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
     }

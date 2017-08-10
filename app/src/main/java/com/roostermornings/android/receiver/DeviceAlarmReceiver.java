@@ -16,6 +16,7 @@ import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.RoosterUtils;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -54,7 +55,12 @@ public class DeviceAlarmReceiver extends WakefulBroadcastReceiver {
         audioServiceIntent.putExtra(Constants.EXTRA_ALARMID, intent.getStringExtra(Constants.EXTRA_UID));
         //Include intent to enable finishing wakeful intent later in AudioService
         audioServiceIntent.putExtra(Constants.DEVICE_ALARM_RECEIVER_WAKEFUL_INTENT, new Intent(context, DeviceAlarmReceiver.class));
-        context.startService(audioServiceIntent);
+
+        if(RoosterUtils.hasO()) {
+            context.startForegroundService(audioServiceIntent);
+        } else {
+            context.startService(audioServiceIntent);
+        }
     }
 
     private void rescheduleAlarmIntents(Intent intent) {

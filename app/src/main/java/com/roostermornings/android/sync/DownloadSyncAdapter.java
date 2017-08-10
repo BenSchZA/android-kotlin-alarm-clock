@@ -148,9 +148,9 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
             retrieveChannelContentData(getApplicationContext());
             BaseActivity.setBadge(getApplicationContext(), BaseApplication.getNotificationFlag(Constants.FLAG_ROOSTERCOUNT));
             audioTableManager.updateRoosterCount();
-            //Listen for requests from friends
-            Intent intent = new Intent(getApplicationContext(), FirebaseListenerService.class);
-            getApplicationContext().startService(intent);
+            //TODO: Listen for requests from friends
+//            Intent intent = new Intent(getApplicationContext(), FirebaseListenerService.class);
+//            getApplicationContext().startService(intent);
         }
     }
 

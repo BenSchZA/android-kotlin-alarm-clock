@@ -14,12 +14,17 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.BuildConfig;
-import com.roostermornings.android.service.BackgroundTaskIntentService;
+import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.Toaster;
 
+import javax.inject.Inject;
+
 public class BackgroundTaskReceiver extends BroadcastReceiver {
+
+    @Inject AudioTableManager audioTableManager;
 
     // The app's AlarmManager, which provides access to the system alarm services.
     private AlarmManager alarmMgrBackgroundTask;
@@ -32,12 +37,21 @@ public class BackgroundTaskReceiver extends BroadcastReceiver {
         // This method is called when the BroadcastReceiver is receiving
         // an Intent broadcast.
 
+        BaseApplication.getRoosterApplicationComponent().inject(this);
+
         Log.d("Background Message:", "BackgroundTaskReceiver");
         if(BuildConfig.DEBUG) Toaster.makeToast(context, "BackgroundTaskReceiver!", Toast.LENGTH_LONG);
 
-        Intent intentService = new Intent(context, BackgroundTaskIntentService.class);
-        intentService.setAction(intent.getAction());
-        context.startService(intentService);
+        switch (intent.getAction()) {
+            case Constants.ACTION_DAILYTASK:
+                //Purge channel audio files that are stagnant: 1 week or older and not present in alarm set
+                audioTableManager.purgeStagnantChannelAudio();
+                //Purge social audio files that are stagnant: 1 day or older and not favourite
+                audioTableManager.purgeStagnantSocialAudio();
+                break;
+            default:
+                break;
+        }
     }
 
     public void scheduleBackgroundDailyTask(Context context, Boolean start) {

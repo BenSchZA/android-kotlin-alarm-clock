@@ -138,9 +138,6 @@ public class BaseApplication extends android.app.Application {
                     //retrieve static User for current user
                     retrieveMyUserDetails();
                     startBackgroundServices();
-                    // Start Firebase listeners applicable to all activities - primarily to update notifications
-                    if(!isServiceRunning(FirebaseListenerService.class))
-                        startService(new Intent(getApplicationContext(), FirebaseListenerService.class));
                 } else {
                     // User is signed out
                     Log.d(TAG, "onAuthStateChanged:signed_out");
@@ -181,16 +178,6 @@ public class BaseApplication extends android.app.Application {
     private FirebaseUser getFirebaseUser() {
         if (mAuth == null) mAuth = FirebaseAuth.getInstance();
         return mAuth.getCurrentUser();
-    }
-
-    private boolean isServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private void startBackgroundServices() {
