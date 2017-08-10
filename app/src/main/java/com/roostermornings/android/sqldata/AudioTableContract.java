@@ -6,7 +6,6 @@
 package com.roostermornings.android.sqldata;
 
 import android.provider.BaseColumns;
-import android.provider.MediaStore;
 
 /**
  * Created by bscholtz on 2/14/17.
@@ -63,7 +62,7 @@ public final class AudioTableContract {
 
                     + AudioTableEntry.COLUMN_DATE_UPLOADED + " INTEGER NOT NULL, "
 
-                    + AudioTableEntry.COLUMN_SOURCE_URL + " TEXT NULL, "
+                    + AudioTableEntry.COLUMN_SOURCE_URL + " TEXT DEFAULT '', "
 
                     + AudioTableEntry.COLUMN_ACTION_TITLE + " TEXT NULL, "
                     + AudioTableEntry.COLUMN_ACTION_URL + " TEXT NULL, "

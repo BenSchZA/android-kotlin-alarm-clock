@@ -48,12 +48,12 @@ public class ChannelsListAdapter extends RecyclerView.Adapter<ChannelsListAdapte
 
         public ViewHolder(View v) {
             super(v);
-            cardViewChannel = (CardView) v.findViewById(R.id.card_view_channels);
-            txtChannelName = (TextView) v.findViewById(R.id.cardview_channel_name);
-            imgInfo = (TextView) v.findViewById(R.id.cardview_channel_info);
-            imgChannelImage = (ImageView) v.findViewById(R.id.card_view_channel_image);
-            imgChannelSelected = (ImageView) v.findViewById(R.id.cardview_channel_selected);
-            progressBar = (ProgressBar) v.findViewById(R.id.progressBar);
+            cardViewChannel = v.findViewById(R.id.card_view_channels);
+            txtChannelName = v.findViewById(R.id.cardview_channel_name);
+            imgInfo = v.findViewById(R.id.cardview_channel_info);
+            imgChannelImage = v.findViewById(R.id.card_view_channel_image);
+            imgChannelSelected = v.findViewById(R.id.cardview_channel_selected);
+            progressBar = v.findViewById(R.id.progressBar);
         }
     }
 

@@ -16,8 +16,6 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
 
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
 import com.roostermornings.android.domain.Alarm;
@@ -26,18 +24,14 @@ import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.sync.DownloadSyncAdapter;
 import com.roostermornings.android.util.Constants;
-import com.roostermornings.android.util.StrUtils;
 import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
-import static com.roostermornings.android.activity.base.BaseActivity.mCurrentUser;
 import static com.roostermornings.android.util.Constants.AUTHORITY;
 import static com.roostermornings.android.util.RoosterUtils.hasKitKat;
 import static com.roostermornings.android.util.RoosterUtils.hasLollipop;

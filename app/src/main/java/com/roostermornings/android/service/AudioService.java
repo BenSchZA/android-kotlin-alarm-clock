@@ -14,7 +14,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.Ringtone;
@@ -28,7 +27,6 @@ import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.media.AudioAttributesCompat;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
@@ -49,7 +47,6 @@ import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.domain.Channel;
 import com.roostermornings.android.domain.ChannelRooster;
-import com.roostermornings.android.firebase.FirebaseNetwork;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
@@ -59,7 +56,6 @@ import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.InternetHelper;
 import com.roostermornings.android.util.JSONPersistence;
-import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.StrUtils;
 
 import java.io.File;
@@ -76,8 +72,6 @@ import javax.inject.Inject;
 
 import static android.content.ContentValues.TAG;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static android.support.v4.media.AudioAttributesCompat.FLAG_AUDIBILITY_ENFORCED;
-import static android.support.v4.media.AudioAttributesCompat.USAGE_ALARM;
 
 //Service to manage playing and pausing audio during Rooster alarm
 public class AudioService extends Service {
@@ -159,8 +153,7 @@ public class AudioService extends Service {
         super.onCreate();
         mRunning = false;
 
-        BaseApplication baseApplication = (BaseApplication) getApplication();
-        baseApplication.getRoosterApplicationComponent().inject(this);
+        BaseApplication.getRoosterApplicationComponent().inject(this);
 
         //Catch all uncaught exceptions
         Thread.setDefaultUncaughtExceptionHandler(

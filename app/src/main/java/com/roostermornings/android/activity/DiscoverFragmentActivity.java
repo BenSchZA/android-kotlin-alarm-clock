@@ -98,7 +98,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_discover);
 
-        inject(((BaseApplication)getApplication()).getRoosterApplicationComponent());
+        inject(BaseApplication.getRoosterApplicationComponent());
 
         //Notify user of no internet connection
         checkInternetConnection();

@@ -82,7 +82,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_new_alarm);
-        inject(((BaseApplication)getApplication()).getRoosterApplicationComponent());
+        inject(BaseApplication.getRoosterApplicationComponent());
 
         setDayNightTheme();
 
@@ -105,7 +105,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.main_content);
+        mViewPager = findViewById(R.id.main_content);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
         Bundle extras = getIntent().getExtras();

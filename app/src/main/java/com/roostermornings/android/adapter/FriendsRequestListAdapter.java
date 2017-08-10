@@ -59,11 +59,11 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
 
         public ViewHolder(View v) {
             super(v);
-            imgProfilePic = (ImageView) itemView.findViewById(R.id.my_friends_profile_pic);
-            txtName = (TextView) itemView.findViewById(R.id.my_friends_profile_name);
-            txtInitials = (TextView) itemView.findViewById(R.id.txtInitials);
-            btnAdd = (Button) itemView.findViewById(R.id.friends_button1);
-            btnDelete = (ImageButton) itemView.findViewById(R.id.friends_button2);
+            imgProfilePic = itemView.findViewById(R.id.my_friends_profile_pic);
+            txtName = itemView.findViewById(R.id.my_friends_profile_name);
+            txtInitials = itemView.findViewById(R.id.txtInitials);
+            btnAdd = itemView.findViewById(R.id.friends_button1);
+            btnDelete = itemView.findViewById(R.id.friends_button2);
         }
     }
 

@@ -130,7 +130,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
         super.onCreate(savedInstanceState);
 
         initialize(R.layout.activity_friends);
-        inject(((BaseApplication)getApplication()).getRoosterApplicationComponent());
+        inject(BaseApplication.getRoosterApplicationComponent());
 
         //If number hasn't been provided
         showNumberEntryDialog();
@@ -385,7 +385,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
         if(tab != null) {
             FrameLayout frameLayout = (FrameLayout) tab.getCustomView();
             if(frameLayout != null) {
-                ImageView tabNotification = (ImageView) frameLayout.findViewById(R.id.notification_friends);
+                ImageView tabNotification = frameLayout.findViewById(R.id.notification_friends);
                 if (notification) tabNotification.setVisibility(View.VISIBLE);
                 else tabNotification.setVisibility(View.GONE);
                 tab.setCustomView(frameLayout);
@@ -394,7 +394,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
     }
 
     public void setButtonBarNotification(boolean notification) {
-        ImageView buttonBarNotification = (ImageView) buttonBarLayout.findViewById(R.id.notification_friends);
+        ImageView buttonBarNotification = buttonBarLayout.findViewById(R.id.notification_friends);
         if (notification) buttonBarNotification.setVisibility(View.VISIBLE);
         else buttonBarNotification.setVisibility(View.GONE);
     }
@@ -444,7 +444,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
 
     public int getTabNotification(int position) {
         TabLayout.Tab tab = tabLayout.getTabAt(position);
-        ImageView imageNotification = (ImageView) tab.getCustomView().findViewById(R.id.notification_friends);
+        ImageView imageNotification = tab.getCustomView().findViewById(R.id.notification_friends);
         return imageNotification.getVisibility();
     }
 

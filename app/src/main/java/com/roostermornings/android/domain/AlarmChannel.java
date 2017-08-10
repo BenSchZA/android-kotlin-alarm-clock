@@ -8,8 +8,6 @@ package com.roostermornings.android.domain;
 import com.google.firebase.database.IgnoreExtraProperties;
 import com.roostermornings.android.util.StrUtils;
 
-import static com.roostermornings.android.util.RoosterUtils.notNull;
-
 /**
  * Created by steven on 2017/02/16.
  */

@@ -7,14 +7,11 @@ package com.roostermornings.android.fragment.base;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.res.ResourcesCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -22,7 +19,6 @@ import com.mobsandgeeks.saripaar.ValidationError;
 import com.mobsandgeeks.saripaar.Validator;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -30,9 +26,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import com.roostermornings.android.BaseApplication;
-import com.roostermornings.android.R;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
-import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Contact;
 import com.roostermornings.android.domain.Friend;
@@ -40,7 +34,6 @@ import com.roostermornings.android.domain.SocialRooster;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.node_api.IHTTPClient;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
-import com.roostermornings.android.util.Toaster;
 
 import butterknife.ButterKnife;
 
@@ -84,11 +77,9 @@ public abstract class BaseFragment extends Fragment implements Validator.Validat
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        baseApplication = (BaseApplication)getActivity().getApplication();
+        BaseApplication.getRoosterApplicationComponent().inject(this);
 
         getDatabaseReference();
-
-        baseApplication.getRoosterApplicationComponent().inject(this);
 
         try {
             baseActivityListener = (BaseActivityListener) getActivity();

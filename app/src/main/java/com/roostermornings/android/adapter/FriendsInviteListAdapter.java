@@ -54,10 +54,10 @@ public class FriendsInviteListAdapter extends RecyclerView.Adapter<RecyclerView.
 
         public AddViewHolder(View v) {
             super(v);
-            imgProfilePic = (ImageView) itemView.findViewById(R.id.my_friends_profile_pic);
-            txtName = (TextView) itemView.findViewById(R.id.my_friends_profile_name);
-            txtInitials = (TextView) itemView.findViewById(R.id.txtInitials);
-            btnAdd = (Button) itemView.findViewById(R.id.friends_add_button);
+            imgProfilePic = itemView.findViewById(R.id.my_friends_profile_pic);
+            txtName = itemView.findViewById(R.id.my_friends_profile_name);
+            txtInitials = itemView.findViewById(R.id.txtInitials);
+            btnAdd = itemView.findViewById(R.id.friends_add_button);
         }
     }
 
@@ -70,10 +70,10 @@ public class FriendsInviteListAdapter extends RecyclerView.Adapter<RecyclerView.
 
         public InviteViewHolder(View v) {
             super(v);
-            imgProfilePic = (ImageView) itemView.findViewById(R.id.my_friends_profile_pic);
-            txtName = (TextView) itemView.findViewById(R.id.my_friends_profile_name);
-            txtInitials = (TextView) itemView.findViewById(R.id.txtInitials);
-            btnAdd = (Button) itemView.findViewById(R.id.friends_add_button);
+            imgProfilePic = itemView.findViewById(R.id.my_friends_profile_pic);
+            txtName = itemView.findViewById(R.id.my_friends_profile_name);
+            txtInitials = itemView.findViewById(R.id.txtInitials);
+            btnAdd = itemView.findViewById(R.id.friends_add_button);
         }
     }
 
@@ -82,7 +82,7 @@ public class FriendsInviteListAdapter extends RecyclerView.Adapter<RecyclerView.
 
         public HeaderViewHolder(View v) {
             super(v);
-            txtHeader = (TextView) itemView.findViewById(R.id.list_header);
+            txtHeader = itemView.findViewById(R.id.list_header);
         }
     }
 

@@ -92,7 +92,7 @@ public class NumberEntryDialogFragment extends DialogFragment implements Validat
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        inject(((BaseApplication)getActivity().getApplication()).getRoosterApplicationComponent());
+        inject(BaseApplication.getRoosterApplicationComponent());
 
         if(getArguments() != null) {
             popup = getArguments().getBoolean(Constants.ARG_SHOW_DISMISS, false);

@@ -16,7 +16,6 @@ import android.widget.Toast;
 
 import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.service.BackgroundTaskIntentService;
-import com.roostermornings.android.service.FirebaseListenerService;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.Toaster;
 

@@ -10,7 +10,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,11 +49,11 @@ public class NewAudioFriendsListAdapter extends RecyclerView.Adapter<NewAudioFri
 
         public ViewHolder(View v) {
             super(v);
-            imgProfilePic = (ImageView) itemView.findViewById(R.id.new_audio_friend_profile_pic);
-            txtName = (TextView) itemView.findViewById(R.id.new_audio_friend_profile_name);
-            txtInitials = (TextView) itemView.findViewById(R.id.txtInitials);
-            btnSelect = (RadioButton) itemView.findViewById(R.id.new_audio_friend_select);
-            roosterFriendSelectLayout = (LinearLayout) itemView.findViewById(R.id.roosterFriendSelectLayout);
+            imgProfilePic = itemView.findViewById(R.id.new_audio_friend_profile_pic);
+            txtName = itemView.findViewById(R.id.new_audio_friend_profile_name);
+            txtInitials = itemView.findViewById(R.id.txtInitials);
+            btnSelect = itemView.findViewById(R.id.new_audio_friend_select);
+            roosterFriendSelectLayout = itemView.findViewById(R.id.roosterFriendSelectLayout);
         }
     }
 

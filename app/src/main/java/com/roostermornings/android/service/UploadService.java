@@ -41,6 +41,7 @@ import com.roostermornings.android.domain.SocialRooster;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.node_api.IHTTPClient;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.Toaster;
 
 import java.io.File;
@@ -96,8 +97,7 @@ public class UploadService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        BaseApplication baseApplication = (BaseApplication) getApplication();
-        baseApplication.getRoosterApplicationComponent().inject(this);
+        BaseApplication.getRoosterApplicationComponent().inject(this);
 
         foregroundNotification("Audio upload in progress");
 
@@ -195,7 +195,12 @@ public class UploadService extends Service {
         }
 
         stopForeground(true);
-        handlerThread.quitSafely();
+
+        if(RoosterUtils.hasJellyBeanMR2()) {
+            handlerThread.quitSafely();
+        } else {
+            handlerThread.quit();
+        }
         this.stopSelf();
     }
 
@@ -252,7 +257,6 @@ public class UploadService extends Service {
 
             @Override
             public void onFailure(Throwable t) {
-                Log.i(TAG, t.getLocalizedMessage());
             }
         });
     }

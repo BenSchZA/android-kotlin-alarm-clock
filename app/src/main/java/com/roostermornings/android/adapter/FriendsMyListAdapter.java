@@ -19,7 +19,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageButton;
@@ -30,7 +29,6 @@ import android.widget.TextView;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.Theme;
-import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.activity.NewAudioRecordActivity;
@@ -43,8 +41,6 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-
-import javax.inject.Inject;
 
 /**
  * Created by bscholtz on 08/03/17.
@@ -68,11 +64,11 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
 
         public ViewHolder(View v) {
             super(v);
-            imgProfilePic = (ImageView) itemView.findViewById(R.id.my_friends_profile_pic);
-            txtName = (TextView) itemView.findViewById(R.id.my_friends_profile_name);
-            txtInitials = (TextView) itemView.findViewById(R.id.txtInitials);
-            btnSend = (ImageButton) itemView.findViewById(R.id.friends_send_button);
-            linearLayout = (LinearLayout) itemView.findViewById(R.id.friendLayout);
+            imgProfilePic = itemView.findViewById(R.id.my_friends_profile_pic);
+            txtName = itemView.findViewById(R.id.my_friends_profile_name);
+            txtInitials = itemView.findViewById(R.id.txtInitials);
+            btnSend = itemView.findViewById(R.id.friends_send_button);
+            linearLayout = itemView.findViewById(R.id.friendLayout);
         }
     }
 

@@ -16,7 +16,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.roostermornings.android.R;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.MyContactsController;
 import com.roostermornings.android.util.StrUtils;
@@ -25,8 +24,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
-
-import static com.roostermornings.android.activity.base.BaseActivity.mCurrentUser;
 
 public class FirebaseNetwork {
 

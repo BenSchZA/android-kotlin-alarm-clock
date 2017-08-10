@@ -7,7 +7,6 @@ package com.roostermornings.android.domain;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
-import com.roostermornings.android.util.Constants;
 
 /**
  * Created by steven on 2017/02/10.

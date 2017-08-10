@@ -6,7 +6,6 @@
 package com.roostermornings.android.util;
 
 import android.content.Context;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;

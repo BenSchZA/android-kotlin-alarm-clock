@@ -40,9 +40,7 @@ public class StrUtils {
 
             StringPair<?, ?> that = (StringPair<?, ?>) o;
 
-            if (!getK().equals(that.getK())) return false;
-            return getV().equals(that.getV());
-
+            return getV().equals(that.getV()) && getK().equals(that.getK());
         }
 
         @Override
