@@ -59,8 +59,8 @@
     <string name="share_button">Share Rooster</string>
     <string name="add_contacts">Add contacts who have Rooster</string>
     <string name="invite_contacts">Invite contacts to Rooster</string>
-    <string name="search_title">Search...</string>
-    <string name="search_hint_friends">Search...</string>
+    <string name="search_title">Search…</string>
+    <string name="search_hint_friends">Search…</string>
     <string name="retrieve_contacts_permission">We need your permission to retrieve addable contacts, click me or swipe to try again.</string>
 
     <string name="select_all_button">Select all friends</string>
@@ -77,7 +77,7 @@
     <string name="new_audio_post_delete_instructions">If at first you don’t succeed, \n skydiving is not for you.</string>
     <string name="new_audio_time_amplitude_instructions">Keep recording and speak up, \n your friends need to hear you!</string>
     <string name="new_audio_continue_instructions">Time to continue and select some friends!</string>
-    <string name="new_audio_quiet_instructions">Psst! That was very quiet, \n please record again...</string>
+    <string name="new_audio_quiet_instructions">Psst! That was very quiet, \n please record again…</string>
 
     <string name="ok">OK</string>
     <string name="save">Save</string>
