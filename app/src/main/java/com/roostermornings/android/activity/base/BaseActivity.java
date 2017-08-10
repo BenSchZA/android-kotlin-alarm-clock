@@ -108,10 +108,8 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        BaseApplication baseApplication = (BaseApplication) getApplication();
-
         //Inject Dagger dependencies
-        baseApplication.getRoosterApplicationComponent().inject(this);
+        BaseApplication.getRoosterApplicationComponent().inject(this);
 
         //Set default application settings preferences - don't overwrite existing if false
         setPreferenceManagerDefaultSettings(false);
@@ -511,7 +509,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
 
     public boolean setupToolbar(TextView toolbarTitle, String title) {
         try {
-            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+            Toolbar toolbar = findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
             if (getSupportActionBar() != null)
                 getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -596,7 +594,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
     public void updateRequestNotification() {
         //Flag check for UI changes on load, broadcastreceiver for changes while activity running
         //If notifications waiting, display new friend request notification
-        if (((BaseApplication) getApplication()).getNotificationFlag(Constants.FLAG_FRIENDREQUESTS) > 0)
+        if (BaseApplication.getNotificationFlag(Constants.FLAG_FRIENDREQUESTS) > 0)
             setButtonBarNotification(R.id.notification_friends, true);
 
         //Broadcast receiver filter to receive UI updates
@@ -637,9 +635,9 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
     }
 
     public void setButtonBarNotification(int notificationId, boolean visible) {
-        LinearLayout buttonBarLayout = (LinearLayout) findViewById(R.id.button_bar);
+        LinearLayout buttonBarLayout = findViewById(R.id.button_bar);
         if(buttonBarLayout != null) {
-            ImageView buttonBarNotification = (ImageView) buttonBarLayout.findViewById(notificationId);
+            ImageView buttonBarNotification = buttonBarLayout.findViewById(notificationId);
             if(buttonBarNotification != null) {
                 if (visible) buttonBarNotification.setVisibility(View.VISIBLE);
                 else buttonBarNotification.setVisibility(View.GONE);

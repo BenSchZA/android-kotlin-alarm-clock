@@ -32,7 +32,7 @@ public class IntroFragment1 extends BaseFragment {
 
     @Override
     public void onAttach(Context context) {
-        inject(((BaseApplication)getActivity().getApplication()).getRoosterApplicationComponent());
+        inject(BaseApplication.getRoosterApplicationComponent());
 
         super.onAttach(context);
     }

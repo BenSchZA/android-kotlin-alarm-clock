@@ -27,21 +27,16 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.Theme;
 import com.roostermornings.android.R;
-import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.activity.MessageStatusFragmentActivity;
-import com.roostermornings.android.domain.SocialRooster;
-import com.roostermornings.android.domain.User;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.StrUtils;
-import com.roostermornings.android.util.Toaster;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -51,9 +46,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Locale;
-import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

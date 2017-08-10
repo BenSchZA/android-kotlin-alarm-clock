@@ -9,24 +9,18 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.provider.ContactsContract;
-import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
-import android.util.Pair;
 
-import com.facebook.stetho.common.StringUtil;
-import com.roostermornings.android.R;
 import com.roostermornings.android.domain.Contact;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.InputStream;
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 
 /**

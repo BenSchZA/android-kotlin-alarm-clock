@@ -8,14 +8,9 @@ package com.roostermornings.android.util;
 import android.os.Build;
 
 import com.roostermornings.android.domain.Alarm;
-import com.roostermornings.android.domain.ChannelRooster;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.Random;
-import java.util.Set;
 
 /**
  * Created by steven on 2017/02/15.
@@ -37,6 +32,10 @@ public class RoosterUtils {
 
     public static boolean hasJellyBean() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN;
+    }
+
+    public static boolean hasJellyBeanMR2() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2;
     }
 
     public static boolean hasGingerbread() {

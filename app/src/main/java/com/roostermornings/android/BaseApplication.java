@@ -5,15 +5,12 @@
 
 package com.roostermornings.android;
 
-import android.accounts.Account;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
@@ -34,7 +31,6 @@ import com.roostermornings.android.dagger.DaggerRoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationModule;
 import com.roostermornings.android.domain.User;
-import com.roostermornings.android.firebase.FirebaseNetwork;
 import com.roostermornings.android.node_api.IHTTPClient;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.service.FirebaseListenerService;
@@ -47,10 +43,6 @@ import javax.inject.Inject;
 import io.fabric.sdk.android.Fabric;
 import retrofit.GsonConverterFactory;
 import retrofit.Retrofit;
-
-import static com.roostermornings.android.R.string.facebook_app_id;
-import static com.roostermornings.android.sync.DownloadSyncAdapter.CreateSyncAccount;
-import static com.roostermornings.android.util.Constants.AUTHORITY;
 
 public class BaseApplication extends android.app.Application {
 

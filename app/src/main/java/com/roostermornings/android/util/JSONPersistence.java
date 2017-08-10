@@ -20,7 +20,6 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class JSONPersistence {
     private static Gson gson = new Gson();

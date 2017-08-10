@@ -5,8 +5,6 @@
 
 package com.roostermornings.android.receiver;
 
-import android.accounts.Account;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -17,7 +15,6 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
-import com.roostermornings.android.sync.DownloadSyncAdapter;
 import com.roostermornings.android.util.Constants;
 
 import javax.inject.Inject;
@@ -25,7 +22,6 @@ import javax.inject.Named;
 
 import static android.content.Context.VIBRATOR_SERVICE;
 import static com.facebook.FacebookSdk.getApplicationContext;
-import static com.roostermornings.android.util.Constants.AUTHORITY;
 
 public class DeviceAlarmReceiver extends WakefulBroadcastReceiver {
 
@@ -35,8 +31,8 @@ public class DeviceAlarmReceiver extends WakefulBroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        BaseApplication baseApplication = (BaseApplication) getApplicationContext();
-        baseApplication.getRoosterApplicationComponent().inject(this);
+
+        BaseApplication.getRoosterApplicationComponent().inject(this);
 
         //Check if vibrator enabled in user settings
         setVibrate(context);

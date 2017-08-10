@@ -5,8 +5,6 @@
 
 package com.roostermornings.android.util;
 
-import com.roostermornings.android.R;
-
 public class Constants {
 
     //Adapter view types

@@ -13,12 +13,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.Bundle;
-import android.support.v4.app.BundleCompat;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
@@ -48,8 +45,8 @@ public class RoosterFirebaseMessagingService extends FirebaseMessagingService {
 // [START receive_message]
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
-        BaseApplication baseApplication = (BaseApplication) getApplication();
-        baseApplication.getRoosterApplicationComponent().inject(this);
+        BaseApplication.getRoosterApplicationComponent().inject(this);
+
         // [START_EXCLUDE]
         // There are two types of messages data messages and notification messages. Data messages are handled
         // here in onMessageReceived whether the app is in the foreground or background. Data messages are the type

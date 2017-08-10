@@ -92,7 +92,7 @@ public class SignInActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_sign_in);
-        inject(((BaseApplication)getApplication()).getRoosterApplicationComponent());
+        inject(BaseApplication.getRoosterApplicationComponent());
 
         FA.Log(FA.Event.onboarding_intro_viewed.class, null, null);
 

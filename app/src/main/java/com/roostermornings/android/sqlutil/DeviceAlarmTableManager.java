@@ -14,8 +14,6 @@ import android.database.sqlite.SQLiteDatabase;
 import com.roostermornings.android.sqldata.DeviceAlarmTableHelper;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
 
 import static com.roostermornings.android.sqldata.DeviceAlarmTableContract.AlarmTableEntry;
 

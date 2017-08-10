@@ -51,7 +51,7 @@ public class IntroFragmentActivity extends BaseActivity  {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.fragmentactivity_intro);
-        inject(((BaseApplication)getApplication()).getRoosterApplicationComponent());
+        inject(BaseApplication.getRoosterApplicationComponent());
 
         createViewPager(mPager);
         tabLayout.setupWithViewPager(mPager, true);

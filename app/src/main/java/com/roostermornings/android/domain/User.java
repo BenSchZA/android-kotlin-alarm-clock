@@ -5,11 +5,8 @@
 
 package com.roostermornings.android.domain;
 
-import android.support.annotation.NonNull;
-
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
-import com.roostermornings.android.util.RoosterUtils;
 
 import java.io.Serializable;
 import java.util.HashMap;

@@ -30,18 +30,14 @@ import com.roostermornings.android.domain.Channel;
 import com.roostermornings.android.domain.ChannelRooster;
 import com.roostermornings.android.fragment.IAlarmSetListener;
 import com.roostermornings.android.fragment.base.BaseFragment;
-import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.util.JSONPersistence;
-import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -97,7 +93,7 @@ public class NewAlarmFragment2 extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        inject(((BaseApplication)getActivity().getApplication()).getRoosterApplicationComponent());
+        inject(BaseApplication.getRoosterApplicationComponent());
 
         if (getArguments() != null) {
             mUserUidParam = getArguments().getString(ARG_USER_UID_PARAM);
@@ -277,7 +273,7 @@ public class NewAlarmFragment2 extends BaseFragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        inject(((BaseApplication)getActivity().getApplication()).getRoosterApplicationComponent());
+        inject(BaseApplication.getRoosterApplicationComponent());
 
         if (context instanceof IAlarmSetListener) {
             mListener = (IAlarmSetListener) context;

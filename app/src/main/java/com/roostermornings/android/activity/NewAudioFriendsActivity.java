@@ -94,7 +94,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_new_audio_friends);
-        inject(((BaseApplication)getApplication()).getRoosterApplicationComponent());
+        inject(BaseApplication.getRoosterApplicationComponent());
 
         setupToolbar(null, null);
         setDayNightTheme();

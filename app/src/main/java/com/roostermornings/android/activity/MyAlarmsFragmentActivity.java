@@ -117,7 +117,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_my_alarms);
-        inject(((BaseApplication)getApplication()).getRoosterApplicationComponent());
+        inject(BaseApplication.getRoosterApplicationComponent());
 
         //Final context to be used in threads
         final Context context = this;

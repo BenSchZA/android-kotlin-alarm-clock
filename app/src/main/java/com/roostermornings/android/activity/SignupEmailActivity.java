@@ -62,7 +62,7 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_signup_email);
-        inject(((BaseApplication)getApplication()).getRoosterApplicationComponent());
+        inject(BaseApplication.getRoosterApplicationComponent());
 
         //instantiate saripaar validator to validate fields with NotEmpty annotations
         validator = new Validator(this);

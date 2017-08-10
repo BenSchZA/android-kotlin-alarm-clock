@@ -5,10 +5,7 @@
 
 package com.roostermornings.android.sqlutil;
 
-import com.roostermornings.android.domain.Alarm;
-
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 

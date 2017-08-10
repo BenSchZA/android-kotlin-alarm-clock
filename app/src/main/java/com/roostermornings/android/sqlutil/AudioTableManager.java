@@ -142,16 +142,6 @@ public class AudioTableManager {
         context.sendBroadcast(intent);
     }
 
-    //TODO: check that this works...
-    public void purgeSocialAudioFiles() {
-        //Purge audio files older than 2 weeks
-
-        for (DeviceAudioQueueItem deviceAudioQueueItem:
-                extractSocialAudioFiles()) {
-            if(deviceAudioQueueItem.getDate_uploaded() < (calendar.getTimeInMillis() - Constants.TIME__MILLIS_1_WEEK*2)) removeAudioEntry(deviceAudioQueueItem);
-        }
-    }
-
     public void removeAllSocialAudioItems() {
         for (DeviceAudioQueueItem deviceAudioQueueItem:
              extractSocialAudioFiles()) {

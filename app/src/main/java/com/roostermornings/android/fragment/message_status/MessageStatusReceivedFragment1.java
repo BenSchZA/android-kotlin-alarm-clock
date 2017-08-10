@@ -19,13 +19,9 @@ import android.view.ViewGroup;
 import com.google.firebase.auth.FirebaseUser;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
-import com.roostermornings.android.adapter.FriendsMyListAdapter;
 import com.roostermornings.android.adapter.MessageStatusReceivedListAdapter;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
-import com.roostermornings.android.domain.SocialRooster;
-import com.roostermornings.android.domain.User;
 import com.roostermornings.android.fragment.base.BaseFragment;
-import com.roostermornings.android.fragment.friends.FriendsMyFragment1;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.util.Constants;
@@ -37,9 +33,6 @@ import java.util.ArrayList;
 import javax.inject.Inject;
 
 import butterknife.BindView;
-
-import static com.roostermornings.android.util.Constants.MESSAGE_STATUS_RECEIVED_FRAGMENT_TYPE_FAVOURITE;
-import static com.roostermornings.android.util.Constants.MESSAGE_STATUS_RECEIVED_FRAGMENT_TYPE_TODAY;
 
 public class MessageStatusReceivedFragment1 extends BaseFragment {
 

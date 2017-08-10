@@ -22,7 +22,6 @@ import android.widget.TextView;
 
 import com.roostermornings.android.R;
 import com.roostermornings.android.domain.SocialRooster;
-import com.roostermornings.android.domain.User;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.StrUtils;
