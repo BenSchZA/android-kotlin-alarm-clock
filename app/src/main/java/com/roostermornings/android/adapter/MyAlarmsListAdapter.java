@@ -8,6 +8,7 @@ package com.roostermornings.android.adapter;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -24,14 +25,19 @@ import android.widget.TextView;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.Theme;
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.domain.Alarm;
+import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.StrUtils;
 
 import java.util.ArrayList;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -43,6 +49,9 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
     private Context context;
 
     boolean computingLayout;
+
+    @Inject @Named("default")
+    SharedPreferences defaultSharedPreferences;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -88,6 +97,8 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
         mDataset = myDataset;
         mActivity = activity;
         setHasStableIds(true);
+
+        BaseApplication.getRoosterApplicationComponent().inject(this);
     }
 
     public MyAlarmsListAdapter() {
@@ -117,8 +128,26 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
         // - replace the contents of the view with that element
         final Alarm alarm = mDataset.get(position);
 
+        //Set 24-hour or 12-hour time format
+        boolean timeFormat = defaultSharedPreferences.getBoolean(Constants.USER_SETTINGS_TIME_FORMAT, true);
+
         try {
-            holder.txtAlarmTime.setText(RoosterUtils.setAlarmTimeFromHourAndMinute(alarm));
+            //If using 12 hour format
+            if(!timeFormat) {
+                String twelveHourTimeString;
+                if(alarm.getHour() >= 12) {
+                    twelveHourTimeString = RoosterUtils.setAlarmTimeFromHourAndMinute(alarm, false)
+                            + mActivity.getResources().getString(R.string.alarm_12_hour_pm);
+                    holder.txtAlarmTime.setText(twelveHourTimeString);
+                } else {
+                    twelveHourTimeString = RoosterUtils.setAlarmTimeFromHourAndMinute(alarm, false)
+                            + mActivity.getResources().getString(R.string.alarm_12_hour_am);
+                    holder.txtAlarmTime.setText(twelveHourTimeString);
+                }
+            } else {
+                holder.txtAlarmTime.setText(RoosterUtils.setAlarmTimeFromHourAndMinute(alarm, true));
+            }
+
             holder.txtAlarmDays.setText(RoosterUtils.getAlarmDays(alarm));
             if(alarm.getChannel() != null) {
                 holder.txtAlarmChannel.setText(alarm.getChannel().getName());

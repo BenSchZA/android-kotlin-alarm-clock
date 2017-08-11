@@ -18,36 +18,40 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/new_alarm_time"
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/spacing_xxlarge"
-                android:layout_marginTop="@dimen/spacing_xxlarge"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_horizontal"
-                android:text="HH:MM"
-                android:textColor="@drawable/rooster_link_white"
-                android:textSize="@dimen/text_xxxhuge" />
+                android:orientation="horizontal">
 
-            <!--android:layoutAnimation="@android:anim/slide_in_left"-->
+                <TextView
+                    android:id="@+id/new_alarm_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/spacing_xxlarge"
+                    android:layout_marginTop="@dimen/spacing_xxlarge"
+                    android:layout_marginLeft="@dimen/spacing_normal_large"
+                    android:layout_marginRight="@dimen/spacing_normal_large"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:layout_centerHorizontal="true"
+                    android:text="HH:MM"
+                    android:textColor="@drawable/rooster_link_white"
+                    android:textSize="@dimen/text_xxxhuge" />
 
+                <TextView
+                    android:id="@+id/new_alarm_am_pm"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="AM/PM"
+                    android:layout_toRightOf="@id/new_alarm_time"
+                    android:layout_centerVertical="true"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:textColor="@drawable/rooster_link_white"
+                    android:textSize="@dimen/text_xlarge"
+                    android:visibility="gone"/>
 
-            <!--<TimePicker-->
-            <!--android:id="@+id/timePicker"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:numbersTextColor="@color/white"-->
-            <!--android:numbersInnerTextColor="@color/white"-->
-            <!--android:layout_gravity="center_horizontal"-->
-            <!--android:timePickerMode="spinner"/>-->
-
-            <!--<NumberPicker-->
-            <!--android:theme="@style/NumberPickerTheme"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_gravity="center_horizontal" />-->
+            </RelativeLayout>
 
             <View
                 android:layout_width="match_parent"

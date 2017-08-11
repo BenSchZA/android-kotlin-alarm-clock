@@ -69,6 +69,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import static android.content.ContentValues.TAG;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -116,6 +117,7 @@ public class AudioService extends Service {
     @Inject
     Account mAccount;
     @Inject SharedPreferences sharedPreferences;
+    @Inject @Named("default") SharedPreferences defaultSharedPreferences;
 
     public static boolean mRunning = false;
 
@@ -354,8 +356,7 @@ public class AudioService extends Service {
         //Try append new content to end of existing content, if it fails - fail safe and play default alarm tone
         try {
             //Reorder channel and social queue according to user preferences
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            if(sharedPreferences.getBoolean(Constants.USER_SETTINGS_ROOSTER_ORDER, false)) {
+            if(defaultSharedPreferences.getBoolean(Constants.USER_SETTINGS_ROOSTER_ORDER, false)) {
                 if (!mThis.channelAudioItems.isEmpty()) {
                     audioItems.addAll(channelAudioItems);
                 }
@@ -968,8 +969,7 @@ public class AudioService extends Service {
 
         deviceAlarmController.snoozeAlarm(alarmUid, false);
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String strSnoozeTime = sharedPreferences.getString(Constants.USER_SETTINGS_SNOOZE_TIME, "10");
+        String strSnoozeTime = defaultSharedPreferences.getString(Constants.USER_SETTINGS_SNOOZE_TIME, "10");
 
         snoozeNotification("Alarm snoozed " + strSnoozeTime + " minutes - touch to dismiss");
         try {
@@ -1041,8 +1041,7 @@ public class AudioService extends Service {
 
             updateAlarmUI(true);
 
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-            String strRingtonePreference = sharedPreferences.getString(Constants.USER_SETTINGS_DEFAULT_TONE, "android.intent.extra.ringtone.DEFAULT_URI");
+            String strRingtonePreference = defaultSharedPreferences.getString(Constants.USER_SETTINGS_DEFAULT_TONE, "android.intent.extra.ringtone.DEFAULT_URI");
 
             RingtoneManager ringtoneManager = new RingtoneManager(this);
             ringtoneManager.setType(RingtoneManager.TYPE_ALL);
@@ -1188,7 +1187,7 @@ public class AudioService extends Service {
         //Ensure alarm volume at least equal to user's minimum alarm volume setting
         try {
             String[] alarmVolumeArrayEntries = getResources().getStringArray(R.array.user_settings_alarm_volume_entry_values);
-            SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+
             float alarmMinimumVolume = 0.4f;
 
             if (alarmVolumeArrayEntries[0].equals(defaultSharedPreferences.getString(Constants.USER_SETTINGS_ALARM_VOLUME, ""))) {
@@ -1226,6 +1225,9 @@ public class AudioService extends Service {
 
         final AudioManager audio = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         final int currentVolume = audio.getStreamVolume(AudioManager.STREAM_ALARM);
+        float timePeriod = (float) Integer.valueOf(defaultSharedPreferences.getString(Constants.USER_SETTINGS_ALARM_VOLUME_INCREMENT_DURATION, "5"));
+        float tempTimeInterval = (timePeriod/(float)currentVolume)*1000;
+        final float timeInterval = tempTimeInterval > 100 ? tempTimeInterval : 100;
 
         final ScheduledExecutorService scheduler =
                 Executors.newSingleThreadScheduledExecutor();
@@ -1241,23 +1243,8 @@ public class AudioService extends Service {
                         audio.setStreamVolume(AudioManager.STREAM_ALARM, volume, 0);
                         volume++;
                     }
-                }, 0, 1, TimeUnit.SECONDS);
+                }, 0, (long)timeInterval, TimeUnit.MILLISECONDS);
     }
-
-//    public void stepAudioVolume(boolean increase) {
-//        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
-//        if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method);
-//
-//        AudioManager audio = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-//        int currentVolume = audio.getStreamVolume(AudioManager.STREAM_ALARM);
-//        int maxVolume = audio.getStreamMaxVolume(AudioManager.STREAM_ALARM);
-//
-//        if((currentVolume < maxVolume) && increase) {
-//            audio.setStreamVolume(AudioManager.STREAM_ALARM, currentVolume + 1, 0);
-//        } else if((currentVolume > 0) && !increase) {
-//            audio.setStreamVolume(AudioManager.STREAM_ALARM, currentVolume - 1, 0);
-//        }
-//    }
 
     private void stopAlarmAudio() {
         String method = Thread.currentThread().getStackTrace()[2].getMethodName();

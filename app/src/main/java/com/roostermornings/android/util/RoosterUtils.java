@@ -68,12 +68,22 @@ public class RoosterUtils {
         }
     }
 
-    public static String setAlarmTimeFromHourAndMinute(Alarm alarm) {
+    public static String setAlarmTimeFromHourAndMinute(Alarm alarm, boolean twentyFourFormat) {
 
-        String alarmHour = (alarm.getHour() < 10 ? "0" : "") + alarm.getHour();
-        String alarmMinute = (alarm.getMinute() < 10 ? "0" : "") + alarm.getMinute();
+        String alarmHour;
+        String alarmMinute;
+        if(twentyFourFormat) {
+            alarmHour = (alarm.getHour() < 10 ? "0" : "") + alarm.getHour();
+            alarmMinute = (alarm.getMinute() < 10 ? "0" : "") + alarm.getMinute();
+        } else {
+            if(alarm.getHour() > 12) {
+                alarmHour = (alarm.getHour() < 10 ? "0" : "") + (alarm.getHour() - 12);
+            } else {
+                alarmHour = (alarm.getHour() < 10 ? "0" : "") + alarm.getHour();
+            }
+            alarmMinute = (alarm.getMinute() < 10 ? "0" : "") + alarm.getMinute();
+        }
         return alarmHour + ":" + alarmMinute;
-
     }
 
     public static String createRandomFileName(int string) {

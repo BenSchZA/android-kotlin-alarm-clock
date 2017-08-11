@@ -7,6 +7,7 @@ package com.roostermornings.android.fragment.new_alarm;
 
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
@@ -34,12 +35,14 @@ import com.roostermornings.android.fragment.IAlarmSetListener;
 import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
+import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.Toaster;
 
 import java.util.Calendar;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import butterknife.BindView;
 import butterknife.OnCheckedChanged;
@@ -50,6 +53,9 @@ public class NewAlarmFragment1 extends BaseFragment{
 
     @BindView(R.id.new_alarm_time)
     TextView textViewAlarmTime;
+
+    @BindView(R.id.new_alarm_am_pm)
+    TextView textViewAlarmAmPm;
 
     @BindView(R.id.days_parent1)
     LinearLayout daysParentLinearLayout1;
@@ -105,6 +111,8 @@ public class NewAlarmFragment1 extends BaseFragment{
     @Inject DeviceAlarmController deviceAlarmController;
     @Inject DeviceAlarmTableManager deviceAlarmTableManager;
     @Inject Context AppContext;
+    @Inject @Named("default")
+    SharedPreferences defaultSharedPreferences;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -147,12 +155,15 @@ public class NewAlarmFragment1 extends BaseFragment{
         mAlarm.setHour(hour);
         mAlarm.setMinute(minute);
 
+        //Set 24-hour or 12-hour time format
+        boolean timeFormat = defaultSharedPreferences.getBoolean(Constants.USER_SETTINGS_TIME_FORMAT, true);
+
         mTimePickerDialog = new TimePickerDialog(getActivity(), R.style.TimeDialogTheme, new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                 setAlarmTime(hourOfDay, minute);
             }
-        }, hour, minute, true); //24h time
+        }, hour, minute, timeFormat);
     }
 
     @Override
@@ -163,7 +174,7 @@ public class NewAlarmFragment1 extends BaseFragment{
 
         //If in edit mode, delete button should be visible and alarm details should be updated
         updateAlarmUIIfEdit();
-        textViewAlarmTime.setText(RoosterUtils.setAlarmTimeFromHourAndMinute(mAlarm));
+        setAlarmTime(mAlarm.getHour(), mAlarm.getMinute());
         textViewAlarmTime.startAnimation(AnimationUtils.loadAnimation(AppContext, R.anim.pulse));
         return view;
     }
@@ -202,7 +213,21 @@ public class NewAlarmFragment1 extends BaseFragment{
         this.minute = minute;
         mAlarm.setHour(hour);
         mAlarm.setMinute(minute);
-        textViewAlarmTime.setText(RoosterUtils.setAlarmTimeFromHourAndMinute(mAlarm));
+
+        //Set 24-hour or 12-hour time format
+        boolean timeFormat = defaultSharedPreferences.getBoolean(Constants.USER_SETTINGS_TIME_FORMAT, true);
+
+        textViewAlarmTime.setText(RoosterUtils.setAlarmTimeFromHourAndMinute(mAlarm, timeFormat));
+
+        //If using 12 hour format
+        if(!timeFormat) {
+            textViewAlarmAmPm.setVisibility(View.VISIBLE);
+            if(mAlarm.getHour() >= 12) {
+                textViewAlarmAmPm.setText(getResources().getString(R.string.alarm_12_hour_pm));
+            } else {
+                textViewAlarmAmPm.setText(getResources().getString(R.string.alarm_12_hour_am));
+            }
+        }
     }
 
     @OnClick(R.id.new_alarm_time)
@@ -373,7 +398,7 @@ public class NewAlarmFragment1 extends BaseFragment{
 
         this.hour = mAlarm.getHour();
         this.minute = mAlarm.getMinute();
-        textViewAlarmTime.setText(RoosterUtils.setAlarmTimeFromHourAndMinute(mAlarm));
+        setAlarmTime(this.hour, this.minute);
         mTimePickerDialog.updateTime(this.hour, this.minute);
 
         switchAudio.setChecked(mAlarm.isAllow_friend_audio_files());

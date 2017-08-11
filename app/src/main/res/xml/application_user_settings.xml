@@ -37,6 +37,16 @@ and no social roosters are received"
             android:entries="@array/user_settings_alarm_volume_entries"
             android:entryValues="@array/user_settings_alarm_volume_entry_values"
             android:defaultValue="@array/user_settings_alarm_volume_default_values" />
+        <EditTextPreference
+            android:key="pref_key_alarm_increment_duration"
+            android:title="Alarm volume increase time"
+            android:summary="The duration of the alarm volume's gradual increase in seconds"
+            android:defaultValue="5"
+            android:hint="Time (seconds)"
+            android:persistent="true"
+            android:maxLines="1"
+            android:inputType="numberDecimal"
+            android:maxLength="2"/>
         <CheckBoxPreference
             android:key="pref_key_rooster_order"
             android:summary="Set channel rooster content to occur before social rooster content"
@@ -57,6 +67,12 @@ and no social roosters are received"
     <PreferenceCategory
         android:title="User Interface"
         android:key="pref_key_user_interface">
+        <CheckBoxPreference
+            android:key="pref_key_24_hour_time"
+            android:summary="Enable for 24-hour format, disable for 12-hour format"
+            android:title="Time format"
+            android:defaultValue="true"
+            android:persistent="true"/>
         <ListPreference
             android:title="Day/night theme"
             android:key="pref_key_day_night_theme"
