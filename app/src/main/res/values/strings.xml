@@ -37,6 +37,9 @@
 
     <string name="send">Send</string>
 
+    <string name="alarm_12_hour_am">AM</string>
+    <string name="alarm_12_hour_pm">PM</string>
+
     <string name="my_alarms">My Alarms</string>
     <string name="create_alarm">Create Alarm</string>
     <string name="edit_alarm">Edit Alarm</string>

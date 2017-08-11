@@ -26,6 +26,7 @@ import com.roostermornings.android.activity.SettingsActivity;
 import com.roostermornings.android.activity.SignInActivity;
 import com.roostermornings.android.activity.SignupEmailActivity;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.adapter.MyAlarmsListAdapter;
 import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.fragment.NumberEntryDialogFragment;
 import com.roostermornings.android.fragment.base.BaseFragment;
@@ -100,6 +101,7 @@ public interface RoosterApplicationComponent {
     void inject(DeviceAlarmController roosterClass);
 
     void inject(DownloadSyncAdapter adapter);
+    void inject(MyAlarmsListAdapter adapter);
 
     //Provision methods have no parameters and return an injected or provided type.
     //Each method may have a Qualifier annotation as well.
