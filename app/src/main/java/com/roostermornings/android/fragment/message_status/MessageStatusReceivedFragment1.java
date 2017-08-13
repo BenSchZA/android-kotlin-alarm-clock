@@ -155,12 +155,14 @@ public class MessageStatusReceivedFragment1 extends BaseFragment {
     private void retrieveSocialAudioItems() {
         if(fragmentType.equals(Constants.MESSAGE_STATUS_RECEIVED_FRAGMENT_TYPE_TODAY)) {
             mRoosters = audioTableManager.extractTodaySocialAudioFiles();
+            mRoosters.addAll(audioTableManager.extractTodayChannelAudioFiles());
             //Sort names alphabetically before notifying adapter
             sortDeviceAudioQueueItems(mRoosters);
             notifyAdapter();
             swipeRefreshLayout.setRefreshing(false);
         } else {
             mRoosters = audioTableManager.extractFavouriteSocialAudioFiles();
+            mRoosters.addAll(audioTableManager.extractFavouriteChannelAudioFiles());
             //Sort names alphabetically before notifying adapter
             sortDeviceAudioQueueItems(mRoosters);
             notifyAdapter();

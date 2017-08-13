@@ -86,7 +86,7 @@ public class RoosterUtils {
         return alarmHour + ":" + alarmMinute;
     }
 
-    public static String createRandomFileName(int string) {
+    public static String createRandomUID(int string) {
         Random random = new Random();
         String mRandomAudioFileName = "ABCDEFGHIJKLMNOP";
         StringBuilder stringBuilder = new StringBuilder(string);

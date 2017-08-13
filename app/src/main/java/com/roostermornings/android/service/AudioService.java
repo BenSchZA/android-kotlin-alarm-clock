@@ -24,7 +24,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Vibrator;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -789,7 +788,7 @@ public class AudioService extends Service {
         }
     }
 
-    public void processChannelAudio() {
+    public void processAudioEntries() {
         //Ensure partially listened channels and roosters are set as listened
         try {
             if (mThis.audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) {
@@ -802,14 +801,12 @@ public class AudioService extends Service {
         }
         //For all listened channels
         for (DeviceAudioQueueItem audioItem :
-                audioTableManager.selectListened()) {
+                audioTableManager.selectListenedByChannel(alarm.getChannel())) {
             try {
                 if (audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) {
                     Integer currentStoryIteration = new JSONPersistence(getApplicationContext()).getStoryIteration(audioItem.getQueue_id());
                     if (currentStoryIteration > 0)
                         new JSONPersistence(getApplicationContext()).setStoryIteration(audioItem.getQueue_id(), currentStoryIteration + 1);
-                    //Clear listened flag as we cache and reuse content when appropriate
-                    audioTableManager.clearListened(audioItem.getId());
                 }
             } catch (NullPointerException e) {
                 logError(e);
@@ -866,7 +863,7 @@ public class AudioService extends Service {
         //Process audio files - set channel persisted iterations,
         // delete all channel audio files/SQL entries,
         // remove files not contained in SQL db
-        processChannelAudio();
+        processAudioEntries();
         purgeAudioFiles();
 
         //Unregister all broadcastreceivers

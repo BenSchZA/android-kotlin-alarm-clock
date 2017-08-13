@@ -7,10 +7,13 @@ package com.roostermornings.android.adapter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
+import android.net.Uri;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
@@ -27,6 +30,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -35,8 +39,10 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.activity.MessageStatusFragmentActivity;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.FileUtils;
 import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.StrUtils;
+import com.roostermornings.android.util.Toaster;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -81,6 +87,9 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
 
         @BindView(R.id.audio_favourite)
         ImageButton favouriteImageButton;
+
+        @BindView(R.id.audio_share)
+        ImageButton shareImageButton;
 
         @BindView(R.id.message_status_friend_date)
         TextView date;
@@ -193,6 +202,51 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
             holder.seekBar.setVisibility(View.GONE);
         }
 
+        if(audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) {
+            holder.shareImageButton.setVisibility(View.VISIBLE);
+        } else {
+            holder.shareImageButton.setVisibility(View.INVISIBLE);
+        }
+
+        holder.shareImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String fileName = audioItem.getFilename();
+                File file = new File(mActivity.getFilesDir() + "/" + fileName);
+
+                try {
+                    //Create file in download directory to share
+                    File shareFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "RoosterShareFile.mp3");
+
+                    //Check if directory exists, if not try create it
+                    if(shareFile.getParentFile().exists() || shareFile.getParentFile().mkdirs()) {
+
+                        //Copy file contents to new public file
+                        FileUtils.copy(file, shareFile);
+
+                        //If file is valid, open a share dialog
+                        if (shareFile.isFile()) {
+                            Intent intent = new Intent(Intent.ACTION_SEND);
+                            intent.putExtra(Intent.EXTRA_STREAM,
+                                    Uri.fromFile(shareFile));
+                            intent.setType("audio/*");
+                            mActivity.startActivity(Intent.createChooser(intent, "Share audio"));
+                            shareFile.deleteOnExit();
+                        } else {
+                            Toaster.makeToast(mActivity, "Failed to share audio", Toast.LENGTH_SHORT);
+                        }
+
+                    } else {
+                        Toaster.makeToast(mActivity, "Failed to make directory", Toast.LENGTH_SHORT);
+                    }
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Toaster.makeToast(mActivity, "Failed to share audio", Toast.LENGTH_SHORT);
+                }
+            }
+        });
+
         if(fragmentType.equals(Constants.MESSAGE_STATUS_RECEIVED_FRAGMENT_TYPE_FAVOURITE)
                 && holder.seekBar.getVisibility() != View.VISIBLE) {
 
@@ -255,7 +309,7 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
         holder.imgProfilePic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                holder.listenImageButton.callOnClick();
+                holder.favouriteImageButton.callOnClick();
             }
         });
 

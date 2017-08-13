@@ -15,6 +15,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.roostermornings.android.firebase.FirebaseNetwork;
 import com.roostermornings.android.sqldata.AudioTableHelper;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.RoosterUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ public class AudioTableManager {
         this.context = context;
     }
 
-    public Boolean insertSocialAudioFile(DeviceAudioQueueItem queue) {
+    public Boolean insertSocialAudioFile(DeviceAudioQueueItem audioItem) {
 
         SQLiteDatabase db = initDB();
 
@@ -47,15 +48,15 @@ public class AudioTableManager {
 
         //Type defines whether the audio file is a channel or social Rooster
         values.put(AudioTableEntry.COLUMN_TYPE, Constants.AUDIO_TYPE_SOCIAL);
-        values.put(AudioTableEntry.COLUMN_FAVOURITE, Constants.AUDIO_TYPE_FAVOURITE_FALSE);
-        values.put(AudioTableEntry.COLUMN_FILENAME, queue.getFilename());
-        values.put(AudioTableEntry.COLUMN_QUEUE_ID, queue.getQueue_id());
+        values.put(AudioTableEntry.COLUMN_FAVOURITE, audioItem.getFavourite());
+        values.put(AudioTableEntry.COLUMN_FILENAME, audioItem.getFilename());
+        values.put(AudioTableEntry.COLUMN_QUEUE_ID, audioItem.getQueue_id());
 
-        values.put(AudioTableEntry.COLUMN_SENDER_ID, queue.getSender_id());
-        values.put(AudioTableEntry.COLUMN_NAME, queue.getName());
-        values.put(AudioTableEntry.COLUMN_PICTURE, queue.getPicture());
-        values.put(AudioTableEntry.COLUMN_DATE_UPLOADED, queue.getDate_uploaded());
-        values.put(AudioTableEntry.COLUMN_SOURCE_URL, queue.getSource_url());
+        values.put(AudioTableEntry.COLUMN_SENDER_ID, audioItem.getSender_id());
+        values.put(AudioTableEntry.COLUMN_NAME, audioItem.getName());
+        values.put(AudioTableEntry.COLUMN_PICTURE, audioItem.getPicture());
+        values.put(AudioTableEntry.COLUMN_DATE_UPLOADED, audioItem.getDate_uploaded());
+        values.put(AudioTableEntry.COLUMN_SOURCE_URL, audioItem.getSource_url());
         values.put(AudioTableEntry.COLUMN_DATE_CREATED, calendar.getTimeInMillis());
 
         try {
@@ -69,7 +70,7 @@ public class AudioTableManager {
         return true;
     }
 
-    public Boolean insertChannelAudioFile(DeviceAudioQueueItem queue) {
+    public Boolean insertChannelAudioFile(DeviceAudioQueueItem audioItem) {
 
         SQLiteDatabase db = initDB();
 
@@ -77,18 +78,25 @@ public class AudioTableManager {
 
         //Type defines whether the audio file is a channel or social Rooster
         values.put(AudioTableEntry.COLUMN_TYPE, Constants.AUDIO_TYPE_CHANNEL);
-        values.put(AudioTableEntry.COLUMN_FAVOURITE, Constants.AUDIO_TYPE_FAVOURITE_FALSE);
-        values.put(AudioTableEntry.COLUMN_FILENAME, queue.getFilename());
-        values.put(AudioTableEntry.COLUMN_QUEUE_ID, queue.getQueue_id());
+        values.put(AudioTableEntry.COLUMN_FAVOURITE, audioItem.getFavourite());
+        values.put(AudioTableEntry.COLUMN_LISTENED, audioItem.getListened());
+        values.put(AudioTableEntry.COLUMN_FILENAME, audioItem.getFilename());
+        values.put(AudioTableEntry.COLUMN_QUEUE_ID, audioItem.getQueue_id());
 
-        values.put(AudioTableEntry.COLUMN_SENDER_ID, queue.getSender_id());
-        values.put(AudioTableEntry.COLUMN_NAME, queue.getName());
-        values.put(AudioTableEntry.COLUMN_PICTURE, queue.getPicture());
-        values.put(AudioTableEntry.COLUMN_DATE_UPLOADED, queue.getDate_uploaded());
-        values.put(AudioTableEntry.COLUMN_ACTION_TITLE, queue.getAction_title());
-        values.put(AudioTableEntry.COLUMN_ACTION_URL, queue.getAction_url());
-        values.put(AudioTableEntry.COLUMN_SOURCE_URL, queue.getSource_url());
-        values.put(AudioTableEntry.COLUMN_DATE_CREATED, calendar.getTimeInMillis());
+        values.put(AudioTableEntry.COLUMN_SENDER_ID, audioItem.getSender_id());
+        values.put(AudioTableEntry.COLUMN_NAME, audioItem.getName());
+        values.put(AudioTableEntry.COLUMN_PICTURE, audioItem.getPicture());
+        values.put(AudioTableEntry.COLUMN_DATE_UPLOADED, audioItem.getDate_uploaded());
+        values.put(AudioTableEntry.COLUMN_ACTION_TITLE, audioItem.getAction_title());
+        values.put(AudioTableEntry.COLUMN_ACTION_URL, audioItem.getAction_url());
+        values.put(AudioTableEntry.COLUMN_SOURCE_URL, audioItem.getSource_url());
+        //If audioItem has date created entry, use it, otherwise use current time
+        //This is used when cloning a channel audioItem for use in the "Roosters" page
+        if(audioItem.getDate_created() == null) {
+            values.put(AudioTableEntry.COLUMN_DATE_CREATED, calendar.getTimeInMillis());
+        } else {
+            values.put(AudioTableEntry.COLUMN_DATE_CREATED, audioItem.getDate_created());
+        }
 
         try {
             // Inserting Row
@@ -99,6 +107,8 @@ public class AudioTableManager {
         }
         return true;
     }
+
+
 
     public void removeAudioEntry(DeviceAudioQueueItem deviceAudioQueueItem){
         SQLiteDatabase db = initDB();
@@ -121,16 +131,23 @@ public class AudioTableManager {
         db.execSQL(updateQuery);
     }
     
-    public void removeChannelAudioEntries(String channelId) {
+    private void removeChannelAudioEntries(String channelId) {
         SQLiteDatabase db = initDB();
+
+        //If file is not contained in either today or favourite list, delete it
+        ArrayList<DeviceAudioQueueItem> todaysChannels = extractTodayChannelAudioFiles();
+        ArrayList<DeviceAudioQueueItem> favouriteChannels = extractFavouriteChannelAudioFiles();
 
         for (DeviceAudioQueueItem deviceAudioQueueItem:
                 extractAlarmChannelAudioFiles(channelId)) {
-            File file = new File(context.getFilesDir(), deviceAudioQueueItem.getFilename());
-            file.delete();
+            if((todaysChannels == null || todaysChannels.contains(deviceAudioQueueItem))
+                    && (favouriteChannels == null || favouriteChannels.contains(deviceAudioQueueItem)) ) {
+                File file = new File(context.getFilesDir(), deviceAudioQueueItem.getFilename());
+                file.delete();
+            }
         }
 
-        String execSql = "DELETE FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_QUEUE_ID + " = '" + channelId + "' AND " + AudioTableEntry.COLUMN_TYPE + " = " + TRUE + ";";
+        String execSql = "DELETE FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_QUEUE_ID + " = '" + channelId + "' AND " + AudioTableEntry.COLUMN_TYPE + " = " + Constants.AUDIO_TYPE_CHANNEL + ";";
         db.execSQL(execSql);
     }
 
@@ -221,7 +238,36 @@ public class AudioTableManager {
         return deviceAudioQueueItems;
     }
 
-    public void updateDateCreated(int ID) {
+    public ArrayList<DeviceAudioQueueItem> extractTodayChannelAudioFiles() {
+
+        SQLiteDatabase db = initDB();
+
+        String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_TYPE + " = " + Constants.AUDIO_TYPE_CHANNEL + " AND "
+                + AudioTableEntry.COLUMN_DATE_CREATED + " > " + (calendar.getTimeInMillis() - Constants.TIME_MILLIS_1_DAY)
+                + " AND " + AudioTableEntry.COLUMN_LISTENED + " = " + TRUE + ";";
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        ArrayList<DeviceAudioQueueItem> deviceAudioQueueItems = extractAudioFiles(cursor);
+        cursor.close();
+
+        return deviceAudioQueueItems;
+    }
+
+    public ArrayList<DeviceAudioQueueItem> extractFavouriteChannelAudioFiles() {
+
+        SQLiteDatabase db = initDB();
+
+        String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_TYPE + " = " + Constants.AUDIO_TYPE_CHANNEL + " AND "
+                + AudioTableEntry.COLUMN_FAVOURITE + " = " + Constants.AUDIO_TYPE_FAVOURITE_TRUE  + ";";
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        ArrayList<DeviceAudioQueueItem> deviceAudioQueueItems = extractAudioFiles(cursor);
+        cursor.close();
+
+        return deviceAudioQueueItems;
+    }
+
+    private void updateDateCreated(int ID) {
         SQLiteDatabase db = initDB();
 
         String updateQuery = "UPDATE " + AudioTableEntry.TABLE_NAME + " SET " + AudioTableEntry.COLUMN_DATE_CREATED + " = " + calendar.getTimeInMillis() + " WHERE " + AudioTableEntry.COLUMN_ID + " = " + ID + ";";
@@ -308,12 +354,40 @@ public class AudioTableManager {
         Cursor cursor = db.rawQuery(selectQuery, null);
 
         if(cursor.getCount() > 0) {
+            //Audio is fresh
             cursor.close();
             return true;
         } else {
+            //Audio is not fresh, remove, and clone if appropriate for display in "Roosters" page
             cursor.close();
+            checkChannelClone(channelId);
             removeChannelAudioEntries(channelId);
             return false;
+        }
+    }
+
+    private void checkChannelClone(String channelId) {
+        SQLiteDatabase db = initDB();
+
+        String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_TYPE + " = " + Constants.AUDIO_TYPE_CHANNEL + " AND " + AudioTableEntry.COLUMN_QUEUE_ID + " LIKE \"%" + channelId + "%\"" +
+                " AND " + AudioTableEntry.COLUMN_LISTENED + " = " + TRUE +
+                " AND (" + AudioTableEntry.COLUMN_DATE_CREATED + " > " + (calendar.getTimeInMillis() - Constants.TIME_MILLIS_1_DAY) +
+                " OR " + AudioTableEntry.COLUMN_FAVOURITE + " = " + TRUE + ");";
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        ArrayList<DeviceAudioQueueItem> audioItems = extractAudioFiles(cursor);
+
+        if(cursor.getCount() > 0) {
+            //Channel is listened, and within day or faovurited, therefore clone before deletion
+
+            //Clone audio item for today's roosters page
+            DeviceAudioQueueItem cloneAudioItem = new DeviceAudioQueueItem(audioItems.get(0));
+            cloneAudioItem.setQueue_id(RoosterUtils.createRandomUID(10));
+            insertChannelAudioFile(cloneAudioItem);
+
+            cursor.close();
+        } else {
+            cursor.close();
         }
     }
 
@@ -325,7 +399,8 @@ public class AudioTableManager {
         // -> no alarms set with matching channel
         SQLiteDatabase db = initDB();
 
-        String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_DATE_CREATED + " < " + (calendar.getTimeInMillis() - Constants.TIME__MILLIS_1_WEEK) + ";";
+        String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_DATE_CREATED + " < " + (calendar.getTimeInMillis() - Constants.TIME__MILLIS_1_WEEK)
+                + " AND " + AudioTableEntry.COLUMN_FAVOURITE + " = " + FALSE + ";";
         Cursor cursor = db.rawQuery(selectQuery, null);
 
         //Find lost children
@@ -412,12 +487,29 @@ public class AudioTableManager {
 
         Cursor cursor = db.rawQuery(selectQuery, null);
         ArrayList<DeviceAudioQueueItem> deviceAudioQueueItems = extractAudioFiles(cursor);
+        cursor.close();
+
+        return deviceAudioQueueItems;
+    }
+
+    public ArrayList<DeviceAudioQueueItem> selectListenedByChannel(String queueId) {
+        SQLiteDatabase db = initDB();
+
+        String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE "
+                + AudioTableEntry.COLUMN_LISTENED + " = " + TRUE +
+                " AND " + AudioTableEntry.COLUMN_TYPE + " = " + Constants.AUDIO_TYPE_CHANNEL +
+                " AND " + AudioTableEntry.COLUMN_QUEUE_ID + " = '" + queueId + "';";
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        ArrayList<DeviceAudioQueueItem> deviceAudioQueueItems = extractAudioFiles(cursor);
+        cursor.close();
 
         return deviceAudioQueueItems;
     }
 
     private ArrayList<DeviceAudioQueueItem> extractAudioFiles(Cursor cursor) {
         ArrayList<DeviceAudioQueueItem> audioList = new ArrayList<>();
+
         if (cursor.moveToFirst()) {
             do {
                 DeviceAudioQueueItem audioFile = new DeviceAudioQueueItem();

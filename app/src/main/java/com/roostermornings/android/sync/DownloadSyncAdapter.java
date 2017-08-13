@@ -34,7 +34,6 @@ import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.Channel;
 import com.roostermornings.android.domain.ChannelRooster;
 import com.roostermornings.android.domain.SocialRooster;
-import com.roostermornings.android.service.FirebaseListenerService;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
@@ -396,7 +395,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
         try {
             //https://firebase.google.com/docs/storage/android/download-files
             final StorageReference audioFileRef = mStorageRef.getStorage().getReferenceFromUrl(channelRooster.getAudio_file_url());
-            final String audioFileUniqueName = Constants.FILENAME_PREFIX_ROOSTER_CONTENT + RoosterUtils.createRandomFileName(5) + ".3gp";
+            final String audioFileUniqueName = Constants.FILENAME_PREFIX_ROOSTER_CONTENT + RoosterUtils.createRandomUID(5) + ".3gp";
 
             Crashlytics.log("Channel pre-download UID: " + channelRooster.getChannel_uid());
 
@@ -473,7 +472,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
         try {
 
             StorageReference audioFileRef = mStorageRef.child("social_rooster_uploads/" + socialRooster.getAudio_file_url());
-            final String audioFileUniqueName = Constants.FILENAME_PREFIX_ROOSTER_CONTENT + RoosterUtils.createRandomFileName(5) + ".3gp";
+            final String audioFileUniqueName = Constants.FILENAME_PREFIX_ROOSTER_CONTENT + RoosterUtils.createRandomUID(5) + ".3gp";
             final DatabaseReference queueRecordReference = mDatabaseRef
                     .child("social_rooster_queue").child(firebaseUser.getUid()).child(socialRooster.getQueue_id());
 

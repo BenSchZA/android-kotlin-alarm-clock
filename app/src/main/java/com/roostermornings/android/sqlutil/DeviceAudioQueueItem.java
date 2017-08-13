@@ -8,6 +8,7 @@ package com.roostermornings.android.sqlutil;
 import com.google.firebase.database.Exclude;
 import com.roostermornings.android.domain.ChannelRooster;
 import com.roostermornings.android.domain.SocialRooster;
+import com.roostermornings.android.util.Constants;
 
 import java.io.Serializable;
 
@@ -24,10 +25,10 @@ public class DeviceAudioQueueItem implements Serializable {
     private String sender_id = "";
     private String name = "";
     private String picture = "";
-    private String listened;
+    private String listened = "0";
     //Type 1 = channel, type 0 = social
     private int type = -1;
-    private int favourite = -1;
+    private int favourite = Constants.AUDIO_TYPE_FAVOURITE_FALSE;
     private String action_title = "";
     private String action_url = "";
     private String source_url = "";
@@ -65,6 +66,24 @@ public class DeviceAudioQueueItem implements Serializable {
         this.action_title = channelRooster.getAction_title();
         this.action_url = channelRooster.getAction_url();
         this.source_url = channelRooster.getAudio_file_url();
+    }
+
+    public DeviceAudioQueueItem(){}
+
+    public DeviceAudioQueueItem(DeviceAudioQueueItem audioQueueItem) {
+        this.queue_id = audioQueueItem.queue_id;
+        this.filename = audioQueueItem.filename;
+        this.date_uploaded = audioQueueItem.date_uploaded;
+        this.sender_id = audioQueueItem.sender_id;
+        this.name = audioQueueItem.name;
+        this.picture = audioQueueItem.picture;
+        this.listened = audioQueueItem.listened;
+        this.type = audioQueueItem.type;
+        this.favourite = audioQueueItem.favourite;
+        this.action_title = audioQueueItem.action_title;
+        this.action_url = audioQueueItem.action_url;
+        this.source_url = audioQueueItem.source_url;
+        this.date_created = audioQueueItem.date_created;
     }
 
     @Exclude
@@ -152,8 +171,6 @@ public class DeviceAudioQueueItem implements Serializable {
     public void setDate_uploaded(Long date_uploaded) {
         this.date_uploaded = date_uploaded;
     }
-
-    public DeviceAudioQueueItem(){}
 
     public int getId() {
         return id;
