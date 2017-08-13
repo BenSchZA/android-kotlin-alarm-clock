@@ -274,14 +274,6 @@ public final class DeviceAlarmController {
         FirebaseNetwork.removeFirebaseAlarm(setId);
     }
 
-    public void removeSetChannelAudio(List<DeviceAlarm> deviceAlarmList) {
-        if (!deviceAlarmList.isEmpty()) {
-            AudioTableManager audioTableManager = new AudioTableManager(context);
-            String channelId = deviceAlarmList.get(0).getChannel();
-            if (channelId != null) audioTableManager.removeChannelAudioEntries(channelId);
-        }
-    }
-
     //Case: local has an alarm that firebase doesn't Result: delete local alarm
     public void syncAlarmSetGlobal(ArrayList<Alarm> firebaseAlarmSets) {
         ArrayList<String> firebaseAlarmSetIDs = new ArrayList<>();

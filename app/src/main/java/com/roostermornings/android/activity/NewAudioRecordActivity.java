@@ -288,7 +288,7 @@ public class NewAudioRecordActivity extends BaseActivity {
             cumulativeAcceptableAmplitudeTime = 0;
             averageAmplitude = 0;
 
-            randomAudioFileName = RoosterUtils.createRandomFileName(5) + Constants.FILENAME_PREFIX_ROOSTER_TEMP_RECORDING + ".3gp";
+            randomAudioFileName = RoosterUtils.createRandomUID(5) + Constants.FILENAME_PREFIX_ROOSTER_TEMP_RECORDING + ".3gp";
 
             if (checkPermission()) {
 

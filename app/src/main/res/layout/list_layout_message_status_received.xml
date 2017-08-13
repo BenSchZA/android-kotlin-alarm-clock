@@ -31,6 +31,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/small_profile_pic_circle" />
+
+        <ImageButton
+            android:id="@+id/audio_favourite"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/message_status_friend_profile_pic"
+            android:layout_alignLeft="@+id/message_status_friend_profile_pic"
+            android:layout_alignRight="@+id/message_status_friend_profile_pic"
+            android:layout_alignTop="@+id/message_status_friend_profile_pic"
+            android:gravity="center"
+            android:layout_margin="@dimen/spacing_normal_large"
+            android:background="@drawable/rooster_audio_favourite_button"
+            android:clickable="true"
+            android:contentDescription="Favourite audio" />
+
     </RelativeLayout>
 
     <LinearLayout
@@ -83,12 +98,13 @@
         android:contentDescription="Play audio" />
 
     <ImageButton
-        android:id="@+id/audio_favourite"
+        android:id="@+id/audio_share"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|right"
-        android:background="@drawable/rooster_audio_favourite_button"
+        android:background="@drawable/ic_share_white_24dp"
         android:clickable="true"
-        android:contentDescription="Favourite audio" />
+        android:contentDescription="Share audio"
+        android:layout_gravity="center_vertical|right"
+        android:visibility="invisible"/>
 
 </LinearLayout>
