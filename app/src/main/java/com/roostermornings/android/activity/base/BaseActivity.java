@@ -517,7 +517,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
         return list.size() > 0;
     }
 
-    public boolean setupToolbar(TextView toolbarTitle, String title) {
+    public Toolbar setupToolbar(TextView toolbarTitle, String title) {
         try {
             Toolbar toolbar = findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
@@ -525,10 +525,10 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
                 getSupportActionBar().setDisplayShowTitleEnabled(false);
             if (toolbarTitle != null && title != null) toolbarTitle.setText(title);
 
-            return true;
+            return toolbar;
         } catch(NullPointerException e) {
             e.printStackTrace();
-            return false;
+            return null;
         }
     }
 

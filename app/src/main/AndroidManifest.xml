@@ -156,9 +156,6 @@
         <service
             android:name=".service.UploadService"
             android:enabled="true" />
-        <service
-            android:name=".service.BackgroundTaskIntentService"
-            android:exported="false" />
 
         <!-- Neither of these services should use exported="false", to ensure they are accessible from other applications via the filter -->
         <service android:name=".service.RoosterFirebaseMessagingService">
@@ -219,7 +216,15 @@
             android:name=".activity.DiscoverFragmentActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="portrait"
-            android:theme="@style/AppThemeDay.NoActionBar" />
+            android:launchMode="singleTop"
+            android:theme="@style/AppThemeDay.NoActionBar">
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable_explore" />
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+        </activity>
 
         <service
             android:name=".sync.DownloadSyncService"

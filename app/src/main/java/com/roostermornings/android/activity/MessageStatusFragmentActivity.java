@@ -19,6 +19,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -94,7 +95,16 @@ public class MessageStatusFragmentActivity extends BaseActivity implements
         setButtonBarSelection();
 
         //Set toolbar title
-        setupToolbar(toolbarTitle, getString(R.string.message_status_activity_title));
+        Toolbar toolbar = setupToolbar(toolbarTitle, getString(R.string.message_status_activity_title));
+        if(toolbar != null) {
+            toolbar.setNavigationIcon(R.drawable.md_nav_back);
+            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    startHomeActivity();
+                }
+            });
+        }
 
         //Create a viewpager with fragments controlled by SectionsPagerAdapter
         createViewPager(mViewPager);
@@ -300,7 +310,8 @@ public class MessageStatusFragmentActivity extends BaseActivity implements
             ((ViewGroup) tabs.getChildAt(position)).setClipChildren(false);
         }
 
-        tabLayout.getTabAt(position).setCustomView(frameLayout);
+        TabLayout.Tab tab = tabLayout.getTabAt(position);
+        if(tab != null) tab.setCustomView(frameLayout);
     }
 
     public void favouriteSocialRooster(int ID, boolean favourite) {
