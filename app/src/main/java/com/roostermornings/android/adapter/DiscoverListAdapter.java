@@ -12,6 +12,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -20,8 +22,10 @@ import android.widget.TextView;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.DiscoverFragmentActivity;
+import com.roostermornings.android.domain.User;
 import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.domain.ChannelRooster;
+import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -30,7 +34,7 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapter.ViewHolder> {
+public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapter.ViewHolder> implements Filterable {
     private ArrayList<ChannelRooster> mDataset;
     private Activity mActivity;
     private Context context;
@@ -69,6 +73,11 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
     public void add(int position, ChannelRooster item) {
         mDataset.add(position, item);
         notifyItemInserted(position);
+    }
+
+    public void refreshAll(ArrayList<ChannelRooster> myDataset) {
+        mDataset = myDataset;
+        notifyDataSetChanged();
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
@@ -171,6 +180,44 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
     @Override
     public int getItemCount() {
         return mDataset.size();
+    }
+
+    @Override
+    public Filter getFilter() {
+
+        final Filter filter = new Filter() {
+
+            @SuppressWarnings("unchecked")
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+
+                mDataset = (ArrayList<ChannelRooster>) results.values;
+                notifyDataSetChanged();
+            }
+
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+
+                FilterResults results = new FilterResults();
+                ArrayList<ChannelRooster> filteredContacts = new ArrayList<>();
+
+                //Perform your search here using the search constraint string
+                constraint = constraint.toString().toLowerCase();
+                for (int i = 0; i < mDataset.size(); i++) {
+                    String contactData = mDataset.get(i).getName();
+                    if (contactData.toLowerCase().contains(constraint.toString()))  {
+                        filteredContacts.add(mDataset.get(i));
+                    }
+                }
+
+                results.count = filteredContacts.size();
+                results.values = filteredContacts;
+
+                return results;
+            }
+        };
+
+        return filter;
     }
 
 }

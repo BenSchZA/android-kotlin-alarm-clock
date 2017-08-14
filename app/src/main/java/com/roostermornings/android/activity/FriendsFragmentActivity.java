@@ -139,7 +139,17 @@ public class FriendsFragmentActivity extends BaseActivity implements
         setButtonBarSelection();
 
         //Set toolbar title
-        setupToolbar(toolbarTitle, getString(R.string.friends));
+        Toolbar toolbar = setupToolbar(toolbarTitle, getString(R.string.friends));
+        if(toolbar != null) {
+            toolbar.setNavigationIcon(R.drawable.md_nav_back);
+            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    startHomeActivity();
+                }
+            });
+        }
+
 
         //Keep local and Firebase alarm dbs synced, and enable offline persistence
         mFriendRequestsReceivedReference = FirebaseDatabase.getInstance().getReference()

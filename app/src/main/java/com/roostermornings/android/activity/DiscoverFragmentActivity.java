@@ -5,7 +5,9 @@
 
 package com.roostermornings.android.activity;
 
+import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -15,7 +17,12 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,6 +40,8 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.DiscoverListAdapter;
+import com.roostermornings.android.adapter.FriendsMyListAdapter;
+import com.roostermornings.android.adapter.MessageStatusReceivedListAdapter;
 import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Channel;
@@ -115,7 +124,16 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                 //Set highlighting of button bar
                 setButtonBarSelection();
                 //Set toolbar title
-                setupToolbar(toolbarTitle, getString(R.string.discover));
+                Toolbar toolbar = setupToolbar(toolbarTitle, getString(R.string.discover));
+                if(toolbar != null) {
+                    toolbar.setNavigationIcon(R.drawable.md_nav_back);
+                    toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            startHomeActivity();
+                        }
+                    });
+                }
 
                 // use this setting to improve performance if you know that changes
                 // in content do not change the layout size of the RecyclerView
@@ -183,6 +201,60 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
         if(oneInstanceTaskFuture != null) oneInstanceTaskFuture.cancel(true);
         clearChannelRoosterMediaChecks();
         mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        handleIntent(intent);
+    }
+
+    private void handleIntent(Intent intent) {
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            //use the query to search your data somehow
+            handleSearch(query);
+        }
+    }
+
+    private void handleSearch(String query) {
+        ((DiscoverListAdapter)mAdapter).refreshAll(channelRoosters);
+        ((DiscoverListAdapter)mAdapter).getFilter().filter(query);
+    }
+
+    public void notifyAdapter() {
+        ((DiscoverListAdapter)mAdapter).refreshAll(channelRoosters);
+        mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_explore, menu);
+
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager =
+                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView =
+                (SearchView) menu.findItem(R.id.search_explore).getActionView();
+        searchView.setSearchableInfo(
+                searchManager.getSearchableInfo(getComponentName()));
+
+        //When searchView is closed, refresh data
+        searchView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+
+            @Override
+            public void onViewDetachedFromWindow(View arg0) {
+                // search was detached/closed
+                notifyAdapter();
+            }
+
+            @Override
+            public void onViewAttachedToWindow(View arg0) {
+                // search was opened
+            }
+        });
+
+        return true;
     }
 
     private void getChannelData() {

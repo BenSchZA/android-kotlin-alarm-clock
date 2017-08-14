@@ -399,7 +399,8 @@ public class AudioTableManager {
         // -> no alarms set with matching channel
         SQLiteDatabase db = initDB();
 
-        String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_DATE_CREATED + " < " + (calendar.getTimeInMillis() - Constants.TIME__MILLIS_1_WEEK)
+        String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_TYPE + " = " + Constants.AUDIO_TYPE_CHANNEL
+                + " AND " + AudioTableEntry.COLUMN_DATE_CREATED + " < " + (calendar.getTimeInMillis() - Constants.TIME__MILLIS_1_WEEK)
                 + " AND " + AudioTableEntry.COLUMN_FAVOURITE + " = " + FALSE + ";";
         Cursor cursor = db.rawQuery(selectQuery, null);
 
@@ -436,7 +437,7 @@ public class AudioTableManager {
     public Boolean isSocialAudioInDatabase(String socialId) {
         SQLiteDatabase db = initDB();
 
-        String selectQuery = "SELECT 1 FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_TYPE + " = " + FALSE + " AND " + AudioTableEntry.COLUMN_QUEUE_ID + " LIKE \"%" + socialId + "%\";";
+        String selectQuery = "SELECT 1 FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_TYPE + " = " + Constants.AUDIO_TYPE_SOCIAL + " AND " + AudioTableEntry.COLUMN_QUEUE_ID + " LIKE \"%" + socialId + "%\";";
 
         Cursor cursor = db.rawQuery(selectQuery, null);
 
