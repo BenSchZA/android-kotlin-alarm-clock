@@ -33,9 +33,11 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
+import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.fragment.message_status.MessageStatusReceivedFragment1;
 import com.roostermornings.android.fragment.message_status.MessageStatusSentFragment2;
 import com.roostermornings.android.sqlutil.AudioTableManager;
+import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.FontsOverride;
 
@@ -314,13 +316,19 @@ public class MessageStatusFragmentActivity extends BaseActivity implements
         if(tab != null) tab.setCustomView(frameLayout);
     }
 
-    public void favouriteSocialRooster(int ID, boolean favourite) {
-        audioTableManager.setFavourite(ID, favourite);
+    public void favouriteRooster(DeviceAudioQueueItem audioItem, boolean favourite) {
+        audioTableManager.setFavourite(audioItem.getId(), favourite);
 
         if(mViewPager.getCurrentItem() == 0) {
             messageStatusFragment2.manualSwipeRefresh();
         } else if(mViewPager.getCurrentItem() == 1) {
             messageStatusFragment1.manualSwipeRefresh();
+        }
+
+        if(audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) {
+            FA.Log(FA.Event.roosters_channel_favourite.class, FA.Event.roosters_channel_favourite.Param.channel_title, audioItem.getName());
+        } else {
+            FA.Log(FA.Event.roosters_social_favourite.class, null, null);
         }
     }
 }

@@ -6,17 +6,23 @@
 package com.roostermornings.android.activity;
 
 import android.accounts.Account;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.graphics.drawable.VectorDrawableCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -50,6 +56,8 @@ import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sync.DownloadSyncAdapter;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.InternetHelper;
+import com.roostermornings.android.util.LifeCycle;
 import com.roostermornings.android.util.StrUtils;
 import com.roostermornings.android.util.Toaster;
 
@@ -91,12 +99,18 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
     private BroadcastReceiver receiver;
 
+    Toolbar toolbar;
+
     @Inject DeviceAlarmController deviceAlarmController;
     @Inject DeviceAlarmTableManager deviceAlarmTableManager;
     @Inject AudioTableManager audioTableManager;
     @Inject BaseApplication baseApplication;
     @Inject @Nullable FirebaseUser firebaseUser;
     @Inject Account mAccount;
+    @Inject
+    SharedPreferences sharedPreferences;
+    @Inject
+    LifeCycle lifeCycle;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -122,11 +136,14 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         //Final context to be used in threads
         final Context context = this;
 
-        //Download any social or channel audio files
-        ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
-
         //Set shared pref to indicate whether mobile number is valid
         FirebaseNetwork.flagValidMobileNumber(this, false);
+
+        //Check if first entry
+        lifeCycle.performInception();
+
+        //Download any social or channel audio files
+        ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
 
         swipeRefreshLayout.setRefreshing(true);
         /*
@@ -140,6 +157,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                         // This method performs the actual data-refresh operation.
                         // The method calls setRefreshing(false) when it's finished.
                         refreshAlarms();
+                        refreshDownloadIndicator();
                     }
                 }
         );
@@ -154,7 +172,9 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                 //Animate FAB with pulse
                 buttonAddAlarm.setAnimation(AnimationUtils.loadAnimation(context, R.anim.pulse));
                 //Set toolbar title
-                setupToolbar(toolbarTitle, getString(R.string.my_alarms));
+                toolbar = setupToolbar(toolbarTitle, getString(R.string.my_alarms));
+                //Set download indicator
+                refreshDownloadIndicator();
 
                 //Set up adapter for monitoring alarm objects
                 mAdapter = new MyAlarmsListAdapter(mAlarms, MyAlarmsFragmentActivity.this);
@@ -222,6 +242,65 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
         //Refresh alarms list from background thread
         refreshAlarms();
+    }
+
+    private void refreshDownloadIndicator() {
+        if(toolbar != null) {
+
+            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    refreshDownloadIndicator();
+                    //Download any social or channel audio files
+                    ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
+                }
+            });
+
+            if(deviceAlarmTableManager.getNextPendingAlarm() == null
+                    || deviceAlarmTableManager.isNextPendingAlarmSynced()) {
+                toolbar.setNavigationIcon(R.drawable.ic_cloud_done_white_24dp);
+            } else if(!InternetHelper.noInternetConnection(this)) {
+                animateRefreshDownloadIndicator();
+            } else {
+                toolbar.setNavigationIcon(R.drawable.ic_cloud_off_white_24dp);
+            }
+
+            //Listen for channel download complete notices
+            DownloadSyncAdapter.setOnChannelDownloadListener(new DownloadSyncAdapter.OnChannelDownloadListener() {
+                @Override
+                public void onChannelDownloadStarted(String channelId) {
+                    if (!deviceAlarmTableManager.isNextPendingAlarmSynced()) {
+                        animateRefreshDownloadIndicator();
+                    }
+                }
+
+                @Override
+                public void onChannelDownloadComplete(boolean valid, String channelId) {
+                    if (deviceAlarmTableManager.isNextPendingAlarmSynced()) {
+                        toolbar.setNavigationIcon(R.drawable.ic_cloud_done_white_24dp);
+                    }
+                }
+            });
+        }
+
+        //Download any social or channel audio files
+        ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
+    }
+
+    private void animateRefreshDownloadIndicator() {
+        Drawable drawableDownloadIndicator = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_cloud_download_white_24dp, null);
+        if(drawableDownloadIndicator != null) {
+            toolbar.setNavigationIcon(drawableDownloadIndicator);
+
+            ObjectAnimator animator = ObjectAnimator.
+                    ofPropertyValuesHolder(
+                            drawableDownloadIndicator,
+                            PropertyValuesHolder.ofInt("alpha", 255, 120));
+            animator.setDuration(1000);
+            animator.setRepeatCount(ObjectAnimator.INFINITE);
+            animator.setRepeatMode(ObjectAnimator.REVERSE);
+            animator.start();
+        }
     }
 
     private void refreshAlarms() {
@@ -397,6 +476,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         //Update notification of pending social roosters
         updateRoosterNotification();
         toggleAlarmFiller();
+        refreshDownloadIndicator();
     }
 
     public void deleteAlarm(final String alarmId) {

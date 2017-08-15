@@ -37,6 +37,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.Theme;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.MessageStatusFragmentActivity;
+import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.FileUtils;
@@ -232,6 +233,12 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
                             intent.setType("audio/*");
                             mActivity.startActivity(Intent.createChooser(intent, "Share audio"));
                             shareFile.deleteOnExit();
+
+                            if(audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) {
+                                FA.Log(FA.Event.roosters_channel_share.class, FA.Event.roosters_channel_share.Param.channel_title, audioItem.getName());
+                            } else {
+                                FA.Log(FA.Event.roosters_social_share.class, null, null);
+                            }
                         } else {
                             Toaster.makeToast(mActivity, "Failed to share audio", Toast.LENGTH_SHORT);
                         }
@@ -284,10 +291,10 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
 
                 if(audioItem.isPlaying()) {
                     holder.listenImageButton.setSelected(false);
-                    pauseSocialRooster(audioItem);
+                    pauseRooster(audioItem);
                 } else {
                     holder.listenImageButton.setSelected(true);
-                    playSocialRooster(audioItem);
+                    playRooster(audioItem);
                 }
             }
         });
@@ -330,7 +337,7 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
                                     @Override
                                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                         holder.favouriteImageButton.setSelected(false);
-                                        ((MessageStatusFragmentActivity)mActivity).favouriteSocialRooster(audioItem.getId(), false);
+                                        ((MessageStatusFragmentActivity)mActivity).favouriteRooster(audioItem, false);
                                         final Handler handler = new Handler();
                                         handler.postDelayed(new Runnable() {
                                             @Override
@@ -347,13 +354,15 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
                     } else {
 
                         holder.favouriteImageButton.setSelected(false);
-                        ((MessageStatusFragmentActivity)mActivity).favouriteSocialRooster(audioItem.getId(), false);
+                        audioItem.setFavourite(Constants.AUDIO_TYPE_FAVOURITE_FALSE);
+                        ((MessageStatusFragmentActivity)mActivity).favouriteRooster(audioItem, false);
 
                     }
                 } else {
 
                     holder.favouriteImageButton.setSelected(true);
-                    ((MessageStatusFragmentActivity)mActivity).favouriteSocialRooster(audioItem.getId(), true);
+                    audioItem.setFavourite(Constants.AUDIO_TYPE_FAVOURITE_TRUE);
+                    ((MessageStatusFragmentActivity)mActivity).favouriteRooster(audioItem, true);
 
                 }
             }
@@ -511,7 +520,7 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
         }
     };
 
-    private void playSocialRooster(final DeviceAudioQueueItem audioItem) {
+    private void playRooster(final DeviceAudioQueueItem audioItem) {
 
         Boolean isPaused = !mediaPlayer.isPlaying() && mediaPlayer.getCurrentPosition() > 1;
         if(isPaused && currentMediaPlayerSourceID == audioItem.getId()) {
@@ -553,6 +562,12 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
                     });
 
                     mediaPlayer.start();
+
+                    if(audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) {
+                        FA.Log(FA.Event.roosters_channel_play.class, FA.Event.roosters_channel_play.Param.channel_title, audioItem.getName());
+                    } else {
+                        FA.Log(FA.Event.roosters_social_play.class, null, null);
+                    }
                 }
             });
 
@@ -570,7 +585,7 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
         }
     }
 
-    private void pauseSocialRooster(DeviceAudioQueueItem audioItem) {
+    private void pauseRooster(DeviceAudioQueueItem audioItem) {
         mediaPlayer.pause();
         audioItem.setPaused(true);
         audioItem.setPlaying(false);
