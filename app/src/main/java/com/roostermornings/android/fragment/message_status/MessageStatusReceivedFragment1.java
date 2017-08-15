@@ -138,7 +138,6 @@ public class MessageStatusReceivedFragment1 extends BaseFragment {
         // Inflate the layout for this fragment
         View view = initiate(inflater, R.layout.fragment_message_status_1, container, false);
 
-        swipeRefreshLayout.setRefreshing(true);
         /*
         * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
         * performs a swipe-to-refresh gesture.
