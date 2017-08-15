@@ -162,7 +162,6 @@ public class FriendsInviteFragment3 extends BaseFragment {
             }
         });
 
-
         swipeRefreshLayout.setRefreshing(true);
         /*
         * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
@@ -378,6 +377,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
 
                             //Sort names alphabetically before notifying adapter
                             sortNamesFriends(mAddableContacts);
+                            new ProcessInvitableBackground().execute("");
                         }
 
                         Log.d("apiResponse", apiResponse.toString());
@@ -396,7 +396,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
         }
 
         protected void onPostExecute(String result) {
-            new ProcessInvitableBackground().execute("");
+
         }
     }
 

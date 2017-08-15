@@ -40,8 +40,6 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.DiscoverListAdapter;
-import com.roostermornings.android.adapter.FriendsMyListAdapter;
-import com.roostermornings.android.adapter.MessageStatusReceivedListAdapter;
 import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Channel;
@@ -54,6 +52,7 @@ import com.roostermornings.android.util.Toaster;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -83,8 +82,12 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
     public static final String TAG = DiscoverFragmentActivity.class.getSimpleName();
 
     private DatabaseReference mChannelsReference;
+    private DatabaseReference mChannelRoostersReference;
+    private ArrayList<ChannelRooster> tempChannelRoosters = new ArrayList<>();
     private ArrayList<ChannelRooster> channelRoosters = new ArrayList<>();
     private Map<Integer, List<ChannelRooster>> channelRoosterMap = new TreeMap<>(Collections.reverseOrder());
+    private HashMap<Channel, Integer> channelIterationMap = new HashMap<>();
+
     private Channel lastChannel;
 
     private MediaPlayer mediaPlayer = new MediaPlayer();
@@ -96,6 +99,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
     @Inject AudioTableManager audioTableManager;
     @Inject BaseApplication AppContext;
     @Inject SharedPreferences sharedPreferences;
+    @Inject JSONPersistence jsonPersistence;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -158,7 +162,13 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
             }
         }.run();
 
-        swipeRefreshLayout.setRefreshing(true);
+        if(!jsonPersistence.getChannelRoosters().isEmpty()) {
+            channelRoosters.addAll(jsonPersistence.getChannelRoosters());
+            mAdapter.notifyDataSetChanged();
+        } else if(checkInternetConnection()) {
+            if(!swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(true);
+        }
+
         /*
         * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
         * performs a swipe-to-refresh gesture.
@@ -201,6 +211,9 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
         if(oneInstanceTaskFuture != null) oneInstanceTaskFuture.cancel(true);
         clearChannelRoosterMediaChecks();
         mAdapter.notifyDataSetChanged();
+
+        //Persist channel roosters for seamless loading
+        jsonPersistence.setChannelRoosters(channelRoosters);
     }
 
     @Override
@@ -262,52 +275,52 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                 .child("channels");
         mChannelsReference.keepSynced(true);
 
+        //Clear old data before syncing
         //Must be called outside thread, or use mThis context to access
-        channelRoosters.clear();
+        tempChannelRoosters.clear();
         channelRoosterMap.clear();
+        channelIterationMap.clear();
 
-        new Thread() {
+        ValueEventListener channelsListener = new ValueEventListener() {
             @Override
-            public void run() {
-
-                ValueEventListener channelsListener = new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        Iterator iterator = dataSnapshot.getChildren().iterator();
-                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                            final Channel channel = postSnapshot.getValue(Channel.class);
-                            if (channel.isActive()) {
-                                if(channel.isNew_alarms_start_at_first_iteration()) {
-                                    Integer iteration = new JSONPersistence(getApplicationContext()).getStoryIteration(channel.getUid());
-                                    if(iteration == null || iteration <= 0) iteration = 1;
-                                    getChannelRoosterData(channel, iteration);
-                                } else {
-                                    Integer iteration = channel.getCurrent_rooster_cycle_iteration();
-                                    if(iteration == null || iteration <= 0) iteration = 1;
-                                    getChannelRoosterData(channel, iteration);
-                                }
-                            }
-                            //When the iterator is at it's last element, save the last channel so that we know when to refresh adapter list
-                            iterator.next();
-                            if(!iterator.hasNext()){
-                                lastChannel = channel;
-                            }
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                    final Channel channel = postSnapshot.getValue(Channel.class);
+                    if (channel.isActive()) {
+                        if(channel.isNew_alarms_start_at_first_iteration()) {
+                            Integer iteration = jsonPersistence.getStoryIteration(channel.getUid());
+                            if(iteration == null || iteration <= 0) iteration = 1;
+                            channelIterationMap.put(channel, iteration);
+                        } else {
+                            Integer iteration = channel.getCurrent_rooster_cycle_iteration();
+                            if(iteration == null || iteration <= 0) iteration = 1;
+                            channelIterationMap.put(channel, iteration);
                         }
                     }
+                }
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                        Toaster.makeToast(AppContext, "Failed to load channel.", Toast.LENGTH_SHORT).checkTastyToast();
-                    }
-                };
-                mChannelsReference.addListenerForSingleValueEvent(channelsListener);
+                //Attach listeners all at once, so that last listener indicates data sync complete
+                for (Map.Entry<Channel, Integer> entry:
+                     channelIterationMap.entrySet()) {
+                    getChannelRoosterData(entry.getKey(), entry.getValue());
+                }
+
+                mChannelRoostersReference = FirebaseDatabase.getInstance().getReference()
+                        .child("channel_rooster_uploads");
 
                 //https://stackoverflow.com/questions/34530566/find-out-if-child-event-listener-on-firebase-completely-load-all-data
                 //Value events are always triggered last and are guaranteed to contain updates from any other events which occurred before that snapshot was taken.
-                mChannelsReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                mChannelRoostersReference.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
+
+                        //When finished, add temp data to adapter array
+                        if(!channelRoosters.equals(tempChannelRoosters)) {
+                            channelRoosters.clear();
+                            channelRoosters.addAll(tempChannelRoosters);
+                            mAdapter.notifyDataSetChanged();
+                        }
+
                         swipeRefreshLayout.setRefreshing(false);
                     }
 
@@ -317,7 +330,14 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                     }
                 });
             }
-        }.run();
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+                Toaster.makeToast(AppContext, "Failed to load channel.", Toast.LENGTH_SHORT).checkTastyToast();
+            }
+        };
+        mChannelsReference.addListenerForSingleValueEvent(channelsListener);
     }
 
     private void getChannelRoosterData(final Channel channel, final Integer iteration) {
@@ -329,7 +349,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
         ValueEventListener channelRoosterUploadsListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                TreeMap<Integer,ChannelRooster> channelIterationMap = new TreeMap<>();
+                TreeMap<Integer,ChannelRooster> channelRoosterIterationMap = new TreeMap<>();
                 //Check if node has children i.e. channelId content exists
                 if(dataSnapshot.getChildrenCount() == 0) return;
                 //Iterate over all content children
@@ -343,14 +363,12 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
 
                     //Only place non-current iterations into the map, to ensure we don't play current iteration in discover
                     if(channelRooster.isActive() && (channelRooster.getRooster_cycle_iteration() != iteration)) {
-                        channelIterationMap.put(channelRooster.getRooster_cycle_iteration(), channelRooster);
+                        channelRoosterIterationMap.put(channelRooster.getRooster_cycle_iteration(), channelRooster);
                     }
                 }
-                if(!channelIterationMap.isEmpty() && iteration != null) {
-                    findNextValidChannelRooster(channelIterationMap, channel, iteration);
+                if(!channelRoosterIterationMap.isEmpty() && iteration != null) {
+                    findNextValidChannelRooster(channelRoosterIterationMap, channel, iteration);
                 }
-                //Only refresh on last item to ensure clean update
-                //if(channel.getUid().equals(lastChannel.getUid())) refreshChannelRoosters();
             }
 
             @Override
@@ -361,20 +379,20 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
         channelRoosterUploadsReference.addListenerForSingleValueEvent(channelRoosterUploadsListener);
     }
 
-    private void findNextValidChannelRooster(final TreeMap<Integer,ChannelRooster> channelIterationMap, final Channel channel, final Integer iteration) {
+    private void findNextValidChannelRooster(final TreeMap<Integer,ChannelRooster> channelRoosterIterationMap, final Channel channel, final Integer iteration) {
         new Thread() {
             @Override
             public void run() {
                 //Check head and tail of naturally sorted TreeMap for next valid channel content
-                SortedMap<Integer,ChannelRooster> tailMap = channelIterationMap.tailMap(iteration);
-                SortedMap<Integer,ChannelRooster> headMap = channelIterationMap.headMap(iteration);
+                SortedMap<Integer,ChannelRooster> tailMap = channelRoosterIterationMap.tailMap(iteration);
+                SortedMap<Integer,ChannelRooster> headMap = channelRoosterIterationMap.headMap(iteration);
                 //        head               tail
                 //  00000000000000[0]  x   00000000
-                // We want to select [] where x is the current iteration, !NOT! included in the channelIterationMap - this ensures best content for discover
+                // We want to select [] where x is the current iteration, !NOT! included in the channelRoosterIterationMap - this ensures best content for discover
                 // Or   x   0000000[0]  in the case of a story that is unstarted or a channel on first iteration
                 if(!headMap.isEmpty()) {
                     //Retrieve channel audio
-                    ChannelRooster channelRooster = channelIterationMap.get(headMap.lastKey());
+                    ChannelRooster channelRooster = channelRoosterIterationMap.get(headMap.lastKey());
                     channelRooster.setSelected(false);
                     //This method allows multiple objects per key
                     if(channelRoosterMap.containsKey(channel.getPriority())) {
@@ -386,7 +404,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                     }
                 } else if(!tailMap.isEmpty()) {
                     //Retrieve channel audio
-                    ChannelRooster channelRooster = channelIterationMap.get(tailMap.lastKey());
+                    ChannelRooster channelRooster = channelRoosterIterationMap.get(tailMap.lastKey());
                     channelRooster.setSelected(false);
                     //This method allows multiple objects per key
                     if(channelRoosterMap.containsKey(channel.getPriority())) {
@@ -398,24 +416,23 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                     }
                 }
                 //For each channel rooster fetched, refresh the display list
-                refreshChannelRoosters();
+                refreshTempChannelRoosters();
             }
         }.run();
     }
 
-    private void refreshChannelRoosters() {
+    private void refreshTempChannelRoosters() {
         new Thread() {
             @Override
             public void run() {
                 //TreeMap ensures unique and allows sorting by priority! How cool is that?
-                channelRoosters.clear();
+                tempChannelRoosters.clear();
                 //This method allows us to have multiple objects per priority key
                 List<ChannelRooster> values = new ArrayList<>();
                 for(List<ChannelRooster> channelRoosterList : channelRoosterMap.values()) {
                     values.addAll(channelRoosterList);
                 }
-                if(!values.isEmpty()) channelRoosters.addAll(values);
-                mAdapter.notifyDataSetChanged();
+                if(!values.isEmpty()) tempChannelRoosters.addAll(values);
             }
         }.run();
     }

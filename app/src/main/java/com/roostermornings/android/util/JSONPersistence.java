@@ -12,8 +12,11 @@ import android.preference.PreferenceManager;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import com.roostermornings.android.domain.Alarm;
+import com.roostermornings.android.domain.ChannelRooster;
 import com.roostermornings.android.domain.Contact;
 import com.roostermornings.android.domain.User;
+import com.roostermornings.android.sqlutil.DeviceAlarm;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -28,6 +31,8 @@ public class JSONPersistence {
     private static final String KEY_USER_FRIENDS_ARRAY = "KEY_USER_FRIENDS_ARRAY";
     private static final String KEY_USER_INVITABLE_CONTACTS_ARRAY = "KEY_USER_INVITABLE_CONTACTS_ARRAY";
     private static final String KEY_USER_CONTACTS_NUMBER_NAME_PAIRS_MAP = "KEY_USER_CONTACTS_NUMBER_NAME_PAIRS_MAP";
+    private static final String KEY_CHANNEL_ROOSTERS_ARRAY = "KEY_CHANNEL_ROOSTERS_ARRAY";
+    private static final String KEY_ALARMS_ARRAY = "KEY_ALARMS_ARRAY";
 
     private Context context;
 
@@ -132,6 +137,68 @@ public class JSONPersistence {
         if(mUsers == null) return;
         try {
             putJSONString(KEY_USER_FRIENDS_ARRAY, gson.toJson(mUsers));
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public ArrayList<ChannelRooster> getChannelRoosters() {
+        ArrayList<ChannelRooster> returnArray = new ArrayList<>();
+        try {
+            if(getJSONString(KEY_CHANNEL_ROOSTERS_ARRAY) != null) {
+                Type type = new TypeToken<ArrayList<ChannelRooster>>(){}.getType();
+                if(gson.fromJson(getJSONString(KEY_CHANNEL_ROOSTERS_ARRAY), type) != null) {
+                    return gson.fromJson(getJSONString(KEY_CHANNEL_ROOSTERS_ARRAY), type);
+                } else {
+                    return returnArray;
+                }
+            } else {
+                return returnArray;
+            }
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+            return returnArray;
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return returnArray;
+        }
+    }
+
+    public void setChannelRoosters(ArrayList<ChannelRooster> mRoosters) {
+        if(mRoosters == null) return;
+        try {
+            putJSONString(KEY_CHANNEL_ROOSTERS_ARRAY, gson.toJson(mRoosters));
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public ArrayList<Alarm> getAlarms() {
+        ArrayList<Alarm> returnArray = new ArrayList<>();
+        try {
+            if(getJSONString(KEY_ALARMS_ARRAY) != null) {
+                Type type = new TypeToken<ArrayList<Alarm>>(){}.getType();
+                if(gson.fromJson(getJSONString(KEY_ALARMS_ARRAY), type) != null) {
+                    return gson.fromJson(getJSONString(KEY_ALARMS_ARRAY), type);
+                } else {
+                    return returnArray;
+                }
+            } else {
+                return returnArray;
+            }
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+            return returnArray;
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return returnArray;
+        }
+    }
+
+    public void setAlarms(ArrayList<Alarm> mAlarms) {
+        if(mAlarms == null) return;
+        try {
+            putJSONString(KEY_ALARMS_ARRAY, gson.toJson(mAlarms));
         } catch (IllegalStateException e) {
             e.printStackTrace();
         }

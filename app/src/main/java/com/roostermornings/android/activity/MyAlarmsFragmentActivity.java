@@ -57,6 +57,7 @@ import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sync.DownloadSyncAdapter;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.InternetHelper;
+import com.roostermornings.android.util.JSONPersistence;
 import com.roostermornings.android.util.LifeCycle;
 import com.roostermornings.android.util.StrUtils;
 import com.roostermornings.android.util.Toaster;
@@ -111,6 +112,8 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     SharedPreferences sharedPreferences;
     @Inject
     LifeCycle lifeCycle;
+    @Inject
+    JSONPersistence jsonPersistence;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -125,6 +128,13 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         updateRequestNotification();
         //Setup day/night theme selection (based on settings, and time)
         setDayNightTheme();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        //Persist alarms for seamless loading
+        jsonPersistence.setAlarms(mAlarms);
     }
 
     @Override
@@ -145,7 +155,6 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         //Download any social or channel audio files
         ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
 
-        swipeRefreshLayout.setRefreshing(true);
         /*
         * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
         * performs a swipe-to-refresh gesture.
@@ -182,6 +191,14 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                 RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(context);
                 mRecyclerView.setLayoutManager(mLayoutManager);
                 mRecyclerView.setAdapter(mAdapter);
+
+                //Check for, and load, persisted data
+                if(!jsonPersistence.getAlarms().isEmpty()) {
+                    mAlarms.addAll(jsonPersistence.getAlarms());
+                    mAdapter.notifyDataSetChanged();
+                } else if(checkInternetConnection()) {
+                    if(!swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(true);
+                }
 
                 //Log new crashlytics user
                 if(firebaseUser != null) {

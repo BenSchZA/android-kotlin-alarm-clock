@@ -183,20 +183,22 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
             holder.txtInitials.setText(RoosterUtils.getInitials(audioItem.getName()));
         }
 
-        //Remove padding so that seekbar thumb aligns with text view
-        holder.seekBar.setPadding(0, 0, 0, 0);
-        //"Attach" the seekbar to a unique audio item
-        holder.seekBar.setId(audioItem.getId());
-        //Set the maximum value to the audio item length
-        holder.seekBar.setMax(0);
-        holder.seekBar.setMax(getAudioItemLength(audioItem.getId()) / 1000);
-        //Listen for seekbar progress updates, and mediaPlayer.seekTo()
-        holder.seekBar.setOnSeekBarChangeListener(onSeekBarChangeListener);
-        //Add the seekbar to a unique ArrayList
-        addUniqueSeekBar(holder.seekBar);
+        if(getSeekBarByID(audioItem.getId()) == null) {
+            //Remove padding so that seekbar thumb aligns with text view
+            holder.seekBar.setPadding(0, 0, 0, 0);
+            //"Attach" the seekbar to a unique audio item
+            holder.seekBar.setId(audioItem.getId());
+            //Set the maximum value to the audio item length
+            holder.seekBar.setMax(0);
+            holder.seekBar.setMax(getAudioItemLength(audioItem.getId()) / 1000);
+            //Listen for seekbar progress updates, and mediaPlayer.seekTo()
+            holder.seekBar.setOnSeekBarChangeListener(onSeekBarChangeListener);
+            //Add the seekbar to a unique ArrayList
+            addUniqueSeekBar(holder.seekBar);
+        }
 
         //If audioitem is active, make seekbar visible
-        if(audioItem.isPlaying() || audioItem.isPaused()) {
+        if (audioItem.isPlaying() || audioItem.isPaused()) {
             holder.seekBar.setVisibility(View.VISIBLE);
         } else {
             holder.seekBar.setProgress(0);
@@ -504,8 +506,13 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
             if(fromUser && audioItem != null) {
                 mediaPlayer.seekTo(progress * 1000);
                 mediaPlayer.start();
+                if(audioItem.isPaused()) {
+                    mHandler.removeCallbacks(runnable);
+                    mHandler.postDelayed(runnable, 1000);
+                }
                 audioItem.setPaused(false);
                 audioItem.setPlaying(true);
+                clearAudioArtifacts(audioItem);
             }
         }
 
@@ -529,6 +536,7 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
             audioItem.setPlaying(true);
             mHandler.removeCallbacks(runnable);
             mHandler.postDelayed(runnable, 1000);
+            clearAudioArtifacts(audioItem);
             return;
         } else {
             audioItem.setPaused(false);
