@@ -274,6 +274,21 @@ public class DeviceAlarmTableManager {
                 && audioTableManager.isChannelAudioInDatabase(nextPendingAlarm.getChannel());
     }
 
+    public boolean isAlarmTableEmpty() {
+        SQLiteDatabase db = initDB();
+
+        String selectQuery = "SELECT 1 FROM " + AlarmTableEntry.TABLE_NAME + ";";
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if(cursor.getCount() > 0) {
+            cursor.close();
+            return false;
+        } else {
+            cursor.close();
+            return true;
+        }
+    }
+
     public DeviceAlarm getNextPendingSocialAlarm() {
         SQLiteDatabase db = initDB();
 

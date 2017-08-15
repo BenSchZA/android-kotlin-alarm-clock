@@ -245,7 +245,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     }
 
     private void refreshDownloadIndicator() {
-        if(toolbar != null) {
+        if(toolbar != null && !deviceAlarmTableManager.isAlarmTableEmpty()) {
 
             toolbar.setNavigationOnClickListener(new View.OnClickListener() {
                 @Override
@@ -281,6 +281,8 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                     }
                 }
             });
+        } else if(toolbar != null) {
+            toolbar.setNavigationIcon(null);
         }
 
         //Download any social or channel audio files
@@ -486,6 +488,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
             //Update notification of pending social roosters
             updateRoosterNotification();
             toggleAlarmFiller();
+            refreshDownloadIndicator();
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
