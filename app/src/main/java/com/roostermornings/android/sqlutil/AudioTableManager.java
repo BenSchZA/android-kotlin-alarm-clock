@@ -297,8 +297,11 @@ public class AudioTableManager {
         String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_TYPE + " = " + TRUE + " AND " + AudioTableEntry.COLUMN_QUEUE_ID + " = " + "'" + channelQueueId + "'" + ";";
 
         Cursor cursor = db.rawQuery(selectQuery, null);
+        ArrayList<DeviceAudioQueueItem> audioItems = extractAudioFiles(cursor);
 
-        return extractAudioFiles(cursor);
+        cursor.close();
+
+        return audioItems;
     }
 
     private ArrayList<DeviceAudioQueueItem> extractAllChannelAudioFiles() {
@@ -307,8 +310,11 @@ public class AudioTableManager {
         String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_TYPE + " = " + TRUE + ";";
 
         Cursor cursor = db.rawQuery(selectQuery, null);
+        ArrayList<DeviceAudioQueueItem> audioItems = extractAudioFiles(cursor);
 
-        return extractAudioFiles(cursor);
+        cursor.close();
+
+        return audioItems;
     }
 
     public ArrayList<String> extractAllAudioFileNames() {
@@ -343,6 +349,23 @@ public class AudioTableManager {
         } else {
             cursor.close();
             return false;
+        }
+    }
+
+    public DeviceAudioQueueItem extractChannelAudioItem(String channelId) {
+        SQLiteDatabase db = initDB();
+
+        String selectQuery = "SELECT * FROM " + AudioTableEntry.TABLE_NAME + " WHERE " + AudioTableEntry.COLUMN_TYPE + " = " + Constants.AUDIO_TYPE_CHANNEL + " AND " + AudioTableEntry.COLUMN_QUEUE_ID + " LIKE \"%" + channelId + "%\" LIMIT 1;";
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        ArrayList<DeviceAudioQueueItem> audioItems = extractAudioFiles(cursor);
+        cursor.close();
+
+        if(!audioItems.isEmpty()) {
+            return audioItems.get(0);
+        } else {
+            return null;
         }
     }
 
@@ -415,6 +438,8 @@ public class AudioTableManager {
             String oldChannelAudioID = oldChannelAudio.getQueue_id();
             if(!alarmChannels.contains(oldChannelAudioID)) removeChannelAudioEntries(oldChannelAudioID);
         }
+
+        cursor.close();
     }
 
     public void purgeStagnantSocialAudio() {

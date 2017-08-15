@@ -45,7 +45,9 @@ import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.service.RoosterFirebaseMessagingService;
 import com.roostermornings.android.service.UploadService;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
+import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sync.DownloadSyncAdapter;
+import com.roostermornings.android.util.LifeCycle;
 
 /**
  * Annotates an interface or abstract class for which a fully-formed, dependency-injected implementation
@@ -99,6 +101,8 @@ public interface RoosterApplicationComponent {
 
     void inject(FA roosterClass);
     void inject(DeviceAlarmController roosterClass);
+    void inject(DeviceAlarmTableManager roosterClass);
+    void inject(LifeCycle roosterClass);
 
     void inject(DownloadSyncAdapter adapter);
     void inject(MyAlarmsListAdapter adapter);

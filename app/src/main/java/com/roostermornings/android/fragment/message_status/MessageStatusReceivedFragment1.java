@@ -21,6 +21,7 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.adapter.MessageStatusReceivedListAdapter;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
+import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
@@ -114,6 +115,11 @@ public class MessageStatusReceivedFragment1 extends BaseFragment {
 
         //Retrieve DeviceAudioQueueItems to display
         retrieveSocialAudioItems();
+
+        //Log how many favourites the user has
+        if(fragmentType.equals(Constants.MESSAGE_STATUS_RECEIVED_FRAGMENT_TYPE_FAVOURITE)) {
+            FA.SetUserProp(FA.UserProp.user_favourites.class, String.valueOf(mRoosters.size()));
+        }
     }
 
     @Override

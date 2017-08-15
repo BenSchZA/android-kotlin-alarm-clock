@@ -78,6 +78,17 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
     @Inject AudioTableManager audioTableManager;
     @Inject DeviceAlarmTableManager deviceAlarmTableManager;
 
+    private static OnChannelDownloadListener onChannelDownloadListener;
+
+    public interface OnChannelDownloadListener {
+        void onChannelDownloadStarted(String channelId);
+        void onChannelDownloadComplete(boolean valid, String channelId);
+    }
+
+    public static void setOnChannelDownloadListener(OnChannelDownloadListener listener) {
+        onChannelDownloadListener = listener;
+    }
+
     public static Bundle getForceBundle() {
         Bundle forceBundle = new Bundle();
         forceBundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
@@ -275,6 +286,8 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
                                     }
                                 }
 
+                                if(channelIterationMap.isEmpty()) return;
+
                                 //Check head and tail of naturally sorted TreeMap for next valid channel content
                                 Integer actualIterationKey;
                                 //Check if iteration is valid in the context of channelIterationMap keys
@@ -375,7 +388,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
         executor.execute(new oneInstanceTask());
     }
 
-    private void retrieveChannelContentAudio(final ChannelRooster channelRooster, final Context context) {
+    public void retrieveChannelContentAudio(final ChannelRooster channelRooster, final Context context) {
 
         if(channelRooster == null) return;
         if(channelRooster.getChannel_uid() == null) return;
@@ -390,7 +403,13 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
         //mAudioTableManager.setChannelAudioFileName(channelRooster.getChannel_uid(), audioFileUniqueName);
 
         if(channelSyncActive) return;
-        if(audioTableManager.isChannelAudioURLFresh(channelRooster.getChannel_uid(), channelRooster.getAudio_file_url())) return;
+        if(audioTableManager.isChannelAudioURLFresh(channelRooster.getChannel_uid(), channelRooster.getAudio_file_url())) {
+            //Notify any listeners
+            if(onChannelDownloadListener != null)
+                onChannelDownloadListener.onChannelDownloadComplete(true, channelRooster.getChannel_uid());
+
+            return;
+        }
 
         try {
             //https://firebase.google.com/docs/storage/android/download-files
@@ -403,6 +422,11 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
             if(StrUtils.notNullOrEmpty(channelRooster.getPhoto())) Picasso.with(getApplicationContext()).load(channelRooster.getPhoto()).fetch();
 
             channelSyncActive = true;
+
+            //Notify any listeners
+            if(onChannelDownloadListener != null)
+                onChannelDownloadListener.onChannelDownloadStarted(channelRooster.getChannel_uid());
+
             audioFileRef.getBytes(Constants.MAX_ROOSTER_FILE_SIZE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                 @Override
                 public void onSuccess(byte[] bytes) {
@@ -429,11 +453,13 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
                         audioTableManager.insertChannelAudioFile(deviceAudioQueueItem);
                         Crashlytics.log("insertChannelAudioFile() completed");
 
-                        Toaster.makeToast(context, "Successfully downloaded", Toast.LENGTH_SHORT);
-
                         //Send broadcast message to notify all receivers of download finished
                         Intent intent = new Intent(Constants.ACTION_CHANNEL_DOWNLOAD_FINISHED);
                         getApplicationContext().sendBroadcast(intent);
+
+                        //Notify any listeners
+                        if(onChannelDownloadListener != null)
+                            onChannelDownloadListener.onChannelDownloadComplete(true, channelRooster.getChannel_uid());
 
                         channelSyncActive = false;
                     } catch (Exception e) {
@@ -485,8 +511,6 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
                         outputStream = context.openFileOutput(audioFileUniqueName, Context.MODE_PRIVATE);
                         outputStream.write(bytes);
                         outputStream.close();
-
-                        Toaster.makeToast(context, "Successfully downloaded", Toast.LENGTH_SHORT);
 
                         //Create new object for storing in SQL db
                         DeviceAudioQueueItem deviceAudioQueueItem = new DeviceAudioQueueItem();

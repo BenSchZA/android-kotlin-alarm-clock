@@ -32,6 +32,9 @@ public abstract class FA {
             public final static String started_explore_playback = "started_explore_playback";
             public final static String no = "no";
         }
+        public abstract class user_favourites {
+
+        }
     }
 
     public abstract static class Event {
@@ -128,6 +131,18 @@ public abstract class FA {
                 public final static String channel_title = "channel_title";
                 public final static String action_url = "action_url";
             }
+        }
+        public abstract class roosters_channel_favourite extends channel_selected {
+        }
+        public abstract class roosters_channel_share extends channel_selected {
+        }
+        public abstract class roosters_channel_play extends channel_selected {
+        }
+        public abstract class roosters_social_favourite {
+        }
+        public abstract class roosters_social_share {
+        }
+        public abstract class roosters_social_play {
         }
         public abstract class memory_warning {
             public abstract class Param {

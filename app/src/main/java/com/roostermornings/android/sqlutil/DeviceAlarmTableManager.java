@@ -11,9 +11,12 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.sqldata.DeviceAlarmTableHelper;
 
 import java.util.ArrayList;
+
+import javax.inject.Inject;
 
 import static com.roostermornings.android.sqldata.DeviceAlarmTableContract.AlarmTableEntry;
 
@@ -28,6 +31,8 @@ public class DeviceAlarmTableManager {
     private DeviceAlarm alarm;
     private Context context;
 
+    @Inject AudioTableManager audioTableManager;
+
     //SQL Arguments
     private String TrueFalse = "0";
     private final static String TRUE = "1";
@@ -36,6 +41,7 @@ public class DeviceAlarmTableManager {
     public DeviceAlarmTableManager(Context context) {
         this.context = context;
         alarm = new DeviceAlarm();
+        BaseApplication.getRoosterApplicationComponent().inject(this);
     }
 
     Boolean insertAlarm(DeviceAlarm alarm, String setId) {
@@ -259,6 +265,13 @@ public class DeviceAlarmTableManager {
 
         cursor.close();
         return alarmList.get(0);
+    }
+
+    public boolean isNextPendingAlarmSynced() {
+        DeviceAlarm nextPendingAlarm = getNextPendingAlarm();
+
+        return nextPendingAlarm != null
+                && audioTableManager.isChannelAudioInDatabase(nextPendingAlarm.getChannel());
     }
 
     public DeviceAlarm getNextPendingSocialAlarm() {
