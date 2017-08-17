@@ -231,8 +231,9 @@ public class NewAudioFriendsActivity extends BaseActivity {
         //0 indicates that service should not be restarted
         bindService(intent, mUploadServiceConnection, 0);
 
-        //Switch to message status activity
+        //Switch to message status activity, set action to change to relevant tab
         Intent roostersSentIntent = new Intent(this, MessageStatusFragmentActivity.class);
+        roostersSentIntent.setAction(Constants.ACTION_FROM_ROOSTER_SEND);
         startActivity(roostersSentIntent);
 
         Intent finishRecordActivityIntent = new Intent(Constants.FINISH_AUDIO_RECORD_ACTIVITY);

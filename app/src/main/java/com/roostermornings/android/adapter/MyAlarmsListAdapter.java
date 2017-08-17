@@ -28,8 +28,10 @@ import com.afollestad.materialdialogs.Theme;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
+import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.domain.Alarm;
+import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.StrUtils;
@@ -52,6 +54,8 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
 
     @Inject @Named("default")
     SharedPreferences defaultSharedPreferences;
+    @Inject
+    AudioTableManager audioTableManager;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -225,52 +229,14 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
         holder.roosterNotificationParent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mActivity instanceof MyAlarmsFragmentActivity) {
-
-                    String dialogText = "Social roosters are voice notes from your friends that wake you up.";
-                    switch (alarm.getUnseen_roosters()){
-                        case 0:
-                            dialogText = "Social roosters are voice notes from your friends that wake you up.";
-                            break;
-                        case 1:
-                            dialogText = "You have received " + String.valueOf(alarm.getUnseen_roosters()) + " rooster from a friend to wake you up.";
-                            break;
-                        default:
-                            dialogText = "You have received " + String.valueOf(alarm.getUnseen_roosters()) + " roosters from friends to wake you up.";
-                            break;
-                    }
-
-                    new MaterialDialog.Builder(mActivity)
-                            .theme(Theme.LIGHT)
-                            .content(dialogText)
-                            .show();
-                }
+                BaseActivity.showAlarmSocialRoostersExplainer(context, alarm, alarm.getUnseen_roosters());
             }
         });
 
         holder.roosterNotificationPerson.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mActivity instanceof MyAlarmsFragmentActivity) {
-
-                    String dialogText = "Social roosters are voice notes from your friends that wake you up.";
-                    switch (alarm.getUnseen_roosters()){
-                        case 0:
-                            dialogText = "Social roosters are voice notes from your friends that wake you up.";
-                            break;
-                        case 1:
-                            dialogText = "You have received " + String.valueOf(alarm.getUnseen_roosters()) + " rooster from a friend to wake you up.";
-                            break;
-                        default:
-                            dialogText = "You have received " + String.valueOf(alarm.getUnseen_roosters()) + " roosters from friends to wake you up.";
-                            break;
-                    }
-
-                    new MaterialDialog.Builder(mActivity)
-                            .theme(Theme.LIGHT)
-                            .content(dialogText)
-                            .show();
-                }
+                BaseActivity.showAlarmSocialRoostersExplainer(context, alarm, alarm.getUnseen_roosters());
             }
         });
 

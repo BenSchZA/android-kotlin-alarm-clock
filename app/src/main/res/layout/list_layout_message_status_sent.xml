@@ -17,16 +17,16 @@
             android:id="@+id/txtInitials"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/message_status_friend_profile_pic"
-            android:layout_alignLeft="@+id/message_status_friend_profile_pic"
-            android:layout_alignRight="@+id/message_status_friend_profile_pic"
-            android:layout_alignTop="@+id/message_status_friend_profile_pic"
+            android:layout_alignBottom="@+id/message_status_profile_pic"
+            android:layout_alignLeft="@+id/message_status_profile_pic"
+            android:layout_alignRight="@+id/message_status_profile_pic"
+            android:layout_alignTop="@+id/message_status_profile_pic"
             android:gravity="center"
             android:text="@string/text_name_initials"
             android:textColor="@color/white" />
 
         <ImageView
-            android:id="@+id/message_status_friend_profile_pic"
+            android:id="@+id/message_status_profile_pic"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/small_profile_pic_circle" />

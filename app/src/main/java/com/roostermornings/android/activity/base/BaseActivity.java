@@ -56,6 +56,7 @@ import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.activity.NewAudioRecordActivity;
 import com.roostermornings.android.activity.SplashActivity;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
+import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.node_api.IHTTPClient;
@@ -535,7 +536,12 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
     @Optional
     @OnClick(R.id.home_my_alarms)
     public void manageMyAlarm() {
-        startHomeActivity();
+        Integer roosterCount = audioTableManager.countUnheardSocialAudioFiles();
+        if(this instanceof MyAlarmsFragmentActivity && roosterCount > 0 && deviceAlarmTableManager.getNextPendingAlarm() == null) {
+            showAlarmSocialRoostersExplainer(this, null, roosterCount);
+        } else {
+            startHomeActivity();
+        }
     }
 
     @Optional
@@ -561,6 +567,34 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
     @OnClick(R.id.home_my_uploads)
     public void manageUploads() {
         startActivity(new Intent(this, MessageStatusFragmentActivity.class));
+    }
+
+    public static void showAlarmSocialRoostersExplainer(Context context, @Nullable Alarm alarm, Integer count) {
+        if (context instanceof MyAlarmsFragmentActivity) {
+
+            //If accessed from button bar
+            if(alarm != null) {
+                count = alarm.getUnseen_roosters();
+            }
+
+            String dialogText = "Social roosters are voice notes from your friends that wake you up.";
+            switch (count){
+                case 0:
+                    dialogText = "Social roosters are voice notes from your friends that wake you up.";
+                    break;
+                case 1:
+                    dialogText = "You have received " + String.valueOf(count) + " rooster from a friend to wake you up.";
+                    break;
+                default:
+                    dialogText = "You have received " + String.valueOf(count) + " roosters from friends to wake you up.";
+                    break;
+            }
+
+            new MaterialDialog.Builder(context)
+                    .theme(Theme.LIGHT)
+                    .content(dialogText)
+                    .show();
+        }
     }
 
     public void updateRoosterNotification() {
