@@ -12,11 +12,10 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
-import android.net.Uri;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
+import android.support.v4.content.FileProvider;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.widget.RecyclerView;
@@ -58,6 +57,8 @@ import java.util.Locale;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static java.text.DateFormat.getDateTimeInstance;
+
 public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<MessageStatusReceivedListAdapter.ViewHolder> implements Filterable {
     private ArrayList<DeviceAudioQueueItem> mDataset = new ArrayList<>();
     private Activity mActivity;
@@ -74,7 +75,7 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        @BindView(R.id.message_status_friend_profile_pic)
+        @BindView(R.id.message_status_profile_pic)
         ImageView imgProfilePic;
 
         @BindView(R.id.message_status_friend_profile_name)
@@ -205,11 +206,12 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
             holder.seekBar.setVisibility(View.GONE);
         }
 
-        if(audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) {
-            holder.shareImageButton.setVisibility(View.VISIBLE);
-        } else {
-            holder.shareImageButton.setVisibility(View.INVISIBLE);
-        }
+        holder.shareImageButton.setVisibility(View.VISIBLE);
+//        if(audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) {
+//            holder.shareImageButton.setVisibility(View.VISIBLE);
+//        } else {
+//            holder.shareImageButton.setVisibility(View.INVISIBLE);
+//        }
 
         holder.shareImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -219,7 +221,10 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
 
                 try {
                     //Create file in download directory to share
-                    File shareFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "RoosterShareFile.mp3");
+
+                    File shareFilePath = new File(context.getFilesDir(), "Media");
+                    String shareFileName = "RoosterShareFile.mp3";
+                    File shareFile = new File(shareFilePath, shareFileName);
 
                     //Check if directory exists, if not try create it
                     if(shareFile.getParentFile().exists() || shareFile.getParentFile().mkdirs()) {
@@ -231,10 +236,9 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
                         if (shareFile.isFile()) {
                             Intent intent = new Intent(Intent.ACTION_SEND);
                             intent.putExtra(Intent.EXTRA_STREAM,
-                                    Uri.fromFile(shareFile));
+                                    FileProvider.getUriForFile(context, "com.roostermornings.android.fileprovider", shareFile));
                             intent.setType("audio/*");
                             mActivity.startActivity(Intent.createChooser(intent, "Share audio"));
-                            shareFile.deleteOnExit();
 
                             if(audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) {
                                 FA.Log(FA.Event.roosters_channel_share.class, FA.Event.roosters_channel_share.Param.channel_title, audioItem.getName());

@@ -240,6 +240,22 @@ public class MessageStatusFragmentActivity extends BaseActivity implements
 
         // Set up the ViewPager with the sections adapter.
         mViewPager.setAdapter(mSectionsPagerAdapter);
+
+        //Switch to relevant tab
+        Intent receivedIntent = getIntent();
+        if(receivedIntent != null) {
+            String intentAction = receivedIntent.getAction();
+            if(intentAction != null) {
+                switch (intentAction) {
+                    case Constants.ACTION_FROM_ROOSTER_SEND:
+                        //Smooth scroll to item 2 of [0,1,2]
+                        mViewPager.setCurrentItem(2, true);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
     }
 
     /**

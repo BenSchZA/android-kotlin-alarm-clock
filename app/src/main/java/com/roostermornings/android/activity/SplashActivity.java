@@ -7,7 +7,12 @@ package com.roostermornings.android.activity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.v4.content.FileProvider;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -20,8 +25,20 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.MinimumRequirements;
+import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.FileUtils;
 import com.roostermornings.android.util.InternetHelper;
+import com.roostermornings.android.util.RoosterUtils;
+import com.roostermornings.android.util.Toaster;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Date;
+
+import static java.text.DateFormat.getDateTimeInstance;
 
 public class SplashActivity extends BaseActivity {
 
@@ -36,6 +53,10 @@ public class SplashActivity extends BaseActivity {
 //        RateThisApp.showRateDialogIfNeeded(this);
 //    }
 
+    Intent receivedIntent;
+    String receivedAction;
+    String receivedType;
+
     @Override
     protected void inject(RoosterApplicationComponent component) {
         component.inject(this);
@@ -44,6 +65,72 @@ public class SplashActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        receivedIntent = getIntent();
+        if(receivedIntent != null) {
+            receivedAction = receivedIntent.getAction();
+            receivedType = receivedIntent.getType();
+
+            if(receivedAction.equals(Intent.ACTION_SEND)) {
+                if(receivedType.startsWith("audio/")) {
+                    Uri receivedUri = receivedIntent.getParcelableExtra(Intent.EXTRA_STREAM);
+                    if(receivedUri != null) {
+
+                        File shareFilePath = new File(getCacheDir(), "Cache");
+                        String timeStamp = getDateTimeInstance().format(new Date());
+                        String shareFileName = "Rooster_Shared_Audio_" + RoosterUtils.createRandomUID(5) + "_" + timeStamp + ".3gp";
+                        File shareFile = new File(shareFilePath, shareFileName);
+
+                        if(shareFile.getParentFile().exists() || shareFile.getParentFile().mkdirs()) {
+
+                            try {
+                                InputStream inputStream = getContentResolver().openInputStream(receivedUri);
+                                //Copy file contents to new public file
+                                FileUtils.copyFromStream(inputStream, shareFile);
+
+                                //If file is valid, open a share dialog
+                                if (shareFile.isFile() && shareFile.length() < Constants.MAX_ROOSTER_FILE_SIZE) {
+                                    //Uri shareFileUri = FileProvider.getUriForFile(this, "com.roostermornings.android.fileprovider", shareFile);
+                                    //Send audio file to friends selection activity
+                                    Intent intent = new Intent(SplashActivity.this, NewAudioFriendsActivity.class);
+                                    Bundle bun = new Bundle();
+                                    bun.putString(Constants.EXTRA_LOCAL_FILE_STRING, shareFile.getPath());
+                                    intent.putExtras(bun);
+                                    startActivity(intent);
+                                    return;
+                                } else {
+                                    Toaster.makeToast(this, "File is greater than 8 MB, or is corrupt.", Toast.LENGTH_LONG);
+                                    finish();
+                                    return;
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            } else if(receivedAction.equals(Intent.ACTION_MAIN)) {
+
+            }
+            startMain();
+        }
+    }
+
+    private long getAudioDuration(File audioFile) {
+        long duration = 0;
+
+        if(audioFile != null) {
+            MediaMetadataRetriever metadataRetriever = new MediaMetadataRetriever();
+            metadataRetriever.setDataSource(audioFile.getPath());
+            String durationStr = metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+            if(durationStr != null) {
+                duration = Long.parseLong(durationStr);
+            }
+        }
+        return duration;
+    }
+
+    private void startMain() {
         if(!InternetHelper.noInternetConnection(this)) {
             checkMinimumRequirements();
         } else {

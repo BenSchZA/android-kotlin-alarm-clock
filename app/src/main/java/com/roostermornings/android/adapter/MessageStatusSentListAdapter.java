@@ -40,7 +40,7 @@ public class MessageStatusSentListAdapter extends RecyclerView.Adapter<MessageSt
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        @BindView(R.id.message_status_friend_profile_pic)
+        @BindView(R.id.message_status_profile_pic)
         ImageView imgProfilePic;
 
         @BindView(R.id.message_status_friend_profile_name)

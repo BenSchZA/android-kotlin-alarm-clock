@@ -95,7 +95,8 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     @BindView(R.id.swiperefresh)
     SwipeRefreshLayout swipeRefreshLayout;
 
-    private final ArrayList<Alarm> mAlarms = new ArrayList<>();
+    private ArrayList<Alarm> mAlarms = new ArrayList<>();
+    private ArrayList<Alarm> mTempAlarms = new ArrayList<>();
     private RecyclerView.Adapter mAdapter;
 
     private BroadcastReceiver receiver;
@@ -325,7 +326,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     private void refreshAlarms() {
 
         //Clear old content
-        mAlarms.clear();
+        mTempAlarms.clear();
 
         DatabaseReference mMyAlarmsReference = FirebaseDatabase.getInstance().getReference()
                 .child("alarms").child(firebaseUser.getUid());
@@ -372,6 +373,12 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                     }
                 }
 
+                //Check if persisted data is fresh
+                if(!mAlarms.equals(mTempAlarms)) {
+                    mAlarms.clear();
+                    mAlarms.addAll(mTempAlarms);
+                }
+
                 //Sort alarms according to time
                 sortAlarms(mAlarms);
                 toggleAlarmFiller();
@@ -382,6 +389,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                 deviceAlarmController.syncAlarmSetGlobal(mAlarms);
 
                 //Load content and stop refresh indicator
+                mAdapter.notifyDataSetChanged();
                 swipeRefreshLayout.setRefreshing(false);
                 //Configure rooster notification indicator
                 updateRoosterNotification();
@@ -409,8 +417,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         }
 
         //Add alarm to adapter display arraylist and notify adapter of change
-        mAlarms.add(alarm);
-        mAdapter.notifyItemInserted(mAlarms.size() - 1);
+        mTempAlarms.add(alarm);
     }
 
     @Override

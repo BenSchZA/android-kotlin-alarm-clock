@@ -22,6 +22,7 @@ public class Constants {
     //Intent actions
     public final static String ACTION_CANCEL_SNOOZE = "rooster.android.intent.action.CANCEL_SNOOZE";
     public final static String ACTION_SHARE_ROOSTER_CHOSEN = "rooster.android.intent.action.ACTION_SHARE_ROOSTER_CHOSEN";
+    public final static String ACTION_FROM_ROOSTER_SEND = "rooster.android.intent.action.ACTION_FROM_ROOSTER_SEND";
 
     //AudioTable
     public final static int AUDIO_TYPE_SOCIAL = 0;
