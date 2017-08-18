@@ -89,7 +89,7 @@ public class SplashActivity extends BaseActivity {
                                 FileUtils.copyFromStream(inputStream, shareFile);
 
                                 //If file is valid, open a share dialog
-                                if (shareFile.isFile() && shareFile.length() < Constants.MAX_ROOSTER_FILE_SIZE) {
+                                if (shareFile.isFile() && validMimeType(shareFile) && shareFile.length() < Constants.MAX_ROOSTER_FILE_SIZE) {
                                     //Uri shareFileUri = FileProvider.getUriForFile(this, "com.roostermornings.android.fileprovider", shareFile);
                                     //Send audio file to friends selection activity
                                     Intent intent = new Intent(SplashActivity.this, NewAudioFriendsActivity.class);
@@ -105,6 +105,9 @@ public class SplashActivity extends BaseActivity {
                                 }
                             } catch (IOException e) {
                                 e.printStackTrace();
+                                Toaster.makeToast(this, "Error loading file.", Toast.LENGTH_LONG);
+                                finish();
+                                return;
                             }
                         }
                     }
@@ -128,6 +131,23 @@ public class SplashActivity extends BaseActivity {
             }
         }
         return duration;
+    }
+
+    private boolean validMimeType(File audioFile) {
+        if(audioFile != null) {
+            MediaMetadataRetriever metadataRetriever = new MediaMetadataRetriever();
+            metadataRetriever.setDataSource(audioFile.getPath());
+            String mimeTypeStr = metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE);
+            if(mimeTypeStr != null &&
+                    (mimeTypeStr.contains("audio/mpeg")
+                    || mimeTypeStr.contains("audio/mp4")
+                    || mimeTypeStr.contains("audio/3gpp"))) {
+                return true;
+            } else if(mimeTypeStr != null) {
+                Toaster.makeToast(this, "Invalid audio mime-type " + mimeTypeStr, Toast.LENGTH_SHORT);
+            }
+        }
+        return false;
     }
 
     private void startMain() {

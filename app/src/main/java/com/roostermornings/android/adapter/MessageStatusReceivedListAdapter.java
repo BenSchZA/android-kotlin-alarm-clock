@@ -20,6 +20,7 @@ import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -71,7 +73,7 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
     private Runnable runnable;
     private int currentMediaPlayerSourceID = -1;
 
-    private ArrayList<SeekBar> seekBarArray = new ArrayList<>();
+    private SparseArray<SeekBar> seekBarArray = new SparseArray<>();
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -184,19 +186,17 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
             holder.txtInitials.setText(RoosterUtils.getInitials(audioItem.getName()));
         }
 
-        if(getSeekBarByID(audioItem.getId()) == null) {
-            //Remove padding so that seekbar thumb aligns with text view
-            holder.seekBar.setPadding(0, 0, 0, 0);
-            //"Attach" the seekbar to a unique audio item
-            holder.seekBar.setId(audioItem.getId());
-            //Set the maximum value to the audio item length
-            holder.seekBar.setMax(0);
-            holder.seekBar.setMax(getAudioItemLength(audioItem.getId()) / 1000);
-            //Listen for seekbar progress updates, and mediaPlayer.seekTo()
-            holder.seekBar.setOnSeekBarChangeListener(onSeekBarChangeListener);
-            //Add the seekbar to a unique ArrayList
-            addUniqueSeekBar(holder.seekBar);
-        }
+        //Remove padding so that seekbar thumb aligns with text view
+        holder.seekBar.setPadding(0, 0, 0, 0);
+        //"Attach" the seekbar to a unique audio item
+        holder.seekBar.setId(audioItem.getId());
+        //Set the maximum value to the audio item length
+        holder.seekBar.setMax(0);
+        holder.seekBar.setMax(getAudioItemLength(audioItem.getId()) / 1000);
+        //Listen for seekbar progress updates, and mediaPlayer.seekTo()
+        holder.seekBar.setOnSeekBarChangeListener(onSeekBarChangeListener);
+        //Add the seekbar to a unique ArrayList
+        addUniqueSeekBar(holder.seekBar);
 
         //If audioitem is active, make seekbar visible
         if (audioItem.isPlaying() || audioItem.isPaused()) {
@@ -207,11 +207,6 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
         }
 
         holder.shareImageButton.setVisibility(View.VISIBLE);
-//        if(audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) {
-//            holder.shareImageButton.setVisibility(View.VISIBLE);
-//        } else {
-//            holder.shareImageButton.setVisibility(View.INVISIBLE);
-//        }
 
         holder.shareImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -483,23 +478,16 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
     }
 
     private void addUniqueSeekBar(SeekBar seekBar) {
-        for (SeekBar sb:
-             seekBarArray) {
-            if(sb.getId() == seekBar.getId()) {
-                seekBarArray.remove(sb);
-                seekBarArray.add(seekBar);
-                return;
-            }
+        if(seekBarArray.get(seekBar.getId()) != null) {
+            seekBarArray.remove(seekBar.getId());
+            seekBarArray.put(seekBar.getId(), seekBar);
+        } else {
+            seekBarArray.put(seekBar.getId(), seekBar);
         }
-        seekBarArray.add(seekBar);
     }
 
-    private SeekBar getSeekBarByID(int ID) {
-        for (SeekBar seekBar:
-                seekBarArray) {
-            if(seekBar.getId() == ID) return seekBar;
-        }
-        return null;
+    private SeekBar getSeekBarByID(Integer ID) {
+        return seekBarArray.get(ID);
     }
 
     private SeekBar.OnSeekBarChangeListener onSeekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
@@ -513,10 +501,10 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
                 if(audioItem.isPaused()) {
                     mHandler.removeCallbacks(runnable);
                     mHandler.postDelayed(runnable, 1000);
+                    audioItem.setPaused(false);
+                    audioItem.setPlaying(true);
+                    clearAudioArtifacts(audioItem);
                 }
-                audioItem.setPaused(false);
-                audioItem.setPlaying(true);
-                clearAudioArtifacts(audioItem);
             }
         }
 
