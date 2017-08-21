@@ -55,11 +55,12 @@ import com.roostermornings.android.activity.MessageStatusFragmentActivity;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.activity.NewAudioRecordActivity;
 import com.roostermornings.android.activity.SplashActivity;
+import com.roostermornings.android.apis.GoogleIHTTPClient;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.fragment.base.BaseFragment;
-import com.roostermornings.android.node_api.IHTTPClient;
+import com.roostermornings.android.apis.NodeIHTTPClient;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.service.FirebaseListenerService;
 import com.roostermornings.android.sqlutil.AudioTableManager;
@@ -215,11 +216,19 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
     }
 
     @Override
-    public IHTTPClient apiService() {
+    public NodeIHTTPClient nodeApiService() {
 
         BaseApplication baseApplication = (BaseApplication) getApplication();
 
-        return baseApplication.getAPIService();
+        return baseApplication.getNodeAPIService();
+    }
+
+    @Override
+    public GoogleIHTTPClient googleApiService() {
+
+        BaseApplication baseApplication = (BaseApplication) getApplication();
+
+        return baseApplication.getGoogleAPIService();
     }
 
     @Override

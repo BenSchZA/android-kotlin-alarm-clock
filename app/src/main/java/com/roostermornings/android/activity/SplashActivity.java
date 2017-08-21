@@ -71,8 +71,8 @@ public class SplashActivity extends BaseActivity {
             receivedAction = receivedIntent.getAction();
             receivedType = receivedIntent.getType();
 
-            if(receivedAction.equals(Intent.ACTION_SEND)) {
-                if(receivedType.startsWith("audio/")) {
+            if(receivedAction != null && receivedAction.equals(Intent.ACTION_SEND)) {
+                if(receivedType != null && receivedType.startsWith("audio/")) {
                     Uri receivedUri = receivedIntent.getParcelableExtra(Intent.EXTRA_STREAM);
                     if(receivedUri != null) {
 
@@ -112,7 +112,7 @@ public class SplashActivity extends BaseActivity {
                         }
                     }
                 }
-            } else if(receivedAction.equals(Intent.ACTION_MAIN)) {
+            } else if(receivedAction != null && receivedAction.equals(Intent.ACTION_MAIN)) {
 
             }
             startMain();

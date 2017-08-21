@@ -70,6 +70,7 @@ import static com.roostermornings.android.util.Constants.ACCOUNT_TYPE;
 public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
 
     private boolean channelSyncActive;
+    private boolean socialSyncActive;
 
     //Firebase SDK
     @Inject @Nullable FirebaseUser firebaseUser;
@@ -493,14 +494,18 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
 
         if(socialRooster == null) return;
 
+        if(socialSyncActive) return;
+
         if(audioTableManager.isSocialAudioInDatabase(socialRooster.getQueue_id())) return;
 
         try {
 
-            StorageReference audioFileRef = mStorageRef.child("social_rooster_uploads/" + socialRooster.getAudio_file_url());
+            final StorageReference audioFileRef = mStorageRef.child("social_rooster_uploads/" + socialRooster.getAudio_file_url());
             final String audioFileUniqueName = Constants.FILENAME_PREFIX_ROOSTER_CONTENT + RoosterUtils.createRandomUID(5) + ".3gp";
             final DatabaseReference queueRecordReference = mDatabaseRef
                     .child("social_rooster_queue").child(firebaseUser.getUid()).child(socialRooster.getQueue_id());
+
+            socialSyncActive = true;
 
             audioFileRef.getBytes(Constants.MAX_ROOSTER_FILE_SIZE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                 @Override
@@ -524,16 +529,20 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
 
                         //Pre-cache image to display on alarm screen, in case no internet connection
                         if(!socialRooster.getProfile_pic().isEmpty()) Picasso.with(getApplicationContext()).load(socialRooster.getProfile_pic()).fetch();
-
+                        socialSyncActive = false;
                     } catch (Exception e) {
                         e.printStackTrace();
+                        socialSyncActive = false;
                     }
-
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception exception) {
                     // Handle any errors
+                    Toaster.makeToast(context, "Error downloading rooster.", Toast.LENGTH_SHORT);
+                    //remove record of queue from FB database on error
+                    queueRecordReference.removeValue();
+                    socialSyncActive = false;
                 }
             });
 
