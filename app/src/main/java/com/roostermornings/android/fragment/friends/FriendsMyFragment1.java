@@ -232,7 +232,7 @@ public class FriendsMyFragment1 extends BaseFragment {
     }
 
     private void callNodeMyFriendsAPI() {
-        Call<Users> call = apiService().retrieveUserFriends(firebaseIdToken);
+        Call<Users> call = nodeApiService().retrieveUserFriends(firebaseIdToken);
 
         call.enqueue(new Callback<Users>() {
             @Override

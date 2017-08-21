@@ -5,7 +5,6 @@
 
 package com.roostermornings.android;
 
-import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +18,7 @@ import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.stetho.Stetho;
+import com.google.android.gms.location.places.PlaceDetectionClient;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -27,15 +27,16 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.roostermornings.android.apis.GoogleIHTTPClient;
 import com.roostermornings.android.dagger.DaggerRoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationModule;
 import com.roostermornings.android.domain.User;
-import com.roostermornings.android.node_api.IHTTPClient;
+import com.roostermornings.android.apis.NodeIHTTPClient;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
-import com.roostermornings.android.service.FirebaseListenerService;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.FontsOverride;
+import com.roostermornings.android.util.LocationUtils;
 import com.roostermornings.android.util.Toaster;
 
 import javax.inject.Inject;
@@ -48,8 +49,11 @@ public class BaseApplication extends android.app.Application {
 
     private static final String TAG = "BaseApplication";
     private static RoosterApplicationComponent roosterApplicationComponent;
-    public Retrofit mRetrofit;
-    public IHTTPClient mAPIService;
+    private PlaceDetectionClient mPlaceDetectionClient;
+    public Retrofit mRetrofitNode;
+    public NodeIHTTPClient mAPIServiceNode;
+    public Retrofit mRetrofitGoogle;
+    public GoogleIHTTPClient mAPIServiceGoogle;
     protected FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
@@ -118,11 +122,18 @@ public class BaseApplication extends android.app.Application {
         roosterApplicationComponent.inject(this);
 
         //Create Retrofit API class for managing Node API
-        mRetrofit = new Retrofit.Builder()
+        mRetrofitNode = new Retrofit.Builder()
                 .baseUrl(getResources().getString(R.string.node_api_url))
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
-        mAPIService = mRetrofit.create(IHTTPClient.class);
+        mAPIServiceNode = mRetrofitNode.create(NodeIHTTPClient.class);
+
+        //Create Retrofit API class for managing Google API
+        mRetrofitGoogle = new Retrofit.Builder()
+                .baseUrl(getResources().getString(R.string.google_api_url))
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        mAPIServiceGoogle = mRetrofitGoogle.create(GoogleIHTTPClient.class);
 
         updateNotification();
 
@@ -215,8 +226,12 @@ public class BaseApplication extends android.app.Application {
         return roosterApplicationComponent;
     }
 
-    public IHTTPClient getAPIService() {
-        return mAPIService;
+    public NodeIHTTPClient getNodeAPIService() {
+        return mAPIServiceNode;
+    }
+
+    public GoogleIHTTPClient getGoogleAPIService() {
+        return mAPIServiceGoogle;
     }
 
     public static int getNotificationFlag(String flag) {

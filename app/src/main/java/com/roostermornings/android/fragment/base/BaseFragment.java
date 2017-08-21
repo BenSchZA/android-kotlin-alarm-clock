@@ -27,12 +27,13 @@ import javax.inject.Inject;
 
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
+import com.roostermornings.android.apis.GoogleIHTTPClient;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Contact;
 import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.SocialRooster;
 import com.roostermornings.android.domain.User;
-import com.roostermornings.android.node_api.IHTTPClient;
+import com.roostermornings.android.apis.NodeIHTTPClient;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 
 import butterknife.ButterKnife;
@@ -52,15 +53,20 @@ public abstract class BaseFragment extends Fragment implements Validator.Validat
         void onValidationSucceeded();
         void onValidationFailed(List<ValidationError> errors);
         boolean checkInternetConnection();
-        IHTTPClient apiService();
+        NodeIHTTPClient nodeApiService();
+        GoogleIHTTPClient googleApiService();
     }
 
     public boolean checkInternetConnection() {
         return baseActivityListener.checkInternetConnection();
     }
 
-    public IHTTPClient apiService() {
-        return baseActivityListener.apiService();
+    public NodeIHTTPClient nodeApiService() {
+        return baseActivityListener.nodeApiService();
+    }
+
+    public GoogleIHTTPClient googleApiService() {
+        return baseActivityListener.googleApiService();
     }
 
     @Override
