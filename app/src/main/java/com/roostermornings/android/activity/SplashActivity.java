@@ -71,8 +71,8 @@ public class SplashActivity extends BaseActivity {
             receivedAction = receivedIntent.getAction();
             receivedType = receivedIntent.getType();
 
-            if(receivedAction.equals(Intent.ACTION_SEND)) {
-                if(receivedType.startsWith("audio/")) {
+            if(Intent.ACTION_SEND.equals(receivedAction)) {
+                if(receivedType != null && receivedType.startsWith("audio/")) {
                     Uri receivedUri = receivedIntent.getParcelableExtra(Intent.EXTRA_STREAM);
                     if(receivedUri != null) {
 
