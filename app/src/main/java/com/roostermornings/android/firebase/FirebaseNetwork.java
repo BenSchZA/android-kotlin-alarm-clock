@@ -82,6 +82,19 @@ public class FirebaseNetwork {
         }
     }
 
+    public static void updateProfileGeoHashLocation(String geohash) {
+        DatabaseReference fDB = FirebaseDatabase.getInstance().getReference();
+        FirebaseUser fUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        Map<String, Object> childUpdates = new HashMap<>();
+
+        if(fUser != null && StrUtils.notNullOrEmpty(fUser.getUid())) {
+            childUpdates.put(String.format("users/%s/%s",
+                    fUser.getUid(), "geohash_location"), geohash);
+            fDB.updateChildren(childUpdates);
+        }
+    }
+
     private static OnFlagValidMobileNumberCompleteListener onFlagValidMobileNumberCompleteListener;
 
     public interface OnFlagValidMobileNumberCompleteListener {

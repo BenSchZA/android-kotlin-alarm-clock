@@ -27,6 +27,7 @@ import com.roostermornings.android.activity.SignInActivity;
 import com.roostermornings.android.activity.SignupEmailActivity;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.MyAlarmsListAdapter;
+import com.roostermornings.android.channels.ChannelManager;
 import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.fragment.NumberEntryDialogFragment;
 import com.roostermornings.android.fragment.base.BaseFragment;
@@ -47,6 +48,8 @@ import com.roostermornings.android.service.UploadService;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sync.DownloadSyncAdapter;
+import com.roostermornings.android.geolocation.GeoHashUtils;
+import com.roostermornings.android.util.JSONPersistence;
 import com.roostermornings.android.util.LifeCycle;
 
 /**
@@ -103,6 +106,9 @@ public interface RoosterApplicationComponent {
     void inject(DeviceAlarmController roosterClass);
     void inject(DeviceAlarmTableManager roosterClass);
     void inject(LifeCycle roosterClass);
+    void inject(GeoHashUtils roosterClass);
+    void inject(JSONPersistence jsonPersistence);
+    void inject(ChannelManager roosterClass);
 
     void inject(DownloadSyncAdapter adapter);
     void inject(MyAlarmsListAdapter adapter);

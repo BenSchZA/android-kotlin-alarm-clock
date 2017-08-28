@@ -16,6 +16,21 @@ import com.roostermornings.android.sync.DownloadSyncAdapter;
 
 import javax.inject.Inject;
 
+/**
+ * <h1>LifeCycle Class</h1>
+ *
+ * Handles the user lifecycle, i.e.
+ *  - onboarding
+ *  - first use guides
+ *  - first social and channel roosters, etc.
+ *
+ * It does this by keeping a record of what the user has seen using sharedPrefs, etc.
+ *
+ * @author bscholtz
+ * @version 1
+ * @since 15/08/17
+ */
+
 public class LifeCycle {
 
     private Context context;
@@ -25,10 +40,21 @@ public class LifeCycle {
 
     private static final String firstEntry = "shared_pref_lifecycle_first_entry";
 
+    /**
+     * Instantiate class and perform Dagger 2 dependency injection
+     * @param context
+     */
+
     public LifeCycle(Context context) {
         this.context = context;
         BaseApplication.getRoosterApplicationComponent().inject(this);
     }
+
+    /**
+     * Performs all tasks for the user's first entry, or inception into Rooster...
+     * (sounds a bit like a cult...)
+     * @return boolean isFirstEntry?
+     */
 
     public boolean performInception() {
         if(sharedPreferences.getBoolean(firstEntry, true)) {
@@ -42,6 +68,11 @@ public class LifeCycle {
             return false;
         }
     }
+
+    /**
+     * This method creates the first channel the user sees, and inserts it in
+     * today's roosters, as well as sets it as a favourite.
+     */
 
     private void createFillerChannel() {
         final ChannelRooster channelRooster = new ChannelRooster(
@@ -75,6 +106,10 @@ public class LifeCycle {
             }
         });
     }
+
+    /**
+     * Set the shared pref to indicate whether this is a user's first entry, this is persisted.
+     */
 
     private void setFirstEntry() {
         sharedPreferences.edit()

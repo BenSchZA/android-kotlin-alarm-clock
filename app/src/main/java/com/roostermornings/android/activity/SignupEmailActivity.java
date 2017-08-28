@@ -145,7 +145,8 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
                                         "",
                                         mAuth.getCurrentUser().getUid(),
                                         null,
-                                        0);
+                                        0,
+                                        null);
 
                                 //Note: "friends" and "cell_number" node not changed TODO: should profile pic be kept?
                                 Map<String, Object> childUpdates = new HashMap<>();

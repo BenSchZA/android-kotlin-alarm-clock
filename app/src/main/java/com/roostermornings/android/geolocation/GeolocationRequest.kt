@@ -3,14 +3,13 @@
  * Copyright (c)  2017 Roosta Media. All rights reserved.
  */
 
-package com.roostermornings.android.domain
+package com.roostermornings.android.geolocation
 
 import android.content.Context
 import android.telephony.TelephonyManager
 import com.google.firebase.database.IgnoreExtraProperties
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
-import com.roostermornings.android.util.LocationUtils
 
 /**
  * com.roostermornings.android.domain
@@ -47,10 +46,10 @@ class GeolocationRequest {
     // Required default constructor for Firebase object mapping
     constructor()
 
-    constructor(context: Context, useIP: Boolean) {
+    constructor(context: Context, useIPOnly: Boolean) {
 
         //Fallback to IP if requested, by making other data null
-        if(!useIP) {
+        if(!useIPOnly) {
             val telephonyManager: TelephonyManager? = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?
             val networkOperator: String? = telephonyManager?.networkOperator
 

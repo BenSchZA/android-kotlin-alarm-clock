@@ -232,7 +232,8 @@ public class SignInActivity extends BaseActivity {
                                     "",
                                     notNull(mAuth.getCurrentUser().getUid()) ? mAuth.getCurrentUser().getUid():null,
                                     null,
-                                    0);
+                                    0,
+                                    null);
 
                             //Note: "friends" and "cell_number" node not changed TODO: should profile pic be kept?
                             Map<String, Object> childUpdates = new HashMap<>();
@@ -313,7 +314,8 @@ public class SignInActivity extends BaseActivity {
                                     "",
                                     notNull(mAuth.getCurrentUser().getUid()) ? mAuth.getCurrentUser().getUid():null,
                                     null,
-                                    0);
+                                    0,
+                                    null);
 
                             //Note: "friends" and "cell_number" node not changed TODO: should profile pic be kept?
                             Map<String, Object> childUpdates = new HashMap<>();

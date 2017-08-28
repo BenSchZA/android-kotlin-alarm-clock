@@ -27,11 +27,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.roostermornings.android.BaseApplication;
+import com.roostermornings.android.channels.ChannelManager;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.geolocation.GeoHashUtils;
 import com.roostermornings.android.util.JSONPersistence;
 import com.roostermornings.android.util.LifeCycle;
 import com.roostermornings.android.util.MyContactsController;
@@ -127,8 +129,8 @@ public class RoosterApplicationModule {
 
     @Provides
     @Singleton
-    JSONPersistence providesJSONPersistence(BaseApplication baseApplication) {
-        return new JSONPersistence(baseApplication);
+    JSONPersistence providesJSONPersistence() {
+        return new JSONPersistence();
     }
 
     @Provides
@@ -153,6 +155,12 @@ public class RoosterApplicationModule {
     @Singleton
     AudioTableManager provideAudioTableManager(BaseApplication baseApplication) {
         return new AudioTableManager(baseApplication);
+    }
+
+    @Provides
+    @Singleton
+    GeoHashUtils provideGeoHashUtils(BaseApplication baseApplication) {
+        return new GeoHashUtils(baseApplication);
     }
 
     @Provides

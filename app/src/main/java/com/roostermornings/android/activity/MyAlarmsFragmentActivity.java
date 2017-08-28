@@ -14,8 +14,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
-import android.location.Address;
-import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -47,8 +45,6 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.MyAlarmsListAdapter;
-import com.roostermornings.android.domain.GeolocationAPIResult;
-import com.roostermornings.android.domain.GeolocationRequest;
 import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.custom_ui.SquareFrameLayout;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
@@ -59,32 +55,22 @@ import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sync.DownloadSyncAdapter;
-import com.roostermornings.android.util.ConnectivityUtils;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.InternetHelper;
 import com.roostermornings.android.util.JSONPersistence;
 import com.roostermornings.android.util.LifeCycle;
-import com.roostermornings.android.util.LocationUtils;
 import com.roostermornings.android.util.StrUtils;
 import com.roostermornings.android.util.Toaster;
 
-import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.OnClick;
 import me.grantland.widget.AutofitTextView;
-import retrofit.Call;
-import retrofit.Callback;
-import retrofit.Response;
-import retrofit.Retrofit;
 
 import static com.roostermornings.android.util.Constants.AUTHORITY;
 
@@ -166,33 +152,6 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
         //Check if first entry
         lifeCycle.performInception();
-
-        //Get user location
-        GeolocationRequest geolocationRequest = new GeolocationRequest(this, false);
-        Call<GeolocationAPIResult> call = googleApiService().getGeolocation(getResources().getString(R.string.google_geolocation_api_key), geolocationRequest);
-
-        call.enqueue(new Callback<GeolocationAPIResult>() {
-            @Override
-            public void onResponse(Response<GeolocationAPIResult> response,
-                                   Retrofit retrofit) {
-
-                int statusCode = response.code();
-                GeolocationAPIResult apiResponse = response.body();
-
-                if (statusCode == 200) {
-                    ConnectivityUtils connectivityUtils = new ConnectivityUtils(context);
-                    boolean isMobile = connectivityUtils.isConnectedMobile();
-                    boolean isWiFi = connectivityUtils.isConnectedWifi();
-                    GeolocationAPIResult.Location location = apiResponse.getLocation();
-                    Toaster.makeToast(context, new LocationUtils(context).getAreaFromCoordinates(location), Toast.LENGTH_LONG);
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                Log.i(TAG, StrUtils.notNullOrEmpty(t.getLocalizedMessage()) ? t.getLocalizedMessage() : " ");
-            }
-        });
 
         //Download any social or channel audio files
         ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());

@@ -5,11 +5,11 @@
 
 package com.roostermornings.android.apis
 
-import com.roostermornings.android.domain.*
+import com.roostermornings.android.geolocation.GeolocationAPIResult
+import com.roostermornings.android.geolocation.GeolocationRequest
 import retrofit.Call
 import retrofit.http.Body
 import retrofit.http.POST
-import retrofit.http.Path
 import retrofit.http.Query
 
 /**

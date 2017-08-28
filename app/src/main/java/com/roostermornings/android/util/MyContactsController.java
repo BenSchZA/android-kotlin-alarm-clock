@@ -24,7 +24,14 @@ import java.util.Iterator;
 import java.util.Set;
 
 /**
- * Created by bscholtz on 04/03/17.
+ * MyContactsController Class
+ *
+ * This class allows you to retrieve, validate, and process local contacts, as well as
+ * load JSON file assets (country codes) and ISO code mappings (ZA -> +27)
+ *
+ * @author bscholtz
+ * @version 1
+ * @since 04/03/17
  */
 
 public class MyContactsController {
@@ -40,6 +47,13 @@ public class MyContactsController {
     public MyContactsController(Context c) {
         this.context = c;
     }
+
+    /**
+     * Get a map of all contact names, with a set of their unique contact numbers (some contacts
+     * will have multiple contacts, and we need to fetch them all for checking which contacts
+     * have Rooster installed)
+     * @return HashMap - name : list of numbers
+     */
 
     private HashMap<String, Set<String>> getContactNumbers() {
         //Stores a map of name with a set of unique numbers
@@ -93,6 +107,11 @@ public class MyContactsController {
         return uniqueContactMap;
     }
 
+    /**
+     * Get a list of unique NSN numbers mapped to the user's name.
+     * @return as above
+     */
+
     public HashMap<String, String> getNumberNamePairs() {
         HashMap<String, String> numberNamePairs = new HashMap<>();
         ArrayList<Contact> contactArray = getContacts();
@@ -107,14 +126,29 @@ public class MyContactsController {
         return numberNamePairs;
     }
 
+    /**
+     * Convert the country ISO code to country prefix (ZA -> +27)
+     * @return String of country prefix, e.g. +27
+     * @see CountryISOToPrefix
+     */
+
     private String getDefaultCountryCode() {
         TelephonyManager tm = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
 
         //Convert the ISO number to a valid country code
-        String ISONumber;
-        ISONumber = tm.getSimCountryIso().toUpperCase();
+        String ISONumber = "";
+        if(tm != null) {
+            ISONumber = tm.getSimCountryIso().toUpperCase();
+        }
         return CountryISOToPrefix.prefixFor(ISONumber);
     }
+
+    /**
+     * Takes a String, entry, and removes invalid characters for a properly formatted number
+     * e.g. A '+' character can only appear at index 0
+     * @param entry String phone number
+     * @return processed String with valid characters and placement
+     */
 
     public static String clearInvalidCharacters(String entry) {
         if(!StrUtils.notNullOrEmpty(entry)) return "";
@@ -139,12 +173,28 @@ public class MyContactsController {
         return entry;
     }
 
+    /**
+     * Checks if entry has invalid characters or placement, so that it can be processed by
+     * clearInvalidCharacters function.
+     * @param entry
+     * @return boolean containsInvalidCharacters? If true, process
+     */
+
     public static boolean containsInvalidCharacters(String entry) {
         boolean entryContainsPlusInvalidPosition = entry.contains("+") && !entry.startsWith("+");
         boolean entryContainsInvalidCharacters = !entry.equals(entry.replaceAll("[^0-9+]", ""));
 
         return entryContainsInvalidCharacters || entryContainsPlusInvalidPosition;
     }
+
+    /**
+     * Using getContactNumbers function first, process these into Contact objects, with:
+     *  - Primary number
+     *  - Name
+     *  - HashMap of unique by NSN numbers split into NSNNumber, and ISO number
+     *
+     * @return ArrayList of processed Contact objects
+     */
 
     public ArrayList<Contact> getContacts() {
         //If contacts have already been retrieved, then abort
@@ -183,6 +233,11 @@ public class MyContactsController {
         return contactArray;
     }
 
+    /**
+     * Get an ArrayList of NSN numbers to send to Node.
+     * @return All the NSN numbers (keySet) from each Contact
+     */
+
     public ArrayList<String> getNodeNumberList() {
         ArrayList<Contact> contactArray = getContacts();
 
@@ -190,13 +245,16 @@ public class MyContactsController {
 
         for (Contact contact:
                 contactArray) {
-            for (String NSNNumber:
-                 contact.getNumbers().keySet()) {
-                phoneNumberList.add(NSNNumber);
-            }
+            phoneNumberList.addAll(contact.getNumbers().keySet());
         }
         return phoneNumberList;
     }
+
+    /**
+     * On contact number entry, process the contact number to remove invalid characters.
+     * @param contactNumber User's entered contact number
+     * @return processed contactNumber
+     */
 
     public String processUserContactNumber(String contactNumber) {
         try {
@@ -215,6 +273,13 @@ public class MyContactsController {
             return "";
         }
     }
+
+    /**
+     * Take a contact number and split it into a valid NSN, ISO pair.
+     * @param contactNumber User's entered contact number
+     * @return StringPair of NSNNumber : ISONumber
+     * @see com.roostermornings.android.util.StrUtils.StringPair
+     */
 
     private StrUtils.StringPair processContactCountry(String contactNumber) {
         String NSNNumber = "";
@@ -250,6 +315,15 @@ public class MyContactsController {
         return new StrUtils.StringPair<>(NSNNumber, ISONumber);
     }
 
+    /**
+     * Check a specific node ina JSON Object to see if it contains a string.
+     * This is used for searching the country codes for valid contact number lengths.
+     * @param json_o The JSON Object of country codes, in this case
+     * @param node The specific node, e.g. "kThreeDigitCodes", to search in
+     * @param find The string to find.
+     * @return a boolean indicating if the string was found
+     */
+
     private boolean inJSONNode(JSONObject json_o, String node, String find) {
         boolean inJSONNode;
         inJSONNode = false;
@@ -266,6 +340,12 @@ public class MyContactsController {
         }
         return inJSONNode;
     }
+
+    /**
+     * A .json file is passed in using the file name found in the android "assets" directory.
+     * @param JSONFile .json file name
+     * @return a JSON string to be parsed into a JSON object
+     */
 
     private String loadJSONFromAsset(String JSONFile) {
         String JSONString;
