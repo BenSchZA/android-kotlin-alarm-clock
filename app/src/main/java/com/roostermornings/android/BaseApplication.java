@@ -36,7 +36,6 @@ import com.roostermornings.android.apis.NodeIHTTPClient;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.FontsOverride;
-import com.roostermornings.android.util.LocationUtils;
 import com.roostermornings.android.util.Toaster;
 
 import javax.inject.Inject;

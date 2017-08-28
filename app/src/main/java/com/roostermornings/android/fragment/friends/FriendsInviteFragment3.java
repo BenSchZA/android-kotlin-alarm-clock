@@ -434,7 +434,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
             }
             for (User currentFriend:
                     currentFriends) {
-                contactNumbersToRemove.add(currentFriend.cell_number);
+                contactNumbersToRemove.add(currentFriend.getCell_number());
             }
 
             //Perform the operation I = C - (A + F)

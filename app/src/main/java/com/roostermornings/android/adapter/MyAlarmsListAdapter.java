@@ -50,7 +50,7 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
     private BroadcastReceiver receiver;
     private Context context;
 
-    boolean computingLayout;
+    private boolean computingLayout;
 
     @Inject @Named("default")
     SharedPreferences defaultSharedPreferences;

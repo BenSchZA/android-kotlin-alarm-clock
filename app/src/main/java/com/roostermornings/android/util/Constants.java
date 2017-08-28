@@ -5,6 +5,17 @@
 
 package com.roostermornings.android.util;
 
+/**
+ * Constants Class
+ *
+ * Store any and all public final static constants for configuration, intent ACTIONs,
+ * shared pref keys, settings keys, etc.
+ *
+ * @author bscholtz
+ * @version 1
+ * @since 22/03/17
+ */
+
 public class Constants {
 
     //Adapter view types
@@ -125,6 +136,8 @@ public class Constants {
     public final static String MOBILE_NUMBER_VALIDATED = "mobileNumberValid";
     public final static String MOBILE_NUMBER_ENTRY_DISMISSED = "mobileNumberEntryDismissed";
     public final static String MOBILE_NUMBER_ENTRY = "mobileNumberEntry";
+
+    public final static String USER_GEOHASH = "USER_GEOHASH";
 
     //Calendar constants
     public final static long TIME_MILLIS_1_MINUTE = 60000;

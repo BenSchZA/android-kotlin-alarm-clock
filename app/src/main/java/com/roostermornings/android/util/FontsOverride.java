@@ -15,7 +15,15 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 /**
- * Created by bscholtz on 08/03/17.
+ * FontsOveride Class
+ *
+ * Up until recently, custom fonts are not easily installed. This class replaces one of the default
+ * fonts with a font of our choice.
+ *
+ * @author bscholtz
+ * @version 1
+ * @since 08/03/17
+ * @see Constants
  */
 
 public final class FontsOverride {
