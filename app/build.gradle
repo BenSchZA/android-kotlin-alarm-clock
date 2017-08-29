@@ -52,7 +52,7 @@ android {
             //Beta version name is release version name at point of diversion, with alpha b
 
             //Release
-            versionCode 37
+            versionCode 39
             versionName "2.2.4"
 
             manifestPlaceholders = [
@@ -66,8 +66,8 @@ android {
             dimension "rooster-release"
 
             //Beta
-            versionName "2.2.3b"
-            versionCode 1000009
+            versionName "2.2.4b"
+            versionCode 1000010
 
             manifestPlaceholders = [
                     app_icon: "@mipmap/ic_launcher_beta",
