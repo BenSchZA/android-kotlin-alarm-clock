@@ -19,10 +19,7 @@ import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.R
 import com.roostermornings.android.domain.Channel
 import com.roostermornings.android.firebase.FirebaseNetwork
-import com.roostermornings.android.util.ConnectivityUtils
-import com.roostermornings.android.util.Constants
-import com.roostermornings.android.util.JSONPersistence
-import com.roostermornings.android.util.StrUtils
+import com.roostermornings.android.util.*
 import retrofit.Callback
 import retrofit.Response
 import retrofit.Retrofit
@@ -127,18 +124,21 @@ class GeoHashUtils(val context: Context) {
                     val location = apiResponse.location
                     userGeoHashEntry.geoHash = GeoHash.geoHashStringWithCharacterPrecision(location.lat ?: Double.MIN_VALUE, location.lng ?: Double.MIN_VALUE, 4)
 
-                    //Create a temporary array, of less than 5 entries, and insert current entry at beginning
-                    val maxUserGeoHashArraySize = 5
-                    val tempUserGeoHashArray: ArrayList<UserGeoHashEntry> = ArrayList()
-                    tempUserGeoHashArray.addAll(
-                            mUserGeoHashArray.filterIndexed { index, userGeoHashEntry -> (index + 1) < maxUserGeoHashArraySize })
-                    tempUserGeoHashArray.add(0, userGeoHashEntry)
+                    //Only append new entry if it contains a geohash
+                    if(userGeoHashEntry.geoHash.isNotBlank()) {
+                        //Create a temporary array, of less than 5 entries, and insert current entry at beginning
+                        val maxUserGeoHashArraySize = 5
+                        val tempUserGeoHashArray: ArrayList<UserGeoHashEntry> = ArrayList()
+                        tempUserGeoHashArray.addAll(
+                                mUserGeoHashArray.filterIndexed { index, userGeoHashEntry -> (index + 1) < maxUserGeoHashArraySize })
+                        tempUserGeoHashArray.add(0, userGeoHashEntry)
 
-                    //Persist the user geohashes to shared pref
-                    jsonPersistence.setUserGeoHashEntries(tempUserGeoHashArray)
+                        //Persist the user geohashes to shared pref
+                        jsonPersistence.setUserGeoHashEntries(tempUserGeoHashArray)
 
-                    //Create a map of user geohash entries to cluster size, and update user's geohash appropriately
-                    checkUserGeoHashClusterMap(tempUserGeoHashArray)
+                        //Create a map of user geohash entries to cluster size, and update user's geohash appropriately
+                        checkUserGeoHashClusterMap(tempUserGeoHashArray)
+                    }
                 }
             }
 
@@ -207,10 +207,11 @@ class GeoHashUtils(val context: Context) {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val geoHashChannels: ArrayList<GeoHashChannel> = ArrayList()
 
-                    dataSnapshot.getChildren().forEach { postSnapshot ->
+                    KotlinUtils.catchAll({
+                        dataSnapshot.getChildren().forEach { postSnapshot ->
                         postSnapshot.getValue(GeoHashChannel::class.java)
-                                ?.let { geoHashChannel -> geoHashChannels.add(geoHashChannel) }
-                    }
+                                ?.let { geoHashChannel -> geoHashChannels.add(geoHashChannel) } }
+                    })
 
                     filterGeoHashChannelsWithinInfluence(geoHashChannels, geoHashUser).let {
                         onFlagGeoHashChannelsDataListener?.onDataChange(it)

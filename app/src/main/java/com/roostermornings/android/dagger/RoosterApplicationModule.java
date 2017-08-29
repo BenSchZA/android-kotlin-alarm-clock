@@ -32,6 +32,7 @@ import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
+import com.roostermornings.android.util.ConnectivityUtils;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.geolocation.GeoHashUtils;
 import com.roostermornings.android.util.JSONPersistence;
@@ -161,6 +162,12 @@ public class RoosterApplicationModule {
     @Singleton
     GeoHashUtils provideGeoHashUtils(BaseApplication baseApplication) {
         return new GeoHashUtils(baseApplication);
+    }
+
+    @Provides
+    @Singleton
+    ConnectivityUtils provideConnectivityUtils(BaseApplication baseApplication) {
+        return new ConnectivityUtils(baseApplication);
     }
 
     @Provides
