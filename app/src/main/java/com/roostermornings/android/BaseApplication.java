@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
@@ -34,6 +35,7 @@ import com.roostermornings.android.dagger.RoosterApplicationModule;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.apis.NodeIHTTPClient;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
+import com.roostermornings.android.receiver.NetworkChangeReceiver;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.FontsOverride;
 import com.roostermornings.android.util.Toaster;
@@ -94,18 +96,6 @@ public class BaseApplication extends android.app.Application {
             firebaseAnalytics.setAnalyticsCollectionEnabled(false);
         }
 
-        //Activate facebook app connection
-        AppEventsLogger.activateApp(this, getResources().getString(R.string.facebook_app_id));
-
-        //Override monospace font with custom font
-        FontsOverride.setDefaultFont(this, "MONOSPACE", Constants.APP_FONT);
-
-        if (BuildConfig.DEBUG) {
-            //Stetho: http://facebook.github.io/stetho/ - debug bridge for Android (view SQL etc.)
-            //Go to chrome://inspect/ in Chrome to inspect
-            Stetho.initializeWithDefaults(this);
-        }
-
         /*Component implementations are primarily instantiated via a generated builder.
         An instance of the builder is obtained using the builder() method on the component implementation.
         If a nested @Component.Builder type exists in the component, the builder() method will
@@ -119,6 +109,21 @@ public class BaseApplication extends android.app.Application {
                 .build();
 
         roosterApplicationComponent.inject(this);
+
+        //Register receiver to listen for network changes
+        NetworkChangeReceiver.Companion.registerReceiverSelf(this);
+
+        //Activate facebook app connection
+        AppEventsLogger.activateApp(this, getResources().getString(R.string.facebook_app_id));
+
+        //Override monospace font with custom font
+        FontsOverride.setDefaultFont(this, "MONOSPACE", Constants.APP_FONT);
+
+        if (BuildConfig.DEBUG) {
+            //Stetho: http://facebook.github.io/stetho/ - debug bridge for Android (view SQL etc.)
+            //Go to chrome://inspect/ in Chrome to inspect
+            Stetho.initializeWithDefaults(this);
+        }
 
         //Create Retrofit API class for managing Node API
         mRetrofitNode = new Retrofit.Builder()

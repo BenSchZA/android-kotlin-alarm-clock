@@ -306,7 +306,6 @@ public class JSONPersistence {
                 return 1;
             }
         } catch (JSONException e) {
-            e.printStackTrace();
             return 1;
         }
     }
