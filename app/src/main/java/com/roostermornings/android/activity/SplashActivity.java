@@ -112,7 +112,7 @@ public class SplashActivity extends BaseActivity {
                         }
                     }
                 }
-            } else if(receivedAction != null && receivedAction.equals(Intent.ACTION_MAIN)) {
+            } else if(Intent.ACTION_MAIN.equals(receivedAction)) {
 
             }
             startMain();
