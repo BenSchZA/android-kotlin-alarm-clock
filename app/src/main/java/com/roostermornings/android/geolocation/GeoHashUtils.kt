@@ -254,7 +254,7 @@ class GeoHashUtils(val context: Context) {
             //Return all channels where the user is within the range of influence
             return channels.filter {
                 channel -> channel.isGeolocated
-                    .and(geoHashChannels.any { geoHashChannel -> geoHashChannel.uid.equals(channel.uid) })
+                    .and(geoHashChannels.any { geoHashChannel -> geoHashChannel.uid == channel.uid })
                     .or(!channel.isGeolocated)
             }
         }
@@ -265,7 +265,7 @@ class GeoHashUtils(val context: Context) {
 
             channelsMap.entries.filter {
                 channelEntry -> channelEntry.key.isGeolocated
-                    .and(geoHashChannels.any { geoHashChannel -> geoHashChannel.uid.equals(channelEntry.key.uid) })
+                    .and(geoHashChannels.any { geoHashChannel -> geoHashChannel.uid == channelEntry.key.uid })
                     .or(!channelEntry.key.isGeolocated)
             }.forEach {
                 channelsMapEntry -> returnedHashMap.put(channelsMapEntry.key, channelsMapEntry.value)

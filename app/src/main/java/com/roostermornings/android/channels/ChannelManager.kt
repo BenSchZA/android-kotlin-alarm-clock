@@ -65,7 +65,7 @@ class ChannelManager(private val context: Context, private val from: Any) {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 for (postSnapshot in dataSnapshot.children) {
                     postSnapshot.getValue(Channel::class.java)?.let {
-                        channel -> channel.isActive.let {
+                        channel -> if(channel.isActive) {
                         if (channel.isNew_alarms_start_at_first_iteration) {
                             var iteration = jsonPersistence.getStoryIteration(channel.getUid())
                             if (iteration <= 0) iteration = 1
