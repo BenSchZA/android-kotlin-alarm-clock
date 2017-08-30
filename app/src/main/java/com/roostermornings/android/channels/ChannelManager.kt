@@ -14,6 +14,7 @@ import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.activity.DiscoverFragmentActivity
 import com.roostermornings.android.domain.Channel
 import com.roostermornings.android.domain.ChannelRooster
+import com.roostermornings.android.domain.GeoHashChannel
 import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment2
 import com.roostermornings.android.geolocation.GeoHashUtils
 import com.roostermornings.android.util.JSONPersistence
@@ -81,7 +82,7 @@ class ChannelManager(private val context: Context, private val from: Any) {
 
                 GeoHashUtils.onFlagGeoHashChannelsDataListener = (
                         object : GeoHashUtils.Companion.OnFlagGeoHashChannelsDataListener {
-                            override fun onDataChange(geoHashChannels: List<GeoHashUtils.GeoHashChannel>) {
+                            override fun onDataChange(geoHashChannels: List<GeoHashChannel>) {
 
                                 //Filter all geolocated channels
                                 channelIterationMap = GeoHashUtils.filterGeoLocatedChannels(channelIterationMap, geoHashChannels)
