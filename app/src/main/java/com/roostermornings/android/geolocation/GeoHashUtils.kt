@@ -10,6 +10,7 @@ import android.content.SharedPreferences
 import android.location.Geocoder
 import android.util.Log
 import ch.hsr.geohash.GeoHash
+import com.crashlytics.android.Crashlytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -72,9 +73,14 @@ class GeoHashUtils(val context: Context) {
 
     fun checkUserGeoHash() {
         var mUserGeoHashArray: ArrayList<UserGeoHashEntry> = ArrayList()
-        if (!jsonPersistence.userGeoHashEntries!!.isEmpty()) {
+        if (!jsonPersistence.userGeoHashEntries.isEmpty()) {
             mUserGeoHashArray = jsonPersistence.userGeoHashEntries
         }
+
+        //Log exception for debugging
+        Crashlytics.log("Geohash shared pref: \n" + sharedPreferences.getString(Constants.USER_GEOHASH, "not set"))
+        Crashlytics.log("Geohash entry array: \n" + mUserGeoHashArray.toString())
+        Crashlytics.logException(Throwable("GeoHashUtils Report"))
 
         val connectivityUtils = ConnectivityUtils(context)
         if(connectivityUtils.isConnected()) {
@@ -200,10 +206,11 @@ class GeoHashUtils(val context: Context) {
         val fUser = FirebaseAuth.getInstance().getCurrentUser()
 
         if (StrUtils.notNullOrEmpty(fUser?.getUid())) {
-            val mMobileNumberReference = fDB
+            val mGeoHashChannelsReference = fDB
                     .child("geohash_channels")
+            mGeoHashChannelsReference.keepSynced(true)
 
-            mMobileNumberReference.addListenerForSingleValueEvent(object : ValueEventListener {
+            mGeoHashChannelsReference.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val geoHashChannels: ArrayList<GeoHashChannel> = ArrayList()
 
@@ -215,6 +222,9 @@ class GeoHashUtils(val context: Context) {
 
                     filterGeoHashChannelsWithinInfluence(geoHashChannels, geoHashUser).let {
                         onFlagGeoHashChannelsDataListener?.onDataChange(it)
+                        //Log exception for debugging
+                        Crashlytics.log("Filtered geohash channels: \n" + it.toString())
+                        Crashlytics.logException(Throwable("GeoHashUtils Report"))
                     }
                     onFlagGeoHashChannelsDataListener?.onPostExecute(true)
                 }
