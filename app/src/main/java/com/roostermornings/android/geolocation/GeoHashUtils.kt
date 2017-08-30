@@ -16,11 +16,14 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.gson.Gson
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.R
 import com.roostermornings.android.domain.Channel
+import com.roostermornings.android.domain.GeoHashChannel
 import com.roostermornings.android.firebase.FirebaseNetwork
 import com.roostermornings.android.util.*
+import org.json.JSONStringer
 import retrofit.Callback
 import retrofit.Response
 import retrofit.Retrofit
@@ -58,13 +61,6 @@ class GeoHashUtils(val context: Context) {
         BaseApplication.getRoosterApplicationComponent().inject(this)
     }
 
-    class GeoHashChannel {
-        var g: ArrayList<String> = ArrayList()
-        var l: ArrayList<Double> = ArrayList()
-        var rad: Int = -1
-        var uid: String = ""
-    }
-
     class UserGeoHashEntry {
         var geoHash: String = ""
         var mobileSource: Boolean = false
@@ -78,8 +74,10 @@ class GeoHashUtils(val context: Context) {
         }
 
         //Log exception for debugging
-        Crashlytics.log("Geohash shared pref: \n" + sharedPreferences.getString(Constants.USER_GEOHASH, "not set"))
-        Crashlytics.log("Geohash entry array: \n" + mUserGeoHashArray.toString())
+        Crashlytics.log("Geohash shared pref: " + sharedPreferences.getString(Constants.USER_GEOHASH, "not set"))
+        for(g in mUserGeoHashArray) {
+            Crashlytics.log("Geohash entry: " + Gson().toJson(g))
+        }
         Crashlytics.logException(Throwable("GeoHashUtils Report"))
 
         val connectivityUtils = ConnectivityUtils(context)
@@ -214,17 +212,12 @@ class GeoHashUtils(val context: Context) {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val geoHashChannels: ArrayList<GeoHashChannel> = ArrayList()
 
-                    KotlinUtils.catchAll({
-                        dataSnapshot.getChildren().forEach { postSnapshot ->
-                        postSnapshot.getValue(GeoHashChannel::class.java)
-                                ?.let { geoHashChannel -> geoHashChannels.add(geoHashChannel) } }
-                    })
+                    dataSnapshot.getChildren().forEach { postSnapshot ->
+                    postSnapshot.getValue(GeoHashChannel::class.java)
+                            ?.let { geoHashChannel -> geoHashChannels.add(geoHashChannel) } }
 
                     filterGeoHashChannelsWithinInfluence(geoHashChannels, geoHashUser).let {
                         onFlagGeoHashChannelsDataListener?.onDataChange(it)
-                        //Log exception for debugging
-                        Crashlytics.log("Filtered geohash channels: \n" + it.toString())
-                        Crashlytics.logException(Throwable("GeoHashUtils Report"))
                     }
                     onFlagGeoHashChannelsDataListener?.onPostExecute(true)
                 }
