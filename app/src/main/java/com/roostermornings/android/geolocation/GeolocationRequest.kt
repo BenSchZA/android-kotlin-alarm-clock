@@ -23,10 +23,10 @@ class GeolocationRequest {
 
     @Expose
     @SerializedName("homeMobileCountryCode")
-    private var homeMobileCountryCode : Int? = null
+    var homeMobileCountryCode : Int? = null
     @Expose
     @SerializedName("homeMobileNetworkCode")
-    private var homeMobileNetworkCode : Int? = null
+    var homeMobileNetworkCode : Int? = null
     @Expose
     @SerializedName("radioType")
     private var radioType : String? = null
@@ -53,8 +53,11 @@ class GeolocationRequest {
             val telephonyManager: TelephonyManager? = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?
             val networkOperator: String? = telephonyManager?.networkOperator
 
-            this.homeMobileCountryCode = networkOperator?.substring(0, 3)?.toInt()
-            this.homeMobileNetworkCode = networkOperator?.substring(3)?.toInt()
+            networkOperator?.takeIf { it.length > 3  }?.let {
+                this.homeMobileCountryCode = it.substring(0, 3).toInt()
+                this.homeMobileNetworkCode = it.substring(3).toInt()
+            }
+
             this.radioType = when (telephonyManager?.networkType) {
                 TelephonyManager.NETWORK_TYPE_LTE -> "lte"
                 TelephonyManager.NETWORK_TYPE_GSM -> "gsm"
