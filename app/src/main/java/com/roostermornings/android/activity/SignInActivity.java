@@ -276,6 +276,9 @@ public class SignInActivity extends BaseActivity {
             // Google Sign In was successful, authenticate with Firebase
             firebaseAuthWithGoogle(result);
         } else {
+            //Remove progress bar on failure
+            progressBar.setVisibility(View.GONE);
+
             // Signed out, show unauthenticated UI.
             Toaster.makeToast(SignInActivity.this, "Google sign-in failed.",
             Toast.LENGTH_LONG);
