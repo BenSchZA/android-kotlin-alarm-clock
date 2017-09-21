@@ -25,6 +25,8 @@ class GeolocationRequest_IUT {
 
     val emptyString: String = ""
     val nullString: String? = null
+    val normalNetworkOperator: String = "65501"
+    val malformedNetworkOperator: String = "6550"
 
     lateinit var telephonyManager: TelephonyManager
     lateinit var appContext: Context
@@ -45,11 +47,22 @@ class GeolocationRequest_IUT {
 
     @Test
     fun networkOperator_NormalCase() {
+        Mockito.`when`(telephonyManager.networkOperator).thenReturn(normalNetworkOperator)
+
         //Test will show if exceptions thrown
         val geolocationRequest = GeolocationRequest(appContext, false)
         assertThat(geolocationRequest, isA(GeolocationRequest::class.java))
         assertThat(geolocationRequest.homeMobileCountryCode.toString(), not(isEmptyOrNullString()))
         assertThat(geolocationRequest.homeMobileNetworkCode.toString(), not(isEmptyOrNullString()))
+    }
+
+    @Test
+    fun networkOperator_FringeCase_MalformedString() {
+        Mockito.`when`(telephonyManager.networkOperator).thenReturn(malformedNetworkOperator)
+
+        //Test will show if exceptions thrown
+        val geolocationRequest = GeolocationRequest(appContext, false)
+        assertThat(geolocationRequest, isA(GeolocationRequest::class.java))
     }
 
     @Test
