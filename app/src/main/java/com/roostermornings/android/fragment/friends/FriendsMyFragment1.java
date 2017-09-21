@@ -241,7 +241,7 @@ public class FriendsMyFragment1 extends BaseFragment {
 
                 statusCode = response.code();
                 Users apiResponse = response.body();
-                if(apiResponse.users == null) {
+                if(apiResponse == null || apiResponse.users == null) {
                     swipeRefreshLayout.setRefreshing(false);
                     return;
                 }
