@@ -6,12 +6,15 @@
 package com.roostermornings.android.activity;
 
 import android.app.SearchManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.os.Bundle;
@@ -45,6 +48,8 @@ import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Channel;
 import com.roostermornings.android.domain.ChannelRooster;
+import com.roostermornings.android.service.AudioService;
+import com.roostermornings.android.service.ExploreService;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.geolocation.GeoHashUtils;
@@ -86,16 +91,12 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
 
     private ArrayList<ChannelRooster> channelRoosters = new ArrayList<>();
 
-    private MediaPlayer mediaPlayer = new MediaPlayer();
-    Future oneInstanceTaskFuture;
-
-    private ChannelManager channelManager = new ChannelManager(this,this);
-
     private RecyclerView.Adapter mAdapter;
 
     @Inject BaseApplication AppContext;
-    @Inject SharedPreferences sharedPreferences;
     @Inject JSONPersistence jsonPersistence;
+    @Inject
+    SharedPreferences sharedPreferences;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -145,7 +146,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                 mRecyclerView.setLayoutManager(mLayoutManager);
                 mRecyclerView.setAdapter(mAdapter);
 
-                //Check if uses explor user prop has been set, and if not then create shared pref with default no
+                //Check if uses explore user prop has been set, and if not then create shared pref with default no
                 String sharedPrefUsesExplore = sharedPreferences.getString(
                         FA.UserProp.uses_explore.shared_pref_uses_explore, "null");
                 if(!sharedPrefUsesExplore.contains(FA.UserProp.uses_explore.no)
@@ -190,17 +191,13 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                         // This method performs the actual data-refresh operation.
                         // The method calls setRefreshing(false) when it's finished.
                         //Reload adapter data and set message status, set listener for new data
-                        onPause();
-                        channelManager.refreshChannelData(channelRoosters);
+                        mExploreService.refreshData();
                     }
                 }
         );
 
         //Set volume rocker to alarm stream
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
-
-        //Fetch content from Firebase
-        channelManager.refreshChannelData(channelRoosters);
     }
 
     @Override
@@ -209,18 +206,113 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
         //Display notifications
         updateRoosterNotification();
         updateRequestNotification();
+
+        //Bind to audio service to allow playback and pausing of alarms in background
+        Intent intent = new Intent(this, ExploreService.class);
+        startService(intent);
+        //0 indicates that service should not be restarted
+        bindService(intent, mExploreServiceConnection, 0);
     }
+
+    ExploreService mExploreService;
+    private boolean mBound = false;
+
+    private ServiceConnection mExploreServiceConnection = new ServiceConnection() {
+        // Called when the connection with the service is established
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            // Because we have bound to an explicit
+            // service that is running in our own process, we can
+            // cast its IBinder to a concrete class and directly access it.
+            ExploreService.LocalBinder binder = (ExploreService.LocalBinder) service;
+            mExploreService = binder.getService();
+            mBound = true;
+
+            mExploreService.startExploreStatusBarPlayer();
+
+            ExploreService.setOnFlagExploreServiceEventListener(new ExploreService.OnFlagExploreServiceEventListener() {
+                @Override
+                public void onEventSeekForward() {
+
+                }
+
+                @Override
+                public void onEventSeekBackward() {
+
+                }
+
+                @Override
+                public void onEventPlayPause(ChannelRooster channelRooster) {
+
+                }
+
+                @Override
+                public void onEventNext() {
+
+                }
+
+                @Override
+                public void onEventPrevious() {
+
+                }
+
+                @Override
+                public void onEventStop() {
+
+                }
+
+                @Override
+                public void onEventDestroy() {
+                    if(mAdapter != null)
+                        mAdapter.notifyDataSetChanged();
+                }
+
+                @Override
+                public void updateSingleUIEntry(int index, ChannelRooster tempChannelRooster) {
+                    if(channelRoosters.get(index) != null) {
+                        channelRoosters.remove(index);
+                        channelRoosters.add(index, tempChannelRooster);
+                        if(mAdapter != null)
+                            mAdapter.notifyDataSetChanged();
+                    }
+                }
+
+                @Override
+                public void updateUI(ArrayList<ChannelRooster> tempChannelRoosters) {
+                    if(!channelRoosters.equals(tempChannelRoosters)) {
+                        channelRoosters.clear();
+                        channelRoosters.addAll(tempChannelRoosters);
+                        if(mAdapter != null)
+                            mAdapter.notifyDataSetChanged();
+                    }
+                }
+
+                @Override
+                public void clearMediaChecks() {
+                }
+
+                @Override
+                public void refreshUI() {
+                    if(mAdapter != null)
+                        mAdapter.notifyDataSetChanged();
+                }
+
+                @Override
+                public void setRefreshing(boolean refreshing) {
+                    swipeRefreshLayout.setRefreshing(refreshing);
+                }
+            });
+        }
+
+        // Called when the connection with the service disconnects unexpectedly
+        public void onServiceDisconnected(ComponentName className) {
+            Log.e(TAG, "onServiceDisconnected");
+            mBound = false;
+        }
+    };
 
     @Override
     public void onPause() {
         super.onPause();
-
-        if(mediaPlayer != null) {
-            mediaPlayer.release();
-        }
-        if(oneInstanceTaskFuture != null) oneInstanceTaskFuture.cancel(true);
-        clearChannelRoosterMediaChecks();
-        mAdapter.notifyDataSetChanged();
 
         //Persist channel roosters for seamless loading
         jsonPersistence.setChannelRoosters(channelRoosters);
@@ -280,166 +372,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
         return true;
     }
 
-    private void notifyDataSetChangedFromUIThread() {
-        this.runOnUiThread(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        mAdapter.notifyDataSetChanged();
-                    }
-                }
-        );
-    }
-
-    public void streamChannelRooster(final ChannelRooster channelRooster) {
-        //The oneInstanceTask creates a new thread, only if one doesn't exist already
-        ExecutorService executor = new ThreadPoolExecutor(1, 1, 1, TimeUnit.MINUTES,
-                    new SynchronousQueue<Runnable>(),
-                    new ThreadPoolExecutor.DiscardPolicy());
-
-        //Check for an active internet connection - displays toast if none
-        if(!checkInternetConnection()) {
-            mediaPlayer.release();
-            return;
-        }
-        //Do not proceed if active download in progress on current channelrooster
-        if(channelRooster.isDownloading()) return;
-
-        class oneInstanceTask implements Runnable {
-            public void run() {
-                StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
-                final StorageReference audioFileRef = mStorageRef.getStorage().getReferenceFromUrl(channelRooster.getAudio_file_url());
-
-                channelRooster.setDownloading(true);
-                channelRooster.setPlaying(false);
-                notifyDataSetChangedFromUIThread();
-
-                mediaPlayer = new MediaPlayer();
-
-                audioFileRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>()
-                {
-                    @Override
-                    public void onSuccess(Uri downloadUrl)
-                    {
-                        //The asynchronous nature of this task meant that even after reset, the download task would return and start the mediaplayer...
-                        //Now by releasing the mediaplayer and initialising it before the async call we avoid this
-                        if(mediaPlayer == null) return;
-                        try {
-                            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                            mediaPlayer.setDataSource(downloadUrl.toString());
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            return;
-                        } catch (IllegalStateException e) {
-                            e.printStackTrace();
-                            return;
-                        }
-                        mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                            @Override
-                            public void onPrepared(MediaPlayer mp) {
-                                mediaPlayer.start();
-
-                                clearChannelRoosterMediaChecks();
-                                channelRooster.setDownloading(false);
-                                channelRooster.setPlaying(true);
-                                notifyDataSetChangedFromUIThread();
-
-                                //Set Firebase user prop for uses_explore
-                                String sharedPrefUsesExplore = sharedPreferences.getString(
-                                        FA.UserProp.uses_explore.shared_pref_uses_explore, "no");
-                                if(sharedPrefUsesExplore.contains(FA.UserProp.uses_explore.no)) {
-                                    sharedPreferences.edit().putString(FA.UserProp.uses_explore.shared_pref_uses_explore,
-                                            FA.UserProp.uses_explore.started_explore_playback).apply();
-                                    FA.SetUserProp(FA.UserProp.uses_explore.class, FA.UserProp.uses_explore.started_explore_playback);
-                                }
-
-                                mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                    @Override
-                                    public void onCompletion(MediaPlayer mp) {
-                                        clearChannelRoosterMediaChecks();
-                                        notifyDataSetChangedFromUIThread();
-
-                                        //Set Firebase user prop for uses_explore
-                                        FA.SetUserProp(FA.UserProp.uses_explore.class, FA.UserProp.uses_explore.completed_explore_playback);
-                                        sharedPreferences.edit().putString(FA.UserProp.uses_explore.shared_pref_uses_explore,
-                                                FA.UserProp.uses_explore.completed_explore_playback).apply();
-                                    }
-                                });
-                            }
-                        });
-
-                        mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-                            @Override
-                            public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
-                                Toaster.makeToast(AppContext, "Content streaming failed.", Toast.LENGTH_SHORT).checkTastyToast();
-                                clearChannelRoosterMediaChecks();
-                                notifyDataSetChangedFromUIThread();
-                                return true;
-                            }
-                        });
-
-                        mediaPlayer.prepareAsync();
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        // Handle any errors
-                        Toaster.makeToast(AppContext, "Content streaming failed.", Toast.LENGTH_SHORT).checkTastyToast();
-                        clearChannelRoosterMediaChecks();
-                        mAdapter.notifyDataSetChanged();
-                    }
-                });
-            }
-        }
-
-        //Check if playing or not playing and handle threading + mediaplayer appropriately
-        if(channelRooster.isPlaying()) {
-            try {
-                mediaPlayer.pause();
-            } catch (IllegalStateException e) {
-                e.printStackTrace();
-            }
-            //If a previous task exists, kill it
-            if(oneInstanceTaskFuture != null) oneInstanceTaskFuture.cancel(true);
-            clearChannelRoosterMediaChecks();
-            channelRooster.setPaused(true);
-            mAdapter.notifyDataSetChanged();
-        } else if(channelRooster.isPaused() && mediaPlayer.getCurrentPosition() > 0) {
-            clearChannelRoosterMediaChecks();
-            try {
-                mediaPlayer.seekTo(mediaPlayer.getCurrentPosition());
-                mediaPlayer.start();
-                channelRooster.setDownloading(false);
-                channelRooster.setPlaying(true);
-                mAdapter.notifyDataSetChanged();
-            } catch (IllegalStateException e) {
-                e.printStackTrace();
-                channelRooster.setDownloading(false);
-                channelRooster.setPlaying(false);
-                mAdapter.notifyDataSetChanged();
-            }
-        } else {
-            try {
-                mediaPlayer.release();
-            } catch (IllegalStateException e) {
-                e.printStackTrace();
-            }
-            //If a previous task exists, kill it
-            if(oneInstanceTaskFuture != null) oneInstanceTaskFuture.cancel(true);
-            clearChannelRoosterMediaChecks();
-            mAdapter.notifyDataSetChanged();
-            //Start a new task thread
-            oneInstanceTaskFuture = executor.submit(new oneInstanceTask());
-        }
-    }
-
-    private void clearChannelRoosterMediaChecks() {
-        //Clear all audio load spinners and set to not playing
-        for (ChannelRooster rooster :
-                channelRoosters) {
-            rooster.setDownloading(false);
-            rooster.setPlaying(false);
-            rooster.setPaused(false);
-        }
+    public void streamChannelRooster(ChannelRooster channelRooster) {
+        if(mExploreService != null) mExploreService.streamChannelRooster(channelRooster);
     }
 }
