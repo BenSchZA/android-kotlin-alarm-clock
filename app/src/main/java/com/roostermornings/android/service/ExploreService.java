@@ -19,6 +19,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
@@ -39,6 +40,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
+import com.roostermornings.android.channels.ChannelManager;
 import com.roostermornings.android.domain.Channel;
 import com.roostermornings.android.domain.ChannelRooster;
 import com.roostermornings.android.firebase.FA;
@@ -48,6 +50,8 @@ import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.Toaster;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -93,14 +97,12 @@ public class ExploreService extends Service {
     NotificationManager notificationManager;
     RemoteViews remoteViews;
 
-    private DatabaseReference mChannelsReference;
-    private DatabaseReference mChannelRoostersReference;
-    private Map<Integer, List<ChannelRooster>> channelRoosterMap = new TreeMap<>(Collections.reverseOrder());
-    private HashMap<Channel, Integer> channelIterationMap = new HashMap<>();
     private ArrayList<ChannelRooster> channelRoosters = new ArrayList<>();
     Future oneInstanceTaskFuture;
     private MediaPlayer mediaPlayer = new MediaPlayer();
     private ChannelRooster currentlyPlaying;
+
+    private ChannelManager channelManager = new ChannelManager(this, this);
 
     @Inject
     SharedPreferences sharedPreferences;
@@ -257,7 +259,7 @@ public class ExploreService extends Service {
 
         if (!mRunning) {
             mRunning = true;
-            getChannelData();
+            refreshData();
         } else {
             if(onFlagExploreServiceEventListener != null)
                 onFlagExploreServiceEventListener.updateUI(channelRoosters);
@@ -344,169 +346,24 @@ public class ExploreService extends Service {
     public void refreshData() {
         mediaPlayer.release();
         startExploreStatusBarPlayer();
-        getChannelData();
-    }
 
-    private void getChannelData() {
-        mChannelsReference = FirebaseDatabase.getInstance().getReference()
-                .child("channels");
-        mChannelsReference.keepSynced(true);
-
-        //Clear old data before syncing
-        //Must be called outside thread, or use mThis context to access
-        channelRoosterMap.clear();
-        channelIterationMap.clear();
-
-        ValueEventListener channelsListener = new ValueEventListener() {
+        ChannelManager.Companion.setOnFlagChannelManagerDataListener(new ChannelManager.Companion.OnFlagChannelManagerDataListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    final Channel channel = postSnapshot.getValue(Channel.class);
-                    if (channel.isActive()) {
-                        if(channel.isNew_alarms_start_at_first_iteration()) {
-                            Integer iteration = jsonPersistence.getStoryIteration(channel.getUid());
-                            if(iteration == null || iteration <= 0) iteration = 1;
-                            channelIterationMap.put(channel, iteration);
-                        } else {
-                            Integer iteration = channel.getCurrent_rooster_cycle_iteration();
-                            if(iteration == null || iteration <= 0) iteration = 1;
-                            channelIterationMap.put(channel, iteration);
-                        }
-                    }
-                }
-
-                //Attach listeners all at once, so that last listener indicates data sync complete
-                for (Map.Entry<Channel, Integer> entry:
-                        channelIterationMap.entrySet()) {
-                    getChannelRoosterData(entry.getKey(), entry.getValue());
-                }
-
-                mChannelRoostersReference = FirebaseDatabase.getInstance().getReference()
-                        .child("channel_rooster_uploads");
-
-                //https://stackoverflow.com/questions/34530566/find-out-if-child-event-listener-on-firebase-completely-load-all-data
-                //Value events are always triggered last and are guaranteed to contain updates from any other events which occurred before that snapshot was taken.
-                mChannelRoostersReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-
-                        if(onFlagExploreServiceEventListener != null) {
-                            onFlagExploreServiceEventListener.updateUI(channelRoosters);
-                            onFlagExploreServiceEventListener.setRefreshing(false);
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                Toaster.makeToast(AppContext, "Failed to load channel.", Toast.LENGTH_SHORT).checkTastyToast();
-            }
-        };
-        mChannelsReference.addListenerForSingleValueEvent(channelsListener);
-    }
-
-    private void getChannelRoosterData(final Channel channel, final Integer iteration) {
-        final DatabaseReference channelRoosterUploadsReference = FirebaseDatabase.getInstance().getReference()
-                .child("channel_rooster_uploads").child(channel.getUid());
-        //Ensure latest data is pulled
-        channelRoosterUploadsReference.keepSynced(true);
-
-        ValueEventListener channelRoosterUploadsListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                TreeMap<Integer,ChannelRooster> channelRoosterIterationMap = new TreeMap<>();
-                //Check if node has children i.e. channelId content exists
-                if(dataSnapshot.getChildrenCount() == 0) return;
-                //Iterate over all content children
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    ChannelRooster channelRooster = postSnapshot.getValue(ChannelRooster.class);
-
-                    //Set channelrooster display picture to banner image & description to channel description
-                    //In future channelrooster specific details will be shown in discover page
-                    channelRooster.setChannel_photo(channel.getPhoto());
-                    channelRooster.setChannel_description(channel.getDescription());
-
-                    //Only place non-current iterations into the map, to ensure we don't play current iteration in discover
-                    if(channelRooster.isActive() && (channelRooster.getRooster_cycle_iteration() != iteration)) {
-                        channelRoosterIterationMap.put(channelRooster.getRooster_cycle_iteration(), channelRooster);
-                    }
-                }
-                if(!channelRoosterIterationMap.isEmpty() && iteration != null) {
-                    findNextValidChannelRooster(channelRoosterIterationMap, channel, iteration);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        };
-        channelRoosterUploadsReference.addListenerForSingleValueEvent(channelRoosterUploadsListener);
-    }
-
-    private void findNextValidChannelRooster(final TreeMap<Integer,ChannelRooster> channelRoosterIterationMap, final Channel channel, final Integer iteration) {
-        new Thread() {
-            @Override
-            public void run() {
-                //Check head and tail of naturally sorted TreeMap for next valid channel content
-                SortedMap<Integer,ChannelRooster> tailMap = channelRoosterIterationMap.tailMap(iteration);
-                SortedMap<Integer,ChannelRooster> headMap = channelRoosterIterationMap.headMap(iteration);
-                //        head               tail
-                //  00000000000000[0]  x   00000000
-                // We want to select [] where x is the current iteration, !NOT! included in the channelRoosterIterationMap - this ensures best content for discover
-                // Or   x   0000000[0]  in the case of a story that is unstarted or a channel on first iteration
-                if(!headMap.isEmpty()) {
-                    //Retrieve channel audio
-                    ChannelRooster channelRooster = channelRoosterIterationMap.get(headMap.lastKey());
-                    channelRooster.setSelected(false);
-                    //This method allows multiple objects per key
-                    if(channelRoosterMap.containsKey(channel.getPriority())) {
-                        channelRoosterMap.get(channel.getPriority()).add(channelRooster);
-                    } else {
-                        List<ChannelRooster> values = new ArrayList<>();
-                        values.add(channelRooster);
-                        channelRoosterMap.put(channel.getPriority(), values);
-                    }
-                } else if(!tailMap.isEmpty()) {
-                    //Retrieve channel audio
-                    ChannelRooster channelRooster = channelRoosterIterationMap.get(tailMap.lastKey());
-                    channelRooster.setSelected(false);
-                    //This method allows multiple objects per key
-                    if(channelRoosterMap.containsKey(channel.getPriority())) {
-                        channelRoosterMap.get(channel.getPriority()).add(channelRooster);
-                    } else {
-                        List<ChannelRooster> values = new ArrayList<>();
-                        values.add(channelRooster);
-                        channelRoosterMap.put(channel.getPriority(), values);
-                    }
-                }
-                //For each channel rooster fetched, refresh the display list
-                refreshTempChannelRoosters();
-            }
-        }.run();
-    }
-
-    private void refreshTempChannelRoosters() {
-        new Thread() {
-            @Override
-            public void run() {
-                //TreeMap ensures unique and allows sorting by priority! How cool is that?
+            public void onChannelRoosterDataChanged(@NotNull ArrayList<ChannelRooster> freshChannelRoosters) {
                 channelRoosters.clear();
-                //This method allows us to have multiple objects per priority key
-                List<ChannelRooster> values = new ArrayList<>();
-                for(List<ChannelRooster> channelRoosterList : channelRoosterMap.values()) {
-                    values.addAll(channelRoosterList);
-                }
-                if(!values.isEmpty()) channelRoosters.addAll(values);
+                channelRoosters.addAll(freshChannelRoosters);
             }
-        }.run();
+
+            @Override
+            public void onSyncFinished() {
+                if(onFlagExploreServiceEventListener != null) {
+                    onFlagExploreServiceEventListener.updateUI(channelRoosters);
+                    onFlagExploreServiceEventListener.setRefreshing(false);
+                }
+            }
+        });
+
+        channelManager.refreshChannelData(channelRoosters);
     }
 
     public void streamChannelRooster(final ChannelRooster channelRooster) {

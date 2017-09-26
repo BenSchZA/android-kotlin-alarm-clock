@@ -160,25 +160,12 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
         }.run();
 
         if(!jsonPersistence.getChannelRoosters().isEmpty()) {
+            channelRoosters.clear();
             channelRoosters.addAll(jsonPersistence.getChannelRoosters());
             mAdapter.notifyDataSetChanged();
         } else if(checkInternetConnection()) {
             if(!swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(true);
         }
-
-        ChannelManager.Companion.setOnFlagChannelManagerDataListener(new ChannelManager.Companion.OnFlagChannelManagerDataListener() {
-            @Override
-            public void onChannelRoosterDataChanged(@NotNull ArrayList<ChannelRooster> freshChannelRoosters) {
-                channelRoosters.clear();
-                channelRoosters.addAll(freshChannelRoosters);
-            }
-
-            @Override
-            public void onSyncFinished() {
-                if(mAdapter != null) mAdapter.notifyDataSetChanged();
-                swipeRefreshLayout.setRefreshing(false);
-            }
-        });
 
         /*
         * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
@@ -191,7 +178,8 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
                         // This method performs the actual data-refresh operation.
                         // The method calls setRefreshing(false) when it's finished.
                         //Reload adapter data and set message status, set listener for new data
-                        mExploreService.refreshData();
+                        if(mBound)
+                            mExploreService.refreshData();
                     }
                 }
         );
@@ -227,6 +215,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
             mExploreService = binder.getService();
             mBound = true;
 
+            mExploreService.refreshData();
             mExploreService.startExploreStatusBarPlayer();
 
             ExploreService.setOnFlagExploreServiceEventListener(new ExploreService.OnFlagExploreServiceEventListener() {

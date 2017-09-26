@@ -38,6 +38,7 @@ import com.roostermornings.android.geolocation.GeoHashUtils;
 import com.roostermornings.android.util.JSONPersistence;
 import com.roostermornings.android.util.LifeCycle;
 import com.roostermornings.android.util.MyContactsController;
+import com.squareup.otto.Bus;
 
 import static com.roostermornings.android.sync.DownloadSyncAdapter.CreateSyncAccount;
 import static com.roostermornings.android.util.Constants.AUTHORITY;
@@ -180,6 +181,12 @@ public class RoosterApplicationModule {
     @Singleton
     BackgroundTaskReceiver provideBackgroundTaskReceiver() {
         return new BackgroundTaskReceiver();
+    }
+
+    @Provides
+    @Singleton
+    Bus provideOttoBus() {
+        return new Bus();
     }
 }
 
