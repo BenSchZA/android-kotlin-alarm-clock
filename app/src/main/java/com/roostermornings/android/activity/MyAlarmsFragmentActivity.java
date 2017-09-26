@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.graphics.drawable.VectorDrawableCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -51,6 +52,7 @@ import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.AlarmChannel;
 import com.roostermornings.android.firebase.FirebaseNetwork;
+import com.roostermornings.android.service.MediaService;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
@@ -152,6 +154,11 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
         //Check if first entry
         lifeCycle.performInception();
+
+        //TODO: remove
+        Intent intent = new Intent(this, MediaService.class);
+        intent.setAction(MediaService.ACTION_PAUSE);
+        ContextCompat.startForegroundService(this, intent);
 
         //Download any social or channel audio files
         ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
