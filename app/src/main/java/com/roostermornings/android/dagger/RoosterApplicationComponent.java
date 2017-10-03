@@ -40,11 +40,12 @@ import com.roostermornings.android.fragment.message_status.MessageStatusReceived
 import com.roostermornings.android.fragment.message_status.MessageStatusSentFragment2;
 import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment1;
 import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment2;
+import com.roostermornings.android.media.MediaNotificationHelper;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 import com.roostermornings.android.receiver.NetworkChangeReceiver;
 import com.roostermornings.android.service.AudioService;
-import com.roostermornings.android.service.ExploreService;
+import com.roostermornings.android.service.MediaService;
 import com.roostermornings.android.service.RoosterFirebaseMessagingService;
 import com.roostermornings.android.service.UploadService;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
@@ -100,7 +101,6 @@ public interface RoosterApplicationComponent {
 
     void inject(AudioService service);
     void inject(UploadService service);
-    void inject(ExploreService service);
     void inject(DeviceAlarmReceiver service);
     void inject(BackgroundTaskReceiver service);
     void inject(NetworkChangeReceiver service);
@@ -113,6 +113,8 @@ public interface RoosterApplicationComponent {
     void inject(GeoHashUtils roosterClass);
     void inject(JSONPersistence jsonPersistence);
     void inject(ChannelManager roosterClass);
+    void inject(MediaNotificationHelper roosterClass);
+    void inject(MediaService roosterClass);
 
     void inject(DownloadSyncAdapter adapter);
     void inject(MyAlarmsListAdapter adapter);

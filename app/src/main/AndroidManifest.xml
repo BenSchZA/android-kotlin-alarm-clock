@@ -76,6 +76,7 @@
             android:name=".receiver.BackgroundTaskReceiver"
             android:enabled="true"
             android:exported="true" />
+
         <receiver android:name="android.support.v4.media.session.MediaButtonReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
@@ -182,9 +183,6 @@
             android:enabled="true" />
         <service
             android:name=".service.UploadService"
-            android:enabled="true" />
-        <service
-            android:name=".service.ExploreService"
             android:enabled="true" />
 
         <!-- Neither of these services should use exported="false", to ensure they are accessible from other applications via the filter -->
@@ -300,6 +298,7 @@
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
         </service>
+
     </application>
 
 </manifest>

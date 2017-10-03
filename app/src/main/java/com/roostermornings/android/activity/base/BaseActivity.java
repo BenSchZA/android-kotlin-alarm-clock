@@ -353,7 +353,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
 
         editor
                 .remove(JSONPersistence.SharedPrefsKeys.KEY_ALARMS_ARRAY)
-                .remove(JSONPersistence.SharedPrefsKeys.KEY_CHANNEL_ROOSTERS_ARRAY)
+                .remove(JSONPersistence.SharedPrefsKeys.KEY_MEDIA_ITEMS_ARRAY)
                 .remove(JSONPersistence.SharedPrefsKeys.KEY_USER_CONTACTS_NUMBER_NAME_PAIRS_MAP)
                 .remove(JSONPersistence.SharedPrefsKeys.KEY_USER_FRIENDS_ARRAY)
                 .remove(JSONPersistence.SharedPrefsKeys.KEY_USER_INVITABLE_CONTACTS_ARRAY)
