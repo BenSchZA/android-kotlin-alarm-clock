@@ -17,7 +17,6 @@ import com.roostermornings.android.domain.ChannelRooster
 import com.roostermornings.android.domain.GeoHashChannel
 import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment2
 import com.roostermornings.android.geolocation.GeoHashUtils
-import com.roostermornings.android.service.ExploreService
 import com.roostermornings.android.service.MediaService
 import com.roostermornings.android.util.JSONPersistence
 import com.roostermornings.android.util.Toaster
@@ -56,7 +55,6 @@ class ChannelManager(private val context: Context, private val from: Any) {
     }
 
     fun refreshChannelData(persistedChannelRoosters: ArrayList<ChannelRooster>) {
-
 
         //Clear old data before syncing
         //Must be called outside thread, or use mThis context to access
@@ -175,7 +173,7 @@ class ChannelManager(private val context: Context, private val from: Any) {
         val tailMap = channelRoosterIterationMap.tailMap(iteration)
         val headMap = channelRoosterIterationMap.headMap(iteration)
 
-        if(from is DiscoverFragmentActivity || from is ExploreService || from is MediaService) {
+        if(from is DiscoverFragmentActivity || from is MediaService) {
 
             //        head               tail
             //  00000000000000[0]  x   00000000

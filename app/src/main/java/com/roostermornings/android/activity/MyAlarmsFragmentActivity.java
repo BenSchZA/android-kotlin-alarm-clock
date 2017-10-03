@@ -155,11 +155,6 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         //Check if first entry
         lifeCycle.performInception();
 
-        //TODO: remove
-        Intent intent = new Intent(this, MediaService.class);
-        intent.setAction(MediaService.ACTION_PAUSE);
-        ContextCompat.startForegroundService(this, intent);
-
         //Download any social or channel audio files
         ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
 

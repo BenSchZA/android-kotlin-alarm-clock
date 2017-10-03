@@ -6,8 +6,13 @@
 package com.roostermornings.android.util;
 
 import android.content.SharedPreferences;
+import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.MediaDescriptionCompat;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.InstanceCreator;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.roostermornings.android.BaseApplication;
@@ -22,13 +27,14 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.KEY_ALARMS_ARRAY;
 import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.KEY_ALARM_CHANNEL_ROOSTERS_ARRAY;
-import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.KEY_CHANNEL_ROOSTERS_ARRAY;
+import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.KEY_MEDIA_ITEMS_ARRAY;
 import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.KEY_CHANNEL_STORY_ITERATION;
 import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.KEY_USER_FRIENDS_ARRAY;
 import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.KEY_USER_GEOHASH_ENTRY_ARRAY;
@@ -48,14 +54,14 @@ import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.K
  */
 
 public class JSONPersistence {
-    private static Gson gson = new Gson();
+    private static Gson gson;
 
     public class SharedPrefsKeys {
         public static final String KEY_CHANNEL_STORY_ITERATION = "KEY_CHANNEL_STORY_ITERATION";
         public static final String KEY_USER_FRIENDS_ARRAY = "KEY_USER_FRIENDS_ARRAY";
         public static final String KEY_USER_INVITABLE_CONTACTS_ARRAY = "KEY_USER_INVITABLE_CONTACTS_ARRAY";
         public static final String KEY_USER_CONTACTS_NUMBER_NAME_PAIRS_MAP = "KEY_USER_CONTACTS_NUMBER_NAME_PAIRS_MAP";
-        public static final String KEY_CHANNEL_ROOSTERS_ARRAY = "KEY_CHANNEL_ROOSTERS_ARRAY";
+        public static final String KEY_MEDIA_ITEMS_ARRAY = "KEY_MEDIA_ITEMS_ARRAY";
         public static final String KEY_ALARM_CHANNEL_ROOSTERS_ARRAY = "KEY_ALARM_CHANNEL_ROOSTERS_ARRAY";
         public static final String KEY_ALARMS_ARRAY = "KEY_ALARMS_ARRAY";
         public static final String KEY_USER_GEOHASH_ENTRY_ARRAY = "KEY_USER_GEOHASH_ENTRY_ARRAY";
@@ -65,6 +71,10 @@ public class JSONPersistence {
 
     public JSONPersistence() {
         BaseApplication.getRoosterApplicationComponent().inject(this);
+
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(MediaBrowserCompat.MediaItem.class, new MediaItemInstanceCreator());
+        gson = gsonBuilder.create();
     }
 
     private JSONObject getJSONObject(String key) {
@@ -94,6 +104,19 @@ public class JSONPersistence {
     private void putJSONString(String key, String Json) {
         if(defaultSharedPreferences != null) {
             defaultSharedPreferences.edit().putString(key, Json).apply();
+        }
+    }
+
+    private void clearJSONString(String key) {
+        if(defaultSharedPreferences != null) {
+            defaultSharedPreferences.edit().remove(key).apply();
+        }
+    }
+
+    class MediaItemInstanceCreator implements InstanceCreator<MediaBrowserCompat.MediaItem> {
+        public MediaBrowserCompat.MediaItem createInstance(Type type) {
+            MediaDescriptionCompat mediaDescription = new MediaDescriptionCompat.Builder().setMediaId("mediaId").build();
+            return new MediaBrowserCompat.MediaItem(mediaDescription, MediaBrowserCompat.MediaItem.FLAG_PLAYABLE);
         }
     }
 
@@ -159,32 +182,31 @@ public class JSONPersistence {
         }
     }
 
-    public ArrayList<ChannelRooster> getChannelRoosters() {
-        ArrayList<ChannelRooster> returnArray = new ArrayList<>();
+    public ArrayList<MediaBrowserCompat.MediaItem> getMediaItems() {
+        ArrayList<MediaBrowserCompat.MediaItem> returnArray = new ArrayList<>();
         try {
-            if(getJSONString(KEY_CHANNEL_ROOSTERS_ARRAY) != null) {
-                Type type = new TypeToken<ArrayList<ChannelRooster>>(){}.getType();
-                if(gson.fromJson(getJSONString(KEY_CHANNEL_ROOSTERS_ARRAY), type) != null) {
-                    return gson.fromJson(getJSONString(KEY_CHANNEL_ROOSTERS_ARRAY), type);
+            if(getJSONString(KEY_MEDIA_ITEMS_ARRAY) != null) {
+                Type type = new TypeToken<ArrayList<MediaBrowserCompat.MediaItem>>(){}.getType();
+                if(gson.fromJson(getJSONString(KEY_MEDIA_ITEMS_ARRAY), type) != null) {
+                    return gson.fromJson(getJSONString(KEY_MEDIA_ITEMS_ARRAY), type);
                 } else {
                     return returnArray;
                 }
             } else {
                 return returnArray;
             }
-        } catch (IllegalStateException e) {
+        } catch(Exception e) {
             e.printStackTrace();
-            return returnArray;
-        } catch (JsonSyntaxException e) {
-            e.printStackTrace();
+            clearJSONString(KEY_MEDIA_ITEMS_ARRAY);
+            Crashlytics.logException(e);
             return returnArray;
         }
     }
 
-    public void setChannelRoosters(ArrayList<ChannelRooster> mRoosters) {
-        if(mRoosters == null) return;
+    public void setMediaItems(ArrayList<MediaBrowserCompat.MediaItem> mMediaItems) {
+        if(mMediaItems == null) return;
         try {
-            putJSONString(KEY_CHANNEL_ROOSTERS_ARRAY, gson.toJson(mRoosters));
+            putJSONString(KEY_MEDIA_ITEMS_ARRAY, gson.toJson(mMediaItems));
         } catch (IllegalStateException e) {
             e.printStackTrace();
         }
