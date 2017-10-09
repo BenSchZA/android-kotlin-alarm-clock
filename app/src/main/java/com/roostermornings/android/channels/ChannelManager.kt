@@ -5,17 +5,14 @@
 
 package com.roostermornings.android.channels
 
-import android.app.Activity
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import com.google.firebase.database.*
 import com.roostermornings.android.BaseApplication
-import com.roostermornings.android.activity.DiscoverFragmentActivity
 import com.roostermornings.android.domain.Channel
 import com.roostermornings.android.domain.ChannelRooster
 import com.roostermornings.android.domain.GeoHashChannel
-import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment2
 import com.roostermornings.android.geolocation.GeoHashUtils
 import com.roostermornings.android.util.JSONPersistence
 import com.roostermornings.android.util.Toaster
@@ -30,7 +27,7 @@ import javax.inject.Inject
  * Copyright © 2017 Roosta Media. All rights reserved.
  */
 
-class ChannelManager(private val context: Context, private val from: Any) {
+class ChannelManager(private val context: Context) {
     private val TAG = ChannelManager::class.java.simpleName
 
     private var mChannelsReference: DatabaseReference = FirebaseDatabase.getInstance().reference
@@ -54,7 +51,6 @@ class ChannelManager(private val context: Context, private val from: Any) {
     }
 
     fun refreshChannelData(persistedChannelRoosters: ArrayList<ChannelRooster>) {
-
 
         //Clear old data before syncing
         //Must be called outside thread, or use mThis context to access
@@ -105,14 +101,14 @@ class ChannelManager(private val context: Context, private val from: Any) {
                                     }
 
                                     override fun onCancelled(databaseError: DatabaseError) {
-
+                                        onFlagChannelManagerDataListener?.onSyncFinished()
                                     }
                                 })
 
                             }
 
                             override fun onCancelled() {
-
+                                onFlagChannelManagerDataListener?.onSyncFinished()
                             }
 
                             override fun onPostExecute(success: Boolean) {
@@ -126,6 +122,7 @@ class ChannelManager(private val context: Context, private val from: Any) {
             override fun onCancelled(databaseError: DatabaseError) {
                 Log.w(TAG, "loadPost:onCancelled", databaseError.toException())
                 Toaster.makeToast(context, "Failed to load channel.", Toast.LENGTH_SHORT).checkTastyToast()
+                onFlagChannelManagerDataListener?.onSyncFinished()
             }
         }
         mChannelsReference.addListenerForSingleValueEvent(channelsListener)
@@ -149,13 +146,13 @@ class ChannelManager(private val context: Context, private val from: Any) {
                         channelRooster.channel_photo = channel.getPhoto()
                         channelRooster.channel_description = channel.getDescription()
 
-                        //Only place non-current iterations into the map, to ensure we don't play current iteration in discover
-                        if (channelRooster.isActive && channelRooster.getRooster_cycle_iteration() != iteration) {
+                        //Only place active channel content into map
+                        if (channelRooster.isActive) {
                             channelRoosterIterationMap.put(channelRooster.getRooster_cycle_iteration(), channelRooster)
                         }
                     }
                 }
-                channelRoosterIterationMap.isNotEmpty().run {
+                if(channelRoosterIterationMap.isNotEmpty()) {
                     findNextValidChannelRooster(channelRoosterIterationMap, channel, iteration)
                 }
             }
@@ -167,82 +164,77 @@ class ChannelManager(private val context: Context, private val from: Any) {
         channelRoosterUploadsReference.addListenerForSingleValueEvent(channelRoosterUploadsListener)
     }
 
-    private fun findNextValidChannelRooster(channelRoosterIterationMap: TreeMap<Int, ChannelRooster>, channel: Channel, iteration: Int) {
+    fun findNextValidChannelRooster(channelRoosterIterationMap: TreeMap<Int, ChannelRooster>, channel: Channel, iteration: Int): ChannelRooster? {
+
+        var validChannelRooster: ChannelRooster? = null
 
         //Check head and tail of naturally sorted TreeMap for next valid channel content
         val tailMap = channelRoosterIterationMap.tailMap(iteration)
         val headMap = channelRoosterIterationMap.headMap(iteration)
 
-        if(from is DiscoverFragmentActivity) {
-
+        // If the channel rooster iteration map contains the current iteration key, proceed, else find nextValidEntry
+        // If date locked, use head/tail logic to ensure we don't select current iteration
+        if(channelRoosterIterationMap.containsKey(iteration)) {
+            validChannelRooster = processValidChannelRooster(channel, channelRoosterIterationMap, iteration)
+        } else {
+            // If story, and not date locked:
             //        head               tail
-            //  00000000000000[0]  x   00000000
-            // We want to select [] where x is the current iteration, !NOT! included in the channelRoosterIterationMap - this ensures best content for discover
-            // Or   x   0000000[0]  in the case of a story that is unstarted or a channel on first iteration
-            if (headMap.isNotEmpty()) {
-                //Retrieve channel audio
-                channelRoosterIterationMap[headMap.lastKey()]?.let { channelRooster ->
-                    channelRooster.setSelected(false)
-                    //This method allows multiple objects per key
-                    if(channelRoosterMap[channel.getPriority()]?.add(channelRooster) != true) {
-                        val values = ArrayList<ChannelRooster>()
-                        values.add(channelRooster)
-                        channelRoosterMap.put(channel.getPriority(), values)
-                    }
-                }
-            } else if (tailMap.isNotEmpty()) {
-                //Retrieve channel audio
-                channelRoosterIterationMap[tailMap.lastKey()]?.let { channelRooster ->
-                    channelRooster.setSelected(false)
-                    //This method allows multiple objects per key
-                    if(channelRoosterMap[channel.getPriority()]?.add(channelRooster) != true) {
-                        val values = ArrayList<ChannelRooster>()
-                        values.add(channelRooster)
-                        channelRoosterMap.put(channel.getPriority(), values)
-                    }
+            //  00000000000000[b]  x  [a]00000000
+            // where x is current invalid iteration
+            // try a first, then b
+            if (channel.isNew_alarms_start_at_first_iteration) {
+                if (tailMap.isNotEmpty()) {
+                    val nextValidEntry = tailMap.firstKey()
+                    validChannelRooster = processValidChannelRooster(channel, channelRoosterIterationMap, nextValidEntry)
+                } else if (headMap.isNotEmpty()) {
+                    val nextValidEntry = headMap.lastKey()
+                    validChannelRooster = processValidChannelRooster(channel, channelRoosterIterationMap, nextValidEntry)
                 }
             }
-        } else if(from is NewAlarmFragment2) {
-
-            if (tailMap.isNotEmpty()) {
-                //User is starting story at next valid entry
-                //Set entry for iteration to current valid story iteration, to be incremented on play
-                jsonPersistence.setStoryIteration(channel.getUid(), tailMap.firstKey())
-                //Retrieve channel audio
-                channelRoosterIterationMap[tailMap.firstKey()]?.let { channelRooster ->
-                    channelRooster.setSelected(false)
-                    //This method allows multiple objects per key
-                    if(channelRoosterMap[channel.getPriority()]?.add(channelRooster) != true) {
-                        val values = ArrayList<ChannelRooster>()
-                        values.add(channelRooster)
-                        channelRoosterMap.put(channel.getPriority(), values)
-                    }
-                }
-            } else if (headMap.isNotEmpty()) {
-                //User is starting story at next valid entry
-                //Set entry for iteration to current valid story iteration, to be incremented on play
-                jsonPersistence.setStoryIteration(channel.getUid(), headMap.firstKey())
-                //Retrieve channel audio
-                channelRoosterIterationMap[headMap.firstKey()]?.let { channelRooster ->
-                    channelRooster.setSelected(false)
-                    //This method allows multiple objects per key
-                    if(channelRoosterMap[channel.getPriority()]?.add(channelRooster) != true) {
-                        val values = ArrayList<ChannelRooster>()
-                        values.add(channelRooster)
-                        channelRoosterMap.put(channel.getPriority(), values)
-                    }
+            // If daily, or date locked:
+            //        head               tail
+            //  00000000000000[a]  x  [b]00000000
+            // where x is current invalid iteration
+            // try a first, then b
+            else {
+                if (headMap.isNotEmpty()) {
+                    val nextValidEntry = headMap.lastKey()
+                    validChannelRooster = processValidChannelRooster(channel, channelRoosterIterationMap, nextValidEntry)
+                } else if (tailMap.isNotEmpty()) {
+                    val nextValidEntry = tailMap.firstKey()
+                    validChannelRooster = processValidChannelRooster(channel, channelRoosterIterationMap, nextValidEntry)
                 }
             }
         }
 
         //For each channel rooster fetched, refresh the display list
         refreshTempChannelRoosters()
+        return validChannelRooster
+    }
+
+    private fun processValidChannelRooster(channel: Channel, channelRoosterIterationMap: TreeMap<Int, ChannelRooster>, nextValidEntry: Int): ChannelRooster? {
+        //Retrieve channel audio
+        channelRoosterIterationMap[nextValidEntry]?.let { channelRooster ->
+            // User is starting at next valid entry
+            // Set entry for iteration to current valid story iteration, to be incremented on play
+            jsonPersistence.setStoryIteration(channel.getUid(), nextValidEntry)
+
+            channelRooster.isSelected = false
+            //This method allows multiple objects per key
+            if(channelRoosterMap[channel.getPriority()]?.add(channelRooster) != true) {
+                val values = ArrayList<ChannelRooster>()
+                values.add(channelRooster)
+                channelRoosterMap.put(channel.getPriority(), values)
+            }
+            return channelRooster
+        }
+        return null
     }
 
     private fun refreshTempChannelRoosters() {
-        //TreeMap ensures unique and allows sorting by priority! How cool is that?
+        // TreeMap ensures unique and allows sorting by priority! How cool is that?
         tempChannelRoosters.clear()
-        //This method allows us to have multiple objects per priority key
+        // This method allows us to have multiple objects per priority key
         val values = ArrayList<ChannelRooster>()
         for (channelRoosterList in channelRoosterMap.values) {
             values.addAll(channelRoosterList)
@@ -251,7 +243,7 @@ class ChannelManager(private val context: Context, private val from: Any) {
     }
 
     companion object {
-        //Listener channel manager data sync
+        // Listener for channel manager data sync
         var onFlagChannelManagerDataListener: OnFlagChannelManagerDataListener? = null
 
         interface OnFlagChannelManagerDataListener {
