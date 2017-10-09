@@ -59,7 +59,7 @@ public class NewAlarmFragment2 extends BaseFragment {
     private String mUserUidParam;
     private IAlarmSetListener mListener;
 
-    private ChannelManager channelManager = new ChannelManager(getApplicationContext(), this);
+    private ChannelManager channelManager = new ChannelManager(getApplicationContext());
 
     private ArrayList<ChannelRooster> channelRoosters = new ArrayList<>();
 

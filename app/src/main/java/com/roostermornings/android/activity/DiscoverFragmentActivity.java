@@ -89,7 +89,7 @@ public class DiscoverFragmentActivity extends BaseActivity implements DiscoverLi
     private MediaPlayer mediaPlayer = new MediaPlayer();
     Future oneInstanceTaskFuture;
 
-    private ChannelManager channelManager = new ChannelManager(this,this);
+    private ChannelManager channelManager = new ChannelManager(this);
 
     private RecyclerView.Adapter mAdapter;
 
