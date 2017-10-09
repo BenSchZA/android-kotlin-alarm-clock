@@ -39,6 +39,7 @@ import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.geolocation.GeoHashUtils;
 import com.roostermornings.android.util.JSONPersistence;
 import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.StrUtils;
@@ -70,6 +71,7 @@ import static com.roostermornings.android.util.Constants.ACCOUNT_TYPE;
 public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
 
     private boolean channelSyncActive;
+    private boolean socialSyncActive;
 
     //Firebase SDK
     @Inject @Nullable FirebaseUser firebaseUser;
@@ -77,6 +79,8 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
     @Inject DatabaseReference mDatabaseRef;
     @Inject AudioTableManager audioTableManager;
     @Inject DeviceAlarmTableManager deviceAlarmTableManager;
+    @Inject GeoHashUtils geoHashUtils;
+    @Inject JSONPersistence jsonPersistence;
 
     private static OnChannelDownloadListener onChannelDownloadListener;
 
@@ -154,13 +158,16 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
         Log.d("SyncAdapter: ", "onPerformSync()");
 
         if(firebaseUser != null) {
+            //Get channel and social audio content
             retrieveSocialRoosterData(getApplicationContext());
             retrieveChannelContentData(getApplicationContext());
+
+            //Update badge count for roosters received
             BaseActivity.setBadge(getApplicationContext(), BaseApplication.getNotificationFlag(Constants.FLAG_ROOSTERCOUNT));
             audioTableManager.updateRoosterCount();
-            //TODO: Listen for requests from friends
-//            Intent intent = new Intent(getApplicationContext(), FirebaseListenerService.class);
-//            getApplicationContext().startService(intent);
+
+            //Check if the user's geohash location entry is still valid
+            geoHashUtils.checkUserGeoHash();
         }
     }
 
@@ -252,7 +259,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
                         final Integer iteration;
                         Integer tempIteration;
                         if(channel.isNew_alarms_start_at_first_iteration()) {
-                            iteration = new JSONPersistence(getApplicationContext()).getStoryIteration(channelId);
+                            iteration = jsonPersistence.getStoryIteration(channelId);
                         } else {
                             Calendar currentCalendar = Calendar.getInstance();
                             Calendar nextPendingCalendar = Calendar.getInstance();
@@ -301,13 +308,13 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
                                 if(!tailMap.isEmpty()) {
                                     //User is starting story at next valid entry
                                     //Set entry for iteration to current valid story iteration, to be incremented on play
-                                    new JSONPersistence(getApplicationContext()).setStoryIteration(channelId, tailMap.firstKey());
+                                    jsonPersistence.setStoryIteration(channelId, tailMap.firstKey());
                                     //Retrieve channel audio
                                     retrieveChannelContentAudio(channelIterationMap.get(tailMap.firstKey()), context);
                                 } else if(!headMap.isEmpty()) {
                                     //User is starting story from beginning again, at valid entry
                                     //Set entry for iteration to current valid story iteration, to be incremented on play
-                                    new JSONPersistence(getApplicationContext()).setStoryIteration(channelId, headMap.firstKey());
+                                    jsonPersistence.setStoryIteration(channelId, headMap.firstKey());
                                     //Retrieve channel audio
                                     retrieveChannelContentAudio(channelIterationMap.get(headMap.firstKey()), context);
                                 }
@@ -493,14 +500,18 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
 
         if(socialRooster == null) return;
 
+        if(socialSyncActive) return;
+
         if(audioTableManager.isSocialAudioInDatabase(socialRooster.getQueue_id())) return;
 
         try {
 
-            StorageReference audioFileRef = mStorageRef.child("social_rooster_uploads/" + socialRooster.getAudio_file_url());
+            final StorageReference audioFileRef = mStorageRef.child("social_rooster_uploads/" + socialRooster.getAudio_file_url());
             final String audioFileUniqueName = Constants.FILENAME_PREFIX_ROOSTER_CONTENT + RoosterUtils.createRandomUID(5) + ".3gp";
             final DatabaseReference queueRecordReference = mDatabaseRef
                     .child("social_rooster_queue").child(firebaseUser.getUid()).child(socialRooster.getQueue_id());
+
+            socialSyncActive = true;
 
             audioFileRef.getBytes(Constants.MAX_ROOSTER_FILE_SIZE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                 @Override
@@ -524,16 +535,20 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
 
                         //Pre-cache image to display on alarm screen, in case no internet connection
                         if(!socialRooster.getProfile_pic().isEmpty()) Picasso.with(getApplicationContext()).load(socialRooster.getProfile_pic()).fetch();
-
+                        socialSyncActive = false;
                     } catch (Exception e) {
                         e.printStackTrace();
+                        socialSyncActive = false;
                     }
-
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception exception) {
                     // Handle any errors
+                    Toaster.makeToast(context, "Error downloading rooster.", Toast.LENGTH_SHORT);
+                    //remove record of queue from FB database on error
+                    queueRecordReference.removeValue();
+                    socialSyncActive = false;
                 }
             });
 

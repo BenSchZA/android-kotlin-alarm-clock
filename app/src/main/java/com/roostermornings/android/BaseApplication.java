@@ -5,12 +5,12 @@
 
 package com.roostermornings.android;
 
-import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
@@ -19,6 +19,7 @@ import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.stetho.Stetho;
+import com.google.android.gms.location.places.PlaceDetectionClient;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -27,13 +28,14 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.roostermornings.android.apis.GoogleIHTTPClient;
 import com.roostermornings.android.dagger.DaggerRoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationModule;
 import com.roostermornings.android.domain.User;
-import com.roostermornings.android.node_api.IHTTPClient;
+import com.roostermornings.android.apis.NodeIHTTPClient;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
-import com.roostermornings.android.service.FirebaseListenerService;
+import com.roostermornings.android.receiver.NetworkChangeReceiver;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.FontsOverride;
 import com.roostermornings.android.util.Toaster;
@@ -48,8 +50,11 @@ public class BaseApplication extends android.app.Application {
 
     private static final String TAG = "BaseApplication";
     private static RoosterApplicationComponent roosterApplicationComponent;
-    public Retrofit mRetrofit;
-    public IHTTPClient mAPIService;
+    private PlaceDetectionClient mPlaceDetectionClient;
+    public Retrofit mRetrofitNode;
+    public NodeIHTTPClient mAPIServiceNode;
+    public Retrofit mRetrofitGoogle;
+    public GoogleIHTTPClient mAPIServiceGoogle;
     protected FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
@@ -91,18 +96,6 @@ public class BaseApplication extends android.app.Application {
             firebaseAnalytics.setAnalyticsCollectionEnabled(false);
         }
 
-        //Activate facebook app connection
-        AppEventsLogger.activateApp(this, getResources().getString(R.string.facebook_app_id));
-
-        //Override monospace font with custom font
-        FontsOverride.setDefaultFont(this, "MONOSPACE", Constants.APP_FONT);
-
-        if (BuildConfig.DEBUG) {
-            //Stetho: http://facebook.github.io/stetho/ - debug bridge for Android (view SQL etc.)
-            //Go to chrome://inspect/ in Chrome to inspect
-            Stetho.initializeWithDefaults(this);
-        }
-
         /*Component implementations are primarily instantiated via a generated builder.
         An instance of the builder is obtained using the builder() method on the component implementation.
         If a nested @Component.Builder type exists in the component, the builder() method will
@@ -117,12 +110,34 @@ public class BaseApplication extends android.app.Application {
 
         roosterApplicationComponent.inject(this);
 
+        //Register receiver to listen for network changes
+        NetworkChangeReceiver.Companion.registerReceiverSelf(this);
+
+        //Activate facebook app connection
+        AppEventsLogger.activateApp(this, getResources().getString(R.string.facebook_app_id));
+
+        //Override monospace font with custom font
+        FontsOverride.setDefaultFont(this, "MONOSPACE", Constants.APP_FONT);
+
+        if (BuildConfig.DEBUG) {
+            //Stetho: http://facebook.github.io/stetho/ - debug bridge for Android (view SQL etc.)
+            //Go to chrome://inspect/ in Chrome to inspect
+            Stetho.initializeWithDefaults(this);
+        }
+
         //Create Retrofit API class for managing Node API
-        mRetrofit = new Retrofit.Builder()
+        mRetrofitNode = new Retrofit.Builder()
                 .baseUrl(getResources().getString(R.string.node_api_url))
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
-        mAPIService = mRetrofit.create(IHTTPClient.class);
+        mAPIServiceNode = mRetrofitNode.create(NodeIHTTPClient.class);
+
+        //Create Retrofit API class for managing Google API
+        mRetrofitGoogle = new Retrofit.Builder()
+                .baseUrl(getResources().getString(R.string.google_api_url))
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        mAPIServiceGoogle = mRetrofitGoogle.create(GoogleIHTTPClient.class);
 
         updateNotification();
 
@@ -215,8 +230,12 @@ public class BaseApplication extends android.app.Application {
         return roosterApplicationComponent;
     }
 
-    public IHTTPClient getAPIService() {
-        return mAPIService;
+    public NodeIHTTPClient getNodeAPIService() {
+        return mAPIServiceNode;
+    }
+
+    public GoogleIHTTPClient getGoogleAPIService() {
+        return mAPIServiceGoogle;
     }
 
     public static int getNotificationFlag(String flag) {

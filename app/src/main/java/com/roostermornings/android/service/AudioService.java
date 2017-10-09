@@ -117,6 +117,7 @@ public class AudioService extends Service {
     Account mAccount;
     @Inject SharedPreferences sharedPreferences;
     @Inject @Named("default") SharedPreferences defaultSharedPreferences;
+    @Inject JSONPersistence jsonPersistence;
 
     public static boolean mRunning = false;
 
@@ -420,7 +421,7 @@ public class AudioService extends Service {
                     //Check if channel has content and whether a story or not
                     final Integer iteration;
                     if(channel.isNew_alarms_start_at_first_iteration()) {
-                        iteration = new JSONPersistence(getApplicationContext()).getStoryIteration(channelId);
+                        iteration = jsonPersistence.getStoryIteration(channelId);
                     } else {
                         iteration = channel.getCurrent_rooster_cycle_iteration() > 0 ? channel.getCurrent_rooster_cycle_iteration() : 1;
                     }
@@ -466,13 +467,13 @@ public class AudioService extends Service {
                             if (!tailMap.isEmpty()) {
                                 //User is starting story at next valid entry
                                 //Set entry for iteration to current valid story iteration, to be incremented on play
-                                new JSONPersistence(getApplicationContext()).setStoryIteration(channelId, tailMap.firstKey());
+                                jsonPersistence.setStoryIteration(channelId, tailMap.firstKey());
                                 //Retrieve channel audio
                                 streamChannelContent(channelIterationMap.get(tailMap.firstKey()).getAudio_file_url());
                             } else if (!headMap.isEmpty()) {
                                 //User is starting story from beginning again, at valid entry
                                 //Set entry for iteration to current valid story iteration, to be incremented on play
-                                new JSONPersistence(getApplicationContext()).setStoryIteration(channelId, headMap.firstKey());
+                                jsonPersistence.setStoryIteration(channelId, headMap.firstKey());
                                 //Retrieve channel audio
                                 streamChannelContent(channelIterationMap.get(headMap.firstKey()).getAudio_file_url());
                             }
@@ -804,9 +805,9 @@ public class AudioService extends Service {
                 audioTableManager.selectListenedByChannel(alarm.getChannel())) {
             try {
                 if (audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) {
-                    Integer currentStoryIteration = new JSONPersistence(getApplicationContext()).getStoryIteration(audioItem.getQueue_id());
+                    Integer currentStoryIteration = jsonPersistence.getStoryIteration(audioItem.getQueue_id());
                     if (currentStoryIteration > 0)
-                        new JSONPersistence(getApplicationContext()).setStoryIteration(audioItem.getQueue_id(), currentStoryIteration + 1);
+                        jsonPersistence.setStoryIteration(audioItem.getQueue_id(), currentStoryIteration + 1);
                 }
             } catch (NullPointerException e) {
                 logError(e);

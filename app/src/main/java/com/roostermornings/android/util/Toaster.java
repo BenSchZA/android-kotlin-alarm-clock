@@ -10,6 +10,17 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 
+/**
+ * Toaster Class
+ *
+ * A class used for creating, managing, authenticating, and destroying Toasts.
+ * This is some highly advanced Toast, butter side up.
+ *
+ * @author bscholtz
+ * @version 1
+ * @since 16/05/17
+ */
+
 public class Toaster {
 
     private static Toast myToast;
@@ -17,6 +28,11 @@ public class Toaster {
 
     private Toaster() {
     }
+
+    /**
+     * A custom Toast class that allows us to ensure a Toast is only shown to authenticated users,
+     * in certain cases.
+     */
 
     //Ensure toast is for a valid user, toast doesn't grow on trees
     public static class ToastyToast {
@@ -30,7 +46,10 @@ public class Toaster {
         }
     }
 
-    //Make toast, and don't allow people to queue for toast... only one static toast allowed
+    /**
+     * Make toast, and don't allow people to queue for toast... only one static toast allowed
+     */
+
     public static ToastyToast makeToast(Context wheresMyToast, String toastedText, int toastyLength) {
         if(myToast == null) {
             myToast = Toast.makeText(wheresMyToast, toastedText, toastyLength);
@@ -43,7 +62,11 @@ public class Toaster {
         return toastyToast;
     }
 
-    //Quickly! Get rid of all toast!
+    /**
+     * Quickly! Get rid of all toast!
+     * @return whether the action was performed or not.
+     */
+
     public static boolean burnTheToast() {
         if(myToast != null) {
             myToast.cancel();
