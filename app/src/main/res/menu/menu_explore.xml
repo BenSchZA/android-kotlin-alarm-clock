@@ -11,4 +11,8 @@
         android:icon="@drawable/ic_search_white_24dp"
         app:actionViewClass="android.support.v7.widget.SearchView"
         app:showAsAction="collapseActionView|always"/>
+    <!--<item android:id="@+id/shuffle_explore"-->
+        <!--android:title="@string/shuffle_title"-->
+        <!--android:icon="@drawable/selectable_shuffle_icon"-->
+        <!--app:showAsAction="collapseActionView|ifRoom"/>-->
 </menu>

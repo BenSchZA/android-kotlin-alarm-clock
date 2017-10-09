@@ -39,50 +39,56 @@ import com.google.android.exoplayer2.trackselection.TrackSelector
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.activity.DiscoverFragmentActivity
-import com.roostermornings.android.activity.MyAlarmsFragmentActivity
 import com.roostermornings.android.channels.ChannelManager
 import com.roostermornings.android.domain.ChannelRooster
 import com.roostermornings.android.media.MediaNotificationHelper
 import com.roostermornings.android.util.RoosterUtils
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 
 class MediaService : MediaBrowserServiceCompat(),
         AudioManager.OnAudioFocusChangeListener{
 
-    companion object {
-        val PLAY_FROM_MEDIA_ID_COMMAND = "PLAY_FROM_MEDIA_ID_COMMAND"
-        val MEDIA_ID_EXTRA = "MEDIA_ID_EXTRA"
-    }
+    private val mThis: Context by lazy { this }
 
-    val mThis: Context by lazy { this }
+    private var mFocusRequest : AudioFocusRequest? = null
 
-    var mFocusRequest : AudioFocusRequest? = null
+    private val mSession: MediaSessionCompat by lazy { MediaSessionCompat(this, "MediaService") }
+    private val mSessionConnector: MediaSessionConnector by lazy { MediaSessionConnector(mSession, PlaybackController()) }
+    private val mTransportControls: MediaControllerCompat.TransportControls by lazy { mSession.controller.transportControls }
 
-    val mSession: MediaSessionCompat by lazy { MediaSessionCompat(this, "MediaService") }
-    val mSessionConnector: MediaSessionConnector by lazy { MediaSessionConnector(mSession, PlaybackController()) }
-    val mTransportControls: MediaControllerCompat.TransportControls by lazy { mSession.controller.transportControls }
-
-    val mPlaybackState: PlaybackStateCompat
+    private val mPlaybackState: PlaybackStateCompat
         get() = mSession.controller.playbackState
-    var mPlayerPreparing = false
 
-    val mCurrentMediaDescription: MediaDescriptionCompat
+    private val mCurrentMediaDescription: MediaDescriptionCompat
         get() = mSession.controller.metadata.description
 
-    val mTrackSelector: TrackSelector = DefaultTrackSelector()
-    val mPlayer by lazy{ ExoPlayerFactory.newSimpleInstance(this, mTrackSelector) }
+    private var currentMediaItem: CurrentMediaItem = CurrentMediaItem("", -1, false)
 
-    var lastVolume : Float = 0f
+    fun CurrentMediaItem.reset(): CurrentMediaItem {
+        return CurrentMediaItem("", -1, false)
+    }
 
-    val audioManager by lazy { getSystemService(Context.AUDIO_SERVICE) as AudioManager }
+    class CurrentMediaItem(val ID: String, val position: Long, val isPlaying: Boolean)
 
-    val channelManager: ChannelManager by lazy { ChannelManager(this, this) }
-    var channelRoosters: ArrayList<ChannelRooster> = ArrayList()
+    private var mPlayerPreparing = false
+    private var mBrowserResultSent = false
+    private var mHasPlayed = false
 
-    var mediaSources: ArrayList<MediaSource> = ArrayList()
+    private val mTrackSelector: TrackSelector = DefaultTrackSelector()
+    private val mPlayer by lazy{ ExoPlayerFactory.newSimpleInstance(this, mTrackSelector) }
 
-    val mWifiLock by lazy { (this.getSystemService(Context.WIFI_SERVICE) as WifiManager).createWifiLock(WifiManager.WIFI_MODE_FULL, "RadiophonyLock")  }
+    private var lastVolume : Float = 0f
+
+    private val audioManager by lazy { getSystemService(Context.AUDIO_SERVICE) as AudioManager }
+
+    private val channelManager: ChannelManager by lazy { ChannelManager(this) }
+    private var channelRoosters: ArrayList<ChannelRooster> = ArrayList()
+
+    private var mediaSources: ArrayList<MediaSource> = ArrayList()
+
+    private val mWiFiLock: WifiManager.WifiLock? by lazy { (this.getSystemService(Context.WIFI_SERVICE) as WifiManager?)?.createWifiLock(WifiManager.WIFI_MODE_FULL, "RadiophonyLock")  }
 
     init {
         BaseApplication.getRoosterApplicationComponent().inject(this)
@@ -103,6 +109,7 @@ class MediaService : MediaBrowserServiceCompat(),
         //Repeat all in queue
         mPlayer.repeatMode = REPEAT_MODE_ALL
         mSession.setRepeatMode(REPEAT_MODE_ALL)
+        //Activate session
         mSession.isActive = true
 
         mSession.controller.registerCallback(mMediaControllerCallback)
@@ -116,22 +123,24 @@ class MediaService : MediaBrowserServiceCompat(),
         initNoisyReceiver()
         retrieveAudioFocus()
         //Lock WiFi during service operation
-        mWifiLock.acquire()
+        mWiFiLock?.acquire()
 
         super.setSessionToken(mSession.sessionToken)
-
-        MediaNotificationHelper.createNotification(this, mSession)
     }
 
     override fun onDestroy() {
         super.onDestroy()
 
-        abandonAudioFocus()
+        NotificationManagerCompat.from(this).cancelAll()
 
-        unregisterReceiver(mNoisyReceiver)
+        //Deactivate session
+        mSession.isActive = false
         mSession.release()
-        if(mWifiLock.isHeld) mWifiLock.release()
-        NotificationManagerCompat.from(this).cancel(1)
+
+        abandonAudioFocus()
+        unregisterReceiver(mNoisyReceiver)
+
+        if(mWiFiLock?.isHeld == true) mWiFiLock?.release()
     }
 
     private fun setAttachedActivity() {
@@ -142,6 +151,7 @@ class MediaService : MediaBrowserServiceCompat(),
         mSession.setSessionActivity(pi)
     }
 
+    // Attempt to retrieve audio focus from Android OS
     private fun retrieveAudioFocus(): Boolean {
         val result : Int
         if(RoosterUtils.hasO()) {
@@ -164,29 +174,26 @@ class MediaService : MediaBrowserServiceCompat(),
         return result == AudioManager.AUDIOFOCUS_GAIN
     }
 
+    // Abandon audio focus when service destroyed
     private fun abandonAudioFocus() {
-        //Abandon audio focus
-        if(RoosterUtils.hasO()) {
-            audioManager.abandonAudioFocusRequest(mFocusRequest)
-        } else {
-            audioManager.abandonAudioFocus(this)
-        }
+        if(RoosterUtils.hasO()) audioManager.abandonAudioFocusRequest(mFocusRequest)
+        else audioManager.abandonAudioFocus(this)
     }
 
+    // Handles headphones coming unplugged - cannot be done through a manifest receiver
     private fun initNoisyReceiver() {
-        // Handles headphones coming unplugged. Cannot be done through a manifest receiver.
         val filter = IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
         registerReceiver(mNoisyReceiver, filter)
     }
 
+    // When headphones disconnected, pause audio
     private val mNoisyReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            if (mPlaybackState.state == PlaybackStateCompat.STATE_PLAYING) {
-                mTransportControls.pause()
-            }
+            if (mPlaybackState.state == PlaybackStateCompat.STATE_PLAYING) mTransportControls.pause()
         }
     }
 
+    // When audio focus is lost, manage audio session properly, e.g. pause when call received
     //https://medium.com/google-developers/how-to-properly-handle-audio-interruptions-3a13540d18fa
     override fun onAudioFocusChange(focusChange: Int) {
         val state = mPlaybackState.state
@@ -210,6 +217,7 @@ class MediaService : MediaBrowserServiceCompat(),
         }
     }
 
+    // Manage error messages and present to user
     class MediaErrorMessageProvider : MediaSessionConnector.ErrorMessageProvider {
         override fun getErrorMessage(playbackException: ExoPlaybackException?): Pair<Int, String> {
             return Pair(1, playbackException.toString())
@@ -230,6 +238,11 @@ class MediaService : MediaBrowserServiceCompat(),
     }
 
     inner class ChannelQueueNavigator : TimelineQueueNavigator(mSession) {
+
+        override fun getSupportedQueueNavigatorActions(player: Player?): Long {
+            return super.getSupportedQueueNavigatorActions(player) or ACTION_SET_SHUFFLE_MODE_ENABLED
+        }
+
         override fun getMediaDescription(windowIndex: Int): MediaDescriptionCompat {
             return getQueueItemMediaDescription(windowIndex)
         }
@@ -245,14 +258,24 @@ class MediaService : MediaBrowserServiceCompat(),
         }
 
         override fun onSkipToQueueItem(player: Player?, id: Long) {
+            // If called on currently playing item, toggle play, else skipToQueueItem
             if(this.getActiveQueueItemId(player) != id) {
                 super.onSkipToQueueItem(player, id)
             }
-            mTransportControls.play()
+        }
+
+        override fun onSetShuffleModeEnabled(player: Player?, enabled: Boolean) {
+            super.onSetShuffleModeEnabled(player, enabled)
+//            if(enabled) {
+//                mTransportControls.setShuffleMode(SHUFFLE_MODE_ALL)
+//            } else {
+//                mTransportControls.setShuffleMode(SHUFFLE_MODE_NONE)
+//            }
         }
     }
 
     fun getQueueItemMediaDescription(windowIndex: Int) : MediaDescriptionCompat {
+        // Create media description from ChannelRooster, for TimelineQueueNavigator
         val rooster: ChannelRooster = channelRoosters[windowIndex]
 
         val mMediaDescriptionCompatBuilder: MediaDescriptionCompat.Builder = MediaDescriptionCompat.Builder()
@@ -261,39 +284,45 @@ class MediaService : MediaBrowserServiceCompat(),
                 .setDescription(rooster.description)
                 .setMediaId(rooster.channel_uid)
                 .setMediaUri(Uri.parse(rooster.audio_file_url))
-                .setIconUri(Uri.parse(rooster.channel_photo))
+                .setIconUri(Uri.parse(rooster.photo))
 
         return mMediaDescriptionCompatBuilder.build()
     }
 
     inner class PlaybackController : DefaultPlaybackController() {
         override fun onRewind(player: Player) {
+            // Override rewind method, to jump back by 10 second interval
             //super.onRewind(player)
             mTransportControls.seekTo(player.currentPosition - TimeUnit.SECONDS.toMillis(10))
             mTransportControls.play()
         }
 
-        override fun onSeekTo(player: Player, pos: Long) {
-            super.onSeekTo(player, pos)
-        }
-
-        override fun getSupportedPlaybackActions(player: Player?): Long {
-            return super.getSupportedPlaybackActions(player)
+        override fun onSeekTo(player: Player?, position: Long) {
+            super.onSeekTo(player, position)
         }
 
         override fun onFastForward(player: Player) {
+            // Override rewind method, to jump forward by 10 second interval
             //super.onFastForward(player)
             mTransportControls.seekTo(player.currentPosition + TimeUnit.SECONDS.toMillis(10))
             mTransportControls.play()
         }
 
+        override fun getSupportedPlaybackActions(player: Player?): Long {
+            return super.getSupportedPlaybackActions(player) or ACTION_SET_SHUFFLE_MODE_ENABLED
+        }
+
         override fun onPlay(player: Player) {
+            // Ensure audio focus is gained before playing
             if(retrieveAudioFocus()) {
                 super.onPlay(player)
-                //Ensure service is started to avoid being killed on browser disconnect
+                // Ensure service is started to avoid being killed on client subscription disconnect
                 startService(Intent(mThis, MediaService::class.java))
             }
+            // Register that a media play action has been received
+            if(!mHasPlayed) mHasPlayed = true
 
+            // Ensure media session is active, to retrieve media commands
             if (!mSession.isActive) {
                 mSession.isActive = true
             }
@@ -301,48 +330,40 @@ class MediaService : MediaBrowserServiceCompat(),
 
         override fun onStop(player: Player) {
             super.onStop(player)
-            NotificationManagerCompat.from(mThis).cancel(1)
-            abandonAudioFocus()
+            //Stop service when media stopped
             stopSelf()
         }
-
-        override fun onPause(player: Player) {
-            super.onPause(player)
-        }
     }
 
-    inner class MediaSessionCallback : MediaSessionCompat.Callback() {
-
-        override fun onPlayFromMediaId(mediaId: String?, extras: Bundle?) {
-            super.onPlayFromMediaId(mediaId, extras)
-        }
-
-        override fun onCommand(command: String?, extras: Bundle?, cb: ResultReceiver?) {
-            super.onCommand(command, extras, cb)
-        }
-    }
-
+    // Update media notification whenever the metadata or playback state changes
     private val mMediaControllerCallback = object : MediaControllerCompat.Callback() {
 
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
             super.onPlaybackStateChanged(state)
-            MediaNotificationHelper.createNotification(mThis, mSession)
+            // Only show notification after first play action
+            if(mHasPlayed) MediaNotificationHelper.createNotification(mThis, mSession)
         }
 
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             super.onMetadataChanged(metadata)
-            MediaNotificationHelper.createNotification(mThis, mSession)
+            // Only show notification after first play action
+            if(mHasPlayed) MediaNotificationHelper.createNotification(mThis, mSession)
         }
     }
 
-    val MEDIA_ID_ROOT = "MEDIA_ID_ROOT"
-    val MEDIA_ID_EMPTY_ROOT = "MEDIA_ID_EMPTY_ROOT"
+    private val MEDIA_ID_ROOT = "MEDIA_ID_ROOT"
+    private val MEDIA_ID_EMPTY_ROOT = "MEDIA_ID_EMPTY_ROOT"
+
+    var currentParentId = "UNINITIALIZED"
+    var currentResult: Result<List<MediaBrowserCompat.MediaItem>>? = null
 
     override fun onLoadChildren(parentId: String, result: MediaBrowserServiceCompat.Result<List<MediaBrowserCompat.MediaItem>>) {
         // Use result.detach to allow calling result.sendResult from another thread
         result.detach()
 
-        //Load queue async and send
+        currentParentId = parentId
+        currentResult = result
+        //Load media queue async, prepare player, and send to subscribed client when ready
         ChannelManager.onFlagChannelManagerDataListener = object : ChannelManager.Companion.OnFlagChannelManagerDataListener {
             override fun onChannelRoosterDataChanged(freshChannelRoosters: java.util.ArrayList<ChannelRooster>) {
                 channelRoosters.clear()
@@ -352,6 +373,7 @@ class MediaService : MediaBrowserServiceCompat(),
             override fun onSyncFinished() {
                 mediaSources = ArrayList(channelRoosters.size)
 
+                // Create MediaSource list to compile and pass to player via ConcatenatingMediaSource()
                 for(item in channelRoosters) {
                     val dataSourceFactory = DefaultHttpDataSourceFactory("MediaService")
                     val extractor = DefaultExtractorsFactory()
@@ -365,13 +387,15 @@ class MediaService : MediaBrowserServiceCompat(),
                     mediaSources.add(mediaSource)
                 }
 
+                // Create a listener to determine when player is prepared
                 val playerEventListener = object : Player.EventListener {
 
                     override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                         when(playbackState) {
                             Player.STATE_READY -> {
                                 if(mPlayerPreparing) {
-                                    loadChildrenImpl(parentId, result)
+                                    // Prepare content to send to subscribed content
+                                    loadChildrenImpl(currentParentId, currentResult as MediaBrowserServiceCompat.Result<List<MediaBrowserCompat.MediaItem>>)
                                     mPlayerPreparing = false
                                 }
                             }
@@ -390,8 +414,17 @@ class MediaService : MediaBrowserServiceCompat(),
                     override fun onTimelineChanged(timeline: Timeline?, manifest: Any?) {}
                 }
 
+                if(mPlaybackState.state == STATE_PLAYING) {
+                    currentMediaItem = CurrentMediaItem(mCurrentMediaDescription.mediaId ?: "" , mPlayer.currentPosition, true)
+                } else {
+                    currentMediaItem.reset()
+                }
+                // Prepare media content and wait for STATE_READY
                 mPlayer.addListener(playerEventListener)
+                mPlayer.playWhenReady = false
                 mPlayerPreparing = true
+                // ConcatenatingMediaSource enables us to create a *windowed* {} loop of media content [ ][ ] {[ ][ ]...x10...[ ][ ]} [ ]
+                // Each window, managed by TimelineQueueNavigator(), is a maximum of 10 items long and dynamically loaded
                 mPlayer.prepare(ConcatenatingMediaSource(*mediaSources.toTypedArray()))
             }
         }
@@ -406,6 +439,7 @@ class MediaService : MediaBrowserServiceCompat(),
             MEDIA_ID_ROOT -> {
                 val tempMediaItems : MutableList<MediaBrowserCompat.MediaItem> = ArrayList(channelRoosters.size)
 
+                //Iterate through channel rooster content and create MediaItems to pass to subscribed client
                  channelRoosters.forEachIndexed { index, _ ->
                      val mediaItem : MediaBrowserCompat.MediaItem = MediaBrowserCompat.MediaItem(getQueueItemMediaDescription(index),
                              MediaBrowserCompat.MediaItem.FLAG_PLAYABLE)
@@ -413,19 +447,30 @@ class MediaService : MediaBrowserServiceCompat(),
                  }
 
                 mediaItems = tempMediaItems.toList()
-            }
-            // Since the client provided the empty root we'll just send back an
-            // empty list
-            MEDIA_ID_EMPTY_ROOT -> { return }
-        }
+                result.sendResult(mediaItems)
 
-        result.sendResult(mediaItems)
+                if(currentMediaItem.isPlaying) {
+                    mediaItems.indexOfFirst { it.mediaId == currentMediaItem.ID }.takeIf { it > -1 }?.let {
+                        mTransportControls.skipToQueueItem(it.toLong())
+                        if(currentMediaItem.position > -1)
+                            mTransportControls.seekTo(currentMediaItem.position)
+                        mTransportControls.play()
+                    }
+                }
+            }
+            // Since the client provided the empty root we'll just send back an empty list
+            MEDIA_ID_EMPTY_ROOT -> {
+                result.sendResult(mediaItems)
+            }
+            else -> {  }
+        }
     }
 
     override fun onGetRoot(clientPackageName: String, clientUid: Int, rootHints: Bundle?): MediaBrowserServiceCompat.BrowserRoot? {
         // Verify the client is authorized to browse media and return the root that
         // makes the most sense here. In this example we simply verify the package name
         // is the same as ours, but more complicated checks, and responses, are possible
+
         return if (clientPackageName != packageName) {
             // Allow the client to connect, but not browse, by returning an empty root
             MediaBrowserServiceCompat.BrowserRoot(MEDIA_ID_EMPTY_ROOT, null)

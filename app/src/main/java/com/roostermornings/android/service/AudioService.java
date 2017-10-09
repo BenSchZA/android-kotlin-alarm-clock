@@ -43,6 +43,7 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
+import com.roostermornings.android.channels.ChannelManager;
 import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.domain.Channel;
 import com.roostermornings.android.domain.ChannelRooster;
@@ -56,6 +57,8 @@ import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.InternetHelper;
 import com.roostermornings.android.util.JSONPersistence;
 import com.roostermornings.android.util.StrUtils;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -118,6 +121,8 @@ public class AudioService extends Service {
     @Inject SharedPreferences sharedPreferences;
     @Inject @Named("default") SharedPreferences defaultSharedPreferences;
     @Inject JSONPersistence jsonPersistence;
+    @Inject
+    ChannelManager channelManager;
 
     public static boolean mRunning = false;
 
@@ -397,103 +402,29 @@ public class AudioService extends Service {
                 return;
             }
 
-            final DatabaseReference channelReference = FirebaseDatabase.getInstance().getReference()
-                    .child("channels").child(channelId);
-            channelReference.keepSynced(true);
+            final ArrayList<ChannelRooster> channelRoosters = jsonPersistence.getNewAlarmChannelRoosters();
 
-            ValueEventListener channelListener = new ValueEventListener() {
+            ChannelManager.Companion.setOnFlagChannelManagerDataListener(new ChannelManager.Companion.OnFlagChannelManagerDataListener() {
                 @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-
-                    Channel channel = dataSnapshot.getValue(Channel.class);
-
-                    //Check if channel exists
-                    if (channel == null) {
-                        startDefaultAlarmTone();
-                        return;
-                    }
-                    //Check if channel is active
-                    if (!channel.isActive()) {
-                        startDefaultAlarmTone();
-                        return;
-                    }
-
-                    //Check if channel has content and whether a story or not
-                    final Integer iteration;
-                    if(channel.isNew_alarms_start_at_first_iteration()) {
-                        iteration = jsonPersistence.getStoryIteration(channelId);
-                    } else {
-                        iteration = channel.getCurrent_rooster_cycle_iteration() > 0 ? channel.getCurrent_rooster_cycle_iteration() : 1;
-                    }
-
-                    final DatabaseReference channelRoosterUploadsReference = FirebaseDatabase.getInstance().getReference()
-                            .child("channel_rooster_uploads").child(channelId);
-
-                    //Ensure latest data is pulled
-                    channelRoosterUploadsReference.keepSynced(true);
-
-                    ValueEventListener channelRoosterUploadsListener = new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            TreeMap<Integer, ChannelRooster> channelIterationMap = new TreeMap<>();
-                            //Check if node has children i.e. channelId content exists
-                            if (dataSnapshot.getChildrenCount() == 0) return;
-                            //Iterate over all content children
-                            for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                                ChannelRooster channelRooster = postSnapshot.getValue(ChannelRooster.class);
-                                if (channelRooster.isActive() && (channelRooster.getRooster_cycle_iteration() != iteration)) {
-                                    channelIterationMap.put(channelRooster.getRooster_cycle_iteration(), channelRooster);
-                                } else if (channelRooster.isActive()) {
-                                    streamChannelContent(channelRooster.getAudio_file_url());
-                                    return;
-                                }
-                            }
-                            //Check for empty iteration map
-                            if(channelIterationMap.isEmpty()) {
-                                startDefaultAlarmTone();
-                                return;
-                            }
-
-                            //Check head and tail of naturally sorted TreeMap for next valid channel content
-                            Integer actualIterationKey;
-                            //Check if iteration is valid in the context of channelIterationMap keys
-                            if(iteration > channelIterationMap.lastKey() || iteration < channelIterationMap.firstKey()) {
-                                actualIterationKey = channelIterationMap.firstKey();
-                            } else {
-                                actualIterationKey = iteration;
-                            }
-                            SortedMap<Integer, ChannelRooster> tailMap = channelIterationMap.tailMap(actualIterationKey);
-                            SortedMap<Integer, ChannelRooster> headMap = channelIterationMap.headMap(actualIterationKey);
-                            if (!tailMap.isEmpty()) {
-                                //User is starting story at next valid entry
-                                //Set entry for iteration to current valid story iteration, to be incremented on play
-                                jsonPersistence.setStoryIteration(channelId, tailMap.firstKey());
-                                //Retrieve channel audio
-                                streamChannelContent(channelIterationMap.get(tailMap.firstKey()).getAudio_file_url());
-                            } else if (!headMap.isEmpty()) {
-                                //User is starting story from beginning again, at valid entry
-                                //Set entry for iteration to current valid story iteration, to be incremented on play
-                                jsonPersistence.setStoryIteration(channelId, headMap.firstKey());
-                                //Retrieve channel audio
-                                streamChannelContent(channelIterationMap.get(headMap.firstKey()).getAudio_file_url());
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-                            startDefaultAlarmTone();
-                        }
-                    };
-                    channelRoosterUploadsReference.addListenerForSingleValueEvent(channelRoosterUploadsListener);
+                public void onChannelRoosterDataChanged(@NotNull ArrayList<ChannelRooster> freshChannelRoosters) {
+                    channelRoosters.clear();
+                    channelRoosters.addAll(freshChannelRoosters);
                 }
 
                 @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+                public void onSyncFinished() {
+                    for (ChannelRooster channelRooster:
+                            channelRoosters) {
+                        if(channelId.equals(channelRooster.channel_uid)) {
+                            streamChannelContent(channelRooster.getAudio_file_url());
+                            return;
+                        }
+                    }
                     startDefaultAlarmTone();
                 }
-            };
-            channelReference.addListenerForSingleValueEvent(channelListener);
+            });
+            channelManager.refreshChannelData(channelRoosters);
+
         } catch(Exception e) {
             logError(e);
             startDefaultAlarmTone();
@@ -805,9 +736,7 @@ public class AudioService extends Service {
                 audioTableManager.selectListenedByChannel(alarm.getChannel())) {
             try {
                 if (audioItem.getType() == Constants.AUDIO_TYPE_CHANNEL) {
-                    Integer currentStoryIteration = jsonPersistence.getStoryIteration(audioItem.getQueue_id());
-                    if (currentStoryIteration > 0)
-                        jsonPersistence.setStoryIteration(audioItem.getQueue_id(), currentStoryIteration + 1);
+                    channelManager.incrementChannelStoryIteration(audioItem.getQueue_id());
                 }
             } catch (NullPointerException e) {
                 logError(e);
