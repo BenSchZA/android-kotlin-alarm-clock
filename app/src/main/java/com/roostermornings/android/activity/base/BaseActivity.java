@@ -55,11 +55,12 @@ import com.roostermornings.android.activity.MessageStatusFragmentActivity;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.activity.NewAudioRecordActivity;
 import com.roostermornings.android.activity.SplashActivity;
+import com.roostermornings.android.apis.GoogleIHTTPClient;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.fragment.base.BaseFragment;
-import com.roostermornings.android.node_api.IHTTPClient;
+import com.roostermornings.android.apis.NodeIHTTPClient;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.service.FirebaseListenerService;
 import com.roostermornings.android.sqlutil.AudioTableManager;
@@ -68,6 +69,7 @@ import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.InternetHelper;
+import com.roostermornings.android.util.JSONPersistence;
 import com.roostermornings.android.util.Toaster;
 
 import java.util.Calendar;
@@ -215,11 +217,19 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
     }
 
     @Override
-    public IHTTPClient apiService() {
+    public NodeIHTTPClient nodeApiService() {
 
         BaseApplication baseApplication = (BaseApplication) getApplication();
 
-        return baseApplication.getAPIService();
+        return baseApplication.getNodeAPIService();
+    }
+
+    @Override
+    public GoogleIHTTPClient googleApiService() {
+
+        BaseApplication baseApplication = (BaseApplication) getApplication();
+
+        return baseApplication.getGoogleAPIService();
     }
 
     @Override
@@ -308,6 +318,8 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
             //Set default application settings preferences - don't overwrite existing if false
             setPreferenceManagerDefaultSettings(true);
             sharedPreferences.edit().clear().apply();
+            //Clear specific persistent collections from shared prefs
+            clearJSONPersistence();
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
@@ -333,6 +345,19 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
             editor.remove("pref_key_user_settings").apply();
         }
         PreferenceManager.setDefaultValues(this, R.xml.application_user_settings, overwrite);
+    }
+
+    private void clearJSONPersistence() {
+        //Clear specific persistent collections from shared prefs
+        SharedPreferences.Editor editor = defaultSharedPreferences.edit();
+
+        editor
+                .remove(JSONPersistence.SharedPrefsKeys.KEY_ALARMS_ARRAY)
+                .remove(JSONPersistence.SharedPrefsKeys.KEY_CHANNEL_ROOSTERS_ARRAY)
+                .remove(JSONPersistence.SharedPrefsKeys.KEY_USER_CONTACTS_NUMBER_NAME_PAIRS_MAP)
+                .remove(JSONPersistence.SharedPrefsKeys.KEY_USER_FRIENDS_ARRAY)
+                .remove(JSONPersistence.SharedPrefsKeys.KEY_USER_INVITABLE_CONTACTS_ARRAY)
+                .apply();
     }
 
     private boolean isServiceRunning(Class<?> serviceClass) {

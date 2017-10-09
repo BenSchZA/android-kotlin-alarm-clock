@@ -23,6 +23,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.adapter.ChannelsListAdapter;
+import com.roostermornings.android.channels.ChannelManager;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.AlarmChannel;
@@ -30,12 +31,16 @@ import com.roostermornings.android.domain.Channel;
 import com.roostermornings.android.domain.ChannelRooster;
 import com.roostermornings.android.fragment.IAlarmSetListener;
 import com.roostermornings.android.fragment.base.BaseFragment;
+import com.roostermornings.android.geolocation.GeoHashUtils;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.util.JSONPersistence;
 import com.roostermornings.android.util.Toaster;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -54,10 +59,9 @@ public class NewAlarmFragment2 extends BaseFragment {
     private String mUserUidParam;
     private IAlarmSetListener mListener;
 
-    private DatabaseReference mChannelsReference;
-    private DatabaseReference mChannelRoostersReference;
+    private ChannelManager channelManager = new ChannelManager(getApplicationContext(), this);
+
     private ArrayList<ChannelRooster> channelRoosters = new ArrayList<>();
-    private Map<Integer, List<ChannelRooster>> channelRoosterMap = new TreeMap<>(Collections.reverseOrder());
 
     @BindView(R.id.main_content)
     RecyclerView mRecyclerView;
@@ -65,7 +69,7 @@ public class NewAlarmFragment2 extends BaseFragment {
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
-    @Inject DeviceAlarmTableManager deviceAlarmTableManager;
+    @Inject JSONPersistence jsonPersistence;
     @Inject Context AppContext;
 
     @Override
@@ -101,14 +105,18 @@ public class NewAlarmFragment2 extends BaseFragment {
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+
+        //Persist channels for seamless loading
+        jsonPersistence.setNewAlarmChannelRoosters(channelRoosters);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         View view = initiate(inflater, R.layout.fragment_new_alarm_step2, container, false);
-
-        mChannelsReference = FirebaseDatabase.getInstance().getReference()
-                .child("channels");
-        mChannelsReference.keepSynced(true);
 
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
@@ -120,153 +128,28 @@ public class NewAlarmFragment2 extends BaseFragment {
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mAdapter);
 
-        new Thread() {
+        if(!jsonPersistence.getNewAlarmChannelRoosters().isEmpty()) {
+            channelRoosters.addAll(jsonPersistence.getNewAlarmChannelRoosters());
+            mAdapter.notifyDataSetChanged();
+        }
+
+        ChannelManager.Companion.setOnFlagChannelManagerDataListener(new ChannelManager.Companion.OnFlagChannelManagerDataListener() {
             @Override
-            public void run() {
-                ValueEventListener channelsListener = new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                            final Channel channel = postSnapshot.getValue(Channel.class);
-
-                            if (channel.isActive()) {
-                                if(channel.isNew_alarms_start_at_first_iteration()) {
-                                    Integer iteration = new JSONPersistence(getApplicationContext()).getStoryIteration(channel.getUid());
-                                    if(iteration == null || iteration <= 0) iteration = 1;
-                                    getChannelRoosterData(channel, iteration);
-                                } else {
-                                    Integer iteration = channel.getCurrent_rooster_cycle_iteration();
-                                    if(iteration == null || iteration <= 0) iteration = 1;
-                                    getChannelRoosterData(channel, iteration);
-                                }
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                        Toaster.makeToast(AppContext, "Failed to load channel.", Toast.LENGTH_SHORT).checkTastyToast();
-                    }
-                };
-                mChannelsReference.addListenerForSingleValueEvent(channelsListener);
-            }
-        }.run();
-
-        return view;
-    }
-
-    private void getChannelRoosterData(final Channel channel, final Integer iteration) {
-        final DatabaseReference channelRoosterUploadsReference = FirebaseDatabase.getInstance().getReference()
-                .child("channel_rooster_uploads").child(channel.getUid());
-        //Ensure latest data is pulled
-        channelRoosterUploadsReference.keepSynced(true);
-
-        ValueEventListener channelRoosterUploadsListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                TreeMap<Integer,ChannelRooster> channelIterationMap = new TreeMap<>();
-                //Check if node has children i.e. channelId content exists
-                if(dataSnapshot.getChildrenCount() == 0) return;
-                //Iterate over all content children
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    ChannelRooster channelRooster = postSnapshot.getValue(ChannelRooster.class);
-
-                    //Set channelrooster display picture to banner image & description to channel description
-                    //In future channelrooster specific details will be shown in discover page
-                    channelRooster.setChannel_photo(channel.getPhoto());
-                    channelRooster.setChannel_description(channel.getDescription());
-
-                    if(channelRooster.isActive() && (channelRooster.getRooster_cycle_iteration() != iteration)) {
-                        channelIterationMap.put(channelRooster.getRooster_cycle_iteration(), channelRooster);
-                    } else if(channelRooster.isActive()) {
-                        channelRooster.setSelected(false);
-                        //This method allows multiple objects per key
-                        if(channelRoosterMap.containsKey(channel.getPriority())) {
-                            channelRoosterMap.get(channel.getPriority()).add(channelRooster);
-                        } else {
-                            List<ChannelRooster> values = new ArrayList<>();
-                            values.add(channelRooster);
-                            channelRoosterMap.put(channel.getPriority(), values);
-                        }
-                        refreshChannelRoosters();
-                        return;
-                    }
-                }
-                if(!channelIterationMap.isEmpty() && iteration != null) {
-                    findNextValidChannelRooster(channelIterationMap, channel, iteration);
-                }
-                refreshChannelRoosters();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        };
-        channelRoosterUploadsReference.addListenerForSingleValueEvent(channelRoosterUploadsListener);
-    }
-
-    private void refreshChannelRoosters() {
-        new Thread() {
-            @Override
-            public void run() {
-                //TreeMap ensures unique and allows sorting by priority! How cool is that?
+            public void onChannelRoosterDataChanged(@NotNull ArrayList<ChannelRooster> freshChannelRoosters) {
                 channelRoosters.clear();
-                //This method allows us to have multiple objects per priority key
-                List<ChannelRooster> values = new ArrayList<>();
-                for(List<ChannelRooster> channelRoosterList : channelRoosterMap.values()) {
-                    values.addAll(channelRoosterList);
-                }
-                if(!values.isEmpty()) channelRoosters.addAll(values);
+                channelRoosters.addAll(freshChannelRoosters);
+            }
+
+            @Override
+            public void onSyncFinished() {
                 if (mListener != null)
                     mListener.retrieveAlarmDetailsFromSQL(); //this is only relevant for alarms being edited
                 if(mAdapter != null) mAdapter.notifyDataSetChanged();
             }
-        }.run();
-    }
+        });
+        channelManager.refreshChannelData(channelRoosters);
 
-    private void findNextValidChannelRooster(final TreeMap<Integer,ChannelRooster> channelIterationMap, final Channel channel, final Integer iteration) {
-        new Thread() {
-            @Override
-            public void run() {
-                //Check head and tail of naturally sorted TreeMap for next valid channel content
-                SortedMap<Integer,ChannelRooster> tailMap = channelIterationMap.tailMap(iteration);
-                SortedMap<Integer,ChannelRooster> headMap = channelIterationMap.headMap(iteration);
-                if(!tailMap.isEmpty()) {
-                    //User is starting story at next valid entry
-                    //Set entry for iteration to current valid story iteration, to be incremented on play
-                    new JSONPersistence(getApplicationContext()).setStoryIteration(channel.getUid(), tailMap.firstKey());
-                    //Retrieve channel audio
-                    ChannelRooster channelRooster = channelIterationMap.get(tailMap.firstKey());
-                    channelRooster.setSelected(false);
-                    //This method allows multiple objects per key
-                    if(channelRoosterMap.containsKey(channel.getPriority())) {
-                        channelRoosterMap.get(channel.getPriority()).add(channelRooster);
-                    } else {
-                        List<ChannelRooster> values = new ArrayList<>();
-                        values.add(channelRooster);
-                        channelRoosterMap.put(channel.getPriority(), values);
-                    }
-                }
-                else if(!headMap.isEmpty()) {
-                    //User is starting story from beginning again, at valid entry
-                    //Set entry for iteration to current valid story iteration, to be incremented on play
-                    new JSONPersistence(getApplicationContext()).setStoryIteration(channel.getUid(), headMap.firstKey());
-                    //Retrieve channel audio
-                    ChannelRooster channelRooster = channelIterationMap.get(headMap.firstKey());
-                    channelRooster.setSelected(false);
-                    //This method allows multiple objects per key
-                    if(channelRoosterMap.containsKey(channel.getPriority())) {
-                        channelRoosterMap.get(channel.getPriority()).add(channelRooster);
-                    } else {
-                        List<ChannelRooster> values = new ArrayList<>();
-                        values.add(channelRooster);
-                        channelRoosterMap.put(channel.getPriority(), values);
-                    }
-                }
-            }
-        }.run();
+        return view;
     }
 
     @Override

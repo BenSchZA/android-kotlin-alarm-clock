@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Rooster Mornings Android.
+  ~ Copyright (c)  2017 Roosta Media. All rights reserved.
+  -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="@dimen/spacing_normal"
+    android:clipChildren="false">
+
+    <ImageView
+        android:id="@+id/explore_notification_profile_pic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/small_profile_pic_circle" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center_vertical|left"
+        android:layout_marginRight="@dimen/spacing_normal"
+        android:layout_marginLeft="@dimen/spacing_large"
+        android:clipChildren="false">
+
+        <TextView
+            android:id="@+id/explore_notification_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:maxLines="1"
+            android:text="Rooster Explore"
+            android:textColor="@color/white"
+            android:textSize="@dimen/text_xlarge" />
+
+        <TextView
+            android:id="@+id/explore_notification_channel_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:maxLines="1"
+            android:text="Select a channel..."
+            android:textColor="@color/white"
+            android:textSize="@dimen/text_large" />
+
+    </LinearLayout>
+
+    <ImageButton
+        android:layout_marginRight="@dimen/spacing_normal"
+        android:id="@+id/explore_notifcation_audio_listen"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical|right"
+        android:background="@drawable/rooster_audio_play_button"
+        android:clickable="true"
+        android:contentDescription="Play audio" />
+
+</LinearLayout>

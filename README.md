@@ -94,22 +94,27 @@ The background tasks that the BackgroundTaskIntentService handles are:
 # Diagrams
 ![Diagram explainer](documentation-media/DiagramExplainer.png)
 
-## BackgroundTaskIntentService
-### Background audio caching task 
+## Background audio caching task -- Deprecated
 ![Background audio caching task](documentation-media/BackgroundAudioFetchServices.png)
 
-### Channel story algorithm
+## Audio syncing process
+Updated 24 July 2017:
+![Background audio caching task](documentation-media/AudioSyncingProcess.png)
+
+## Channel story algorithm
 ![Channel story algorithm](documentation-media/ChannelStoryAlgorithm.png)
 
-## UploadService
+## Social rooster upload process
 ![Upload service](documentation-media/UploadService.png)
 
-## AudioService
+## Audio service
 ![Audio service](documentation-media/AudioService.png)
 
-## Alarm Display Activity
-### Alarm loading process
+## Alarm syncing process -- Deprecated
 ![Alarm loading process](documentation-media/AlarmLoadingProcess.png)
+
+## Geolocation Protocol
+![Geolocation protocol](documentation-media/RoosterGeolocationProtocol.png)
 
 
 # Android Release Procedure

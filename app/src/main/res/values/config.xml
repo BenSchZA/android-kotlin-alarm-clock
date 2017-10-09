@@ -8,6 +8,8 @@
     <string name="extras_mobile_number">mobile_number</string>
     <string name="extras_already_user">already_user</string>
     <string name="node_api_url">http://rooster-node.appspot-preview.com/</string>
+    <string name="google_api_url">https://www.googleapis.com/</string>
+    <string name="google_geolocation_api_key">AIzaSyAQVwkDqz4ZPH9jUb-LpdgoBBbkln9uyOE</string>
     <string name="rooster_website_t_and_c_url">https://www.roostermornings.com/t-cs</string>
     <string name="facebook_app_id">190341188110134</string>
 </resources>

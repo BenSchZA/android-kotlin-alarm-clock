@@ -232,7 +232,7 @@ public class FriendsMyFragment1 extends BaseFragment {
     }
 
     private void callNodeMyFriendsAPI() {
-        Call<Users> call = apiService().retrieveUserFriends(firebaseIdToken);
+        Call<Users> call = nodeApiService().retrieveUserFriends(firebaseIdToken);
 
         call.enqueue(new Callback<Users>() {
             @Override
@@ -241,7 +241,7 @@ public class FriendsMyFragment1 extends BaseFragment {
 
                 statusCode = response.code();
                 Users apiResponse = response.body();
-                if(apiResponse.users == null) {
+                if(apiResponse == null || apiResponse.users == null) {
                     swipeRefreshLayout.setRefreshing(false);
                     return;
                 }

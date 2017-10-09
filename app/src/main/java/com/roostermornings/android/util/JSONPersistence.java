@@ -5,18 +5,17 @@
 
 package com.roostermornings.android.util;
 
-import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.ChannelRooster;
 import com.roostermornings.android.domain.Contact;
 import com.roostermornings.android.domain.User;
-import com.roostermornings.android.sqlutil.DeviceAlarm;
+import com.roostermornings.android.geolocation.GeoHashUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,29 +23,53 @@ import org.json.JSONObject;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.KEY_ALARMS_ARRAY;
+import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.KEY_ALARM_CHANNEL_ROOSTERS_ARRAY;
+import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.KEY_CHANNEL_ROOSTERS_ARRAY;
+import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.KEY_CHANNEL_STORY_ITERATION;
+import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.KEY_USER_FRIENDS_ARRAY;
+import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.KEY_USER_GEOHASH_ENTRY_ARRAY;
+import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.KEY_USER_INVITABLE_CONTACTS_ARRAY;
+
+/**
+ * JSONPersistence Class
+ *
+ * A class for persisting, and safely fetching, various objects (predominantly Arrays) from
+ * shared prefs in JSON String form.
+ *
+ * e.g. alarms, friends, channels etc.
+ *
+ * @author bscholtz
+ * @version 1
+ * @since 15/05/17
+ */
+
 public class JSONPersistence {
     private static Gson gson = new Gson();
 
-    private static final String KEY_CHANNEL_STORY_ITERATION = "KEY_CHANNEL_STORY_ITERATION";
-    private static final String KEY_USER_FRIENDS_ARRAY = "KEY_USER_FRIENDS_ARRAY";
-    private static final String KEY_USER_INVITABLE_CONTACTS_ARRAY = "KEY_USER_INVITABLE_CONTACTS_ARRAY";
-    private static final String KEY_USER_CONTACTS_NUMBER_NAME_PAIRS_MAP = "KEY_USER_CONTACTS_NUMBER_NAME_PAIRS_MAP";
-    private static final String KEY_CHANNEL_ROOSTERS_ARRAY = "KEY_CHANNEL_ROOSTERS_ARRAY";
-    private static final String KEY_ALARMS_ARRAY = "KEY_ALARMS_ARRAY";
+    public class SharedPrefsKeys {
+        public static final String KEY_CHANNEL_STORY_ITERATION = "KEY_CHANNEL_STORY_ITERATION";
+        public static final String KEY_USER_FRIENDS_ARRAY = "KEY_USER_FRIENDS_ARRAY";
+        public static final String KEY_USER_INVITABLE_CONTACTS_ARRAY = "KEY_USER_INVITABLE_CONTACTS_ARRAY";
+        public static final String KEY_USER_CONTACTS_NUMBER_NAME_PAIRS_MAP = "KEY_USER_CONTACTS_NUMBER_NAME_PAIRS_MAP";
+        public static final String KEY_CHANNEL_ROOSTERS_ARRAY = "KEY_CHANNEL_ROOSTERS_ARRAY";
+        public static final String KEY_ALARM_CHANNEL_ROOSTERS_ARRAY = "KEY_ALARM_CHANNEL_ROOSTERS_ARRAY";
+        public static final String KEY_ALARMS_ARRAY = "KEY_ALARMS_ARRAY";
+        public static final String KEY_USER_GEOHASH_ENTRY_ARRAY = "KEY_USER_GEOHASH_ENTRY_ARRAY";
+    }
 
-    private Context context;
+    @Inject @Named("default") SharedPreferences defaultSharedPreferences;
 
-    private JSONPersistence(){}
-
-    public JSONPersistence(Context context) {
-        this.context = context;
+    public JSONPersistence() {
+        BaseApplication.getRoosterApplicationComponent().inject(this);
     }
 
     private JSONObject getJSONObject(String key) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-
         String JSONString = "";
-        if(sharedPreferences != null) JSONString = sharedPreferences.getString(key, "");
+        if(defaultSharedPreferences != null) JSONString = defaultSharedPreferences.getString(key, "");
         if(JSONString.isEmpty()) return new JSONObject();
         try {
             return new JSONObject(JSONString);
@@ -57,26 +80,20 @@ public class JSONPersistence {
     }
 
     private void putJSONObject(String key, JSONObject jsonObject) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-
-        if(sharedPreferences != null) {
-            sharedPreferences.edit().putString(key, jsonObject.toString()).apply();
+        if(defaultSharedPreferences != null) {
+            defaultSharedPreferences.edit().putString(key, jsonObject.toString()).apply();
         }
     }
 
     private String getJSONString(String key) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-
         String JSONString = "";
-        if(sharedPreferences != null) JSONString = sharedPreferences.getString(key, "");
+        if(defaultSharedPreferences != null) JSONString = defaultSharedPreferences.getString(key, "");
         return JSONString;
     }
 
     private void putJSONString(String key, String Json) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-
-        if(sharedPreferences != null) {
-            sharedPreferences.edit().putString(key, Json).apply();
+        if(defaultSharedPreferences != null) {
+            defaultSharedPreferences.edit().putString(key, Json).apply();
         }
     }
 
@@ -173,6 +190,37 @@ public class JSONPersistence {
         }
     }
 
+    public ArrayList<ChannelRooster> getNewAlarmChannelRoosters() {
+        ArrayList<ChannelRooster> returnArray = new ArrayList<>();
+        try {
+            if(getJSONString(KEY_ALARM_CHANNEL_ROOSTERS_ARRAY) != null) {
+                Type type = new TypeToken<ArrayList<ChannelRooster>>(){}.getType();
+                if(gson.fromJson(getJSONString(KEY_ALARM_CHANNEL_ROOSTERS_ARRAY), type) != null) {
+                    return gson.fromJson(getJSONString(KEY_ALARM_CHANNEL_ROOSTERS_ARRAY), type);
+                } else {
+                    return returnArray;
+                }
+            } else {
+                return returnArray;
+            }
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+            return returnArray;
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return returnArray;
+        }
+    }
+
+    public void setNewAlarmChannelRoosters(ArrayList<ChannelRooster> mRoosters) {
+        if(mRoosters == null) return;
+        try {
+            putJSONString(KEY_ALARM_CHANNEL_ROOSTERS_ARRAY, gson.toJson(mRoosters));
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+        }
+    }
+
     public ArrayList<Alarm> getAlarms() {
         ArrayList<Alarm> returnArray = new ArrayList<>();
         try {
@@ -204,6 +252,37 @@ public class JSONPersistence {
         }
     }
 
+    public ArrayList<GeoHashUtils.UserGeoHashEntry> getUserGeoHashEntries() {
+        ArrayList<GeoHashUtils.UserGeoHashEntry> returnArray = new ArrayList<>();
+        try {
+            if(getJSONString(KEY_USER_GEOHASH_ENTRY_ARRAY) != null) {
+                Type type = new TypeToken<ArrayList<GeoHashUtils.UserGeoHashEntry>>(){}.getType();
+                if(gson.fromJson(getJSONString(KEY_USER_GEOHASH_ENTRY_ARRAY), type) != null) {
+                    return gson.fromJson(getJSONString(KEY_USER_GEOHASH_ENTRY_ARRAY), type);
+                } else {
+                    return returnArray;
+                }
+            } else {
+                return returnArray;
+            }
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+            return returnArray;
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return returnArray;
+        }
+    }
+
+    public void setUserGeoHashEntries(ArrayList<GeoHashUtils.UserGeoHashEntry> mEntries) {
+        if(mEntries == null) return;
+        try {
+            putJSONString(KEY_USER_GEOHASH_ENTRY_ARRAY, gson.toJson(mEntries));
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void setStoryIteration(String channelRoosterUID, Integer iteration) {
         if(channelRoosterUID == null || iteration == null) return;
         try {
@@ -227,7 +306,6 @@ public class JSONPersistence {
                 return 1;
             }
         } catch (JSONException e) {
-            e.printStackTrace();
             return 1;
         }
     }

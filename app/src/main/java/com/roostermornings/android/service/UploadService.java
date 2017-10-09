@@ -39,7 +39,7 @@ import com.roostermornings.android.domain.FCMPayloadSocialRooster;
 import com.roostermornings.android.domain.NodeAPIResult;
 import com.roostermornings.android.domain.SocialRooster;
 import com.roostermornings.android.domain.User;
-import com.roostermornings.android.node_api.IHTTPClient;
+import com.roostermornings.android.apis.NodeIHTTPClient;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.Toaster;
@@ -261,9 +261,9 @@ public class UploadService extends Service {
         });
     }
 
-    private IHTTPClient apiService() {
+    private NodeIHTTPClient apiService() {
         BaseApplication baseApplication = (BaseApplication) getApplication();
-        return baseApplication.getAPIService();
+        return baseApplication.getNodeAPIService();
     }
 
     public void processAudioFile(String firebaseIdToken, String localFileString, ArrayList<User> friendsList) {

@@ -13,15 +13,16 @@ import java.io.Serializable;
 @IgnoreExtraProperties
 public class Channel implements Serializable {
 
-    public Integer current_rooster_cycle_iteration;
-    public Boolean new_alarms_start_at_first_iteration;
-    public Integer priority;
-    public String description;
-    public String name;
-    public String photo;
-    public Integer rooster_count;
-    public boolean active;
-    public String uid;
+    public Integer current_rooster_cycle_iteration = 1;
+    public Boolean new_alarms_start_at_first_iteration = true;
+    public Integer priority = 0;
+    public String description = "";
+    public String name = "";
+    public String photo = "";
+    public Integer rooster_count = 0;
+    public boolean active = false;
+    public String uid = "";
+    public boolean geolocated = false;
 
     @Exclude
     private Boolean selected = false;
@@ -29,9 +30,10 @@ public class Channel implements Serializable {
     // Required default constructor for Firebase object mapping
     @SuppressWarnings("unused")
     public Channel() {
+
     }
 
-    public Channel(int current_rooster_cycle_iteration, boolean new_alarms_start_at_first_iteration, String description, String name, String photo, int rooster_count, boolean active, boolean selected, String uid, Integer priority) {
+    public Channel(int current_rooster_cycle_iteration, boolean new_alarms_start_at_first_iteration, String description, String name, String photo, int rooster_count, boolean active, boolean selected, String uid, Integer priority, boolean geoLocated) {
         this.current_rooster_cycle_iteration = current_rooster_cycle_iteration;
         this.new_alarms_start_at_first_iteration = new_alarms_start_at_first_iteration;
         this.description = description;
@@ -42,6 +44,15 @@ public class Channel implements Serializable {
         this.selected = selected;
         this.uid = uid;
         this.priority = priority;
+        this.geolocated = geoLocated;
+    }
+
+    public boolean isGeolocated() {
+        return geolocated;
+    }
+
+    public void setGeolocated(boolean geolocated) {
+        this.geolocated = geolocated;
     }
 
     public Integer getPriority() {

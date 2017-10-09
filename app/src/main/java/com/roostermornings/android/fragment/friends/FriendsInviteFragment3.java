@@ -347,7 +347,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
         protected String doInBackground(String... params) {
             String idToken = params[0];
 
-            Call<NodeUsers> call = apiService().checkLocalContacts(new LocalContacts(myContactsController.getNodeNumberList(), idToken));
+            Call<NodeUsers> call = nodeApiService().checkLocalContacts(new LocalContacts(myContactsController.getNodeNumberList(), idToken));
 
             call.enqueue(new Callback<NodeUsers>() {
                 @Override
@@ -434,7 +434,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
             }
             for (User currentFriend:
                     currentFriends) {
-                contactNumbersToRemove.add(currentFriend.cell_number);
+                contactNumbersToRemove.add(currentFriend.getCell_number());
             }
 
             //Perform the operation I = C - (A + F)

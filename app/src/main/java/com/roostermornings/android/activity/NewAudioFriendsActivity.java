@@ -253,7 +253,7 @@ public class NewAudioFriendsActivity extends BaseActivity {
             Toaster.makeToast(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG).checkTastyToast();
             return;
         }
-        Call<Users> call = apiService().retrieveUserFriends(firebaseIdToken);
+        Call<Users> call = nodeApiService().retrieveUserFriends(firebaseIdToken);
 
         call.enqueue(new Callback<Users>() {
             @Override
