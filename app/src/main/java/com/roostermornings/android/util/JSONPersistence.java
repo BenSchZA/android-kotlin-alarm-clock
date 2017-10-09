@@ -27,6 +27,7 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -34,6 +35,7 @@ import javax.inject.Named;
 
 import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.KEY_ALARMS_ARRAY;
 import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.KEY_ALARM_CHANNEL_ROOSTERS_ARRAY;
+import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.KEY_CHANNEL_STORY_ITERATION_DATE_LOCK;
 import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.KEY_MEDIA_ITEMS_ARRAY;
 import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.KEY_CHANNEL_STORY_ITERATION;
 import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.KEY_USER_FRIENDS_ARRAY;
@@ -58,6 +60,7 @@ public class JSONPersistence {
 
     public class SharedPrefsKeys {
         public static final String KEY_CHANNEL_STORY_ITERATION = "KEY_CHANNEL_STORY_ITERATION";
+        public static final String KEY_CHANNEL_STORY_ITERATION_DATE_LOCK = "KEY_CHANNEL_STORY_ITERATION_DATE_LOCK";
         public static final String KEY_USER_FRIENDS_ARRAY = "KEY_USER_FRIENDS_ARRAY";
         public static final String KEY_USER_INVITABLE_CONTACTS_ARRAY = "KEY_USER_INVITABLE_CONTACTS_ARRAY";
         public static final String KEY_USER_CONTACTS_NUMBER_NAME_PAIRS_MAP = "KEY_USER_CONTACTS_NUMBER_NAME_PAIRS_MAP";
@@ -302,6 +305,33 @@ public class JSONPersistence {
             putJSONString(KEY_USER_GEOHASH_ENTRY_ARRAY, gson.toJson(mEntries));
         } catch (IllegalStateException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void setStoryIterationDateLock(String channelRoosterUID, Long currentTime) {
+        if(channelRoosterUID == null) return;
+        try {
+            putJSONObject(KEY_CHANNEL_STORY_ITERATION_DATE_LOCK, getJSONObject(KEY_CHANNEL_STORY_ITERATION_DATE_LOCK).put(channelRoosterUID, currentTime));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public long getStoryIterationDateLock(String channelRoosterUID) {
+        if(channelRoosterUID == null) return 0L;
+        try {
+            if(!getJSONObject(KEY_CHANNEL_STORY_ITERATION_DATE_LOCK).get(channelRoosterUID).toString().isEmpty()) {
+                try {
+                    return Long.valueOf(getJSONObject(KEY_CHANNEL_STORY_ITERATION_DATE_LOCK).get(channelRoosterUID).toString());
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                    return 0L;
+                }
+            } else {
+                return 0L;
+            }
+        } catch (JSONException e) {
+            return 0L;
         }
     }
 

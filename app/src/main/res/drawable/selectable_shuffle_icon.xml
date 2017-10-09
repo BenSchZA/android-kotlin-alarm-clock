@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Rooster Mornings Android.
+  ~ Copyright (c)  2017 Roosta Media. All rights reserved.
+  -->
+
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/ic_shuffle_white_24dp" android:state_checked="true"/>
+    <item android:drawable="@drawable/ic_shuffle_white_24dp">
+        <bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+            android:src="@drawable/ic_shuffle_white_24dp"
+            android:alpha="77">
+        </bitmap>
+    </item>
+</selector>

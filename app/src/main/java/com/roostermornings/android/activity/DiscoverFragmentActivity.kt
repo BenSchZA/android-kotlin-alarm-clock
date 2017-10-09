@@ -11,6 +11,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.SharedPreferences
+import android.graphics.PorterDuff
 import android.media.AudioManager
 import android.media.browse.MediaBrowser
 import android.os.IBinder
@@ -24,16 +25,14 @@ import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.support.v4.widget.SwipeRefreshLayout
 import android.os.Bundle
+import android.support.annotation.Nullable
+import android.support.v4.media.session.MediaSessionCompat
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SearchView
 import android.support.v7.widget.Toolbar
 import android.util.Log
-import android.view.KeyEvent
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MotionEvent
-import android.view.View
+import android.view.*
 import android.widget.LinearLayout
 import android.widget.MediaController
 import android.widget.TextView
@@ -49,11 +48,10 @@ import com.roostermornings.android.service.MediaService
 import com.roostermornings.android.util.JSONPersistence
 import com.roostermornings.android.util.RoosterUtils
 
-import java.util.ArrayList
-
 import javax.inject.Inject
 
 import butterknife.BindView
+import java.util.*
 
 class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAudioSampleInterface, MediaController.MediaPlayerControl {
 
@@ -73,7 +71,7 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
     private var mAdapter = DiscoverListAdapter(mediaItems, this@DiscoverFragmentActivity)
 
     private var mMediaController: MediaControllerCompat? = null
-    private val mMediaBrowser by lazy { MediaBrowserCompat(this, ComponentName(this, MediaService::class.java), ConnectionCallback(), null) }
+    private lateinit var mMediaBrowser: MediaBrowserCompat
 
     private val mMediaControllerWidget: MediaController? = null
 
@@ -110,10 +108,11 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
         }
     }
 
-    inner class ConnectionCallback : MediaBrowserCompat.ConnectionCallback() {
+    private val connectionCallback = object: MediaBrowserCompat.ConnectionCallback() {
         override fun onConnected() {
             super.onConnected()
 
+            mMediaBrowser.unsubscribe(mMediaBrowser.root)
             mMediaBrowser.subscribe(mMediaBrowser.root, subscriptionCallback)
             try {
                 // Create a MediaControllerCompat
@@ -129,7 +128,6 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
             } catch (e: RemoteException) {
                 e.printStackTrace()
             }
-
         }
 
         override fun onConnectionSuspended() {
@@ -232,6 +230,9 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
             // This method performs the actual data-refresh operation.
             // The method calls setRefreshing(false) when it's finished.
             //Reload adapter data and set message status, set listener for new data
+            if(mMediaBrowser.isConnected) {
+                //mMediaController?.transportControls?.sendCustomAction()
+            }
         }
 
         //Set volume rocker to alarm stream
@@ -244,6 +245,10 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
         updateRoosterNotification()
         updateRequestNotification()
 
+        //Initialise mediabrowser -- done here so that instance recreated
+        //https://stackoverflow.com/questions/35752575/kotlin-lazy-properties-and-values-reset-a-resettable-lazy-delegate
+        mMediaBrowser = MediaBrowserCompat(this, ComponentName(this, MediaService::class.java), connectionCallback, null)
+
         if (!mMediaBrowser.isConnected)
             mMediaBrowser.connect()
     }
@@ -254,12 +259,17 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
         //Persist channel roosters for seamless loading
         if (!mediaItems.isEmpty()) jsonPersistence.mediaItems = ArrayList<MediaBrowserCompat.MediaItem>(mediaItems)
 
+        // If media not playing, stop the media service
+        if(mMediaController?.playbackState?.state != PlaybackStateCompat.STATE_PLAYING)
+            mMediaController?.transportControls?.stop()
+
         //Unsubscribe and unregister MediaControllerCompat callbacks
         MediaControllerCompat.getMediaController(this@DiscoverFragmentActivity)?.unregisterCallback(mediaControllerCallback)
         if (mMediaBrowser.isConnected) {
             mMediaBrowser.unsubscribe(mMediaBrowser.root, subscriptionCallback)
             mMediaBrowser.disconnect()
         }
+        finish()
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -276,6 +286,14 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
         }
         when (keyCode) {
             KeyEvent.KEYCODE_MEDIA_PLAY -> {
+                mMediaController?.dispatchMediaButtonEvent(event)
+                return true
+            }
+            KeyEvent.KEYCODE_MEDIA_PAUSE -> {
+                mMediaController?.dispatchMediaButtonEvent(event)
+                return true
+            }
+            KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> {
                 mMediaController?.dispatchMediaButtonEvent(event)
                 return true
             }
@@ -322,15 +340,39 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
         return true
     }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle item selection
+//        when (item.itemId) {
+//            R.id.shuffle_explore -> {
+//                if(mMediaController?.shuffleMode == PlaybackStateCompat.SHUFFLE_MODE_NONE) {
+//                    if(RoosterUtils.hasO()) {
+//                        mMediaController?.transportControls?.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL)
+//                    } else {
+//                        mMediaController?.transportControls?.setShuffleModeEnabled(true)
+//                    }
+//
+//                    mMediaController?.transportControls?.play()
+//                    item.isChecked = true
+//                }
+//                else {
+//                    mMediaController?.transportControls?.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE)
+//                    item.isChecked = false
+//                }
+//                return true
+//            }
+//            else -> return super.onOptionsItemSelected(item)
+//        }
+        return super.onOptionsItemSelected(item)
+    }
+
     override fun onMediaItemSelected(item: MediaBrowserCompat.MediaItem, isPlaying: Boolean) {
-        val controller = MediaControllerCompat.getMediaController(this)
-        val controls = controller.transportControls
         if (isPlaying) {
-            controls.pause()
+            mMediaController?.transportControls?.pause()
         } else {
-            controls.pause()
+            mMediaController?.transportControls?.pause()
             mediaItems.indexOfFirst { it.mediaId == item.mediaId }.takeIf { it > -1 }?.let {
-                controls.skipToQueueItem(it.toLong())
+                mMediaController?.transportControls?.skipToQueueItem(it.toLong())
+                mMediaController?.transportControls?.play()
             }
         }
     }

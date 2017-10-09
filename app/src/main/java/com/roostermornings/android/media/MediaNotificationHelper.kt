@@ -52,6 +52,8 @@ object MediaNotificationHelper {
 
     var mNotificationManager: NotificationManagerCompat? = null
 
+    val NOTIFICATION_ID = 101
+
     init {
         BaseApplication.getRoosterApplicationComponent().inject(this)
     }
@@ -119,9 +121,12 @@ object MediaNotificationHelper {
         val notificationBuilder = NotificationCompat.Builder(context, "MediaNotification")
         notificationBuilder
                 .setStyle(android.support.v4.media.app.NotificationCompat.MediaStyle()
-                        // show only play/pause in compact view
+                        // Show actions 0,2,4 in compact view
                         .setShowActionsInCompactView(0,2,4)
-                        .setMediaSession(mediaSession.sessionToken))
+                        .setMediaSession(mediaSession.sessionToken)
+                        .setShowCancelButton(true)
+                        .setCancelButtonIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(context,
+                                PlaybackStateCompat.ACTION_STOP)))
                 .setSmallIcon(R.drawable.logo_icon)
                 .setShowWhen(false)
                 .setContentIntent(controller.sessionActivity)
@@ -133,6 +138,7 @@ object MediaNotificationHelper {
                 .setLargeIcon(art)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setOngoing(mPlaybackState.state == PlaybackStateCompat.STATE_PLAYING)
+                .setOnlyAlertOnce(true)
 
         notificationBuilder.addAction(NotificationCompat.Action(
                 R.drawable.exo_controls_previous,
@@ -158,6 +164,6 @@ object MediaNotificationHelper {
                 MediaButtonReceiver.buildMediaButtonPendingIntent(context,
                         PlaybackStateCompat.ACTION_SKIP_TO_NEXT)))
 
-        mNotificationManager?.notify(1, notificationBuilder.build())
+        mNotificationManager?.notify(NOTIFICATION_ID, notificationBuilder.build())
     }
 }

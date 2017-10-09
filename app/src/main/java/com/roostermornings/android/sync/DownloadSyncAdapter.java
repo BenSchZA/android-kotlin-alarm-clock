@@ -31,6 +31,7 @@ import com.google.firebase.storage.StorageReference;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.activity.base.BaseActivity;
+import com.roostermornings.android.channels.ChannelManager;
 import com.roostermornings.android.domain.Channel;
 import com.roostermornings.android.domain.ChannelRooster;
 import com.roostermornings.android.domain.SocialRooster;
@@ -81,6 +82,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
     @Inject DeviceAlarmTableManager deviceAlarmTableManager;
     @Inject GeoHashUtils geoHashUtils;
     @Inject JSONPersistence jsonPersistence;
+    @Inject ChannelManager channelManager;
 
     private static OnChannelDownloadListener onChannelDownloadListener;
 
@@ -247,7 +249,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
 
-                        Channel channel = dataSnapshot.getValue(Channel.class);
+                        final Channel channel = dataSnapshot.getValue(Channel.class);
 
                         //Check if channel exists
                         if(channel == null) return;
@@ -259,7 +261,9 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
                         final Integer iteration;
                         Integer tempIteration;
                         if(channel.isNew_alarms_start_at_first_iteration()) {
-                            iteration = jsonPersistence.getStoryIteration(channelId);
+                            tempIteration = jsonPersistence.getStoryIteration(channelId);
+                            if (tempIteration <= 0) tempIteration = 1;
+                            iteration = tempIteration;
                         } else {
                             Calendar currentCalendar = Calendar.getInstance();
                             Calendar nextPendingCalendar = Calendar.getInstance();
@@ -285,11 +289,8 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
                                 //Iterate over all content children
                                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                                     ChannelRooster channelRooster = postSnapshot.getValue(ChannelRooster.class);
-                                    if(channelRooster.isActive() && (channelRooster.getRooster_cycle_iteration() != iteration)) {
+                                    if(channelRooster.isActive()) {
                                         channelIterationMap.put(channelRooster.getRooster_cycle_iteration(), channelRooster);
-                                    } else if(channelRooster.isActive()) {
-                                        retrieveChannelContentAudio(channelRooster, context);
-                                        return;
                                     }
                                 }
 
@@ -303,21 +304,9 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
                                 } else {
                                     actualIterationKey = iteration;
                                 }
-                                SortedMap<Integer,ChannelRooster> tailMap = channelIterationMap.tailMap(actualIterationKey);
-                                SortedMap<Integer,ChannelRooster> headMap = channelIterationMap.headMap(actualIterationKey);
-                                if(!tailMap.isEmpty()) {
-                                    //User is starting story at next valid entry
-                                    //Set entry for iteration to current valid story iteration, to be incremented on play
-                                    jsonPersistence.setStoryIteration(channelId, tailMap.firstKey());
-                                    //Retrieve channel audio
-                                    retrieveChannelContentAudio(channelIterationMap.get(tailMap.firstKey()), context);
-                                } else if(!headMap.isEmpty()) {
-                                    //User is starting story from beginning again, at valid entry
-                                    //Set entry for iteration to current valid story iteration, to be incremented on play
-                                    jsonPersistence.setStoryIteration(channelId, headMap.firstKey());
-                                    //Retrieve channel audio
-                                    retrieveChannelContentAudio(channelIterationMap.get(headMap.firstKey()), context);
-                                }
+                                ChannelRooster validChannelRooster = channelManager.findNextValidChannelRooster(
+                                        channelIterationMap, channel, actualIterationKey, true);
+                                retrieveChannelContentAudio(validChannelRooster, context);
                             }
 
                             @Override

@@ -6,6 +6,7 @@
 package com.roostermornings.android.dagger;
 
 import android.accounts.Account;
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -181,6 +182,12 @@ public class RoosterApplicationModule {
     @Singleton
     BackgroundTaskReceiver provideBackgroundTaskReceiver() {
         return new BackgroundTaskReceiver();
+    }
+
+    @Provides
+    @Singleton
+    ChannelManager provideChannelManager(BaseApplication baseApplication) {
+        return new ChannelManager(baseApplication);
     }
 
     @Provides
