@@ -174,7 +174,7 @@ class ChannelManager(private val context: Context) {
 
         // If the channel rooster iteration map contains the current iteration key, proceed, else find nextValidEntry
         // If date locked, use head/tail logic to ensure we don't select current iteration
-        if(channelRoosterIterationMap.containsKey(iteration)) {
+        if(channelRoosterIterationMap.containsKey(iteration) and !isChannelStoryDateLocked(channel.uid)) {
             validChannelRooster = processValidChannelRooster(channel, channelRoosterIterationMap, iteration)
         } else {
             // If story, and not date locked:
@@ -182,7 +182,7 @@ class ChannelManager(private val context: Context) {
             //  00000000000000[b]  x  [a]00000000
             // where x is current invalid iteration
             // try a first, then b
-            if (channel.isNew_alarms_start_at_first_iteration) {
+            if (channel.isNew_alarms_start_at_first_iteration and !isChannelStoryDateLocked(channel.uid)) {
                 if (tailMap.isNotEmpty()) {
                     val nextValidEntry = tailMap.firstKey()
                     validChannelRooster = processValidChannelRooster(channel, channelRoosterIterationMap, nextValidEntry)
@@ -217,10 +217,12 @@ class ChannelManager(private val context: Context) {
         channelRoosterIterationMap[nextValidEntry]?.let { channelRooster ->
             // User is starting at next valid entry
             // Set entry for iteration to current valid story iteration, to be incremented on play
-            jsonPersistence.setStoryIteration(channel.getUid(), nextValidEntry)
+            if(!isChannelStoryDateLocked(channel.uid))
+                jsonPersistence.setStoryIteration(channel.getUid(), nextValidEntry)
 
             channelRooster.isSelected = false
-            //This method allows multiple objects per key
+            // This method allows multiple objects per key
+            // Try get priority mutable list, add to it, if unsuccessful (i.e. first entry) then create list
             if(channelRoosterMap[channel.getPriority()]?.add(channelRooster) != true) {
                 val values = ArrayList<ChannelRooster>()
                 values.add(channelRooster)
@@ -229,6 +231,31 @@ class ChannelManager(private val context: Context) {
             return channelRooster
         }
         return null
+    }
+
+    fun incrementChannelStoryIteration(channelRoosterUID: String) {
+        //Attempt to increment channel story iteration, if not day locked
+        val currentTime = Calendar.getInstance()
+
+        if(!isChannelStoryDateLocked(channelRoosterUID)) {
+            // Story iteration not locked
+            jsonPersistence.setStoryIteration(channelRoosterUID, jsonPersistence.getStoryIteration(channelRoosterUID) + 1)
+            jsonPersistence.setStoryIterationDateLock(channelRoosterUID, currentTime.timeInMillis)
+        }
+    }
+
+    fun isChannelStoryDateLocked(channelRoosterUID: String): Boolean {
+        //Attempt to increment channel story iteration, if not day locked
+        val dateLockTimeInMillis = jsonPersistence.getStoryIterationDateLock(channelRoosterUID)
+        val dateLockTime = Calendar.getInstance()
+        dateLockTime.timeInMillis = dateLockTimeInMillis
+        val currentTime = Calendar.getInstance()
+
+        if(dateLockTime.get(Calendar.DATE) == currentTime.get(Calendar.DATE)) {
+            // Story iteration locked
+            return true
+        }
+        return false
     }
 
     private fun refreshTempChannelRoosters() {

@@ -7,6 +7,10 @@ package com.roostermornings.android.adapter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.support.annotation.Nullable;
+import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -24,24 +28,49 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.activity.DiscoverFragmentActivity;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.firebase.FA;
-import com.roostermornings.android.domain.ChannelRooster;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapter.ViewHolder> implements Filterable {
-    private ArrayList<ChannelRooster> mDataset;
+    private List<MediaBrowserCompat.MediaItem> mDataset;
     private Activity mActivity;
     private Context context;
 
+    private String mCurrentMediaId;
+    private PlaybackStateCompat mPlaybackState;
+
+    @Nullable
+    private String getPlayingMediaId() {
+        boolean isPlaying = mPlaybackState != null
+                && mPlaybackState.getState() == PlaybackStateCompat.STATE_PLAYING;
+        return isPlaying ? mCurrentMediaId : null;
+    }
+
+    private boolean isPlaying(MediaBrowserCompat.MediaItem mediaItem) {
+        String mediaId = mediaItem.getMediaId();
+        return mediaId != null && mediaId.equals(getPlayingMediaId());
+    }
+
+    public void setCurrentMediaMetadata(MediaMetadataCompat mediaMetadata) {
+        mCurrentMediaId = mediaMetadata != null
+                ? mediaMetadata.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID)
+                : null;
+    }
+
+    public void setPlaybackState(PlaybackStateCompat playbackState) {
+        mPlaybackState = playbackState;
+    }
+
     private DiscoverAudioSampleInterface discoverAudioSampleInterface;
     public interface DiscoverAudioSampleInterface {
-        void streamChannelRooster(final ChannelRooster channelRooster);
+        void onMediaItemSelected(MediaBrowserCompat.MediaItem item, boolean isPlaying);
     }
 
     // Provide a reference to the views for each data item
@@ -70,18 +99,18 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
         }
     }
 
-    public void add(int position, ChannelRooster item) {
+    public void add(int position, MediaBrowserCompat.MediaItem item) {
         mDataset.add(position, item);
         notifyItemInserted(position);
     }
 
-    public void refreshAll(ArrayList<ChannelRooster> myDataset) {
+    public void refreshAll(List<MediaBrowserCompat.MediaItem> myDataset) {
         mDataset = myDataset;
         notifyDataSetChanged();
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public DiscoverListAdapter(ArrayList<ChannelRooster> mDataset, Activity mActivity) {
+    public DiscoverListAdapter(List<MediaBrowserCompat.MediaItem> mDataset, Activity mActivity) {
         this.mDataset = mDataset;
         this.mActivity = mActivity;
         if(mActivity instanceof DiscoverFragmentActivity) {
@@ -108,55 +137,57 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         // - get element from your dataset at this position
-        final ChannelRooster channelRooster = mDataset.get(position);
+        final MediaBrowserCompat.MediaItem mediaItem = mDataset.get(position);
         // - replace the contents of the view with that element
-        if (channelRooster.isPlaying()) {
+        if (isPlaying(mediaItem)) {
             holder.listenImageButton.setBackgroundResource(R.drawable.rooster_new_audio_pause_button);
         } else {
             holder.listenImageButton.setBackgroundResource(R.drawable.rooster_audio_play_button);
         }
 
-        if(channelRooster.isDownloading()) {
-            holder.audioProgressBar.setVisibility(View.VISIBLE);
-        } else {
-            holder.audioProgressBar.setVisibility(View.GONE);
-        }
+        //TODO: implement
+//        if(mediaItem.isDownloading()) {
+//            holder.audioProgressBar.setVisibility(View.VISIBLE);
+//        } else {
+//            holder.audioProgressBar.setVisibility(View.GONE);
+//        }
+        holder.audioProgressBar.setVisibility(View.GONE);
 
         holder.cardViewChannel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                discoverAudioSampleInterface.streamChannelRooster(channelRooster);
-                FA.Log(FA.Event.explore_channel_rooster_played.class, FA.Event.explore_channel_rooster_played.Param.channel_title, channelRooster.getChannel_uid());
+                discoverAudioSampleInterface.onMediaItemSelected(mediaItem, isPlaying(mediaItem));
+                FA.Log(FA.Event.explore_channel_rooster_played.class, FA.Event.explore_channel_rooster_played.Param.channel_title, mediaItem.getMediaId());
             }
         });
 
         holder.listenImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                discoverAudioSampleInterface.streamChannelRooster(channelRooster);
-                FA.Log(FA.Event.explore_channel_rooster_played.class, FA.Event.explore_channel_rooster_played.Param.channel_title, channelRooster.getChannel_uid());
+                discoverAudioSampleInterface.onMediaItemSelected(mediaItem, isPlaying(mediaItem));
+                FA.Log(FA.Event.explore_channel_rooster_played.class, FA.Event.explore_channel_rooster_played.Param.channel_title, mediaItem.getMediaId());
             }
         });
 
-        holder.txtChannelName.setText(channelRooster.getName());
+        holder.txtChannelName.setText(mediaItem.getDescription().getTitle());
 
         holder.channelInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 new MaterialDialog.Builder(mActivity)
-                        .title(channelRooster.getName())
-                        .content(channelRooster.getDescription())
+                        .title(mediaItem.getDescription().getTitle())
+                        .content(mediaItem.getDescription().getDescription())
                         .positiveText(R.string.ok)
                         .negativeText("")
                         .show();
 
-                FA.Log(FA.Event.channel_info_viewed.class, FA.Event.channel_info_viewed.Param.channel_title, channelRooster.getChannel_uid());
+                FA.Log(FA.Event.channel_info_viewed.class, FA.Event.channel_info_viewed.Param.channel_title, mediaItem.getMediaId());
             }
         });
 
         try {
-            Picasso.with(context).load(channelRooster.getPhoto())
+            Picasso.with(context).load(mediaItem.getDescription().getIconUri())
                     .fit()
                     .centerCrop()
                     .into(holder.imgChannelImage, new Callback() {
@@ -191,7 +222,7 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
 
-                mDataset = (ArrayList<ChannelRooster>) results.values;
+                mDataset = (List<MediaBrowserCompat.MediaItem>) results.values;
                 notifyDataSetChanged();
             }
 
@@ -199,12 +230,12 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
             protected FilterResults performFiltering(CharSequence constraint) {
 
                 FilterResults results = new FilterResults();
-                ArrayList<ChannelRooster> filteredContacts = new ArrayList<>();
+                List<MediaBrowserCompat.MediaItem> filteredContacts = new ArrayList<>();
 
                 //Perform your search here using the search constraint string
                 constraint = constraint.toString().toLowerCase();
                 for (int i = 0; i < mDataset.size(); i++) {
-                    String contactData = mDataset.get(i).getName();
+                    String contactData = mDataset.get(i).getDescription().getTitle().toString();
                     if (contactData.toLowerCase().contains(constraint.toString()))  {
                         filteredContacts.add(mDataset.get(i));
                     }

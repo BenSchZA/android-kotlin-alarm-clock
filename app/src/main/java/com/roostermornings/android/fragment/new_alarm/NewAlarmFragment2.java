@@ -59,8 +59,6 @@ public class NewAlarmFragment2 extends BaseFragment {
     private String mUserUidParam;
     private IAlarmSetListener mListener;
 
-    private ChannelManager channelManager = new ChannelManager(getApplicationContext());
-
     private ArrayList<ChannelRooster> channelRoosters = new ArrayList<>();
 
     @BindView(R.id.main_content)
@@ -71,6 +69,7 @@ public class NewAlarmFragment2 extends BaseFragment {
 
     @Inject JSONPersistence jsonPersistence;
     @Inject Context AppContext;
+    @Inject ChannelManager channelManager;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {

@@ -63,6 +63,7 @@
     <string name="add_contacts">Add contacts who have Rooster</string>
     <string name="invite_contacts">Invite contacts to Rooster</string>
     <string name="search_title">Search…</string>
+    <string name="shuffle_title">Shuffle</string>
     <string name="search_hint_friends">Search…</string>
     <string name="retrieve_contacts_permission">We need your permission to retrieve addable contacts, click me or swipe to try again.</string>
 
