@@ -42,8 +42,8 @@ class GeolocationWiFiAccessPoints(context: Context) {
 
     init {
         val wifiMan = context.applicationContext.getSystemService(
-                Context.WIFI_SERVICE) as WifiManager
-        val wifiInf = wifiMan.connectionInfo
-        this.macAddress = wifiInf.macAddress
+                Context.WIFI_SERVICE) as WifiManager?
+        val wifiInf = wifiMan?.connectionInfo
+        this.macAddress = wifiInf?.macAddress ?: ""
     }
 }
