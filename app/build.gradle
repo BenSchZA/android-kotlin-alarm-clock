@@ -24,7 +24,7 @@ android {
         }
     }
     compileSdkVersion 26
-    buildToolsVersion "26.0.1"
+    buildToolsVersion "26.0.2"
     defaultConfig {
         applicationId "com.roostermornings.android"
         minSdkVersion 17
@@ -118,9 +118,9 @@ repositories {
     mavenCentral()
 }
 
-def support_lib_version = "26.0.1"
+def support_lib_version = "26.1.0"
 
-def google_play_services_version = "11.2.0"
+def google_play_services_version = "11.4.2"
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
@@ -144,7 +144,7 @@ dependencies {
     // required if you want to use Mockito for Android tests
     androidTestImplementation 'org.mockito:mockito-android:2.7.22'
 
-    implementation 'com.android.support:support-core-utils:26.0.1'
+    implementation "com.android.support:support-core-utils:${support_lib_version}"
     implementation "com.android.support:appcompat-v7:${support_lib_version}"
     implementation "com.android.support:design:${support_lib_version}"
     implementation "com.android.support:support-v4:${support_lib_version}"
