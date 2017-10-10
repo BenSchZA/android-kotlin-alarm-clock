@@ -353,15 +353,16 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
 
         editor
                 .remove(JSONPersistence.SharedPrefsKeys.KEY_ALARMS_ARRAY)
-                .remove(JSONPersistence.SharedPrefsKeys.KEY_CHANNEL_ROOSTERS_ARRAY)
+                .remove(JSONPersistence.SharedPrefsKeys.KEY_MEDIA_ITEMS_ARRAY)
                 .remove(JSONPersistence.SharedPrefsKeys.KEY_USER_CONTACTS_NUMBER_NAME_PAIRS_MAP)
                 .remove(JSONPersistence.SharedPrefsKeys.KEY_USER_FRIENDS_ARRAY)
                 .remove(JSONPersistence.SharedPrefsKeys.KEY_USER_INVITABLE_CONTACTS_ARRAY)
                 .apply();
     }
 
-    private boolean isServiceRunning(Class<?> serviceClass) {
+    public boolean isServiceRunning(Class<?> serviceClass) {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        if(manager == null) return false;
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
             if (serviceClass.getName().equals(service.service.getClassName())) {
                 return true;

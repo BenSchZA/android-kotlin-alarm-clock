@@ -89,7 +89,6 @@ public class LifeCycle {
                 "");
 
         DownloadSyncAdapter downloadSyncAdapter = new DownloadSyncAdapter(context, true);
-        downloadSyncAdapter.retrieveChannelContentAudio(channelRooster, context);
 
         DownloadSyncAdapter.setOnChannelDownloadListener(new DownloadSyncAdapter.OnChannelDownloadListener() {
             @Override
@@ -105,6 +104,8 @@ public class LifeCycle {
                 }
             }
         });
+
+        downloadSyncAdapter.retrieveChannelContentAudio(channelRooster, context);
     }
 
     /**

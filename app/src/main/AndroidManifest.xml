@@ -20,20 +20,27 @@
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
 
-    <uses-feature android:name="android.hardware.camera.flash" android:required="false" />
-    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera.flash"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera.autofocus"
+        android:required="false" />
 
     <!-- <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" /> -->
-    <!--allowBackup set to false due to error where social roosters as well as SQL entries are restored after app reinstall, and play again-->
+    <!-- allowBackup set to false due to error where social roosters as well as SQL entries are restored after app reinstall, and play again -->
     <application
         android:name=".BaseApplication"
         android:allowBackup="false"
         android:icon="${app_icon}"
         android:label="${app_name}"
         android:supportsRtl="true">
-        <meta-data android:name="android.max_aspect" android:value="2.1" />
+        <meta-data
+            android:name="android.max_aspect"
+            android:value="2.1" />
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
@@ -42,7 +49,7 @@
             android:value="${fabric_api_key}" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyAQVwkDqz4ZPH9jUb-LpdgoBBbkln9uyOE"/>
+            android:value="AIzaSyAQVwkDqz4ZPH9jUb-LpdgoBBbkln9uyOE" />
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_stat_ic_notification" />
@@ -70,19 +77,29 @@
             android:enabled="true"
             android:exported="true" />
 
+        <receiver android:name="android.support.v4.media.session.MediaButtonReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+                <action android:name="android.media.AUDIO_BECOMING_NOISY" />
+            </intent-filter>
+        </receiver>
+
         <activity
             android:name=".activity.SplashActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:screenOrientation="portrait"
             android:noHistory="true"
+            android:screenOrientation="portrait"
             android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="audio/mpeg" />
                 <data android:mimeType="audio/mp4" />
                 <data android:mimeType="audio/3gpp" />
@@ -180,14 +197,14 @@
             </intent-filter>
         </service>
 
-        <!--Launch mode important for searchable activity, to avoid activity recreation-->
+        <!-- Launch mode important for searchable activity, to avoid activity recreation -->
         <activity
             android:name=".activity.MessageStatusFragmentActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:launchMode="singleTop"
-            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait"
-            android:theme="@style/AppThemeDay.NoActionBar">
+            android:theme="@style/AppThemeDay.NoActionBar"
+            android:windowSoftInputMode="adjustPan">
             <meta-data
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable_roosters" />
@@ -226,12 +243,13 @@
         <activity
             android:name=".activity.DiscoverFragmentActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:screenOrientation="portrait"
             android:launchMode="singleTop"
+            android:screenOrientation="portrait"
             android:theme="@style/AppThemeDay.NoActionBar">
             <meta-data
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable_explore" />
+
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
@@ -264,10 +282,23 @@
             android:exported="false"
             android:syncable="true" />
 
-        <activity android:name=".activity.InvalidateVersion"
+        <activity
+            android:name=".activity.InvalidateVersion"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="portrait"
-            android:theme="@style/SplashTheme"/>
+            android:theme="@style/SplashTheme" />
+
+        <service
+            android:name=".service.MediaService"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+                <action android:name="android.media.AUDIO_BECOMING_NOISY" />
+                <action android:name="android.media.browse.MediaBrowserService" />
+            </intent-filter>
+        </service>
+
     </application>
 
 </manifest>
