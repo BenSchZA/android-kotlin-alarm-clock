@@ -305,7 +305,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
                                     actualIterationKey = iteration;
                                 }
                                 ChannelRooster validChannelRooster = channelManager.findNextValidChannelRooster(
-                                        channelIterationMap, channel, actualIterationKey, true);
+                                        channelIterationMap, channel, actualIterationKey);
                                 retrieveChannelContentAudio(validChannelRooster, context);
                             }
 
