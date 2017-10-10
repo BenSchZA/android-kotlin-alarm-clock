@@ -36,6 +36,7 @@ import android.view.*
 import android.widget.LinearLayout
 import android.widget.MediaController
 import android.widget.TextView
+import android.widget.Toast
 
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.R
@@ -51,6 +52,8 @@ import com.roostermornings.android.util.RoosterUtils
 import javax.inject.Inject
 
 import butterknife.BindView
+import com.roostermornings.android.channels.ChannelManager
+import com.roostermornings.android.util.Toaster
 import java.util.*
 
 class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAudioSampleInterface, MediaController.MediaPlayerControl {
@@ -79,6 +82,7 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
     @Inject lateinit var jsonPersistence: JSONPersistence
     @Inject
     lateinit var sharedPreferences: SharedPreferences
+    @Inject lateinit var channelManager: ChannelManager
 
     private val subscriptionCallback = object : MediaBrowserCompat.SubscriptionCallback() {
         override fun onChildrenLoaded(parentId: String, children: List<MediaBrowserCompat.MediaItem>) {
@@ -229,14 +233,21 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
         swipeRefreshLayout.setOnRefreshListener {
             // This method performs the actual data-refresh operation.
             // The method calls setRefreshing(false) when it's finished.
-            //Reload adapter data and set message status, set listener for new data
-            if(mMediaBrowser.isConnected) {
-                //mMediaController?.transportControls?.sendCustomAction()
-            }
+            refreshData()
         }
 
         //Set volume rocker to alarm stream
         volumeControlStream = AudioManager.STREAM_MUSIC
+    }
+
+    private fun refreshData() {
+        if(mMediaBrowser.isConnected) {
+            mMediaController?.sendCommand(MediaService.Companion.CustomCommand.REFRESH.toString(), null, null)
+        } else {
+            swipeRefreshLayout.isRefreshing = false
+            if(checkInternetConnection())
+                Toaster.makeToast(this, "Failed to refresh, please try again.", Toast.LENGTH_SHORT)
+        }
     }
 
     override fun onStart() {
@@ -260,8 +271,8 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
         if (!mediaItems.isEmpty()) jsonPersistence.mediaItems = ArrayList<MediaBrowserCompat.MediaItem>(mediaItems)
 
         // If media not playing, stop the media service
-        if(mMediaController?.playbackState?.state != PlaybackStateCompat.STATE_PLAYING)
-            mMediaController?.transportControls?.stop()
+        //if(mMediaController?.playbackState?.state != PlaybackStateCompat.STATE_PLAYING)
+        //    mMediaController?.transportControls?.stop()
 
         //Unsubscribe and unregister MediaControllerCompat callbacks
         MediaControllerCompat.getMediaController(this@DiscoverFragmentActivity)?.unregisterCallback(mediaControllerCallback)
@@ -269,7 +280,6 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
             mMediaBrowser.unsubscribe(mMediaBrowser.root, subscriptionCallback)
             mMediaBrowser.disconnect()
         }
-        finish()
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -373,6 +383,8 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
             mediaItems.indexOfFirst { it.mediaId == item.mediaId }.takeIf { it > -1 }?.let {
                 mMediaController?.transportControls?.skipToQueueItem(it.toLong())
                 mMediaController?.transportControls?.play()
+                // Increment, so that new content received tomorrow
+                mediaItems[it].mediaId?.let { channelManager.incrementChannelStoryIteration(it) }
             }
         }
     }

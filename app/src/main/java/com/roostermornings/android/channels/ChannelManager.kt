@@ -153,7 +153,7 @@ class ChannelManager(private val context: Context) {
                     }
                 }
                 if(channelRoosterIterationMap.isNotEmpty()) {
-                    findNextValidChannelRooster(channelRoosterIterationMap, channel, iteration, false)
+                    findNextValidChannelRooster(channelRoosterIterationMap, channel, iteration)
                 }
             }
 
@@ -164,7 +164,7 @@ class ChannelManager(private val context: Context) {
         channelRoosterUploadsReference.addListenerForSingleValueEvent(channelRoosterUploadsListener)
     }
 
-    fun findNextValidChannelRooster(channelRoosterIterationMap: TreeMap<Int, ChannelRooster>, channel: Channel, iteration: Int, ignoreDateLock: Boolean): ChannelRooster? {
+    fun findNextValidChannelRooster(channelRoosterIterationMap: TreeMap<Int, ChannelRooster>, channel: Channel, iteration: Int): ChannelRooster? {
 
         var validChannelRooster: ChannelRooster? = null
 
@@ -174,21 +174,21 @@ class ChannelManager(private val context: Context) {
 
         // If the channel rooster iteration map contains the current iteration key, proceed, else find nextValidEntry
         // If date locked, use head/tail logic to ensure we don't select current iteration
-        if(channelRoosterIterationMap.containsKey(iteration) and (!isChannelStoryDateLocked(channel.uid))) {
-            validChannelRooster = processValidChannelRooster(channel, channelRoosterIterationMap, iteration, ignoreDateLock)
+        if(channelRoosterIterationMap.containsKey(iteration) and !isChannelStoryDateLocked(channel.uid)) {
+            validChannelRooster = processValidChannelRooster(channel, channelRoosterIterationMap, iteration)
         } else {
             // If story, and not date locked:
             //        head               tail
             //  00000000000000[b]  x  [a]00000000
             // where x is current invalid iteration
             // try a first, then b
-            if (channel.isNew_alarms_start_at_first_iteration and (!isChannelStoryDateLocked(channel.uid))) {
+            if (channel.isNew_alarms_start_at_first_iteration and !isChannelStoryDateLocked(channel.uid)) {
                 if (tailMap.isNotEmpty()) {
                     val nextValidEntry = tailMap.firstKey()
-                    validChannelRooster = processValidChannelRooster(channel, channelRoosterIterationMap, nextValidEntry, ignoreDateLock)
+                    validChannelRooster = processValidChannelRooster(channel, channelRoosterIterationMap, nextValidEntry)
                 } else if (headMap.isNotEmpty()) {
                     val nextValidEntry = headMap.lastKey()
-                    validChannelRooster = processValidChannelRooster(channel, channelRoosterIterationMap, nextValidEntry, ignoreDateLock)
+                    validChannelRooster = processValidChannelRooster(channel, channelRoosterIterationMap, nextValidEntry)
                 }
             }
             // If daily, or date locked:
@@ -199,10 +199,10 @@ class ChannelManager(private val context: Context) {
             else {
                 if (headMap.isNotEmpty()) {
                     val nextValidEntry = headMap.lastKey()
-                    validChannelRooster = processValidChannelRooster(channel, channelRoosterIterationMap, nextValidEntry, ignoreDateLock)
+                    validChannelRooster = processValidChannelRooster(channel, channelRoosterIterationMap, nextValidEntry)
                 } else if (tailMap.isNotEmpty()) {
                     val nextValidEntry = tailMap.firstKey()
-                    validChannelRooster = processValidChannelRooster(channel, channelRoosterIterationMap, nextValidEntry, ignoreDateLock)
+                    validChannelRooster = processValidChannelRooster(channel, channelRoosterIterationMap, nextValidEntry)
                 }
             }
         }
@@ -212,15 +212,17 @@ class ChannelManager(private val context: Context) {
         return validChannelRooster
     }
 
-    private fun processValidChannelRooster(channel: Channel, channelRoosterIterationMap: TreeMap<Int, ChannelRooster>, nextValidEntry: Int, ignoreDateLock: Boolean): ChannelRooster? {
-        // User is starting at next valid entry
-        // Set entry for iteration to current valid story iteration, to be incremented on play
-        if(ignoreDateLock or !isChannelStoryDateLocked(channel.uid))
-            jsonPersistence.setStoryIteration(channel.getUid(), nextValidEntry)
+    private fun processValidChannelRooster(channel: Channel, channelRoosterIterationMap: TreeMap<Int, ChannelRooster>, nextValidEntry: Int): ChannelRooster? {
         //Retrieve channel audio
         channelRoosterIterationMap[nextValidEntry]?.let { channelRooster ->
+            // User is starting at next valid entry
+            // Set entry for iteration to current valid story iteration, to be incremented on play
+            if(!isChannelStoryDateLocked(channel.uid))
+                jsonPersistence.setStoryIteration(channel.getUid(), nextValidEntry)
+
             channelRooster.isSelected = false
-            //This method allows multiple objects per key
+            // This method allows multiple objects per key
+            // Try get priority mutable list, add to it, if unsuccessful (i.e. first entry) then create list
             if(channelRoosterMap[channel.getPriority()]?.add(channelRooster) != true) {
                 val values = ArrayList<ChannelRooster>()
                 values.add(channelRooster)

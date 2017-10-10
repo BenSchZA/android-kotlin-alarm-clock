@@ -73,8 +73,8 @@ class MediaService : MediaBrowserServiceCompat(),
     class CurrentMediaItem(val ID: String, val position: Long, val isPlaying: Boolean)
 
     private var mPlayerPreparing = false
-    private var mBrowserResultSent = false
     private var mHasPlayed = false
+    private var mStopCalled = false
 
     private val mTrackSelector: TrackSelector = DefaultTrackSelector()
     private val mPlayer by lazy{ ExoPlayerFactory.newSimpleInstance(this, mTrackSelector) }
@@ -131,14 +131,14 @@ class MediaService : MediaBrowserServiceCompat(),
     override fun onDestroy() {
         super.onDestroy()
 
-        NotificationManagerCompat.from(this).cancelAll()
+        abandonAudioFocus()
+        unregisterReceiver(mNoisyReceiver)
 
         //Deactivate session
         mSession.isActive = false
         mSession.release()
 
-        abandonAudioFocus()
-        unregisterReceiver(mNoisyReceiver)
+        NotificationManagerCompat.from(this).cancelAll()
 
         if(mWiFiLock?.isHeld == true) mWiFiLock?.release()
     }
@@ -224,15 +224,29 @@ class MediaService : MediaBrowserServiceCompat(),
         }
     }
 
+    companion object {
+        enum class CustomCommand {
+            REFRESH
+        }
+    }
+
     inner class MediaPlaybackPreparer : MediaSessionConnector.PlaybackPreparer {
 
         override fun getSupportedPrepareActions(): Long {
             return (ACTION_PLAY_FROM_MEDIA_ID)
         }
 
+        override fun onCommand(command: String?, extras: Bundle?, cb: ResultReceiver?) {
+            when(command) {
+                // Refresh media browser content and send result to subscribers
+                CustomCommand.REFRESH.toString() -> {
+                    notifyChildrenChanged(MEDIA_ID_ROOT)
+                }
+            }
+        }
+
         override fun onPrepareFromMediaId(mediaId: String?, extras: Bundle?) { TODO("not implemented") }
         override fun onPrepareFromSearch(query: String?, extras: Bundle?) { TODO("not implemented") }
-        override fun onCommand(command: String?, extras: Bundle?, cb: ResultReceiver?) { TODO("not implemented") }
         override fun onPrepareFromUri(uri: Uri?, extras: Bundle?) { TODO("not implemented")  }
         override fun onPrepare() { TODO("not implemented") }
     }
@@ -317,21 +331,24 @@ class MediaService : MediaBrowserServiceCompat(),
             if(retrieveAudioFocus()) {
                 super.onPlay(player)
                 // Ensure service is started to avoid being killed on client subscription disconnect
+                if(mStopCalled) {
+                    notifyChildrenChanged(MEDIA_ID_ROOT)
+                    mStopCalled = false
+                }
                 startService(Intent(mThis, MediaService::class.java))
             }
             // Register that a media play action has been received
             if(!mHasPlayed) mHasPlayed = true
 
             // Ensure media session is active, to retrieve media commands
-            if (!mSession.isActive) {
-                mSession.isActive = true
-            }
+            if (!mSession.isActive) mSession.isActive = true
         }
 
         override fun onStop(player: Player) {
             super.onStop(player)
             //Stop service when media stopped
             stopSelf()
+            mStopCalled = true
         }
     }
 
@@ -341,13 +358,20 @@ class MediaService : MediaBrowserServiceCompat(),
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
             super.onPlaybackStateChanged(state)
             // Only show notification after first play action
-            if(mHasPlayed) MediaNotificationHelper.createNotification(mThis, mSession)
+            when(state?.state) {
+                PlaybackStateCompat.STATE_PLAYING -> {
+                    if(mHasPlayed) MediaNotificationHelper.createNotification(mThis, mSession)
+                }
+                PlaybackStateCompat.STATE_PAUSED -> {
+                    if(mHasPlayed) MediaNotificationHelper.createNotification(mThis, mSession)
+                }
+            }
         }
 
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             super.onMetadataChanged(metadata)
             // Only show notification after first play action
-            if(mHasPlayed) MediaNotificationHelper.createNotification(mThis, mSession)
+            // if(mHasPlayed) MediaNotificationHelper.createNotification(mThis, mSession)
         }
     }
 
@@ -414,14 +438,14 @@ class MediaService : MediaBrowserServiceCompat(),
                     override fun onTimelineChanged(timeline: Timeline?, manifest: Any?) {}
                 }
 
+                // Cache last playing state before refreshing content
                 if(mPlaybackState.state == STATE_PLAYING) {
                     currentMediaItem = CurrentMediaItem(mCurrentMediaDescription.mediaId ?: "" , mPlayer.currentPosition, true)
                 } else {
-                    currentMediaItem.reset()
+                    currentMediaItem = currentMediaItem.reset()
                 }
                 // Prepare media content and wait for STATE_READY
                 mPlayer.addListener(playerEventListener)
-                mPlayer.playWhenReady = false
                 mPlayerPreparing = true
                 // ConcatenatingMediaSource enables us to create a *windowed* {} loop of media content [ ][ ] {[ ][ ]...x10...[ ][ ]} [ ]
                 // Each window, managed by TimelineQueueNavigator(), is a maximum of 10 items long and dynamically loaded
@@ -439,7 +463,7 @@ class MediaService : MediaBrowserServiceCompat(),
             MEDIA_ID_ROOT -> {
                 val tempMediaItems : MutableList<MediaBrowserCompat.MediaItem> = ArrayList(channelRoosters.size)
 
-                //Iterate through channel rooster content and create MediaItems to pass to subscribed client
+                // Iterate through channel rooster content and create MediaItems to pass to subscribed client
                  channelRoosters.forEachIndexed { index, _ ->
                      val mediaItem : MediaBrowserCompat.MediaItem = MediaBrowserCompat.MediaItem(getQueueItemMediaDescription(index),
                              MediaBrowserCompat.MediaItem.FLAG_PLAYABLE)
@@ -447,8 +471,8 @@ class MediaService : MediaBrowserServiceCompat(),
                  }
 
                 mediaItems = tempMediaItems.toList()
-                result.sendResult(mediaItems)
 
+                // Re-initialize last playing item before refresh action
                 if(currentMediaItem.isPlaying) {
                     mediaItems.indexOfFirst { it.mediaId == currentMediaItem.ID }.takeIf { it > -1 }?.let {
                         mTransportControls.skipToQueueItem(it.toLong())
@@ -459,11 +483,11 @@ class MediaService : MediaBrowserServiceCompat(),
                 }
             }
             // Since the client provided the empty root we'll just send back an empty list
-            MEDIA_ID_EMPTY_ROOT -> {
-                result.sendResult(mediaItems)
-            }
+            MEDIA_ID_EMPTY_ROOT -> {  }
             else -> {  }
         }
+
+        result.sendResult(mediaItems)
     }
 
     override fun onGetRoot(clientPackageName: String, clientUid: Int, rootHints: Bundle?): MediaBrowserServiceCompat.BrowserRoot? {
