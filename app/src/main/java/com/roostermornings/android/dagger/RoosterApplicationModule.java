@@ -6,7 +6,6 @@
 package com.roostermornings.android.dagger;
 
 import android.accounts.Account;
-import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -28,7 +27,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.roostermornings.android.BaseApplication;
-import com.roostermornings.android.channels.ChannelManager;
+import com.roostermornings.android.adapter_data.RoosterAlarmManager;
+import com.roostermornings.android.adapter_data.ChannelManager;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
@@ -188,6 +188,12 @@ public class RoosterApplicationModule {
     @Singleton
     ChannelManager provideChannelManager(BaseApplication baseApplication) {
         return new ChannelManager(baseApplication);
+    }
+
+    @Provides
+    @Singleton
+    RoosterAlarmManager provideRoosterAlarmManager(BaseApplication baseApplication) {
+        return new RoosterAlarmManager(baseApplication);
     }
 
     @Provides

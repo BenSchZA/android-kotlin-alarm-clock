@@ -3,6 +3,7 @@
   ~ Copyright (c)  2017 Roosta Media. All rights reserved.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.roostermornings.android">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -35,6 +36,7 @@
     <application
         android:name=".BaseApplication"
         android:allowBackup="false"
+        tools:replace="android:allowBackup,android:label"
         android:icon="${app_icon}"
         android:label="${app_name}"
         android:supportsRtl="true">
@@ -76,7 +78,6 @@
             android:name=".receiver.BackgroundTaskReceiver"
             android:enabled="true"
             android:exported="true" />
-
         <receiver android:name="android.support.v4.media.session.MediaButtonReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
@@ -299,6 +300,27 @@
             </intent-filter>
         </service>
 
+        <receiver android:name=".widgets.AlarmToggleWidget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/alarm_toggle_widget_info" />
+        </receiver>
+
+        <activity android:name=".widgets.AlarmToggleWidgetConfigureActivity">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".widgets.AlarmToggleWidgetService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
     </application>
 
 </manifest>

@@ -173,6 +173,8 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
                 holder.roosterNotificationPerson.clearAnimation();
                 holder.roosterNotificationParent.clearAnimation();
             }
+        } else {
+            holder.roosterNotificationParent.setVisibility(View.INVISIBLE);
         }
 
         holder.switchEnable.setOnCheckedChangeListener(new SwitchCompat.OnCheckedChangeListener() {

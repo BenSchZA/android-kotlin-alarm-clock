@@ -24,6 +24,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.R;
@@ -36,6 +37,7 @@ import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.FirstMileManager;
 import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.Toaster;
 

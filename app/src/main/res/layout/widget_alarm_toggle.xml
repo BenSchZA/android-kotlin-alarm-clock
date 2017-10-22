@@ -1,0 +1,30 @@
+<!--
+  ~ Rooster Mornings Android.
+  ~ Copyright (c)  2017 Roosta Media. All rights reserved.
+  -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/widget_margin"
+    android:orientation="vertical"
+    android:id="@+id/widget_alarm_toggle">
+
+    <ListView
+        android:id="@+id/widget_alarmsListView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipToPadding="false"
+        android:paddingLeft="@dimen/fab_margin"
+        android:paddingRight="@dimen/fab_margin"
+        android:paddingTop="@dimen/fab_margin" />
+
+    <ImageButton
+        android:layout_below="@+id/widget_alarmsListView"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/ic_alarm_add_white_24px"
+        android:layout_centerHorizontal="true"
+        android:baselineAlignBottom="true"/>
+
+</RelativeLayout>

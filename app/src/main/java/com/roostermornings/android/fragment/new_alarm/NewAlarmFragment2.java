@@ -5,59 +5,65 @@
 
 package com.roostermornings.android.fragment.new_alarm;
 
+import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
+import android.media.MediaMetadataRetriever;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.adapter.ChannelsListAdapter;
-import com.roostermornings.android.channels.ChannelManager;
+import com.roostermornings.android.adapter_data.ChannelManager;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.AlarmChannel;
-import com.roostermornings.android.domain.Channel;
 import com.roostermornings.android.domain.ChannelRooster;
 import com.roostermornings.android.fragment.IAlarmSetListener;
 import com.roostermornings.android.fragment.base.BaseFragment;
-import com.roostermornings.android.geolocation.GeoHashUtils;
-import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
+import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.FileUtils;
+import com.roostermornings.android.util.FirstMileManager;
 import com.roostermornings.android.util.JSONPersistence;
+import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.Toaster;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URI;
+import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.Date;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 
-import static com.facebook.FacebookSdk.getApplicationContext;
+import static android.app.Activity.RESULT_OK;
 
 public class NewAlarmFragment2 extends BaseFragment {
+
+    private static final int AUDIO_GET_REQUEST = 10110;
 
     private static final String ARG_USER_UID_PARAM = "user_uid_param";
     public static final String TAG = NewAlarmFragment2.class.getSimpleName();
     private String mUserUidParam;
     private IAlarmSetListener mListener;
+
+    private NewAlarmFragment2 mThis = this;
 
     private ArrayList<ChannelRooster> channelRoosters = new ArrayList<>();
 
@@ -101,6 +107,10 @@ public class NewAlarmFragment2 extends BaseFragment {
         if (getArguments() != null) {
             mUserUidParam = getArguments().getString(ARG_USER_UID_PARAM);
         }
+
+//        Intent musicPickerIntent = new Intent(Intent.ACTION_GET_CONTENT);
+//        musicPickerIntent.setType("audio/*");
+//        startActivityForResult(musicPickerIntent, AUDIO_GET_REQUEST);
     }
 
     @Override
@@ -149,6 +159,89 @@ public class NewAlarmFragment2 extends BaseFragment {
         channelManager.refreshChannelData(channelRoosters);
 
         return view;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        MediaPlayer mediaPlayer = new MediaPlayer();
+        if(resultCode == RESULT_OK){
+            switch (requestCode) {
+                case AUDIO_GET_REQUEST:
+                    if(data != null) {
+                        Uri audioUri = data.getData();
+                        if(audioUri != null) {
+
+                            File customFilePath = new File(getContext().getFilesDir(), "Media");
+                            String timeStamp = DateFormat.getDateTimeInstance().format(new Date());
+                            String customFileName = "Rooster_Custom_Audio_" + RoosterUtils.createRandomUID(5) + "_" + timeStamp + ".3gp";
+                            File customFile = new File(customFilePath, customFileName);
+
+                            if(customFile.getParentFile().exists() || customFile.getParentFile().mkdirs()) {
+
+                                try {
+                                    //Copy file contents to new public file
+                                    FileUtils.copyFromStream(getContext().getContentResolver().openInputStream(audioUri), customFile);
+
+                                    //If file is valid, open a share dialog
+//                                  && shareFile.length() < Constants.MAX_ROOSTER_FILE_SIZE
+                                    if (customFile.isFile() && validMimeType(customFile)) {
+                                        //Uri shareFileUri = FileProvider.getUriForFile(this, "com.roostermornings.android.fileprovider", shareFile);
+                                        //Send audio file to friends selection activity
+//                                        Intent intent = new Intent(SplashActivity.this, NewAudioFriendsActivity.class);
+//                                        Bundle bun = new Bundle();
+//                                        bun.putString(Constants.EXTRA_LOCAL_FILE_STRING, shareFile.getPath());
+//                                        intent.putExtras(bun);
+//                                        startActivity(intent);
+
+                                        try {
+                                            mediaPlayer.setDataSource(customFile.getAbsolutePath());
+                                            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                                                @Override
+                                                public void onPrepared(MediaPlayer mediaPlayer) {
+                                                    mediaPlayer.start();
+                                                }
+                                            });
+                                            mediaPlayer.prepareAsync();
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+
+                                        return;
+                                    } else {
+                                        Toaster.makeToast(getContext(), "File is greater than 8 MB, or is corrupt.", Toast.LENGTH_LONG);
+                                        return;
+                                    }
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                    Toaster.makeToast(getContext(), "Error loading file.", Toast.LENGTH_LONG);
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                default:
+                    break;
+            }
+        }
+    }
+
+    private boolean validMimeType(File audioFile) {
+        if(audioFile != null) {
+            MediaMetadataRetriever metadataRetriever = new MediaMetadataRetriever();
+            metadataRetriever.setDataSource(audioFile.getPath());
+            String mimeTypeStr = metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE);
+            if(mimeTypeStr != null &&
+                    (mimeTypeStr.contains("audio/mpeg")
+                            || mimeTypeStr.contains("audio/mp4")
+                            || mimeTypeStr.contains("audio/3gpp"))) {
+                return true;
+            } else if(mimeTypeStr != null) {
+                Toaster.makeToast(getContext(), "Invalid audio mime-type " + mimeTypeStr, Toast.LENGTH_SHORT);
+            }
+        }
+        return false;
     }
 
     @Override

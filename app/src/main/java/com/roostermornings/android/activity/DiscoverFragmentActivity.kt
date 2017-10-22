@@ -9,52 +9,40 @@ import android.app.SearchManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
 import android.content.SharedPreferences
-import android.graphics.PorterDuff
 import android.media.AudioManager
-import android.media.browse.MediaBrowser
-import android.os.IBinder
+import android.os.Bundle
 import android.os.RemoteException
-import android.support.v4.content.ContextCompat
 import android.support.v4.media.MediaBrowserCompat
-import android.support.v4.media.MediaBrowserServiceCompat
 import android.support.v4.media.MediaMetadataCompat
-import android.support.v4.media.session.MediaButtonReceiver
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.support.v4.widget.SwipeRefreshLayout
-import android.os.Bundle
-import android.support.annotation.Nullable
-import android.support.v4.media.session.MediaSessionCompat
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SearchView
-import android.support.v7.widget.Toolbar
-import android.util.Log
-import android.view.*
+import android.view.KeyEvent
+import android.view.Menu
+import android.view.MotionEvent
+import android.view.View
 import android.widget.LinearLayout
 import android.widget.MediaController
 import android.widget.TextView
 import android.widget.Toast
-
+import butterknife.BindView
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.R
 import com.roostermornings.android.activity.base.BaseActivity
 import com.roostermornings.android.adapter.DiscoverListAdapter
-import com.roostermornings.android.firebase.FA
+import com.roostermornings.android.adapter_data.ChannelManager
 import com.roostermornings.android.dagger.RoosterApplicationComponent
-import com.roostermornings.android.media.MediaNotificationHelper
+import com.roostermornings.android.firebase.FA
 import com.roostermornings.android.service.MediaService
 import com.roostermornings.android.util.JSONPersistence
 import com.roostermornings.android.util.RoosterUtils
-
-import javax.inject.Inject
-
-import butterknife.BindView
-import com.roostermornings.android.channels.ChannelManager
 import com.roostermornings.android.util.Toaster
 import java.util.*
+import javax.inject.Inject
 
 class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAudioSampleInterface, MediaController.MediaPlayerControl {
 
@@ -112,7 +100,7 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
         }
     }
 
-    private val connectionCallback = object: MediaBrowserCompat.ConnectionCallback() {
+    private val connectionCallback = object : MediaBrowserCompat.ConnectionCallback() {
         override fun onConnected() {
             super.onConnected()
 
@@ -144,15 +132,9 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
             }
         }
 
-        override fun onConnectionFailed() {
-            super.onConnectionFailed()
-        }
     }
 
     private val mediaControllerCallback = object : MediaControllerCompat.Callback() {
-        override fun onSessionDestroyed() {
-            super.onSessionDestroyed()
-        }
 
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
             super.onPlaybackStateChanged(state)
@@ -241,11 +223,11 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
     }
 
     private fun refreshData() {
-        if(mMediaBrowser.isConnected) {
+        if (mMediaBrowser.isConnected) {
             mMediaController?.sendCommand(MediaService.Companion.CustomCommand.REFRESH.toString(), null, null)
         } else {
             swipeRefreshLayout.isRefreshing = false
-            if(checkInternetConnection())
+            if (checkInternetConnection())
                 Toaster.makeToast(this, "Failed to refresh, please try again.", Toast.LENGTH_SHORT)
         }
     }
@@ -348,31 +330,6 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
         })
 
         return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle item selection
-//        when (item.itemId) {
-//            R.id.shuffle_explore -> {
-//                if(mMediaController?.shuffleMode == PlaybackStateCompat.SHUFFLE_MODE_NONE) {
-//                    if(RoosterUtils.hasO()) {
-//                        mMediaController?.transportControls?.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL)
-//                    } else {
-//                        mMediaController?.transportControls?.setShuffleModeEnabled(true)
-//                    }
-//
-//                    mMediaController?.transportControls?.play()
-//                    item.isChecked = true
-//                }
-//                else {
-//                    mMediaController?.transportControls?.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE)
-//                    item.isChecked = false
-//                }
-//                return true
-//            }
-//            else -> return super.onOptionsItemSelected(item)
-//        }
-        return super.onOptionsItemSelected(item)
     }
 
     override fun onMediaItemSelected(item: MediaBrowserCompat.MediaItem, isPlaying: Boolean) {

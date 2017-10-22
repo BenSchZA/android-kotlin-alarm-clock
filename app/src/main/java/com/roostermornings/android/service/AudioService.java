@@ -26,26 +26,20 @@ import android.os.IBinder;
 import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.crash.FirebaseCrash;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
+import com.roostermornings.android.activity.MessageStatusFragmentActivity;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
-import com.roostermornings.android.channels.ChannelManager;
+import com.roostermornings.android.adapter_data.ChannelManager;
 import com.roostermornings.android.firebase.FA;
-import com.roostermornings.android.domain.Channel;
 import com.roostermornings.android.domain.ChannelRooster;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
@@ -64,8 +58,6 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -73,7 +65,6 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import static android.content.ContentValues.TAG;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 //Service to manage playing and pausing audio during Rooster alarm
@@ -201,7 +192,7 @@ public class AudioService extends Service {
 
                 endService();
                 //Start Rooster to show on wakeup
-                Intent homeIntent = new Intent(mThis, MyAlarmsFragmentActivity.class);
+                Intent homeIntent = new Intent(mThis, MessageStatusFragmentActivity.class);
                 homeIntent.setFlags(FLAG_ACTIVITY_NEW_TASK);
                 startActivity(homeIntent);
             }

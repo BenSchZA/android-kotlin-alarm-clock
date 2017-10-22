@@ -46,6 +46,10 @@ public class RoosterUtils {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD;
     }
 
+    public static boolean hasIceCreamSandwich() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH;
+    }
+
     public static Boolean notNull(Object object) {
         return object != null;
     }
