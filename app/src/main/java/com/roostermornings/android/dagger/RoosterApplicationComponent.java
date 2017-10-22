@@ -27,7 +27,8 @@ import com.roostermornings.android.activity.SignInActivity;
 import com.roostermornings.android.activity.SignupEmailActivity;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.MyAlarmsListAdapter;
-import com.roostermornings.android.channels.ChannelManager;
+import com.roostermornings.android.adapter_data.RoosterAlarmManager;
+import com.roostermornings.android.adapter_data.ChannelManager;
 import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.fragment.NumberEntryDialogFragment;
 import com.roostermornings.android.fragment.base.BaseFragment;
@@ -54,6 +55,7 @@ import com.roostermornings.android.sync.DownloadSyncAdapter;
 import com.roostermornings.android.geolocation.GeoHashUtils;
 import com.roostermornings.android.util.JSONPersistence;
 import com.roostermornings.android.util.LifeCycle;
+import com.roostermornings.android.widgets.AlarmToggleWidgetDataProvider;
 
 /**
  * Annotates an interface or abstract class for which a fully-formed, dependency-injected implementation
@@ -115,6 +117,8 @@ public interface RoosterApplicationComponent {
     void inject(ChannelManager roosterClass);
     void inject(MediaNotificationHelper roosterClass);
     void inject(MediaService roosterClass);
+    void inject(RoosterAlarmManager roosterClass);
+    void inject(AlarmToggleWidgetDataProvider roosterClass);
 
     void inject(DownloadSyncAdapter adapter);
     void inject(MyAlarmsListAdapter adapter);

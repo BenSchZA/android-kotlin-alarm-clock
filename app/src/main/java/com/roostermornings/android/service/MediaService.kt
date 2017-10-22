@@ -39,7 +39,7 @@ import com.google.android.exoplayer2.trackselection.TrackSelector
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.activity.DiscoverFragmentActivity
-import com.roostermornings.android.channels.ChannelManager
+import com.roostermornings.android.adapter_data.ChannelManager
 import com.roostermornings.android.domain.ChannelRooster
 import com.roostermornings.android.media.MediaNotificationHelper
 import com.roostermornings.android.util.RoosterUtils

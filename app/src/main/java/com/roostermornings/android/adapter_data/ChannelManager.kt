@@ -3,7 +3,7 @@
  * Copyright (c)  2017 Roosta Media. All rights reserved.
  */
 
-package com.roostermornings.android.channels
+package com.roostermornings.android.adapter_data
 
 import android.content.Context
 import android.util.Log

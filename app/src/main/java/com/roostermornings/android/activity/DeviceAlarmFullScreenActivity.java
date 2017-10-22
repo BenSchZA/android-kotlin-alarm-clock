@@ -150,7 +150,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
             if (mBound) unbindService(mAudioServiceConnection);
             mBound = false;
             finish();
-            startActivity(new Intent(this, MyAlarmsFragmentActivity.class));
+            startNextActivity();
         }
         //Clear flag
         actionUrlClicked = false;
@@ -162,7 +162,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         if(mBound) unbindService(mAudioServiceConnection);
         mBound = false;
         finish();
-        startActivity(new Intent(this, MyAlarmsFragmentActivity.class));
+        startNextActivity();
     }
 
     @OnClick(R.id.alarm_snooze_button)
@@ -171,7 +171,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         if(mBound) unbindService(mAudioServiceConnection);
         mBound = false;
         finish();
-        startActivity(new Intent(this, MyAlarmsFragmentActivity.class));
+        startNextActivity();
     }
 
     @OnClick(R.id.alarm_dismiss)
@@ -180,7 +180,11 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
         if(mBound) unbindService(mAudioServiceConnection);
         mBound = false;
         finish();
-        startActivity(new Intent(this, MyAlarmsFragmentActivity.class));
+        startNextActivity();
+    }
+
+    private void startNextActivity() {
+        startActivity(new Intent(this, MessageStatusFragmentActivity.class));
     }
 
     @OnClick(R.id.alarm_action_button)

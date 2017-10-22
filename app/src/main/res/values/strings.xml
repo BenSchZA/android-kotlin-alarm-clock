@@ -143,7 +143,7 @@
         <item>USER_SETTINGS_ALARM_VOLUME_40</item>
     </string-array>
 
-    <string-array name="CountryCodes" >
+    <string-array name="CountryCodes">
         <item>93,AF</item>
         <item>355,AL</item>
         <item>213,DZ</item>
@@ -351,5 +351,8 @@
         <item>260,ZM</item>
         <item>263,ZW</item>
     </string-array>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="configure">Configure</string>
+    <string name="add_widget">Add widget</string>
 
 </resources>
