@@ -36,7 +36,8 @@ import javax.inject.Named
 class AlarmToggleWidgetDataProvider
 (private val context: Context, private val intent: Intent) : RemoteViewsService.RemoteViewsFactory {
 
-    private var mAppWidgetId: Int = -1
+    private var mAppWidgetId: Int
+    private var mAppWidgetManager: AppWidgetManager
 
     val mAlarms: ArrayList<Alarm> = ArrayList()
 
@@ -48,27 +49,29 @@ class AlarmToggleWidgetDataProvider
         BaseApplication.getRoosterApplicationComponent().inject(this)
         mAppWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
                 AppWidgetManager.INVALID_APPWIDGET_ID)
+        mAppWidgetManager = AppWidgetManager.getInstance(context)
     }
 
     override fun onCreate() {
-
         mAlarms.addAll(jsonPersistence.alarms)
 
         RoosterAlarmManager.onFlagAlarmManagerDataListener = object: RoosterAlarmManager.Companion.OnFlagAlarmManagerDataListener {
             override fun onAlarmDataChanged(freshAlarms: ArrayList<Alarm>) {
                 mAlarms.clear()
                 mAlarms.addAll(freshAlarms)
+                //mAppWidgetManager.notifyAppWidgetViewDataChanged(mAppWidgetId, R.id.widget_alarmsListView)
             }
 
             override fun onSyncFinished() {
 
             }
         }
+
+        roosterAlarmManager.fetchAlarms(mAlarms)
     }
 
     override fun onDataSetChanged() {
-        /** Listen for data changes and initialize the cursor again  */
-        roosterAlarmManager.fetchAlarms()
+
     }
 
     override fun onDestroy() {
@@ -93,14 +96,14 @@ class AlarmToggleWidgetDataProvider
             if(!timeFormat) {
                 val twelveHourTimeString: String
                 if(mAlarm.hour >= 12) {
-                    twelveHourTimeString = RoosterUtils.setAlarmTimeFromHourAndMinute(mAlarm, false) + context.resources.getString(R.string.alarm_12_hour_pm)
+                    twelveHourTimeString = RoosterUtils.setAlarmTimeFromHourAndMinute(mAlarm.hour, mAlarm.minute, false) + context.resources.getString(R.string.alarm_12_hour_pm)
                     remoteViews.setTextViewText(R.id.cardview_alarm_time_textview, twelveHourTimeString)
                 } else {
-                    twelveHourTimeString = RoosterUtils.setAlarmTimeFromHourAndMinute(mAlarm, false) + context.resources.getString(R.string.alarm_12_hour_am)
+                    twelveHourTimeString = RoosterUtils.setAlarmTimeFromHourAndMinute(mAlarm.hour, mAlarm.minute, false) + context.resources.getString(R.string.alarm_12_hour_am)
                     remoteViews.setTextViewText(R.id.cardview_alarm_time_textview, twelveHourTimeString)
                 }
             } else {
-                remoteViews.setTextViewText(R.id.cardview_alarm_time_textview, RoosterUtils.setAlarmTimeFromHourAndMinute(mAlarm, true))
+                remoteViews.setTextViewText(R.id.cardview_alarm_time_textview, RoosterUtils.setAlarmTimeFromHourAndMinute(mAlarm.hour, mAlarm.minute, true))
             }
 
             remoteViews.setTextViewText(R.id.cardview_alarm_days_textview, RoosterUtils.getAlarmDays(mAlarm))

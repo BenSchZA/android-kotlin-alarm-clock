@@ -55,24 +55,24 @@
     </FrameLayout>
 
     <!--<FrameLayout-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:layout_weight="1"-->
-        <!--android:clickable="true">-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:layout_weight="1"-->
+    <!--android:clickable="true">-->
 
 
-        <!--<ImageButton-->
-            <!--android:id="@+id/home_my_alarms"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:layout_gravity="center"-->
-            <!--android:layout_margin="@dimen/spacing_small"-->
-            <!--android:background="?attr/selectableItemBackgroundBorderless"-->
-            <!--android:clickable="true"-->
-            <!--android:contentDescription="My alarms"-->
-            <!--android:padding="@dimen/spacing_normal_large"-->
-            <!--android:soundEffectsEnabled="true"-->
-            <!--android:src="@drawable/rooster_button_bar_add_alarm" />-->
+    <!--<ImageButton-->
+    <!--android:id="@+id/home_my_alarms"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:layout_gravity="center"-->
+    <!--android:layout_margin="@dimen/spacing_small"-->
+    <!--android:background="?attr/selectableItemBackgroundBorderless"-->
+    <!--android:clickable="true"-->
+    <!--android:contentDescription="My alarms"-->
+    <!--android:padding="@dimen/spacing_normal_large"-->
+    <!--android:soundEffectsEnabled="true"-->
+    <!--android:src="@drawable/rooster_button_bar_add_alarm" />-->
 
     <!--</FrameLayout>-->
 

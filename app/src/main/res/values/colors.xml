@@ -8,6 +8,7 @@
     <color name="normal">#90B7FD</color>
     <color name="grey_transparent">#66a2a2a2</color>
     <color name="black_transparent">#66000000</color>
+    <color name="black_20_transparent">#33000000</color>
     <color name="black">#000000</color>
     <color name="grey">#d1d1d1</color>
     <color name="grey_semi">#7aeaeaea</color>

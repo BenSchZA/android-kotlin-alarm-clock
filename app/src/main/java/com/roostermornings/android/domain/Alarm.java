@@ -126,7 +126,7 @@ public class Alarm {
     }
 
     @Exclude
-    public void setAlarmDayFromDeviceAlarm(List<Integer> alarmDays) {
+    public void setAlarmDaysFromDeviceAlarm(List<Integer> alarmDays) {
         for (Integer day:
                 alarmDays) {
             switch (day) {

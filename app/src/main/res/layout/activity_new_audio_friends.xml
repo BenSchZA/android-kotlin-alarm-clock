@@ -15,42 +15,43 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    <android.support.design.widget.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/appbar"
-        android:theme="@style/AppTheme.AppBarOverlay">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/appbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/PopupMenuStyle"/>
+            android:layout_height="wrap_content"
+            android:theme="@style/AppTheme.AppBarOverlay">
 
-    </android.support.design.widget.AppBarLayout>
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                app:popupTheme="@style/PopupMenuStyle" />
 
-    <RelativeLayout
-        android:id="@+id/main_content"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/appbar"
-        android:background="@drawable/main_background_layer_list" >
-        <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
+        </android.support.design.widget.AppBarLayout>
 
-        <include layout="@layout/content_new_audio_friends"
-            android:layout_above="@+id/button_bar"
+        <RelativeLayout
+            android:id="@+id/main_content"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/appbar"
+            android:background="@drawable/main_background_layer_list">
+            <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
 
-        <include
-            android:id="@+id/button_bar"
-            layout="@layout/button_bar" />
+            <include
+                layout="@layout/content_new_audio_friends"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_above="@+id/button_bar"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+            <include
+                android:id="@+id/button_bar"
+                layout="@layout/button_bar" />
+
+        </RelativeLayout>
 
     </RelativeLayout>
-
-</RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>
 

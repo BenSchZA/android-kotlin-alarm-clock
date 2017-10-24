@@ -27,16 +27,16 @@
             android:orientation="vertical">
 
             <ImageView
-                android:maxHeight="200dp"
-                android:minHeight="50dp"
-                android:minWidth="50dp"
-                android:maxWidth="200dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:adjustViewBounds="true"
-                android:layout_marginRight="100dp"
                 android:layout_marginLeft="100dp"
+                android:layout_marginRight="100dp"
                 android:layout_marginTop="10dp"
+                android:adjustViewBounds="true"
+                android:maxHeight="200dp"
+                android:maxWidth="200dp"
+                android:minHeight="50dp"
+                android:minWidth="50dp"
                 android:src="@drawable/logo" />
 
             <TextView

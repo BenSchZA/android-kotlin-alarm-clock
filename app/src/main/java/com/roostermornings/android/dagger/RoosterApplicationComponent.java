@@ -55,6 +55,7 @@ import com.roostermornings.android.sync.DownloadSyncAdapter;
 import com.roostermornings.android.geolocation.GeoHashUtils;
 import com.roostermornings.android.util.JSONPersistence;
 import com.roostermornings.android.util.LifeCycle;
+import com.roostermornings.android.widgets.AlarmToggleWidget;
 import com.roostermornings.android.widgets.AlarmToggleWidgetDataProvider;
 
 /**
@@ -119,6 +120,7 @@ public interface RoosterApplicationComponent {
     void inject(MediaService roosterClass);
     void inject(RoosterAlarmManager roosterClass);
     void inject(AlarmToggleWidgetDataProvider roosterClass);
+    void inject(AlarmToggleWidget roosterClass);
 
     void inject(DownloadSyncAdapter adapter);
     void inject(MyAlarmsListAdapter adapter);

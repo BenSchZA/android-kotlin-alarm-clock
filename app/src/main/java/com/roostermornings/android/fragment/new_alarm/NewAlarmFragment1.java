@@ -219,7 +219,7 @@ public class NewAlarmFragment1 extends BaseFragment{
         //Set 24-hour or 12-hour time format
         boolean timeFormat = defaultSharedPreferences.getBoolean(Constants.USER_SETTINGS_TIME_FORMAT, true);
 
-        textViewAlarmTime.setText(RoosterUtils.setAlarmTimeFromHourAndMinute(mAlarm, timeFormat));
+        textViewAlarmTime.setText(RoosterUtils.setAlarmTimeFromHourAndMinute(mAlarm.getHour(), mAlarm.getMinute(), timeFormat));
 
         //If using 12 hour format
         if(!timeFormat) {

@@ -336,7 +336,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
         mAlarm.fromDeviceAlarm(tempAlarms.get(0), deviceAlarmTableManager.isSetEnabled(mEditAlarmId));
         if(mAlarm.isRecurring()) {
             List<Integer> alarmDays = deviceAlarmTableManager.getAlarmClassDays(mEditAlarmId);
-            mAlarm.setAlarmDayFromDeviceAlarm(alarmDays);
+            mAlarm.setAlarmDaysFromDeviceAlarm(alarmDays);
         }
 
         if (mFragment1 instanceof NewAlarmFragment1) {

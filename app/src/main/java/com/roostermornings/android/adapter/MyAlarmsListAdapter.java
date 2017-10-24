@@ -140,16 +140,16 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
             if(!timeFormat) {
                 String twelveHourTimeString;
                 if(alarm.getHour() >= 12) {
-                    twelveHourTimeString = RoosterUtils.setAlarmTimeFromHourAndMinute(alarm, false)
+                    twelveHourTimeString = RoosterUtils.setAlarmTimeFromHourAndMinute(alarm.getHour(), alarm.getMinute(), false)
                             + mActivity.getResources().getString(R.string.alarm_12_hour_pm);
                     holder.txtAlarmTime.setText(twelveHourTimeString);
                 } else {
-                    twelveHourTimeString = RoosterUtils.setAlarmTimeFromHourAndMinute(alarm, false)
+                    twelveHourTimeString = RoosterUtils.setAlarmTimeFromHourAndMinute(alarm.getHour(), alarm.getMinute(), false)
                             + mActivity.getResources().getString(R.string.alarm_12_hour_am);
                     holder.txtAlarmTime.setText(twelveHourTimeString);
                 }
             } else {
-                holder.txtAlarmTime.setText(RoosterUtils.setAlarmTimeFromHourAndMinute(alarm, true));
+                holder.txtAlarmTime.setText(RoosterUtils.setAlarmTimeFromHourAndMinute(alarm.getHour(), alarm.getMinute(), true));
             }
 
             holder.txtAlarmDays.setText(RoosterUtils.getAlarmDays(alarm));

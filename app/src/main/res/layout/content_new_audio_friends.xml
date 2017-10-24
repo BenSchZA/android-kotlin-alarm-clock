@@ -3,93 +3,65 @@
   ~ Copyright (c)  2017 Roosta Media. All rights reserved.
   -->
 
-<!--<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
-    <!--xmlns:app="http://schemas.android.com/apk/res-auto"-->
-    <!--xmlns:tools="http://schemas.android.com/tools"-->
-    <!--android:id="@+id/main_content"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="match_parent"-->
-    <!--android:background="@drawable/main_background_layer_list"-->
-    <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
-    <!--tools:context="com.roostermornings.android.activity.NewAudioFriendsActivity"-->
-    <!--tools:showIn="@layout/activity_new_audio_friends">-->
+<!--<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"--><!--xmlns:app="http://schemas.android.com/apk/res-auto"--><!--xmlns:tools="http://schemas.android.com/tools"--><!--android:id="@+id/main_content"--><!--android:layout_width="match_parent"--><!--android:layout_height="match_parent"--><!--android:background="@drawable/main_background_layer_list"--><!--app:layout_behavior="@string/appbar_scrolling_view_behavior"--><!--tools:context="com.roostermornings.android.activity.NewAudioFriendsActivity"--><!--tools:showIn="@layout/activity_new_audio_friends">-->
 
-    <!--<FrameLayout-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:layout_above="@id/button_bar">-->
+<!--<FrameLayout--><!--android:layout_width="match_parent"--><!--android:layout_height="match_parent"--><!--android:layout_above="@id/button_bar">-->
 
-        <!--<android.support.v7.widget.RecyclerView-->
-            <!--android:id="@+id/new_audio_friendsListView"-->
-            <!--android:layout_width="fill_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_weight="1"-->
-            <!--android:clipToPadding="false"-->
-            <!--android:padding="@dimen/spacing_normal"-->
-            <!--android:visibility="gone" />-->
+<!--<android.support.v7.widget.RecyclerView--><!--android:id="@+id/new_audio_friendsListView"--><!--android:layout_width="fill_parent"--><!--android:layout_height="wrap_content"--><!--android:layout_weight="1"--><!--android:clipToPadding="false"--><!--android:padding="@dimen/spacing_normal"--><!--android:visibility="gone" />-->
 
-        <!--<ProgressBar-->
-            <!--android:id="@+id/progressBar"-->
-            <!--style="@style/Widget.AppCompat.ProgressBar"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_gravity="center"-->
-            <!--android:visibility="visible" />-->
-    <!--</FrameLayout>-->
+<!--<ProgressBar--><!--android:id="@+id/progressBar"--><!--style="@style/Widget.AppCompat.ProgressBar"--><!--android:layout_width="match_parent"--><!--android:layout_height="wrap_content"--><!--android:layout_gravity="center"--><!--android:visibility="visible" />--><!--</FrameLayout>-->
 
-    <!--<include-->
-        <!--android:id="@+id/button_bar"-->
-        <!--layout="@layout/button_bar" />-->
+<!--<include--><!--android:id="@+id/button_bar"--><!--layout="@layout/button_bar" />-->
 
 <!--</RelativeLayout>-->
 
-    <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        tools:context="com.roostermornings.android.fragment.friends.FriendsInviteFragment3">
-        <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.roostermornings.android.fragment.friends.FriendsInviteFragment3">
+    <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
 
-        <android.support.design.widget.AppBarLayout
-            android:id="@+id/main.appbar"
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/main.appbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent">
+        <!--android:fitsSystemWindows="true"-->
+
+        <android.support.design.widget.CollapsingToolbarLayout
+            android:id="@+id/main.collapsing"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@android:color/transparent">
-            <!--android:fitsSystemWindows="true"-->
+            android:fitsSystemWindows="true"
+            app:expandedTitleMarginEnd="64dp"
+            app:expandedTitleMarginStart="48dp"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
-            <android.support.design.widget.CollapsingToolbarLayout
-                android:id="@+id/main.collapsing"
+            <Button
+                android:id="@+id/select_all_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fitsSystemWindows="true"
-                app:expandedTitleMarginEnd="64dp"
-                app:expandedTitleMarginStart="48dp"
-                app:layout_scrollFlags="scroll|exitUntilCollapsed">
+                android:layout_gravity="center_vertical"
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_marginRight="@dimen/activity_horizontal_margin"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:background="@drawable/rooster_share_button"
+                android:minHeight="48dp"
+                android:paddingBottom="@dimen/spacing_large"
+                android:paddingLeft="@dimen/spacing_large"
+                android:paddingRight="@dimen/spacing_large"
+                android:paddingTop="@dimen/spacing_large"
+                android:text="@string/select_all_button"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="@dimen/text_large" />
 
-                    <Button
-                        android:id="@+id/select_all_button"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginBottom="@dimen/activity_vertical_margin"
-                        android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                        android:layout_marginRight="@dimen/activity_horizontal_margin"
-                        android:layout_marginTop="@dimen/activity_vertical_margin"
-                        android:background="@drawable/rooster_share_button"
-                        android:minHeight="48dp"
-                        android:paddingBottom="@dimen/spacing_large"
-                        android:paddingLeft="@dimen/spacing_large"
-                        android:paddingRight="@dimen/spacing_large"
-                        android:paddingTop="@dimen/spacing_large"
-                        android:text="@string/select_all_button"
-                        android:textAllCaps="false"
-                        android:textColor="@color/white"
-                        android:textSize="@dimen/text_large" />
-
-            </android.support.design.widget.CollapsingToolbarLayout>
-        </android.support.design.widget.AppBarLayout>
+        </android.support.design.widget.CollapsingToolbarLayout>
+    </android.support.design.widget.AppBarLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -114,7 +86,7 @@
 
     </FrameLayout>
 
-    </android.support.design.widget.CoordinatorLayout>
+</android.support.design.widget.CoordinatorLayout>
 
 
 
