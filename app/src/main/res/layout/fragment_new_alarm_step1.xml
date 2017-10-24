@@ -27,13 +27,13 @@
                     android:id="@+id/new_alarm_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
                     android:layout_marginBottom="@dimen/spacing_xxlarge"
-                    android:layout_marginTop="@dimen/spacing_xxlarge"
                     android:layout_marginLeft="@dimen/spacing_normal_large"
                     android:layout_marginRight="@dimen/spacing_normal_large"
+                    android:layout_marginTop="@dimen/spacing_xxlarge"
                     android:clickable="true"
                     android:focusable="true"
-                    android:layout_centerHorizontal="true"
                     android:text="HH:MM"
                     android:textColor="@drawable/rooster_link_white"
                     android:textSize="@dimen/text_xxxhuge" />
@@ -42,14 +42,14 @@
                     android:id="@+id/new_alarm_am_pm"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="AM/PM"
-                    android:layout_toRightOf="@id/new_alarm_time"
                     android:layout_centerVertical="true"
+                    android:layout_toRightOf="@id/new_alarm_time"
                     android:clickable="true"
                     android:focusable="true"
+                    android:text="AM/PM"
                     android:textColor="@drawable/rooster_link_white"
                     android:textSize="@dimen/text_xlarge"
-                    android:visibility="gone"/>
+                    android:visibility="gone" />
 
             </RelativeLayout>
 

@@ -16,6 +16,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.roostermornings.android.domain.Channel;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.MyContactsController;
 import com.roostermornings.android.util.StrUtils;
@@ -189,6 +190,41 @@ public class FirebaseNetwork {
             childUpdates.put(String.format("social_rooster_uploads/%s/%s/%s",
                     senderId, queueId, "listened"), true);
             fDB.updateChildren(childUpdates);
+        }
+    }
+
+    private static OnFlagChannelNameReceivedListener onFlagChannelNameReceivedListener;
+
+    public interface OnFlagChannelNameReceivedListener {
+        void onChannelNameReceived(String channelName);
+    }
+
+    public static void setOnFlagChannelNameReceivedListener(OnFlagChannelNameReceivedListener listener) {
+        onFlagChannelNameReceivedListener = listener;
+    }
+
+    public static void getChannelNameFromUID(String UID) {
+        DatabaseReference fDB = FirebaseDatabase.getInstance().getReference();
+        FirebaseUser fUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        if(fUser != null && StrUtils.notNullOrEmpty(fUser.getUid())) {
+            DatabaseReference mChannelNameReference = fDB
+                    .child("channels").child(UID).child("name");
+
+            mChannelNameReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    String channelName = dataSnapshot.getValue(String.class);
+
+                    if(onFlagChannelNameReceivedListener != null)
+                        onFlagChannelNameReceivedListener.onChannelNameReceived(channelName);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
         }
     }
 }

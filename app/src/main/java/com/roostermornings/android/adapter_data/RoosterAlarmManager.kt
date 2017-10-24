@@ -19,10 +19,10 @@ import com.roostermornings.android.sqlutil.DeviceAlarmController
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager
 import com.roostermornings.android.util.StrUtils
 import com.roostermornings.android.util.Toaster
-import java.util.ArrayList
 import javax.inject.Inject
 import com.google.firebase.auth.FirebaseUser
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity
+import java.util.*
 
 /**
  * com.roostermornings.android.`adapter-data`
@@ -51,7 +51,7 @@ class RoosterAlarmManager(val context: Context) {
         this.firebaseUser = firebaseUser
     }
 
-    fun fetchAlarms() {
+    fun fetchAlarms(persistedAlarms: ArrayList<Alarm>) {
 
         //Clear old content
         mTempAlarms.clear()
@@ -97,7 +97,8 @@ class RoosterAlarmManager(val context: Context) {
                     }
                 }
 
-                onFlagAlarmManagerDataListener?.onAlarmDataChanged(mTempAlarms)
+                if(persistedAlarms.sortedWith(compareBy({it.getUid()})) != mTempAlarms.sortedWith(compareBy({it.getUid()})))
+                    onFlagAlarmManagerDataListener?.onAlarmDataChanged(mTempAlarms)
                 onFlagAlarmManagerDataListener?.onSyncFinished()
             }
 

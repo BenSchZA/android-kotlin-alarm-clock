@@ -4,37 +4,34 @@
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    >
+    android:layout_height="wrap_content">
 
     <FrameLayout
         android:id="@+id/card_view_alarms"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="@dimen/spacing_normal_large"
         android:clickable="true"
-        android:foreground="@drawable/selectable_item_background">
+        android:foreground="@drawable/selectable_item_background"
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_normal_large">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:orientation="horizontal"
             android:clipChildren="false"
-            android:clipToPadding="false">
+            android:clipToPadding="false"
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/cardview_alarm_time_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center_horizontal|center_vertical"
-                android:paddingLeft="@dimen/spacing_large"
                 android:text="HH:MM"
                 android:textColor="@color/white"
-                android:textSize="@dimen/text_xlarge"
+                android:textSize="@dimen/text_xxxlarge"
                 android:textStyle="bold" />
 
             <LinearLayout
@@ -74,7 +71,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:clipChildren="false"
-                android:clipToPadding="false" >
+                android:clipToPadding="false">
 
                 <FrameLayout
                     android:layout_width="wrap_content"
@@ -99,16 +96,16 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="top|right"
                         android:layout_marginRight="-8dp"
-                        android:visibility="gone"
                         android:clipChildren="false"
-                        android:clipToPadding="false" >
+                        android:clipToPadding="false"
+                        android:visibility="gone">
 
                         <ImageView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_centerInParent="true"
                             android:background="@drawable/counter_circle_yellow"
-                            android:scaleType="fitCenter"/>
+                            android:scaleType="fitCenter" />
 
                         <TextView
                             android:id="@+id/rooster_notification_text"

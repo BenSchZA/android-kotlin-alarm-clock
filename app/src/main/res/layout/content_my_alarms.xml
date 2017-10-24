@@ -18,10 +18,9 @@
     <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/button_bar" >
+        android:layout_above="@id/button_bar">
 
-        <android.support.v4.widget.SwipeRefreshLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
+        <android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/swiperefresh"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -53,33 +52,33 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:alpha="0.5"
-            android:orientation="vertical"
-            android:gravity="center">
+            android:gravity="center"
+            android:orientation="vertical">
 
             <com.roostermornings.android.custom_ui.SquareFrameLayout
                 android:id="@+id/add_alarm_filler"
-                android:clickable="true"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="100dp"
                 android:layout_marginRight="100dp"
+                android:clickable="true"
                 android:visibility="gone" />
 
             <me.grantland.widget.AutofitTextView
                 android:id="@+id/add_alarm_filler_text"
-                android:clickable="true"
-                android:layout_marginLeft="100dp"
-                android:layout_marginRight="100dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="100dp"
+                android:layout_marginRight="100dp"
+                android:clickable="true"
                 android:maxLines="2"
                 android:paddingBottom="@dimen/spacing_normal"
                 android:text="Tap to add\nnew alarm"
+                android:textAlignment="center"
                 android:textColor="@color/white"
                 android:textSize="@dimen/text_xxlarge"
                 android:textStyle="bold"
-                android:textAlignment="center"
-                android:visibility="gone"/>
+                android:visibility="gone" />
 
         </LinearLayout>
 

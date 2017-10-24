@@ -72,20 +72,20 @@ public class RoosterUtils {
         }
     }
 
-    public static String setAlarmTimeFromHourAndMinute(Alarm alarm, boolean twentyFourFormat) {
+    public static String setAlarmTimeFromHourAndMinute(int hour, int minute, boolean twentyFourFormat) {
 
         String alarmHour;
         String alarmMinute;
         if(twentyFourFormat) {
-            alarmHour = (alarm.getHour() < 10 ? "0" : "") + alarm.getHour();
-            alarmMinute = (alarm.getMinute() < 10 ? "0" : "") + alarm.getMinute();
+            alarmHour = (hour < 10 ? "0" : "") + hour;
+            alarmMinute = (minute < 10 ? "0" : "") + minute;
         } else {
-            if(alarm.getHour() > 12) {
-                alarmHour = (alarm.getHour() < 10 ? "0" : "") + (alarm.getHour() - 12);
+            if(hour > 12) {
+                alarmHour = (hour < 10 ? "0" : "") + (hour - 12);
             } else {
-                alarmHour = (alarm.getHour() < 10 ? "0" : "") + alarm.getHour();
+                alarmHour = (hour < 10 ? "0" : "") + hour;
             }
-            alarmMinute = (alarm.getMinute() < 10 ? "0" : "") + alarm.getMinute();
+            alarmMinute = (minute < 10 ? "0" : "") + minute;
         }
         return alarmHour + ":" + alarmMinute;
     }

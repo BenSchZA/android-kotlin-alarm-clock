@@ -8,7 +8,9 @@ package com.roostermornings.android.activity;
 import android.accounts.Account;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
+import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -59,6 +61,8 @@ import com.roostermornings.android.util.InternetHelper;
 import com.roostermornings.android.util.JSONPersistence;
 import com.roostermornings.android.util.LifeCycle;
 import com.roostermornings.android.util.StrUtils;
+import com.roostermornings.android.widgets.AlarmToggleWidget;
+import com.roostermornings.android.widgets.AlarmToggleWidgetDataProvider;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -137,6 +141,14 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         super.onPause();
         //Persist alarms for seamless loading
         jsonPersistence.setAlarms(mAlarms);
+
+        //Update app widget
+        Intent updateWidgetIntent = new Intent(this, AlarmToggleWidget.class);
+        updateWidgetIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(getApplication());
+        int ids[] = appWidgetManager.getAppWidgetIds(new ComponentName(getApplication(), AlarmToggleWidget.class));
+        updateWidgetIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+        sendBroadcast(updateWidgetIntent);
     }
 
     @Override
@@ -170,7 +182,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                     public void onRefresh() {
                         // This method performs the actual data-refresh operation.
                         // The method calls setRefreshing(false) when it's finished.
-                        roosterAlarmManager.fetchAlarms();
+                        roosterAlarmManager.fetchAlarms(mAlarms);
                         refreshDownloadIndicator();
                     }
                 }
@@ -292,7 +304,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         });
 
         //Refresh alarms list from background thread
-        roosterAlarmManager.fetchAlarms();
+        roosterAlarmManager.fetchAlarms(mAlarms);
     }
 
     private void refreshDownloadIndicator() {

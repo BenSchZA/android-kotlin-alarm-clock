@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Rooster Mornings Android.
   ~ Copyright (c)  2017 Roosta Media. All rights reserved.
   -->
@@ -7,9 +6,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:clipChildren="false"
     android:orientation="horizontal"
-    android:padding="@dimen/spacing_normal"
-    android:clipChildren="false">
+    android:padding="@dimen/spacing_normal">
 
     <ImageView
         android:id="@+id/explore_notification_profile_pic"
@@ -19,13 +18,13 @@
 
     <LinearLayout
         android:layout_width="0dp"
-        android:layout_weight="1"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:layout_gravity="center_vertical|left"
-        android:layout_marginRight="@dimen/spacing_normal"
         android:layout_marginLeft="@dimen/spacing_large"
-        android:clipChildren="false">
+        android:layout_marginRight="@dimen/spacing_normal"
+        android:layout_weight="1"
+        android:clipChildren="false"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/explore_notification_title"
@@ -50,11 +49,11 @@
     </LinearLayout>
 
     <ImageButton
-        android:layout_marginRight="@dimen/spacing_normal"
         android:id="@+id/explore_notifcation_audio_listen"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|right"
+        android:layout_marginRight="@dimen/spacing_normal"
         android:background="@drawable/rooster_audio_play_button"
         android:clickable="true"
         android:contentDescription="Play audio" />
