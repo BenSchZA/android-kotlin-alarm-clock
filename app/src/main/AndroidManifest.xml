@@ -36,10 +36,10 @@
     <application
         android:name=".BaseApplication"
         android:allowBackup="false"
-        tools:replace="android:allowBackup,android:label"
         android:icon="${app_icon}"
         android:label="${app_name}"
-        android:supportsRtl="true">
+        android:supportsRtl="true"
+        tools:replace="android:allowBackup,android:label">
         <meta-data
             android:name="android.max_aspect"
             android:value="2.1" />
@@ -300,7 +300,8 @@
             </intent-filter>
         </service>
 
-        <receiver android:name=".widgets.AlarmToggleWidget"
+        <receiver
+            android:name=".widgets.AlarmToggleWidget"
             android:label="Alarm/Clock">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -322,6 +323,27 @@
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
+
+        <service
+            android:name=".widgets.WidgetService"
+            android:enabled="true"
+            android:exported="true" />
+
+        <receiver
+            android:name=".widgets.WidgetBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.ACTION_DREAMING_STOPPED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.USER_PRESENT" />
+            </intent-filter>
+            <intent-filter android:priority="500">
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

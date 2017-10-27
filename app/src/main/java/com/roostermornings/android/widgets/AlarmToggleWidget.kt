@@ -11,6 +11,7 @@ import android.widget.RemoteViews
 import com.roostermornings.android.R
 import android.app.PendingIntent
 import android.content.*
+import android.support.v4.content.LocalBroadcastManager
 import android.view.View
 import android.widget.Toast
 import com.roostermornings.android.BaseApplication
@@ -31,6 +32,8 @@ import javax.inject.Named
  * App Widget Configuration implemented in [AlarmToggleWidgetConfigureActivity]
  */
 class AlarmToggleWidget : AppWidgetProvider() {
+
+    val ctx: Context? = null
 
     @Inject
     @Named("default") lateinit var defaultSharedPreferences: SharedPreferences
@@ -193,8 +196,6 @@ class AlarmToggleWidget : AppWidgetProvider() {
             val viewIndex = intent.getIntExtra(EXTRA_ITEM, 0)
             Toast.makeText(context, "Touched view " + viewIndex, Toast.LENGTH_SHORT).show()
         }
-        // Register system 1 minute tick broadcast receiver
-        context.applicationContext.registerReceiver(receiver, IntentFilter(Intent.ACTION_TIME_TICK))
         super.onReceive(context, intent)
     }
 
@@ -213,28 +214,12 @@ class AlarmToggleWidget : AppWidgetProvider() {
         }
     }
 
-    val receiver = object : BroadcastReceiver() {
-        override fun onReceive(ctx: Context, intent: Intent) {
-            if (intent.action?.compareTo(Intent.ACTION_TIME_TICK) == 0) {
-                //Update app widget
-                val updateWidgetIntent = Intent(ctx, AlarmToggleWidget::class.java)
-                updateWidgetIntent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-                val appWidgetManager = AppWidgetManager.getInstance(ctx.applicationContext)
-                val ids = appWidgetManager.getAppWidgetIds(ComponentName(ctx.applicationContext, AlarmToggleWidget::class.java))
-                updateWidgetIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
-                ctx.sendBroadcast(updateWidgetIntent)
-            }
-        }
-    }
-
     override fun onEnabled(context: Context) {
         // Enter relevant functionality for when the first widget is created
-        context.applicationContext.registerReceiver(receiver, IntentFilter(Intent.ACTION_TIME_TICK))
     }
 
     override fun onDisabled(context: Context) {
         // Enter relevant functionality for when the last widget is disabled
-        KotlinUtils.catchAll { context.applicationContext.unregisterReceiver(receiver) }
     }
 }
 
