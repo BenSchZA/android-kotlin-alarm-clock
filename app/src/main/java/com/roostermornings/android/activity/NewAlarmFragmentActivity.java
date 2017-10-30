@@ -260,12 +260,9 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 //Download any social or channel audio files
                 ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
 
-                FA.Log(FA.Event.alarm_creation_completed.class,
-                        FA.Event.alarm_creation_completed.Param.social_roosters_enabled,
-                        mAlarm.isAllow_friend_audio_files());
-                FA.Log(FA.Event.alarm_creation_completed.class,
-                        FA.Event.alarm_creation_completed.Param.channel_selected,
-                        !"".equals(mAlarm.getChannel().getName()));
+                FA.LogMany(FA.Event.alarm_creation_completed.class,
+                        new String[]{FA.Event.alarm_creation_completed.Param.social_roosters_enabled, FA.Event.alarm_creation_completed.Param.channel_selected},
+                        new Object[]{mAlarm.isAllow_friend_audio_files(), !"".equals(mAlarm.getChannel().getName())});
 
                 if(StrUtils.notNullOrEmpty(mAlarm.getChannel().getName())) {
                     FA.Log(FA.Event.channel_selected.class,

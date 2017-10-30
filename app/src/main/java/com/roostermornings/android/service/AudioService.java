@@ -177,7 +177,6 @@ public class AudioService extends Service {
     }
 
     private void logError(Throwable e) {
-        //Log an error, that will be appended to AudioService Report throwable during finishTransaction
         e.printStackTrace();
         FirebaseCrash.log(e.toString());
         Crashlytics.log(e.toString());
@@ -312,16 +311,13 @@ public class AudioService extends Service {
         channelAudioItems = audioTableManager.extractAlarmChannelAudioFiles(mThis.alarmChannelUid);
         socialAudioItems = audioTableManager.extractUnheardSocialAudioFiles();
 
-        if(channelAudioItems != null) FA.Log(FA.Event.alarm_activated.class, FA.Event.alarm_activated.Param.channel_content_received, channelAudioItems.size());
-        if(socialAudioItems != null) FA.Log(FA.Event.alarm_activated.class, FA.Event.alarm_activated.Param.social_content_received, socialAudioItems.size());
-
         this.alarmCycle = 1;
 
         try {
             //If alarm channel is not empty and channel audioitems is empty, try download
             if (StrUtils.notNullOrEmpty(mThis.alarmChannelUid) && channelAudioItems.isEmpty()) {
 
-                FA.Log(FA.Event.alarm_activated.class, FA.Event.alarm_activated.Param.data_loaded, false);
+                logAlarmActivation(false);
 
                 if (!InternetHelper.noInternetConnection(this)) {
                     //Download any social or channel audio files
@@ -330,12 +326,22 @@ public class AudioService extends Service {
                     compileAudioItemContent();
                 }
             } else {
-                FA.Log(FA.Event.alarm_activated.class, FA.Event.alarm_activated.Param.data_loaded, true);
+                logAlarmActivation(true);
                 compileAudioItemContent();
             }
         } catch(NullPointerException e) {
             logError(e);
             compileAudioItemContent();
+        }
+    }
+
+    private void logAlarmActivation(boolean dataLoaded) {
+        if(channelAudioItems != null && socialAudioItems != null) {
+            FA.LogMany(FA.Event.alarm_activated.class, new String[]{FA.Event.alarm_activated.Param.channel_content_received, FA.Event.alarm_activated.Param.social_content_received, FA.Event.alarm_activated.Param.data_loaded}, new Object[]{channelAudioItems.size(), socialAudioItems.size(), dataLoaded});
+        } else if(channelAudioItems != null) {
+            FA.LogMany(FA.Event.alarm_activated.class, new String[]{FA.Event.alarm_activated.Param.channel_content_received, FA.Event.alarm_activated.Param.data_loaded}, new Object[]{channelAudioItems.size(), dataLoaded});
+        } else if(socialAudioItems != null) {
+            FA.LogMany(FA.Event.alarm_activated.class, new String[]{FA.Event.alarm_activated.Param.social_content_received, FA.Event.alarm_activated.Param.data_loaded}, new Object[]{socialAudioItems.size(), dataLoaded});
         }
     }
 

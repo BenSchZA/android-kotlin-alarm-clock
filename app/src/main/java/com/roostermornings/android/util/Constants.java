@@ -163,6 +163,9 @@ public class Constants {
     public final static String FILENAME_PREFIX_ROOSTER_EXAMPLE_CONTENT = "example_clip";
 
     public final static long MAX_ROOSTER_FILE_SIZE = 8 * 1024 * 1024;
+    public final static long ABSOLUTE_MAX_FILE_SIZE = 15 * 1024 * 1024;
+    public final static String APP_CUMULATIVE_RX_BYTES = "APP_CUMULATIVE_RX_BYTES";
+    public final static String APP_CUMULATIVE_TX_BYTES = "APP_CUMULATIVE_TX_BYTES";
 
     //DownloadSyncService config
     // The authority for the sync adapter's content provider

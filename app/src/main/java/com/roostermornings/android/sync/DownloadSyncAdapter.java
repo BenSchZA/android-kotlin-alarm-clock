@@ -7,12 +7,16 @@ package com.roostermornings.android.sync;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.app.usage.NetworkStatsManager;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.SyncResult;
+import android.content.pm.PackageManager;
+import android.net.TrafficStats;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -49,6 +53,9 @@ import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Calendar;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
@@ -60,6 +67,7 @@ import javax.inject.Inject;
 
 import static android.content.ContentValues.TAG;
 import static android.content.Context.ACCOUNT_SERVICE;
+import static com.facebook.FacebookSdk.CALLBACK_OFFSET_PROPERTY;
 import static com.facebook.FacebookSdk.getApplicationContext;
 import static com.roostermornings.android.util.Constants.ACCOUNT;
 import static com.roostermornings.android.util.Constants.ACCOUNT_TYPE;
@@ -82,6 +90,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
     @Inject GeoHashUtils geoHashUtils;
     @Inject JSONPersistence jsonPersistence;
     @Inject ChannelManager channelManager;
+    @Inject SharedPreferences sharedPreferences;
 
     private static OnChannelDownloadListener onChannelDownloadListener;
 
@@ -198,7 +207,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
              */
         } else {
             /*
-             * The account exists or some other error occurred. Log this, report it,
+             * The account exists or some other error occurred. LogMany this, report it,
              * or handle it internally.
              */
         }
@@ -422,7 +431,62 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
             if(onChannelDownloadListener != null)
                 onChannelDownloadListener.onChannelDownloadStarted(channelRooster.getChannel_uid());
 
-            audioFileRef.getBytes(Constants.MAX_ROOSTER_FILE_SIZE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            //Check for oversize files and report to Crashlytics
+            final URL uri = new URL(channelRooster.getAudio_file_url());
+            URLConnection ucon;
+            try {
+                ucon = uri.openConnection();
+                ucon.connect();
+                final String contentLengthStr = ucon.getHeaderField("content-length");
+                long contentLength = Long.valueOf(contentLengthStr);
+
+                if(contentLength > Constants.MAX_ROOSTER_FILE_SIZE) {
+                    Crashlytics.log("File URL: " + channelRooster.audio_file_url);
+                    Crashlytics.log("File size: " + contentLengthStr);
+                    Crashlytics.logException(new Throwable("Sync Adapter Oversize File Report"));
+                }
+
+                // If file size is greater than absolute max, abort download
+                if(contentLength > Constants.ABSOLUTE_MAX_FILE_SIZE) return;
+            } catch(final Exception e) {
+                // File content length not readable
+                Crashlytics.log("File URL: " + channelRooster.audio_file_url);
+                Crashlytics.log("Content length not readable!");
+                Crashlytics.logException(new Throwable("Sync Adapter Oversize File Report"));
+            } finally {
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+
+                // Check and log device data usage
+                int appUid = android.os.Process.myUid();
+                long rxBytes = TrafficStats.getUidRxBytes(appUid);
+                long txBytes = TrafficStats.getUidTxBytes(appUid);
+                long previousRxBytes = sharedPreferences.getLong(Constants.APP_CUMULATIVE_RX_BYTES, 0);
+                long previousTxBytes = sharedPreferences.getLong(Constants.APP_CUMULATIVE_TX_BYTES, 0);
+                long appCumulativeRxBytes;
+                long appCumulativeTxBytes;
+
+                if(rxBytes > previousRxBytes) appCumulativeRxBytes = previousRxBytes + (rxBytes - previousRxBytes);
+                else appCumulativeRxBytes = previousRxBytes + rxBytes;
+
+                if(txBytes > previousTxBytes) appCumulativeTxBytes = previousTxBytes + (txBytes - previousTxBytes);
+                else appCumulativeTxBytes = previousTxBytes + txBytes;
+
+                // Clear cumulative data on first day of month
+                if(Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == 1) {
+                    appCumulativeRxBytes = 0;
+                    appCumulativeTxBytes = 0;
+                }
+
+                editor.putLong(Constants.APP_CUMULATIVE_RX_BYTES, appCumulativeRxBytes);
+                editor.putLong(Constants.APP_CUMULATIVE_TX_BYTES, appCumulativeTxBytes);
+                editor.apply();
+
+                Crashlytics.log("App cumulative RX bytes: " + appCumulativeRxBytes);
+                Crashlytics.log("App cumulative TX bytes: " + appCumulativeTxBytes);
+                Crashlytics.logException(new Throwable("App Cumulative Monthly Data Usage"));
+            }
+
+            audioFileRef.getBytes(Constants.ABSOLUTE_MAX_FILE_SIZE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                 @Override
                 public void onSuccess(byte[] bytes) {
 
@@ -447,6 +511,8 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
                         deviceAudioQueueItem.setDate_uploaded(System.currentTimeMillis());
                         audioTableManager.insertChannelAudioFile(deviceAudioQueueItem);
                         Crashlytics.log("insertChannelAudioFile() completed");
+
+                        Crashlytics.logException(new Throwable("Sync Adapter Channel Download Report"));
 
                         //Send broadcast message to notify all receivers of download finished
                         Intent intent = new Intent(Constants.ACTION_CHANNEL_DOWNLOAD_FINISHED);
