@@ -8,6 +8,8 @@ package com.roostermornings.android.firebase;
 import android.os.Bundle;
 import android.support.annotation.Keep;
 
+import org.jetbrains.annotations.NotNull;
+
 import static com.roostermornings.android.BaseApplication.firebaseAnalytics;
 
 
@@ -116,6 +118,10 @@ public abstract class FA {
         public abstract class channel_info_viewed extends channel_selected {
         }
         public abstract class explore_channel_rooster_played extends channel_selected {
+            public abstract class Param {
+                //String param
+                public final static String channel_title = "channel_title";
+            }
         }
         public abstract class default_alarm_play {
             public abstract class Param {
@@ -173,7 +179,7 @@ public abstract class FA {
             }
         }.run();
     }
-    
+
     public static void Log(final Class<?> Event, final String Param, final Object entry) {
         new Thread() {
             @Override
@@ -202,6 +208,48 @@ public abstract class FA {
                     bundle.putBoolean(Param, (Boolean) entry);
                     firebaseAnalytics.logEvent(eventString, bundle);
                 }
+            }
+        }.run();
+    }
+    
+    public static void LogMany(final Class<?> Event, final String[] Params, final Object[] entries) {
+        new Thread() {
+            @Override
+            public void run() {
+
+                Bundle bundle = new Bundle();
+                String eventString;
+
+                if (Event == null) {
+                    throw new NullPointerException();
+                } else {
+                    eventString = Event.toString();
+                    int eventStringPosition = eventString.lastIndexOf("$") + 1;
+                    eventString = eventString.substring(eventStringPosition);
+                }
+
+                if(Params == null || entries == null) {
+                    firebaseAnalytics.logEvent(eventString, null);
+                    return;
+                }
+
+                int index = -1;
+                for (String Param:
+                     Params) {
+                    index++;
+                    Object entry = entries[index];
+                    if (Param != null && entry != null) {
+                        if (entry instanceof String) {
+                            bundle.putString(Param, (String) entry);
+                        } else if (entry instanceof Integer) {
+                            bundle.putInt(Param, (Integer) entry);
+                        } else if (entry instanceof Boolean) {
+                            bundle.putBoolean(Param, (Boolean) entry);
+                        }
+                    }
+                }
+                if(bundle.isEmpty()) bundle = null;
+                firebaseAnalytics.logEvent(eventString, bundle);
             }
         }.run();
     }

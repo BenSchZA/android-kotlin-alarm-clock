@@ -138,7 +138,6 @@ public class UploadService extends Service {
         final Uri file = Uri.fromFile(localFile);
         StorageReference audioFileRef = mStorageRef.child("social_rooster_uploads/" + file.getLastPathSegment());
 
-        //Log Firebase user prop: social rooster sender
         if(!friendsList.isEmpty()) {
             int sentRoosters = 0;
             if (sharedPreferences.contains(FA.UserProp.social_rooster_sender.shared_pref_sent_roosters)) {

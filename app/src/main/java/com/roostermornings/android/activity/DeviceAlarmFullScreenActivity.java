@@ -195,8 +195,7 @@ public class DeviceAlarmFullScreenActivity extends BaseActivity {
                 Uri uri = Uri.parse(audioItem.getAction_url());
                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
-                FA.Log(FA.Event.action_url_click.class, FA.Event.action_url_click.Param.channel_title, audioItem.getName());
-                FA.Log(FA.Event.action_url_click.class, FA.Event.action_url_click.Param.action_url, audioItem.getAction_url());
+                FA.LogMany(FA.Event.action_url_click.class, new String[]{FA.Event.action_url_click.Param.channel_title, FA.Event.action_url_click.Param.action_url}, new Object[]{audioItem.getName(), audioItem.getAction_url()});
             } catch (Exception e) {
                 e.printStackTrace();
                 alarmActionButton.setVisibility(View.GONE);

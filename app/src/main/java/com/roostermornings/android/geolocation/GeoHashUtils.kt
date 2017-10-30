@@ -74,11 +74,11 @@ class GeoHashUtils(val context: Context) {
         }
 
         //Log exception for debugging
-        Crashlytics.log("Geohash shared pref: " + sharedPreferences.getString(Constants.USER_GEOHASH, "not set"))
-        for(g in mUserGeoHashArray) {
-            Crashlytics.log("Geohash entry: " + Gson().toJson(g))
-        }
-        Crashlytics.logException(Throwable("GeoHashUtils Report"))
+//        Crashlytics.log("Geohash shared pref: " + sharedPreferences.getString(Constants.USER_GEOHASH, "not set"))
+//        for(g in mUserGeoHashArray) {
+//            Crashlytics.log("Geohash entry: " + Gson().toJson(g))
+//        }
+//        Crashlytics.logException(Throwable("GeoHashUtils Report"))
 
         val connectivityUtils = ConnectivityUtils(context)
         if(connectivityUtils.isConnected()) {

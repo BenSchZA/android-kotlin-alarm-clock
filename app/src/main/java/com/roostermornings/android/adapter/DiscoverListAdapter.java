@@ -157,7 +157,6 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
             @Override
             public void onClick(View view) {
                 discoverAudioSampleInterface.onMediaItemSelected(mediaItem, isPlaying(mediaItem));
-                FA.Log(FA.Event.explore_channel_rooster_played.class, FA.Event.explore_channel_rooster_played.Param.channel_title, mediaItem.getMediaId());
             }
         });
 
@@ -165,7 +164,6 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
             @Override
             public void onClick(View view) {
                 discoverAudioSampleInterface.onMediaItemSelected(mediaItem, isPlaying(mediaItem));
-                FA.Log(FA.Event.explore_channel_rooster_played.class, FA.Event.explore_channel_rooster_played.Param.channel_title, mediaItem.getMediaId());
             }
         });
 
