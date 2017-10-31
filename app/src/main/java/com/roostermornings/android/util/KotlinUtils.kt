@@ -19,11 +19,11 @@ import java.util.logging.Logger
 
 class KotlinUtils {
     companion object {
-        inline fun catchAll(action: () -> Unit) {
+        inline fun catchAll(log: Boolean, action: () -> Unit) {
             try {
                 action()
             } catch (t: Throwable) {
-                Crashlytics.logException(t)
+                if(log) Crashlytics.logException(t)
             }
         }
     }

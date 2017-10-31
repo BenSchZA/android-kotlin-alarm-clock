@@ -36,7 +36,7 @@ class WidgetService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         // Register system 1 minute tick broadcast receiver
-        KotlinUtils.catchAll { unregisterReceiver(receiver) }
+        KotlinUtils.catchAll(false) { unregisterReceiver(receiver) }
         registerReceiver(receiver, IntentFilter(Intent.ACTION_TIME_TICK))
 
         return START_STICKY
@@ -44,6 +44,6 @@ class WidgetService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        KotlinUtils.catchAll { unregisterReceiver(receiver) }
+        KotlinUtils.catchAll(false) { unregisterReceiver(receiver) }
     }
 }
