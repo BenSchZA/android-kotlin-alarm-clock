@@ -563,7 +563,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
     @OnClick(R.id.home_my_alarms)
     public void manageMyAlarm() {
         Integer roosterCount = audioTableManager.countUnheardSocialAudioFiles();
-        if(this instanceof MyAlarmsFragmentActivity && roosterCount > 0 && deviceAlarmTableManager.getNextPendingAlarm() == null) {
+        if(this instanceof MyAlarmsFragmentActivity && roosterCount > 0 && deviceAlarmTableManager.getNextPendingSocialAlarm() == null) {
             showAlarmSocialRoostersExplainer(this, null, roosterCount);
         } else {
             startHomeActivity();
