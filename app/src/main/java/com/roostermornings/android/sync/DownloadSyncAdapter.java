@@ -17,6 +17,7 @@ import android.content.SharedPreferences;
 import android.content.SyncResult;
 import android.content.pm.PackageManager;
 import android.net.TrafficStats;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -54,6 +55,7 @@ import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Calendar;
@@ -432,59 +434,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
                 onChannelDownloadListener.onChannelDownloadStarted(channelRooster.getChannel_uid());
 
             //Check for oversize files and report to Crashlytics
-            final URL uri = new URL(channelRooster.getAudio_file_url());
-            URLConnection ucon;
-            try {
-                ucon = uri.openConnection();
-                ucon.connect();
-                final String contentLengthStr = ucon.getHeaderField("content-length");
-                long contentLength = Long.valueOf(contentLengthStr);
-
-                if(contentLength > Constants.MAX_ROOSTER_FILE_SIZE) {
-                    Crashlytics.log("File URL: " + channelRooster.audio_file_url);
-                    Crashlytics.log("File size: " + contentLengthStr);
-                    Crashlytics.logException(new Throwable("Sync Adapter Oversize File Report"));
-                }
-
-                // If file size is greater than absolute max, abort download
-                if(contentLength > Constants.ABSOLUTE_MAX_FILE_SIZE) return;
-            } catch(final Exception e) {
-                // File content length not readable
-                Crashlytics.log("File URL: " + channelRooster.audio_file_url);
-                Crashlytics.log("Content length not readable!");
-                Crashlytics.logException(new Throwable("Sync Adapter Oversize File Report"));
-            } finally {
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-
-                // Check and log device data usage
-                int appUid = android.os.Process.myUid();
-                long rxBytes = TrafficStats.getUidRxBytes(appUid);
-                long txBytes = TrafficStats.getUidTxBytes(appUid);
-                long previousRxBytes = sharedPreferences.getLong(Constants.APP_CUMULATIVE_RX_BYTES, 0);
-                long previousTxBytes = sharedPreferences.getLong(Constants.APP_CUMULATIVE_TX_BYTES, 0);
-                long appCumulativeRxBytes;
-                long appCumulativeTxBytes;
-
-                if(rxBytes > previousRxBytes) appCumulativeRxBytes = previousRxBytes + (rxBytes - previousRxBytes);
-                else appCumulativeRxBytes = previousRxBytes + rxBytes;
-
-                if(txBytes > previousTxBytes) appCumulativeTxBytes = previousTxBytes + (txBytes - previousTxBytes);
-                else appCumulativeTxBytes = previousTxBytes + txBytes;
-
-                // Clear cumulative data on first day of month
-                if(Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == 1) {
-                    appCumulativeRxBytes = 0;
-                    appCumulativeTxBytes = 0;
-                }
-
-                editor.putLong(Constants.APP_CUMULATIVE_RX_BYTES, appCumulativeRxBytes);
-                editor.putLong(Constants.APP_CUMULATIVE_TX_BYTES, appCumulativeTxBytes);
-                editor.apply();
-
-                Crashlytics.log("App cumulative RX bytes: " + appCumulativeRxBytes);
-                Crashlytics.log("App cumulative TX bytes: " + appCumulativeTxBytes);
-                Crashlytics.logException(new Throwable("App Cumulative Monthly Data Usage"));
-            }
+            if(isOversize(channelRooster.audio_file_url)) return;
 
             audioFileRef.getBytes(Constants.ABSOLUTE_MAX_FILE_SIZE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                 @Override
@@ -548,6 +498,76 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
             deviceAlarmTableManager.updateAlarmLabel(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED);
             channelSyncActive = false;
         }
+    }
+
+    private boolean isOversize(String fileUrl) {
+        //Check for oversize files and report to Crashlytics
+        final URL uri;
+        try {
+            uri = new URL(fileUrl);
+        } catch(MalformedURLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        URLConnection ucon;
+        try {
+            ucon = uri.openConnection();
+            ucon.connect();
+            final String contentLengthStr = ucon.getHeaderField("content-length");
+            long contentLength = Long.valueOf(contentLengthStr);
+
+            if(contentLength > Constants.MAX_ROOSTER_FILE_SIZE) {
+                Crashlytics.log("File URL: " + fileUrl);
+                Crashlytics.log("File size: " + String.valueOf(contentLength/1024));
+                Crashlytics.logException(new Throwable("Sync Adapter Oversize File Report"));
+            }
+
+            // If file size is greater than absolute max, abort download
+            if(contentLength > Constants.ABSOLUTE_MAX_FILE_SIZE) return true;
+        } catch(final Exception e) {
+            // File content length not readable
+            Crashlytics.log("File URL: " + fileUrl);
+            Crashlytics.log("Content length not readable!");
+            Crashlytics.logException(new Throwable("Sync Adapter Oversize File Report"));
+        } finally {
+            try {
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+
+                // Check and log device data usage
+                int appUid = android.os.Process.myUid();
+                long rxBytes = TrafficStats.getUidRxBytes(appUid);
+                long txBytes = TrafficStats.getUidTxBytes(appUid);
+                long previousRxBytes = sharedPreferences.getLong(Constants.APP_CUMULATIVE_RX_BYTES, 0);
+                long previousTxBytes = sharedPreferences.getLong(Constants.APP_CUMULATIVE_TX_BYTES, 0);
+                long appCumulativeRxBytes;
+                long appCumulativeTxBytes;
+
+                if (rxBytes > previousRxBytes)
+                    appCumulativeRxBytes = previousRxBytes + (rxBytes - previousRxBytes);
+                else appCumulativeRxBytes = previousRxBytes + rxBytes;
+
+                if (txBytes > previousTxBytes)
+                    appCumulativeTxBytes = previousTxBytes + (txBytes - previousTxBytes);
+                else appCumulativeTxBytes = previousTxBytes + txBytes;
+
+                // Clear cumulative data on first day of month
+                if (Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == 1) {
+                    appCumulativeRxBytes = 0;
+                    appCumulativeTxBytes = 0;
+                }
+
+                editor.putLong(Constants.APP_CUMULATIVE_RX_BYTES, appCumulativeRxBytes);
+                editor.putLong(Constants.APP_CUMULATIVE_TX_BYTES, appCumulativeTxBytes);
+                editor.apply();
+
+                Crashlytics.log("App cumulative RX MiB: " + appCumulativeRxBytes / 1000000);
+                Crashlytics.log("App cumulative TX MiB: " + appCumulativeTxBytes / 1000000);
+                Crashlytics.logException(new Throwable("App Cumulative Monthly Data Usage"));
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
     }
 
     private void retrieveSocialRoosterAudio(final SocialRooster socialRooster, final Context context) {
