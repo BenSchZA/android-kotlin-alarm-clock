@@ -66,8 +66,8 @@ android {
             dimension "rooster-release"
 
             //Beta
-            versionName "2.3.2b"
-            versionCode 1000013
+            versionName "2.3.3b"
+            versionCode 1000014
 
             manifestPlaceholders = [
                     app_icon: "@mipmap/ic_launcher_beta",
@@ -80,8 +80,8 @@ android {
     buildTypes {
         release {
             //During debugging, enable debugging... and disable minify to get proper stacktraces
-            //debuggable true
-            minifyEnabled true
+            debuggable true
+            //minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             consumerProguardFiles 'proguard-rules.txt'
             proguardFile 'proguard-square-okio.pro'
@@ -124,16 +124,17 @@ def google_play_services_version = "11.4.2"
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-
     androidTestImplementation 'junit:junit:4.12'
-
     androidTestImplementation "com.android.support:support-annotations:${support_lib_version}"
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test:rules:1.0.1'
+
     // Optional -- Hamcrest library
     androidTestImplementation 'org.hamcrest:hamcrest-library:1.3'
+
     // Optional -- UI testing with UI Automator
     androidTestImplementation 'com.android.support.test.uiautomator:uiautomator-v18:2.1.3'
+
     // Optional -- UI testing with Espresso
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
@@ -141,17 +142,16 @@ dependencies {
 
     // required if you want to use Mockito for unit tests
     testImplementation 'org.mockito:mockito-core:2.7.22'
+
     // required if you want to use Mockito for Android tests
     androidTestImplementation 'org.mockito:mockito-android:2.7.22'
-
     implementation "com.android.support:support-core-utils:${support_lib_version}"
     implementation "com.android.support:appcompat-v7:${support_lib_version}"
     implementation "com.android.support:design:${support_lib_version}"
     implementation "com.android.support:support-v4:${support_lib_version}"
     implementation "com.android.support:recyclerview-v7:${support_lib_version}"
     implementation "com.android.support:cardview-v7:${support_lib_version}"
-    implementation('com.crashlytics.sdk.android:crashlytics:2.6.8@aar')
-    {
+    implementation('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
         transitive = true;
     }
     implementation('com.crashlytics.sdk.android:crashlytics:2.6.0@aar') {
@@ -187,7 +187,9 @@ dependencies {
     implementation 'com.google.android.exoplayer:extension-mediasession:r2.5.3'
     implementation 'com.github.amlcurran.showcaseview:library:5.4.3'
     implementation 'com.github.wooplr:Spotlight:1.3'
+
     //Upgraded Dagger to work with Butterknife
+
     //https://github.com/JakeWharton/butterknife/issues/863
     implementation 'com.google.dagger:dagger:2.9'
     kapt 'com.google.dagger:dagger-compiler:2.9'
