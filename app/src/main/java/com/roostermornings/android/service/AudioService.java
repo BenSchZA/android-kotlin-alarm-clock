@@ -935,15 +935,9 @@ public class AudioService extends Service {
 
         try {
             if(!audioItems.isEmpty()) {
-                FA.Log(FA.Event.alarm_snoozed.class,
-                        FA.Event.alarm_snoozed.Param.alarm_activation_cycle_count,
-                        alarmCycle);
-                FA.Log(FA.Event.alarm_snoozed.class,
-                        FA.Event.alarm_snoozed.Param.alarm_activation_index,
-                        audioItems.indexOf(audioItem) + 1);
-                FA.Log(FA.Event.alarm_snoozed.class,
-                        FA.Event.alarm_snoozed.Param.alarm_activation_total_roosters,
-                        channelAudioItems.size() + socialAudioItems.size());
+                FA.LogMany(FA.Event.alarm_snoozed.class,
+                        new String[]{FA.Event.alarm_snoozed.Param.alarm_activation_cycle_count, FA.Event.alarm_snoozed.Param.alarm_activation_index, FA.Event.alarm_snoozed.Param.alarm_activation_total_roosters},
+                        new Object[]{alarmCycle, audioItems.indexOf(audioItem) + 1, channelAudioItems.size() + socialAudioItems.size()});
             }
         } catch (NullPointerException e) {
             logError(e);
@@ -1074,21 +1068,15 @@ public class AudioService extends Service {
         if(StrUtils.notNullOrEmpty(method)) Crashlytics.log(method + " Failure:" + String.valueOf(failure));
 
         //Log a firebase analytics event indicating whether an attempt was/should have been made to play audio content
-        if (!socialAudioItems.isEmpty() || !channelAudioItems.isEmpty()) {
-            FA.Log(FA.Event.default_alarm_play.class, FA.Event.default_alarm_play.Param.attempt_to_play, true);
-        } else {
-            FA.Log(FA.Event.default_alarm_play.class, FA.Event.default_alarm_play.Param.attempt_to_play, false);
-        }
+        FA.LogMany(FA.Event.default_alarm_play.class,
+                new String[]{FA.Event.default_alarm_play.Param.attempt_to_play, FA.Event.default_alarm_play.Param.fatal_failure},
+                new Object[]{!socialAudioItems.isEmpty() || !channelAudioItems.isEmpty(), failure});
 
         if (failure) {
             //Show dialog explainer again by clearing shared pref
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false);
             editor.apply();
-
-            FA.Log(FA.Event.default_alarm_play.class, FA.Event.default_alarm_play.Param.fatal_failure, true);
-        } else {
-            FA.Log(FA.Event.default_alarm_play.class, FA.Event.default_alarm_play.Param.fatal_failure, false);
         }
     }
 
