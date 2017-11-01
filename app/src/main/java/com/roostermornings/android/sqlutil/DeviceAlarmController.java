@@ -16,10 +16,12 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
 
+import com.activeandroid.ActiveAndroid;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.firebase.FirebaseNetwork;
+import com.roostermornings.android.logging.AlarmFailureLog;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.sync.DownloadSyncAdapter;
@@ -64,6 +66,22 @@ public final class DeviceAlarmController {
         for (DeviceAlarm deviceAlarm : deviceAlarmList) {
             setAlarm(deviceAlarm, false);
         }
+
+        ActiveAndroid.beginTransaction();
+        try {
+            for(DeviceAlarm deviceAlarm: deviceAlarmList) {
+                // Create new AlarmFailureLog ActiveAndroid db entry
+                AlarmFailureLog alarmFailureLog = new AlarmFailureLog();
+                alarmFailureLog.setPendingIntentID(deviceAlarm.getPiId());
+                alarmFailureLog.setAlarmUid(deviceAlarm.getSetId());
+                alarmFailureLog.setScheduledTime(deviceAlarm.getMillis());
+                AlarmFailureLog.Companion.updateOrCreateAlarmFailureLogEntry(alarmFailureLog);
+            }
+            ActiveAndroid.setTransactionSuccessful();
+        } finally {
+            ActiveAndroid.endTransaction();
+        }
+
         //Clear all changed flags
         deviceAlarmTableManager.clearChanged();
     }
@@ -324,6 +342,8 @@ public final class DeviceAlarmController {
     private void cancelAlarm(DeviceAlarm deviceAlarm) {
         //Use setAlarm with cancel Boolean set to true - this recreates intent in order to clear it
         setAlarm(deviceAlarm, true);
+        // Clear AlarmFailureLog ActiveAndroid db entry
+        AlarmFailureLog.Companion.tryDeleteAlarmFailureLogByPIID(deviceAlarm.getPiId());
     }
 
     //Used to recreate alarm intents after reboot. All ENABLED alarms recreated.

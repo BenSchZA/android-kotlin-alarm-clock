@@ -77,8 +77,16 @@ public abstract class FA {
         }
         //First play of rooster
         public abstract class channel_unique_play extends channel_selected {
+            public abstract class Param {
+                //String param
+                public final static String channel_title = "channel_title";
+            }
         }
         public abstract class channel_play extends channel_selected {
+            public abstract class Param {
+                //String param
+                public final static String channel_title = "channel_title";
+            }
         }
         //First play of rooster
         public abstract class social_rooster_unique_play {
@@ -96,6 +104,14 @@ public abstract class FA {
             }
         }
         public abstract class alarm_dismissed extends alarm_snoozed {
+            public abstract class Param {
+                //Number param
+                public final static String alarm_activation_total_roosters = "alarm_activation_total_roosters";
+                //Number param
+                public final static String alarm_activation_index = "alarm_activation_index";
+                //Number param
+                public final static String alarm_activation_cycle_count = "alarm_activation_cycle_count";
+            }
         }
         public abstract class social_rooster_recorded {
         }

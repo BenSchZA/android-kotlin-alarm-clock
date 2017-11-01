@@ -56,6 +56,7 @@ public class Constants {
     public final static String USER_SETTINGS_ALARM_VOLUME = "pref_key_failsafe_alarm_volume";
     public final static String USER_SETTINGS_TIME_FORMAT = "pref_key_24_hour_time";
     public final static String USER_SETTINGS_ALARM_VOLUME_INCREMENT_DURATION = "pref_key_alarm_increment_duration";
+    public final static String USER_SETTINGS_LIMIT_ALARM_TIME = "pref_key_limit_alarm_time";
     public final static String ABOUT_APP_VERSION = "pref_key_static_field_version";
 
     public final static long[] VIBRATE_PATTERN = {0, 1000, 500, 1000, 500};

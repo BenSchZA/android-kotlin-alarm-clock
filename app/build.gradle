@@ -80,8 +80,8 @@ android {
     buildTypes {
         release {
             //During debugging, enable debugging... and disable minify to get proper stacktraces
-            //debuggable true
-            minifyEnabled true
+            debuggable true
+            //minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             consumerProguardFiles 'proguard-rules.txt'
             proguardFile 'proguard-square-okio.pro'
@@ -187,7 +187,7 @@ dependencies {
     implementation 'com.google.android.exoplayer:extension-mediasession:r2.5.3'
     implementation 'com.github.amlcurran.showcaseview:library:5.4.3'
     implementation 'com.github.wooplr:Spotlight:1.3'
-
+    implementation 'com.michaelpardo:activeandroid:3.1.0-SNAPSHOT'
     //Upgraded Dagger to work with Butterknife
 
     //https://github.com/JakeWharton/butterknife/issues/863
