@@ -63,6 +63,12 @@ and no social roosters are received"
             android:maxLines="1"
             android:inputType="numberDecimal"
             android:maxLength="5"/>
+        <CheckBoxPreference
+            android:key="pref_key_limit_alarm_time"
+            android:summary="Enable a limit (5 minutes) on the alarm time before automatic snooze"
+            android:title="Limit alarm time"
+            android:defaultValue="true"
+            android:persistent="true"/>
     </PreferenceCategory>
     <PreferenceCategory
         android:title="User Interface"

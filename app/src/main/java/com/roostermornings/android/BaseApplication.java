@@ -15,6 +15,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.activeandroid.ActiveAndroid;
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
 import com.facebook.appevents.AppEventsLogger;
@@ -95,6 +96,9 @@ public class BaseApplication extends android.app.Application {
         if(BuildConfig.DEBUG) {
             firebaseAnalytics.setAnalyticsCollectionEnabled(false);
         }
+
+        // Initialize Active Android database
+        ActiveAndroid.initialize(this);
 
         /*Component implementations are primarily instantiated via a generated builder.
         An instance of the builder is obtained using the builder() method on the component implementation.
