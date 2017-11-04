@@ -67,21 +67,6 @@ public final class DeviceAlarmController {
             setAlarm(deviceAlarm, false);
         }
 
-        ActiveAndroid.beginTransaction();
-        try {
-            for(DeviceAlarm deviceAlarm: deviceAlarmList) {
-                // Create new AlarmFailureLog ActiveAndroid db entry
-                AlarmFailureLog alarmFailureLog = new AlarmFailureLog();
-                alarmFailureLog.setPendingIntentID(deviceAlarm.getPiId());
-                alarmFailureLog.setAlarmUid(deviceAlarm.getSetId());
-                alarmFailureLog.setScheduledTime(deviceAlarm.getMillis());
-                AlarmFailureLog.Companion.updateOrCreateAlarmFailureLogEntry(alarmFailureLog);
-            }
-            ActiveAndroid.setTransactionSuccessful();
-        } finally {
-            ActiveAndroid.endTransaction();
-        }
-
         //Clear all changed flags
         deviceAlarmTableManager.clearChanged();
     }
@@ -102,14 +87,28 @@ public final class DeviceAlarmController {
                 alarmIntent.putExtra(Constants.EXTRA_RECURRING, true);
             }
 
+            PendingIntent temp  = PendingIntent.getBroadcast(context,
+                    deviceAlarm.getPiId(), alarmIntent,
+                    PendingIntent.FLAG_NO_CREATE);
+            boolean pendingIntentExists = temp != null;
+            if(temp != null) temp.cancel();
+
             PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(context,
                     deviceAlarm.getPiId(), alarmIntent,
                     PendingIntent.FLAG_UPDATE_CURRENT);
+
+            // Only clear log if pending intent exists, which indicates intent has not fired
+            if(cancel && pendingIntentExists) {
+                // Clear AlarmFailureLog ActiveAndroid db entry
+                AlarmFailureLog.Companion.tryDeleteAlarmFailureLogByPIID(deviceAlarm.getPiId());
+            }
 
             //Use setAlarm with cancel Boolean set to true - this recreates intent in order to clear it
             if(cancel) {
                 //Cancel alarm intent
                 alarmMgr.cancel(alarmPendingIntent);
+                alarmPendingIntent.cancel();
+
                 //The below method is reeeaaallly delayed...?
                 //alarmPendingIntent.cancel();
                 return;
@@ -133,6 +132,23 @@ public final class DeviceAlarmController {
             }
             //store the alarm table with the alarm's new date and time
             deviceAlarmTableManager.updateAlarmMillis(deviceAlarm.getPiId(), alarmTime);
+            deviceAlarm.setMillis(alarmTime);
+
+            if(pendingIntentExists) {
+                // Update AlarmFailureLog ActiveAndroid db entry
+                AlarmFailureLog alarmFailureLog = new AlarmFailureLog();
+                alarmFailureLog.setPendingIntentID(deviceAlarm.getPiId());
+                alarmFailureLog.setAlarmUid(deviceAlarm.getSetId());
+                alarmFailureLog.setScheduledTime(deviceAlarm.getMillis());
+                AlarmFailureLog.Companion.updateOrCreateAlarmFailureLogEntry(alarmFailureLog);
+            } else {
+                // Create new AlarmFailureLog ActiveAndroid db entry
+                AlarmFailureLog alarmFailureLog = new AlarmFailureLog();
+                alarmFailureLog.setPendingIntentID(deviceAlarm.getPiId());
+                alarmFailureLog.setAlarmUid(deviceAlarm.getSetId());
+                alarmFailureLog.setScheduledTime(deviceAlarm.getMillis());
+                alarmFailureLog.save();
+            }
 
             //if newer version of Android, create info pending intent
             if (hasLollipop()) {
@@ -342,8 +358,6 @@ public final class DeviceAlarmController {
     private void cancelAlarm(DeviceAlarm deviceAlarm) {
         //Use setAlarm with cancel Boolean set to true - this recreates intent in order to clear it
         setAlarm(deviceAlarm, true);
-        // Clear AlarmFailureLog ActiveAndroid db entry
-        AlarmFailureLog.Companion.tryDeleteAlarmFailureLogByPIID(deviceAlarm.getPiId());
     }
 
     //Used to recreate alarm intents after reboot. All ENABLED alarms recreated.
