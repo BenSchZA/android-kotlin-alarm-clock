@@ -51,6 +51,7 @@ import com.roostermornings.android.custom_ui.SquareFrameLayout;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.firebase.FirebaseNetwork;
+import com.roostermornings.android.logging.AlarmFailureLog;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
@@ -69,6 +70,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -159,6 +161,11 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
         //Final context to be used in threads
         final Context context = this;
+
+        // Process any alarm failures
+        List<AlarmFailureLog> alarmFailureLogs = AlarmFailureLog.Companion.getAllAlarmFailureLogs();
+        AlarmFailureLog.Companion.processAlarmFailures();
+        List<AlarmFailureLog> alarmFailures = AlarmFailureLog.Companion.sendAlarmFailureLogs();
 
         //Set shared pref to indicate whether mobile number is valid
         FirebaseNetwork.flagValidMobileNumber(this, false);

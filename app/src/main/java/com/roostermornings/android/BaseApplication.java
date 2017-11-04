@@ -10,12 +10,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.net.ConnectivityManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.activeandroid.ActiveAndroid;
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
 import com.facebook.appevents.AppEventsLogger;
@@ -44,6 +44,7 @@ import com.roostermornings.android.util.Toaster;
 import javax.inject.Inject;
 
 import io.fabric.sdk.android.Fabric;
+import io.realm.Realm;
 import retrofit.GsonConverterFactory;
 import retrofit.Retrofit;
 
@@ -93,12 +94,12 @@ public class BaseApplication extends android.app.Application {
         }
 
         //If debug, disable Firebase analytics
-        if(BuildConfig.DEBUG) {
+        if(BuildConfig.DEBUG || (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE))) {
             firebaseAnalytics.setAnalyticsCollectionEnabled(false);
         }
 
-        // Initialize Active Android database
-        ActiveAndroid.initialize(this);
+        // Initialize Realm database
+        Realm.init(this);
 
         /*Component implementations are primarily instantiated via a generated builder.
         An instance of the builder is obtained using the builder() method on the component implementation.

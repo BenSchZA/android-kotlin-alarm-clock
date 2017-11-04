@@ -21,6 +21,7 @@ buildscript {
         // in the individual module build.gradle files
         classpath 'com.google.gms:google-services:3.1.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "io.realm:realm-gradle-plugin:4.1.1"
     }
 }
 
@@ -29,7 +30,6 @@ allprojects {
         jcenter()
         maven { url "https://maven.google.com" }
         maven { url "https://jitpack.io" }
-        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
     }
 }
 

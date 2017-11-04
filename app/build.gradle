@@ -7,11 +7,16 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'com.google.firebase.firebase-crash'
+apply plugin: 'realm-android'
 
 //https://kotlinlang.org/docs/reference/kapt.html
 //https://github.com/realm/realm-java/issues/4650
 kapt {
     generateStubs = true
+}
+
+realm {
+    syncEnabled = true
 }
 
 android {
@@ -187,7 +192,9 @@ dependencies {
     implementation 'com.google.android.exoplayer:extension-mediasession:r2.5.3'
     implementation 'com.github.amlcurran.showcaseview:library:5.4.3'
     implementation 'com.github.wooplr:Spotlight:1.3'
-    implementation 'com.michaelpardo:activeandroid:3.1.0-SNAPSHOT'
+    //https://github.com/pardom/ActiveAndroid/issues/332
+    //implementation 'com.michaelpardo:activeandroid:3.1.0-SNAPSHOT'
+    //implementation 'com.github.vicpinm:activeandroidrx:3.1.5'
     //Upgraded Dagger to work with Butterknife
 
     //https://github.com/JakeWharton/butterknife/issues/863

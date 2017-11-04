@@ -24,6 +24,7 @@ import javax.inject.Named
 
 import android.content.Context.VIBRATOR_SERVICE
 import com.facebook.FacebookSdk.getApplicationContext
+import com.roostermornings.android.logging.AlarmFailureLog.Companion.updateOrCreateAlarmFailureLogEntry
 
 class DeviceAlarmReceiver : WakefulBroadcastReceiver() {
 
@@ -67,7 +68,7 @@ class DeviceAlarmReceiver : WakefulBroadcastReceiver() {
 
         AlarmFailureLog.getAlarmFailureLogByPIID(intent.getIntExtra(Constants.EXTRA_REQUESTCODE, -1))?.let {
             it.fired = true
-            it.updateOrCreateAlarmFailureLogEntry()
+            updateOrCreateAlarmFailureLogEntry(it)
         }
     }
 

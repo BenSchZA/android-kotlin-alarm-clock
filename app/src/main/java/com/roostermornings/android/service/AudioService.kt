@@ -65,6 +65,7 @@ import javax.inject.Named
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.support.v4.content.WakefulBroadcastReceiver
 import com.roostermornings.android.logging.AlarmFailureLog
+import com.roostermornings.android.logging.AlarmFailureLog.Companion.updateOrCreateAlarmFailureLogEntry
 
 //Service to manage playing and pausing audio during Rooster alarm
 class AudioService : Service() {
@@ -200,11 +201,6 @@ class AudioService : Service() {
         //Register broadcast receivers for external access
         registerEndAudioServiceBroadcastReceiver()
         registerSnoozeAudioServiceBroadcastReceiver()
-
-        //Start fullscreen alarm activation activity
-        val intentAlarmFullscreen = Intent(mThis, DeviceAlarmFullScreenActivity::class.java)
-        intentAlarmFullscreen.addFlags(FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        mThis.startActivity(intentAlarmFullscreen)
     }
 
     private fun logError(e: Throwable) {
@@ -253,12 +249,24 @@ class AudioService : Service() {
 
         AlarmFailureLog.getAlarmFailureLogByPIID(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)?:-1)?.let {
             it.activated = true
-            it.updateOrCreateAlarmFailureLogEntry()
+            updateOrCreateAlarmFailureLogEntry(it)
         }
 
         //Only attempt to start alarm once, in case of multiple conflicting alarms
         if (!mRunning) {
             mRunning = true
+
+            AlarmFailureLog.getAlarmFailureLogByPIID(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)?:-1)?.let {
+                it.running = true
+                updateOrCreateAlarmFailureLogEntry(it)
+            }
+
+            //Start fullscreen alarm activation activity
+            val intentAlarmFullscreen = Intent(mThis, DeviceAlarmFullScreenActivity::class.java)
+            intentAlarmFullscreen.addFlags(FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            intentAlarmFullscreen.putExtra(Constants.EXTRA_REQUESTCODE, intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1))
+            mThis.startActivity(intentAlarmFullscreen)
+
             //Get wakeful intent of DeviceAlarmReceiver to enable finishing it in endService()
             wakefulIntent = intent?.getParcelableExtra(Constants.DEVICE_ALARM_RECEIVER_WAKEFUL_INTENT)
             mThis.intent = intent
@@ -325,6 +333,11 @@ class AudioService : Service() {
         //Check if Social and Channel alarm content exists, else startDefaultAlarmTone
         channelAudioItems = audioTableManager.extractAlarmChannelAudioFiles(mThis.alarmChannelUid)
         socialAudioItems = audioTableManager.extractUnheardSocialAudioFiles()
+
+        AlarmFailureLog.getAlarmFailureLogByPIID(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)?:-1)?.let {
+            it.content = true
+            updateOrCreateAlarmFailureLogEntry(it)
+        }
 
         // Check if user setting limit alarm time enabled
         this.limitAlarmTime = defaultSharedPreferences.getBoolean(Constants.USER_SETTINGS_LIMIT_ALARM_TIME, true)
@@ -486,6 +499,12 @@ class AudioService : Service() {
             streamMediaPlayer.setOnPreparedListener(MediaPlayer.OnPreparedListener {
                 if (streamMediaPlayer.isPlaying) return@OnPreparedListener
                 streamMediaPlayer.start()
+
+                AlarmFailureLog.getAlarmFailureLogByPIID(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)?:-1)?.let {
+                    it.heard = true
+                    updateOrCreateAlarmFailureLogEntry(it)
+                }
+
                 checkStreamVolume(AudioManager.STREAM_ALARM)
                 softStartAudio()
 
@@ -593,6 +612,11 @@ class AudioService : Service() {
 
             mediaPlayerRooster.setOnPreparedListener {
                 mediaPlayerRooster.start()
+
+                AlarmFailureLog.getAlarmFailureLogByPIID(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)?:-1)?.let {
+                    it.interaction = true
+                    updateOrCreateAlarmFailureLogEntry(it)
+                }
 
                 if (alarmPosition == 1 && currentAlarmCycle == 1) {
                     //Slowly increase volume from low to current volume
@@ -904,6 +928,11 @@ class AudioService : Service() {
         var method = Thread.currentThread().stackTrace[2].methodName
         if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method)
 
+        AlarmFailureLog.getAlarmFailureLogByPIID(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)?:-1)?.let {
+            it.default = true
+            updateOrCreateAlarmFailureLogEntry(it)
+        }
+
         //If channel UID attached to alarm, content should have played
         val failure = StrUtils.notNullOrEmpty(alarm.channel) && !InternetHelper.noInternetConnection(this)
 
@@ -951,6 +980,12 @@ class AudioService : Service() {
 
                     if (mediaPlayerRooster.isPlaying) return@OnPreparedListener
                     mediaPlayerDefault.start()
+
+                    AlarmFailureLog.getAlarmFailureLogByPIID(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)?:-1)?.let {
+                        it.heard = true
+                        updateOrCreateAlarmFailureLogEntry(it)
+                    }
+
                     //Start timer to kill after 5 minutes
                     startTimer()
                     //Log whether a failure or just default alarm tone selected
@@ -1008,6 +1043,19 @@ class AudioService : Service() {
         if (failsafeRingtone != null && !failsafeRingtone!!.isPlaying) {
             Crashlytics.log("Not null and not playing " + failsafeRingtone!!.getTitle(baseContext))
             failsafeRingtone?.play()
+        }
+
+        if(failsafeRingtone != null && failsafeRingtone!!.isPlaying) {
+            AlarmFailureLog.getAlarmFailureLogByPIID(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)?:-1)?.let {
+                it.heard = true
+                it.failsafe = true
+                updateOrCreateAlarmFailureLogEntry(it)
+            }
+        } else {
+            AlarmFailureLog.getAlarmFailureLogByPIID(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)?:-1)?.let {
+                it.failsafe = true
+                updateOrCreateAlarmFailureLogEntry(it)
+            }
         }
     }
 
