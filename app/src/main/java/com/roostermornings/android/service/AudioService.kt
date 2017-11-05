@@ -65,7 +65,7 @@ import javax.inject.Named
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.support.v4.content.WakefulBroadcastReceiver
 import com.roostermornings.android.logging.AlarmFailureLog
-import com.roostermornings.android.logging.AlarmFailureLog.Companion.updateOrCreateAlarmFailureLogEntry
+import com.roostermornings.android.logging.RealmManager
 
 //Service to manage playing and pausing audio during Rooster alarm
 class AudioService : Service() {
@@ -114,6 +114,7 @@ class AudioService : Service() {
     @Inject lateinit var jsonPersistence: JSONPersistence
     @Inject
     lateinit var channelManager: ChannelManager
+    @Inject lateinit var realmManager: RealmManager
 
     companion object {
         private val audioItems = ArrayList<DeviceAudioQueueItem>()
@@ -247,18 +248,19 @@ class AudioService : Service() {
         val method = Thread.currentThread().stackTrace[2].methodName
         if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method)
 
-        AlarmFailureLog.getAlarmFailureLogByPIID(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)?:-1)?.let {
+        realmManager.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
             it.activated = true
-            updateOrCreateAlarmFailureLogEntry(it)
+            it.def = true //TODO: revert
+            it
         }
 
         //Only attempt to start alarm once, in case of multiple conflicting alarms
         if (!mRunning) {
             mRunning = true
 
-            AlarmFailureLog.getAlarmFailureLogByPIID(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)?:-1)?.let {
+            realmManager.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
                 it.running = true
-                updateOrCreateAlarmFailureLogEntry(it)
+                it
             }
 
             //Start fullscreen alarm activation activity
@@ -334,9 +336,9 @@ class AudioService : Service() {
         channelAudioItems = audioTableManager.extractAlarmChannelAudioFiles(mThis.alarmChannelUid)
         socialAudioItems = audioTableManager.extractUnheardSocialAudioFiles()
 
-        AlarmFailureLog.getAlarmFailureLogByPIID(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)?:-1)?.let {
+        realmManager.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
             it.content = true
-            updateOrCreateAlarmFailureLogEntry(it)
+            it
         }
 
         // Check if user setting limit alarm time enabled
@@ -500,9 +502,9 @@ class AudioService : Service() {
                 if (streamMediaPlayer.isPlaying) return@OnPreparedListener
                 streamMediaPlayer.start()
 
-                AlarmFailureLog.getAlarmFailureLogByPIID(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)?:-1)?.let {
+                realmManager.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
                     it.heard = true
-                    updateOrCreateAlarmFailureLogEntry(it)
+                    it
                 }
 
                 checkStreamVolume(AudioManager.STREAM_ALARM)
@@ -613,9 +615,9 @@ class AudioService : Service() {
             mediaPlayerRooster.setOnPreparedListener {
                 mediaPlayerRooster.start()
 
-                AlarmFailureLog.getAlarmFailureLogByPIID(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)?:-1)?.let {
-                    it.interaction = true
-                    updateOrCreateAlarmFailureLogEntry(it)
+                realmManager.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+                    it.heard = true
+                    it
                 }
 
                 if (alarmPosition == 1 && currentAlarmCycle == 1) {
@@ -928,9 +930,9 @@ class AudioService : Service() {
         var method = Thread.currentThread().stackTrace[2].methodName
         if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method)
 
-        AlarmFailureLog.getAlarmFailureLogByPIID(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)?:-1)?.let {
-            it.default = true
-            updateOrCreateAlarmFailureLogEntry(it)
+        realmManager.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+            it.def = true
+            it
         }
 
         //If channel UID attached to alarm, content should have played
@@ -981,9 +983,9 @@ class AudioService : Service() {
                     if (mediaPlayerRooster.isPlaying) return@OnPreparedListener
                     mediaPlayerDefault.start()
 
-                    AlarmFailureLog.getAlarmFailureLogByPIID(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)?:-1)?.let {
+                    realmManager.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
                         it.heard = true
-                        updateOrCreateAlarmFailureLogEntry(it)
+                        it
                     }
 
                     //Start timer to kill after 5 minutes
@@ -1046,15 +1048,15 @@ class AudioService : Service() {
         }
 
         if(failsafeRingtone != null && failsafeRingtone!!.isPlaying) {
-            AlarmFailureLog.getAlarmFailureLogByPIID(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)?:-1)?.let {
+            realmManager.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
                 it.heard = true
                 it.failsafe = true
-                updateOrCreateAlarmFailureLogEntry(it)
+                it
             }
         } else {
-            AlarmFailureLog.getAlarmFailureLogByPIID(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)?:-1)?.let {
+            realmManager.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
                 it.failsafe = true
-                updateOrCreateAlarmFailureLogEntry(it)
+                it
             }
         }
     }

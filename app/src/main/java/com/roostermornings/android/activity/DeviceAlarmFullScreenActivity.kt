@@ -11,13 +11,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.ServiceConnection
-import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.media.AudioManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
-import android.support.v4.graphics.drawable.RoundedBitmapDrawable
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory
 import android.util.Log
 import android.view.View
@@ -43,8 +41,7 @@ import javax.inject.Inject
 
 import butterknife.BindView
 import butterknife.OnClick
-import com.roostermornings.android.logging.AlarmFailureLog
-import com.roostermornings.android.logging.AlarmFailureLog.Companion.updateOrCreateAlarmFailureLogEntry
+import com.roostermornings.android.logging.RealmManager
 
 class DeviceAlarmFullScreenActivity : BaseActivity() {
 
@@ -83,6 +80,7 @@ class DeviceAlarmFullScreenActivity : BaseActivity() {
     lateinit var alarmActionButton: Button
 
     @Inject lateinit var deviceAlarmController: DeviceAlarmController
+    @Inject lateinit var realmManager: RealmManager
 
     private val mAudioServiceConnection = object : ServiceConnection {
         // Called when the connection with the service is established
@@ -135,9 +133,9 @@ class DeviceAlarmFullScreenActivity : BaseActivity() {
 
         initialize(R.layout.activity_device_alarm_full_screen)
 
-        AlarmFailureLog.getAlarmFailureLogByPIID(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)?:-1)?.let {
+        realmManager.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
             it.seen = true
-            updateOrCreateAlarmFailureLogEntry(it)
+            it
         }
 
         setDayNightTheme()
@@ -240,9 +238,9 @@ class DeviceAlarmFullScreenActivity : BaseActivity() {
     }
 
     private fun logAlarmUIInteraction() {
-        AlarmFailureLog.getAlarmFailureLogByPIID(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)?:-1)?.let {
+        realmManager.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
             it.interaction = true
-            updateOrCreateAlarmFailureLogEntry(it)
+            it
         }
     }
 
