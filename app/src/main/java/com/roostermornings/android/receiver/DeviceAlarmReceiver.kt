@@ -71,6 +71,8 @@ class DeviceAlarmReceiver : WakefulBroadcastReceiver() {
             it.fired = true
             it
         }
+        // Close Realm object
+        realmManager.closeRealm()
     }
 
     private fun rescheduleAlarmIntents(intent: Intent) {

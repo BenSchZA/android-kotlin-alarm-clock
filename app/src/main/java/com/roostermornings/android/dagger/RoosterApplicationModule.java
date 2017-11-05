@@ -210,7 +210,6 @@ public class RoosterApplicationModule {
     }
 
     @Provides
-    @Singleton
     RealmManager provideRealmManager(BaseApplication baseApplication) {
         return new RealmManager(baseApplication);
     }

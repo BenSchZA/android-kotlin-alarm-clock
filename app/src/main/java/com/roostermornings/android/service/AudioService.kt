@@ -796,6 +796,9 @@ class AudioService : Service() {
             logError(e)
         }
 
+        // Close Realm object
+        realmManager.closeRealm()
+
         //Delete audio records from arraylist
         audioItems.clear()
         //Clear variables

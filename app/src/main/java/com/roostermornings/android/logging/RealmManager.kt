@@ -29,6 +29,10 @@ class RealmManager(val context: Context) {
         BaseApplication.getRoosterApplicationComponent().inject(this)
     }
 
+    fun closeRealm() {
+        realm.close()
+    }
+
     fun getAllAlarmFailureLogs(): List<AlarmFailureLog> {
         return realm.where(AlarmFailureLog::class.java)
                 .findAll().toList()
