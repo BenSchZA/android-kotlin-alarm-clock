@@ -52,6 +52,7 @@ import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.firebase.FirebaseNetwork;
 import com.roostermornings.android.logging.AlarmFailureLog;
+import com.roostermornings.android.logging.RealmManager;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
@@ -122,6 +123,8 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     LifeCycle lifeCycle;
     @Inject
     JSONPersistence jsonPersistence;
+    @Inject
+    RealmManager realmManager;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -163,9 +166,8 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         final Context context = this;
 
         // Process any alarm failures
-        List<AlarmFailureLog> alarmFailureLogs = AlarmFailureLog.Companion.getAllAlarmFailureLogs();
-        AlarmFailureLog.Companion.processAlarmFailures();
-        List<AlarmFailureLog> alarmFailures = AlarmFailureLog.Companion.sendAlarmFailureLogs();
+        List<AlarmFailureLog> alarmFailureLogs = realmManager.getAllAlarmFailureLogs();
+        realmManager.processAlarmFailures();
 
         //Set shared pref to indicate whether mobile number is valid
         FirebaseNetwork.flagValidMobileNumber(this, false);

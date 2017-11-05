@@ -316,6 +316,20 @@ public class DeviceAlarmTableManager {
         return alarmList.get(0).getMillis();
     }
 
+    public Long getMillisOfPendingIntent(int pendingIntentID) {
+        SQLiteDatabase db = initDB();
+
+        String selectQuery = "SELECT * FROM " + AlarmTableEntry.TABLE_NAME +
+                " WHERE " + AlarmTableEntry.COLUMN_PI_ID + " = " + pendingIntentID + " ORDER BY " + AlarmTableEntry.COLUMN_MILLIS + " ASC LIMIT 1;";
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        if(!checkValidCursor(cursor)) return null;
+        ArrayList<DeviceAlarm> alarmList = extractAlarms(cursor);
+
+        cursor.close();
+        return alarmList.get(0).getMillis();
+    }
+
     ArrayList<DeviceAlarm> getAlarmSets() {
         SQLiteDatabase db = initDB();
 

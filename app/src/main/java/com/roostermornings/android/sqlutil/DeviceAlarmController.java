@@ -16,12 +16,12 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
 
-import com.activeandroid.ActiveAndroid;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.firebase.FirebaseNetwork;
 import com.roostermornings.android.logging.AlarmFailureLog;
+import com.roostermornings.android.logging.RealmManager;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.sync.DownloadSyncAdapter;
@@ -54,6 +54,8 @@ public final class DeviceAlarmController {
 
     @Inject
     Account mAccount;
+    @Inject
+    RealmManager realmManager;
 
     public DeviceAlarmController(Context context) {
         BaseApplication.getRoosterApplicationComponent().inject(this);
@@ -100,7 +102,7 @@ public final class DeviceAlarmController {
             // Only clear log if pending intent exists, which indicates intent has not fired
             if(cancel && pendingIntentExists) {
                 // Clear AlarmFailureLog ActiveAndroid db entry
-                AlarmFailureLog.Companion.tryDeleteAlarmFailureLogByPIID(deviceAlarm.getPiId());
+                realmManager.tryDeleteAlarmFailureLogByUIDAndPIID(deviceAlarm.getSetId(), deviceAlarm.getPiId());
             }
 
             //Use setAlarm with cancel Boolean set to true - this recreates intent in order to clear it
@@ -140,14 +142,14 @@ public final class DeviceAlarmController {
                 alarmFailureLog.setPendingIntentID(deviceAlarm.getPiId());
                 alarmFailureLog.setAlarmUid(deviceAlarm.getSetId());
                 alarmFailureLog.setScheduledTime(deviceAlarm.getMillis());
-                AlarmFailureLog.Companion.updateOrCreateAlarmFailureLogEntry(alarmFailureLog);
+                realmManager.updateOrCreateAlarmFailureLogEntry(alarmFailureLog);
             } else {
                 // Create new AlarmFailureLog ActiveAndroid db entry
                 AlarmFailureLog alarmFailureLog = new AlarmFailureLog();
                 alarmFailureLog.setPendingIntentID(deviceAlarm.getPiId());
                 alarmFailureLog.setAlarmUid(deviceAlarm.getSetId());
                 alarmFailureLog.setScheduledTime(deviceAlarm.getMillis());
-                alarmFailureLog.save();
+                realmManager.updateOrCreateAlarmFailureLogEntry(alarmFailureLog);
             }
 
             //if newer version of Android, create info pending intent

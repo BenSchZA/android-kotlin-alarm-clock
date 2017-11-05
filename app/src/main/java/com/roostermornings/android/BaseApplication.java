@@ -45,6 +45,7 @@ import javax.inject.Inject;
 
 import io.fabric.sdk.android.Fabric;
 import io.realm.Realm;
+import io.realm.RealmConfiguration;
 import retrofit.GsonConverterFactory;
 import retrofit.Retrofit;
 
@@ -100,6 +101,12 @@ public class BaseApplication extends android.app.Application {
 
         // Initialize Realm database
         Realm.init(this);
+
+        RealmConfiguration alarmFailureLogRealmConfig = new RealmConfiguration.Builder()
+                .name("alarm_failure_log.realm")
+                .schemaVersion(1)
+                .build();
+        Realm.setDefaultConfiguration(alarmFailureLogRealmConfig);
 
         /*Component implementations are primarily instantiated via a generated builder.
         An instance of the builder is obtained using the builder() method on the component implementation.

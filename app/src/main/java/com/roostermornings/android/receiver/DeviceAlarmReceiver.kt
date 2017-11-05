@@ -24,7 +24,7 @@ import javax.inject.Named
 
 import android.content.Context.VIBRATOR_SERVICE
 import com.facebook.FacebookSdk.getApplicationContext
-import com.roostermornings.android.logging.AlarmFailureLog.Companion.updateOrCreateAlarmFailureLogEntry
+import com.roostermornings.android.logging.RealmManager
 
 class DeviceAlarmReceiver : WakefulBroadcastReceiver() {
 
@@ -32,6 +32,7 @@ class DeviceAlarmReceiver : WakefulBroadcastReceiver() {
     @Inject lateinit var alarmTableManager: DeviceAlarmTableManager
     @Inject
     @Named("default") lateinit var sharedPreferences: SharedPreferences
+    @Inject lateinit var realmManager: RealmManager
 
     override fun onReceive(context: Context, intent: Intent) {
 
@@ -66,9 +67,9 @@ class DeviceAlarmReceiver : WakefulBroadcastReceiver() {
             context.startService(audioServiceIntent)
         }
 
-        AlarmFailureLog.getAlarmFailureLogByPIID(intent.getIntExtra(Constants.EXTRA_REQUESTCODE, -1))?.let {
+        realmManager.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
             it.fired = true
-            updateOrCreateAlarmFailureLogEntry(it)
+            it
         }
     }
 
