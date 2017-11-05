@@ -158,6 +158,8 @@ class DeviceAlarmFullScreenActivity : BaseActivity() {
         } catch (e: IllegalArgumentException) {
             e.printStackTrace()
         }
+        // Close Realm object
+        realmManager.closeRealm()
     }
 
     override fun onUserLeaveHint() {

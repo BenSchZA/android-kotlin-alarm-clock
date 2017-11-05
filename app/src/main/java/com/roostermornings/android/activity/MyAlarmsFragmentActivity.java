@@ -415,6 +415,8 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
             unregisterReceiver(receiver);
             receiver = null;
         }
+        // Close Realm object
+        realmManager.closeRealm();
         super.onDestroy();
     }
 
