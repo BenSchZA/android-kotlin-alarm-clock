@@ -41,8 +41,10 @@ import com.roostermornings.android.service.MediaService
 import com.roostermornings.android.util.JSONPersistence
 import com.roostermornings.android.util.RoosterUtils
 import com.roostermornings.android.util.Toaster
+import io.realm.Realm
 import java.util.*
 import javax.inject.Inject
+import kotlin.collections.ArrayList
 
 class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAudioSampleInterface, MediaController.MediaPlayerControl {
 
@@ -66,11 +68,11 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
 
     private val mMediaControllerWidget: MediaController? = null
 
-    @Inject lateinit var AppContext: BaseApplication
     @Inject lateinit var jsonPersistence: JSONPersistence
     @Inject
     lateinit var sharedPreferences: SharedPreferences
     @Inject lateinit var channelManager: ChannelManager
+    @Inject lateinit var realm: Realm
 
     private val subscriptionCallback = object : MediaBrowserCompat.SubscriptionCallback() {
         override fun onChildrenLoaded(parentId: String, children: List<MediaBrowserCompat.MediaItem>) {
@@ -199,14 +201,23 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
             }
         }.run()
 
-        if (!jsonPersistence.mediaItems.isEmpty()) {
-            mediaItems.clear()
-            mediaItems.addAll(jsonPersistence.mediaItems)
-            mAdapter.notifyDataSetChanged()
-            swipeRefreshLayout.isRefreshing = false
-        } else if (checkInternetConnection()) {
-            if (!swipeRefreshLayout.isRefreshing) swipeRefreshLayout.isRefreshing = true
-        }
+//        realm.where(RoosterMediaItem::class.java)
+//                .findAll()
+//                .takeIf { it.isNotEmpty() }
+//                .also {
+//            if(checkInternetConnection() && !swipeRefreshLayout.isRefreshing)
+//                swipeRefreshLayout.isRefreshing = true
+//        }?.let {
+//            realmMediaItems ->
+//            mediaItems.clear()
+//            realmMediaItems.forEach {
+//                mediaItems.add(it.mediaItem)
+//            }
+//            mAdapter.notifyDataSetChanged()
+//            swipeRefreshLayout.isRefreshing = false
+//        }
+        if(checkInternetConnection() && !swipeRefreshLayout.isRefreshing)
+            swipeRefreshLayout.isRefreshing = true
 
         /*
         * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
@@ -250,7 +261,16 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
         super.onPause()
 
         //Persist channel roosters for seamless loading
-        if (!mediaItems.isEmpty()) jsonPersistence.mediaItems = ArrayList<MediaBrowserCompat.MediaItem>(mediaItems)
+//        if (!mediaItems.isEmpty()) {
+//            realm.executeTransaction {
+//                realm.where(RoosterMediaItem::class.java).findAll().deleteAllFromRealm()
+//                mediaItems.forEach {
+//                    val roosterMediaItem = RoosterMediaItem()
+//                    roosterMediaItem.mediaItem = it
+//                    realm.insert(roosterMediaItem)
+//                }
+//            }
+//        }
 
         // If media not playing, stop the media service
         //if(mMediaController?.playbackState?.state != PlaybackStateCompat.STATE_PLAYING)

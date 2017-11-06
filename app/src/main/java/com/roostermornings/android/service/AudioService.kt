@@ -27,11 +27,9 @@ import android.os.Vibrator
 import android.support.v4.app.NotificationCompat
 
 import com.crashlytics.android.Crashlytics
-import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.crash.FirebaseCrash
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageReference
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.R
 import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity
@@ -40,7 +38,6 @@ import com.roostermornings.android.activity.MyAlarmsFragmentActivity
 import com.roostermornings.android.adapter_data.ChannelManager
 import com.roostermornings.android.firebase.FA
 import com.roostermornings.android.domain.ChannelRooster
-import com.roostermornings.android.receiver.DeviceAlarmReceiver
 import com.roostermornings.android.sqlutil.DeviceAlarm
 import com.roostermornings.android.sqlutil.DeviceAlarmController
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager
@@ -52,11 +49,9 @@ import com.roostermornings.android.util.JSONPersistence
 import com.roostermornings.android.util.StrUtils
 
 import java.io.File
-import java.io.FilenameFilter
 import java.io.IOException
 import java.util.ArrayList
 import java.util.concurrent.Executors
-import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
 import javax.inject.Inject
@@ -64,8 +59,7 @@ import javax.inject.Named
 
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.support.v4.content.WakefulBroadcastReceiver
-import com.roostermornings.android.logging.AlarmFailureLog
-import com.roostermornings.android.logging.RealmManager
+import com.roostermornings.android.realm.RealmManager_AlarmFailureLog
 
 //Service to manage playing and pausing audio during Rooster alarm
 class AudioService : Service() {
@@ -114,7 +108,7 @@ class AudioService : Service() {
     @Inject lateinit var jsonPersistence: JSONPersistence
     @Inject
     lateinit var channelManager: ChannelManager
-    @Inject lateinit var realmManager: RealmManager
+    @Inject lateinit var realmManagerAlarmFailureLog: RealmManager_AlarmFailureLog
 
     companion object {
         private val audioItems = ArrayList<DeviceAudioQueueItem>()
@@ -248,9 +242,8 @@ class AudioService : Service() {
         val method = Thread.currentThread().stackTrace[2].methodName
         if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method)
 
-        realmManager.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+        realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
             it.activated = true
-            it.def = true //TODO: revert
             it
         }
 
@@ -258,7 +251,7 @@ class AudioService : Service() {
         if (!mRunning) {
             mRunning = true
 
-            realmManager.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+            realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
                 it.running = true
                 it
             }
@@ -336,7 +329,7 @@ class AudioService : Service() {
         channelAudioItems = audioTableManager.extractAlarmChannelAudioFiles(mThis.alarmChannelUid)
         socialAudioItems = audioTableManager.extractUnheardSocialAudioFiles()
 
-        realmManager.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+        realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
             it.content = true
             it
         }
@@ -502,7 +495,7 @@ class AudioService : Service() {
                 if (streamMediaPlayer.isPlaying) return@OnPreparedListener
                 streamMediaPlayer.start()
 
-                realmManager.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+                realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
                     it.heard = true
                     it
                 }
@@ -615,7 +608,7 @@ class AudioService : Service() {
             mediaPlayerRooster.setOnPreparedListener {
                 mediaPlayerRooster.start()
 
-                realmManager.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+                realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
                     it.heard = true
                     it
                 }
@@ -797,7 +790,7 @@ class AudioService : Service() {
         }
 
         // Close Realm object
-        realmManager.closeRealm()
+        realmManagerAlarmFailureLog.closeRealm()
 
         //Delete audio records from arraylist
         audioItems.clear()
@@ -933,7 +926,7 @@ class AudioService : Service() {
         var method = Thread.currentThread().stackTrace[2].methodName
         if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method)
 
-        realmManager.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+        realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
             it.def = true
             it
         }
@@ -986,7 +979,7 @@ class AudioService : Service() {
                     if (mediaPlayerRooster.isPlaying) return@OnPreparedListener
                     mediaPlayerDefault.start()
 
-                    realmManager.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+                    realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
                         it.heard = true
                         it
                     }
@@ -1051,13 +1044,13 @@ class AudioService : Service() {
         }
 
         if(failsafeRingtone != null && failsafeRingtone!!.isPlaying) {
-            realmManager.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+            realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
                 it.heard = true
                 it.failsafe = true
                 it
             }
         } else {
-            realmManager.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+            realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
                 it.failsafe = true
                 it
             }

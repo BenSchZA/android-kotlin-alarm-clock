@@ -1,13 +1,10 @@
-package com.roostermornings.android.logging
+package com.roostermornings.android.realm
 
 import android.content.Context
 import com.crashlytics.android.Crashlytics
-import com.google.gson.Gson
 import com.roostermornings.android.BaseApplication
-import com.roostermornings.android.domain.User
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager
 import io.realm.Realm
-import io.realm.RealmResults
 import java.util.*
 import javax.inject.Inject
 import com.google.gson.FieldAttributes
@@ -20,7 +17,7 @@ import io.realm.RealmObject
  * Created by bscholtz on 2017/11/04.
  */
 
-class RealmManager(val context: Context) {
+class RealmManager_AlarmFailureLog(val context: Context) {
 
     @Inject lateinit var realm: Realm
     @Inject lateinit var alarmTableManager: DeviceAlarmTableManager
@@ -38,7 +35,7 @@ class RealmManager(val context: Context) {
                 .findAll().toList()
     }
 
-    fun processAlarmFailures() {
+    fun processAlarmFailures(clear: Boolean) {
         val currentTime = Calendar.getInstance().timeInMillis
 
         realm.executeTransaction {
@@ -48,21 +45,26 @@ class RealmManager(val context: Context) {
                     .lessThan("scheduledTime", currentTime)
                     .not()
                     .beginGroup()
+                        .equalTo("fired", true)
                         .equalTo("activated", true)
                         .equalTo("running", false)
                     .endGroup()
                     .beginGroup()
+                        .equalTo("fired", false)
+                        .or()
+                        .equalTo("activated", false)
+                        .or()
+                        .equalTo("running", false)
+                        .or()
                         .equalTo("seen", false)
                         .or()
                         .equalTo("heard", false)
                         .or()
+                        .equalTo("failsafe", true)
+                        .or()
                         .equalTo("content", true)
                             .beginGroup()
                                 .equalTo("def", true)
-                                .or()
-                                .equalTo("failsafe", true)
-                                .or()
-                                .equalTo("heard", false)
                             .endGroup()
                     .endGroup()
 
@@ -75,12 +77,12 @@ class RealmManager(val context: Context) {
             }
         }
         // Send relevant logs to Crashlytics
-        sendAlarmFailureLogs()
+        sendAlarmFailureLogs(clear)
         // Clear all logs older than current time in millis
-        clearOldAlarmFailureLogs()
+        if(clear) clearOldAlarmFailureLogs()
     }
 
-    private fun sendAlarmFailureLogs(): List<AlarmFailureLog> {
+    private fun sendAlarmFailureLogs(clear: Boolean): List<AlarmFailureLog> {
         // Ignore serialization of RealmObject subclass to avoid StackOverFlow error
         val GSON = GsonBuilder().addSerializationExclusionStrategy(object : ExclusionStrategy {
             override fun shouldSkipField(f: FieldAttributes): Boolean {
@@ -94,9 +96,9 @@ class RealmManager(val context: Context) {
 
         // Log each alarm failure to Crashlytics before deleting from Realm
         getAlarmFailures().onEach { alarmFailure ->
-            Crashlytics.log("Alarm Failure: \n" + GSON.toJson(alarmFailure))
+            //Crashlytics.log("Alarm Failure: \n" + GSON.toJson(alarmFailure))
             realm.executeTransaction {
-                alarmFailure.deleteFromRealm()
+                if(clear) alarmFailure.deleteFromRealm()
             }
         }.takeIf {
             // If the list is not empty, continue
@@ -109,7 +111,7 @@ class RealmManager(val context: Context) {
         return emptyList()
     }
 
-    private fun clearOldAlarmFailureLogs() {
+    fun clearOldAlarmFailureLogs() {
         // Clear all logs older than current time - i.e. pending intent that has fired (hopefully)
         val currentTime = Calendar.getInstance().timeInMillis
 

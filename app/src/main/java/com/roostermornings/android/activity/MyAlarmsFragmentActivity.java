@@ -28,17 +28,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.crashlytics.android.Crashlytics;
-import com.github.amlcurran.showcaseview.MaterialShowcaseDrawer;
-import com.github.amlcurran.showcaseview.ShowcaseView;
-import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
 import com.roostermornings.android.BaseApplication;
@@ -51,20 +46,18 @@ import com.roostermornings.android.custom_ui.SquareFrameLayout;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.firebase.FirebaseNetwork;
-import com.roostermornings.android.logging.AlarmFailureLog;
-import com.roostermornings.android.logging.RealmManager;
+import com.roostermornings.android.realm.AlarmFailureLog;
+import com.roostermornings.android.realm.RealmManager_AlarmFailureLog;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sync.DownloadSyncAdapter;
 import com.roostermornings.android.util.Constants;
-import com.roostermornings.android.util.FirstMileManager;
 import com.roostermornings.android.util.InternetHelper;
 import com.roostermornings.android.util.JSONPersistence;
 import com.roostermornings.android.util.LifeCycle;
 import com.roostermornings.android.util.StrUtils;
 import com.roostermornings.android.widgets.AlarmToggleWidget;
-import com.roostermornings.android.widgets.AlarmToggleWidgetDataProvider;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -112,9 +105,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     @Inject DeviceAlarmController deviceAlarmController;
     @Inject DeviceAlarmTableManager deviceAlarmTableManager;
     @Inject AudioTableManager audioTableManager;
-    @Inject
-    RoosterAlarmManager roosterAlarmManager;
-    @Inject BaseApplication baseApplication;
+    @Inject RoosterAlarmManager roosterAlarmManager;
     @Inject @Nullable FirebaseUser firebaseUser;
     @Inject Account mAccount;
     @Inject
@@ -124,7 +115,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     @Inject
     JSONPersistence jsonPersistence;
     @Inject
-    RealmManager realmManager;
+    RealmManager_AlarmFailureLog realmManagerAlarmFailureLog;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -160,14 +151,14 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize(R.layout.activity_my_alarms);
-        inject(BaseApplication.getRoosterApplicationComponent());
+        BaseApplication.getRoosterApplicationComponent().inject(this);
 
         //Final context to be used in threads
         final Context context = this;
 
         // Process any alarm failures
-        List<AlarmFailureLog> alarmFailureLogs = realmManager.getAllAlarmFailureLogs();
-        realmManager.processAlarmFailures();
+        List<AlarmFailureLog> alarmFailureLogs = realmManagerAlarmFailureLog.getAllAlarmFailureLogs();
+        realmManagerAlarmFailureLog.processAlarmFailures(true);
 
         //Set shared pref to indicate whether mobile number is valid
         FirebaseNetwork.flagValidMobileNumber(this, false);
@@ -416,7 +407,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
             receiver = null;
         }
         // Close Realm object
-        realmManager.closeRealm();
+        realmManagerAlarmFailureLog.closeRealm();
         super.onDestroy();
     }
 

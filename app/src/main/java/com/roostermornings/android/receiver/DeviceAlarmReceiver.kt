@@ -12,7 +12,6 @@ import android.os.Vibrator
 import android.support.v4.content.WakefulBroadcastReceiver
 
 import com.roostermornings.android.BaseApplication
-import com.roostermornings.android.logging.AlarmFailureLog
 import com.roostermornings.android.service.AudioService
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager
 import com.roostermornings.android.sqlutil.DeviceAlarmController
@@ -24,7 +23,7 @@ import javax.inject.Named
 
 import android.content.Context.VIBRATOR_SERVICE
 import com.facebook.FacebookSdk.getApplicationContext
-import com.roostermornings.android.logging.RealmManager
+import com.roostermornings.android.realm.RealmManager_AlarmFailureLog
 
 class DeviceAlarmReceiver : WakefulBroadcastReceiver() {
 
@@ -32,7 +31,7 @@ class DeviceAlarmReceiver : WakefulBroadcastReceiver() {
     @Inject lateinit var alarmTableManager: DeviceAlarmTableManager
     @Inject
     @Named("default") lateinit var sharedPreferences: SharedPreferences
-    @Inject lateinit var realmManager: RealmManager
+    @Inject lateinit var realmManagerAlarmFailureLog: RealmManager_AlarmFailureLog
 
     override fun onReceive(context: Context, intent: Intent) {
 
@@ -67,12 +66,12 @@ class DeviceAlarmReceiver : WakefulBroadcastReceiver() {
             context.startService(audioServiceIntent)
         }
 
-        realmManager.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+        realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
             it.fired = true
             it
         }
         // Close Realm object
-        realmManager.closeRealm()
+        realmManagerAlarmFailureLog.closeRealm()
     }
 
     private fun rescheduleAlarmIntents(intent: Intent) {
