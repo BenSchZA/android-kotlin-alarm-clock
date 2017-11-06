@@ -41,7 +41,7 @@ import javax.inject.Inject
 
 import butterknife.BindView
 import butterknife.OnClick
-import com.roostermornings.android.logging.RealmManager
+import com.roostermornings.android.realm.RealmManager_AlarmFailureLog
 
 class DeviceAlarmFullScreenActivity : BaseActivity() {
 
@@ -80,7 +80,7 @@ class DeviceAlarmFullScreenActivity : BaseActivity() {
     lateinit var alarmActionButton: Button
 
     @Inject lateinit var deviceAlarmController: DeviceAlarmController
-    @Inject lateinit var realmManager: RealmManager
+    @Inject lateinit var realmManagerAlarmFailureLog: RealmManager_AlarmFailureLog
 
     private val mAudioServiceConnection = object : ServiceConnection {
         // Called when the connection with the service is established
@@ -133,7 +133,7 @@ class DeviceAlarmFullScreenActivity : BaseActivity() {
 
         initialize(R.layout.activity_device_alarm_full_screen)
 
-        realmManager.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+        realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
             it.seen = true
             it
         }
@@ -159,7 +159,7 @@ class DeviceAlarmFullScreenActivity : BaseActivity() {
             e.printStackTrace()
         }
         // Close Realm object
-        realmManager.closeRealm()
+        realmManagerAlarmFailureLog.closeRealm()
     }
 
     override fun onUserLeaveHint() {
@@ -240,7 +240,7 @@ class DeviceAlarmFullScreenActivity : BaseActivity() {
     }
 
     private fun logAlarmUIInteraction() {
-        realmManager.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+        realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
             it.interaction = true
             it
         }

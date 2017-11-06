@@ -30,7 +30,7 @@ import com.google.firebase.storage.StorageReference;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.adapter_data.RoosterAlarmManager;
 import com.roostermornings.android.adapter_data.ChannelManager;
-import com.roostermornings.android.logging.RealmManager;
+import com.roostermornings.android.realm.RealmManager_AlarmFailureLog;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
@@ -210,8 +210,8 @@ public class RoosterApplicationModule {
     }
 
     @Provides
-    RealmManager provideRealmManager(BaseApplication baseApplication) {
-        return new RealmManager(baseApplication);
+    RealmManager_AlarmFailureLog provideRealmManager(BaseApplication baseApplication) {
+        return new RealmManager_AlarmFailureLog(baseApplication);
     }
 }
 
