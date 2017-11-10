@@ -52,8 +52,8 @@ android {
             //Beta version name is release version name at point of diversion, with alpha b
 
             //Release
-            versionCode 42
-            versionName "2.3.3"
+            versionCode 43
+            versionName "2.3.4"
 
             manifestPlaceholders = [
                     app_icon: "@mipmap/ic_launcher",
