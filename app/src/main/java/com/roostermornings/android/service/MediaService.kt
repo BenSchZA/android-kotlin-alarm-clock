@@ -94,7 +94,7 @@ class MediaService : MediaBrowserServiceCompat(),
         BaseApplication.getRoosterApplicationComponent().inject(this)
     }
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         MediaButtonReceiver.handleIntent(mSession, intent)
         return super.onStartCommand(intent, flags, startId)
     }
