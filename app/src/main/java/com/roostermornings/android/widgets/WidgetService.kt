@@ -23,12 +23,7 @@ class WidgetService : Service() {
             when(intent.action) {
                 Intent.ACTION_TIME_TICK -> {
                     //Update app widget
-                    val updateWidgetIntent = Intent(ctx, AlarmToggleWidget::class.java)
-                    updateWidgetIntent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-                    val appWidgetManager = AppWidgetManager.getInstance(ctx.applicationContext)
-                    val ids = appWidgetManager.getAppWidgetIds(ComponentName(ctx.applicationContext, AlarmToggleWidget::class.java))
-                    updateWidgetIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
-                    ctx.sendBroadcast(updateWidgetIntent)
+                    AlarmToggleWidget.sendUpdateBroadcast(ctx)
                 }
             }
         }

@@ -11,6 +11,7 @@ import com.google.gson.FieldAttributes
 import com.google.gson.ExclusionStrategy
 import com.google.gson.GsonBuilder
 import io.realm.RealmObject
+import java.lang.reflect.Modifier
 
 
 /**
@@ -84,7 +85,10 @@ class RealmManager_AlarmFailureLog(val context: Context) {
 
     private fun sendAlarmFailureLogs(clear: Boolean): List<AlarmFailureLog> {
         // Ignore serialization of RealmObject subclass to avoid StackOverFlow error
-        val GSON = GsonBuilder().addSerializationExclusionStrategy(object : ExclusionStrategy {
+        val GSON = GsonBuilder()
+                .excludeFieldsWithoutExposeAnnotation()
+                .excludeFieldsWithModifiers(Modifier.ABSTRACT)
+                .addSerializationExclusionStrategy(object : ExclusionStrategy {
             override fun shouldSkipField(f: FieldAttributes): Boolean {
                 return f.declaringClass == RealmObject::class.java
             }
@@ -96,7 +100,7 @@ class RealmManager_AlarmFailureLog(val context: Context) {
 
         // Log each alarm failure to Crashlytics before deleting from Realm
         getAlarmFailures().onEach { alarmFailure ->
-            //Crashlytics.log("Alarm Failure: \n" + GSON.toJson(alarmFailure))
+            Crashlytics.log("Alarm Failure: \n" + GSON.toJson(realm.copyFromRealm(alarmFailure)))
             realm.executeTransaction {
                 if(clear) alarmFailure.deleteFromRealm()
             }

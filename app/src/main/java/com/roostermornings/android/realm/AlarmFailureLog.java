@@ -1,5 +1,8 @@
 package com.roostermornings.android.realm;
 
+import com.google.firebase.database.Exclude;
+import com.google.gson.annotations.Expose;
+
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 import kotlin.jvm.JvmField;
@@ -11,32 +14,45 @@ import kotlin.jvm.JvmField;
 public class AlarmFailureLog extends RealmObject {
 
     // Pending intent ID
+    @Expose
     public Integer pendingIntentID = -1;
     // Firebase UID of alarm
+    @Expose
     public String alarmUid = "";
     // Time of scheduled alarm
+    @Expose
     @PrimaryKey
     public Long scheduledTime = -1L;
     // Pending intent triggered
-    public Boolean fired = false;
+    @Expose
+    public boolean fired = false;
     // Activation service started
-    public Boolean activated = false;
+    @Expose
+    public boolean activated = false;
     // Activation service running
-    public Boolean running = false;
+    @Expose
+    public boolean running = false;
     // User dismissed, snoozed, or clicked next on alarm
-    public Boolean interaction = false;
+    @Expose
+    public boolean interaction = false;
     // Activation activity visible
-    public Boolean seen = false;
+    @Expose
+    public boolean seen = false;
     // Audio successfully started
-    public Boolean heard = false;
+    @Expose
+    public boolean heard = false;
     // Audio default received
-    public Boolean def = false;
+    @Expose
+    public boolean def = false;
     // Audio fail-safe received
-    public Boolean failsafe = false;
+    @Expose
+    public boolean failsafe = false;
     // Audio content received
-    public Boolean content = false;
+    @Expose
+    public boolean content = false;
     // Alarm defined as failure
-    public Boolean failure = false;
+    @Expose
+    public boolean failure = false;
 
     // A failure can be defined by the following failure modes, and is implemented in a
     // RealmManager_AlarmFailureLog query.
@@ -70,83 +86,83 @@ public class AlarmFailureLog extends RealmObject {
         this.scheduledTime = scheduledTime;
     }
 
-    public Boolean isFired() {
+    public boolean isFired() {
         return fired;
     }
 
-    public void setFired(Boolean fired) {
+    public void setFired(boolean fired) {
         this.fired = fired;
     }
 
-    public Boolean isActivated() {
+    public boolean isActivated() {
         return activated;
     }
 
-    public void setActivated(Boolean activated) {
+    public void setActivated(boolean activated) {
         this.activated = activated;
     }
 
-    public Boolean isRunning() {
+    public boolean isRunning() {
         return running;
     }
 
-    public void setRunning(Boolean running) {
+    public void setRunning(boolean running) {
         this.running = running;
     }
 
-    public Boolean isInteraction() {
+    public boolean isInteraction() {
         return interaction;
     }
 
-    public void setInteraction(Boolean interaction) {
+    public void setInteraction(boolean interaction) {
         this.interaction = interaction;
     }
 
-    public Boolean isSeen() {
+    public boolean isSeen() {
         return seen;
     }
 
-    public void setSeen(Boolean seen) {
+    public void setSeen(boolean seen) {
         this.seen = seen;
     }
 
-    public Boolean isHeard() {
+    public boolean isHeard() {
         return heard;
     }
 
-    public void setHeard(Boolean heard) {
+    public void setHeard(boolean heard) {
         this.heard = heard;
     }
 
-    public Boolean isDef() {
+    public boolean isDef() {
         return def;
     }
 
-    public void setDef(Boolean def) {
+    public void setDef(boolean def) {
         this.def = def;
     }
 
-    public Boolean isFailsafe() {
+    public boolean isFailsafe() {
         return failsafe;
     }
 
-    public void setFailsafe(Boolean failsafe) {
+    public void setFailsafe(boolean failsafe) {
         this.failsafe = failsafe;
     }
 
-    public Boolean isContent() {
+    public boolean isContent() {
         return content;
     }
 
-    public void setContent(Boolean content) {
+    public void setContent(boolean content) {
         this.content = content;
     }
 
-    public Boolean isFailure() {
+    public boolean isFailure() {
         return failure;
     }
 
-    public void setFailure(Boolean failure) {
+    public void setFailure(boolean failure) {
         this.failure = failure;
     }
 }
