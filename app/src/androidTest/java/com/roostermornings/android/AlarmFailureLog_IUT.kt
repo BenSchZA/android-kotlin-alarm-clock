@@ -69,6 +69,9 @@ class AlarmFailureLog_IUT {
             it.setDef(false)
             it.setFailsafe(false)
             it.setFailure(false)
+            it.setContent(true)
+            it.setStream(false)
+            it.setChannel(true)
             it.setAlarmUid("test")
             it.setPendingIntentID(1)
             it.setScheduledTime(1)
@@ -90,7 +93,7 @@ class AlarmFailureLog_IUT {
     fun failurePermutationTests() {
         configureAlarmFailureLogEntry()
 
-        for (permutation in 1..10) {
+        for (permutation in 1..13) {
             when(permutation) {
                 1 -> testPermutation(true) { it.setFired(false) }
                 2 -> testPermutation(true) { it.setActivated(false) }
@@ -115,6 +118,21 @@ class AlarmFailureLog_IUT {
                     it.setHeard(false)
                     it.setSeen(false)
                     it.setFailsafe(true)
+                }
+                11 -> testPermutation(true) {
+                    it.setChannel(true)
+                    it.setContent(false)
+                }
+                12 -> testPermutation(true) {
+                    it.setDef(true)
+                    it.setContent(true)
+                }
+                13 -> testPermutation(true) {
+                    it.setDef(true)
+                    it.setChannel(true)
+                }
+                14 -> testPermutation(true) {
+                    it.setStream(true)
                 }
             }
         }

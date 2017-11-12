@@ -105,6 +105,7 @@ public class BaseApplication extends android.app.Application {
         RealmConfiguration alarmFailureLogRealmConfig = new RealmConfiguration.Builder()
                 .name("alarm_failure_log.realm")
                 .schemaVersion(1)
+                .deleteRealmIfMigrationNeeded()
                 .build();
         Realm.setDefaultConfiguration(alarmFailureLogRealmConfig);
 

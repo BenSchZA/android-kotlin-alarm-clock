@@ -7,7 +7,9 @@ package com.roostermornings.android.util;
 
 import android.os.Build;
 
+import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.domain.Alarm;
+import com.roostermornings.android.domain.MinimumRequirements;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -70,6 +72,33 @@ public class RoosterUtils {
             e.printStackTrace();
             return "";
         }
+    }
+
+    public static boolean isAboveVersion(MinimumRequirements minimumRequirements) {
+        try {
+            String buildVersionComponents[] = BuildConfig.VERSION_NAME.replaceAll("[^\\d.]", "").split("\\.");
+            String minVersionComponents[] = minimumRequirements.getApp_version().replaceAll("[^\\d.]", "").split("\\.");
+            int position = 0;
+            for (String component :
+                    minVersionComponents) {
+                if (!component.isEmpty()) {
+                    Integer componentInteger = Integer.valueOf(component);
+                    if (position >= buildVersionComponents.length) break;
+                    Integer buildComponentInteger = Integer.valueOf(buildVersionComponents[position]);
+                    if(buildComponentInteger < componentInteger) {
+                        return false;
+                    } else if(buildComponentInteger > componentInteger) {
+                        return true;
+                    } else {
+                        position++;
+                    }
+                }
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            return true;
+        }
+        return true;
     }
 
     public static String setAlarmTimeFromHourAndMinute(int hour, int minute, boolean twentyFourFormat) {

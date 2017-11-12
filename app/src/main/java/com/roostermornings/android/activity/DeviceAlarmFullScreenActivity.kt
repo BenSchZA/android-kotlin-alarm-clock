@@ -135,7 +135,6 @@ class DeviceAlarmFullScreenActivity : BaseActivity() {
 
         realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
             it.seen = true
-            it
         }
 
         setDayNightTheme()
@@ -242,7 +241,6 @@ class DeviceAlarmFullScreenActivity : BaseActivity() {
     private fun logAlarmUIInteraction() {
         realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
             it.interaction = true
-            it
         }
     }
 
