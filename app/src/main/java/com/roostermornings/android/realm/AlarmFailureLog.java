@@ -50,6 +50,15 @@ public class AlarmFailureLog extends RealmObject {
     // Audio content received
     @Expose
     public boolean content = false;
+    // Audio content selected
+    @Expose
+    public boolean channel = false;
+    // Audio content stream attempted
+    @Expose
+    public boolean stream = false;
+    // Internet connection available
+    @Expose
+    public boolean internet = false;
     // Alarm defined as failure
     @Expose
     public boolean failure = false;
@@ -61,6 +70,30 @@ public class AlarmFailureLog extends RealmObject {
     // FailureMode1 = (!seen || !heard)
     // FailureMode2 = content && (default || !heard)
     // FailureMode3 = failsafe
+
+    public boolean isChannel() {
+        return channel;
+    }
+
+    public void setChannel(boolean channel) {
+        this.channel = channel;
+    }
+
+    public boolean isStream() {
+        return stream;
+    }
+
+    public void setStream(boolean stream) {
+        this.stream = stream;
+    }
+
+    public boolean isInternet() {
+        return internet;
+    }
+
+    public void setInternet(boolean internet) {
+        this.internet = internet;
+    }
 
     public Integer getPendingIntentID() {
         return pendingIntentID;

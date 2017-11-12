@@ -59,6 +59,7 @@ import javax.inject.Named
 
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.support.v4.content.WakefulBroadcastReceiver
+import com.google.firebase.auth.FirebaseUser
 import com.roostermornings.android.realm.RealmManager_AlarmFailureLog
 
 //Service to manage playing and pausing audio during Rooster alarm
@@ -109,6 +110,7 @@ class AudioService : Service() {
     @Inject
     lateinit var channelManager: ChannelManager
     @Inject lateinit var realmManagerAlarmFailureLog: RealmManager_AlarmFailureLog
+    var firebaseUser: FirebaseUser? = null
 
     companion object {
         private val audioItems = ArrayList<DeviceAudioQueueItem>()
@@ -158,6 +160,11 @@ class AudioService : Service() {
     //Set timer to kill alarm after 5 minutes
     private val alarmFinishTimerRunnable = Runnable { notifyActivityTimesUp() }
 
+    @Inject
+    fun AudioService(firebaseUser: FirebaseUser?) {
+        mThis.firebaseUser = firebaseUser
+    }
+
     /**
      * Class used for the client Binder.  Because we know this service always
      * runs in the same process as its clients, we don't need to deal with IPC.
@@ -196,6 +203,11 @@ class AudioService : Service() {
         //Register broadcast receivers for external access
         registerEndAudioServiceBroadcastReceiver()
         registerSnoozeAudioServiceBroadcastReceiver()
+
+        // Register user data for Crashlytics reports
+        Crashlytics.setUserIdentifier(firebaseUser?.uid)
+        Crashlytics.setUserEmail(firebaseUser?.email?:"")
+        Crashlytics.setUserName(firebaseUser?.displayName?:"")
     }
 
     private fun logError(e: Throwable) {
@@ -244,7 +256,6 @@ class AudioService : Service() {
 
         realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
             it.activated = true
-            it
         }
 
         //Only attempt to start alarm once, in case of multiple conflicting alarms
@@ -253,7 +264,12 @@ class AudioService : Service() {
 
             realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
                 it.running = true
-                it
+            }
+
+            if(!InternetHelper.noInternetConnection(this)) {
+                realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+                    it.internet = true
+                }
             }
 
             //Start fullscreen alarm activation activity
@@ -329,9 +345,16 @@ class AudioService : Service() {
         channelAudioItems = audioTableManager.extractAlarmChannelAudioFiles(mThis.alarmChannelUid)
         socialAudioItems = audioTableManager.extractUnheardSocialAudioFiles()
 
-        realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
-            it.content = true
-            it
+        if(channelAudioItems.isNotEmpty()) {
+            realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+                it.content = true
+            }
+        }
+
+        if(StrUtils.notNullOrEmpty(mThis.alarmChannelUid)) {
+            realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+                it.channel = true
+            }
         }
 
         // Check if user setting limit alarm time enabled
@@ -348,6 +371,10 @@ class AudioService : Service() {
                 if (!InternetHelper.noInternetConnection(this)) {
                     //Download any social or channel audio files
                     attemptContentUriRetrieval(alarm)
+
+                    realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+                        it.stream = true
+                    }
                 } else {
                     compileAudioItemContent()
                 }
@@ -364,7 +391,7 @@ class AudioService : Service() {
 
     private fun logAlarmActivation(dataLoaded: Boolean) {
         if (channelAudioItems.isNotEmpty() && socialAudioItems.isNotEmpty() ) {
-            FA.LogMany(FA.Event.alarm_activated::class.java, arrayOf(FA.Event.alarm_activated.Param.channel_content_received, FA.Event.alarm_activated.Param.social_content_received, FA.Event.alarm_activated.Param.data_loaded), arrayOf(channelAudioItems!!.size, socialAudioItems.size, dataLoaded))
+            FA.LogMany(FA.Event.alarm_activated::class.java, arrayOf(FA.Event.alarm_activated.Param.channel_content_received, FA.Event.alarm_activated.Param.social_content_received, FA.Event.alarm_activated.Param.data_loaded), arrayOf(channelAudioItems.size, socialAudioItems.size, dataLoaded))
         } else if (channelAudioItems.isNotEmpty() ) {
             FA.LogMany(FA.Event.alarm_activated::class.java, arrayOf(FA.Event.alarm_activated.Param.channel_content_received, FA.Event.alarm_activated.Param.data_loaded), arrayOf(channelAudioItems.size, dataLoaded))
         } else if (socialAudioItems.isNotEmpty() ) {
@@ -497,7 +524,6 @@ class AudioService : Service() {
 
                 realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
                     it.heard = true
-                    it
                 }
 
                 checkStreamVolume(AudioManager.STREAM_ALARM)
@@ -610,7 +636,6 @@ class AudioService : Service() {
 
                 realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
                     it.heard = true
-                    it
                 }
 
                 if (alarmPosition == 1 && currentAlarmCycle == 1) {
@@ -928,7 +953,6 @@ class AudioService : Service() {
 
         realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
             it.def = true
-            it
         }
 
         //If channel UID attached to alarm, content should have played
@@ -981,7 +1005,6 @@ class AudioService : Service() {
 
                     realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
                         it.heard = true
-                        it
                     }
 
                     //Start timer to kill after 5 minutes
@@ -1047,12 +1070,10 @@ class AudioService : Service() {
             realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
                 it.heard = true
                 it.failsafe = true
-                it
             }
         } else {
             realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
                 it.failsafe = true
-                it
             }
         }
     }
@@ -1064,11 +1085,6 @@ class AudioService : Service() {
     private fun logDefaultRingtoneState(failure: Boolean) {
         val method = Thread.currentThread().stackTrace[2].methodName
         if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method + " Failure:" + failure.toString())
-
-        //Log a firebase analytics event indicating whether an attempt was/should have been made to play audio content
-        FA.LogMany(FA.Event.default_alarm_play::class.java,
-                arrayOf(FA.Event.default_alarm_play.Param.attempt_to_play, FA.Event.default_alarm_play.Param.fatal_failure),
-                arrayOf<Any>(!socialAudioItems.isEmpty() || !channelAudioItems.isEmpty(), failure))
 
         if (failure) {
             //Show dialog explainer again by clearing shared pref

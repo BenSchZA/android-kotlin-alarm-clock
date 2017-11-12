@@ -10,6 +10,7 @@ import javax.inject.Inject
 import com.google.gson.FieldAttributes
 import com.google.gson.ExclusionStrategy
 import com.google.gson.GsonBuilder
+import com.roostermornings.android.firebase.FA
 import io.realm.RealmObject
 import java.lang.reflect.Modifier
 
@@ -63,9 +64,18 @@ class RealmManager_AlarmFailureLog(val context: Context) {
                         .or()
                         .equalTo("failsafe", true)
                         .or()
-                        .equalTo("content", true)
+                        .equalTo("stream", true)
+                        .or()
+                        .equalTo("def", true)
                             .beginGroup()
-                                .equalTo("def", true)
+                                .equalTo("content", true)
+                                .or()
+                                .equalTo("channel", true)
+                            .endGroup()
+                        .or()
+                        .equalTo("channel", true)
+                            .beginGroup()
+                                .equalTo("content", false)
                             .endGroup()
                     .endGroup()
 
@@ -100,10 +110,16 @@ class RealmManager_AlarmFailureLog(val context: Context) {
 
         // Log each alarm failure to Crashlytics before deleting from Realm
         getAlarmFailures().onEach { alarmFailure ->
-            Crashlytics.log("Alarm Failure: \n" + GSON.toJson(realm.copyFromRealm(alarmFailure)))
+            val unmanagedAlarmFailure = realm.copyFromRealm(alarmFailure)
+            Crashlytics.log("Alarm Failure: \n" + GSON.toJson(unmanagedAlarmFailure))
             realm.executeTransaction {
                 if(clear) alarmFailure.deleteFromRealm()
             }
+
+            //Log a firebase analytics event indicating whether an attempt was/should have been made to play audio content
+            FA.LogMany(FA.Event.default_alarm_play::class.java,
+                    arrayOf(FA.Event.default_alarm_play.Param.attempt_to_play, FA.Event.default_alarm_play.Param.fatal_failure),
+                    arrayOf<Any>(unmanagedAlarmFailure.content, (!unmanagedAlarmFailure.seen || !unmanagedAlarmFailure.heard) && !unmanagedAlarmFailure.interaction))
         }.takeIf {
             // If the list is not empty, continue
             it.isNotEmpty()
@@ -140,7 +156,7 @@ class RealmManager_AlarmFailureLog(val context: Context) {
                 .findFirst()
     }
 
-    fun getAlarmFailureLogMillisSlot(pendingIntentID: Int?, operation: (AlarmFailureLog) -> AlarmFailureLog): AlarmFailureLog? {
+    fun getAlarmFailureLogMillisSlot(pendingIntentID: Int?, operation: (AlarmFailureLog) -> Unit): AlarmFailureLog? {
         // scheduledTime is a unique key - return the slot where scheduledTime is equal to the
         // millis set for the specific pending intent passed to method
         val millis = alarmTableManager.getMillisOfPendingIntent(pendingIntentID?:-1)

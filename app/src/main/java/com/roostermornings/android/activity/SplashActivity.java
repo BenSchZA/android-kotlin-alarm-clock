@@ -180,31 +180,7 @@ public class SplashActivity extends BaseActivity {
                     return;
                 }
                 if(minimumRequirements.isInvalidate_user()) {
-                    try {
-                        String buildVersionComponents[] = BuildConfig.VERSION_NAME.replaceAll("[^\\d.]", "").split("\\.");
-                        String minVersionComponents[] = minimumRequirements.getApp_version().replaceAll("[^\\d.]", "").split("\\.");
-                        int position = 0;
-                        for (String component :
-                                minVersionComponents) {
-                            if (!component.isEmpty()) {
-                                Integer componentInteger = Integer.valueOf(component);
-                                if (position >= buildVersionComponents.length) break;
-                                Integer buildComponentInteger = Integer.valueOf(buildVersionComponents[position]);
-                                if(buildComponentInteger < componentInteger) {
-                                    aboveMinReq = false;
-                                    break;
-                                } else if(buildComponentInteger > componentInteger) {
-                                    aboveMinReq = true;
-                                    break;
-                                } else {
-                                    position++;
-                                }
-                            }
-                        }
-                    } catch (NullPointerException e) {
-                        e.printStackTrace();
-                        chooseActivity(true, null);
-                    }
+                    aboveMinReq = RoosterUtils.isAboveVersion(minimumRequirements);
                 }
                 chooseActivity(aboveMinReq, minimumRequirements);
             }
