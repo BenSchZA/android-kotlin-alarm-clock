@@ -107,6 +107,7 @@ class AlarmFailureLog_IUT {
                 6 -> testPermutation(false) { it.setInteraction(false) }
                 7 -> testPermutation(true) { it.setDef(true) }
                 8 -> testPermutation(false) {
+                    it.setChannel(false)
                     it.setContent(false)
                     it.setDef(true)
                 }
