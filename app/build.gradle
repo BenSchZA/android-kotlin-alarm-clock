@@ -39,6 +39,11 @@ android {
         vectorDrawables.useSupportLibrary = true
         // Enabling multidex support.
         multiDexEnabled true
+
+        // Filter out unneeded CPU architectures, size vs performance
+        ndk {
+            abiFilters "armeabi-v7a", "x86"
+        }
     }
 
     //As of AS 3.0
@@ -72,7 +77,7 @@ android {
 
             //Beta
             versionName "2.3.4b"
-            versionCode 1000015
+            versionCode 1000016
 
             manifestPlaceholders = [
                     app_icon: "@mipmap/ic_launcher_beta",
@@ -87,6 +92,7 @@ android {
             //During debugging, enable debugging... and disable minify to get proper stacktraces
             //debuggable true
             minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             consumerProguardFiles 'proguard-rules.txt'
             proguardFile 'proguard-square-okio.pro'
