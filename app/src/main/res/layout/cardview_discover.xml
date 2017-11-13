@@ -31,7 +31,6 @@
                 android:foreground="@drawable/filter_channel_cardview"
                 android:maxHeight="500dp"
                 android:maxWidth="1000dp"
-                android:src="@drawable/landscape"
                 android:visibility="invisible" />
 
             <ProgressBar
