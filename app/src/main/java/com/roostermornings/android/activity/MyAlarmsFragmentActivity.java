@@ -18,7 +18,9 @@ import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.graphics.drawable.VectorDrawableCompat;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -56,6 +58,7 @@ import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.InternetHelper;
 import com.roostermornings.android.util.JSONPersistence;
 import com.roostermornings.android.util.LifeCycle;
+import com.roostermornings.android.util.SnackbarManager;
 import com.roostermornings.android.util.StrUtils;
 import com.roostermornings.android.widgets.AlarmToggleWidget;
 
@@ -78,6 +81,8 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
     private static final String TAG = MyAlarmsFragmentActivity.class.getSimpleName();
 
+    @BindView(R.id.my_alarms_coordinator_layout)
+    CoordinatorLayout myAlarmsCoordinatorLayout;
     @BindView(R.id.home_alarmsListView)
     RecyclerView mRecyclerView;
     @BindView(R.id.toolbar_title)
@@ -101,6 +106,8 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     private BroadcastReceiver receiver;
 
     Toolbar toolbar;
+
+    SnackbarManager snackbarManager;
 
     @Inject DeviceAlarmController deviceAlarmController;
     @Inject DeviceAlarmTableManager deviceAlarmTableManager;
@@ -165,6 +172,12 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
         //Check if first entry
         lifeCycle.performInception();
+
+        snackbarManager = new SnackbarManager(this, myAlarmsCoordinatorLayout);
+
+        snackbarManager.generateNoInternetConnection();
+        snackbarManager.generateSyncing();
+        snackbarManager.generateFinished();
 
         //FirstMileManager firstMileManager = new FirstMileManager();
         //firstMileManager.createShowcase(this, new ViewTarget(buttonAddAlarm.getId(), this), 1);
@@ -326,6 +339,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                 animateRefreshDownloadIndicator();
             } else {
                 toolbar.setNavigationIcon(R.drawable.ic_cloud_off_white_24dp);
+                snackbarManager.generateNoInternetConnection();
             }
 
             //Listen for channel download complete notices
@@ -334,6 +348,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                 public void onChannelDownloadStarted(String channelId) {
                     if (!deviceAlarmTableManager.isNextPendingAlarmSynced()) {
                         animateRefreshDownloadIndicator();
+                        snackbarManager.generateSyncing();
                     }
                 }
 
@@ -341,6 +356,9 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                 public void onChannelDownloadComplete(boolean valid, String channelId) {
                     if (deviceAlarmTableManager.isNextPendingAlarmSynced()) {
                         toolbar.setNavigationIcon(R.drawable.ic_cloud_done_white_24dp);
+                        if(snackbarManager.getPreviousState() ==
+                                SnackbarManager.PreviousState.SYNCING)
+                            snackbarManager.generateFinished();
                     }
                 }
             });

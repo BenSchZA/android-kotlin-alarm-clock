@@ -66,10 +66,13 @@ public class AlarmFailureLog extends RealmObject {
     // A failure can be defined by the following failure modes, and is implemented in a
     // RealmManager_AlarmFailureLog query.
     // Failure = FailureMode0 && (FailureMode1 || FailureMode2)
-    // FailureMode0 = (currentTime > scheduledTime) && !(activated & !running)
-    // FailureMode1 = (!seen || !heard)
-    // FailureMode2 = content && (default || !heard)
-    // FailureMode3 = failsafe
+    // FailureMode0 = (currentTime > scheduledTime) && !(fired & activated & !running)
+    // FailureMode1 = (!fired  || !activated || !running || !seen || !heard || failsafe || stream)
+    // FailureMode2 = default && (content || channel) || channel && !content
+    // What we want to feed back to the user:
+    // * Alarm content didn't download because of internet connection
+    // as a subset of above: not to worry, alarm default occurred, or streamed if internet access present at time of activation
+    // * Alarm intent didn't fire, possibly because of not being whitelisted (can cross reference with phone model)
 
     public boolean isChannel() {
         return channel;

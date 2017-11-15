@@ -16,6 +16,7 @@
     tools:showIn="@layout/activity_my_alarms">
 
     <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/my_alarms_coordinator_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/button_bar">
@@ -45,6 +46,7 @@
             android:layout_margin="@dimen/fab_margin"
             android:background="@color/rooster_light_blue"
             android:clickable="true"
+            android:focusable="true"
             android:src="@drawable/ic_add_white_24dp"
             app:borderWidth="0dp" />
 

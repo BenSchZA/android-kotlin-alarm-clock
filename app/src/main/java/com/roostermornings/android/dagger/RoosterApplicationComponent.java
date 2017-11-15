@@ -43,6 +43,7 @@ import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment1;
 import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment2;
 import com.roostermornings.android.realm.RealmManager_AlarmFailureLog;
 import com.roostermornings.android.media.MediaNotificationHelper;
+import com.roostermornings.android.realm.RealmManager_ScheduledSnackbar;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 import com.roostermornings.android.receiver.NetworkChangeReceiver;
@@ -56,6 +57,7 @@ import com.roostermornings.android.sync.DownloadSyncAdapter;
 import com.roostermornings.android.geolocation.GeoHashUtils;
 import com.roostermornings.android.util.JSONPersistence;
 import com.roostermornings.android.util.LifeCycle;
+import com.roostermornings.android.util.SnackbarManager;
 import com.roostermornings.android.widgets.AlarmToggleWidget;
 import com.roostermornings.android.widgets.AlarmToggleWidgetDataProvider;
 
@@ -123,6 +125,8 @@ public interface RoosterApplicationComponent {
     void inject(AlarmToggleWidgetDataProvider roosterClass);
     void inject(AlarmToggleWidget roosterClass);
     void inject(RealmManager_AlarmFailureLog roosterClass);
+    void inject(RealmManager_ScheduledSnackbar roosterClass);
+    void inject(SnackbarManager roosterClass);
 
     void inject(DownloadSyncAdapter adapter);
     void inject(MyAlarmsListAdapter adapter);

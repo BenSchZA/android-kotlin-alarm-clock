@@ -31,6 +31,7 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.adapter_data.RoosterAlarmManager;
 import com.roostermornings.android.adapter_data.ChannelManager;
 import com.roostermornings.android.realm.RealmManager_AlarmFailureLog;
+import com.roostermornings.android.realm.RealmManager_ScheduledSnackbar;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
@@ -210,8 +211,13 @@ public class RoosterApplicationModule {
     }
 
     @Provides
-    RealmManager_AlarmFailureLog provideRealmManager(BaseApplication baseApplication) {
+    RealmManager_AlarmFailureLog provideRealmManagerAlarmFailureLog(BaseApplication baseApplication) {
         return new RealmManager_AlarmFailureLog(baseApplication);
+    }
+
+    @Provides
+    RealmManager_ScheduledSnackbar provideRealmManagerScheduledSnackbar(BaseApplication baseApplication) {
+        return new RealmManager_ScheduledSnackbar();
     }
 }
 
