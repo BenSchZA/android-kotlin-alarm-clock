@@ -1,6 +1,9 @@
 package com.roostermornings.android.realm
 
 import android.content.Context
+import android.content.SharedPreferences
+import android.support.design.widget.Snackbar
+import android.view.View
 import com.crashlytics.android.Crashlytics
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager
@@ -10,8 +13,12 @@ import javax.inject.Inject
 import com.google.gson.FieldAttributes
 import com.google.gson.ExclusionStrategy
 import com.google.gson.GsonBuilder
+import com.roostermornings.android.activity.MyAlarmsFragmentActivity
 import com.roostermornings.android.firebase.FA
+import com.roostermornings.android.util.Constants
+import com.roostermornings.android.util.SnackbarManager
 import io.realm.RealmObject
+import io.realm.RealmResults
 import java.lang.reflect.Modifier
 
 
@@ -22,7 +29,9 @@ import java.lang.reflect.Modifier
 class RealmManager_AlarmFailureLog(val context: Context) {
 
     @Inject lateinit var realm: Realm
+    @Inject lateinit var realmManagerScheduledSnackbar: RealmManager_ScheduledSnackbar
     @Inject lateinit var alarmTableManager: DeviceAlarmTableManager
+    @Inject lateinit var sharedPreferences: SharedPreferences
 
     init {
         BaseApplication.getRoosterApplicationComponent().inject(this)
@@ -42,7 +51,7 @@ class RealmManager_AlarmFailureLog(val context: Context) {
 
         realm.executeTransaction {
             // Query Realm, looking for alarm failures, as defined in AlarmFailureLog comments
-            val query = realm
+            var tempResults = realm
                     .where(AlarmFailureLog::class.java)
                     .lessThan("scheduledTime", currentTime)
                     .not()
@@ -50,7 +59,12 @@ class RealmManager_AlarmFailureLog(val context: Context) {
                         .equalTo("fired", true)
                         .equalTo("activated", true)
                         .equalTo("running", false)
-                    .endGroup()
+                    .endGroup().findAll()
+
+            // Find all results where alarm delayed by more than 5 minutes
+            val delayedAlarms = tempResults.filter { Math.abs(it.scheduledTime - it.firedTime) >= Constants.TIME_MILLIS_1_MINUTE*5 }
+
+            tempResults = tempResults.where()
                     .beginGroup()
                         .equalTo("fired", false)
                         .or()
@@ -77,10 +91,10 @@ class RealmManager_AlarmFailureLog(val context: Context) {
                             .beginGroup()
                                 .equalTo("content", false)
                             .endGroup()
-                    .endGroup()
+                    .endGroup().findAll()
 
             // Find all objects matching query
-            val failures: List<AlarmFailureLog> = query.findAll()
+            val failures: List<AlarmFailureLog> = tempResults + delayedAlarms.filterNot { tempResults.contains(it) }
 
             // For each alarm failure, mark it as such for easy fetching later
             failures.forEach { alarmFailure ->
@@ -112,6 +126,9 @@ class RealmManager_AlarmFailureLog(val context: Context) {
         getAlarmFailures().onEach { alarmFailure ->
             val unmanagedAlarmFailure = realm.copyFromRealm(alarmFailure)
             Crashlytics.log("Alarm Failure: \n" + GSON.toJson(unmanagedAlarmFailure))
+
+            generateScheduledSnackbarForAlarmFailure(unmanagedAlarmFailure)
+
             realm.executeTransaction {
                 if(clear) alarmFailure.deleteFromRealm()
             }
@@ -129,6 +146,58 @@ class RealmManager_AlarmFailureLog(val context: Context) {
             return@sendAlarmFailureLogs it
         }
         return emptyList()
+    }
+
+    private fun generateScheduledSnackbarForAlarmFailure(alarmFailureLog: AlarmFailureLog) {
+        val snackbarQueueElement = SnackbarManager.Companion.SnackbarQueueElement()
+        snackbarQueueElement.actionText = "Learn more"
+        snackbarQueueElement.priority = 10
+        snackbarQueueElement.length = Snackbar.LENGTH_INDEFINITE
+
+        val activityName = MyAlarmsFragmentActivity::class.java.name
+
+        // 88 characters max for text
+        alarmFailureLog.takeIf {
+            Math.abs(it.scheduledTime - it.firedTime) >= Constants.TIME_MILLIS_1_MINUTE*5}?.let {
+
+            snackbarQueueElement.text = "Your alarm was delayed. Your phone may be doing this to save power."
+
+            realmManagerScheduledSnackbar.updateOrCreateScheduledSnackbarEntry(snackbarQueueElement, activityName, -1L)
+            return@generateScheduledSnackbarForAlarmFailure
+        }
+        alarmFailureLog.takeIf {
+            it.def && it.channel && !it.content}?.let {
+
+            snackbarQueueElement.text = "Received a default alarm tone? We need an internet connection when alarm set."
+
+            realmManagerScheduledSnackbar.updateOrCreateScheduledSnackbarEntry(snackbarQueueElement, activityName, -1L)
+            return@generateScheduledSnackbarForAlarmFailure
+        }
+        alarmFailureLog.takeIf {
+            it.stream  && it.channel && !it.content}?.let {
+
+            snackbarQueueElement.text = "Your alarm was streamed. We need an internet connection when your alarm is set."
+
+            realmManagerScheduledSnackbar.updateOrCreateScheduledSnackbarEntry(snackbarQueueElement, activityName, -1L)
+            return@generateScheduledSnackbarForAlarmFailure
+        }
+        alarmFailureLog.takeIf {
+            (!it.fired || !it.activated) && !it.running}?.let {
+
+            //Show dialog explainer again by clearing shared pref
+            val editor = sharedPreferences.edit()
+            editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false)
+            editor.apply()
+
+            snackbarQueueElement.text = "Your alarm didn't fire. Your phone may be blocking Rooster."
+
+            realmManagerScheduledSnackbar.updateOrCreateScheduledSnackbarEntry(snackbarQueueElement, activityName, -1L)
+            return@generateScheduledSnackbarForAlarmFailure
+        }
+        /*//Show dialog explainer again by clearing shared pref
+        val editor = sharedPreferences.edit()
+        editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false)
+        editor.apply()*/
     }
 
     fun clearOldAlarmFailureLogs() {

@@ -5,6 +5,7 @@ import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4
 import com.roostermornings.android.realm.AlarmFailureLog
 import com.roostermornings.android.realm.RealmManager_AlarmFailureLog
+import com.roostermornings.android.util.Constants
 import io.realm.Realm
 import org.junit.runner.RunWith
 import org.hamcrest.core.Is.`is`
@@ -74,7 +75,8 @@ class AlarmFailureLog_IUT {
             it.setChannel(true)
             it.setAlarmUid("test")
             it.setPendingIntentID(1)
-            it.setScheduledTime(1)
+            it.setScheduledTime(Constants.TIME_MILLIS_1_HOUR)
+            it.setFiredTime(Constants.TIME_MILLIS_1_HOUR)
             realmManagerAlarmFailureLog.updateOrCreateAlarmFailureLogEntry(it)
         }
     }
@@ -93,7 +95,7 @@ class AlarmFailureLog_IUT {
     fun failurePermutationTests() {
         configureAlarmFailureLogEntry()
 
-        for (permutation in 1..13) {
+        for (permutation in 1..18) {
             when(permutation) {
                 1 -> testPermutation(true) { it.setFired(false) }
                 2 -> testPermutation(true) { it.setActivated(false) }
@@ -134,6 +136,18 @@ class AlarmFailureLog_IUT {
                 }
                 14 -> testPermutation(true) {
                     it.setStream(true)
+                }
+                15 -> testPermutation(true) {
+                    it.setFiredTime(Constants.TIME_MILLIS_1_HOUR + Constants.TIME_MILLIS_1_MINUTE*6)
+                }
+                16 -> testPermutation(false) {
+                    it.setFiredTime(Constants.TIME_MILLIS_1_HOUR + Constants.TIME_MILLIS_1_MINUTE*4)
+                }
+                17 -> testPermutation(true) {
+                    it.setFiredTime(Constants.TIME_MILLIS_1_HOUR - Constants.TIME_MILLIS_1_MINUTE*6)
+                }
+                18 -> testPermutation(false) {
+                    it.setFiredTime(Constants.TIME_MILLIS_1_HOUR - Constants.TIME_MILLIS_1_MINUTE*4)
                 }
             }
         }

@@ -24,6 +24,7 @@ import javax.inject.Named
 import android.content.Context.VIBRATOR_SERVICE
 import com.facebook.FacebookSdk.getApplicationContext
 import com.roostermornings.android.realm.RealmManager_AlarmFailureLog
+import java.util.*
 
 class DeviceAlarmReceiver : WakefulBroadcastReceiver() {
 
@@ -68,7 +69,7 @@ class DeviceAlarmReceiver : WakefulBroadcastReceiver() {
 
         realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
             it.fired = true
-            it
+            it.firedTime = Calendar.getInstance().timeInMillis
         }
         // Close Realm object
         realmManagerAlarmFailureLog.closeRealm()

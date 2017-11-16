@@ -14,18 +14,22 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.view.View;
 import android.widget.Toast;
 
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
+import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.firebase.FirebaseNetwork;
 import com.roostermornings.android.realm.AlarmFailureLog;
 import com.roostermornings.android.realm.RealmManager_AlarmFailureLog;
+import com.roostermornings.android.realm.RealmManager_ScheduledSnackbar;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.sync.DownloadSyncAdapter;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.SnackbarManager;
 import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
@@ -56,6 +60,8 @@ public final class DeviceAlarmController {
     Account mAccount;
     @Inject
     RealmManager_AlarmFailureLog realmManagerAlarmFailureLog;
+    @Inject
+    RealmManager_ScheduledSnackbar realmManagerScheduledSnackbar;
 
     public DeviceAlarmController(Context context) {
         BaseApplication.getRoosterApplicationComponent().inject(this);
@@ -283,7 +289,19 @@ public final class DeviceAlarmController {
         else nextAlarmTimeString = String.format("%s days, %s hours, and %s minutes", days, hours, minutes);
 
         //Ensure alarm time accurate before notice
-        if(minutes >= 0 && hours >= 0 && days >= 0) Toaster.makeToast(context, "Alarm set for " + nextAlarmTimeString + " from now.", Toast.LENGTH_LONG).checkTastyToast();
+        if(minutes >= 0 && hours >= 0 && days >= 0) {
+//            Toaster.makeToast(context, "Alarm set for " + nextAlarmTimeString + " from now.", Toast.LENGTH_LONG).checkTastyToast();
+
+            SnackbarManager.Companion.SnackbarQueueElement snackbarQueueElement = new SnackbarManager.Companion.SnackbarQueueElement();
+            snackbarQueueElement.setText("Alarm set for " + nextAlarmTimeString + " from now.");
+            snackbarQueueElement.setAction(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {}});
+
+            String activityName = MyAlarmsFragmentActivity.class.getName();
+
+            realmManagerScheduledSnackbar.updateOrCreateScheduledSnackbarEntry(snackbarQueueElement, activityName, -1L);
+        }
     }
 
     public void deleteAllLocalAlarms() {
