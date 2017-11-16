@@ -25,6 +25,8 @@ public class AlarmFailureLog extends RealmObject {
     public Long scheduledTime = -1L;
     // Pending intent triggered
     @Expose
+    public Long firedTime = -1L;
+    @Expose
     public boolean fired = false;
     // Activation service started
     @Expose
@@ -73,6 +75,14 @@ public class AlarmFailureLog extends RealmObject {
     // * Alarm content didn't download because of internet connection
     // as a subset of above: not to worry, alarm default occurred, or streamed if internet access present at time of activation
     // * Alarm intent didn't fire, possibly because of not being whitelisted (can cross reference with phone model)
+
+    public Long getFiredTime() {
+        return firedTime;
+    }
+
+    public void setFiredTime(Long firedTime) {
+        this.firedTime = firedTime;
+    }
 
     public boolean isChannel() {
         return channel;

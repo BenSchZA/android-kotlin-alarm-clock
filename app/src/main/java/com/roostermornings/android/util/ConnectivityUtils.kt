@@ -8,7 +8,11 @@ package com.roostermornings.android.util
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
+import android.os.AsyncTask
 import android.telephony.TelephonyManager
+import java.net.InetAddress
+import java.net.URL
+import java.net.UnknownHostException
 
 class ConnectivityUtils(val context: Context) {
 
@@ -20,22 +24,41 @@ class ConnectivityUtils(val context: Context) {
 
     //Check if there is any connectivity
     fun isConnected(): Boolean {
-        return getNetworkInfo()?.isConnected ?:false
+        return getNetworkInfo()?.isConnectedOrConnecting ?:false
+    }
+
+    fun isActive(operation: (Boolean) -> Unit) {
+
+        class TaskThread : AsyncTask<String, Void, Boolean>() {
+            override fun doInBackground(vararg params: String): Boolean {
+                return try {
+                    //InetAddress.getByName("google.com").isReachable(5000)
+                    val command = "ping -c 1 google.com"
+                    return Runtime.getRuntime().exec(command).waitFor() == 0
+                } catch(exception: Exception) {
+                    exception.printStackTrace()
+                    false
+                }
+            }
+            override fun onPostExecute(result: Boolean) { operation(result) }
+        }
+
+        TaskThread().execute()
     }
 
     //Check if there is any connectivity to a Wifi network
     fun isConnectedWifi(): Boolean {
-        return getNetworkInfo()?.isConnected ?:false && getNetworkInfo()?.type == ConnectivityManager.TYPE_WIFI
+        return getNetworkInfo()?.isConnectedOrConnecting ?:false && getNetworkInfo()?.type == ConnectivityManager.TYPE_WIFI
     }
 
     //Check if there is any connectivity to a mobile network
     fun isConnectedMobile(): Boolean {
-        return getNetworkInfo()?.isConnected ?:false && getNetworkInfo()?.type == ConnectivityManager.TYPE_MOBILE
+        return getNetworkInfo()?.isConnectedOrConnecting ?:false && getNetworkInfo()?.type == ConnectivityManager.TYPE_MOBILE
     }
 
     //Check if there is fast connectivity
     fun isConnectedFast(): Boolean {
-        return getNetworkInfo()?.isConnected ?:false && isConnectionFast(getNetworkInfo()?.type, getNetworkInfo()?.subtype)
+        return getNetworkInfo()?.isConnectedOrConnecting ?:false && isConnectionFast(getNetworkInfo()?.type, getNetworkInfo()?.subtype)
     }
 
 

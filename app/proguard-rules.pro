@@ -42,6 +42,7 @@
 -keep class com.roostermornings.android.analytics.** { *; }
 -keep class com.roostermornings.android.firebase.** { *; }
 -keep class com.roostermornings.android.service.** { *; }
+-keep class com.roostermornings.android.realm.** { *; }
 
 # Preserve annotations, line numbers, and source file names
 -keepattributes *Annotation*,SourceFile,LineNumberTable

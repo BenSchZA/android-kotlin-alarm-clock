@@ -1,6 +1,7 @@
 package com.roostermornings.android.realm
 
 import android.app.Activity
+import android.view.View
 import com.google.gson.ExclusionStrategy
 import com.google.gson.FieldAttributes
 import com.google.gson.GsonBuilder
@@ -8,7 +9,9 @@ import com.google.gson.reflect.TypeToken
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.util.SnackbarManager
 import io.realm.Realm
+import io.realm.RealmChangeListener
 import io.realm.RealmObject
+import io.realm.RealmResults
 import java.lang.reflect.Modifier
 import java.util.*
 import javax.inject.Inject
@@ -18,6 +21,8 @@ import javax.inject.Inject
  */
 class RealmManager_ScheduledSnackbar {
     @Inject lateinit var realm: Realm
+
+    var realmResults: RealmResults<ScheduledSnackbar>? = null
 
     init {
         BaseApplication.getRoosterApplicationComponent().inject(this)
@@ -34,7 +39,7 @@ class RealmManager_ScheduledSnackbar {
         val calendar = Calendar.getInstance()
 
         realm.where(ScheduledSnackbar::class.java)
-                .equalTo("localDisplayClassName", activity.localClassName)
+                .equalTo("localDisplayClassName", activity.javaClass.name)
                 .findAll().toList()
                 .filter { (it.displayTime == -1L) || (it.displayTime < calendar.timeInMillis) }
                 .onEach { snackbar ->
@@ -43,6 +48,7 @@ class RealmManager_ScheduledSnackbar {
 
             val type = object : TypeToken<SnackbarManager.Companion.SnackbarQueueElement>() {}.type
             gson.fromJson<SnackbarManager.Companion.SnackbarQueueElement>(unmanagedScheduledSnackbar.jsonSnackbarQueueElement, type)?.let {
+                it.action = View.OnClickListener {  }
                 unmanagedScheduledSnackbar.snackbarQueueElement = it
             }
             snackbarsForActivity.add(unmanagedScheduledSnackbar)
@@ -54,6 +60,15 @@ class RealmManager_ScheduledSnackbar {
             return snackbarsForActivity
         }
         return snackbarsForActivity
+    }
+
+    fun listenForScheduledSnackbars(activity: Activity, operation: () -> Unit) {
+        realmResults = realm.where(ScheduledSnackbar::class.java)
+                .equalTo("localDisplayClassName", activity.javaClass.name)
+                .findAll()
+        realmResults?.addChangeListener { results: RealmResults<ScheduledSnackbar>? ->
+            operation()
+        }
     }
 
     fun updateOrCreateScheduledSnackbarEntry(snackbarQueueElement: SnackbarManager.Companion.SnackbarQueueElement, localDisplayClassName: String, displayTimeMillis: Long) {

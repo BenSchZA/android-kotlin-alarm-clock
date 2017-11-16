@@ -43,10 +43,6 @@ import com.roostermornings.android.sqlutil.DeviceAlarmController
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem
 import com.roostermornings.android.sqlutil.AudioTableManager
-import com.roostermornings.android.util.Constants
-import com.roostermornings.android.util.InternetHelper
-import com.roostermornings.android.util.JSONPersistence
-import com.roostermornings.android.util.StrUtils
 
 import java.io.File
 import java.io.IOException
@@ -61,6 +57,7 @@ import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.support.v4.content.WakefulBroadcastReceiver
 import com.google.firebase.auth.FirebaseUser
 import com.roostermornings.android.realm.RealmManager_AlarmFailureLog
+import com.roostermornings.android.util.*
 
 //Service to manage playing and pausing audio during Rooster alarm
 class AudioService : Service() {
@@ -101,6 +98,8 @@ class AudioService : Service() {
 
     private var currentPositionRooster = 0
 
+    private var activeInternetConnection: Boolean? = null
+
     @Inject
     lateinit var mAccount: Account
     @Inject lateinit var sharedPreferences: SharedPreferences
@@ -111,6 +110,7 @@ class AudioService : Service() {
     lateinit var channelManager: ChannelManager
     @Inject lateinit var realmManagerAlarmFailureLog: RealmManager_AlarmFailureLog
     var firebaseUser: FirebaseUser? = null
+    @Inject lateinit var connectivityUtils: ConnectivityUtils
 
     companion object {
         private val audioItems = ArrayList<DeviceAudioQueueItem>()
@@ -266,9 +266,10 @@ class AudioService : Service() {
                 it.running = true
             }
 
-            if(!InternetHelper.noInternetConnection(this)) {
+            connectivityUtils.isActive { active ->
                 realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
-                    it.internet = true
+                    it.internet = active
+                    activeInternetConnection = active
                 }
             }
 
@@ -368,15 +369,13 @@ class AudioService : Service() {
 
                 logAlarmActivation(false)
 
-                if (!InternetHelper.noInternetConnection(this)) {
-                    //Download any social or channel audio files
-                    attemptContentUriRetrieval(alarm)
-
-                    realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
-                        it.stream = true
-                    }
+                // Check for an active internet connection
+                if(activeInternetConnection != null) {
+                    switchOnActiveInternetConnection(activeInternetConnection)
                 } else {
-                    compileAudioItemContent()
+                    connectivityUtils.isActive { active ->
+                        switchOnActiveInternetConnection(active)
+                    }
                 }
             } else {
                 logAlarmActivation(true)
@@ -386,7 +385,19 @@ class AudioService : Service() {
             logError(e)
             compileAudioItemContent()
         }
+    }
 
+    private fun switchOnActiveInternetConnection(active: Boolean?) {
+        if(active != null && active) {
+            //Download any social or channel audio files
+            attemptContentUriRetrieval(alarm)
+
+            realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+                it.stream = true
+            }
+        } else {
+            compileAudioItemContent()
+        }
     }
 
     private fun logAlarmActivation(dataLoaded: Boolean) {
@@ -949,18 +960,19 @@ class AudioService : Service() {
 
     private fun startDefaultAlarmTone() {
         var method = Thread.currentThread().stackTrace[2].methodName
-        if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method)
-
-        realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
-            it.def = true
-        }
-
-        //If channel UID attached to alarm, content should have played
-        val failure = StrUtils.notNullOrEmpty(alarm.channel) && !InternetHelper.noInternetConnection(this)
+        if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method + " not started.")
 
         try {
             //Check if audio already playing
             if (isAudioPlaying) return
+            if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method + " started.")
+
+            realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+                it.def = true
+            }
+
+            //If channel UID attached to alarm, content should have played
+            val failure = StrUtils.notNullOrEmpty(alarm.channel) && !InternetHelper.noInternetConnection(this)
 
             foregroundNotification("Alarm ringtone playing")
 
@@ -1009,8 +1021,6 @@ class AudioService : Service() {
 
                     //Start timer to kill after 5 minutes
                     startTimer()
-                    //Log whether a failure or just default alarm tone selected
-                    logDefaultRingtoneState(failure)
                 })
                 mediaPlayerDefault.setOnErrorListener { mediaPlayer, what, extra ->
                     method = Thread.currentThread().stackTrace[2].methodName
@@ -1045,9 +1055,6 @@ class AudioService : Service() {
         val method = Thread.currentThread().stackTrace[2].methodName
         if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method)
 
-        //If this method is called, we should log alarm as a failure
-        logDefaultRingtoneState(true)
-
         checkStreamVolume(AudioManager.STREAM_RING)
         //Do everything possible to wake user up at this stage
         startVibrate()
@@ -1080,18 +1087,6 @@ class AudioService : Service() {
 
     private fun stopFailsafe() {
         if (failsafeRingtone != null && failsafeRingtone!!.isPlaying) failsafeRingtone?.stop()
-    }
-
-    private fun logDefaultRingtoneState(failure: Boolean) {
-        val method = Thread.currentThread().stackTrace[2].methodName
-        if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method + " Failure:" + failure.toString())
-
-        if (failure) {
-            //Show dialog explainer again by clearing shared pref
-            val editor = sharedPreferences.edit()
-            editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false)
-            editor.apply()
-        }
     }
 
     private fun checkStreamVolume(streamType: Int) {

@@ -394,7 +394,9 @@ public class DeviceAlarmTableManager {
     }
 
     private Boolean checkValidCursor(Cursor cursor) {
-        return ((cursor != null) && (cursor.getCount() > 0));
+        Boolean valid = ((cursor != null) && (cursor.getCount() > 0));
+        if(cursor != null && !valid) cursor.close();
+        return valid;
     }
 
     private ArrayList<DeviceAlarm> extractAlarms(Cursor cursor) {

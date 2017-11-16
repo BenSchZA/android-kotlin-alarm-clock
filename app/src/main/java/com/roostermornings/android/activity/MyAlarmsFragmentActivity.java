@@ -54,6 +54,7 @@ import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sync.DownloadSyncAdapter;
+import com.roostermornings.android.util.ConnectivityUtils;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.InternetHelper;
 import com.roostermornings.android.util.JSONPersistence;
@@ -73,6 +74,9 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import kotlin.Function;
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 import me.grantland.widget.AutofitTextView;
 
 import static com.roostermornings.android.util.Constants.AUTHORITY;
@@ -123,6 +127,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     JSONPersistence jsonPersistence;
     @Inject
     RealmManager_AlarmFailureLog realmManagerAlarmFailureLog;
+    @Inject ConnectivityUtils connectivityUtils;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -174,10 +179,6 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         lifeCycle.performInception();
 
         snackbarManager = new SnackbarManager(this, myAlarmsCoordinatorLayout);
-
-        snackbarManager.generateNoInternetConnection();
-        snackbarManager.generateSyncing();
-        snackbarManager.generateFinished();
 
         //FirstMileManager firstMileManager = new FirstMileManager();
         //firstMileManager.createShowcase(this, new ViewTarget(buttonAddAlarm.getId(), this), 1);
@@ -335,11 +336,19 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
             if(deviceAlarmTableManager.getNextPendingAlarm() == null
                     || deviceAlarmTableManager.isNextPendingAlarmSynced()) {
                 toolbar.setNavigationIcon(R.drawable.ic_cloud_done_white_24dp);
-            } else if(!InternetHelper.noInternetConnection(this)) {
-                animateRefreshDownloadIndicator();
             } else {
-                toolbar.setNavigationIcon(R.drawable.ic_cloud_off_white_24dp);
-                snackbarManager.generateNoInternetConnection();
+                connectivityUtils.isActive(new Function1<Boolean, Unit>() {
+                    @Override
+                    public Unit invoke(Boolean active) {
+                        if(active) {
+                            animateRefreshDownloadIndicator();
+                        } else {
+                            toolbar.setNavigationIcon(R.drawable.ic_cloud_off_white_24dp);
+                            snackbarManager.generateNoInternetConnection();
+                        }
+                        return null;
+                    }
+                });
             }
 
             //Listen for channel download complete notices
@@ -357,7 +366,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                     if (deviceAlarmTableManager.isNextPendingAlarmSynced()) {
                         toolbar.setNavigationIcon(R.drawable.ic_cloud_done_white_24dp);
                         if(snackbarManager.getPreviousState() ==
-                                SnackbarManager.PreviousState.SYNCING)
+                                SnackbarManager.State.SYNCING)
                             snackbarManager.generateFinished();
                     }
                 }
