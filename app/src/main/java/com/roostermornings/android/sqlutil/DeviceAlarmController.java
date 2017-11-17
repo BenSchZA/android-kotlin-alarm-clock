@@ -15,7 +15,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.view.View;
-import android.widget.Toast;
 
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
@@ -29,8 +28,7 @@ import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.sync.DownloadSyncAdapter;
 import com.roostermornings.android.util.Constants;
-import com.roostermornings.android.util.SnackbarManager;
-import com.roostermornings.android.util.Toaster;
+import com.roostermornings.android.snackbar.SnackbarManager;
 
 import java.util.ArrayList;
 import java.util.Calendar;

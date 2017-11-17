@@ -57,7 +57,7 @@ import com.roostermornings.android.sync.DownloadSyncAdapter;
 import com.roostermornings.android.geolocation.GeoHashUtils;
 import com.roostermornings.android.util.JSONPersistence;
 import com.roostermornings.android.util.LifeCycle;
-import com.roostermornings.android.util.SnackbarManager;
+import com.roostermornings.android.snackbar.SnackbarManager;
 import com.roostermornings.android.widgets.AlarmToggleWidget;
 import com.roostermornings.android.widgets.AlarmToggleWidgetDataProvider;
 

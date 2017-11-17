@@ -3,7 +3,6 @@ package com.roostermornings.android.realm
 import android.content.Context
 import android.content.SharedPreferences
 import android.support.design.widget.Snackbar
-import android.view.View
 import com.crashlytics.android.Crashlytics
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager
@@ -16,9 +15,8 @@ import com.google.gson.GsonBuilder
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity
 import com.roostermornings.android.firebase.FA
 import com.roostermornings.android.util.Constants
-import com.roostermornings.android.util.SnackbarManager
+import com.roostermornings.android.snackbar.SnackbarManager
 import io.realm.RealmObject
-import io.realm.RealmResults
 import java.lang.reflect.Modifier
 
 
@@ -169,6 +167,9 @@ class RealmManager_AlarmFailureLog(val context: Context) {
             it.def && it.channel && !it.content}?.let {
 
             snackbarQueueElement.text = "Received a default alarm tone? We need an internet connection when alarm set."
+            snackbarQueueElement.dialog = true
+            snackbarQueueElement.dialogTitle = "What's this default alarm tone about?"
+            snackbarQueueElement.dialogText = "Blah blah blah..."
 
             realmManagerScheduledSnackbar.updateOrCreateScheduledSnackbarEntry(snackbarQueueElement, activityName, -1L)
             return@generateScheduledSnackbarForAlarmFailure
