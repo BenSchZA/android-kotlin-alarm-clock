@@ -20,7 +20,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.graphics.drawable.VectorDrawableCompat;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -56,10 +55,9 @@ import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
 import com.roostermornings.android.sync.DownloadSyncAdapter;
 import com.roostermornings.android.util.ConnectivityUtils;
 import com.roostermornings.android.util.Constants;
-import com.roostermornings.android.util.InternetHelper;
 import com.roostermornings.android.util.JSONPersistence;
 import com.roostermornings.android.util.LifeCycle;
-import com.roostermornings.android.util.SnackbarManager;
+import com.roostermornings.android.snackbar.SnackbarManager;
 import com.roostermornings.android.util.StrUtils;
 import com.roostermornings.android.widgets.AlarmToggleWidget;
 
@@ -74,7 +72,6 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.OnClick;
-import kotlin.Function;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 import me.grantland.widget.AutofitTextView;
@@ -151,12 +148,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         jsonPersistence.setAlarms(mAlarms);
 
         //Update app widget
-        Intent updateWidgetIntent = new Intent(this, AlarmToggleWidget.class);
-        updateWidgetIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(getApplication());
-        int ids[] = appWidgetManager.getAppWidgetIds(new ComponentName(getApplication(), AlarmToggleWidget.class));
-        updateWidgetIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
-        sendBroadcast(updateWidgetIntent);
+        AlarmToggleWidget.Companion.sendUpdateBroadcast(getApplicationContext());
     }
 
     @Override

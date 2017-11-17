@@ -1,7 +1,7 @@
 package com.roostermornings.android.realm;
 
 import com.google.gson.annotations.Expose;
-import com.roostermornings.android.util.SnackbarManager;
+import com.roostermornings.android.snackbar.SnackbarManager;
 
 import io.realm.RealmObject;
 import io.realm.annotations.Ignore;

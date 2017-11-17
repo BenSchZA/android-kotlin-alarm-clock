@@ -7,9 +7,8 @@ import com.google.gson.FieldAttributes
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.roostermornings.android.BaseApplication
-import com.roostermornings.android.util.SnackbarManager
+import com.roostermornings.android.snackbar.SnackbarManager
 import io.realm.Realm
-import io.realm.RealmChangeListener
 import io.realm.RealmObject
 import io.realm.RealmResults
 import java.lang.reflect.Modifier
