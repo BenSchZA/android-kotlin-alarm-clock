@@ -1,11 +1,16 @@
 package com.roostermornings.android.snackbar
 
 import android.app.Activity
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.support.design.widget.BaseTransientBottomBar
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.Snackbar
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.Button
 import android.widget.TextView
 import com.flipboard.bottomsheet.BottomSheetLayout
 import com.google.gson.annotations.Expose
@@ -21,7 +26,7 @@ import javax.inject.Inject
  */
 class SnackbarManager(val activity: Activity, val view: View) {
 
-    private var currentSnackbar: Snackbar = Snackbar.make(view, "", Snackbar.LENGTH_LONG)
+    private var currentSnackbar = Snackbar.make(view, "", Snackbar.LENGTH_LONG)
     private var currentSnackbarQueueElement = SnackbarQueueElement()
     private var snackbarQueue = ArrayList<SnackbarQueueElement>()
 
@@ -29,7 +34,7 @@ class SnackbarManager(val activity: Activity, val view: View) {
     @Inject lateinit var realmManagerScheduledSnackbar: RealmManager_ScheduledSnackbar
 
     // Timer to manage automatic transition of queue elements
-    private var timerTask: TimerTask
+    private var timerTask: TimerTask = object: TimerTask(){ override fun run() {} }
     private fun resetTimerTask() {
         timerTask = object: TimerTask() {
             override fun run() {
@@ -101,7 +106,7 @@ class SnackbarManager(val activity: Activity, val view: View) {
 
     init {
         BaseApplication.getRoosterApplicationComponent().inject(this)
-        timerTask = object: TimerTask(){ override fun run() {} }
+
         realmManagerScheduledSnackbar.getScheduledSnackbarsForActivity(activity).forEach {
             if(addSnackbarToQueue(it.snackbarQueueElement)) checkQueue()
         }
@@ -138,7 +143,8 @@ class SnackbarManager(val activity: Activity, val view: View) {
                 var dialogText: String = "")
     }
 
-    fun closeRealm() {
+    fun destroy() {
+        realmManagerScheduledSnackbar.removeListeners()
         realmManagerScheduledSnackbar.closeRealm()
     }
 
@@ -174,8 +180,11 @@ class SnackbarManager(val activity: Activity, val view: View) {
     // Assign current snack bar from queue element data
     private fun initializeCurrentSnackBar(snackbarQueueElement: SnackbarQueueElement) {
         currentSnackbar.setText(snackbarQueueElement.text)
-        currentSnackbar.setAction(snackbarQueueElement.actionText, snackbarQueueElement.action)
-        if(true) {
+        currentSnackbar.setAction(
+                snackbarQueueElement.actionText,
+                snackbarQueueElement.action ?: View.OnClickListener {  })
+
+        if(renew) {
             currentSnackbar.setAction(snackbarQueueElement.actionText, View.OnClickListener {
                 val view = LayoutInflater.from(activity.applicationContext).inflate(R.layout.snackbar_dialog, bottomSheet, false)
 
@@ -185,6 +194,17 @@ class SnackbarManager(val activity: Activity, val view: View) {
                 val dialogText = view.findViewById<TextView>(R.id.dialogText)
                 //dialogText.text = snackbarQueueElement.dialogText
                 dialogText.text = "We noticed that the alarm audio content was not downloaded before your alarm went off, this can happen if:\n\n" + "1) You didn't have an active internet connection when you created your alarm (note that your alarm will still go off without an internet connection, but you need to make sure the content is downloaded when you set your alarm for the best experience).\n\n" + "2) Your phone is blocking Rooster from downloading content. Some phones have a page within your settings that allows you to add Rooster to a whitelist of allowed apps.\n\n" + "On the home page, the little cloud will indicate the current download state: either downloading, finished downloading, or no active internet connection."
+
+                val yesButton = view.findViewById<Button>(R.id.snackbarDialogButtonYes)
+                val noButton = view.findViewById<Button>(R.id.snackbarDialogButtonNo)
+
+                // For now, on button click, dismiss sheet
+                yesButton.setOnClickListener {
+                    bottomSheet.dismissSheet()
+                }
+                noButton.setOnClickListener {
+                    bottomSheet.dismissSheet()
+                }
 
                 bottomSheet.showWithSheetView(view)
                 bottomSheet.peekSheetTranslation = activityContentView.height*0.3f
@@ -202,6 +222,7 @@ class SnackbarManager(val activity: Activity, val view: View) {
     }
 
     private fun resetCurrentSnackbar() {
+        currentSnackbar.dismiss()
         currentSnackbar = Snackbar.make(view, "", Snackbar.LENGTH_LONG)
     }
 
@@ -211,7 +232,7 @@ class SnackbarManager(val activity: Activity, val view: View) {
             resetCurrentSnackbar()
             initializeCurrentSnackBar(snackbarQueue[0])
             if(renew) {
-                currentSnackbar.duration = snackbarQueue[0].length
+                currentSnackbar.duration = currentSnackbarQueueElement.length
 
                 currentSnackbar.removeCallback(callback1)
                 currentSnackbar.addCallback(callback1)
@@ -240,7 +261,6 @@ class SnackbarManager(val activity: Activity, val view: View) {
             renew = true
             clearQueue()
             if(currentSnackbar.isShownOrQueued) {
-                currentSnackbar.dismiss()
                 resetCurrentSnackbar()
             }
             snackbarQueue.add(element)
