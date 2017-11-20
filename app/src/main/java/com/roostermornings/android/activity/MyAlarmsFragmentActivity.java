@@ -108,7 +108,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
     Toolbar toolbar;
 
-    SnackbarManager snackbarManager;
+    private SnackbarManager snackbarManager;
 
     @Inject DeviceAlarmController deviceAlarmController;
     @Inject DeviceAlarmTableManager deviceAlarmTableManager;
@@ -146,6 +146,8 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         super.onPause();
         //Persist alarms for seamless loading
         jsonPersistence.setAlarms(mAlarms);
+
+        snackbarManager.destroy();
 
         //Update app widget
         AlarmToggleWidget.Companion.sendUpdateBroadcast(getApplicationContext());

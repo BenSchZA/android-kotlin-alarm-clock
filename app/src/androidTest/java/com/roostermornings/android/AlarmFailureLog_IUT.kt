@@ -153,6 +153,9 @@ class AlarmFailureLog_IUT {
         }
     }
 
+    /**Check that the AlarmFailureLog permutation results in the expected failure result, assertFailure.
+    * Pass a Realm database operation as a lambda (still need to check this is what I think it is...)*/
+
     private fun testPermutation(assertFailure: Boolean, operation: (AlarmFailureLog) -> Unit) {
         val alarmFailureLog = mockRealm.where(AlarmFailureLog::class.java)
                 .findFirst()?:AlarmFailureLog()
