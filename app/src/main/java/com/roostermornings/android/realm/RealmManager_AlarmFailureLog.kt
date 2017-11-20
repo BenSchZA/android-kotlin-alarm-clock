@@ -158,7 +158,10 @@ class RealmManager_AlarmFailureLog(val context: Context) {
         alarmFailureLog.takeIf {
             Math.abs(it.scheduledTime - it.firedTime) >= Constants.TIME_MILLIS_1_MINUTE*5}?.let {
 
-            snackbarQueueElement.text = "Your alarm was delayed. Your phone may be doing this to save power."
+            snackbarQueueElement.text = "Your alarm was delayed. Find out why."
+            snackbarQueueElement.dialog = true
+            snackbarQueueElement.dialogTitle = "What's this delay about?"
+            snackbarQueueElement.dialogText = "We noticed your alarm was delayed by more than 5 minutes. This is most likely because your phone OS is delaying Rooster's alarms to save power. You might be able to add Rooster to a protected list in your phone settings that gives Rooster priority, and solves the delayed alarm issue."
 
             realmManagerScheduledSnackbar.updateOrCreateScheduledSnackbarEntry(snackbarQueueElement, activityName, -1L)
             return@generateScheduledSnackbarForAlarmFailure
@@ -166,10 +169,10 @@ class RealmManager_AlarmFailureLog(val context: Context) {
         alarmFailureLog.takeIf {
             it.def && it.channel && !it.content}?.let {
 
-            snackbarQueueElement.text = "Received a default alarm tone? We need an internet connection when alarm set."
+            snackbarQueueElement.text = "Received a default alarm tone? Find out why."
             snackbarQueueElement.dialog = true
             snackbarQueueElement.dialogTitle = "What's this default alarm tone about?"
-            snackbarQueueElement.dialogText = "Blah blah blah..."
+            snackbarQueueElement.dialogText = "We noticed that the alarm audio content was not downloaded before your alarm went off, this can happen if:\n\n" + "1) You didn't have an active internet connection when you created your alarm (note that your alarm will still go off without an internet connection, but you need to make sure the content is downloaded when you set your alarm for the best experience).\n\n" + "2) Your phone is blocking Rooster from downloading content. Some phones have a page within your settings that allows you to add Rooster to a whitelist of allowed apps.\n\n" + "On the home page, the little cloud will indicate the current download state: either downloading, finished downloading, or no active internet connection."
 
             realmManagerScheduledSnackbar.updateOrCreateScheduledSnackbarEntry(snackbarQueueElement, activityName, -1L)
             return@generateScheduledSnackbarForAlarmFailure
@@ -177,7 +180,7 @@ class RealmManager_AlarmFailureLog(val context: Context) {
         alarmFailureLog.takeIf {
             it.stream  && it.channel && !it.content}?.let {
 
-            snackbarQueueElement.text = "Your alarm was streamed. We need an internet connection when your alarm is set."
+            snackbarQueueElement.text = "Your alarm was streamed. Find out why."
 
             realmManagerScheduledSnackbar.updateOrCreateScheduledSnackbarEntry(snackbarQueueElement, activityName, -1L)
             return@generateScheduledSnackbarForAlarmFailure
@@ -190,7 +193,7 @@ class RealmManager_AlarmFailureLog(val context: Context) {
             editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false)
             editor.apply()
 
-            snackbarQueueElement.text = "Your alarm didn't fire. Your phone may be blocking Rooster."
+            snackbarQueueElement.text = "Your alarm didn't fire. Find out why."
 
             realmManagerScheduledSnackbar.updateOrCreateScheduledSnackbarEntry(snackbarQueueElement, activityName, -1L)
             return@generateScheduledSnackbarForAlarmFailure

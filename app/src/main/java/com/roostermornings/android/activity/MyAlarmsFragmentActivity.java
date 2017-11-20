@@ -330,7 +330,13 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
             if(deviceAlarmTableManager.getNextPendingAlarm() == null
                     || deviceAlarmTableManager.isNextPendingAlarmSynced()) {
                 toolbar.setNavigationIcon(R.drawable.ic_cloud_done_white_24dp);
+
+                // If "no internet" high priority snackbar is showing, dismiss it, we're synced
+                if(snackbarManager.getPreviousState() == SnackbarManager.State.NO_INTERNET) {
+                    snackbarManager.dismissSnackbar();
+                }
             } else {
+                // Check the current connectivity status, display appropriate icon and snackbar
                 connectivityUtils.isActive(new Function1<Boolean, Unit>() {
                     @Override
                     public Unit invoke(Boolean active) {

@@ -33,7 +33,7 @@ class SnackbarManager(val activity: Activity, val view: View) {
     @Inject lateinit var realm: Realm
     @Inject lateinit var realmManagerScheduledSnackbar: RealmManager_ScheduledSnackbar
 
-    // Timer to manage automatic transition of queue elements
+    /** Timer to manage refreshing of current snackbar content.*/
     private var timerTask: TimerTask = object: TimerTask(){ override fun run() {} }
     private fun resetTimerTask() {
         timerTask = object: TimerTask() {
@@ -50,6 +50,7 @@ class SnackbarManager(val activity: Activity, val view: View) {
         }
     }
 
+    /** Recreate timer task to ensure only a single timer is running at any given time.*/
     private fun clearTimerTask() {
         timerTask.cancel()
         resetTimerTask()
@@ -58,7 +59,8 @@ class SnackbarManager(val activity: Activity, val view: View) {
     private val bottomSheet: BottomSheetLayout
     private val activityContentView: CoordinatorLayout
 
-    val callback1 = object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+    /** Snackbar callback used for snackbar renewal display method.*/
+    private val callback1 = object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
         override fun onShown(transientBottomBar: Snackbar?) {
             super.onShown(transientBottomBar)
         }
@@ -82,7 +84,8 @@ class SnackbarManager(val activity: Activity, val view: View) {
         }
     }
 
-    val callback2 = object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+    /** Snackbar callback used for snackbar timer refresh display method.*/
+    private val callback2 = object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
 
         override fun onShown(transientBottomBar: Snackbar?) {
             super.onShown(transientBottomBar)
@@ -107,20 +110,24 @@ class SnackbarManager(val activity: Activity, val view: View) {
     init {
         BaseApplication.getRoosterApplicationComponent().inject(this)
 
+        /** On initialization, fetch all relevant snackbars for current activity.*/
         realmManagerScheduledSnackbar.getScheduledSnackbarsForActivity(activity).forEach {
             if(addSnackbarToQueue(it.snackbarQueueElement)) checkQueue()
         }
+        /** Listen for scheduled snackbars added to realm database while activity is running.*/
         realmManagerScheduledSnackbar.listenForScheduledSnackbars(activity) {
             realmManagerScheduledSnackbar.getScheduledSnackbarsForActivity(activity).forEach {
                 if(addSnackbarToQueue(it.snackbarQueueElement)) checkQueue()
             }
         }
 
-        // Initialize bottom sheet views
+        /** Initialize bottom sheet (snackbar dialog) and coordinator layout view references.*/
         bottomSheet = activity.findViewById(R.id.snackbarBottomsheet)
         activityContentView = activity.findViewById(R.id.my_alarms_coordinator_layout)
     }
 
+    /** Element inserted into realm database and used for keeping track of pending snackbars
+     * in snackbar queue.*/
     companion object {
         class SnackbarQueueElement(
                 @Expose
@@ -143,57 +150,56 @@ class SnackbarManager(val activity: Activity, val view: View) {
                 var dialogText: String = "")
     }
 
+    /** Ensure this method is called, else instances of this class will be kept and called from
+     * the RealmResults listener.*/
     fun destroy() {
         realmManagerScheduledSnackbar.removeListeners()
         realmManagerScheduledSnackbar.closeRealm()
     }
 
-    // Set the previous state for activity side logic
+    /** Set the previous state for activity side logic*/
     var previousState = State.NONE
     enum class State {
         NONE, SYNCING, FINISHED, NO_INTERNET
     }
 
-    // Set whether to create new snackbar on addition, or add to queue with timer
+    /** Set whether to create new snackbar on addition, or add to queue with timer*/
     private var renew: Boolean = false
     fun setRenew(shouldRenew: Boolean = false) {
         renew = shouldRenew
     }
 
-    // For snackbar with high priority, lock queue
+    /** For snackbar with high priority, lock queue. No more elements can be added.*/
     private var locked: Boolean = false
     fun setLocked(lock: Boolean = false) {
         locked = lock
         if(locked) clearTimerTask()
     }
 
-    // Clear the queue
     fun clearQueue() {
         snackbarQueue.clear()
     }
 
-    // Check whether the current snackbar inserted has the highest priority
+    /** Check whether the current snackbar inserted has the highest priority*/
     private fun hasPriority(priority: Int): Boolean {
         return snackbarQueue.isNotEmpty() && !snackbarQueue.any{ it.priority >= priority } || priority > -1
     }
 
-    // Assign current snack bar from queue element data
+    /** Configure current snackbar from queue element data, then remove element from queue.*/
     private fun initializeCurrentSnackBar(snackbarQueueElement: SnackbarQueueElement) {
         currentSnackbar.setText(snackbarQueueElement.text)
         currentSnackbar.setAction(
                 snackbarQueueElement.actionText,
                 snackbarQueueElement.action ?: View.OnClickListener {  })
 
-        if(renew) {
+        if(snackbarQueueElement.dialog) {
             currentSnackbar.setAction(snackbarQueueElement.actionText, View.OnClickListener {
                 val view = LayoutInflater.from(activity.applicationContext).inflate(R.layout.snackbar_dialog, bottomSheet, false)
 
                 val dialogTitle = view.findViewById<TextView>(R.id.dialogTitle)
-                //dialogTitle.text = snackbarQueueElement.dialogTitle
-                dialogTitle.text = "Why did I receive a default alarm tone?"
+                dialogTitle.text = snackbarQueueElement.dialogTitle
                 val dialogText = view.findViewById<TextView>(R.id.dialogText)
-                //dialogText.text = snackbarQueueElement.dialogText
-                dialogText.text = "We noticed that the alarm audio content was not downloaded before your alarm went off, this can happen if:\n\n" + "1) You didn't have an active internet connection when you created your alarm (note that your alarm will still go off without an internet connection, but you need to make sure the content is downloaded when you set your alarm for the best experience).\n\n" + "2) Your phone is blocking Rooster from downloading content. Some phones have a page within your settings that allows you to add Rooster to a whitelist of allowed apps.\n\n" + "On the home page, the little cloud will indicate the current download state: either downloading, finished downloading, or no active internet connection."
+                dialogText.text = snackbarQueueElement.dialogText
 
                 val yesButton = view.findViewById<Button>(R.id.snackbarDialogButtonYes)
                 val noButton = view.findViewById<Button>(R.id.snackbarDialogButtonNo)
@@ -221,12 +227,20 @@ class SnackbarManager(val activity: Activity, val view: View) {
         currentSnackbar.show()
     }
 
+    /** Allow current snackbar to be dismissed from SnackbarManager instance.*/
+    fun dismissSnackbar() {
+        currentSnackbar.dismiss()
+    }
+
     private fun resetCurrentSnackbar() {
         currentSnackbar.dismiss()
         currentSnackbar = Snackbar.make(view, "", Snackbar.LENGTH_LONG)
     }
 
-    // Check if snackbar queue has elements, and if snackbar is currently shown
+    /**Check if snackbar queue has elements, and if snackbar is currently shown.
+     * Two snackbar display methods exist:
+     *  1) Dismiss and recreate current snackbar, or
+     *  2) Add snackbar to a queue and use timer to refresh snackbar content*/
     private fun checkQueue() {
         if(snackbarQueue.isNotEmpty() && !currentSnackbar.isShownOrQueued) {
             resetCurrentSnackbar()
@@ -253,6 +267,17 @@ class SnackbarManager(val activity: Activity, val view: View) {
         }
     }
 
+    /** Add snackbar to a queue, checking if the queue is empty and no snackbar showing, then
+     * unlock the queue.
+     * If the snackbar has priority, do the following:
+     *  1) Lock the queue
+     *  2) Set the snackbar display method to renew
+     *  3) Clear the queue
+     *  4) Reset the snackbar if necessary
+     *  5) Add snackbar to queue, and return that addition was successful
+     *
+     * If the snackbar doesn't have priority, only add it to the queue if the
+     * queue is not locked.*/
     private fun addSnackbarToQueue(element: SnackbarQueueElement): Boolean {
         if(snackbarQueue.isEmpty() && !currentSnackbar.isShownOrQueued) setLocked(false)
         // If snackbar has priority: lock queue, renew snackbar, and dismiss current snackbar
@@ -269,14 +294,15 @@ class SnackbarManager(val activity: Activity, val view: View) {
         }
     }
 
+    /** Generate the alarm content sync status snackbars: syncing, finished, and no-internet.*/
     fun generateSyncing() {
-        if(addSnackbarToQueue(SnackbarQueueElement("Alarm content is downloading...", action = View.OnClickListener { }, state = State.SYNCING))) {
+        if(addSnackbarToQueue(SnackbarQueueElement("Alarm content is downloading...", action = View.OnClickListener { }, state = State.SYNCING, priority = 1))) {
             checkQueue()
         }
     }
 
     fun generateFinished() {
-        if(addSnackbarToQueue(SnackbarQueueElement("Alarm content has finished downloading.", action = View.OnClickListener { }, state = State.FINISHED))) {
+        if(addSnackbarToQueue(SnackbarQueueElement("Alarm content has finished downloading.", action = View.OnClickListener { }, state = State.FINISHED, priority = 1))) {
             checkQueue()
         }
     }
