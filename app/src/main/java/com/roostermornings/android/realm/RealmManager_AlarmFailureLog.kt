@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.support.design.widget.Snackbar
 import com.crashlytics.android.Crashlytics
+import com.crashlytics.android.answers.Answers
+import com.crashlytics.android.answers.CustomEvent
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager
 import io.realm.Realm
@@ -107,7 +109,7 @@ class RealmManager_AlarmFailureLog(val context: Context) {
 
     private fun sendAlarmFailureLogs(clear: Boolean): List<AlarmFailureLog> {
         // Ignore serialization of RealmObject subclass to avoid StackOverFlow error
-        val GSON = GsonBuilder()
+        val gson = GsonBuilder()
                 .excludeFieldsWithoutExposeAnnotation()
                 .excludeFieldsWithModifiers(Modifier.ABSTRACT)
                 .addSerializationExclusionStrategy(object : ExclusionStrategy {
@@ -123,7 +125,7 @@ class RealmManager_AlarmFailureLog(val context: Context) {
         // Log each alarm failure to Crashlytics before deleting from Realm
         getAlarmFailures().onEach { alarmFailure ->
             val unmanagedAlarmFailure = realm.copyFromRealm(alarmFailure)
-            Crashlytics.log("Alarm Failure: \n" + GSON.toJson(unmanagedAlarmFailure))
+            Crashlytics.log("Alarm Failure: \n" + gson.toJson(unmanagedAlarmFailure))
 
             generateScheduledSnackbarForAlarmFailure(unmanagedAlarmFailure)
 
