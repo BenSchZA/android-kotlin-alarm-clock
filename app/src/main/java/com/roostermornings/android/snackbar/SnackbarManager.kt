@@ -12,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import com.crashlytics.android.Crashlytics
 import com.flipboard.bottomsheet.BottomSheetLayout
 import com.google.gson.annotations.Expose
 import com.roostermornings.android.BaseApplication
@@ -147,7 +148,9 @@ class SnackbarManager(val activity: Activity, val view: View) {
                 @Expose
                 var dialogTitle: String = "",
                 @Expose
-                var dialogText: String = "")
+                var dialogText: String = "",
+                @Expose
+                var dialogType: DialogType = DialogType.NONE)
     }
 
     /** Ensure this method is called, else instances of this class will be kept and called from
@@ -161,6 +164,11 @@ class SnackbarManager(val activity: Activity, val view: View) {
     var previousState = State.NONE
     enum class State {
         NONE, SYNCING, FINISHED, NO_INTERNET
+    }
+
+    /** Set the dialog type for analytics logging*/
+    enum class DialogType {
+        NONE, DELAYED, DEFAULT, STREAM, NOT_FIRED
     }
 
     /** Set whether to create new snackbar on addition, or add to queue with timer*/
@@ -187,40 +195,59 @@ class SnackbarManager(val activity: Activity, val view: View) {
 
     /** Configure current snackbar from queue element data, then remove element from queue.*/
     private fun initializeCurrentSnackBar(snackbarQueueElement: SnackbarQueueElement) {
+        // Set Snackbar text
         currentSnackbar.setText(snackbarQueueElement.text)
+
+        // Configure Snackbar action, currently only used when dialog configured
         currentSnackbar.setAction(
                 snackbarQueueElement.actionText,
                 snackbarQueueElement.action ?: View.OnClickListener {  })
 
+        // Configure dialog shown when user wants to know more
+        initializeSnackbarDialog(snackbarQueueElement)
+
+        // Log the current state
+        previousState = snackbarQueueElement.state
+
+        // Keep record of current element, and then remove from queue
+        currentSnackbarQueueElement = snackbarQueueElement
+        snackbarQueue.removeAt(0)
+    }
+
+    private fun initializeSnackbarDialog(snackbarQueueElement: SnackbarQueueElement) {
         if(snackbarQueueElement.dialog) {
             currentSnackbar.setAction(snackbarQueueElement.actionText, View.OnClickListener {
-                val view = LayoutInflater.from(activity.applicationContext).inflate(R.layout.snackbar_dialog, bottomSheet, false)
+                val dialogView = LayoutInflater.from(activity.applicationContext).inflate(R.layout.snackbar_dialog, bottomSheet, false)
 
-                val dialogTitle = view.findViewById<TextView>(R.id.dialogTitle)
+                // Set dialog title and text from Snackbar queue element
+                val dialogTitle = dialogView.findViewById<TextView>(R.id.dialogTitle)
                 dialogTitle.text = snackbarQueueElement.dialogTitle
-                val dialogText = view.findViewById<TextView>(R.id.dialogText)
+                val dialogText = dialogView.findViewById<TextView>(R.id.dialogText)
                 dialogText.text = snackbarQueueElement.dialogText
 
-                val yesButton = view.findViewById<Button>(R.id.snackbarDialogButtonYes)
-                val noButton = view.findViewById<Button>(R.id.snackbarDialogButtonNo)
+                // Get user usefulness rating buttons
+                val yesButton = dialogView.findViewById<Button>(R.id.snackbarDialogButtonYes)
+                val noButton = dialogView.findViewById<Button>(R.id.snackbarDialogButtonNo)
 
-                // For now, on button click, dismiss sheet
+                // Dismiss sheet and rate dialog usefulness
                 yesButton.setOnClickListener {
                     bottomSheet.dismissSheet()
+                    Crashlytics.log(1, "YesButton: ", snackbarQueueElement.dialogType.name + " Snackbar dialog was voted useful.")
+                    Crashlytics.logException(Throwable("Snackbar Dialog Rating"))
                 }
                 noButton.setOnClickListener {
                     bottomSheet.dismissSheet()
+                    Crashlytics.log(1, "NoButton: ", snackbarQueueElement.dialogType.name + " Snackbar dialog was voted not useful.")
+                    Crashlytics.logException(Throwable("Snackbar Dialog Rating"))
                 }
 
-                bottomSheet.showWithSheetView(view)
+                // Show bottomsheet dialog
+                bottomSheet.showWithSheetView(dialogView)
+                // Set height of sheet to 30% from bottom of content view
                 bottomSheet.peekSheetTranslation = activityContentView.height*0.3f
                 bottomSheet.peekSheet()
             })
         }
-        previousState = snackbarQueueElement.state
-
-        currentSnackbarQueueElement = snackbarQueueElement
-        snackbarQueue.removeAt(0)
     }
 
     private fun showSnackbar() {

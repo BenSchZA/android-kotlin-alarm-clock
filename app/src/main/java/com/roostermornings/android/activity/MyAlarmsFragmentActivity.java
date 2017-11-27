@@ -8,9 +8,7 @@ package com.roostermornings.android.activity;
 import android.accounts.Account;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
-import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -42,13 +40,14 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.MyAlarmsListAdapter;
 import com.roostermornings.android.adapter_data.RoosterAlarmManager;
-import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.custom_ui.SquareFrameLayout;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Alarm;
+import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.firebase.FirebaseNetwork;
 import com.roostermornings.android.realm.AlarmFailureLog;
 import com.roostermornings.android.realm.RealmManager_AlarmFailureLog;
+import com.roostermornings.android.snackbar.SnackbarManager;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
@@ -57,7 +56,6 @@ import com.roostermornings.android.util.ConnectivityUtils;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.JSONPersistence;
 import com.roostermornings.android.util.LifeCycle;
-import com.roostermornings.android.snackbar.SnackbarManager;
 import com.roostermornings.android.util.StrUtils;
 import com.roostermornings.android.widgets.AlarmToggleWidget;
 
@@ -106,7 +104,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
 
     private BroadcastReceiver receiver;
 
-    Toolbar toolbar;
+    private Toolbar toolbar;
 
     private SnackbarManager snackbarManager;
 
@@ -144,12 +142,13 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     @Override
     public void onPause() {
         super.onPause();
-        //Persist alarms for seamless loading
+        // Persist alarms for seamless loading
         jsonPersistence.setAlarms(mAlarms);
 
+        // Remove Realm listeners, and close Realm
         snackbarManager.destroy();
 
-        //Update app widget
+        // Update app widget
         AlarmToggleWidget.Companion.sendUpdateBroadcast(getApplicationContext());
     }
 
@@ -159,17 +158,16 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         initialize(R.layout.activity_my_alarms);
         BaseApplication.getRoosterApplicationComponent().inject(this);
 
-        //Final context to be used in threads
+        // Final context to be used in threads
         final Context context = this;
 
         // Process any alarm failures
-        List<AlarmFailureLog> alarmFailureLogs = realmManagerAlarmFailureLog.getAllAlarmFailureLogs();
         realmManagerAlarmFailureLog.processAlarmFailures(true);
 
-        //Set shared pref to indicate whether mobile number is valid
+        // Set shared pref to indicate whether mobile number is valid
         FirebaseNetwork.flagValidMobileNumber(this, false);
 
-        //Check if first entry
+        // Check if first entry
         lifeCycle.performInception();
 
         snackbarManager = new SnackbarManager(this, myAlarmsCoordinatorLayout);
@@ -177,7 +175,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         //FirstMileManager firstMileManager = new FirstMileManager();
         //firstMileManager.createShowcase(this, new ViewTarget(buttonAddAlarm.getId(), this), 1);
 
-        //Download any social or channel audio files
+        // Download any social or channel audio files
         ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
 
         /*
@@ -196,28 +194,28 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                 }
         );
 
-        //UI setup thread
+        // UI setup thread
         new Thread() {
             @Override
             public void run() {
 
-                //Set highlighting of button bar
+                // Set highlighting of button bar
                 setButtonBarSelection();
-                //Animate FAB with pulse
+                // Animate FAB with pulse
                 buttonAddAlarm.setAnimation(AnimationUtils.loadAnimation(context, R.anim.pulse));
-                //Set toolbar title
+                // Set toolbar title
                 toolbar = setupToolbar(toolbarTitle, getString(R.string.my_alarms));
-                //Set download indicator
+                // Set download indicator
                 refreshDownloadIndicator();
 
-                //Set up adapter for monitoring alarm objects
+                // Set up adapter for monitoring alarm objects
                 mAdapter = new MyAlarmsListAdapter(mAlarms, MyAlarmsFragmentActivity.this);
-                //Use a linear layout manager
+                // Use a linear layout manager
                 RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(context);
                 mRecyclerView.setLayoutManager(mLayoutManager);
                 mRecyclerView.setAdapter(mAdapter);
 
-                //Check for, and load, persisted data
+                // Check for, and load, persisted data
                 if(!jsonPersistence.getAlarms().isEmpty()) {
                     mAlarms.addAll(jsonPersistence.getAlarms());
                     mAdapter.notifyDataSetChanged();
@@ -225,9 +223,9 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                     if(!swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(true);
                 }
 
-                //Log new crashlytics user
+                // Log new Crashlytics user
                 if(firebaseUser != null) {
-                    //Check user sign in method and set Firebase user prop
+                    // Check user sign in method and set Firebase user prop
                     for (UserInfo user: firebaseUser.getProviderData()) {
                         if(user == null) break;
                         if(user.getProviderId() == null) break;
@@ -251,7 +249,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
             }
         }.run();
 
-        //Process intent bundle thread
+        // Process intent bundle thread
         new Thread() {
             @Override
             public void run() {
@@ -269,7 +267,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                     }
                 }
 
-                //Clear snooze if action
+                // Clear snooze if action
                 if(Constants.ACTION_CANCEL_SNOOZE.equals(getIntent().getAction())) {
                     try {
                         if(extras != null && StrUtils.notNullOrEmpty(extras.getString(Constants.EXTRA_ALARMID))) {
@@ -285,7 +283,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         RoosterAlarmManager.Companion.setOnFlagAlarmManagerDataListener(new RoosterAlarmManager.Companion.OnFlagAlarmManagerDataListener() {
             @Override
             public void onAlarmDataChanged(@NotNull ArrayList<Alarm> freshAlarms) {
-                //Check if persisted data is fresh
+                // Check if persisted data is fresh
                 if (mAlarms != freshAlarms) {
                     mAlarms.clear();
                     mAlarms.addAll(freshAlarms);
@@ -318,6 +316,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
     private void refreshDownloadIndicator() {
         if(toolbar != null && !deviceAlarmTableManager.isAlarmTableEmpty()) {
 
+            // When sync icon clicked, try refresh content
             toolbar.setNavigationOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -327,6 +326,8 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                 }
             });
 
+            /* If there is no pending alarm, or pending alarm is synced,
+            indicate with icon and clear no-internet snackbar*/
             if(deviceAlarmTableManager.getNextPendingAlarm() == null
                     || deviceAlarmTableManager.isNextPendingAlarmSynced()) {
                 toolbar.setNavigationIcon(R.drawable.ic_cloud_done_white_24dp);
@@ -351,18 +352,19 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                 });
             }
 
-            //Listen for channel download complete notices
+            // Listen for channel download complete notices from sync adapter
             DownloadSyncAdapter.setOnChannelDownloadListener(new DownloadSyncAdapter.OnChannelDownloadListener() {
                 @Override
                 public void onChannelDownloadStarted(String channelId) {
+                    // When download starts, indicate this to user
                     if (!deviceAlarmTableManager.isNextPendingAlarmSynced()) {
                         animateRefreshDownloadIndicator();
-                        snackbarManager.generateSyncing();
                     }
                 }
 
                 @Override
                 public void onChannelDownloadComplete(boolean valid, String channelId) {
+                    // When download completes, indicate this to user
                     if (deviceAlarmTableManager.isNextPendingAlarmSynced()) {
                         toolbar.setNavigationIcon(R.drawable.ic_cloud_done_white_24dp);
                         if(snackbarManager.getPreviousState() ==
@@ -372,6 +374,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                 }
             });
         } else if(toolbar != null) {
+            // If there are no alarms, clear navigation icon
             toolbar.setNavigationIcon(null);
         }
 
