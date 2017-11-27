@@ -79,7 +79,7 @@ class RealmManager_ScheduledSnackbar {
 
     fun updateOrCreateScheduledSnackbarEntry(snackbarQueueElement: SnackbarManager.Companion.SnackbarQueueElement, localDisplayClassName: String, displayTimeMillis: Long) {
         // Ignore serialization of RealmObject subclass to avoid StackOverFlow error
-        val GSON = GsonBuilder()
+        val gson = GsonBuilder()
                 .excludeFieldsWithoutExposeAnnotation()
                 .excludeFieldsWithModifiers(Modifier.ABSTRACT)
                 .addSerializationExclusionStrategy(object : ExclusionStrategy {
@@ -93,7 +93,7 @@ class RealmManager_ScheduledSnackbar {
                 }).create()
 
         val scheduledSnackbar = ScheduledSnackbar()
-        scheduledSnackbar.jsonSnackbarQueueElement = GSON.toJson(snackbarQueueElement)
+        scheduledSnackbar.jsonSnackbarQueueElement = gson.toJson(snackbarQueueElement)
         scheduledSnackbar.localDisplayClassName = localDisplayClassName
         scheduledSnackbar.displayTime = displayTimeMillis
 
