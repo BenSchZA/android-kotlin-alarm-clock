@@ -3,12 +3,14 @@
  * Copyright (c)  2017 Roosta Media. All rights reserved.
  */
 
-package com.roostermornings.android.widgets
+package com.roostermornings.android.receiver
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.roostermornings.android.util.RoosterUtils
+import com.roostermornings.android.widgets.AlarmToggleWidget
+import com.roostermornings.android.widgets.WidgetService
 
 class WidgetBroadcastReceiver : BroadcastReceiver() {
 

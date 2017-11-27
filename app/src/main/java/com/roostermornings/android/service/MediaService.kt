@@ -439,10 +439,10 @@ class MediaService : MediaBrowserServiceCompat(),
                 }
 
                 // Cache last playing state before refreshing content
-                if(mPlaybackState.state == STATE_PLAYING) {
-                    currentMediaItem = CurrentMediaItem(mCurrentMediaDescription.mediaId ?: "" , mPlayer.currentPosition, true)
+                currentMediaItem = if(mPlaybackState.state == STATE_PLAYING) {
+                    CurrentMediaItem(mCurrentMediaDescription.mediaId ?: "" , mPlayer.currentPosition, true)
                 } else {
-                    currentMediaItem = currentMediaItem.reset()
+                    currentMediaItem.reset()
                 }
                 // Prepare media content and wait for STATE_READY
                 mPlayer.addListener(playerEventListener)

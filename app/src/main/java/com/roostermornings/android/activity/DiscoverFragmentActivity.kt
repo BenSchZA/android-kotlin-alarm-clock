@@ -12,6 +12,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.media.AudioManager
 import android.os.Bundle
+import android.os.Parcel
 import android.os.RemoteException
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
@@ -37,12 +38,12 @@ import com.roostermornings.android.adapter.DiscoverListAdapter
 import com.roostermornings.android.adapter_data.ChannelManager
 import com.roostermornings.android.dagger.RoosterApplicationComponent
 import com.roostermornings.android.firebase.FA
+import com.roostermornings.android.realm.RoosterMediaItem
 import com.roostermornings.android.service.MediaService
 import com.roostermornings.android.util.JSONPersistence
 import com.roostermornings.android.util.RoosterUtils
 import com.roostermornings.android.util.Toaster
 import io.realm.Realm
-import java.util.*
 import javax.inject.Inject
 import kotlin.collections.ArrayList
 
@@ -66,13 +67,14 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
     private var mMediaController: MediaControllerCompat? = null
     private lateinit var mMediaBrowser: MediaBrowserCompat
 
-    private val mMediaControllerWidget: MediaController? = null
-
-    @Inject lateinit var jsonPersistence: JSONPersistence
+    @Inject
+    lateinit var jsonPersistence: JSONPersistence
     @Inject
     lateinit var sharedPreferences: SharedPreferences
-    @Inject lateinit var channelManager: ChannelManager
-    @Inject lateinit var realm: Realm
+    @Inject
+    lateinit var channelManager: ChannelManager
+    @Inject
+    lateinit var realm: Realm
 
     private val subscriptionCallback = object : MediaBrowserCompat.SubscriptionCallback() {
         override fun onChildrenLoaded(parentId: String, children: List<MediaBrowserCompat.MediaItem>) {
@@ -114,11 +116,6 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
                 mMediaController?.registerCallback(mediaControllerCallback)
                 // Save the controller
                 MediaControllerCompat.setMediaController(this@DiscoverFragmentActivity, mMediaController)
-
-                //                mMediaControllerWidget.setAnchorView(findViewById(R.id.anchorText));
-                //                mMediaControllerWidget.setMediaPlayer();
-                //                mMediaControllerWidget.setEnabled(true);
-                //mMediaControllerWidget.show(0);
             } catch (e: RemoteException) {
                 e.printStackTrace()
             }
@@ -201,23 +198,24 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
             }
         }.run()
 
-//        realm.where(RoosterMediaItem::class.java)
-//                .findAll()
-//                .takeIf { it.isNotEmpty() }
-//                .also {
-//            if(checkInternetConnection() && !swipeRefreshLayout.isRefreshing)
-//                swipeRefreshLayout.isRefreshing = true
-//        }?.let {
-//            realmMediaItems ->
-//            mediaItems.clear()
-//            realmMediaItems.forEach {
-//                mediaItems.add(it.mediaItem)
-//            }
-//            mAdapter.notifyDataSetChanged()
-//            swipeRefreshLayout.isRefreshing = false
-//        }
-        if(checkInternetConnection() && !swipeRefreshLayout.isRefreshing)
-            swipeRefreshLayout.isRefreshing = true
+        realm.where(RoosterMediaItem::class.java)
+                .findAll()
+                .takeIf { it.isNotEmpty() }
+                .also {
+            if(checkInternetConnection() && !swipeRefreshLayout.isRefreshing)
+                swipeRefreshLayout.isRefreshing = true
+        }?.let {
+            realmMediaItems ->
+            mediaItems.clear()
+            realmMediaItems.forEach {
+                val mediaItem = MediaBrowserCompat.MediaItem.CREATOR.createFromParcel(it.parcel)
+                mediaItems.add(mediaItem)
+            }
+            mAdapter.notifyDataSetChanged()
+            swipeRefreshLayout.isRefreshing = false
+        }
+//        if(checkInternetConnection() && !swipeRefreshLayout.isRefreshing)
+//            swipeRefreshLayout.isRefreshing = true
 
         /*
         * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
@@ -261,16 +259,16 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
         super.onPause()
 
         //Persist channel roosters for seamless loading
-//        if (!mediaItems.isEmpty()) {
-//            realm.executeTransaction {
-//                realm.where(RoosterMediaItem::class.java).findAll().deleteAllFromRealm()
-//                mediaItems.forEach {
-//                    val roosterMediaItem = RoosterMediaItem()
-//                    roosterMediaItem.mediaItem = it
-//                    realm.insert(roosterMediaItem)
-//                }
-//            }
-//        }
+        if (!mediaItems.isEmpty()) {
+            realm.executeTransaction {
+                realm.where(RoosterMediaItem::class.java).findAll().deleteAllFromRealm()
+                mediaItems.forEach {
+                    val roosterMediaItem = RoosterMediaItem()
+                    it.writeToParcel(roosterMediaItem.parcel, 0)
+                    realm.insert(roosterMediaItem)
+                }
+            }
+        }
 
         // If media not playing, stop the media service
         //if(mMediaController?.playbackState?.state != PlaybackStateCompat.STATE_PLAYING)
