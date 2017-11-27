@@ -31,6 +31,8 @@ import android.widget.MediaController
 import android.widget.TextView
 import android.widget.Toast
 import butterknife.BindView
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.R
 import com.roostermornings.android.activity.base.BaseActivity
@@ -198,24 +200,26 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
             }
         }.run()
 
-        realm.where(RoosterMediaItem::class.java)
-                .findAll()
-                .takeIf { it.isNotEmpty() }
-                .also {
-            if(checkInternetConnection() && !swipeRefreshLayout.isRefreshing)
-                swipeRefreshLayout.isRefreshing = true
-        }?.let {
-            realmMediaItems ->
-            mediaItems.clear()
-            realmMediaItems.forEach {
-                val mediaItem = MediaBrowserCompat.MediaItem.CREATOR.createFromParcel(it.parcel)
-                mediaItems.add(mediaItem)
-            }
-            mAdapter.notifyDataSetChanged()
-            swipeRefreshLayout.isRefreshing = false
-        }
-//        if(checkInternetConnection() && !swipeRefreshLayout.isRefreshing)
-//            swipeRefreshLayout.isRefreshing = true
+//        realm.where(RoosterMediaItem::class.java)
+//                .findAll()
+//                .takeIf { it.isNotEmpty() }
+//                .also {
+//            if(checkInternetConnection() && !swipeRefreshLayout.isRefreshing)
+//                swipeRefreshLayout.isRefreshing = true
+//        }?.let {
+//            realmMediaItems ->
+//            mediaItems.clear()
+//            val gson = Gson()
+//            realmMediaItems.forEach {
+//                val parcel = gson.fromJson<Parcel>(it.jsonParcel, Parcel::class.java)
+//                val mediaItem = MediaBrowserCompat.MediaItem.CREATOR.createFromParcel(parcel)
+//                mediaItems.add(mediaItem)
+//            }
+//            mAdapter.notifyDataSetChanged()
+//            swipeRefreshLayout.isRefreshing = false
+//        }
+        if(checkInternetConnection() && !swipeRefreshLayout.isRefreshing)
+            swipeRefreshLayout.isRefreshing = true
 
         /*
         * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
@@ -258,17 +262,20 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
     public override fun onPause() {
         super.onPause()
 
-        //Persist channel roosters for seamless loading
-        if (!mediaItems.isEmpty()) {
-            realm.executeTransaction {
-                realm.where(RoosterMediaItem::class.java).findAll().deleteAllFromRealm()
-                mediaItems.forEach {
-                    val roosterMediaItem = RoosterMediaItem()
-                    it.writeToParcel(roosterMediaItem.parcel, 0)
-                    realm.insert(roosterMediaItem)
-                }
-            }
-        }
+//        //Persist channel roosters for seamless loading
+//        if (!mediaItems.isEmpty()) {
+//            realm.executeTransaction {
+//                realm.where(RoosterMediaItem::class.java).findAll().deleteAllFromRealm()
+//                val gson = Gson()
+//                mediaItems.forEach {
+//                    val roosterMediaItem = RoosterMediaItem()
+//                    val parcel = Parcel.obtain()
+//                    it.writeToParcel(parcel, 0)
+//                    roosterMediaItem.jsonParcel = gson.toJson(parcel)
+//                    realm.insert(roosterMediaItem)
+//                }
+//            }
+//        }
 
         // If media not playing, stop the media service
         //if(mMediaController?.playbackState?.state != PlaybackStateCompat.STATE_PLAYING)

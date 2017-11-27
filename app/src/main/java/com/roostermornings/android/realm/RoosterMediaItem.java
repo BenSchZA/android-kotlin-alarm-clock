@@ -1,6 +1,9 @@
 package com.roostermornings.android.realm;
 
 import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.google.gson.Gson;
 
 import io.realm.RealmObject;
 
@@ -9,5 +12,14 @@ import io.realm.RealmObject;
  */
 
 public class RoosterMediaItem extends RealmObject {
-    public Parcel parcel = Parcel.obtain();
+
+    public String jsonParcel = "";
+
+    public String getJsonParcel() {
+        return jsonParcel;
+    }
+
+    public void setJsonParcel(String jsonParcel) {
+        this.jsonParcel = jsonParcel;
+    }
 }
