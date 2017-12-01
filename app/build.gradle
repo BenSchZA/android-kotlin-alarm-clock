@@ -66,8 +66,8 @@ android {
             versionName "2.3.4"
 
             manifestPlaceholders = [
-                    app_icon: "@mipmap/ic_launcher",
-                    app_name: "Rooster",
+                    app_icon      : "@mipmap/ic_launcher",
+                    app_name      : "Rooster",
                     fabric_api_key: "ee6fca3fad50fdd435d89f9ed6c33257e984faa5",
             ]
         }
@@ -80,8 +80,8 @@ android {
             versionCode 1000017
 
             manifestPlaceholders = [
-                    app_icon: "@mipmap/ic_launcher_beta",
-                    app_name: "Rooster Beta",
+                    app_icon      : "@mipmap/ic_launcher_beta",
+                    app_name      : "Rooster Beta",
                     fabric_api_key: "ee6fca3fad50fdd435d89f9ed6c33257e984faa5",
             ]
         }
@@ -131,10 +131,11 @@ repositories {
 
 def support_lib_version = "26.1.0"
 
-def google_play_services_version = "11.4.2"
+def google_play_services_version = "11.6.2"
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:support-v4:26.1.0'
     androidTestImplementation 'junit:junit:4.12'
     androidTestImplementation "com.android.support:support-annotations:${support_lib_version}"
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
@@ -209,6 +210,7 @@ dependencies {
     implementation 'com.jakewharton:butterknife:8.8.0'
     kapt 'com.jakewharton:butterknife-compiler:8.8.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+    implementation "com.android.support:gridlayout-v7:${support_lib_version}"
 }
 
 apply plugin: 'com.google.gms.google-services'

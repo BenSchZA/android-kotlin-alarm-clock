@@ -6,8 +6,18 @@
 
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item
-        android:drawable="@color/rooster_splash"/>
+    <!--<item-->
+        <!--android:drawable="@color/rooster_splash"/>-->
+
+    <item>
+        <shape>
+            <gradient
+                android:angle="90"
+                android:startColor="#B9E6FE"
+                android:endColor="#FFFFFF"
+                android:type="linear" />
+        </shape>
+    </item>
 
     <item>
         <bitmap
