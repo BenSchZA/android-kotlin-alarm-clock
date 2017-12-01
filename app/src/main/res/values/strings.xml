@@ -10,6 +10,9 @@
     <string name="action_profile">Profile</string>
     <string name="action_signout">Sign out</string>
 
+    <string name="onboarding_hook">An alarm that is your friend, not foe.</string>
+    <string name="onboarding_hook_button">Find out how</string>
+
     <string name="intro_screen1_blurb">Wake up to surprise voice notes from your friends.</string>
     <string name="intro_screen2_blurb">Choose channel roosters for daily inspiration, jokes, music, and more!</string>
     <string name="intro_screen3_blurb">We need your number so that we can help you find your friends</string>
@@ -354,5 +357,11 @@
     <string name="appwidget_text">EXAMPLE</string>
     <string name="configure">Configure</string>
     <string name="add_widget">Add widget</string>
+    <string name="title_activity_onboarding">OnboardingActivity</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+
+    <string name="title_activity_fullscreen">FullscreenActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 
 </resources>

@@ -207,13 +207,11 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
     }
 
     protected void initialize(int layoutId) {
-
         setContentView(layoutId);
 
         //Bind to butterknife delegate
         //Calls to ButterKnife.bind can be made anywhere you would otherwise put findViewById calls.
         ButterKnife.bind(this);
-
     }
 
     @Override
