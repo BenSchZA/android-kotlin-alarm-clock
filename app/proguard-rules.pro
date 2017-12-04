@@ -47,3 +47,6 @@
 
 # Preserve annotations, line numbers, and source file names
 -keepattributes *Annotation*,SourceFile,LineNumberTable
+
+# Keep enum to avoid Gson AssertionError
+-keepclassmembers enum * { *; }
