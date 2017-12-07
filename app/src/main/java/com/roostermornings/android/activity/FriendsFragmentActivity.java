@@ -210,7 +210,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
             newFragment.show(fm, "new frag");
         }
 
-        FirebaseNetwork.setOnFlagValidMobileNumberCompleteListener(new FirebaseNetwork.OnFlagValidMobileNumberCompleteListener() {
+        FirebaseNetwork.INSTANCE.setOnFlagValidMobileNumberCompleteListener(new FirebaseNetwork.OnFlagValidMobileNumberCompleteListener() {
             @Override
             public void onEvent(boolean valid) {
                 if(!valid) {
@@ -219,7 +219,7 @@ public class FriendsFragmentActivity extends BaseActivity implements
                 }
             }
         });
-        FirebaseNetwork.flagValidMobileNumber(this, true);
+        FirebaseNetwork.INSTANCE.flagValidMobileNumber(this, true);
     }
 
 

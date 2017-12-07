@@ -165,7 +165,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         realmManagerAlarmFailureLog.processAlarmFailures(true);
 
         // Set shared pref to indicate whether mobile number is valid
-        FirebaseNetwork.flagValidMobileNumber(this, false);
+        FirebaseNetwork.INSTANCE.flagValidMobileNumber(this, false);
 
         // Check if first entry
         lifeCycle.performInception();
@@ -244,7 +244,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
                     Crashlytics.setUserIdentifier(firebaseUser.getUid());
                     Crashlytics.setUserEmail(firebaseUser.getEmail());
                     Crashlytics.setUserName(firebaseUser.getDisplayName());
-                    FirebaseNetwork.updateLastSeen();
+                    FirebaseNetwork.INSTANCE.updateLastSeen();
                 }
             }
         }.run();

@@ -135,6 +135,16 @@
         <item name="android:background">@drawable/rooster_button_white</item>
     </style>
 
+    <style name="RoosterButtonNoFillStyle" parent="@style/Widget.AppCompat.Button.Borderless">
+        <item name="android:textAllCaps">false</item>
+        <item name="textAllCaps">false</item>
+        <item name="android:textSize">@dimen/text_large</item>
+        <item name="android:minHeight">38dp</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:minWidth">140dp</item>
+        <item name="android:background">@drawable/rooster_button_nofill</item>
+    </style>
+
     <style name="RoosterButtonLightBlueStyle" parent="@style/Widget.AppCompat.Button.Borderless">
         <item name="android:textAllCaps">false</item>
         <item name="textAllCaps">false</item>

@@ -32,6 +32,9 @@
     <color name="rooster_dark_blue">#024272</color>
     <color name="rooster_blue_transparent">#8D2C77FD</color>
 
+    <color name="onboarding_light_blue">#B9E6FE</color>
+    <color name="onboarding_blue">#379BF5</color>
+
     <color name="rooster_splash">#024272</color>
 
     <!--<color name="gradient_start_day">#50aced</color>-->

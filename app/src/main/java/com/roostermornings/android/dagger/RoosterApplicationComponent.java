@@ -25,10 +25,12 @@ import com.roostermornings.android.activity.ProfileActivity;
 import com.roostermornings.android.activity.SettingsActivity;
 import com.roostermornings.android.activity.SignInActivity;
 import com.roostermornings.android.activity.SignupEmailActivity;
+import com.roostermornings.android.activity.SplashActivity;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.adapter.MyAlarmsListAdapter;
 import com.roostermornings.android.adapter_data.RoosterAlarmManager;
 import com.roostermornings.android.adapter_data.ChannelManager;
+import com.roostermornings.android.auth.AuthManager;
 import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.fragment.NumberEntryDialogFragment;
 import com.roostermornings.android.fragment.base.BaseFragment;
@@ -41,6 +43,8 @@ import com.roostermornings.android.fragment.message_status.MessageStatusReceived
 import com.roostermornings.android.fragment.message_status.MessageStatusSentFragment2;
 import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment1;
 import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment2;
+import com.roostermornings.android.onboarding.OnboardingActivity;
+import com.roostermornings.android.onboarding.ProfileCreationFragment;
 import com.roostermornings.android.realm.RealmManager_AlarmFailureLog;
 import com.roostermornings.android.media.MediaNotificationHelper;
 import com.roostermornings.android.realm.RealmManager_ScheduledSnackbar;
@@ -93,6 +97,8 @@ public interface RoosterApplicationComponent {
     void inject(SettingsActivity activity);
     void inject(SignInActivity activity);
     void inject(SignupEmailActivity activity);
+    void inject(OnboardingActivity activity);
+    void inject(SplashActivity activity);
 
     void inject(FriendsInviteFragment3 fragment);
     void inject(FriendsMyFragment1 fragment);
@@ -104,6 +110,7 @@ public interface RoosterApplicationComponent {
     void inject(NumberEntryDialogFragment fragment);
     void inject(MessageStatusReceivedFragment1 fragment);
     void inject(MessageStatusSentFragment2 fragment);
+    void inject(ProfileCreationFragment fragment);
 
     void inject(AudioService service);
     void inject(UploadService service);
@@ -127,6 +134,7 @@ public interface RoosterApplicationComponent {
     void inject(RealmManager_AlarmFailureLog roosterClass);
     void inject(RealmManager_ScheduledSnackbar roosterClass);
     void inject(SnackbarManager roosterClass);
+    void inject(AuthManager roosterClass);
 
     void inject(DownloadSyncAdapter adapter);
     void inject(MyAlarmsListAdapter adapter);

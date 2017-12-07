@@ -509,14 +509,9 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
         }
 
         @Override
-        public void onStartTrackingTouch(final SeekBar seekBar) {
-
-        }
-
+        public void onStartTrackingTouch(final SeekBar seekBar) {}
         @Override
-        public void onStopTrackingTouch(SeekBar seekBar) {
-
-        }
+        public void onStopTrackingTouch(SeekBar seekBar) {}
     };
 
     private void playRooster(final DeviceAudioQueueItem audioItem) {

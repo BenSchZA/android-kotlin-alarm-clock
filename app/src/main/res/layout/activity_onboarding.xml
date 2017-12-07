@@ -5,24 +5,22 @@
     android:id="@+id/main_content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     android:keepScreenOn="true"
-    tools:context="com.roostermornings.android.activity.OnboardingActivity">
+    tools:context="com.roostermornings.android.onboarding.OnboardingActivity">
 
     <android.support.v4.view.ViewPager
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" >
-    </android.support.v4.view.ViewPager>
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <ProgressBar
         android:layout_alignParentBottom="true"
         android:id="@+id/progressBar"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="-8dp"
+        android:layout_height="5dp"
+        android:layout_marginBottom="0dp"
         android:layout_marginTop="@dimen/spacing_normal"
         android:progress="0"
         android:progressDrawable="@drawable/progressbar_progress_white"/>

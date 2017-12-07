@@ -1,45 +1,71 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-  ~ Rooster Mornings Android.
-  ~ Copyright (c)  2017 Roosta Media. All rights reserved.
-  -->
+<?xml version="1.0" encoding="utf-8"?>
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/rooster_splash"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/background_onboarding"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".activity.SignInActivity">
 
-    <ImageView
-        android:id="@+id/rooster_logo"
+    <me.grantland.widget.AutofitTextView
+        android:id="@+id/signUpBenefits"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:text="@string/onboarding_sign_up_benefits"
+        android:maxLines="2"
+        android:paddingLeft="@dimen/spacing_large"
+        android:paddingRight="@dimen/spacing_large"
+        android:paddingTop="@dimen/spacing_large"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        android:textSize="@dimen/text_large"/>
+
+    <ImageView
+        android:id="@+id/roosterCloud"
+        android:layout_below="@+id/signUpBenefits"
         android:layout_centerHorizontal="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp"
+        android:adjustViewBounds="true"
+        android:maxHeight="230dp"
+        android:maxWidth="230dp"
+        android:minHeight="50dp"
+        android:minWidth="50dp"
+        app:srcCompat="@drawable/ic_cloud_white_24px" />
+
+    <ImageView
+        android:id="@+id/roosterChannels"
+        android:layout_below="@+id/signUpBenefits"
+        android:layout_centerHorizontal="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginLeft="100dp"
         android:layout_marginRight="100dp"
-        android:layout_marginTop="100dp"
         android:adjustViewBounds="true"
         android:maxHeight="200dp"
         android:maxWidth="200dp"
         android:minHeight="50dp"
         android:minWidth="50dp"
-        android:src="@drawable/logo" />
+        android:src="@drawable/rooster_channels"
+        android:elevation="@dimen/spacing_small" />
 
     <FrameLayout
+        android:id="@+id/signInLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/rooster_logo"
+        android:layout_below="@id/roosterCloud"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:layout_marginTop="@dimen/spacing_xxlarge"
         android:gravity="center_horizontal">
 
         <LinearLayout
-            android:id="@+id/signInLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical">
@@ -53,37 +79,54 @@
                 android:layout_marginBottom="30dp"
                 android:layout_marginTop="30dp"
                 android:visibility="gone" />
-
+    <!--com_facebook_button_icon-->
             <Button
+                style="@style/RoosterButtonWhiteStyle"
                 android:id="@+id/signin_button_facebook"
-                style="@style/RoosterButtonStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginBottom="@dimen/spacing_normal"
-                android:drawableLeft="@drawable/com_facebook_button_icon"
+                android:drawableStart="@drawable/com_facebook_button_icon_blue"
                 android:drawablePadding="@dimen/spacing_normal"
                 android:paddingLeft="@dimen/spacing_normal_large"
                 android:paddingRight="@dimen/spacing_normal_large"
-                android:text="@string/signup_facebook" />
+                android:text="@string/signup_facebook"
+                android:textColor="@color/onboarding_blue"
+                android:elevation="@dimen/spacing_small"/>
 
             <!-- Fix for fetching external vector drawable for facebook logo -->
             <!-- v2.0.1: http://stackoverflow.com/questions/35622438/update-android-support-library-to-23-2-0-cause-error-xmlpullparserexception-bin-->
             <!-- v2.0.2: use icon instead of drawable -->
 
             <Button
+                style="@style/RoosterButtonWhiteStyle"
                 android:id="@+id/signin_button_google"
-                style="@style/RoosterButtonStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginBottom="@dimen/spacing_normal"
                 android:layout_marginTop="@dimen/spacing_normal"
-                android:drawableLeft="@drawable/googleg_standard_color_18"
+                android:drawableStart="@drawable/googleg_standard_color_18"
                 android:drawablePadding="@dimen/spacing_normal"
                 android:paddingLeft="@dimen/spacing_normal_large"
                 android:paddingRight="@dimen/spacing_normal_large"
-                android:text="@string/signup_google" />
+                android:text="@string/signup_google"
+                android:textColor="@color/onboarding_blue"
+                android:elevation="@dimen/spacing_small"/>
+
+            <Button
+                style="@style/RoosterButtonNoFillStyle"
+                android:id="@+id/signin_button_notnow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="@dimen/spacing_normal"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:paddingLeft="@dimen/spacing_normal_large"
+                android:paddingRight="@dimen/spacing_normal_large"
+                android:text="@string/signup_not_now"
+                android:textColor="@color/white" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -100,7 +143,9 @@
                     android:focusable="true"
                     android:gravity="center"
                     android:text="Login"
-                    android:textColor="@drawable/rooster_link_white" />
+                    android:textColor="@drawable/rooster_link_white"
+                    android:textSize="@dimen/text_large"
+                    android:textStyle="bold"/>
 
                 <TextView
                     android:id="@+id/sign_up_email_textview"
@@ -111,7 +156,9 @@
                     android:focusable="true"
                     android:gravity="center"
                     android:text="Sign Up With Email"
-                    android:textColor="@drawable/rooster_link_white" />
+                    android:textColor="@drawable/rooster_link_white"
+                    android:textSize="@dimen/text_large"
+                    android:textStyle="bold"/>
 
             </LinearLayout>
 
@@ -128,6 +175,7 @@
     </FrameLayout>
 
     <LinearLayout
+        android:id="@+id/ts_and_cs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -143,7 +191,9 @@
             android:focusable="true"
             android:gravity="center|bottom"
             android:text="@string/terms_and_conditions"
-            android:textColor="@drawable/rooster_link_white" />
+            android:textColor="@drawable/rooster_link_white"
+            android:textSize="@dimen/text_large"
+            android:textStyle="bold"/>
 
     </LinearLayout>
 

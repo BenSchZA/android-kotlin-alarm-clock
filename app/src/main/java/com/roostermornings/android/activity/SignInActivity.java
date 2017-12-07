@@ -96,6 +96,10 @@ public class SignInActivity extends BaseActivity {
 
         FA.Log(FA.Event.onboarding_intro_viewed.class, null, null);
 
+        initializeAuthProviders();
+    }
+
+    private void initializeAuthProviders() {
         //Facebook
         facebookLoginButton.setReadPermissions("email", "public_profile");
         facebookCallbackManager = CallbackManager.Factory.create();
@@ -105,7 +109,7 @@ public class SignInActivity extends BaseActivity {
                     @Override
                     public void onSuccess(LoginResult loginResult) {
                         Log.d(TAG, "facebook:onSuccess:" + loginResult);
-                        handleFacebookAccessToken(loginResult.getAccessToken());
+                        firebaseAuthWithFacebook(loginResult.getAccessToken());
                     }
 
                     @Override
@@ -131,7 +135,7 @@ public class SignInActivity extends BaseActivity {
         // Build a GoogleApiClient with access to the Google Sign-In API and the
         // options specified by gso.
         mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this /* FragmentActivity */, null  /* OnConnectionFailedListener */)
+                .enableAutoManage(this, null)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
     }
@@ -160,9 +164,8 @@ public class SignInActivity extends BaseActivity {
     public void onFacebookSigninButtonClick(View v) {
         LoginManager.getInstance().logInWithReadPermissions(
                 this,
-                Arrays.asList("public_profile")
+                Arrays.asList("public_profile", "email")
         );
-        //Arrays.asList("user_photos", "email", "user_birthday", "public_profile")
     }
 
     @OnClick(R.id.signin_button_google)
@@ -188,15 +191,15 @@ public class SignInActivity extends BaseActivity {
         if (requestCode == RC_SIGN_IN) {
             progressBar.setVisibility(View.VISIBLE);
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            handleSignInResult(result);
+            handleGoogleSignInResult(result);
         }
     }
 
     //Facebook
-    private void handleFacebookAccessToken(AccessToken token) {
+    private void firebaseAuthWithFacebook(AccessToken token) {
         if (!checkInternetConnection()) return;
 
-        Log.d(TAG, "handleFacebookAccessToken:" + token);
+        Log.d(TAG, "firebaseAuthWithFacebook:" + token);
 
         final AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
         mAuth.signInWithCredential(credential)
@@ -212,50 +215,18 @@ public class SignInActivity extends BaseActivity {
                             String deviceToken = FirebaseInstanceId.getInstance().getToken();
                             FirebaseDatabase database = FirebaseDatabase.getInstance();
 
-                            String photoURLString;
+                            String photoURL;
                             try {
                                 //photoURLString = mAuth.getCurrentUser().getPhotoUrl().toString();
                                 int dimensionPixelSize = getResources().getDimensionPixelSize(com.facebook.R.dimen.com_facebook_profilepictureview_preset_size_normal);
                                 Profile profile = Profile.getCurrentProfile();
-                                photoURLString = ImageRequest.getProfilePictureUri(profile.getId(), dimensionPixelSize, dimensionPixelSize).toString();
+                                photoURL = ImageRequest.getProfilePictureUri(profile.getId(), dimensionPixelSize, dimensionPixelSize).toString();
                             }catch (java.lang.NullPointerException e){
                                 e.printStackTrace();
-                                photoURLString = null;
+                                photoURL = null;
                             }
 
-                            if(mAuth.getCurrentUser() == null) return;
-                            User user = new User(null,
-                                    "android",
-                                    deviceToken,
-                                    photoURLString,
-                                    notNull(mAuth.getCurrentUser().getDisplayName()) ? mAuth.getCurrentUser().getDisplayName():"",
-                                    "",
-                                    notNull(mAuth.getCurrentUser().getUid()) ? mAuth.getCurrentUser().getUid():null,
-                                    null,
-                                    0,
-                                    null);
-
-                            //Note: "friends" and "cell_number" node not changed TODO: should profile pic be kept?
-                            Map<String, Object> childUpdates = new HashMap<>();
-                            childUpdates.put(String.format("users/%s/%s",
-                                    mAuth.getCurrentUser().getUid(), "device_token"), user.getDevice_token());
-                            childUpdates.put(String.format("users/%s/%s",
-                                    mAuth.getCurrentUser().getUid(), "device_type"), user.getDevice_type());
-                            childUpdates.put(String.format("users/%s/%s",
-                                    mAuth.getCurrentUser().getUid(), "profile_pic"), user.getProfile_pic());
-                            childUpdates.put(String.format("users/%s/%s",
-                                    mAuth.getCurrentUser().getUid(), "uid"), user.getUid());
-                            childUpdates.put(String.format("users/%s/%s",
-                                    mAuth.getCurrentUser().getUid(), "user_name"), user.getUser_name());
-                            childUpdates.put(String.format("users/%s/%s",
-                                    mAuth.getCurrentUser().getUid(), "unseen_roosters"), user.getUnseen_roosters());
-
-                            //Add user as a friend of theirs
-                            childUpdates.put(String.format("users/%s/%s/%s", mAuth.getCurrentUser().getUid(), "friends", mAuth.getCurrentUser().getUid()), true);
-
-                            mDatabase.updateChildren(childUpdates);
-
-                            proceedToMyAlarmsActivity();
+                            createOrUpdateRoosterUser(deviceToken, photoURL);
 
                         } else{
                             //Remove progress bar on failure
@@ -270,8 +241,8 @@ public class SignInActivity extends BaseActivity {
     }
 
     //Google
-    private void handleSignInResult(GoogleSignInResult result) {
-        Log.d(TAG, "handleSignInResult:" + result.isSuccess());
+    private void handleGoogleSignInResult(GoogleSignInResult result) {
+        Log.d(TAG, "handleGoogleSignInResult:" + result.isSuccess());
         if (result.isSuccess()) {
             // Google Sign In was successful, authenticate with Firebase
             firebaseAuthWithGoogle(result);
@@ -305,44 +276,11 @@ public class SignInActivity extends BaseActivity {
                             String deviceToken = FirebaseInstanceId.getInstance().getToken();
                             FirebaseDatabase database = FirebaseDatabase.getInstance();
 
-                            String photoURLString;
-                            photoURLString = notNull(account.getPhotoUrl()) ? account.getPhotoUrl().toString():null;
+                            String photoURL;
+                            photoURL = notNull(account.getPhotoUrl()) ? account.getPhotoUrl().toString() : null;
 
-                            if(mAuth.getCurrentUser() == null) return;
-                            User user = new User(null,
-                                    "android",
-                                    deviceToken,
-                                    photoURLString,
-                                    notNull(mAuth.getCurrentUser().getDisplayName()) ? mAuth.getCurrentUser().getDisplayName():"",
-                                    "",
-                                    notNull(mAuth.getCurrentUser().getUid()) ? mAuth.getCurrentUser().getUid():null,
-                                    null,
-                                    0,
-                                    null);
-
-                            //Note: "friends" and "cell_number" node not changed TODO: should profile pic be kept?
-                            Map<String, Object> childUpdates = new HashMap<>();
-                            childUpdates.put(String.format("users/%s/%s",
-                                    mAuth.getCurrentUser().getUid(), "device_token"), user.getDevice_token());
-                            childUpdates.put(String.format("users/%s/%s",
-                                    mAuth.getCurrentUser().getUid(), "device_type"), user.getDevice_type());
-                            childUpdates.put(String.format("users/%s/%s",
-                                    mAuth.getCurrentUser().getUid(), "profile_pic"), user.getProfile_pic());
-                            childUpdates.put(String.format("users/%s/%s",
-                                    mAuth.getCurrentUser().getUid(), "uid"), user.getUid());
-                            childUpdates.put(String.format("users/%s/%s",
-                                    mAuth.getCurrentUser().getUid(), "user_name"), user.getUser_name());
-                            childUpdates.put(String.format("users/%s/%s",
-                                    mAuth.getCurrentUser().getUid(), "unseen_roosters"), user.getUnseen_roosters());
-
-                            //Add user as a friend of theirs
-                            childUpdates.put(String.format("users/%s/%s/%s", mAuth.getCurrentUser().getUid(), "friends", mAuth.getCurrentUser().getUid()), true);
-
-                            mDatabase.updateChildren(childUpdates);
-
-                            proceedToMyAlarmsActivity();
-
-                        } else{
+                            createOrUpdateRoosterUser(deviceToken, photoURL);
+                        } else {
                             //Remove progress bar on failure
                             progressBar.setVisibility(View.GONE);
 
@@ -352,6 +290,42 @@ public class SignInActivity extends BaseActivity {
                         }
                     }
                 });
+    }
+
+    private void createOrUpdateRoosterUser(String deviceToken, String photoURL) {
+        if(mAuth.getCurrentUser() == null) return;
+        User user = new User(null,
+                "android",
+                deviceToken,
+                photoURL,
+                notNull(mAuth.getCurrentUser().getDisplayName()) ? mAuth.getCurrentUser().getDisplayName():"",
+                "",
+                notNull(mAuth.getCurrentUser().getUid()) ? mAuth.getCurrentUser().getUid():null,
+                null,
+                0,
+                null);
+
+        //Note: "friends" and "cell_number" node not changed TODO: should profile pic be kept?
+        Map<String, Object> childUpdates = new HashMap<>();
+        childUpdates.put(String.format("users/%s/%s",
+                mAuth.getCurrentUser().getUid(), "device_token"), user.getDevice_token());
+        childUpdates.put(String.format("users/%s/%s",
+                mAuth.getCurrentUser().getUid(), "device_type"), user.getDevice_type());
+        childUpdates.put(String.format("users/%s/%s",
+                mAuth.getCurrentUser().getUid(), "profile_pic"), user.getProfile_pic());
+        childUpdates.put(String.format("users/%s/%s",
+                mAuth.getCurrentUser().getUid(), "uid"), user.getUid());
+        childUpdates.put(String.format("users/%s/%s",
+                mAuth.getCurrentUser().getUid(), "user_name"), user.getUser_name());
+        childUpdates.put(String.format("users/%s/%s",
+                mAuth.getCurrentUser().getUid(), "unseen_roosters"), user.getUnseen_roosters());
+
+        //Add user as a friend of theirs
+        childUpdates.put(String.format("users/%s/%s/%s", mAuth.getCurrentUser().getUid(), "friends", mAuth.getCurrentUser().getUid()), true);
+
+        mDatabase.updateChildren(childUpdates);
+
+        proceedToMyAlarmsActivity();
     }
 
     //On successful authentication, proceed to alarms activity

@@ -141,7 +141,7 @@ public class NumberEntryDialogFragment extends DialogFragment implements Validat
         editor.apply();
 
         String mobileNumberString = mobileNumber.getText().toString().trim();
-        FirebaseNetwork.updateProfileCellNumber(getContext(), mobileNumber.getText().toString().trim());
+        FirebaseNetwork.INSTANCE.updateProfileCellNumber(getContext(), mobileNumber.getText().toString().trim());
 
         mListener.onMobileNumberValidated(mobileNumberString);
         dismiss();

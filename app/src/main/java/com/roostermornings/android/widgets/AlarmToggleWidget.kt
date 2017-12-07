@@ -148,14 +148,18 @@ class AlarmToggleWidget : AppWidgetProvider() {
             mAlarm.fromDeviceAlarm(pendingAlarm, true)
             mAlarm.setAlarmDaysFromDeviceAlarm(deviceAlarmTableManager.getAlarmClassDays(pendingAlarm.setId))
 
-            FirebaseNetwork.setOnFlagChannelNameReceivedListener { channelName ->
-                if(channelName.isNullOrBlank()) views.setViewVisibility(R.id.widget_alarm_channel_textview, View.GONE)
-                else {
-                    views.setViewVisibility(R.id.widget_alarm_channel_textview, View.VISIBLE)
-                    views.setTextViewText(R.id.widget_alarm_channel_textview, channelName)
+            val channelNameListener = object: FirebaseNetwork.OnFlagChannelNameReceivedListener {
+                override fun onChannelNameReceived(channelName: String?) {
+                    if(channelName.isNullOrBlank()) views.setViewVisibility(R.id.widget_alarm_channel_textview, View.GONE)
+                    else {
+                        views.setViewVisibility(R.id.widget_alarm_channel_textview, View.VISIBLE)
+                        views.setTextViewText(R.id.widget_alarm_channel_textview, channelName)
+                    }
+                    appWidgetManager.updateAppWidget(appWidgetId, views)
                 }
-                appWidgetManager.updateAppWidget(appWidgetId, views)
             }
+
+            FirebaseNetwork.setOnFlagChannelNameReceivedListener(channelNameListener)
             FirebaseNetwork.getChannelNameFromUID(pendingAlarm.channel)
 
             views.setViewVisibility(R.id.widget_toggle_alarm, View.VISIBLE)

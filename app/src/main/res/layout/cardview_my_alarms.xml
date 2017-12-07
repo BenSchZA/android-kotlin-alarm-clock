@@ -16,6 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="true"
+        android:focusable="true"
         android:foreground="@drawable/selectable_item_background"
         app:cardBackgroundColor="@color/card_white_transparent"
         app:cardCornerRadius="6dp"

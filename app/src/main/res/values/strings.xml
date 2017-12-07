@@ -12,6 +12,8 @@
 
     <string name="onboarding_hook">An alarm that is your friend, not foe.</string>
     <string name="onboarding_hook_button">Find out how</string>
+    <string name="onboarding_image_transition">onboarding_image_transition</string>
+    <string name="onboarding_sign_up_benefits">Sync your alarms and help us suggest the best channels for you by creating a profile</string>
 
     <string name="intro_screen1_blurb">Wake up to surprise voice notes from your friends.</string>
     <string name="intro_screen2_blurb">Choose channel roosters for daily inspiration, jokes, music, and more!</string>
@@ -28,6 +30,7 @@
 
     <string name="signup_facebook">Continue with Facebook</string>
     <string name="signup_google">Continue with Google</string>
+    <string name="signup_not_now">Not now</string>
     <string name="signup_email">Sign up with Email</string>
     <string name="signup_auth_failed">Authentication failed. Please try again.</string>
 
