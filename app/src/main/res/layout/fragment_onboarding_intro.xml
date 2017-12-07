@@ -3,13 +3,13 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/tableLayout"
+    android:id="@+id/fragmentOnboardingIntro"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_vertical"
     android:orientation="vertical"
     android:background="@drawable/background_onboarding"
-    tools:context="com.roostermornings.android.activity.OnboardingActivity">
+    tools:context="com.roostermornings.android.onboarding.OnboardingActivity">
 
     <ImageView
         android:id="@+id/cloud1"

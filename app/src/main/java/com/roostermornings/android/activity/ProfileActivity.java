@@ -113,7 +113,7 @@ public class ProfileActivity extends BaseActivity {
         super.onPause();
 
         if(StrUtils.notNullOrEmpty(profileMobileNumberText)) {
-            FirebaseNetwork.updateProfileCellNumber(this, profileMobileNumberText);
+            FirebaseNetwork.INSTANCE.updateProfileCellNumber(this, profileMobileNumberText);
             //Persist last valid mobile number entry
             sharedPreferences
                     .edit()
@@ -168,7 +168,7 @@ public class ProfileActivity extends BaseActivity {
     @OnTextChanged(R.id.settings_profile_name)
     public void onTextChangedProfileName() {
         String profileNameText = profileName.getText().toString();
-        FirebaseNetwork.updateProfileUserName(profileNameText);
+        FirebaseNetwork.INSTANCE.updateProfileUserName(profileNameText);
     }
 
     @OnTextChanged(R.id.settings_profile_mobile_number)
@@ -287,7 +287,7 @@ public class ProfileActivity extends BaseActivity {
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                         // Get a URL to the uploaded content
                         Uri firebaseStorageURL = taskSnapshot.getDownloadUrl();
-                        FirebaseNetwork.updateProfileProfilePic(firebaseStorageURL);
+                        FirebaseNetwork.INSTANCE.updateProfileProfilePic(firebaseStorageURL);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {

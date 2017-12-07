@@ -18,6 +18,9 @@ package com.roostermornings.android.util;
 
 public class Constants {
 
+    // AuthManager
+    public static final String ANONYMOUS_USER_UID = "ANONYMOUS_USER_UID";
+
     //Adapter view types
     public static final int VIEW_TYPE_UNKNOWN = 99;
     public static final int VIEW_TYPE_ADD = 1;

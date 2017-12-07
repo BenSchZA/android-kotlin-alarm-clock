@@ -17,15 +17,15 @@ import com.roostermornings.android.util.RoosterUtils.notNull
 class User : Serializable {
 
     var channels: HashMap<String, Boolean>? = HashMap()
-    var device_type :String? = ""
-    var device_token :String? = ""
-    var profile_pic :String? = ""
-    var user_name :String? = ""
-    var cell_number :String? = ""
-    var friends: HashMap<String, Any>? = HashMap()
-    var uid :String? = ""
-    var unseen_roosters :Int? = 0
-    var geohash_location :String? = ""
+    var device_type :String = ""
+    var device_token :String = ""
+    var profile_pic :String = ""
+    var user_name :String = ""
+    var cell_number :String = ""
+    var friends: HashMap<String, Any> = HashMap()
+    var uid :String = ""
+    var unseen_roosters :Int = 0
+    var geohash_location :String = ""
 
     @Exclude
     @get:Exclude
@@ -46,14 +46,14 @@ class User : Serializable {
                 unseen_roosters: Int?,
                 geohash_location: String?) {
 
-        this.channels = channels ?:HashMap()
-        this.cell_number = cell_number ?:""
-        this.device_token = device_token ?:""
-        this.device_type = device_type ?:""
-        this.profile_pic = profile_pic ?:""
-        this.user_name = user_name ?:""
-        this.uid = uid ?:""
-        this.unseen_roosters = unseen_roosters ?:0
-        this.geohash_location = geohash_location ?:""
+        this.channels = channels?:HashMap()
+        this.cell_number = cell_number?:""
+        this.device_token = device_token?:""
+        this.device_type = device_type?:""
+        this.profile_pic = profile_pic?:""
+        this.user_name = user_name?:""
+        this.uid = uid?:""
+        this.unseen_roosters = unseen_roosters?:0
+        this.geohash_location = geohash_location?:""
     }
 }
