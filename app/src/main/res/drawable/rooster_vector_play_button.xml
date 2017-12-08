@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Rooster Mornings Android.
+  ~ Copyright (c)  2017 Roosta Media. All rights reserved.
+  -->
+
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_selected="false" android:drawable="@drawable/ic_play_circle_filled_white_48px">
+    </item>
+    <item android:state_selected="true" android:drawable="@drawable/ic_pause_circle_filled_white_48px">
+    </item>
+</selector>

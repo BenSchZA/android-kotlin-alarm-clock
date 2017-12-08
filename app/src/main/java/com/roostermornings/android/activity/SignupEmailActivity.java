@@ -79,9 +79,7 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
 
     @OnClick(R.id.signup_button_email)
     public void onSignupButtonClicked() {
-
         validator.validate();
-
     }
 
     @Override
@@ -118,7 +116,6 @@ public class SignupEmailActivity extends BaseActivity implements Validator.Valid
                             }
                         }
                     });
-
 
         } else {
 

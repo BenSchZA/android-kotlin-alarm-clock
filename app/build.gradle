@@ -205,6 +205,8 @@ dependencies {
     implementation 'com.flipboard:bottomsheet-core:1.5.3'
     implementation 'com.flipboard:bottomsheet-commons:1.5.3' // optional
 
+    implementation 'de.hdodenhof:circleimageview:2.2.0'
+
     //https://github.com/JakeWharton/butterknife/issues/863
     implementation 'com.google.dagger:dagger:2.9'
     kapt 'com.google.dagger:dagger-compiler:2.9'

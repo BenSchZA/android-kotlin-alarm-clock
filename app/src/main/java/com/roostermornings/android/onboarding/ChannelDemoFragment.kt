@@ -6,6 +6,7 @@ import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
 import android.support.v4.app.Fragment
+import android.support.v4.content.res.ResourcesCompat
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.StaggeredGridLayoutManager
 import android.transition.Fade
@@ -127,6 +128,8 @@ class ChannelDemoFragment : BaseFragment(), ChannelDemoInterface, FragmentInterf
             } catch (e: ClassCastException) {
                 TODO("HostInterface not implemented") //To change body of created functions use File | Settings | File Templates.
             }
+
+            view.navigationFAB.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.onboarding_blue, null))
         }
     }
 
@@ -136,6 +139,17 @@ class ChannelDemoFragment : BaseFragment(), ChannelDemoInterface, FragmentInterf
     }
 
     private var previousOverlayFragment: Fragment? = null
+
+    override fun customCommand(command: InterfaceCommands.Companion.Command) {
+        when(command) {
+            InterfaceCommands.Companion.Command.HIDE_FAB -> {
+                view?.navigationFAB?.hide()
+            }
+            InterfaceCommands.Companion.Command.SHOW_FAB -> {
+                view?.navigationFAB?.show()
+            }
+        }
+    }
 
     override fun performChannelImageTransition(title: String, drawableID: Int, imageView: ImageView, media: Int) {
         val overlayFragment = ChannelDemoOverlayFragment.newInstance(title, drawableID, media)

@@ -10,7 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
-import android.widget.Button
+import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -26,25 +26,24 @@ import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.auth.api.signin.GoogleSignInResult
 import com.google.android.gms.common.api.GoogleApiClient
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.iid.FirebaseInstanceId
+import com.mobsandgeeks.saripaar.Validator
+import com.mobsandgeeks.saripaar.annotation.NotEmpty
+import com.mobsandgeeks.saripaar.annotation.Password
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.R
-import com.roostermornings.android.activity.MyAlarmsFragmentActivity
-import com.roostermornings.android.activity.SignupEmailActivity
 import com.roostermornings.android.auth.AuthManager
 import com.roostermornings.android.dagger.RoosterApplicationComponent
-import com.roostermornings.android.domain.User
-import com.roostermornings.android.firebase.FA
 import com.roostermornings.android.firebase.FirebaseNetwork
+import com.roostermornings.android.firebase.FirebaseNetwork.createOrUpdateRoosterUser
 import com.roostermornings.android.fragment.base.BaseFragment
 import com.roostermornings.android.util.Toaster
+import kotlinx.android.synthetic.main.activity_onboarding.*
+import kotlinx.android.synthetic.main.fragment_onboarding_profile_creation.*
 import kotlinx.android.synthetic.main.fragment_onboarding_profile_creation.view.*
 import java.util.*
 import javax.inject.Inject
@@ -52,10 +51,13 @@ import javax.inject.Inject
 /**
  * Created by bscholtz on 2017/12/04.
  */
-class ProfileCreationFragment : BaseFragment() {
+class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.ValidationListener {
     private var mHostInterface: HostInterface? = null
 
     private val RC_SIGN_IN = 7
+
+    private var validator: Validator = Validator(this)
+    private var mAlreadyUser = false
 
     private var facebookCallbackManager: CallbackManager? = null
     private var mGoogleApiClient: GoogleApiClient? = null
@@ -71,6 +73,17 @@ class ProfileCreationFragment : BaseFragment() {
 
     @BindView(R.id.progressBar)
     lateinit var progressBar: ProgressBar
+
+    @NotEmpty
+    @BindView(R.id.signup_username_edittext)
+    lateinit var mUserName: EditText
+
+    @BindView(R.id.signup_email_address_edittext)
+    lateinit var mEmailAddress: EditText
+
+    @Password(min = 6, scheme = Password.Scheme.ALPHA_NUMERIC)
+    @BindView(R.id.signup_password_edittext)
+    lateinit var mPassword: EditText
 
     @Inject
     lateinit var firebaseAuth: FirebaseAuth
@@ -124,7 +137,17 @@ class ProfileCreationFragment : BaseFragment() {
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        if(authManager.isUserSignedIn()) {
+            view?.signUpLayout?.visibility = View.INVISIBLE
+            view?.emailLayout?.visibility = View.INVISIBLE
+            signedInLayout.visibility = View.VISIBLE
+        }
+
         initializeAuthProviders()
+
+        //instantiate saripaar validator to validate fields with NotEmpty annotations
+        validator.setValidationListener(this)
 
         view?.let {
             val animationCloud = TranslateAnimation(0f, 0f, -10f, 10f)
@@ -133,7 +156,18 @@ class ProfileCreationFragment : BaseFragment() {
             animationCloud.repeatCount = -1
             animationCloud.repeatMode = Animation.REVERSE
 
-            view.roosterCloud.animation = animationCloud
+            view.roosterCloud?.animation = animationCloud
+        }
+    }
+
+    override fun fragmentVisible(position: Int) {}
+
+    override fun customCommand(command: InterfaceCommands.Companion.Command) {
+        when(command) {
+            InterfaceCommands.Companion.Command.SCROLL_RIGHT -> {
+                mHostInterface?.scrollViewPager(View.FOCUS_RIGHT)
+            }
+            else -> {}
         }
     }
 
@@ -176,15 +210,35 @@ class ProfileCreationFragment : BaseFragment() {
 
     @OnClick(R.id.already_user_textview)
     fun onAlreadyUserClicked() {
-//        val intent = Intent(this@SignInActivity, SignupEmailActivity::class.java)
-//        intent.putExtra(getApplicationContext().getString(R.string.extras_already_user), true)
-//        startActivity(intent)
+        mAlreadyUser = true
+        mUserName.visibility = View.INVISIBLE
+        view?.signUpLayout?.visibility = View.INVISIBLE
+        view?.emailLayout?.visibility = View.VISIBLE
+        signedInLayout.visibility = View.INVISIBLE
     }
 
     @OnClick(R.id.sign_up_email_textview)
     fun onSignUpEmailClicked() {
-//        val intent = Intent(this@SignInActivity, SignupEmailActivity::class.java)
-//        startActivity(intent)
+        mAlreadyUser = false
+        mUserName.visibility = View.VISIBLE
+        view?.signUpLayout?.visibility = View.INVISIBLE
+        view?.emailLayout?.visibility = View.VISIBLE
+        signedInLayout.visibility = View.INVISIBLE
+    }
+
+    @OnClick(R.id.cancel_button)
+    fun onClickCancel() {
+        view?.signUpLayout?.visibility = View.VISIBLE
+        view?.emailLayout?.visibility = View.INVISIBLE
+        signedInLayout.visibility = View.INVISIBLE
+    }
+
+    @OnClick(R.id.sign_out_button)
+    fun onClickSignOut() {
+        signUpLayout.visibility = View.VISIBLE
+        emailLayout.visibility = View.INVISIBLE
+        signedInLayout.visibility = View.INVISIBLE
+        authManager.signOut()
     }
 
     @OnClick(R.id.terms_and_conditions_link)
@@ -209,7 +263,7 @@ class ProfileCreationFragment : BaseFragment() {
 
     @OnClick(R.id.signin_button_notnow)
     fun onNotNowSigninButtonClick() {
-        //TODO: continue
+        mHostInterface?.scrollViewPager(View.FOCUS_RIGHT)
     }
 
     //Receive auth activity result and start callback
@@ -247,6 +301,10 @@ class ProfileCreationFragment : BaseFragment() {
             // the auth state listener will be notified and logic to handle the
             // signed in user can be handled in the listener.
             if (task.isSuccessful) {
+                view?.signUpLayout?.visibility = View.INVISIBLE
+                view?.emailLayout?.visibility = View.INVISIBLE
+                signedInLayout.visibility = View.VISIBLE
+
                 FirebaseNetwork.migrateUserMetrics(authManager.getPersistedAnonymousUID(), firebaseAuth.currentUser?.uid)
 
                 val deviceToken = FirebaseInstanceId.getInstance().token
@@ -261,7 +319,8 @@ class ProfileCreationFragment : BaseFragment() {
                     null
                 }
 
-                createOrUpdateRoosterUser(deviceToken, photoURL)
+                createOrUpdateRoosterUser(deviceToken, photoURL, false)
+                proceedToNextPage()
 
                 Toaster.makeToast(context,
                         "Facebook sign-in successful.",
@@ -311,12 +370,17 @@ class ProfileCreationFragment : BaseFragment() {
             // the auth state listener will be notified and logic to handle the
             // signed in user can be handled in the listener.
             if (task.isSuccessful) {
+                view?.signUpLayout?.visibility = View.INVISIBLE
+                view?.emailLayout?.visibility = View.INVISIBLE
+                signedInLayout.visibility = View.VISIBLE
+
                 FirebaseNetwork.migrateUserMetrics(authManager.getPersistedAnonymousUID(), firebaseAuth.currentUser?.uid)
 
                 val deviceToken = FirebaseInstanceId.getInstance().token
                 val photoURL = account?.photoUrl?.toString()
 
-                createOrUpdateRoosterUser(deviceToken, photoURL)
+                createOrUpdateRoosterUser(deviceToken, photoURL, false)
+                proceedToNextPage()
 
                 Toaster.makeToast(context,
                         "Google sign-in successful.",
@@ -333,61 +397,87 @@ class ProfileCreationFragment : BaseFragment() {
         }
     }
 
-    private fun createOrUpdateRoosterUser(deviceToken: String?, photoURL: String?) {
-        if (firebaseAuth.currentUser == null) return
-
-        val user = User(null,
-                "android",
-                deviceToken,
-                photoURL,
-                firebaseAuth.currentUser?.displayName?:"",
-                "",
-                firebaseAuth.currentUser?.uid,
-                null,
-                0,
-                null)
-
-        //Note: "friends" and "cell_number" node not changed TODO: should profile pic be kept?
-        val childUpdates = HashMap<String, Any>()
-        childUpdates.put(String.format("users/%s/%s",
-                firebaseAuth.currentUser?.uid, "device_token"),
-                user.device_token)
-        childUpdates.put(String.format("users/%s/%s",
-                firebaseAuth.currentUser?.uid, "device_type"),
-                user.device_type)
-        childUpdates.put(String.format("users/%s/%s",
-                firebaseAuth.currentUser?.uid, "profile_pic"),
-                user.profile_pic)
-        childUpdates.put(String.format("users/%s/%s",
-                firebaseAuth.currentUser?.uid, "uid"),
-                user.uid)
-        childUpdates.put(String.format("users/%s/%s",
-                firebaseAuth.currentUser?.uid, "user_name"),
-                user.user_name)
-        childUpdates.put(String.format("users/%s/%s",
-                firebaseAuth.currentUser?.uid, "unseen_roosters"),
-                user.unseen_roosters)
-
-        //Add user as a friend of theirs
-        childUpdates.put(String.format("users/%s/%s/%s",
-                firebaseAuth.currentUser?.uid, "friends", firebaseAuth.currentUser?.uid),
-                true)
-
-        mDatabase.updateChildren(childUpdates)
-
-        //TODO: proceed
-        ////Remove progress bar on failure
-        //progressBar.visibility = View.GONE
-        proceedToMyAlarmsActivity()
-    }
-
     //On successful authentication, proceed to alarms activity
-    private fun proceedToMyAlarmsActivity() {
+    private fun proceedToNextPage() {
         //Remove progress bar on success
         progressBar.visibility = View.GONE
 
-        val intent = Intent(context, MyAlarmsFragmentActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        startActivity(intent)
+        mHostInterface?.scrollViewPager(View.FOCUS_RIGHT)
+    }
+
+    @OnClick(R.id.signup_button_email)
+    fun onSignupButtonClicked() {
+        validator.validate()
+    }
+
+    override fun onValidationSucceeded() {
+        super.onValidationSucceeded()
+
+        if (!checkInternetConnection()) return
+
+        val email = mEmailAddress.text.toString().trim({ it <= ' ' })
+        val password = mPassword.text.toString().trim({ it <= ' ' })
+        val name = mUserName.text.toString().trim({ it <= ' ' })
+
+        if (mAlreadyUser) {
+
+            firebaseAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener({ task ->
+                        Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful)
+
+                        if (!task.isSuccessful) {
+                            Toast.makeText(context, R.string.signup_auth_failed,
+                                    Toast.LENGTH_LONG).show()
+                        } else {
+                            view?.signUpLayout?.visibility = View.INVISIBLE
+                            view?.emailLayout?.visibility = View.INVISIBLE
+                            signedInLayout.visibility = View.VISIBLE
+
+                            FirebaseNetwork.migrateUserMetrics(authManager.getPersistedAnonymousUID(), firebaseAuth.currentUser?.uid)
+
+                            val deviceToken = FirebaseInstanceId.getInstance().token
+
+                            firebaseAuth.currentUser?.updateProfile(
+                                    UserProfileChangeRequest.Builder().setDisplayName(name).build())
+
+                            FirebaseNetwork.createOrUpdateRoosterUser(deviceToken, "", true)
+
+                            Toaster.makeToast(context,
+                                    "Email sign-in successful.",
+                                    Toast.LENGTH_LONG)
+
+                            proceedToNextPage()
+                        }
+                    })
+
+
+        } else {
+
+            firebaseAuth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener({ task ->
+                        Log.d(TAG, "createUserWithEmail:onComplete:" + task.isSuccessful)
+
+                        if (!task.isSuccessful) {
+                            Toaster.makeToast(context, task.exception?.message?:"",
+                                    Toast.LENGTH_LONG)
+                        } else {
+                            view?.signUpLayout?.visibility = View.INVISIBLE
+                            view?.emailLayout?.visibility = View.INVISIBLE
+                            signedInLayout.visibility = View.VISIBLE
+
+                            FirebaseNetwork.migrateUserMetrics(authManager.getPersistedAnonymousUID(), firebaseAuth.currentUser?.uid)
+
+                            val deviceToken = FirebaseInstanceId.getInstance().token
+
+                            FirebaseNetwork.createOrUpdateRoosterUser(deviceToken, "", false)
+
+                            Toaster.makeToast(context,
+                                    "Email sign-in successful.",
+                                    Toast.LENGTH_LONG)
+
+                            proceedToNextPage()
+                        }
+                    })
+        }
     }
 }
