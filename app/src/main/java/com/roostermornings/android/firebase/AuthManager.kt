@@ -1,14 +1,12 @@
-package com.roostermornings.android.auth
+package com.roostermornings.android.firebase
 
 import android.content.SharedPreferences
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.PhoneAuthCredential
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.util.Constants
 import javax.inject.Inject
-import javax.inject.Named
 
 /**
  * Created by bscholtz on 2017/12/05.

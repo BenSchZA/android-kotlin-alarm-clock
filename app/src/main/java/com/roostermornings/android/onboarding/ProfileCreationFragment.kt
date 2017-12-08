@@ -36,13 +36,12 @@ import com.mobsandgeeks.saripaar.annotation.NotEmpty
 import com.mobsandgeeks.saripaar.annotation.Password
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.R
-import com.roostermornings.android.auth.AuthManager
+import com.roostermornings.android.firebase.AuthManager
 import com.roostermornings.android.dagger.RoosterApplicationComponent
 import com.roostermornings.android.firebase.FirebaseNetwork
 import com.roostermornings.android.firebase.FirebaseNetwork.createOrUpdateRoosterUser
 import com.roostermornings.android.fragment.base.BaseFragment
 import com.roostermornings.android.util.Toaster
-import kotlinx.android.synthetic.main.activity_onboarding.*
 import kotlinx.android.synthetic.main.fragment_onboarding_profile_creation.*
 import kotlinx.android.synthetic.main.fragment_onboarding_profile_creation.view.*
 import java.util.*

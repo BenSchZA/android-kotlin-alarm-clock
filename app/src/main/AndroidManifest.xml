@@ -109,22 +109,6 @@
 
         <!-- windowSoftInputMode ensures that text entry for mobile number is always visible -->
         <activity
-            android:name=".activity.IntroFragmentActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBarIntro"
-            android:windowSoftInputMode="adjustPan" />
-        <activity
-            android:name=".activity.SignInActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBarIntro" />
-        <activity
-            android:name=".activity.SignupEmailActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBarIntro" />
-        <activity
             android:name=".activity.MyAlarmsFragmentActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/my_alarms"
