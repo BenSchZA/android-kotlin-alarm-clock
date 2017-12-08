@@ -11,11 +11,15 @@ import butterknife.ButterKnife
 import com.roostermornings.android.R
 import kotlinx.android.synthetic.main.onboarding_channel_overlay.view.*
 import android.graphics.PorterDuff
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.LayerDrawable
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
 import android.os.Parcel
+import android.support.v4.content.res.ResourcesCompat
 import android.transition.TransitionInflater
 import android.widget.RelativeLayout
 import android.widget.SeekBar
@@ -23,6 +27,7 @@ import butterknife.BindView
 import butterknife.OnClick
 import com.roostermornings.android.util.FileUtils
 import com.roostermornings.android.util.RoosterUtils
+import kotlinx.android.synthetic.main.onboarding_audio_demo.view.*
 import java.io.File
 
 
@@ -72,8 +77,11 @@ class ChannelDemoOverlayFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.onboarding_channel_overlay, container, false)
+        val view = inflater.inflate(R.layout.onboarding_audio_demo, container, false)
         ButterKnife.bind(this, view)
+
+        mHostInterface?.customCommand(InterfaceCommands.Companion.Command.HIDE_FAB)
+
         return view
     }
 
@@ -82,37 +90,58 @@ class ChannelDemoOverlayFragment : Fragment() {
 
         val media = arguments.getInt(ARG_MEDIA)
         view?.let{
-            view.image.setImageResource(arguments.getInt(ARG_DRAWABLE_ID))
-            view.title.text = arguments.getString(ARG_TITLE_STRING)
+            view.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.black_overlay, null))
 
-            view.seekbar.progressDrawable.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN)
-            view.seekbar.thumb.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN)
+            val drawable = ResourcesCompat.getDrawable(resources, arguments.getInt(ARG_DRAWABLE_ID), null)
+            val color = ColorDrawable(ResourcesCompat.getColor(resources, R.color.white, null))
+
+            val ld = LayerDrawable(arrayOf(color, drawable))
+            view.audioDemoImage.setImageDrawable(ld)
+
+            view.audioDemoText.text = arguments.getString(ARG_TITLE_STRING)
+            view.audioDemoText.visibility = View.VISIBLE
+
+            view.demoAudioSeekBar.visibility = View.VISIBLE
+            view.demoAudioSeekBar.progressDrawable.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN)
+            view.demoAudioSeekBar.thumb.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN)
 
             //Set the maximum value to the audio item length
-            view.seekbar.max = 0
-            view.seekbar.max = getMediaLength(media)/1000
+            view.demoAudioSeekBar.max = 0
+            view.demoAudioSeekBar.max = getMediaLength(media)/1000
             //Listen for seekbar progress updates, and mediaPlayer.seekTo()
-            view.seekbar.setOnSeekBarChangeListener(onSeekBarChangeListener)
+            view.demoAudioSeekBar.setOnSeekBarChangeListener(onSeekBarChangeListener)
 
             //Update seekbar on UI thread
             runnable = Runnable {
-                if (view.seekbar != null && mMediaPlayer.isPlaying) {
+                if (view.demoAudioSeekBar != null && mMediaPlayer.isPlaying) {
                     val mCurrentPosition = mMediaPlayer.currentPosition / 1000
-                    view.seekbar.progress = mCurrentPosition
+                    view.demoAudioSeekBar.progress = mCurrentPosition
 
-                    if (view.seekbar.max >= mCurrentPosition) {
+                    if (view.demoAudioSeekBar.max >= mCurrentPosition) {
                         mHandler.removeCallbacks(runnable)
                         mHandler.postDelayed(runnable, 1000)
                     }
                 }
             }
-        }
 
-        if(mMediaPlayer.isPlaying) mMediaPlayer.stop()
-        mMediaPlayer = MediaPlayer.create(context, arguments.getInt(ARG_MEDIA))
-        mMediaPlayer.start()
-        mHandler.removeCallbacks(runnable)
-        mHandler.postDelayed(runnable, 1000)
+            if(mMediaPlayer.isPlaying) mMediaPlayer.stop()
+            mMediaPlayer = MediaPlayer.create(context, arguments.getInt(ARG_MEDIA))
+
+            mMediaPlayer.setOnCompletionListener {
+                activity.supportFragmentManager.popBackStackImmediate()
+            }
+
+            view.playPause?.isSelected = true
+            view.audioDemoImage.setOnClickListener {
+                view.playPause?.isSelected = !mMediaPlayer.isPlaying
+                if(mMediaPlayer.isPlaying) {
+                    pauseMedia()
+                } else {
+                    playMedia()
+                }
+            }
+            playMedia()
+        }
     }
 
     private val onSeekBarChangeListener = object: SeekBar.OnSeekBarChangeListener {
@@ -127,8 +156,25 @@ class ChannelDemoOverlayFragment : Fragment() {
                 }
                 mMediaPlayer.seekTo(progress * 1000)
                 mMediaPlayer.start()
+                view?.playPause?.isSelected = true
             }
         }
+    }
+
+    private fun playMedia() {
+        runnable?.let { mHandler.removeCallbacks(runnable) }
+        mMediaPlayer.start()
+        mHandler.postDelayed(runnable, 1000)
+    }
+
+    private fun pauseMedia() {
+        runnable?.let { mHandler.removeCallbacks(runnable) }
+        if(mMediaPlayer.isPlaying) mMediaPlayer.pause()
+    }
+
+    private fun stopMedia() {
+        runnable?.let { mHandler.removeCallbacks(runnable) }
+        if(mMediaPlayer.isPlaying) mMediaPlayer.stop()
     }
 
     private fun getMediaLength(media: Int): Int {
@@ -142,16 +188,14 @@ class ChannelDemoOverlayFragment : Fragment() {
         return Integer.parseInt(durationStr)
     }
 
-    @OnClick(R.id.onboardingChannelOverlay)
+    @OnClick(R.id.onboardingAudioDemoLayout)
     fun onClickOverlay() {
         activity.supportFragmentManager.popBackStackImmediate()
     }
 
     override fun onPause() {
         super.onPause()
-        if(mMediaPlayer.isPlaying) mMediaPlayer.stop()
-        runnable?.let {
-            mHandler.removeCallbacks(runnable)
-        }
+        stopMedia()
+        mHostInterface?.customCommand(InterfaceCommands.Companion.Command.SHOW_FAB)
     }
 }

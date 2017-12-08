@@ -13,7 +13,13 @@
     <string name="onboarding_hook">An alarm that is your friend, not foe.</string>
     <string name="onboarding_hook_button">Find out how</string>
     <string name="onboarding_image_transition">onboarding_image_transition</string>
-    <string name="onboarding_sign_up_benefits">Sync your alarms and help us suggest the best channels for you by creating a profile</string>
+    <string name="onboarding_sign_up_benefits">Sync your alarms and help us suggest\nthe best channels for you by creating a profile</string>
+    <string name="onboarding_social_hook_1">You can also&#8230;</string>
+    <string name="onboarding_social_hook_2">Wake up to voice notes\nfrom friends and family</string>
+    <string name="onboarding_sounds_cool">Sounds cool</string>
+    <string name="onboarding_try_later">Try later</string>
+    <string name="onboarding_social_vibe">Rooster is about\nspreading the love</string>
+    <string name="onboarding_got_it">Got it</string>
 
     <string name="intro_screen1_blurb">Wake up to surprise voice notes from your friends.</string>
     <string name="intro_screen2_blurb">Choose channel roosters for daily inspiration, jokes, music, and more!</string>
@@ -28,9 +34,12 @@
     <string name="take_to_settings">Go to settings</string>
     <string name="later">Later</string>
 
+    <string name="already_signed_in">You are already signed in</string>
+    <string name="sign_out">Sign out</string>
     <string name="signup_facebook">Continue with Facebook</string>
     <string name="signup_google">Continue with Google</string>
     <string name="signup_not_now">Not now</string>
+    <string name="signup_cancel">Cancel</string>
     <string name="signup_email">Sign up with Email</string>
     <string name="signup_auth_failed">Authentication failed. Please try again.</string>
 

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/onboardingAudioDemoLayout"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".onboarding.OnboardingActivity"
+    tools:layout_editor_absoluteY="81dp">
+
+    <me.grantland.widget.AutofitTextView
+        android:id="@+id/audioDemoText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="32dp"
+        android:maxLines="1"
+        android:paddingBottom="@dimen/spacing_large"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textSize="@dimen/text_xxlarge"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/audioDemoImage"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        android:src="@drawable/rooster_wakeup"
+        app:civ_border_color="#FF000000"
+        app:civ_border_width="5dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/audioDemoText" />
+
+    <ImageButton
+        android:id="@+id/playPause"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="120dp"
+        android:layout_marginEnd="120dp"
+        android:layout_marginStart="120dp"
+        android:layout_marginTop="120dp"
+        android:background="@drawable/md_transparent"
+        android:scaleType="fitCenter"
+        android:src="@drawable/rooster_vector_play_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/audioDemoText" />
+
+    <LinearLayout
+        android:visibility="gone"
+        android:id="@+id/socialDemoText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@+id/demoAudioSeekBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/audioDemoImage">
+
+        <me.grantland.widget.AutofitTextView
+            android:id="@+id/socialDemoPerson"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Person"
+            android:textColor="@color/white"
+            android:textSize="@dimen/text_xlarge"
+            android:textStyle="bold" />
+
+        <me.grantland.widget.AutofitTextView
+            android:id="@+id/socialDemoMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Message"
+            android:textColor="@color/white"
+            android:textSize="@dimen/text_large" />
+    </LinearLayout>
+
+    <SeekBar
+        android:id="@+id/demoAudioSeekBar"
+        android:layout_width="0dp"
+        android:layout_height="30dp"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:padding="@dimen/spacing_small"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.736"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/socialDemoText" />
+
+</android.support.constraint.ConstraintLayout>

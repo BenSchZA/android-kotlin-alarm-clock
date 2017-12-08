@@ -22,10 +22,10 @@ import kotlinx.android.synthetic.main.activity_onboarding.*
 class OnboardingActivity: BaseActivity(), HostInterface {
 
     companion object {
-        private val NUMBER_OF_ONBOARDING_PAGES = 5.0
+        private val NUMBER_OF_ONBOARDING_PAGES = Page.values().size
 
         enum class Page {
-            INTRO, CHANNEL_DEMO, SIGN_IN
+            INTRO, CHANNEL_DEMO, SIGN_IN, SOCIAL_HOOK, SOCIAL_DEMO
         }
     }
 
@@ -90,6 +90,16 @@ class OnboardingActivity: BaseActivity(), HostInterface {
                                 OnboardingJourneyEvent(subject = "Sign-In UI")
                                         .setType(OnboardingJourneyEvent.Companion.Event.VIEW))
                     }
+                    Page.SOCIAL_HOOK.ordinal -> {
+                        FirebaseNetwork.logOnboardingEvent(
+                                OnboardingJourneyEvent(subject = "Social Hook UI")
+                                        .setType(OnboardingJourneyEvent.Companion.Event.VIEW))
+                    }
+                    Page.SOCIAL_DEMO.ordinal -> {
+                        FirebaseNetwork.logOnboardingEvent(
+                                OnboardingJourneyEvent(subject = "Social Demo UI")
+                                        .setType(OnboardingJourneyEvent.Companion.Event.VIEW))
+                    }
                     else -> {}
                 }
             }
@@ -97,7 +107,7 @@ class OnboardingActivity: BaseActivity(), HostInterface {
     }
 
     override fun setOnboardingProgress(pageNumber: Int) {
-        val progress = (pageNumber/ NUMBER_OF_ONBOARDING_PAGES *100).toInt()
+        val progress = (pageNumber/NUMBER_OF_ONBOARDING_PAGES.toFloat() *100).toInt()
         if(RoosterUtils.hasNougat()) {
             progressBar.setProgress(progress, true)
         } else {
@@ -107,6 +117,10 @@ class OnboardingActivity: BaseActivity(), HostInterface {
 
     override fun scrollViewPager(direction: Int) {
         container.arrowScroll(direction)
+    }
+
+    override fun customCommand(command: InterfaceCommands.Companion.Command) {
+        fragmentInterface?.customCommand(command)
     }
 
     /**
@@ -132,6 +146,12 @@ class OnboardingActivity: BaseActivity(), HostInterface {
                 Page.SIGN_IN.ordinal -> {
                     ProfileCreationFragment.newInstance()
                 }
+                Page.SOCIAL_HOOK.ordinal -> {
+                    SocialHookFragment.newInstance()
+                }
+                Page.SOCIAL_DEMO.ordinal -> {
+                    SocialDemoFragment.newInstance()
+                }
                 else -> {
                     val point = Point()
                     windowManager?.defaultDisplay?.getSize(point)
@@ -142,7 +162,7 @@ class OnboardingActivity: BaseActivity(), HostInterface {
 
         override fun getCount(): Int {
             // Show X total pages.
-            return 3
+            return NUMBER_OF_ONBOARDING_PAGES
         }
     }
 

@@ -18,6 +18,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.roostermornings.android.domain.Channel
 import com.roostermornings.android.domain.OnboardingJourneyEvent
+import com.roostermornings.android.domain.User
 import com.roostermornings.android.util.Constants
 import com.roostermornings.android.util.MyContactsController
 import com.roostermornings.android.util.StrUtils
@@ -242,6 +243,55 @@ object FirebaseNetwork {
             val uid = fUser.uid
             val timestamp = event.timestamp
             childUpdates.put("user_metrics/$uid/onboarding_journey/$timestamp", event)
+            fDB.updateChildren(childUpdates)
+        }
+    }
+
+    fun createOrUpdateRoosterUser(deviceToken: String?, photoURL: String?, emailUser: Boolean) {
+        val fDB = FirebaseDatabase.getInstance().reference
+        val fUser = FirebaseAuth.getInstance().currentUser
+
+        if (fUser?.uid?.isNotBlank() == true) {
+            val user = User(null,
+                    "android",
+                    deviceToken,
+                    photoURL,
+                    fUser.displayName ?: "",
+                    "",
+                    fUser.uid,
+                    null,
+                    0,
+                    null)
+
+            //Note: "friends" and "cell_number" node not changed TODO: should profile pic be kept?
+            val childUpdates = HashMap<String, Any>()
+            childUpdates.put(String.format("users/%s/%s",
+                    fUser.uid, "device_token"),
+                    user.device_token)
+            childUpdates.put(String.format("users/%s/%s",
+                    fUser.uid, "device_type"),
+                    user.device_type)
+            childUpdates.put(String.format("users/%s/%s",
+                    fUser.uid, "unseen_roosters"),
+                    user.unseen_roosters)
+
+            if (!emailUser) {
+                childUpdates.put(String.format("users/%s/%s",
+                        fUser.uid, "profile_pic"),
+                        user.profile_pic)
+                childUpdates.put(String.format("users/%s/%s",
+                        fUser.uid, "uid"),
+                        user.uid)
+                childUpdates.put(String.format("users/%s/%s",
+                        fUser.uid, "user_name"),
+                        user.user_name)
+            }
+
+            //Add user as a friend of theirs
+            childUpdates.put(String.format("users/%s/%s/%s",
+                    fUser.uid, "friends", fUser.uid),
+                    true)
+
             fDB.updateChildren(childUpdates)
         }
     }

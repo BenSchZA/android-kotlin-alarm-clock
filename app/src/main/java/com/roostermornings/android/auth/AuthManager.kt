@@ -1,6 +1,7 @@
 package com.roostermornings.android.auth
 
 import android.content.SharedPreferences
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.PhoneAuthCredential
@@ -24,6 +25,15 @@ class AuthManager {
         BaseApplication.getRoosterApplicationComponent().inject(this)
     }
 
+    fun isUserSignedIn(): Boolean {
+        return firebaseAuth.currentUser != null
+                && firebaseAuth.currentUser?.isAnonymous == false
+    }
+
+    fun signOut() {
+        firebaseAuth.signOut()
+    }
+
     fun signInAnonymouslyIfNecessary() {
         // If current user is anonymous, or no current user, then login anonymously
         if(firebaseAuth.currentUser?.isAnonymous == true || firebaseAuth.currentUser == null) {
@@ -31,8 +41,7 @@ class AuthManager {
                 clearPersistedAnonymousUID()
                 persistAnonymousUID(firebaseAuth.currentUser)
             }.addOnFailureListener {
-                it.cause
-                it.message
+                Log.e(it.cause.toString(),it.message)
             }
         }
     }

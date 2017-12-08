@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/background_onboarding"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".onboarding.OnboardingActivity">
+
+    <me.grantland.widget.AutofitTextView
+        android:id="@+id/text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:maxLines="2"
+        android:paddingBottom="@dimen/spacing_large"
+        android:text="@string/onboarding_social_hook_1"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textSize="@dimen/text_xxlarge"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/roosterCloud"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_below="@+id/text"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:adjustViewBounds="true"
+        android:maxHeight="230dp"
+        android:maxWidth="230dp"
+        android:minHeight="50dp"
+        android:minWidth="50dp"
+        app:layout_constraintBottom_toTopOf="@+id/socialHook2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text"
+        app:srcCompat="@drawable/ic_cloud_white_24px" />
+
+    <ImageView
+        android:id="@+id/roosterWakeUp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_below="@+id/text"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:adjustViewBounds="true"
+        android:elevation="@dimen/spacing_small"
+        android:maxHeight="250dp"
+        android:maxWidth="250dp"
+        android:minHeight="50dp"
+        android:minWidth="50dp"
+        android:src="@drawable/rooster_wakeup"
+        app:layout_constraintBottom_toBottomOf="@+id/roosterCloud"
+        app:layout_constraintEnd_toEndOf="@+id/roosterCloud"
+        app:layout_constraintStart_toStartOf="@+id/roosterCloud"
+        app:layout_constraintTop_toTopOf="@+id/roosterCloud" />
+
+    <me.grantland.widget.AutofitTextView
+        android:id="@+id/socialHook2"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_below="@+id/roosterCloud"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:maxLines="2"
+        android:minLines="2"
+        android:text="@string/onboarding_social_hook_2"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textSize="@dimen/text_xlarge"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <Button
+            android:id="@+id/button_yes"
+            style="@style/RoosterButtonWhiteStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:elevation="@dimen/spacing_small"
+            android:paddingLeft="@dimen/spacing_normal_large"
+            android:paddingRight="@dimen/spacing_normal_large"
+            android:text="@string/onboarding_sounds_cool"
+            android:textColor="@color/onboarding_blue" />
+
+        <Button
+            android:id="@+id/button_no"
+            style="@style/RoosterButtonNoFillStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:paddingLeft="@dimen/spacing_normal_large"
+            android:paddingRight="@dimen/spacing_normal_large"
+            android:text="@string/onboarding_try_later"
+            android:textColor="@color/white" />
+
+    </LinearLayout>
+
+</android.support.constraint.ConstraintLayout>
