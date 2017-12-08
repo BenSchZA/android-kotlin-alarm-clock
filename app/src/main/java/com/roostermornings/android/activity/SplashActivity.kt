@@ -20,7 +20,7 @@ import com.google.firebase.database.ValueEventListener
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.R
 import com.roostermornings.android.activity.base.BaseActivity
-import com.roostermornings.android.auth.AuthManager
+import com.roostermornings.android.firebase.AuthManager
 import com.roostermornings.android.dagger.RoosterApplicationComponent
 import com.roostermornings.android.domain.MinimumRequirements
 import com.roostermornings.android.domain.OnboardingJourneyEvent

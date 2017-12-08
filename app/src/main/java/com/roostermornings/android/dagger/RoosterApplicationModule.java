@@ -30,7 +30,7 @@ import com.google.firebase.storage.StorageReference;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.adapter_data.RoosterAlarmManager;
 import com.roostermornings.android.adapter_data.ChannelManager;
-import com.roostermornings.android.auth.AuthManager;
+import com.roostermornings.android.firebase.AuthManager;
 import com.roostermornings.android.realm.RealmManager_AlarmFailureLog;
 import com.roostermornings.android.realm.RealmManager_ScheduledSnackbar;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
