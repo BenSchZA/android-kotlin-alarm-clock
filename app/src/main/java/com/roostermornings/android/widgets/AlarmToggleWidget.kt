@@ -46,6 +46,16 @@ class AlarmToggleWidget : AppWidgetProvider() {
         val TOAST_ACTION = "AlarmToggleWidget.TOAST_ACTION"
         val EXTRA_ITEM = "AlarmToggleWidget.EXTRA_ITEM"
         val EXTRA_ALARM_UID = "AlarmToggleWidget.EXTRA_ALARM_UID"
+
+        fun sendUpdateBroadcast(ctx: Context) {
+            //Update app widget
+            val updateWidgetIntent = Intent(ctx, AlarmToggleWidget::class.java)
+            updateWidgetIntent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+            val appWidgetManager = AppWidgetManager.getInstance(ctx.applicationContext)
+            val ids = appWidgetManager.getAppWidgetIds(ComponentName(ctx.applicationContext, AlarmToggleWidget::class.java))
+            updateWidgetIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+            ctx.sendBroadcast(updateWidgetIntent)
+        }
     }
 
     fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager,
@@ -196,7 +206,9 @@ class AlarmToggleWidget : AppWidgetProvider() {
             val viewIndex = intent.getIntExtra(EXTRA_ITEM, 0)
             Toast.makeText(context, "Touched view " + viewIndex, Toast.LENGTH_SHORT).show()
         }
+
         context.startService(Intent(context, WidgetService::class.java))
+
         super.onReceive(context, intent)
     }
 

@@ -143,12 +143,7 @@ public class MyAlarmsFragmentActivity extends BaseActivity {
         jsonPersistence.setAlarms(mAlarms);
 
         //Update app widget
-        Intent updateWidgetIntent = new Intent(this, AlarmToggleWidget.class);
-        updateWidgetIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(getApplication());
-        int ids[] = appWidgetManager.getAppWidgetIds(new ComponentName(getApplication(), AlarmToggleWidget.class));
-        updateWidgetIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
-        sendBroadcast(updateWidgetIntent);
+        AlarmToggleWidget.Companion.sendUpdateBroadcast(this);
     }
 
     @Override
