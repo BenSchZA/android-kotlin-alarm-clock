@@ -111,7 +111,7 @@ public class RoosterApplicationModule {
     @Provides
     @Singleton
     AuthManager provideAuthManager() {
-        return new AuthManager();
+        return new AuthManager(baseApplication);
     }
 
     @Provides

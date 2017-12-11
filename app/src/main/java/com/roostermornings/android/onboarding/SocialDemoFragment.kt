@@ -110,12 +110,13 @@ class SocialDemoFragment: BaseFragment() {
             view.viewFlipper.startFlipping()
 
             for(childIndex in 0 until view.viewFlipper.childCount) {
-                view.viewFlipper.getChildAt(childIndex).setOnClickListener {
+
+                val mediaOnClickListener = View.OnClickListener {
                     view.viewFlipper?.stopFlipping()
                     val childView = view.viewFlipper.getChildAt(childIndex)
 
                     if(mPlaying) {
-                        mMediaPlayer.stop()
+                        mMediaPlayer.pause()
                         mPlaying = false
                         childView.playPause.isSelected = false
                         view.viewFlipper?.startFlipping()
@@ -132,6 +133,10 @@ class SocialDemoFragment: BaseFragment() {
                         mPlaying = false
                     }
                 }
+                view.viewFlipper.getChildAt(childIndex)
+                        .playPause.setOnClickListener(mediaOnClickListener)
+                view.viewFlipper.getChildAt(childIndex)
+                        .audioDemoImage.setOnClickListener(mediaOnClickListener)
             }
         }
     }

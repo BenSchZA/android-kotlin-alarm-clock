@@ -8,24 +8,47 @@
     tools:context=".onboarding.OnboardingActivity"
     tools:layout_editor_absoluteY="81dp">
 
-    <me.grantland.widget.AutofitTextView
+
+    <LinearLayout
         android:id="@+id/audioDemoText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="32dp"
-        android:maxLines="1"
-        android:paddingBottom="@dimen/spacing_large"
-        android:textAlignment="center"
-        android:textColor="@color/white"
-        android:textSize="@dimen/text_xxlarge"
-        android:textStyle="bold"
-        android:visibility="gone"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/audioDemoImage"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <me.grantland.widget.AutofitTextView
+            android:id="@+id/audioDemoTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:text="Sample title"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="@dimen/text_xxlarge"
+            android:textStyle="bold"
+            android:visibility="visible" />
+
+        <me.grantland.widget.AutofitTextView
+            android:id="@+id/audioDemoDescription"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:text="Sample title"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="@dimen/text_xlarge"
+            android:textStyle="bold"
+            android:visibility="visible" />
+
+    </LinearLayout>
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/audioDemoImage"
@@ -42,7 +65,7 @@
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/audioDemoText" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
         android:id="@+id/playPause"
@@ -59,7 +82,7 @@
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/audioDemoText" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
         android:visibility="gone"
@@ -106,7 +129,6 @@
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.736"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/socialDemoText" />
 

@@ -61,13 +61,11 @@ class ConnectivityUtils(val context: Context) {
         return getNetworkInfo()?.isConnectedOrConnecting ?:false && isConnectionFast(getNetworkInfo()?.type, getNetworkInfo()?.subtype)
     }
 
-
     //Check if the connection is fast
     fun isConnectionFast(type: Int? = -1, subType: Int? = -1): Boolean {
-        if (type == ConnectivityManager.TYPE_WIFI) {
-            return true
-        } else if (type == ConnectivityManager.TYPE_MOBILE) {
-            when (subType) {
+        when (type) {
+            ConnectivityManager.TYPE_WIFI -> return true
+            ConnectivityManager.TYPE_MOBILE -> when (subType) {
                 TelephonyManager.NETWORK_TYPE_1xRTT -> return false // ~ 50-100 kbps
                 TelephonyManager.NETWORK_TYPE_CDMA -> return false // ~ 14-64 kbps
                 TelephonyManager.NETWORK_TYPE_EDGE -> return false // ~ 50-100 kbps
@@ -78,7 +76,7 @@ class ConnectivityUtils(val context: Context) {
                 TelephonyManager.NETWORK_TYPE_HSPA -> return true // ~ 700-1700 kbps
                 TelephonyManager.NETWORK_TYPE_HSUPA -> return true // ~ 1-23 Mbps
                 TelephonyManager.NETWORK_TYPE_UMTS -> return true // ~ 400-7000 kbps
-                /*
+            /*
                  * Above API level 7, make sure to set android:targetSdkVersion
                  * to appropriate level to use these
                  */
@@ -92,14 +90,13 @@ class ConnectivityUtils(val context: Context) {
                 -> return false // ~25 kbps
                 TelephonyManager.NETWORK_TYPE_LTE // API level 11
                 -> return true // ~ 10+ Mbps
-                // Unknown
+            // Unknown
                 TelephonyManager.NETWORK_TYPE_UNKNOWN
                 -> return false
                 else
                 -> return false
             }
-        } else {
-            return false
+            else -> return false
         }
     }
 }

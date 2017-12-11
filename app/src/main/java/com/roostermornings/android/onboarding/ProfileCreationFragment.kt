@@ -26,10 +26,8 @@ import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.auth.api.signin.GoogleSignInResult
 import com.google.android.gms.common.api.GoogleApiClient
-import com.google.firebase.auth.FacebookAuthProvider
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.*
 import com.google.firebase.iid.FirebaseInstanceId
 import com.mobsandgeeks.saripaar.Validator
 import com.mobsandgeeks.saripaar.annotation.NotEmpty
@@ -178,8 +176,8 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
                 facebookCallbackManager,
                 object : FacebookCallback<LoginResult> {
                     override fun onSuccess(loginResult: LoginResult) {
-                        Log.d(TAG, "facebook:onSuccess:" + loginResult)
-                        firebaseAuthWithFacebook(loginResult.accessToken)
+                        Log.d(TAG, "facebook:onLinkSuccess:" + loginResult)
+                        authWithFacebook(loginResult.accessToken)
                     }
 
                     override fun onCancel() {
@@ -285,64 +283,12 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
         }
     }
 
-    //Facebook
-    private fun firebaseAuthWithFacebook(token: AccessToken) {
-        if (!checkInternetConnection()) return
-
-        Log.d(TAG, "firebaseAuthWithFacebook:" + token)
-
-        val credential = FacebookAuthProvider.getCredential(token.token)
-
-        firebaseAuth.signInWithCredential(credential).addOnCompleteListener { task ->
-            Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful)
-
-            // If sign in fails, display a message to the user. If sign in succeeds
-            // the auth state listener will be notified and logic to handle the
-            // signed in user can be handled in the listener.
-            if (task.isSuccessful) {
-                view?.signUpLayout?.visibility = View.INVISIBLE
-                view?.emailLayout?.visibility = View.INVISIBLE
-                signedInLayout.visibility = View.VISIBLE
-
-                FirebaseNetwork.migrateUserMetrics(authManager.getPersistedAnonymousUID(), firebaseAuth.currentUser?.uid)
-
-                val deviceToken = FirebaseInstanceId.getInstance().token
-
-                val photoURL = try {
-                    //photoURLString = firebaseAuth.getCurrentUser().getPhotoUrl().toString();
-                    val dimensionPixelSize = resources.getDimensionPixelSize(com.facebook.R.dimen.com_facebook_profilepictureview_preset_size_normal)
-                    val profile = Profile.getCurrentProfile()
-                    ImageRequest.getProfilePictureUri(profile.id, dimensionPixelSize, dimensionPixelSize).toString()
-                } catch (e: java.lang.NullPointerException) {
-                    e.printStackTrace()
-                    null
-                }
-
-                createOrUpdateRoosterUser(deviceToken, photoURL, false)
-                proceedToNextPage()
-
-                Toaster.makeToast(context,
-                        "Facebook sign-in successful.",
-                        Toast.LENGTH_LONG)
-
-            } else {
-                //Remove progress bar on failure
-                progressBar.visibility = View.GONE
-
-                Log.w(TAG, "Facebook: signInWithCredential", task.exception)
-                Toaster.makeToast(context,
-                        "Facebook sign-in failed.",
-                        Toast.LENGTH_LONG)
-            }
-        }
-    }
-
     //Google
     private fun handleGoogleSignInResult(result: GoogleSignInResult) {
         Log.d(TAG, "handleGoogleSignInResult:" + result.isSuccess)
         if (result.isSuccess) {
             // Google Sign In was successful, authenticate with Firebase
-            firebaseAuthWithGoogle(result)
+            authWithGoogle(result)
         } else {
             //Remove progress bar on failure
             progressBar.visibility = View.GONE
@@ -354,46 +300,60 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
         }
     }
 
-    private fun firebaseAuthWithGoogle(result: GoogleSignInResult) {
-        if (!checkInternetConnection()) return
+    private fun authWithFacebook(token: AccessToken) {
+        authManager.firebaseAuthWithFacebook(token, object: AuthManager.Companion.AuthInterface {
+            override fun onAuthSuccess(task: Task<AuthResult>) {
+                authManager.performMigration(activity)
 
-        val account = result.signInAccount
-        Log.d(TAG, "firebaseAuthWithGoogle:" + account?.id)
-
-        val credential = GoogleAuthProvider.getCredential(account?.idToken, null)
-
-        firebaseAuth.signInWithCredential(credential).addOnCompleteListener { task ->
-            Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful)
-
-            // If sign in fails, display a message to the user. If sign in succeeds
-            // the auth state listener will be notified and logic to handle the
-            // signed in user can be handled in the listener.
-            if (task.isSuccessful) {
                 view?.signUpLayout?.visibility = View.INVISIBLE
                 view?.emailLayout?.visibility = View.INVISIBLE
                 signedInLayout.visibility = View.VISIBLE
 
-                FirebaseNetwork.migrateUserMetrics(authManager.getPersistedAnonymousUID(), firebaseAuth.currentUser?.uid)
+                proceedToNextPage()
 
-                val deviceToken = FirebaseInstanceId.getInstance().token
-                val photoURL = account?.photoUrl?.toString()
+                Toaster.makeToast(context,
+                        "Facebook sign-in successful.",
+                        Toast.LENGTH_LONG)
+            }
 
-                createOrUpdateRoosterUser(deviceToken, photoURL, false)
+            override fun onAuthFailure() {
+                //Remove progress bar on failure
+                progressBar.visibility = View.GONE
+
+                Log.w(AuthManager.TAG, "Facebook: signInWithCredential failed")
+                Toaster.makeToast(context,
+                        "Facebook sign-in failed.",
+                        Toast.LENGTH_LONG)
+            }
+        })
+    }
+
+    private fun authWithGoogle(result: GoogleSignInResult) {
+        authManager.firebaseAuthWithGoogle(result, object: AuthManager.Companion.AuthInterface {
+            override fun onAuthSuccess(task: Task<AuthResult>) {
+                authManager.performMigration(activity)
+
+                view?.signUpLayout?.visibility = View.INVISIBLE
+                view?.emailLayout?.visibility = View.INVISIBLE
+                signedInLayout.visibility = View.VISIBLE
+
                 proceedToNextPage()
 
                 Toaster.makeToast(context,
                         "Google sign-in successful.",
                         Toast.LENGTH_LONG)
-            } else {
+            }
+
+            override fun onAuthFailure() {
                 //Remove progress bar on failure
                 progressBar.visibility = View.GONE
 
-                Log.w(TAG, "Google: signInWithCredential", task.exception)
+                Log.w(AuthManager.TAG, "Google: signInWithCredential failed")
                 Toaster.makeToast(context,
                         "Google sign-in failed.",
                         Toast.LENGTH_LONG)
             }
-        }
+        })
     }
 
     //On successful authentication, proceed to alarms activity
@@ -432,7 +392,7 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
                             view?.emailLayout?.visibility = View.INVISIBLE
                             signedInLayout.visibility = View.VISIBLE
 
-                            FirebaseNetwork.migrateUserMetrics(authManager.getPersistedAnonymousUID(), firebaseAuth.currentUser?.uid)
+                            FirebaseNetwork.migrateOnboardingJourney(authManager.getPersistedAnonymousUID(), firebaseAuth.currentUser?.uid)
 
                             val deviceToken = FirebaseInstanceId.getInstance().token
 
@@ -464,9 +424,12 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
                             view?.emailLayout?.visibility = View.INVISIBLE
                             signedInLayout.visibility = View.VISIBLE
 
-                            FirebaseNetwork.migrateUserMetrics(authManager.getPersistedAnonymousUID(), firebaseAuth.currentUser?.uid)
+                            FirebaseNetwork.migrateOnboardingJourney(authManager.getPersistedAnonymousUID(), firebaseAuth.currentUser?.uid)
 
                             val deviceToken = FirebaseInstanceId.getInstance().token
+
+                            firebaseAuth.currentUser?.updateProfile(
+                                    UserProfileChangeRequest.Builder().setDisplayName(name).build())
 
                             FirebaseNetwork.createOrUpdateRoosterUser(deviceToken, "", false)
 

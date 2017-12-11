@@ -1,7 +1,6 @@
 package com.roostermornings.android.onboarding
 
 import android.app.Activity
-import android.media.MediaPlayer
 import android.os.Handler
 import android.widget.ImageView
 
@@ -20,7 +19,7 @@ interface HostInterface {
 }
 
 interface ChannelDemoInterface {
-    fun performChannelImageTransition(title: String, drawableID: Int, imageView: ImageView, media: Int)
+    fun performChannelImageTransition(title: String, description: String, drawableID: Int, imageView: ImageView, media: Int)
 }
 
 interface FragmentInterface {
