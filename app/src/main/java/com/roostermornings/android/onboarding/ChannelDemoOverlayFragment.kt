@@ -9,25 +9,21 @@ import android.view.View
 import android.view.ViewGroup
 import butterknife.ButterKnife
 import com.roostermornings.android.R
-import kotlinx.android.synthetic.main.onboarding_channel_overlay.view.*
 import android.graphics.PorterDuff
 import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
-import android.os.Parcel
 import android.support.v4.content.res.ResourcesCompat
 import android.transition.TransitionInflater
-import android.widget.RelativeLayout
 import android.widget.SeekBar
-import butterknife.BindView
 import butterknife.OnClick
 import com.roostermornings.android.util.FileUtils
 import com.roostermornings.android.util.RoosterUtils
 import kotlinx.android.synthetic.main.onboarding_audio_demo.view.*
+import kotlinx.android.synthetic.main.onboarding_channel_overlay.view.*
 import java.io.File
 
 
@@ -46,12 +42,14 @@ class ChannelDemoOverlayFragment : Fragment() {
 
         private val ARG_DRAWABLE_ID = "ARG_DRAWABLE_ID"
         private val ARG_TITLE_STRING = "ARG_TITLE_STRING"
+        private val ARG_DESCRIPTION_STRING = "ARG_DESCRIPTION_STRING"
         private val ARG_MEDIA = "ARG_MEDIA"
 
-        fun newInstance(title: String, imageID: Int, media: Int): Fragment {
+        fun newInstance(title: String, description: String, imageID: Int, media: Int): Fragment {
             val fragment = ChannelDemoOverlayFragment()
             val args = Bundle()
             args.putString(ARG_TITLE_STRING, title)
+            args.putString(ARG_DESCRIPTION_STRING, description)
             args.putInt(ARG_DRAWABLE_ID, imageID)
             args.putInt(ARG_MEDIA, media)
             fragment.arguments = args
@@ -98,8 +96,9 @@ class ChannelDemoOverlayFragment : Fragment() {
             val ld = LayerDrawable(arrayOf(color, drawable))
             view.audioDemoImage.setImageDrawable(ld)
 
-            view.audioDemoText.text = arguments.getString(ARG_TITLE_STRING)
             view.audioDemoText.visibility = View.VISIBLE
+            view.audioDemoTitle.text = arguments.getString(ARG_TITLE_STRING)
+            view.audioDemoDescription.text = arguments.getString(ARG_DESCRIPTION_STRING)
 
             view.demoAudioSeekBar.visibility = View.VISIBLE
             view.demoAudioSeekBar.progressDrawable.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN)
@@ -132,7 +131,8 @@ class ChannelDemoOverlayFragment : Fragment() {
             }
 
             view.playPause?.isSelected = true
-            view.audioDemoImage.setOnClickListener {
+
+            val mediaOnClickListener = View.OnClickListener {
                 view.playPause?.isSelected = !mMediaPlayer.isPlaying
                 if(mMediaPlayer.isPlaying) {
                     pauseMedia()
@@ -140,6 +140,8 @@ class ChannelDemoOverlayFragment : Fragment() {
                     playMedia()
                 }
             }
+            view.playPause.setOnClickListener(mediaOnClickListener)
+            view.audioDemoImage.setOnClickListener(mediaOnClickListener)
             playMedia()
         }
     }

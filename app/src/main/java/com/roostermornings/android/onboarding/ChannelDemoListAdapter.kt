@@ -26,7 +26,12 @@ import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt.STATE_FO
 import uk.co.samuelwall.materialtaptargetprompt.extras.focals.RectanglePromptFocal
 
 
-class ChannelDemoListAdapter(private val mDataset: ArrayList<ChannelDemoItem>, private val mFragment: Fragment) : RecyclerView.Adapter<ChannelDemoListAdapter.ViewHolder>(), ShowcaseInterface {
+class ChannelDemoListAdapter(
+        private val mDataset: ArrayList<ChannelDemoFragment.Companion.ChannelDemoItem>,
+        private val mFragment: Fragment) :
+        RecyclerView.Adapter<ChannelDemoListAdapter.ViewHolder>(),
+        ShowcaseInterface {
+
     private var context: Context? = null
 
     private var showcaseChannelCardView: CardView? = null
@@ -52,7 +57,7 @@ class ChannelDemoListAdapter(private val mDataset: ArrayList<ChannelDemoItem>, p
         }
     }
 
-    fun add(position: Int, item: ChannelDemoItem) {
+    fun add(position: Int, item: ChannelDemoFragment.Companion.ChannelDemoItem) {
         mDataset.add(position, item)
         notifyItemInserted(position)
     }
@@ -84,8 +89,9 @@ class ChannelDemoListAdapter(private val mDataset: ArrayList<ChannelDemoItem>, p
         }
         if(position == 1) showcaseChannelCardView = holder.cardView
 
+        //TODO: descriptions
         holder.cardView.setOnClickListener {
-            channelDemoInterface?.performChannelImageTransition(it.title.text.toString(), it.image.tag as Int, holder.image, R.raw.onboarding_the_shins)
+            channelDemoInterface?.performChannelImageTransition(it.title.text.toString(), "Sample channel demo description", it.image.tag as Int, holder.image, R.raw.onboarding_the_shins)
         }
     }
 

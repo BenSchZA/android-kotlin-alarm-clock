@@ -60,6 +60,7 @@ class ChannelDemoFragment : BaseFragment(), ChannelDemoInterface, FragmentInterf
     private var mAdapter = ChannelDemoListAdapter(mDataSet, this@ChannelDemoFragment)
 
     companion object {
+        class ChannelDemoItem(var imageID: Int = -1, var title: String = "")
 
         /**
          * Returns a new instance of this fragment for the given section
@@ -151,8 +152,8 @@ class ChannelDemoFragment : BaseFragment(), ChannelDemoInterface, FragmentInterf
         }
     }
 
-    override fun performChannelImageTransition(title: String, drawableID: Int, imageView: ImageView, media: Int) {
-        val overlayFragment = ChannelDemoOverlayFragment.newInstance(title, drawableID, media)
+    override fun performChannelImageTransition(title: String, description: String, drawableID: Int, imageView: ImageView, media: Int) {
+        val overlayFragment = ChannelDemoOverlayFragment.newInstance(title, description, drawableID, media)
 
         // Note that we need the API version check here because the actual transition classes (e.g. Fade)
         // are not in the support library and are only available in API 21+. The methods we are calling on the Fragment
@@ -192,15 +193,3 @@ class ChannelDemoFragment : BaseFragment(), ChannelDemoInterface, FragmentInterf
         mShowcaseHandler.removeCallbacksAndMessages(null)
     }
 }
-
-@TargetApi(21)
-class DetailsTransition : android.transition.TransitionSet() {
-    init {
-        ordering = ORDERING_TOGETHER
-        addTransition(android.transition.ChangeBounds()).
-                addTransition(android.transition.ChangeTransform()).
-                addTransition(android.transition.ChangeImageTransform())
-    }
-}
-
-class ChannelDemoItem(var imageID: Int = -1, var title: String = "")

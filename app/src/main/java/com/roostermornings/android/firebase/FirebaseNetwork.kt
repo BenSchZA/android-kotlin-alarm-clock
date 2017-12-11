@@ -222,13 +222,24 @@ object FirebaseNetwork {
         }
     }
 
-    fun migrateUserMetrics(anonymousUID: String?, signInUID: String?) {
+    fun migrateOnboardingJourney(anonymousUID: String?, signInUID: String?) {
         val fDB = FirebaseDatabase.getInstance().reference
 
         val childUpdates = HashMap<String, Any>()
 
         if (!anonymousUID.isNullOrBlank() && !signInUID.isNullOrBlank()) {
             childUpdates.put("user_metrics/$anonymousUID/convert_uid", signInUID!!)
+            fDB.updateChildren(childUpdates)
+        }
+    }
+
+    fun migrateUserUID(anonymousUID: String?, signInUID: String?) {
+        val fDB = FirebaseDatabase.getInstance().reference
+
+        val childUpdates = HashMap<String, Any>()
+
+        if (!anonymousUID.isNullOrBlank() && !signInUID.isNullOrBlank()) {
+            childUpdates.put("user_metrics/$anonymousUID/migrate_uid", signInUID!!)
             fDB.updateChildren(childUpdates)
         }
     }
