@@ -174,19 +174,75 @@ class AuthManager(val context: Context) {
         })
     }
 
+    private fun onSuccessfulGoogleAuth(account: GoogleSignInAccount?) {
+        val deviceToken = FirebaseInstanceId.getInstance().token
+        val photoURL = account?.photoUrl?.toString()
+
+        createOrUpdateRoosterUser(deviceToken, photoURL, false)
+    }
+
+    fun firebaseAuthWithEmail(name: String, email: String, password: String, mAlreadyUser: Boolean, listener: AuthInterface) {
+
+        if (!conUtils.isConnected()) return
+
+        Log.d(TAG, "firebaseAuthWithEmail")
+
+        val credential = EmailAuthProvider.getCredential(email, password)
+
+        attemptAnonymousLinking(credential, object: AnonymousLinkingListener {
+            override fun onLinkSuccess(task: Task<AuthResult>) {
+                firebaseAuth.createUserWithEmailAndPassword(email, password)
+                        .addOnCompleteListener { createTask ->
+                            Log.d(TAG, "signInWithCredential:onComplete:" + createTask.isSuccessful)
+
+                            // If sign in fails, display a message to the user. If sign in succeeds
+                            // the auth state listener will be notified and logic to handle the
+                            // signed in user can be handled in the listener.
+                            if (createTask.isSuccessful) {
+                                onSuccessfulEmailAuth(name, mAlreadyUser)
+                                listener.onAuthSuccess(createTask)
+                            } else {
+                                Log.d(TAG, "firebaseAuthWithEmail: failure")
+                                listener.onAuthFailure()
+                            }
+                        }
+            }
+
+            override fun onLinkFailure(exception: Exception) {
+                firebaseAuth.signInWithEmailAndPassword(email, password)
+                        .addOnCompleteListener { task ->
+                            Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful)
+
+                            // If sign in fails, display a message to the user. If sign in succeeds
+                            // the auth state listener will be notified and logic to handle the
+                            // signed in user can be handled in the listener.
+                            if (task.isSuccessful) {
+                                onSuccessfulEmailAuth(name, mAlreadyUser)
+                                listener.onAuthSuccess(task)
+                            } else {
+                                Log.d(TAG, "firebaseAuthWithEmail:" + exception)
+                                listener.onAuthFailure()
+                            }
+                        }
+            }
+        })
+    }
+
+    private fun onSuccessfulEmailAuth(name: String, mAlreadyUser: Boolean) {
+        val deviceToken = FirebaseInstanceId.getInstance().token
+
+        firebaseAuth.currentUser?.updateProfile(
+                UserProfileChangeRequest.Builder().setDisplayName(name).build())
+
+        FirebaseNetwork.createOrUpdateRoosterUser(deviceToken, "", mAlreadyUser)
+    }
+
     fun performMigration(activity: Activity) {
         if(activity is OnboardingActivity) {
             FirebaseNetwork.migrateOnboardingJourney(getPersistedAnonymousUID(), firebaseAuth.currentUser?.uid)
         } else {
             FirebaseNetwork.migrateUserUID(getPersistedAnonymousUID(), firebaseAuth.currentUser?.uid)
         }
-    }
-
-    private fun onSuccessfulGoogleAuth(account: GoogleSignInAccount?) {
-        val deviceToken = FirebaseInstanceId.getInstance().token
-        val photoURL = account?.photoUrl?.toString()
-
-        createOrUpdateRoosterUser(deviceToken, photoURL, false)
     }
 
     private fun attemptAnonymousLinking(credential: AuthCredential, resultListener: AnonymousLinkingListener) {
