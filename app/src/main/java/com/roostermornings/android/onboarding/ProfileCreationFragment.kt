@@ -372,74 +372,35 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
     override fun onValidationSucceeded() {
         super.onValidationSucceeded()
 
-        if (!checkInternetConnection()) return
-
         val email = mEmailAddress.text.toString().trim({ it <= ' ' })
         val password = mPassword.text.toString().trim({ it <= ' ' })
         val name = mUserName.text.toString().trim({ it <= ' ' })
 
-        if (mAlreadyUser) {
+        authManager.firebaseAuthWithEmail(name, email, password, mAlreadyUser,
+                object: AuthManager.Companion.AuthInterface {
+            override fun onAuthSuccess(task: Task<AuthResult>) {
+                authManager.performMigration(activity)
 
-            firebaseAuth.signInWithEmailAndPassword(email, password)
-                    .addOnCompleteListener({ task ->
-                        Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful)
+                view?.signUpLayout?.visibility = View.INVISIBLE
+                view?.emailLayout?.visibility = View.INVISIBLE
+                signedInLayout.visibility = View.VISIBLE
 
-                        if (!task.isSuccessful) {
-                            Toast.makeText(context, R.string.signup_auth_failed,
-                                    Toast.LENGTH_LONG).show()
-                        } else {
-                            view?.signUpLayout?.visibility = View.INVISIBLE
-                            view?.emailLayout?.visibility = View.INVISIBLE
-                            signedInLayout.visibility = View.VISIBLE
+                proceedToNextPage()
 
-                            FirebaseNetwork.migrateOnboardingJourney(authManager.getPersistedAnonymousUID(), firebaseAuth.currentUser?.uid)
+                Toaster.makeToast(context,
+                        "Email sign-in successful.",
+                        Toast.LENGTH_LONG)
+            }
 
-                            val deviceToken = FirebaseInstanceId.getInstance().token
+            override fun onAuthFailure() {
+                //Remove progress bar on failure
+                progressBar.visibility = View.GONE
 
-                            firebaseAuth.currentUser?.updateProfile(
-                                    UserProfileChangeRequest.Builder().setDisplayName(name).build())
-
-                            FirebaseNetwork.createOrUpdateRoosterUser(deviceToken, "", true)
-
-                            Toaster.makeToast(context,
-                                    "Email sign-in successful.",
-                                    Toast.LENGTH_LONG)
-
-                            proceedToNextPage()
-                        }
-                    })
-
-
-        } else {
-
-            firebaseAuth.createUserWithEmailAndPassword(email, password)
-                    .addOnCompleteListener({ task ->
-                        Log.d(TAG, "createUserWithEmail:onComplete:" + task.isSuccessful)
-
-                        if (!task.isSuccessful) {
-                            Toaster.makeToast(context, task.exception?.message?:"",
-                                    Toast.LENGTH_LONG)
-                        } else {
-                            view?.signUpLayout?.visibility = View.INVISIBLE
-                            view?.emailLayout?.visibility = View.INVISIBLE
-                            signedInLayout.visibility = View.VISIBLE
-
-                            FirebaseNetwork.migrateOnboardingJourney(authManager.getPersistedAnonymousUID(), firebaseAuth.currentUser?.uid)
-
-                            val deviceToken = FirebaseInstanceId.getInstance().token
-
-                            firebaseAuth.currentUser?.updateProfile(
-                                    UserProfileChangeRequest.Builder().setDisplayName(name).build())
-
-                            FirebaseNetwork.createOrUpdateRoosterUser(deviceToken, "", false)
-
-                            Toaster.makeToast(context,
-                                    "Email sign-in successful.",
-                                    Toast.LENGTH_LONG)
-
-                            proceedToNextPage()
-                        }
-                    })
-        }
+                Log.w(AuthManager.TAG, "Email: signInWithCredential failed")
+                Toaster.makeToast(context,
+                        "Email sign-in failed.",
+                        Toast.LENGTH_LONG)
+            }
+        })
     }
 }

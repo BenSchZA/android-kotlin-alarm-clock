@@ -23,7 +23,6 @@ import butterknife.OnClick
 import com.roostermornings.android.util.FileUtils
 import com.roostermornings.android.util.RoosterUtils
 import kotlinx.android.synthetic.main.onboarding_audio_demo.view.*
-import kotlinx.android.synthetic.main.onboarding_channel_overlay.view.*
 import java.io.File
 
 
