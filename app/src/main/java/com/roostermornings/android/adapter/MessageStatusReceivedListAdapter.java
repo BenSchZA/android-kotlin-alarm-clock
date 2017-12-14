@@ -159,17 +159,17 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
     public MessageStatusReceivedListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                                       int viewType) {
         context = parent.getContext();
-        // create a new view
+        // create a new activityContentView
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_layout_message_status_received, parent, false);
-        // set the view's size, margins, paddings and layout parameters
+        // set the activityContentView's size, margins, paddings and layout parameters
         return new MessageStatusReceivedListAdapter.ViewHolder(view);
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
+    // Replace the contents of a activityContentView (invoked by the layout manager)
     @Override
     public void onBindViewHolder(final MessageStatusReceivedListAdapter.ViewHolder holder, int position) {
         // - get element from your dataset at this position
-        // - replace the contents of the view with that element
+        // - replace the contents of the activityContentView with that element
         final DeviceAudioQueueItem audioItem = mDataset.get(position);
 
         holder.txtName.setText(audioItem.getName());
@@ -186,7 +186,7 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
             holder.txtInitials.setText(RoosterUtils.getInitials(audioItem.getName()));
         }
 
-        //Remove padding so that seekbar thumb aligns with text view
+        //Remove padding so that seekbar thumb aligns with text activityContentView
         holder.seekBar.setPadding(0, 0, 0, 0);
         //"Attach" the seekbar to a unique audio item
         holder.seekBar.setId(audioItem.getId());

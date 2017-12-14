@@ -6,17 +6,13 @@
 package com.roostermornings.android.firebase
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.net.Uri
 
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.roostermornings.android.domain.Channel
 import com.roostermornings.android.domain.OnboardingJourneyEvent
 import com.roostermornings.android.domain.User
 import com.roostermornings.android.util.Constants
@@ -32,7 +28,43 @@ object FirebaseNetwork {
     private var onFlagValidMobileNumberCompleteListener: OnFlagValidMobileNumberCompleteListener? = null
     private var onFlagChannelNameReceivedListener: OnFlagChannelNameReceivedListener? = null
 
+    private fun isUserSignedIn(): Boolean {
+        return FirebaseAuth.getInstance().currentUser != null
+                && FirebaseAuth.getInstance().currentUser?.isAnonymous == false
+    }
+
+    fun getRoosterUser(uid: String?, operation: (User?) -> Unit) {
+        if(!isUserSignedIn()) {
+            operation(null)
+            return
+        }
+
+        val fDB = FirebaseDatabase.getInstance().reference
+        val fUser = FirebaseAuth.getInstance().currentUser
+
+        val userListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val user = dataSnapshot.getValue(User::class.java)
+                operation(user)
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                operation(null)
+            }
+        }
+
+        if(FirebaseAuth.getInstance().currentUser != null
+                && FirebaseAuth.getInstance().currentUser?.isAnonymous == false
+                && !uid.isNullOrBlank()) {
+            val ref = fDB.child("users").child(uid)
+            ref.keepSynced(true)
+            ref.addListenerForSingleValueEvent(userListener)
+        } else operation(null)
+    }
+
     fun updateLastSeen() {
+        if(!isUserSignedIn()) return
+
         val fDB = FirebaseDatabase.getInstance().reference
         val fUser = FirebaseAuth.getInstance().currentUser
         val calendar = Calendar.getInstance()
@@ -48,6 +80,8 @@ object FirebaseNetwork {
     }
 
     fun updateProfileUserName(userName: String) {
+        if(!isUserSignedIn()) return
+
         val fDB = FirebaseDatabase.getInstance().reference
         val fUser = FirebaseAuth.getInstance().currentUser
 
@@ -61,6 +95,8 @@ object FirebaseNetwork {
     }
 
     fun updateProfileCellNumber(context: Context, cellNumberString: String) {
+        if(!isUserSignedIn()) return
+
         val myContactsController = MyContactsController(context)
         val nsnNumber: String
         nsnNumber = if (StrUtils.notNullOrEmpty(cellNumberString)) myContactsController.processUserContactNumber(cellNumberString) else ""
@@ -88,6 +124,8 @@ object FirebaseNetwork {
     }
 
     fun updateProfileGeoHashLocation(geohash: String) {
+        if(!isUserSignedIn()) return
+
         val fDB = FirebaseDatabase.getInstance().reference
         val fUser = FirebaseAuth.getInstance().currentUser
 
@@ -109,6 +147,11 @@ object FirebaseNetwork {
     }
 
     fun flagValidMobileNumber(context: Context, notify: Boolean) {
+        if(!isUserSignedIn()) {
+            onFlagValidMobileNumberCompleteListener?.onEvent(false)
+            return
+        }
+
         val fDB = FirebaseDatabase.getInstance().reference
         val fUser = FirebaseAuth.getInstance().currentUser
 
@@ -146,6 +189,8 @@ object FirebaseNetwork {
     }
 
     fun updateProfileProfilePic(url: Uri) {
+        if(!isUserSignedIn()) return
+
         val fDB = FirebaseDatabase.getInstance().reference
         val fUser = FirebaseAuth.getInstance().currentUser
 
@@ -182,6 +227,8 @@ object FirebaseNetwork {
 
     //Ensure used on social roosters
     fun setListened(senderId: String, queueId: String) {
+        if(!isUserSignedIn()) return
+
         val fDB = FirebaseDatabase.getInstance().reference
 
         val childUpdates = HashMap<String, Any>()
@@ -258,7 +305,9 @@ object FirebaseNetwork {
         }
     }
 
-    fun createOrUpdateRoosterUser(deviceToken: String?, photoURL: String?, emailUser: Boolean) {
+    fun createOrUpdateRoosterUser(deviceToken: String?, photoURL: String?) {
+        if(!isUserSignedIn()) return
+
         val fDB = FirebaseDatabase.getInstance().reference
         val fUser = FirebaseAuth.getInstance().currentUser
 
@@ -285,18 +334,15 @@ object FirebaseNetwork {
             childUpdates.put(String.format("users/%s/%s",
                     fUser.uid, "unseen_roosters"),
                     user.unseen_roosters)
-
-            if (!emailUser) {
-                childUpdates.put(String.format("users/%s/%s",
-                        fUser.uid, "profile_pic"),
-                        user.profile_pic)
-                childUpdates.put(String.format("users/%s/%s",
-                        fUser.uid, "uid"),
-                        user.uid)
-                childUpdates.put(String.format("users/%s/%s",
-                        fUser.uid, "user_name"),
-                        user.user_name)
-            }
+            childUpdates.put(String.format("users/%s/%s",
+                    fUser.uid, "profile_pic"),
+                    user.profile_pic)
+            childUpdates.put(String.format("users/%s/%s",
+                    fUser.uid, "uid"),
+                    user.uid)
+            childUpdates.put(String.format("users/%s/%s",
+                    fUser.uid, "user_name"),
+                    user.user_name)
 
             //Add user as a friend of theirs
             childUpdates.put(String.format("users/%s/%s/%s",

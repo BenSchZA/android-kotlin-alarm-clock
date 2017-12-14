@@ -32,7 +32,7 @@
             android:padding="@dimen/spacing_xsmall"
             android:textColor="@color/white"
             android:textStyle="bold"
-            android:background="@color/black_overlay"/>
+            android:background="@color/black_overlay_a40"/>
 
     </RelativeLayout>
 

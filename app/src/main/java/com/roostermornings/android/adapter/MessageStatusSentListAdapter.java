@@ -84,17 +84,17 @@ public class MessageStatusSentListAdapter extends RecyclerView.Adapter<MessageSt
     public MessageStatusSentListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                                       int viewType) {
         context = parent.getContext();
-        // create a new view
+        // create a new activityContentView
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_layout_message_status_sent, parent, false);
-        // set the view's size, margins, paddings and layout parameters
+        // set the activityContentView's size, margins, paddings and layout parameters
         return new MessageStatusSentListAdapter.ViewHolder(view);
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
+    // Replace the contents of a activityContentView (invoked by the layout manager)
     @Override
     public void onBindViewHolder(final MessageStatusSentListAdapter.ViewHolder holder, int position) {
         // - get element from your dataset at this position
-        // - replace the contents of the view with that element
+        // - replace the contents of the activityContentView with that element
         final SocialRooster socialRooster = mDataset.get(position);
         holder.txtName.setText(socialRooster.getUser_name());
         //Check if image is null, else previous images reused

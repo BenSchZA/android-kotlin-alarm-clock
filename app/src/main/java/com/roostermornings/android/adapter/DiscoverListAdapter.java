@@ -74,8 +74,8 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
     }
 
     // Provide a reference to the views for each data item
-    // Complex data items may need more than one view per item, and
-    // you provide access to all the views for a data item in a view holder
+    // Complex data items may need more than one activityContentView per item, and
+    // you provide access to all the views for a data item in a activityContentView holder
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.cardview_channel_name)
@@ -127,18 +127,18 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
     public DiscoverListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                              int viewType) {
         context = parent.getContext();
-        // create a new view
+        // create a new activityContentView
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.cardview_discover, parent, false);
-        // set the view's size, margins, paddings and layout parameters
+        // set the activityContentView's size, margins, paddings and layout parameters
         return new ViewHolder(v);
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
+    // Replace the contents of a activityContentView (invoked by the layout manager)
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         // - get element from your dataset at this position
         final MediaBrowserCompat.MediaItem mediaItem = mDataset.get(position);
-        // - replace the contents of the view with that element
+        // - replace the contents of the activityContentView with that element
         if (isPlaying(mediaItem)) {
             holder.listenImageButton.setBackgroundResource(R.drawable.rooster_new_audio_pause_button);
         } else {

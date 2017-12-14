@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.R
 import com.roostermornings.android.dagger.RoosterApplicationComponent
 import com.roostermornings.android.fragment.base.BaseFragment
@@ -25,6 +26,10 @@ class TemplateFragment : BaseFragment() {
 //            fragment.arguments = args
             return fragment
         }
+    }
+
+    init {
+        BaseApplication.getRoosterApplicationComponent().inject(this)
     }
 
     override fun inject(component: RoosterApplicationComponent?) {

@@ -18,7 +18,6 @@ import butterknife.BindView
 import butterknife.OnClick
 import com.facebook.*
 import com.facebook.internal.CallbackManagerImpl
-import com.facebook.internal.ImageRequest
 import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
 import com.facebook.login.widget.LoginButton
@@ -28,7 +27,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.*
-import com.google.firebase.iid.FirebaseInstanceId
 import com.mobsandgeeks.saripaar.Validator
 import com.mobsandgeeks.saripaar.annotation.NotEmpty
 import com.mobsandgeeks.saripaar.annotation.Password
@@ -36,20 +34,18 @@ import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.R
 import com.roostermornings.android.firebase.AuthManager
 import com.roostermornings.android.dagger.RoosterApplicationComponent
-import com.roostermornings.android.firebase.FirebaseNetwork
-import com.roostermornings.android.firebase.FirebaseNetwork.createOrUpdateRoosterUser
 import com.roostermornings.android.fragment.base.BaseFragment
 import com.roostermornings.android.util.Toaster
 import kotlinx.android.synthetic.main.fragment_onboarding_profile_creation.*
-import kotlinx.android.synthetic.main.fragment_onboarding_profile_creation.view.*
 import java.util.*
 import javax.inject.Inject
 
 /**
  * Created by bscholtz on 2017/12/04.
  */
-class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.ValidationListener {
+class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.ValidationListener, CustomCommandInterface {
     private var mHostInterface: HostInterface? = null
+    private var mCustomCommandInterface: CustomCommandInterface? = null
 
     private val RC_SIGN_IN = 7
 
@@ -83,23 +79,27 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
     lateinit var mPassword: EditText
 
     @Inject
-    lateinit var firebaseAuth: FirebaseAuth
-    @Inject
     lateinit var authManager: AuthManager
 
     companion object {
 
         val TAG = ProfileCreationFragment::class.java.simpleName?:"nullSimpleName"
 
+        val ARG_FROM_SOURCE = "ARG_FROM_SOURCE"
+
+        enum class Source {
+            ONBOARDING, FRIENDS_PAGE, HOME_PAGE, PROFILE
+        }
+
         /**
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        fun newInstance(): ProfileCreationFragment {
+        fun newInstance(fromSource: Source): ProfileCreationFragment {
             val fragment = ProfileCreationFragment()
-//            val args = Bundle()
-//            args.putParcelable(ARG_WINDOW_SIZE, windowSize)
-//            fragment.arguments = args
+            val args = Bundle()
+            args.putSerializable(ARG_FROM_SOURCE, fromSource)
+            fragment.arguments = args
             return fragment
         }
     }
@@ -114,11 +114,13 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
+        // If class cast exception, no worries, will perform safe interface call
         try {
             mHostInterface = context as HostInterface
-        } catch (e: ClassCastException) {
-            TODO("HostInterface not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
+        } catch (e: ClassCastException) {}
+        try {
+            mCustomCommandInterface = context as CustomCommandInterface
+        } catch (e: ClassCastException) {}
     }
 
     override fun onPause() {
@@ -135,9 +137,28 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        when(arguments.getSerializable(ARG_FROM_SOURCE) as Source) {
+            Source.FRIENDS_PAGE -> {
+                signin_button_notnow.visibility = View.GONE
+                terms_and_conditions_link.visibility = View.GONE
+                signUpBenefits.text = getString(R.string.onboarding_in_app_sign_up_benefits)
+            }
+            Source.HOME_PAGE -> {
+                signin_button_notnow.text = getString(R.string.signup_cancel)
+                terms_and_conditions_link.visibility = View.GONE
+                signUpBenefits.text = getString(R.string.onboarding_in_app_sign_up_benefits)
+            }
+            Source.PROFILE -> {
+                signin_button_notnow.text = getString(R.string.signup_not_now)
+                terms_and_conditions_link.visibility = View.GONE
+                signUpBenefits.text = getString(R.string.onboarding_in_profile_sign_up_benefits)
+            }
+            else -> {}
+        }
+
         if(authManager.isUserSignedIn()) {
-            view?.signUpLayout?.visibility = View.INVISIBLE
-            view?.emailLayout?.visibility = View.INVISIBLE
+            signUpLayout?.visibility = View.INVISIBLE
+            emailLayout?.visibility = View.INVISIBLE
             signedInLayout.visibility = View.VISIBLE
         }
 
@@ -153,15 +174,15 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
             animationCloud.repeatCount = -1
             animationCloud.repeatMode = Animation.REVERSE
 
-            view.roosterCloud?.animation = animationCloud
+            roosterCloud?.animation = animationCloud
         }
     }
 
     override fun fragmentVisible(position: Int) {}
 
-    override fun customCommand(command: InterfaceCommands.Companion.Command) {
+    override fun onCustomCommand(command: InterfaceCommands.Companion.Command) {
         when(command) {
-            InterfaceCommands.Companion.Command.SCROLL_RIGHT -> {
+            InterfaceCommands.Companion.Command.PROCEED -> {
                 mHostInterface?.scrollViewPager(View.FOCUS_RIGHT)
             }
             else -> {}
@@ -179,12 +200,15 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
                         Log.d(TAG, "facebook:onLinkSuccess:" + loginResult)
                         authWithFacebook(loginResult.accessToken)
                     }
-
                     override fun onCancel() {
                         Log.e("Facebook: ", "onCancel")
+                        //Remove progress bar on failure
+                        progressBar.visibility = View.GONE
                     }
                     override fun onError(exception: FacebookException) {
                         Log.e("Facebook: ", "onError")
+                        //Remove progress bar on failure
+                        progressBar.visibility = View.GONE
                     }
                 }
         )
@@ -209,8 +233,8 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
     fun onAlreadyUserClicked() {
         mAlreadyUser = true
         mUserName.visibility = View.INVISIBLE
-        view?.signUpLayout?.visibility = View.INVISIBLE
-        view?.emailLayout?.visibility = View.VISIBLE
+        signUpLayout?.visibility = View.INVISIBLE
+        emailLayout?.visibility = View.VISIBLE
         signedInLayout.visibility = View.INVISIBLE
     }
 
@@ -218,15 +242,15 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
     fun onSignUpEmailClicked() {
         mAlreadyUser = false
         mUserName.visibility = View.VISIBLE
-        view?.signUpLayout?.visibility = View.INVISIBLE
-        view?.emailLayout?.visibility = View.VISIBLE
+        signUpLayout?.visibility = View.INVISIBLE
+        emailLayout?.visibility = View.VISIBLE
         signedInLayout.visibility = View.INVISIBLE
     }
 
     @OnClick(R.id.cancel_button)
     fun onClickCancel() {
-        view?.signUpLayout?.visibility = View.VISIBLE
-        view?.emailLayout?.visibility = View.INVISIBLE
+        signUpLayout?.visibility = View.VISIBLE
+        emailLayout?.visibility = View.INVISIBLE
         signedInLayout.visibility = View.INVISIBLE
     }
 
@@ -260,7 +284,7 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
 
     @OnClick(R.id.signin_button_notnow)
     fun onNotNowSigninButtonClick() {
-        mHostInterface?.scrollViewPager(View.FOCUS_RIGHT)
+        proceedToNextPage()
     }
 
     //Receive auth activity result and start callback
@@ -304,11 +328,7 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
         authManager.firebaseAuthWithFacebook(token, object: AuthManager.Companion.AuthInterface {
             override fun onAuthSuccess(task: Task<AuthResult>) {
                 authManager.performMigration(activity)
-
-                view?.signUpLayout?.visibility = View.INVISIBLE
-                view?.emailLayout?.visibility = View.INVISIBLE
-                signedInLayout.visibility = View.VISIBLE
-
+                changeLayoutSignedIn()
                 proceedToNextPage()
 
                 Toaster.makeToast(context,
@@ -332,11 +352,7 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
         authManager.firebaseAuthWithGoogle(result, object: AuthManager.Companion.AuthInterface {
             override fun onAuthSuccess(task: Task<AuthResult>) {
                 authManager.performMigration(activity)
-
-                view?.signUpLayout?.visibility = View.INVISIBLE
-                view?.emailLayout?.visibility = View.INVISIBLE
-                signedInLayout.visibility = View.VISIBLE
-
+                changeLayoutSignedIn()
                 proceedToNextPage()
 
                 Toaster.makeToast(context,
@@ -362,6 +378,7 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
         progressBar.visibility = View.GONE
 
         mHostInterface?.scrollViewPager(View.FOCUS_RIGHT)
+        mCustomCommandInterface?.onCustomCommand(InterfaceCommands.Companion.Command.PROCEED)
     }
 
     @OnClick(R.id.signup_button_email)
@@ -376,15 +393,13 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
         val password = mPassword.text.toString().trim({ it <= ' ' })
         val name = mUserName.text.toString().trim({ it <= ' ' })
 
+        progressBar.visibility = View.VISIBLE
+
         authManager.firebaseAuthWithEmail(name, email, password, mAlreadyUser,
                 object: AuthManager.Companion.AuthInterface {
             override fun onAuthSuccess(task: Task<AuthResult>) {
                 authManager.performMigration(activity)
-
-                view?.signUpLayout?.visibility = View.INVISIBLE
-                view?.emailLayout?.visibility = View.INVISIBLE
-                signedInLayout.visibility = View.VISIBLE
-
+                changeLayoutSignedIn()
                 proceedToNextPage()
 
                 Toaster.makeToast(context,
@@ -402,5 +417,17 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
                         Toast.LENGTH_LONG)
             }
         })
+    }
+
+    private fun changeLayoutSignedIn() {
+        if(arguments.getBoolean(ARG_FROM_SOURCE)) {
+            signUpLayout?.visibility = View.INVISIBLE
+            emailLayout?.visibility = View.INVISIBLE
+            signedInLayout.visibility = View.GONE
+        } else {
+            signUpLayout?.visibility = View.INVISIBLE
+            emailLayout?.visibility = View.INVISIBLE
+            signedInLayout.visibility = View.VISIBLE
+        }
     }
 }

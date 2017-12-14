@@ -72,8 +72,8 @@ class AlarmToggleWidget : AppWidgetProvider() {
 //            val rv = RemoteViews(context.packageName, R.layout.widget_alarm_toggle)
 //            rv.setRemoteAdapter(R.id.widget_alarmsListView, intent)
 //
-//            // The empty view is displayed when the collection has no items. It should be a sibling
-//            // of the collection view.
+//            // The empty activityContentView is displayed when the collection has no items. It should be a sibling
+//            // of the collection activityContentView.
 //            rv.setEmptyView(R.id.widget_alarmsListView, R.id.widget_alarmsListView)
 //
 //            // This section makes it possible for items to have individualized behavior.
@@ -83,7 +83,7 @@ class AlarmToggleWidget : AppWidgetProvider() {
 //            // to create unique behavior on an item-by-item basis.
 //            val toastIntent = Intent(context, AlarmToggleWidget::class.java)
 //            // Set the action for the intent.
-//            // When the user touches a particular view, it will have the effect of
+//            // When the user touches a particular activityContentView, it will have the effect of
 //            // broadcasting TOAST_ACTION.
 //            toastIntent.action = TOAST_ACTION
 //            toastIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
@@ -208,7 +208,7 @@ class AlarmToggleWidget : AppWidgetProvider() {
             val appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
                     AppWidgetManager.INVALID_APPWIDGET_ID)
             val viewIndex = intent.getIntExtra(EXTRA_ITEM, 0)
-            Toast.makeText(context, "Touched view " + viewIndex, Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Touched activityContentView " + viewIndex, Toast.LENGTH_SHORT).show()
         }
 
         context.startService(Intent(context, WidgetService::class.java))

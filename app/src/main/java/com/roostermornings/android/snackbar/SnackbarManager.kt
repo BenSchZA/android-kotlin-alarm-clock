@@ -1,10 +1,6 @@
 package com.roostermornings.android.snackbar
 
 import android.app.Activity
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.support.design.widget.BaseTransientBottomBar
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.Snackbar
@@ -25,9 +21,9 @@ import javax.inject.Inject
 /**
  * Created by bscholtz on 2017/11/13.
  */
-class SnackbarManager(val activity: Activity, val view: View) {
+class SnackbarManager(val activity: Activity, val activityContentView: CoordinatorLayout) {
 
-    private var currentSnackbar = Snackbar.make(view, "", Snackbar.LENGTH_LONG)
+    private var currentSnackbar = Snackbar.make(activityContentView, "", Snackbar.LENGTH_LONG)
     private var currentSnackbarQueueElement = SnackbarQueueElement()
     private var snackbarQueue = ArrayList<SnackbarQueueElement>()
 
@@ -57,8 +53,7 @@ class SnackbarManager(val activity: Activity, val view: View) {
         resetTimerTask()
     }
 
-    private val bottomSheet: BottomSheetLayout
-    private val activityContentView: CoordinatorLayout
+    private val bottomSheet: BottomSheetLayout?
 
     /** Snackbar callback used for snackbar renewal display method.*/
     private val callback1 = object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
@@ -122,9 +117,8 @@ class SnackbarManager(val activity: Activity, val view: View) {
             }
         }
 
-        /** Initialize bottom sheet (snackbar dialog) and coordinator layout view references.*/
+        /** Initialize bottom sheet (snackbar dialog) and coordinator layout activityContentView references.*/
         bottomSheet = activity.findViewById(R.id.snackbarBottomsheet)
-        activityContentView = activity.findViewById(R.id.my_alarms_coordinator_layout)
     }
 
     /** Element inserted into realm database and used for keeping track of pending snackbars
@@ -215,7 +209,7 @@ class SnackbarManager(val activity: Activity, val view: View) {
     }
 
     private fun initializeSnackbarDialog(snackbarQueueElement: SnackbarQueueElement) {
-        if(snackbarQueueElement.dialog) {
+        if(snackbarQueueElement.dialog && bottomSheet != null) {
             currentSnackbar.setAction(snackbarQueueElement.actionText, View.OnClickListener {
                 val dialogView = LayoutInflater.from(activity.applicationContext).inflate(R.layout.snackbar_dialog, bottomSheet, false)
 
@@ -243,7 +237,7 @@ class SnackbarManager(val activity: Activity, val view: View) {
 
                 // Show bottomsheet dialog
                 bottomSheet.showWithSheetView(dialogView)
-                // Set height of sheet to 30% from bottom of content view
+                // Set height of sheet to 30% from bottom of content activityContentView
                 bottomSheet.peekSheetTranslation = activityContentView.height*0.3f
                 bottomSheet.peekSheet()
             })
@@ -261,7 +255,7 @@ class SnackbarManager(val activity: Activity, val view: View) {
 
     private fun resetCurrentSnackbar() {
         currentSnackbar.dismiss()
-        currentSnackbar = Snackbar.make(view, "", Snackbar.LENGTH_LONG)
+        currentSnackbar = Snackbar.make(activityContentView, "", Snackbar.LENGTH_LONG)
     }
 
     /**Check if snackbar queue has elements, and if snackbar is currently shown.
@@ -319,6 +313,11 @@ class SnackbarManager(val activity: Activity, val view: View) {
         } else {
             !locked && snackbarQueue.add(element)
         }
+    }
+
+    /** Public method to immediately show snackbar*/
+    fun generateSnackbar(snackbarQueueElement: SnackbarQueueElement) {
+        if(addSnackbarToQueue(snackbarQueueElement)) checkQueue()
     }
 
     /** Generate the alarm content sync status snackbars: syncing, finished, and no-internet.*/

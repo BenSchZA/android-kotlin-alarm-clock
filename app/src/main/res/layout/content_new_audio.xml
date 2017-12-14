@@ -3,139 +3,114 @@
   ~ Copyright (c)  2017 Roosta Media. All rights reserved.
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/main_background_layer_list"
-    android:orientation="vertical">
+    android:background="@drawable/main_background_layer_list" >
 
     <TextView
         android:id="@+id/new_message"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/spacing_xxxlarge"
+        android:layout_marginEnd="32dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
         android:background="@drawable/rooster_new_audio_instructions_background"
         android:gravity="center"
         android:text="@string/new_audio_instructions"
         android:textColor="@color/white"
-        android:textSize="@dimen/text_large" />
+        android:textSize="@dimen/text_large"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
+    <TextView
+        android:id="@+id/new_audio_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="60"
+        android:textColor="@color/white"
+        android:textSize="@dimen/text_huge"
+        app:layout_constraintBottom_toBottomOf="@+id/new_audio_listen_circle_outer"
+        app:layout_constraintEnd_toEndOf="@+id/new_audio_listen_circle_outer"
+        app:layout_constraintStart_toStartOf="@+id/new_audio_listen_circle_outer"
+        app:layout_constraintTop_toTopOf="@+id/new_audio_listen_circle_outer" />
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:context="com.roostermornings.android.activity.MyAlarmsFragmentActivity"
-        tools:showIn="@layout/activity_new_audio">
+    <ImageButton
+        android:id="@+id/new_audio_save"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:background="@drawable/rooster_new_audio_upload_button"
+        app:layout_constraintBottom_toBottomOf="@+id/new_audio_listen_circle_outer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.2"
+        app:layout_constraintStart_toEndOf="@+id/new_audio_listen_circle_outer"
+        app:layout_constraintTop_toTopOf="@+id/new_audio_listen_circle_outer" />
 
-        <TextView
-            android:id="@+id/new_audio_time"
-            android:layout_width="match_parent"
+    <ImageButton
+        android:id="@+id/new_audio_delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rooster_new_audio_delete_button"
+        android:clickable="true"
+        app:layout_constraintBottom_toBottomOf="@+id/new_audio_listen_circle_outer"
+        app:layout_constraintEnd_toStartOf="@+id/new_audio_listen_circle_outer"
+        app:layout_constraintHorizontal_bias="0.8"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/new_audio_listen_circle_outer" />
+
+    <FrameLayout
+        android:id="@+id/new_audio_listen_circle_outer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/rooster_listen_audio_circle"
+        app:layout_constraintBottom_toTopOf="@+id/button_bar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageButton
+            android:id="@+id/new_audio_listen"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="15dp"
+            android:background="@drawable/rooster_audio_play_button"
+            android:clickable="true" />
+
+    </FrameLayout>
+
+    <include
+        android:id="@+id/button_bar"
+        layout="@layout/button_bar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <FrameLayout
+        android:id="@+id/new_audio_circle_outer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rooster_record_audio_circle_outer"
+        app:layout_constraintBottom_toBottomOf="@+id/new_audio_listen_circle_outer"
+        app:layout_constraintEnd_toEndOf="@+id/new_audio_listen_circle_outer"
+        app:layout_constraintStart_toStartOf="@+id/new_audio_listen_circle_outer"
+        app:layout_constraintTop_toTopOf="@+id/new_audio_listen_circle_outer">
+
+        <ImageView
+            android:id="@+id/new_audio_start_stop"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/record_playback_layout"
-            android:gravity="center"
-            android:text="60"
-            android:textColor="@color/white"
-            android:textSize="@dimen/text_huge" />
+            android:layout_margin="10dp"
+            android:background="@drawable/rooster_record_audio_circle_inner_selectable"
+            android:clickable="true" />
 
-        <FrameLayout
-            android:id="@+id/record_playback_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_above="@id/button_bar"
-            android:layout_marginBottom="@dimen/spacing_xxxlarge">
+    </FrameLayout>
 
-
-            <RelativeLayout
-                android:id="@+id/new_audio_record_parent"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:padding="@dimen/spacing_large"
-                android:visibility="visible">
-
-                <FrameLayout
-                    android:id="@+id/new_audio_circle_outer"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/rooster_record_audio_circle_outer">
-
-                    <ImageView
-                        android:id="@+id/new_audio_start_stop"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="10dp"
-                        android:background="@drawable/rooster_record_audio_circle_inner_selectable"
-                        android:clickable="true" />
-
-                </FrameLayout>
-
-            </RelativeLayout>
-
-            <LinearLayout
-                android:id="@+id/new_audio_listen_parent"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:orientation="horizontal"
-                android:padding="@dimen/spacing_large"
-                android:visibility="gone">
-
-                <ImageButton
-                    android:id="@+id/new_audio_delete"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_marginRight="@dimen/spacing_xxlarge"
-                    android:background="@drawable/rooster_new_audio_delete_button"
-                    android:clickable="true" />
-
-                <RelativeLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:layout_gravity="center_horizontal|center_vertical"
-                    android:gravity="center_horizontal|center_vertical">
-
-                    <FrameLayout
-                        android:id="@+id/new_audio_listen_circle_outer"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/rooster_listen_audio_circle">
-
-                        <ImageButton
-                            android:id="@+id/new_audio_listen"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_margin="15dp"
-                            android:background="@drawable/rooster_audio_play_button"
-                            android:clickable="true" />
-
-                    </FrameLayout>
-
-                </RelativeLayout>
-
-                <ImageButton
-                    android:id="@+id/new_audio_save"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_marginLeft="@dimen/spacing_xxlarge"
-                    android:background="@drawable/rooster_new_audio_upload_button" />
-
-            </LinearLayout>
-
-
-        </FrameLayout>
-
-        <include
-            android:id="@+id/button_bar"
-            layout="@layout/button_bar" />
-
-    </RelativeLayout>
-
-</LinearLayout>
+</android.support.constraint.ConstraintLayout>

@@ -19,10 +19,12 @@ import com.roostermornings.android.util.RoosterUtils
 
 import kotlinx.android.synthetic.main.activity_onboarding.*
 
-class OnboardingActivity: BaseActivity(), HostInterface {
+class OnboardingActivity: BaseActivity(), HostInterface, CustomCommandInterface {
 
     companion object {
         private val NUMBER_OF_ONBOARDING_PAGES = Page.values().size
+        // -1 for first page
+        private val NUMBER_OF_PROGRESS_SEGMENTS = NUMBER_OF_ONBOARDING_PAGES - 1
 
         enum class Page {
             INTRO, CHANNEL_DEMO, SIGN_IN, SOCIAL_HOOK, SOCIAL_DEMO
@@ -39,7 +41,8 @@ class OnboardingActivity: BaseActivity(), HostInterface {
      */
     private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
 
-    private var fragmentInterface: FragmentInterface? = null
+    private var mFragmentInterface: FragmentInterface? = null
+    private var mCustomCommandInterface: CustomCommandInterface? = null
 
     @BindView(R.id.progressBar)
     lateinit var progressBar: ProgressBar
@@ -56,7 +59,7 @@ class OnboardingActivity: BaseActivity(), HostInterface {
         // Set display to fullscreen
         window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN)
-        // Inflate view and bind children views
+        // Inflate activityContentView and bind children views
         initialize(R.layout.activity_onboarding)
 
         // Create the adapter that will return a fragment for each of the three
@@ -71,9 +74,9 @@ class OnboardingActivity: BaseActivity(), HostInterface {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
                 setOnboardingProgress(position)
-                fragmentInterface?.fragmentVisible(position)
+                mFragmentInterface?.fragmentVisible(position)
 
-                // Log onboarding journey view event
+                // Log onboarding journey activityContentView event
                 when(position) {
                     Page.INTRO.ordinal -> {
                         FirebaseNetwork.logOnboardingEvent(
@@ -107,7 +110,7 @@ class OnboardingActivity: BaseActivity(), HostInterface {
     }
 
     override fun setOnboardingProgress(pageNumber: Int) {
-        val progress = (pageNumber/NUMBER_OF_ONBOARDING_PAGES.toFloat() *100).toInt()
+        val progress = (pageNumber/ NUMBER_OF_PROGRESS_SEGMENTS.toFloat() *100).toInt()
         if(RoosterUtils.hasNougat()) {
             progressBar.setProgress(progress, true)
         } else {
@@ -119,8 +122,8 @@ class OnboardingActivity: BaseActivity(), HostInterface {
         container.arrowScroll(direction)
     }
 
-    override fun customCommand(command: InterfaceCommands.Companion.Command) {
-        fragmentInterface?.customCommand(command)
+    override fun onCustomCommand(command: InterfaceCommands.Companion.Command) {
+        mCustomCommandInterface?.onCustomCommand(command)
     }
 
     /**
@@ -140,11 +143,12 @@ class OnboardingActivity: BaseActivity(), HostInterface {
                 }
                 Page.CHANNEL_DEMO.ordinal -> {
                     val fragment = ChannelDemoFragment.newInstance()
-                    fragmentInterface = fragment
+                    mFragmentInterface = fragment
+                    mCustomCommandInterface = fragment
                     fragment
                 }
                 Page.SIGN_IN.ordinal -> {
-                    ProfileCreationFragment.newInstance()
+                    ProfileCreationFragment.newInstance(ProfileCreationFragment.Companion.Source.ONBOARDING)
                 }
                 Page.SOCIAL_HOOK.ordinal -> {
                     SocialHookFragment.newInstance()

@@ -10,6 +10,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import android.os.AsyncTask
 import android.telephony.TelephonyManager
+import android.widget.Toast
 import java.net.InetAddress
 import java.net.URL
 import java.net.UnknownHostException
@@ -27,7 +28,7 @@ class ConnectivityUtils(val context: Context) {
         return getNetworkInfo()?.isConnectedOrConnecting ?:false
     }
 
-    fun isActive(operation: (Boolean) -> Unit) {
+    fun isActive(makeToast: Boolean = false, operation: (Boolean) -> Unit) {
 
         class TaskThread : AsyncTask<String, Void, Boolean>() {
             override fun doInBackground(vararg params: String): Boolean {
@@ -40,7 +41,12 @@ class ConnectivityUtils(val context: Context) {
                     false
                 }
             }
-            override fun onPostExecute(result: Boolean) { operation(result) }
+            override fun onPostExecute(result: Boolean) {
+                operation(result)
+                if(makeToast && !result) {
+                    Toaster.makeToast(context, "No active internet connection was found, please connect and try again.", Toast.LENGTH_LONG)
+                }
+            }
         }
 
         TaskThread().execute()

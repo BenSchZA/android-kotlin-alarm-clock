@@ -28,6 +28,7 @@ import java.io.File
 
 class ChannelDemoOverlayFragment : Fragment() {
     private var mHostInterface: HostInterface? = null
+    private var mCustomCommandInterface: CustomCommandInterface? = null
 
     private var mMediaPlayer: MediaPlayer = MediaPlayer()
     private val mHandler = Handler(Looper.getMainLooper())
@@ -60,8 +61,9 @@ class ChannelDemoOverlayFragment : Fragment() {
         super.onAttach(context)
         try {
             mHostInterface = context as HostInterface
+            mCustomCommandInterface = context as CustomCommandInterface
         } catch (e: ClassCastException) {
-            TODO("HostInterface not implemented") //To change body of created functions use File | Settings | File Templates.
+            TODO("Interface not implemented") //To change body of created functions use File | Settings | File Templates.
         }
     }
 
@@ -77,7 +79,7 @@ class ChannelDemoOverlayFragment : Fragment() {
         val view = inflater.inflate(R.layout.onboarding_audio_demo, container, false)
         ButterKnife.bind(this, view)
 
-        mHostInterface?.customCommand(InterfaceCommands.Companion.Command.HIDE_FAB)
+        mCustomCommandInterface?.onCustomCommand(InterfaceCommands.Companion.Command.HIDE_FAB)
 
         return view
     }
@@ -87,7 +89,7 @@ class ChannelDemoOverlayFragment : Fragment() {
 
         val media = arguments.getInt(ARG_MEDIA)
         view?.let{
-            view.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.black_overlay, null))
+            view.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.black_overlay_a40, null))
 
             val drawable = ResourcesCompat.getDrawable(resources, arguments.getInt(ARG_DRAWABLE_ID), null)
             val color = ColorDrawable(ResourcesCompat.getColor(resources, R.color.white, null))
@@ -197,6 +199,6 @@ class ChannelDemoOverlayFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         stopMedia()
-        mHostInterface?.customCommand(InterfaceCommands.Companion.Command.SHOW_FAB)
+        mCustomCommandInterface?.onCustomCommand(InterfaceCommands.Companion.Command.SHOW_FAB)
     }
 }
