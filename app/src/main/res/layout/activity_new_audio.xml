@@ -29,6 +29,5 @@
 
     <include layout="@layout/content_new_audio" />
 
-
 </android.support.design.widget.CoordinatorLayout>
 

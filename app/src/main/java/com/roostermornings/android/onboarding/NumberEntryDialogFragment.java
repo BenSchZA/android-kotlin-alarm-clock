@@ -3,7 +3,7 @@
  * Copyright (c)  2017 Roosta Media. All rights reserved.
  */
 
-package com.roostermornings.android.fragment;
+package com.roostermornings.android.onboarding;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -108,7 +108,7 @@ public class NumberEntryDialogFragment extends DialogFragment implements Validat
 
         if(popup) buttonLater.setVisibility(View.VISIBLE);
 
-        //instantiate saripaar validator to validate fields with NotEmpty annotations
+        // Instantiate Saripaar validator to validate fields with NotEmpty annotations
         validator = new Validator(this);
         validator.setValidationListener(this);
 

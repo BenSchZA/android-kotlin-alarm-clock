@@ -27,7 +27,7 @@ import android.support.v7.widget.GridLayoutManager
 
 
 
-class ChannelDemoFragment : BaseFragment(), ChannelDemoInterface, FragmentInterface {
+class ChannelDemoFragment : BaseFragment(), ChannelDemoInterface, FragmentInterface, CustomCommandInterface {
     private var mHostInterface: HostInterface? = null
     private var mShowcaseInterface: ShowcaseInterface? = null
     private var mShowcaseHandler: Handler = Handler()
@@ -141,7 +141,7 @@ class ChannelDemoFragment : BaseFragment(), ChannelDemoInterface, FragmentInterf
 
     private var previousOverlayFragment: Fragment? = null
 
-    override fun customCommand(command: InterfaceCommands.Companion.Command) {
+    override fun onCustomCommand(command: InterfaceCommands.Companion.Command) {
         when(command) {
             InterfaceCommands.Companion.Command.HIDE_FAB -> {
                 view?.navigationFAB?.hide()
@@ -152,8 +152,9 @@ class ChannelDemoFragment : BaseFragment(), ChannelDemoInterface, FragmentInterf
         }
     }
 
+    private var overlayFragment: Fragment? = null
     override fun performChannelImageTransition(title: String, description: String, drawableID: Int, imageView: ImageView, media: Int) {
-        val overlayFragment = ChannelDemoOverlayFragment.newInstance(title, description, drawableID, media)
+        overlayFragment = ChannelDemoOverlayFragment.newInstance(title, description, drawableID, media)
 
         // Note that we need the API version check here because the actual transition classes (e.g. Fade)
         // are not in the support library and are only available in API 21+. The methods we are calling on the Fragment
@@ -184,6 +185,13 @@ class ChannelDemoFragment : BaseFragment(), ChannelDemoInterface, FragmentInterf
             }
             else -> {
                 mShowcaseHandler.removeCallbacksAndMessages(null)
+                mShowcaseInterface?.dismissShowcase()
+                overlayFragment?.let {
+                    activity.supportFragmentManager
+                            .beginTransaction()
+                            .remove(it)
+                            .commit()
+                }
             }
         }
     }

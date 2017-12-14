@@ -34,6 +34,10 @@
 
     <color name="onboarding_light_blue">#B9E6FE</color>
     <color name="onboarding_blue">#379BF5</color>
+    <color name="primaryColor">#b9e6fe</color>
+    <color name="primaryLightColor">#ecffff</color>
+    <color name="primaryDarkColor">#88b4cb</color>
+    <color name="primaryTextColor">#000000</color>
 
     <color name="rooster_splash">#024272</color>
 
@@ -48,5 +52,6 @@
     <color name="gradient_center_night">#1f4464</color>
     <color name="gradient_end_night">#4a6883</color>
 
-    <color name="black_overlay">#66000000</color>
+    <color name="black_overlay_a40">#66000000</color>
+    <color name="black_overlay_a70">#B3000000</color>
 </resources>

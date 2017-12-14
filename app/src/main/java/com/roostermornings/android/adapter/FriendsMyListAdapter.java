@@ -52,8 +52,8 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
     private Context context;
 
     // Provide a reference to the views for each data item
-    // Complex data items may need more than one view per item, and
-    // you provide access to all the views for a data item in a view holder
+    // Complex data items may need more than one activityContentView per item, and
+    // you provide access to all the views for a data item in a activityContentView holder
     public class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
         public ImageView imgProfilePic;
@@ -98,17 +98,17 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
     public FriendsMyListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                                   int viewType) {
         context = parent.getContext();
-        // create a new view
+        // create a new activityContentView
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_layout_friends_my, parent, false);
-        // set the view's size, margins, paddings and layout parameters
+        // set the activityContentView's size, margins, paddings and layout parameters
         return new FriendsMyListAdapter.ViewHolder(v);
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
+    // Replace the contents of a activityContentView (invoked by the layout manager)
     @Override
     public void onBindViewHolder(final FriendsMyListAdapter.ViewHolder holder, final int position) {
         // - get element from your dataset at this position
-        // - replace the contents of the view with that element
+        // - replace the contents of the activityContentView with that element
         final User user = mDataset.get(position);
         user.setSelected(false);
         holder.txtName.setText(user.getUser_name());

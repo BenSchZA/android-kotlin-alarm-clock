@@ -29,7 +29,8 @@ import com.roostermornings.android.adapter_data.RoosterAlarmManager;
 import com.roostermornings.android.adapter_data.ChannelManager;
 import com.roostermornings.android.firebase.AuthManager;
 import com.roostermornings.android.firebase.FA;
-import com.roostermornings.android.fragment.NumberEntryDialogFragment;
+import com.roostermornings.android.firebase.FirebaseNetwork;
+import com.roostermornings.android.onboarding.NumberEntryDialogFragment;
 import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.fragment.friends.FriendsInviteFragment3;
 import com.roostermornings.android.fragment.friends.FriendsMyFragment1;
@@ -38,6 +39,7 @@ import com.roostermornings.android.fragment.message_status.MessageStatusReceived
 import com.roostermornings.android.fragment.message_status.MessageStatusSentFragment2;
 import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment1;
 import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment2;
+import com.roostermornings.android.onboarding.NumberEntryFragment;
 import com.roostermornings.android.onboarding.OnboardingActivity;
 import com.roostermornings.android.onboarding.ProfileCreationFragment;
 import com.roostermornings.android.realm.RealmManager_AlarmFailureLog;
@@ -101,6 +103,7 @@ public interface RoosterApplicationComponent {
     void inject(MessageStatusReceivedFragment1 fragment);
     void inject(MessageStatusSentFragment2 fragment);
     void inject(ProfileCreationFragment fragment);
+    void inject(NumberEntryFragment fragment);
 
     void inject(AudioService service);
     void inject(UploadService service);
@@ -125,6 +128,7 @@ public interface RoosterApplicationComponent {
     void inject(RealmManager_ScheduledSnackbar roosterClass);
     void inject(SnackbarManager roosterClass);
     void inject(AuthManager roosterClass);
+    void inject(FirebaseNetwork roosterClass);
 
     void inject(DownloadSyncAdapter adapter);
     void inject(MyAlarmsListAdapter adapter);

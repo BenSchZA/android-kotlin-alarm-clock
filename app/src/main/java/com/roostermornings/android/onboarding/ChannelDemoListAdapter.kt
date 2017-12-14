@@ -2,12 +2,12 @@ package com.roostermornings.android.onboarding
 
 import android.app.Activity
 import android.content.Context
-import android.media.MediaPlayer
 import android.os.Handler
 import android.support.v4.app.Fragment
 import android.support.v4.content.res.ResourcesCompat
 import android.support.v7.widget.CardView
 import android.support.v7.widget.RecyclerView
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,10 +15,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import butterknife.BindView
 import butterknife.ButterKnife
-import com.github.amlcurran.showcaseview.targets.Target
-import com.github.amlcurran.showcaseview.targets.ViewTarget
 import com.roostermornings.android.R
-import com.roostermornings.android.util.FirstMileManager
 import kotlinx.android.synthetic.main.cardview_onboarding_channel_demo.view.*
 import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt
 import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt.STATE_DISMISSED
@@ -35,14 +32,15 @@ class ChannelDemoListAdapter(
     private var context: Context? = null
 
     private var showcaseChannelCardView: CardView? = null
+    private var mShowcase: MaterialTapTargetPrompt? = null
 
     private var channelDemoInterface: ChannelDemoInterface? = null
 
     private var showCaseSeen: Boolean = false
 
     // Provide a reference to the views for each data item
-    // Complex data items may need more than one view per item, and
-    // you provide access to all the views for a data item in a view holder
+    // Complex data items may need more than one activityContentView per item, and
+    // you provide access to all the views for a data item in a activityContentView holder
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
         @BindView(R.id.cardView)
@@ -66,18 +64,18 @@ class ChannelDemoListAdapter(
     override fun onCreateViewHolder(parent: ViewGroup,
                                     viewType: Int): ViewHolder {
         context = parent.context
-        // create a new view
+        // create a new activityContentView
         val v = LayoutInflater.from(parent.context).inflate(R.layout.cardview_onboarding_channel_demo, parent, false)
 
         if (mFragment is ChannelDemoFragment) {
             channelDemoInterface = mFragment
         }
 
-        // set the view's size, margins, paddings and layout parameters
+        // set the activityContentView's size, margins, paddings and layout parameters
         return ViewHolder(v)
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
+    // Replace the contents of a activityContentView (invoked by the layout manager)
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = mDataset[position]
         holder.image.setImageResource(item.imageID)
@@ -107,13 +105,18 @@ class ChannelDemoListAdapter(
 //        }, 500)
         if(!showCaseSeen) {
             handler.postDelayed({
-                MaterialTapTargetPrompt.Builder(activity)
+                mShowcase = MaterialTapTargetPrompt.Builder(activity)
                         .setTarget(showcaseChannelCardView)
                         .setPrimaryText("Test what works for you")
                         .setSecondaryText("Design your morning...")
+                        .setPrimaryTextSize(R.dimen.text_xxlarge)
+                        .setSecondaryTextSize(R.dimen.text_xxlarge)
+                        .setIdleAnimationEnabled(false)
                         .setFocalRadius(300f)
+                        .setPrimaryTextGravity(Gravity.BOTTOM)
+                        .setSecondaryTextGravity(Gravity.BOTTOM)
                         .setPromptFocal(RectanglePromptFocal())
-                        .setBackgroundColour(ResourcesCompat.getColor(activity.resources, R.color.black_overlay, null))
+                        .setBackgroundColour(ResourcesCompat.getColor(activity.resources, R.color.black_overlay_a70, null))
                         .setPromptStateChangeListener({ _, state ->
                             when(state) {
                                 STATE_DISMISSED, STATE_FOCAL_PRESSED -> {
@@ -125,5 +128,9 @@ class ChannelDemoListAdapter(
                         .show()
             }, 500)
         }
+    }
+
+    override fun dismissShowcase() {
+        mShowcase?.dismiss()
     }
 }

@@ -72,6 +72,7 @@
                 android:layout_marginLeft="100dp"
                 android:layout_marginRight="100dp"
                 android:clickable="true"
+                android:focusable="true"
                 android:visibility="gone" />
 
             <me.grantland.widget.AutofitTextView
@@ -81,6 +82,7 @@
                 android:layout_marginLeft="100dp"
                 android:layout_marginRight="100dp"
                 android:clickable="true"
+                android:focusable="true"
                 android:maxLines="2"
                 android:paddingBottom="@dimen/spacing_normal"
                 android:text="Tap to add\nnew alarm"

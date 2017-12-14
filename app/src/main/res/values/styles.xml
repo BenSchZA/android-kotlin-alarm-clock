@@ -17,7 +17,8 @@
         <item name="colorControlHighlight">@color/accent</item>
 
         <!--Actually overridden to Nunito-Bold-->
-        <item name="android:typeface">monospace</item>
+        <!--<item name="android:typeface">monospace</item>-->
+
         <!--&lt;!&ndash;Used for preference screen text colour&ndash;&gt;-->
         <!--<item name="android:textColor">@color/white</item>-->
         <!--<item name="android:textColorPrimary">@color/white</item>-->
@@ -75,9 +76,6 @@
         <item name="colorControlNormal">@color/normal</item>
         <item name="colorControlActivated">@color/accent</item>
         <item name="colorControlHighlight">@color/accent</item>
-
-        <!--Actually overridden to Nunito-Bold-->
-        <item name="android:typeface">monospace</item>
 
         <item name="android:actionMenuTextColor">@android:color/black</item>
         <item name="actionOverflowMenuStyle">@style/ActionBarMenuStyle</item>
@@ -195,7 +193,7 @@
     </style>
 
     <style name="FullscreenActionBarStyle" parent="Widget.AppCompat.ActionBar">
-        <item name="android:background">@color/black_overlay</item>
+        <item name="android:background">@color/black_overlay_a40</item>
     </style>
 
     <style name="Fade">

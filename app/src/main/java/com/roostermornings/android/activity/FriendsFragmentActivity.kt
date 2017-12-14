@@ -1,0 +1,553 @@
+/*
+ * Rooster Mornings Android.
+ * Copyright (c)  2017 Roosta Media. All rights reserved.
+ */
+
+package com.roostermornings.android.activity
+
+import android.app.SearchManager
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.content.SharedPreferences
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Bundle
+import android.support.annotation.Nullable
+import android.support.design.widget.TabLayout
+import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentManager
+import android.support.v4.app.FragmentPagerAdapter
+import android.support.v4.app.FragmentStatePagerAdapter
+import android.support.v4.view.PagerAdapter
+import android.support.v4.view.ViewPager
+import android.support.v7.widget.SearchView
+import android.support.v7.widget.Toolbar
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
+
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.roostermornings.android.BaseApplication
+import com.roostermornings.android.R
+import com.roostermornings.android.activity.base.BaseActivity
+import com.roostermornings.android.dagger.RoosterApplicationComponent
+import com.roostermornings.android.domain.Contact
+import com.roostermornings.android.domain.Friend
+import com.roostermornings.android.domain.User
+import com.roostermornings.android.firebase.AuthManager
+import com.roostermornings.android.firebase.FirebaseNetwork
+import com.roostermornings.android.onboarding.NumberEntryDialogFragment
+import com.roostermornings.android.fragment.friends.FriendsInviteFragment3
+import com.roostermornings.android.fragment.friends.FriendsMyFragment1
+import com.roostermornings.android.fragment.friends.FriendsRequestFragment2
+import com.roostermornings.android.util.Constants
+
+import javax.inject.Inject
+
+import butterknife.BindView
+import com.roostermornings.android.onboarding.*
+import com.roostermornings.android.snackbar.SnackbarManager
+import kotlinx.android.synthetic.main.activity_friends.*
+
+//Responsible for managing friends: 1) my friends, 2) addable friends, 3) friend invites
+class FriendsFragmentActivity : BaseActivity(), FriendsMyFragment1.OnFragmentInteractionListener, FriendsRequestFragment2.OnFragmentInteractionListener, NumberEntryListener, CustomCommandInterface {
+    @BindView(R.id.toolbar)
+    lateinit var toolbar: Toolbar
+    @BindView(R.id.toolbar_title)
+    lateinit var toolbarTitle: TextView
+    @BindView(R.id.tabs)
+    lateinit var tabLayout: TabLayout
+    @BindView(R.id.home_friends)
+    lateinit var buttonMyFriends: ImageButton
+    @BindView(R.id.button_bar)
+    lateinit var buttonBarLayout: LinearLayout
+
+    /**
+     * The [ViewPager] that will host the section contents.
+     */
+    @BindView(R.id.friendsViewPager)
+    lateinit var mViewPager: ViewPager
+    /**
+     * The [android.support.v4.view.PagerAdapter] that will provide
+     * fragments for each of the sections. We use a
+     * [FragmentPagerAdapter] derivative, which will keep every
+     * loaded fragment in memory. If this becomes too memory intensive, it
+     * may be best to switch to a
+     * [android.support.v4.app.FragmentStatePagerAdapter].
+     */
+    private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
+
+    private var mFriendRequestsReceivedReference: DatabaseReference? = null
+    private var mFriendRequestsSentReference: DatabaseReference? = null
+    private var mCurrentUserReference: DatabaseReference? = null
+    private var receiver: BroadcastReceiver? = null
+
+    private var friendsFragment1: FriendsMyFragment1? = null
+    private var friendsFragment2: FriendsRequestFragment2? = null
+    private var friendsFragment3: FriendsInviteFragment3? = null
+
+    @Inject lateinit var baseApplication: BaseApplication
+    @Inject @Nullable lateinit var firebaseUser: FirebaseUser
+    @Inject lateinit var sharedPreferences: SharedPreferences
+    @Inject lateinit var authManager: AuthManager
+
+    private var snackbarManager: SnackbarManager? = null
+
+    override fun inject(component: RoosterApplicationComponent) {
+        component.inject(this)
+    }
+
+    interface FriendsInviteListAdapterInterface {
+        //Send invite to Rooster user from contact list
+        fun addUser(inviteFriend: Friend)
+    }
+
+    interface FriendsRequestListAdapterInterface {
+        //Accept friend request and update Firebase DB
+        fun acceptFriendRequest(acceptFriend: Friend)
+        fun rejectFriendRequest(rejectFriend: Friend)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        initialize(R.layout.activity_friends)
+        inject(BaseApplication.getRoosterApplicationComponent())
+
+        // If the user is anonymous, show sign-up fragment
+        if (!authManager.isUserSignedIn()) {
+            showSignUpFragment()
+        } else {
+            // If number hasn't been provided
+            showNumberEntryFragment()
+        }
+
+        snackbarManager = SnackbarManager(this, fillerContainer)
+
+        setDayNightTheme()
+        setButtonBarSelection()
+
+        //Set toolbar title
+        val toolbar = setupToolbar(toolbarTitle, getString(R.string.friends))
+        toolbar?.setNavigationIcon(R.drawable.md_nav_back)
+        toolbar?.setNavigationOnClickListener { startHomeActivity() }
+
+        //Keep local and Firebase alarm dbs synced, and enable offline persistence
+        mFriendRequestsReceivedReference = FirebaseDatabase.getInstance().reference
+                .child("friend_requests_received").child(firebaseUser.uid)
+
+        mFriendRequestsSentReference = FirebaseDatabase.getInstance().reference
+                .child("friend_requests_sent").child(firebaseUser.uid)
+
+        mCurrentUserReference = FirebaseDatabase.getInstance().reference
+                .child("users").child(firebaseUser.uid)
+
+        mFriendRequestsReceivedReference?.keepSynced(true)
+        mFriendRequestsSentReference?.keepSynced(true)
+        mCurrentUserReference?.keepSynced(true)
+
+        //Create a viewpager with fragments controlled by SectionsPagerAdapter
+        createViewPager(mViewPager)
+        //This makes sure activityContentView is not recreated when scrolling, as we have 3 fragment pages
+        mViewPager.offscreenPageLimit = 2
+        tabLayout.setupWithViewPager(mViewPager)
+        //Generate custom tab for tab layout
+        createTabIcons()
+
+        //Check for new Firebase datachange notifications and register broadcast receiver
+        updateNotifications()
+
+        //Listen for change to mViewPager page display - used for toggling notifications
+        mViewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
+
+            override fun onPageSelected(position: Int) {
+                if (position == 1) {
+                    //Clear request notification badge
+                    setTabNotification(position, false)
+                    setButtonBarNotification(false)
+                    BaseApplication.setNotificationFlag(0, Constants.FLAG_FRIENDREQUESTS)
+                }
+            }
+
+            override fun onPageScrollStateChanged(state: Int) {}
+        })
+
+        //Handle search intent
+        handleIntent(intent)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // Remove Realm listeners, and close Realm
+        snackbarManager?.destroy()
+    }
+
+    private var numberEntryFragment: NumberEntryFragment? = null
+    private fun showNumberEntryFragment() {
+        if (!sharedPreferences.getBoolean(Constants.MOBILE_NUMBER_ENTRY_DISMISSED, false) && !sharedPreferences.getBoolean(Constants.MOBILE_NUMBER_VALIDATED, false)) {
+            appbar.visibility = View.GONE
+
+            numberEntryFragment = NumberEntryFragment.newInstance()
+            supportFragmentManager.beginTransaction()
+                    .replace(R.id.fillerContainer, numberEntryFragment)
+                    .commit()
+        }
+
+        FirebaseNetwork.setOnFlagValidMobileNumberCompleteListener(object : FirebaseNetwork.OnFlagValidMobileNumberCompleteListener {
+            override fun onEvent(valid: Boolean) {
+                if (!valid) {
+                    //Refresh UI fragment to show number entry dialog
+                    if (mSectionsPagerAdapter != null) mSectionsPagerAdapter?.notifyDataSetChanged()
+                }
+            }
+        })
+        FirebaseNetwork.flagValidMobileNumber(this, true)
+    }
+
+    private var profileCreationFragment: ProfileCreationFragment? = null
+    private fun showSignUpFragment() {
+        appbar.visibility = View.GONE
+
+        profileCreationFragment = ProfileCreationFragment.newInstance(ProfileCreationFragment.Companion.Source.FRIENDS_PAGE)
+        supportFragmentManager.beginTransaction()
+                .replace(R.id.fillerContainer, profileCreationFragment)
+                .commit()
+    }
+
+    private fun clearOnboardingFragments() {
+        appbar.visibility = View.VISIBLE
+
+        val transaction = supportFragmentManager
+                .beginTransaction()
+
+        profileCreationFragment?.let {
+            transaction
+                    .remove(it)
+        }
+        numberEntryFragment?.let {
+            transaction
+                    .remove(it)
+        }
+        transaction.commit()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        //Display notifications
+        updateRoosterNotification()
+        //updateRequestNotification();
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        handleIntent(intent)
+    }
+
+    override fun onCustomCommand(command: InterfaceCommands.Companion.Command) {
+        when(command) {
+            InterfaceCommands.Companion.Command.PROCEED -> {
+                clearOnboardingFragments()
+                showNumberEntryFragment()
+            }
+            else -> {}
+        }
+    }
+
+    private fun handleIntent(intent: Intent) {
+        //mViewPager.setCurrentItem(sharedPreferences.getInt(Constants.FRIENDS_ACTIVITY_CURRENT_FRAGMENT, 0));
+        if (Intent.ACTION_SEARCH == intent.action) {
+            val query = intent.getStringExtra(SearchManager.QUERY)
+            //use the query to search your data somehow
+            handleSearch(query)
+        }
+    }
+
+    private fun handleSearch(query: String) {
+        when(mViewPager.currentItem) {
+            0 -> friendsFragment1?.searchRecyclerViewAdapter(query)
+            1 -> if (friendsFragment2?.isAdded == true)
+                friendsFragment2?.searchRecyclerViewAdapter(query)
+            2 -> friendsFragment3?.searchRecyclerViewAdapter(query)
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        val inflater = menuInflater
+        inflater.inflate(R.menu.menu_friends, menu)
+
+        // Associate searchable configuration with the SearchView
+        val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
+        val searchView = menu.findItem(R.id.search_friends).actionView as SearchView
+        searchView.setSearchableInfo(
+                searchManager.getSearchableInfo(componentName))
+
+        //When searchView is closed, refresh data
+        searchView.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+
+            override fun onViewDetachedFromWindow(arg0: View) {
+                // search was detached/closed
+                when(mViewPager.currentItem) {
+                    0 -> friendsFragment1?.notifyAdapter()
+                    1 -> if (friendsFragment2?.isAdded == true)
+                            friendsFragment2?.notifyAdapter()
+                    2 -> friendsFragment3?.notifyAdapter()
+                }
+            }
+
+            override fun onViewAttachedToWindow(arg0: View) {
+                // search was opened
+            }
+        })
+
+        return true
+    }
+
+    private fun createViewPager(mViewPager: ViewPager) {
+
+        // Create the adapter that will return a fragment for each of the three
+        // primary sections of the activity.
+        mSectionsPagerAdapter = SectionsPagerAdapter(supportFragmentManager)
+
+        friendsFragment1 = Fragment.instantiate(applicationContext, FriendsMyFragment1::class.java.name) as FriendsMyFragment1
+        friendsFragment2 = Fragment.instantiate(applicationContext, FriendsRequestFragment2::class.java.name) as FriendsRequestFragment2
+        friendsFragment3 = Fragment.instantiate(applicationContext, FriendsInviteFragment3::class.java.name) as FriendsInviteFragment3
+
+        // Set up the ViewPager with the sections adapter.
+        mViewPager.adapter = mSectionsPagerAdapter
+    }
+
+    /**
+     * A [FragmentPagerAdapter] that returns a fragment corresponding to
+     * one of the sections/tabs/pages.
+     */
+    private inner class SectionsPagerAdapter internal constructor(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
+
+        override fun getItem(position: Int): Fragment? {
+
+            return when (position) {
+                0 -> friendsFragment1
+                1 ->{
+                    if (sharedPreferences
+                            .getBoolean(Constants.MOBILE_NUMBER_VALIDATED, false))
+                        friendsFragment2
+                    else NumberEntryDialogFragment()
+                }
+                2 -> friendsFragment3
+                else -> null
+            }
+        }
+
+        override fun getItemPosition(`object`: Any?): Int {
+            return PagerAdapter.POSITION_NONE
+        }
+
+        override fun getCount(): Int {
+            return 3
+        }
+
+        override fun getPageTitle(position: Int): CharSequence? {
+            return when (position) {
+                0 -> "FRIENDS"
+                1 -> "REQUESTS"
+                2 -> "INVITE"
+                else -> null
+            }
+        }
+    }
+
+    override fun onMobileNumberValidated(mobileNumber: String) {
+        clearOnboardingFragments()
+        mSectionsPagerAdapter?.notifyDataSetChanged()
+    }
+
+    override fun dismissFragment() {
+        clearOnboardingFragments()
+    }
+
+    private fun createTabIcons() {
+        setTabLayout(0, "FRIENDS")
+        setTabLayout(1, "REQUESTS")
+        setTabLayout(2, "INVITE")
+    }
+
+    //Create custom tab layout
+    private fun setTabLayout(position: Int, title: String) {
+        val frameLayout = LayoutInflater.from(this).inflate(R.layout.custom_friends_tab, null) as? FrameLayout
+
+        (frameLayout?.getChildAt(0) as? TextView)?.let {
+            it.text = title
+        }
+
+        //Disable clipping to ensure notification is shown properly
+        (tabLayout.getChildAt(0) as? ViewGroup)?.let {
+            it.clipToPadding = false
+            it.clipChildren = false
+        }
+
+        (tabs.getChildAt(position) as? ViewGroup)?.let {
+            it.clipToPadding = false
+            it.clipChildren = false
+        }
+
+        tabLayout.getTabAt(position)?.customView = frameLayout
+    }
+
+    //Set current tab notification
+    fun setTabNotification(position: Int, notification: Boolean) {
+        val tab = tabLayout.getTabAt(position)
+        if (tab != null) {
+            val frameLayout = tab.customView as? FrameLayout
+            if (frameLayout != null) {
+                val tabNotification = frameLayout.findViewById<ImageView>(R.id.notification_friends)
+                if (notification)
+                    tabNotification.visibility = View.VISIBLE
+                else
+                    tabNotification.visibility = View.GONE
+                tab.customView = frameLayout
+            }
+        }
+    }
+
+    fun setButtonBarNotification(notification: Boolean) {
+        val buttonBarNotification = buttonBarLayout.findViewById<ImageView>(R.id.notification_friends)
+        if (notification)
+            buttonBarNotification.visibility = View.VISIBLE
+        else
+            buttonBarNotification.visibility = View.GONE
+    }
+
+    private fun updateNotifications() {
+        //Flag check for UI changes on load, broadcastreceiver for changes while activity running
+        //If notifications waiting, display new friend request notification
+        if (BaseApplication.getNotificationFlag(Constants.FLAG_FRIENDREQUESTS) > 0) {
+            setButtonBarNotification(true)
+            setTabNotification(1, true)
+        }
+
+        //Broadcast receiver filter to receive UI updates
+        val firebaseListenerServiceFilter = IntentFilter()
+        firebaseListenerServiceFilter.addAction(Constants.ACTION_REQUESTNOTIFICATION)
+
+        receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                //do something based on the intent's action
+                if (BaseApplication.getNotificationFlag(Constants.FLAG_FRIENDREQUESTS) > 0) {
+                    setButtonBarNotification(true)
+                    setTabNotification(1, true)
+                    manualSwipeRefreshRequests()
+                }
+            }
+        }
+        registerReceiver(receiver, firebaseListenerServiceFilter)
+    }
+
+    fun manualSwipeRefreshFriends() {
+        friendsFragment1?.manualSwipeRefresh()
+    }
+
+    fun manualSwipeRefreshRequests() {
+        if (friendsFragment2?.isAdded == true) friendsFragment2?.manualSwipeRefresh()
+    }
+
+    override fun onDestroy() {
+        if (receiver != null) {
+            unregisterReceiver(receiver)
+            receiver = null
+        }
+        super.onDestroy()
+    }
+
+    fun getTabNotification(position: Int): Int {
+        val tab = tabLayout.getTabAt(position)
+        val imageNotification = tab?.customView?.findViewById<ImageView>(R.id.notification_friends)
+        return imageNotification?.visibility?:-1
+    }
+
+    override fun onFragmentInteraction(uri: Uri) {
+        //you can leave it empty
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int,
+                                            permissions: Array<String>, grantResults: IntArray) {
+        when (requestCode) {
+            Constants.MY_PERMISSIONS_REQUEST_READ_CONTACTS -> {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    friendsFragment3?.requestPermissionReadContacts()
+                } else {
+                    friendsFragment3?.displayRequestPermissionExplainer(true)
+                }
+            }
+        }// other 'case' lines to check for other
+        // permissions this app might request
+    }
+
+    //Delete friend from Firebase user friend list
+    fun deleteFriend(deleteFriend: User) {
+//        if(deleteFriend.uid != firebaseUser.uid) {
+            val currentUserUrl = String.format("users/%s/friends/%s", firebaseUser.uid, deleteFriend.uid)
+            val friendUserUrl = String.format("users/%s/friends/%s", deleteFriend.uid, firebaseUser.uid)
+
+            //Clear current user's and friend's friend list
+            mDatabase.database.getReference(currentUserUrl).setValue(null)
+            mDatabase.database.getReference(friendUserUrl).setValue(null)
+
+            val snackbar = SnackbarManager.Companion.SnackbarQueueElement("${deleteFriend.user_name} deleted", action = View.OnClickListener {
+                //Undo clear current user's and friend's friend list
+                mDatabase.database.getReference(currentUserUrl).setValue(true)
+                mDatabase.database.getReference(friendUserUrl).setValue(true)
+            }, actionText = "Undo", priority = 1)
+            snackbarManager?.generateSnackbar(snackbar)
+//        } else {
+//
+//        }
+    }
+
+    //Invite contact via Whatsapp or fallback to SMS
+    fun inviteContact(contact: Contact) {
+        //        Uri uri = Uri.parse("smsto:" + contact.getPrimaryNumber());
+        //        Intent intent = new Intent(Intent.ACTION_SENDTO, uri);
+        //        intent.putExtra("sms_body", getResources().getString(R.string.invite_to_rooster_message));
+        //        intent.setType("text/plain");
+        //        intent.setPackage("com.whatsapp");
+        //        startActivity(Intent.createChooser(intent, ""));
+        //        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        //        intent.putExtra(Intent.EXTRA_PHONE_NUMBER, contact.getPrimaryNumber());
+        //        intent.putExtra(Intent.EXTRA_TEXT, getResources().getString(R.string.invite_to_rooster_message));
+        //        intent.setType("text/plain");
+        //        intent.setPackage("com.whatsapp");
+        //        startActivity(intent);
+        //        Intent sendIntent = new Intent("android.intent.action.MAIN");
+        //        //sendIntent.setComponent(new ComponentName("com.whatsapp", "com.whatsapp.Conversation"));
+        //        sendIntent.setAction(Intent.ACTION_SEND);
+        //        sendIntent.setType("text/plain");
+        //        sendIntent.putExtra(Intent.EXTRA_TEXT, "This is my text to send.");
+        //        sendIntent.putExtra("jid", contact.getPrimaryNumber() + "@s.whatsapp.net");
+        //        sendIntent.setPackage("com.whatsapp");
+        //        startActivity(sendIntent);
+        //        Intent sendIntent = new Intent("android.intent.action.SEND");
+        //        sendIntent.setComponent(new ComponentName("com.whatsapp","com.whatsapp.ContactPicker"));
+        //        sendIntent.putExtra("jid", contact.getPrimaryNumber() + "@s.whatsapp.net");
+        //        sendIntent.putExtra(Intent.EXTRA_TEXT,"sample text you want to send along with the image");
+        //        startActivity(sendIntent);
+
+        val uri = Uri.parse("smsto:" + contact.primaryNumber)
+        val intent = Intent(Intent.ACTION_SENDTO, uri)
+        intent.putExtra("sms_body", resources.getString(R.string.invite_to_rooster_message))
+        startActivity(intent)
+    }
+
+    companion object {
+        val TAG = FriendsFragmentActivity::class.java.simpleName
+    }
+}

@@ -12,6 +12,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.WindowManager
 import android.widget.Toast
+import com.google.firebase.auth.FirebaseAuth
 
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -60,7 +61,7 @@ class SplashActivity : BaseActivity() {
         // Authenticate client to give access to DB
         authManager.signInAnonymouslyIfNecessary()
 
-        // Log onboarding journey view event
+        // Log onboarding journey activityContentView event
         FirebaseNetwork.logOnboardingEvent(
                 OnboardingJourneyEvent(subject = "Splash UI")
                         .setType(OnboardingJourneyEvent.Companion.Event.VIEW))
@@ -207,13 +208,12 @@ class SplashActivity : BaseActivity() {
             startActivity(i)
             finish()
         } else {
-            //TODO:
-            //            if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            //                navigateToActivity(IntroFragmentActivity.class);
-            //            } else {
-            //                navigateToActivity(MyAlarmsFragmentActivity.class);
-            //            }
-            navigateToActivity(OnboardingActivity::class.java)
+            // If the user is signed-in, skip onboarding and open app
+            if (authManager.isUserSignedIn()) {
+                navigateToActivity(MyAlarmsFragmentActivity::class.java)
+            } else {
+                navigateToActivity(OnboardingActivity::class.java)
+            }
         }
     }
 }

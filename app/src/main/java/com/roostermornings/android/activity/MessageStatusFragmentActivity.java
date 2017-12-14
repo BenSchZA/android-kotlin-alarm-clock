@@ -110,7 +110,7 @@ public class MessageStatusFragmentActivity extends BaseActivity implements
 
         //Create a viewpager with fragments controlled by SectionsPagerAdapter
         createViewPager(mViewPager);
-        //This makes sure view is not recreated when scrolling, as we have 3 fragment pages
+        //This makes sure activityContentView is not recreated when scrolling, as we have 3 fragment pages
         mViewPager.setOffscreenPageLimit(2);
         tabLayout.setupWithViewPager(mViewPager);
         //Generate custom tab for tab layout
@@ -136,7 +136,7 @@ public class MessageStatusFragmentActivity extends BaseActivity implements
             }
         });
 
-        FontsOverride.changeTabsFont(getApplicationContext(), tabLayout, Constants.APP_FONT);
+        //FontsOverride.changeTabsFont(getApplicationContext(), tabLayout, Constants.APP_FONT);
 
         //Handle search intent
         handleIntent(getIntent());

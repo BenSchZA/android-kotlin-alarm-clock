@@ -3,6 +3,7 @@ package com.roostermornings.android.firebase
 import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
+import android.net.Uri
 import android.util.Log
 import com.facebook.AccessToken
 import com.facebook.Profile
@@ -18,6 +19,7 @@ import com.roostermornings.android.onboarding.OnboardingActivity
 import com.roostermornings.android.onboarding.ProfileCreationFragment
 import com.roostermornings.android.util.ConnectivityUtils
 import com.roostermornings.android.util.Constants
+import java.net.URL
 import javax.inject.Inject
 
 /**
@@ -138,7 +140,7 @@ class AuthManager(val context: Context) {
             null
         }
 
-        createOrUpdateRoosterUser(deviceToken, photoURL, false)
+        createOrUpdateRoosterUser(deviceToken, photoURL)
     }
 
     fun firebaseAuthWithGoogle(result: GoogleSignInResult, listener: AuthInterface) {
@@ -178,7 +180,7 @@ class AuthManager(val context: Context) {
         val deviceToken = FirebaseInstanceId.getInstance().token
         val photoURL = account?.photoUrl?.toString()
 
-        createOrUpdateRoosterUser(deviceToken, photoURL, false)
+        createOrUpdateRoosterUser(deviceToken, photoURL)
     }
 
     fun firebaseAuthWithEmail(name: String, email: String, password: String, mAlreadyUser: Boolean, listener: AuthInterface) {
@@ -231,10 +233,29 @@ class AuthManager(val context: Context) {
     private fun onSuccessfulEmailAuth(name: String, mAlreadyUser: Boolean) {
         val deviceToken = FirebaseInstanceId.getInstance().token
 
-        firebaseAuth.currentUser?.updateProfile(
-                UserProfileChangeRequest.Builder().setDisplayName(name).build())
+        FirebaseNetwork.getRoosterUser(firebaseAuth.currentUser?.uid) { roosterUser ->
 
-        FirebaseNetwork.createOrUpdateRoosterUser(deviceToken, "", mAlreadyUser)
+            val userName = if(!roosterUser?.user_name.isNullOrBlank()) {
+                roosterUser?.user_name
+            } else {
+                if(name.isNotBlank()) name else "Me"
+            }
+
+            val userPhoto = if(!roosterUser?.profile_pic.isNullOrBlank()) {
+                Uri.parse(roosterUser?.profile_pic)
+            } else {
+                null
+                //TODO:
+                //FirebaseNetwork.updateProfileProfilePic()
+            }
+
+            val builder = UserProfileChangeRequest.Builder()
+            builder.setDisplayName(userName)
+            if(userPhoto != null) builder.setPhotoUri(userPhoto)
+            firebaseAuth.currentUser?.updateProfile(builder.build())
+
+            FirebaseNetwork.createOrUpdateRoosterUser(deviceToken, "")
+        }
     }
 
     fun performMigration(activity: Activity) {

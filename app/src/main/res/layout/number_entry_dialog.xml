@@ -78,7 +78,7 @@
 
             <Button
                 android:id="@+id/button_okay"
-                style="@style/RoosterButtonStyle"
+                style="@style/RoosterButtonWhiteStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/spacing_normal"

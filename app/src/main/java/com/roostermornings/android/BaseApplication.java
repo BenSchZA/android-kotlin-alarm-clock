@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
-import android.net.ConnectivityManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
@@ -38,7 +37,6 @@ import com.roostermornings.android.apis.NodeIHTTPClient;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.receiver.NetworkChangeReceiver;
 import com.roostermornings.android.util.Constants;
-import com.roostermornings.android.util.FontsOverride;
 import com.roostermornings.android.util.Toaster;
 
 import javax.inject.Inject;
@@ -86,8 +84,9 @@ public class BaseApplication extends android.app.Application {
         //Get static FBAnalytics instance
         firebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
+        Boolean debuggable = (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
         //Activate crashlytics instance
-        CrashlyticsCore core = new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build();
+        CrashlyticsCore core = new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG || debuggable).build();
         if("BetaFlavour".equals(BuildConfig.FLAVOR)) {
             Fabric.with(new Fabric.Builder(this).kits(new Crashlytics.Builder().core(core).build()).appIdentifier("com.roostermornings.android.beta").build());
         } else {
@@ -95,7 +94,7 @@ public class BaseApplication extends android.app.Application {
         }
 
         //If debug, disable Firebase analytics
-        if(BuildConfig.DEBUG || (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE))) {
+        if(BuildConfig.DEBUG || debuggable) {
             firebaseAnalytics.setAnalyticsCollectionEnabled(false);
         }
 
@@ -129,11 +128,8 @@ public class BaseApplication extends android.app.Application {
         //Activate facebook app connection
         AppEventsLogger.activateApp(this, getResources().getString(R.string.facebook_app_id));
 
-        //Override monospace font with custom font
-        FontsOverride.setDefaultFont(this, "MONOSPACE", Constants.APP_FONT);
-
         if (BuildConfig.DEBUG) {
-            //Stetho: http://facebook.github.io/stetho/ - debug bridge for Android (view SQL etc.)
+            //Stetho: http://facebook.github.io/stetho/ - debug bridge for Android (activityContentView SQL etc.)
             //Go to chrome://inspect/ in Chrome to inspect
             Stetho.initializeWithDefaults(this);
         }
