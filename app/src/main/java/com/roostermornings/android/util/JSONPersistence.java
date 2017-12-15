@@ -20,6 +20,7 @@ import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.ChannelRooster;
 import com.roostermornings.android.domain.Contact;
 import com.roostermornings.android.domain.User;
+import com.roostermornings.android.firebase.AuthManager;
 import com.roostermornings.android.geolocation.GeoHashUtils;
 
 import org.json.JSONException;
@@ -38,6 +39,7 @@ import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.K
 import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.KEY_CHANNEL_STORY_ITERATION_DATE_LOCK;
 import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.KEY_MEDIA_ITEMS_ARRAY;
 import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.KEY_CHANNEL_STORY_ITERATION;
+import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.KEY_ROOSTER_USER;
 import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.KEY_USER_FRIENDS_ARRAY;
 import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.KEY_USER_GEOHASH_ENTRY_ARRAY;
 import static com.roostermornings.android.util.JSONPersistence.SharedPrefsKeys.KEY_USER_INVITABLE_CONTACTS_ARRAY;
@@ -68,6 +70,7 @@ public class JSONPersistence {
         public static final String KEY_ALARM_CHANNEL_ROOSTERS_ARRAY = "KEY_ALARM_CHANNEL_ROOSTERS_ARRAY";
         public static final String KEY_ALARMS_ARRAY = "KEY_ALARMS_ARRAY";
         public static final String KEY_USER_GEOHASH_ENTRY_ARRAY = "KEY_USER_GEOHASH_ENTRY_ARRAY";
+        public static final String KEY_ROOSTER_USER = "KEY_ROOSTER_USER";
     }
 
     @Inject @Named("default") SharedPreferences defaultSharedPreferences;
@@ -149,6 +152,37 @@ public class JSONPersistence {
         if(contacts == null) return;
         try {
             putJSONString(KEY_USER_INVITABLE_CONTACTS_ARRAY, gson.toJson(contacts));
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public User getRoosterUser() {
+        User user = new User();
+        try {
+            if(getJSONString(KEY_ROOSTER_USER) != null) {
+                Type type = new TypeToken<User>(){}.getType();
+                if(gson.fromJson(getJSONString(KEY_ROOSTER_USER), type) != null) {
+                    return gson.fromJson(getJSONString(KEY_ROOSTER_USER), type);
+                } else {
+                    return null;
+                }
+            } else {
+                return null;
+            }
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+            return null;
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public void setRoosterUser(User user) {
+        if(user == null) return;
+        try {
+            putJSONString(KEY_USER_FRIENDS_ARRAY, gson.toJson(user));
         } catch (IllegalStateException e) {
             e.printStackTrace();
         }

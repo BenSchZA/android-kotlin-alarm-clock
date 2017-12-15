@@ -114,7 +114,7 @@ public class MessageStatusSentFragment2 extends BaseFragment {
         void onFragmentInteraction(Uri uri);
     }
 
-    //NB: bind ButterKnife to view and then initialise UI elements
+    //NB: bind ButterKnife to activityContentView and then initialise UI elements
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);

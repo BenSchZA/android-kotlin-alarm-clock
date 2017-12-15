@@ -323,7 +323,7 @@ public final class DeviceAlarmController {
     //Remove entire set of alarms, first recreate intent EXACTLY as before, then call alarmMgr.cancel(intent)
     public void deleteAlarmSetGlobal(String setId) {
         deleteAlarmSetIntents(setId);
-        FirebaseNetwork.removeFirebaseAlarm(setId);
+        FirebaseNetwork.INSTANCE.removeFirebaseAlarm(setId);
     }
 
     //Case: local has an alarm that firebase doesn't Result: delete local alarm
@@ -350,7 +350,7 @@ public final class DeviceAlarmController {
             deviceAlarmTableManager.setSetChanged(setId, true);
             refreshAlarms(deviceAlarmTableManager.selectChanged());
 
-            FirebaseNetwork.updateFirebaseAlarmEnabled(setId, enabled);
+            FirebaseNetwork.INSTANCE.updateFirebaseAlarmEnabled(setId, enabled);
             //Trigger audio download
             //Download any social or channel audio files
             ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
@@ -366,7 +366,7 @@ public final class DeviceAlarmController {
             }
             deviceAlarmTableManager.setSetEnabled(setId, enabled);
             //removeSetChannelAudio(deviceAlarmList);
-            FirebaseNetwork.updateFirebaseAlarmEnabled(setId, enabled);
+            FirebaseNetwork.INSTANCE.updateFirebaseAlarmEnabled(setId, enabled);
             //Trigger audio download
             //Download any social or channel audio files
             ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());

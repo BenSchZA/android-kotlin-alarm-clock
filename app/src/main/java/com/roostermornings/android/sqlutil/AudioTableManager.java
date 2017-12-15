@@ -490,7 +490,7 @@ public class AudioTableManager {
     public void setListened(DeviceAudioQueueItem audioItem) {
         SQLiteDatabase db = initDB();
 
-        FirebaseNetwork.setListened(audioItem.getSender_id(), audioItem.getQueue_id());
+        FirebaseNetwork.INSTANCE.setListened(audioItem.getSender_id(), audioItem.getQueue_id());
         updateDateCreated(audioItem.getId());
 
         String updateQuery = "UPDATE " + AudioTableEntry.TABLE_NAME + " SET " + AudioTableEntry.COLUMN_LISTENED + " = " + TRUE + " WHERE " + AudioTableEntry.COLUMN_ID + " = " + audioItem.getId() + ";";

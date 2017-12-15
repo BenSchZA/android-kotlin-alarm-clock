@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragmentOnboardingIntro"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_vertical"
+    android:orientation="vertical"
+    android:background="@drawable/background_onboarding"
+    tools:context="com.roostermornings.android.onboarding.OnboardingActivity">
+
+    <ImageView
+        android:id="@+id/cloud1"
+        android:layout_width="121dp"
+        android:layout_height="101dp"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="@dimen/spacing_xlarge"
+        android:layout_alignParentTop="true"
+        android:elevation="@dimen/spacing_small"
+        android:visibility="invisible"
+        app:srcCompat="@drawable/ic_cloud_white_24px" />
+
+    <ImageView
+        android:id="@+id/cloud2"
+        android:layout_width="105dp"
+        android:layout_height="58dp"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="@dimen/spacing_xlarge"
+        android:alpha="0.6"
+        android:layout_below="@id/cloud1"
+        android:elevation="@dimen/spacing_small"
+        android:visibility="invisible"
+        app:srcCompat="@drawable/ic_cloud_white_24px" />
+
+    <ImageView
+        android:id="@+id/cloud3"
+        android:layout_width="143dp"
+        android:layout_height="56dp"
+        android:alpha="0.6"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/cloud4"
+        android:layout_margin="@dimen/spacing_xlarge"
+        android:elevation="@dimen/spacing_small"
+        android:visibility="invisible"
+        app:srcCompat="@drawable/ic_cloud_white_24px" />
+
+    <ImageView
+        android:id="@+id/cloud4"
+        android:layout_width="153dp"
+        android:layout_height="136dp"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@id/button"
+        android:layout_margin="@dimen/spacing_xlarge"
+        android:elevation="@dimen/spacing_small"
+        android:visibility="invisible"
+        app:srcCompat="@drawable/ic_cloud_white_24px" />
+
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="@dimen/spacing_xxxlarge"
+        android:layout_height="200dp"
+        android:layout_alignParentTop="true"
+        android:src="@drawable/logo"
+        android:elevation="@dimen/spacing_small"/>
+
+    <me.grantland.widget.AutofitTextView
+        android:id="@+id/hookText"
+        android:alpha="0"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:layout_below="@+id/logo"
+        android:layout_margin="@dimen/spacing_normal_large"
+        android:textSize="@dimen/text_xlarge"
+        android:textAlignment="center"
+        android:text="@string/onboarding_hook"
+        android:textColor="@color/white"
+        android:elevation="@dimen/spacing_small" />
+
+    <Button
+        android:id="@+id/button"
+        style="@style/RoosterButtonWhiteStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="@dimen/spacing_xlarge"
+        android:layout_centerHorizontal="true"
+        android:text="@string/onboarding_hook_button"
+        android:shadowColor="@color/white"
+        android:elevation="@dimen/spacing_small"/>
+
+</RelativeLayout>

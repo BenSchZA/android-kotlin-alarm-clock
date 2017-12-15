@@ -13,7 +13,7 @@
         <!--<item name="android:statusBarColor">@android:color/transparent</item>-->
 
         <!--Actually overridden to Nunito-Bold-->
-        <item name="android:typeface">monospace</item>
+        <!--<item name="android:typeface">monospace</item>-->
         <item name="android:windowActivityTransitions">@null</item>
         <item name="android:windowAnimationStyle">@null</item>
 
