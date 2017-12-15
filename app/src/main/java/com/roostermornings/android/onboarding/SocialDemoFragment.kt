@@ -32,18 +32,26 @@ class SocialDemoFragment: BaseFragment() {
     private var mMediaPlayer = MediaPlayer()
     private var mPlaying  = false
 
+    private val media = intArrayOf(
+            R.raw.onboarding_social_audio_anathie,
+            R.raw.onboarding_social_audio_dom,
+            R.raw.onboarding_social_audio_kathy,
+            R.raw.onboarding_social_audio_peza)
     private val imageDrawables = intArrayOf(
-            R.drawable.rooster_wakeup,
-            R.drawable.rooster_channels,
-            R.drawable.logo_icon)
+            R.drawable.onboarding_social_demo_anathi,
+            R.drawable.onboarding_social_demo_dom,
+            R.drawable.onboarding_social_demo_mother,
+            R.drawable.onboarding_social_demo_pez)
     private val imageTitles = arrayOf(
-            "Uncle Joe",
-            "Friendly Friend",
-            "Sassy Sister")
+            "Sister",
+            "Friend",
+            "Mom",
+            "Classmate")
     private val imageDescriptions = arrayOf(
-            "Telling Dad jokes",
-            "Bit of banter",
-            "Lots of love from Greece")
+            "A sweet message",
+            "Laugh your way out of bed",
+            "A thought provoking start",
+            "Motivation to crush Monday")
 
     companion object {
         /**
@@ -130,7 +138,7 @@ class SocialDemoFragment: BaseFragment() {
                         childView.playPause.isSelected = false
                         view.viewFlipper?.startFlipping()
                     } else {
-                        mMediaPlayer = MediaPlayer.create(context, R.raw.onboarding_the_shins)
+                        mMediaPlayer = MediaPlayer.create(context, media[childIndex])
                         childView.playPause.isSelected = true
                         mMediaPlayer.start()
                         mPlaying = true

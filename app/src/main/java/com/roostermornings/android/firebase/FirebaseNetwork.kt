@@ -248,14 +248,13 @@ object FirebaseNetwork {
     fun createOrUpdateRoosterUser(deviceToken: String?, photoURL: String?) {
         val fDB = FirebaseDatabase.getInstance().reference
         val fUser = FirebaseAuth.getInstance().currentUser
-        val isAnonymous = fUser?.isAnonymous
 
         if (fUser?.uid?.isNotBlank() == true) {
             val user = User(null,
                     "android",
                     deviceToken,
                     photoURL,
-                    fUser.displayName ?: "",
+                    fUser.displayName?:"Anonymous Rooster (Me)",
                     "",
                     fUser.uid,
                     null,

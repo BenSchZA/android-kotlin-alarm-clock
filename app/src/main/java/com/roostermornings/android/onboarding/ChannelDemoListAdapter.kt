@@ -98,15 +98,15 @@ class ChannelDemoListAdapter(
 
         //TODO: descriptions
         holder.cardView.setOnClickListener {
-            val channelUid = getItem(it.cardView.tag as Int).uid
+            val channelTitle = getItem(it.cardView.tag as Int).title
             val imageResourceId = getItem(it.cardView.tag as Int).imageID
             val audioResourceId = getItem(it.cardView.tag as Int).audioID
             val demoDescription = getItem(it.cardView.tag as Int).description
 
             channelDemoInterface
                     ?.performChannelImageTransition(
-                            uid = channelUid,
-                            title = it.title.text.toString(),
+                            uid = channelTitle,
+                            title = channelTitle,
                             description = demoDescription,
                             drawableID = imageResourceId,
                             imageView = holder.image,
@@ -115,7 +115,7 @@ class ChannelDemoListAdapter(
             UserMetrics.logOnboardingEvent(
                     OnboardingJourneyEvent(
                             subject = "Channel Demo UI",
-                            content_uid = channelUid)
+                            content_uid = channelTitle)
                             .setType(OnboardingJourneyEvent.Companion.Event.CLICK_CONTENT))
         }
     }

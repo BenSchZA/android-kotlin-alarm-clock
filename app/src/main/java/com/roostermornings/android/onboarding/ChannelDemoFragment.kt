@@ -26,57 +26,57 @@ class ChannelDemoFragment : BaseFragment(), ChannelDemoInterface, FragmentInterf
     private var mShowcaseInterface: ShowcaseInterface? = null
     private var mShowcaseHandler: Handler = Handler()
 
-    //TODO:
-    private val channelUIDs = arrayOf(
-            "1234uid")
-    private val audioResourceIDs = intArrayOf(
-            R.raw.onboarding_the_shins)
-    private val demoDescriptions = arrayOf(
-            "Sample channel demo description")
-
-    private val imageResourceIDs = intArrayOf(
-            R.drawable.onboarding_channel_demo_inspiration,
-            R.drawable.onboarding_channel_demo_martin_luther,
-            R.drawable.onboarding_channel_demo_cross,
-            R.drawable.onboarding_channel_demo_meditation,
-            R.drawable.onboarding_channel_demo_purple_breasted_roller,
-            R.drawable.onboarding_channel_demo_sports,
-            R.drawable.onboarding_channel_demo_nature_sounds,
-            R.drawable.onboarding_channel_demo_tanabbah,
-            R.drawable.onboarding_channel_demo_trevor_noah,
-            R.drawable.onboarding_channel_demo_tdih)
-
-    private val imageTitles = arrayOf(
-            "Inspiration",
-            "Famous Speeches",
-            "Christian",
-            "Meditation",
-            "Bird Calls",
-            "Sport News",
-            "Nature Sounds",
-            "Tanabbah",
-            "Comedy",
-            "This Day in History")
+    private val examples = arrayOf(
+            ChannelDemoItem("Inspiration",
+                    "Sample channel demo description",
+                    R.drawable.onboarding_channel_demo_inspiration,
+                    R.raw.onboarding_channel_audio_inspiration),
+            ChannelDemoItem("Meditation",
+                    "Sample channel demo description",
+                    R.drawable.onboarding_channel_demo_meditation,
+                    R.raw.onboarding_channel_audio_meditation),
+            ChannelDemoItem("Bird Calls",
+                    "Sample channel demo description",
+                    R.drawable.onboarding_channel_demo_purple_breasted_roller,
+                    R.raw.onboarding_channel_audio_bird_calls),
+            ChannelDemoItem("Music",
+                    "Sample channel demo description",
+                    R.drawable.onboarding_channel_demo_music,
+                    R.raw.onboarding_channel_audio_music),
+            ChannelDemoItem("Get Pumped",
+                    "Sample channel demo description",
+                    R.drawable.onboarding_channel_demo_get_pumped,
+                    R.raw.onboarding_channel_audio_big_red),
+            ChannelDemoItem("Comedy",
+                    "Sample channel demo description",
+                    R.drawable.onboarding_channel_demo_comedy,
+                    R.raw.onboarding_channel_audio_comedy),
+            ChannelDemoItem("Nature Sounds",
+                    "Sample channel demo description",
+                    R.drawable.onboarding_channel_demo_nature_sounds,
+                    R.raw.onboarding_channel_audio_nature_sounds),
+            ChannelDemoItem("Muslim",
+                    "Sample channel demo description",
+                    R.drawable.onboarding_channel_demo_tanabbah,
+                    R.raw.onboarding_channel_audio_muslim),
+            ChannelDemoItem("Christian",
+                    "Sample channel demo description",
+                    R.drawable.onboarding_channel_demo_christian,
+                    R.raw.onboarding_channel_audio_christian),
+            ChannelDemoItem("This Day in History",
+                    "Sample channel demo description",
+                    R.drawable.onboarding_channel_demo_tdih,
+                    R.raw.onboarding_channel_audio_tdih))
 
     private var mDataSet = ArrayList<ChannelDemoItem>()
     private var mAdapter = ChannelDemoListAdapter(mDataSet, this@ChannelDemoFragment)
 
     init {
-        // TODO: replace 0 with index
-        imageResourceIDs.forEachIndexed { index, imageID ->
-            mDataSet.add(index,
-                    ChannelDemoItem(
-                            uid = channelUIDs[0],
-                            title = imageTitles[index],
-                            description = demoDescriptions[0],
-                            imageID = imageID,
-                            audioID = audioResourceIDs[0]))
-        }
+        mDataSet.addAll(examples)
     }
 
     companion object {
-        class ChannelDemoItem(var uid: String = "",
-                              var title: String = "",
+        class ChannelDemoItem(var title: String = "",
                               var description: String = "",
                               var imageID: Int = -1,
                               var audioID: Int = -1)
