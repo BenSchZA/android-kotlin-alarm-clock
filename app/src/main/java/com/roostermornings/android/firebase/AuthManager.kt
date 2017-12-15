@@ -64,13 +64,13 @@ class AuthManager(val context: Context) {
         signInAnonymouslyIfNecessary{}
     }
 
-    fun signInAnonymouslyIfNecessary(operation: () -> Unit) {
+    fun signInAnonymouslyIfNecessary(operation: (String?) -> Unit) {
         // If current user is anonymous, or no current user, then login anonymously
         if(firebaseAuth.currentUser?.isAnonymous == true || firebaseAuth.currentUser == null) {
             firebaseAuth.signInAnonymously().addOnCompleteListener {
                 clearPersistedAnonymousUID()
                 persistAnonymousUID(firebaseAuth.currentUser)
-                operation()
+                operation(firebaseAuth.currentUser?.uid)
             }.addOnFailureListener {
                 Log.e(it.cause.toString(),it.message)
             }
@@ -262,10 +262,11 @@ class AuthManager(val context: Context) {
     fun firebaseAnonymousAuth() {
         val deviceToken = FirebaseInstanceId.getInstance().token
 
-        FirebaseAuth.getInstance().currentUser?.updateProfile(
-                UserProfileChangeRequest.Builder()
-                .setDisplayName("Anonymous Rooster (Me)")
-                .build())
+        //TODO:
+//        FirebaseAuth.getInstance().currentUser?.updateProfile(
+//                UserProfileChangeRequest.Builder()
+//                .setDisplayName("Anonymous Rooster (Me)")
+//                .build())
 
         FirebaseNetwork.createOrUpdateRoosterUser(deviceToken, null)
     }

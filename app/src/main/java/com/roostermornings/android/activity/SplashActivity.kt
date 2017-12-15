@@ -58,7 +58,7 @@ class SplashActivity : BaseActivity() {
         BaseApplication.getRoosterApplicationComponent().inject(this)
 
         // Authenticate client to give access to DB
-        authManager.signInAnonymouslyIfNecessary{
+        authManager.signInAnonymouslyIfNecessary{ uid ->
             UserMetrics.generateNewUserMetricsEntry()
             // Log last seen in user metrics, to enable clearing stagnant data
             UserMetrics.updateLastSeen()
