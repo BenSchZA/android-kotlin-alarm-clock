@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragmentOnboardingChannelDemo"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_vertical"
+    android:orientation="vertical"
+    tools:context="com.roostermornings.android.onboarding.OnboardingActivity"
+    android:background="@drawable/background_onboarding" >
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/gridRecylerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/navigationFAB"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_margin="@dimen/fab_margin"
+        android:layout_gravity="bottom|end"
+        android:background="@color/onboarding_blue"
+        android:src="@drawable/ic_forward_white_24dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:borderWidth="0dp"/>
+
+</android.support.design.widget.CoordinatorLayout>

@@ -145,7 +145,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
         return view;
     }
 
-    //NB: bind ButterKnife to view and then initialise UI elements
+    //NB: bind ButterKnife to activityContentView and then initialise UI elements
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -297,7 +297,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
             //If there is no internet connection, attempt to retrieve invitable contacts from persistence
             if(!jsonPersistence.getInvitableContacts().isEmpty() && !checkInternetConnection()) {
                 mInvitableContacts = jsonPersistence.getInvitableContacts();
-                //Populate recycler view elements
+                //Populate recycler activityContentView elements
                 mRecyclerViewElements.add(invitableHeader);
                 mRecyclerViewElements.addAll(mInvitableContacts);
                 //Display results

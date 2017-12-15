@@ -95,11 +95,10 @@ public abstract class BaseFragment extends Fragment implements Validator.Validat
     }
 
     protected View initiate(LayoutInflater inflater, int resource, ViewGroup root, boolean attachToRoot){
-
         View view = inflater.inflate(resource, root, attachToRoot);
+
         ButterKnife.bind(this, view);
         return view;
-
     }
 
     protected DatabaseReference getDatabaseReference() {

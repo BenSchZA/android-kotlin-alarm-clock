@@ -20,7 +20,7 @@ public abstract class FA {
         public abstract class sign_in_method {
             public final static String Google = "Google";
             public final static String Facebook = "Facebook";
-            public final static String Email = "Email";
+            public final static String Email = "Password";
             public final static String Unknown = "Unknown";
         }
         public abstract class social_rooster_sender {

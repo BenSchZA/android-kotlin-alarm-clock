@@ -58,8 +58,8 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
     AudioTableManager audioTableManager;
 
     // Provide a reference to the views for each data item
-    // Complex data items may need more than one view per item, and
-    // you provide access to all the views for a data item in a view holder
+    // Complex data items may need more than one activityContentView per item, and
+    // you provide access to all the views for a data item in a activityContentView holder
     public class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
         @BindView(R.id.card_view_alarms)
@@ -115,21 +115,21 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
                                                              int viewType) {
         context = parent.getContext();
 
-        // create a new view
+        // create a new activityContentView
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.cardview_my_alarms, parent, false);
-        // set the view's size, margins, paddings and layout parameters
+        // set the activityContentView's size, margins, paddings and layout parameters
         ViewHolder vh = new ViewHolder(v);
         return vh;
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
+    // Replace the contents of a activityContentView (invoked by the layout manager)
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         //Set flag to show layout is being refreshed
         computingLayout = true;
 
         // - get element from your dataset at this position
-        // - replace the contents of the view with that element
+        // - replace the contents of the activityContentView with that element
         final Alarm alarm = mDataset.get(position);
 
         //Set 24-hour or 12-hour time format

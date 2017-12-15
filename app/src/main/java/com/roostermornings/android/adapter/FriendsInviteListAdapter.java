@@ -43,8 +43,8 @@ public class FriendsInviteListAdapter extends RecyclerView.Adapter<RecyclerView.
     private Context context;
 
     // Provide a reference to the views for each data item
-    // Complex data items may need more than one view per item, and
-    // you provide access to all the views for a data item in a view holder
+    // Complex data items may need more than one activityContentView per item, and
+    // you provide access to all the views for a data item in a activityContentView holder
     public class AddViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
         public ImageView imgProfilePic;
@@ -144,11 +144,11 @@ public class FriendsInviteListAdapter extends RecyclerView.Adapter<RecyclerView.
         }
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
+    // Replace the contents of a activityContentView (invoked by the layout manager)
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder objectHolder, int position) {
         // - get element from your dataset at this position
-        // - replace the contents of the view with that element
+        // - replace the contents of the activityContentView with that element
 
         if(objectHolder instanceof AddViewHolder) {
             final FriendsInviteListAdapter.AddViewHolder holder = (AddViewHolder)objectHolder;

@@ -53,6 +53,12 @@ class RoosterAlarmManager(val context: Context) {
 
     fun fetchAlarms(persistedAlarms: ArrayList<Alarm>) {
 
+        // If user is null, finish syncing and return
+        if(firebaseUser?.uid == null) {
+            onFlagAlarmManagerDataListener?.onSyncFinished()
+            return
+        }
+
         //Clear old content
         mTempAlarms.clear()
 

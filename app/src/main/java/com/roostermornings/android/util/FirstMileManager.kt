@@ -32,7 +32,7 @@ class FirstMileManager {
                 .setTarget(target)
                 .setContentTitle("ShowcaseView")
                 .setContentText("This is highlighting the Home button")
-                //.singleShot(id)
+                //.singleShot(id.toLong())
                 .withMaterialShowcase()
                 .setStyle(R.style.RoosterShowcaseTheme)
                 .setShowcaseDrawer(showcaseDrawer)

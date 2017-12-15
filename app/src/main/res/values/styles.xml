@@ -17,7 +17,8 @@
         <item name="colorControlHighlight">@color/accent</item>
 
         <!--Actually overridden to Nunito-Bold-->
-        <item name="android:typeface">monospace</item>
+        <!--<item name="android:typeface">monospace</item>-->
+
         <!--&lt;!&ndash;Used for preference screen text colour&ndash;&gt;-->
         <!--<item name="android:textColor">@color/white</item>-->
         <!--<item name="android:textColorPrimary">@color/white</item>-->
@@ -76,9 +77,6 @@
         <item name="colorControlActivated">@color/accent</item>
         <item name="colorControlHighlight">@color/accent</item>
 
-        <!--Actually overridden to Nunito-Bold-->
-        <item name="android:typeface">monospace</item>
-
         <item name="android:actionMenuTextColor">@android:color/black</item>
         <item name="actionOverflowMenuStyle">@style/ActionBarMenuStyle</item>
 
@@ -101,14 +99,14 @@
         <item name="android:windowTranslucentStatus">true</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
 
     <style name="RoosterEditText" parent="android:Widget.EditText">
         <item name="android:textSize">@dimen/text_large</item>
-        <item name="android:textColorHint">@color/accent</item>
+        <item name="android:textColorHint">@color/white</item>
         <item name="android:textColor">@color/white</item>
         <item name="android:ems">10</item>
         <item name="android:gravity">center_vertical</item>
@@ -123,6 +121,26 @@
         <item name="android:textColor">@color/white</item>
         <item name="android:minWidth">140dp</item>
         <item name="android:background">@drawable/rooster_button</item>
+    </style>
+
+    <style name="RoosterButtonWhiteStyle" parent="@style/Widget.AppCompat.Button.Borderless">
+        <item name="android:textAllCaps">false</item>
+        <item name="textAllCaps">false</item>
+        <item name="android:textSize">@dimen/text_large</item>
+        <item name="android:minHeight">38dp</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:minWidth">140dp</item>
+        <item name="android:background">@drawable/rooster_button_white</item>
+    </style>
+
+    <style name="RoosterButtonNoFillStyle" parent="@style/Widget.AppCompat.Button.Borderless">
+        <item name="android:textAllCaps">false</item>
+        <item name="textAllCaps">false</item>
+        <item name="android:textSize">@dimen/text_large</item>
+        <item name="android:minHeight">38dp</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:minWidth">140dp</item>
+        <item name="android:background">@drawable/rooster_button_nofill</item>
     </style>
 
     <style name="RoosterButtonLightBlueStyle" parent="@style/Widget.AppCompat.Button.Borderless">
@@ -175,7 +193,7 @@
     </style>
 
     <style name="FullscreenActionBarStyle" parent="Widget.AppCompat.ActionBar">
-        <item name="android:background">@color/black_overlay</item>
+        <item name="android:background">@color/black_overlay_a40</item>
     </style>
 
     <style name="Fade">
@@ -198,6 +216,13 @@
 
     <style name="CustomText2" parent="TextAppearance.ShowcaseView.Detail.Light">
         <item name="android:textColor">#ffffff</item>
+    </style>
+
+    <style name="AppTheme" parent="Theme.AppCompat.Light" />
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
 
 </resources>

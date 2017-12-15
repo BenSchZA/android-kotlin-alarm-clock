@@ -59,6 +59,7 @@ import com.roostermornings.android.apis.GoogleIHTTPClient;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.User;
+import com.roostermornings.android.firebase.AuthManager;
 import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.apis.NodeIHTTPClient;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
@@ -67,6 +68,7 @@ import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
+import com.roostermornings.android.util.ConnectivityUtils;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.InternetHelper;
 import com.roostermornings.android.util.JSONPersistence;
@@ -105,6 +107,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
     @Inject BackgroundTaskReceiver backgroundTaskReceiver;
     @Inject public DatabaseReference mDatabase;
     @Inject Account mAccount;
+    @Inject AuthManager authManager;
 
     protected abstract void inject(RoosterApplicationComponent component);
 
@@ -207,13 +210,11 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
     }
 
     protected void initialize(int layoutId) {
-
         setContentView(layoutId);
 
         //Bind to butterknife delegate
         //Calls to ButterKnife.bind can be made anywhere you would otherwise put findViewById calls.
         ButterKnife.bind(this);
-
     }
 
     @Override
@@ -325,7 +326,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
         }
         //End user session - auth state listener in BaseApplication will be triggered
         // and necessary signout procedure performed
-        mAuth.signOut();
+        authManager.signOut();
 
         //Go to splash activity and onboarding
         Intent intent = new Intent(BaseActivity.this, SplashActivity.class);
