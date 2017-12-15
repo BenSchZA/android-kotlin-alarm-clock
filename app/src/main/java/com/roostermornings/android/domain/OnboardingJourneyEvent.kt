@@ -43,12 +43,14 @@ class OnboardingJourneyEvent(
             Event.VIEW -> {
                 subject = subject?:""
             }
-            Event.SCROLL -> {}
+            Event.SCROLL -> {
+                subject = subject?:""
+            }
             Event.CLICK_CONTENT -> {
                 content_uid = content_uid?:""
             }
             Event.LISTEN -> {
-                length = -1
+                length = length?:-1
                 content_uid = content_uid?:""
             }
             Event.SEEK_TRACK -> {

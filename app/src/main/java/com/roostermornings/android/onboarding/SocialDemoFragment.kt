@@ -17,7 +17,9 @@ import android.graphics.drawable.ColorDrawable
 import android.media.MediaPlayer
 import butterknife.OnClick
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity
+import com.roostermornings.android.domain.OnboardingJourneyEvent
 import com.roostermornings.android.firebase.FA
+import com.roostermornings.android.firebase.UserMetrics
 import kotlinx.android.synthetic.main.fragment_onboarding_social_demo.*
 
 
@@ -81,6 +83,12 @@ class SocialDemoFragment: BaseFragment() {
         val intent = Intent(context, MyAlarmsFragmentActivity::class.java)
         startActivity(intent)
         FA.Log(FA.Event.onboarding_first_entry::class.java, null, null)
+
+        UserMetrics.logOnboardingEvent(
+                OnboardingJourneyEvent(
+                        subject = "Social Demo UI",
+                        target = "onClickProceed")
+                        .setType(OnboardingJourneyEvent.Companion.Event.CLICK_ON))
     }
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
@@ -112,6 +120,7 @@ class SocialDemoFragment: BaseFragment() {
             for(childIndex in 0 until view.viewFlipper.childCount) {
 
                 val mediaOnClickListener = View.OnClickListener {
+
                     view.viewFlipper?.stopFlipping()
                     val childView = view.viewFlipper.getChildAt(childIndex)
 
@@ -125,6 +134,12 @@ class SocialDemoFragment: BaseFragment() {
                         childView.playPause.isSelected = true
                         mMediaPlayer.start()
                         mPlaying = true
+
+                        UserMetrics.logOnboardingEvent(
+                                OnboardingJourneyEvent(
+                                        subject = "Social Demo UI",
+                                        content_uid = imageTitles[childIndex])
+                                        .setType(OnboardingJourneyEvent.Companion.Event.CLICK_CONTENT))
                     }
 
                     mMediaPlayer.setOnCompletionListener {

@@ -34,11 +34,6 @@ object FirebaseNetwork {
     }
 
     fun getRoosterUser(uid: String?, operation: (User?) -> Unit) {
-        if(!isUserSignedIn()) {
-            operation(null)
-            return
-        }
-
         val fDB = FirebaseDatabase.getInstance().reference
         val fUser = FirebaseAuth.getInstance().currentUser
 
@@ -56,15 +51,13 @@ object FirebaseNetwork {
         if(FirebaseAuth.getInstance().currentUser != null
                 && FirebaseAuth.getInstance().currentUser?.isAnonymous == false
                 && !uid.isNullOrBlank()) {
-            val ref = fDB.child("users").child(uid)
+            val ref = fDB.child("users/$uid")
             ref.keepSynced(true)
             ref.addListenerForSingleValueEvent(userListener)
         } else operation(null)
     }
 
     fun updateLastSeen() {
-        if(!isUserSignedIn()) return
-
         val fDB = FirebaseDatabase.getInstance().reference
         val fUser = FirebaseAuth.getInstance().currentUser
         val calendar = Calendar.getInstance()
@@ -73,30 +66,24 @@ object FirebaseNetwork {
         calendar.timeZone = TimeZone.getTimeZone("UTC")
 
         if (fUser?.uid?.isNotBlank() == true) {
-            val uid = fUser.uid
-            childUpdates.put("users/$uid/last_seen", calendar.timeInMillis)
+            childUpdates.put("users/${fUser.uid}/last_seen", calendar.timeInMillis)
             fDB.updateChildren(childUpdates)
         }
     }
 
     fun updateProfileUserName(userName: String) {
-        if(!isUserSignedIn()) return
-
         val fDB = FirebaseDatabase.getInstance().reference
         val fUser = FirebaseAuth.getInstance().currentUser
 
         val childUpdates = HashMap<String, Any>()
 
         if (fUser?.uid?.isNotBlank() == true) {
-            val uid = fUser.uid
-            childUpdates.put("users/$uid/user_name", userName)
+            childUpdates.put("users/${fUser.uid}/user_name", userName)
             fDB.updateChildren(childUpdates)
         }
     }
 
     fun updateProfileCellNumber(context: Context, cellNumberString: String) {
-        if(!isUserSignedIn()) return
-
         val myContactsController = MyContactsController(context)
         val nsnNumber: String
         nsnNumber = if (StrUtils.notNullOrEmpty(cellNumberString)) myContactsController.processUserContactNumber(cellNumberString) else ""
@@ -107,8 +94,7 @@ object FirebaseNetwork {
         val childUpdates = HashMap<String, Any>()
 
         if (fUser?.uid?.isNotBlank() == true) {
-            val uid = fUser.uid
-            childUpdates.put("users/$uid/cell_number", nsnNumber)
+            childUpdates.put("users/${fUser.uid}/cell_number", nsnNumber)
             fDB.updateChildren(childUpdates)
 
             if (!nsnNumber.isBlank()) {
@@ -124,16 +110,13 @@ object FirebaseNetwork {
     }
 
     fun updateProfileGeoHashLocation(geohash: String) {
-        if(!isUserSignedIn()) return
-
         val fDB = FirebaseDatabase.getInstance().reference
         val fUser = FirebaseAuth.getInstance().currentUser
 
         val childUpdates = HashMap<String, Any>()
 
         if (fUser?.uid?.isNotBlank() == true) {
-            val uid = fUser.uid
-            childUpdates.put("users/$uid/geohash_location", geohash)
+            childUpdates.put("users/${fUser.uid}/geohash_location", geohash)
             fDB.updateChildren(childUpdates)
         }
     }
@@ -189,16 +172,13 @@ object FirebaseNetwork {
     }
 
     fun updateProfileProfilePic(url: Uri) {
-        if(!isUserSignedIn()) return
-
         val fDB = FirebaseDatabase.getInstance().reference
         val fUser = FirebaseAuth.getInstance().currentUser
 
         val childUpdates = HashMap<String, Any>()
 
         if (fUser?.uid?.isNotBlank() == true) {
-            val uid = fUser.uid
-            childUpdates.put("users/$uid/profile_pic", url.toString())
+            childUpdates.put("users/${fUser.uid}/profile_pic", url.toString())
             fDB.updateChildren(childUpdates)
         }
     }
@@ -210,8 +190,7 @@ object FirebaseNetwork {
         val childUpdates = HashMap<String, Any>()
 
         if (fUser?.uid?.isNotBlank() == true && setId.isNotBlank()) {
-            val uid = fUser.uid
-            childUpdates.put("alarms/$uid/$setId/enabled", enabled)
+            childUpdates.put("alarms/${fUser.uid}/$setId/enabled", enabled)
             fDB.updateChildren(childUpdates)
         }
     }
@@ -221,14 +200,12 @@ object FirebaseNetwork {
         val fUser = FirebaseAuth.getInstance().currentUser
 
         if (fUser?.uid?.isNotBlank() == true && setId.isNotBlank()) {
-            fDB.child("alarms").child(fUser.uid).child(setId).removeValue()
+            fDB.child("alarms/${fUser.uid}/$setId").removeValue()
         }
     }
 
     //Ensure used on social roosters
     fun setListened(senderId: String, queueId: String) {
-        if(!isUserSignedIn()) return
-
         val fDB = FirebaseDatabase.getInstance().reference
 
         val childUpdates = HashMap<String, Any>()
@@ -252,8 +229,7 @@ object FirebaseNetwork {
         val fUser = FirebaseAuth.getInstance().currentUser
 
         if (fUser?.uid?.isNotBlank() == true) {
-            val mChannelNameReference = fDB
-                    .child("channels").child(UID).child("name")
+            val mChannelNameReference = fDB.child("channels/$UID/name")
 
             mChannelNameReference.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -269,47 +245,10 @@ object FirebaseNetwork {
         }
     }
 
-    fun migrateOnboardingJourney(anonymousUID: String?, signInUID: String?) {
-        val fDB = FirebaseDatabase.getInstance().reference
-
-        val childUpdates = HashMap<String, Any>()
-
-        if (!anonymousUID.isNullOrBlank() && !signInUID.isNullOrBlank()) {
-            childUpdates.put("user_metrics/$anonymousUID/convert_uid", signInUID!!)
-            fDB.updateChildren(childUpdates)
-        }
-    }
-
-    fun migrateUserUID(anonymousUID: String?, signInUID: String?) {
-        val fDB = FirebaseDatabase.getInstance().reference
-
-        val childUpdates = HashMap<String, Any>()
-
-        if (!anonymousUID.isNullOrBlank() && !signInUID.isNullOrBlank()) {
-            childUpdates.put("user_metrics/$anonymousUID/migrate_uid", signInUID!!)
-            fDB.updateChildren(childUpdates)
-        }
-    }
-
-    fun logOnboardingEvent(event: OnboardingJourneyEvent) {
-        val fDB = FirebaseDatabase.getInstance().reference
-        val fUser = FirebaseAuth.getInstance().currentUser
-
-        val childUpdates = HashMap<String, Any>()
-
-        if (fUser?.uid?.isNotBlank() == true) {
-            val uid = fUser.uid
-            val timestamp = event.timestamp
-            childUpdates.put("user_metrics/$uid/onboarding_journey/$timestamp", event)
-            fDB.updateChildren(childUpdates)
-        }
-    }
-
     fun createOrUpdateRoosterUser(deviceToken: String?, photoURL: String?) {
-        if(!isUserSignedIn()) return
-
         val fDB = FirebaseDatabase.getInstance().reference
         val fUser = FirebaseAuth.getInstance().currentUser
+        val isAnonymous = fUser?.isAnonymous
 
         if (fUser?.uid?.isNotBlank() == true) {
             val user = User(null,
@@ -325,29 +264,15 @@ object FirebaseNetwork {
 
             //Note: "friends" and "cell_number" node not changed TODO: should profile pic be kept?
             val childUpdates = HashMap<String, Any>()
-            childUpdates.put(String.format("users/%s/%s",
-                    fUser.uid, "device_token"),
-                    user.device_token)
-            childUpdates.put(String.format("users/%s/%s",
-                    fUser.uid, "device_type"),
-                    user.device_type)
-            childUpdates.put(String.format("users/%s/%s",
-                    fUser.uid, "unseen_roosters"),
-                    user.unseen_roosters)
-            childUpdates.put(String.format("users/%s/%s",
-                    fUser.uid, "profile_pic"),
-                    user.profile_pic)
-            childUpdates.put(String.format("users/%s/%s",
-                    fUser.uid, "uid"),
-                    user.uid)
-            childUpdates.put(String.format("users/%s/%s",
-                    fUser.uid, "user_name"),
-                    user.user_name)
+            childUpdates.put("users/${fUser.uid}/device_token", user.device_token)
+            childUpdates.put("users/${fUser.uid}/device_type", user.device_type)
+            childUpdates.put("users/${fUser.uid}/unseen_roosters", user.unseen_roosters)
+            childUpdates.put("users/${fUser.uid}/profile_pic", user.profile_pic)
+            childUpdates.put("users/${fUser.uid}/uid", user.uid)
+            childUpdates.put("users/${fUser.uid}/user_name", user.user_name)
 
             //Add user as a friend of theirs
-            childUpdates.put(String.format("users/%s/%s/%s",
-                    fUser.uid, "friends", fUser.uid),
-                    true)
+            childUpdates.put("users/${fUser.uid}/friends/${fUser.uid}", true)
 
             fDB.updateChildren(childUpdates)
         }

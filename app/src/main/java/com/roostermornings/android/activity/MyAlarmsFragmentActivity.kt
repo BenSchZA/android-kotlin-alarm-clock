@@ -60,6 +60,7 @@ import javax.inject.Inject
 
 import butterknife.BindView
 import butterknife.OnClick
+import com.roostermornings.android.firebase.UserMetrics
 import com.roostermornings.android.onboarding.CustomCommandInterface
 import com.roostermornings.android.onboarding.InterfaceCommands
 import com.roostermornings.android.onboarding.ProfileCreationFragment
@@ -238,6 +239,8 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface {
                     Crashlytics.setUserEmail(firebaseUser?.email)
                     Crashlytics.setUserName(firebaseUser?.displayName)
                     FirebaseNetwork.updateLastSeen()
+                    // Log last seen in user metrics, to enable clearing stagnant data
+                    UserMetrics.updateLastSeen()
                     }
                 }
         }.run()

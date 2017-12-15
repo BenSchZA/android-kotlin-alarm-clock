@@ -20,6 +20,8 @@ import android.support.v4.content.res.ResourcesCompat
 import android.transition.TransitionInflater
 import android.widget.SeekBar
 import butterknife.OnClick
+import com.roostermornings.android.domain.OnboardingJourneyEvent
+import com.roostermornings.android.firebase.UserMetrics
 import com.roostermornings.android.util.FileUtils
 import com.roostermornings.android.util.RoosterUtils
 import kotlinx.android.synthetic.main.onboarding_audio_demo.view.*
@@ -40,14 +42,16 @@ class ChannelDemoOverlayFragment : Fragment() {
          * number.
          */
 
-        private val ARG_DRAWABLE_ID = "ARG_DRAWABLE_ID"
+        private val ARG_UID_STRING = "ARG_UID_STRING"
         private val ARG_TITLE_STRING = "ARG_TITLE_STRING"
         private val ARG_DESCRIPTION_STRING = "ARG_DESCRIPTION_STRING"
+        private val ARG_DRAWABLE_ID = "ARG_DRAWABLE_ID"
         private val ARG_MEDIA = "ARG_MEDIA"
 
-        fun newInstance(title: String, description: String, imageID: Int, media: Int): Fragment {
+        fun newInstance(uid: String, title: String, description: String, imageID: Int, media: Int): Fragment {
             val fragment = ChannelDemoOverlayFragment()
             val args = Bundle()
+            args.putString(ARG_UID_STRING, uid)
             args.putString(ARG_TITLE_STRING, title)
             args.putString(ARG_DESCRIPTION_STRING, description)
             args.putInt(ARG_DRAWABLE_ID, imageID)
@@ -149,7 +153,14 @@ class ChannelDemoOverlayFragment : Fragment() {
 
     private val onSeekBarChangeListener = object: SeekBar.OnSeekBarChangeListener {
         override fun onStartTrackingTouch(p0: SeekBar?) {}
-        override fun onStopTrackingTouch(p0: SeekBar?) {}
+        override fun onStopTrackingTouch(p0: SeekBar?) {
+            UserMetrics.logOnboardingEvent(
+                    OnboardingJourneyEvent(
+                            subject = "Channel Demo UI",
+                            content_uid = arguments.getString(ARG_UID_STRING),
+                            target_time = mMediaPlayer.currentPosition/1000)
+                            .setType(OnboardingJourneyEvent.Companion.Event.SEEK_TRACK))
+        }
 
         override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
             if (fromUser) {
@@ -157,6 +168,7 @@ class ChannelDemoOverlayFragment : Fragment() {
                     mHandler.removeCallbacks(runnable)
                     mHandler.postDelayed(runnable, 1000)
                 }
+
                 mMediaPlayer.seekTo(progress * 1000)
                 mMediaPlayer.start()
                 view?.playPause?.isSelected = true
@@ -198,6 +210,15 @@ class ChannelDemoOverlayFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
+        val finishPosition = mMediaPlayer.currentPosition/1000
+        // Listen event triggered in onPause, with length as current position
+        UserMetrics.logOnboardingEvent(
+                OnboardingJourneyEvent(
+                        subject = "Channel Demo UI",
+                        content_uid = arguments.getString(ARG_UID_STRING),
+                        length = finishPosition)
+                        .setType(OnboardingJourneyEvent.Companion.Event.LISTEN))
+
         stopMedia()
         mCustomCommandInterface?.onCustomCommand(InterfaceCommands.Companion.Command.SHOW_FAB)
     }

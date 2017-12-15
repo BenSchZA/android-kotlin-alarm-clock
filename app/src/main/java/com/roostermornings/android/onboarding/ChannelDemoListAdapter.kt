@@ -16,6 +16,8 @@ import android.widget.TextView
 import butterknife.BindView
 import butterknife.ButterKnife
 import com.roostermornings.android.R
+import com.roostermornings.android.domain.OnboardingJourneyEvent
+import com.roostermornings.android.firebase.UserMetrics
 import kotlinx.android.synthetic.main.cardview_onboarding_channel_demo.view.*
 import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt
 import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt.STATE_DISMISSED
@@ -60,6 +62,10 @@ class ChannelDemoListAdapter(
         notifyItemInserted(position)
     }
 
+    private fun getItem(position: Int): ChannelDemoFragment.Companion.ChannelDemoItem {
+        return mDataset[position]
+    }
+
     // Create new views (invoked by the layout manager)
     override fun onCreateViewHolder(parent: ViewGroup,
                                     viewType: Int): ViewHolder {
@@ -78,8 +84,11 @@ class ChannelDemoListAdapter(
     // Replace the contents of a activityContentView (invoked by the layout manager)
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = mDataset[position]
+        // Set cardview position for later reference
+        holder.cardView.tag = position
+        // Set image
         holder.image.setImageResource(item.imageID)
-        holder.image.tag = item.imageID
+        // Set text
         holder.title.text = item.title
 
         if(item.imageID == R.drawable.onboarding_channel_demo_purple_breasted_roller) {
@@ -89,7 +98,25 @@ class ChannelDemoListAdapter(
 
         //TODO: descriptions
         holder.cardView.setOnClickListener {
-            channelDemoInterface?.performChannelImageTransition(it.title.text.toString(), "Sample channel demo description", it.image.tag as Int, holder.image, R.raw.onboarding_the_shins)
+            val channelUid = getItem(it.cardView.tag as Int).uid
+            val imageResourceId = getItem(it.cardView.tag as Int).imageID
+            val audioResourceId = getItem(it.cardView.tag as Int).audioID
+            val demoDescription = getItem(it.cardView.tag as Int).description
+
+            channelDemoInterface
+                    ?.performChannelImageTransition(
+                            uid = channelUid,
+                            title = it.title.text.toString(),
+                            description = demoDescription,
+                            drawableID = imageResourceId,
+                            imageView = holder.image,
+                            media = audioResourceId)
+
+            UserMetrics.logOnboardingEvent(
+                    OnboardingJourneyEvent(
+                            subject = "Channel Demo UI",
+                            content_uid = channelUid)
+                            .setType(OnboardingJourneyEvent.Companion.Event.CLICK_CONTENT))
         }
     }
 
@@ -99,10 +126,6 @@ class ChannelDemoListAdapter(
     }
 
     override fun startShowCase(handler: Handler, activity: Activity) {
-//        Handler().postDelayed({
-//            val firstMileManager = FirstMileManager()
-//            firstMileManager.createShowcase(activity, ViewTarget(showcaseChannelCardView), 1)
-//        }, 500)
         if(!showCaseSeen) {
             handler.postDelayed({
                 mShowcase = MaterialTapTargetPrompt.Builder(activity)
