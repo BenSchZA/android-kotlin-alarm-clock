@@ -12,6 +12,8 @@ import android.view.animation.TranslateAnimation
 import butterknife.OnClick
 import com.roostermornings.android.R
 import com.roostermornings.android.dagger.RoosterApplicationComponent
+import com.roostermornings.android.domain.OnboardingJourneyEvent
+import com.roostermornings.android.firebase.UserMetrics
 import com.roostermornings.android.fragment.base.BaseFragment
 import kotlinx.android.synthetic.main.fragment_onboarding_intro.view.*
 import java.util.*
@@ -51,6 +53,12 @@ class IntroFragment : BaseFragment() {
     @OnClick(R.id.button)
     fun onClickContinueButton() {
         mHostInterface?.scrollViewPager(View.FOCUS_RIGHT)
+
+        UserMetrics.logOnboardingEvent(
+                OnboardingJourneyEvent(
+                        subject = "Intro UI",
+                        target = "onClickContinueButton")
+                        .setType(OnboardingJourneyEvent.Companion.Event.CLICK_ON))
     }
 
     private var mHostInterface: HostInterface? = null

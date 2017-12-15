@@ -42,34 +42,35 @@ class AuthManager(val context: Context) {
 
     companion object {
         val TAG = AuthManager::class.java.simpleName?:"nullSimpleName"
-
-        interface AuthInterface {
-            fun onAuthSuccess(task: Task<AuthResult>)
-            fun onAuthFailure()
-        }
     }
 
-    private interface AnonymousLinkingListener {
+    interface AuthInterface {
+        fun onAuthSuccess(task: Task<AuthResult>)
+        fun onAuthFailure()
+    }
+
+    interface AnonymousLinkingListener {
         fun onLinkSuccess(task: Task<AuthResult>)
         fun onLinkFailure(exception: Exception)
     }
 
     fun isUserSignedIn(): Boolean {
-        return firebaseAuth.currentUser != null
-                && firebaseAuth.currentUser?.isAnonymous == false
+        return FirebaseAuth.getInstance().currentUser != null
+                && FirebaseAuth.getInstance().currentUser?.isAnonymous == false
     }
 
     fun signOut() {
         firebaseAuth.signOut()
-        signInAnonymouslyIfNecessary()
+        signInAnonymouslyIfNecessary{}
     }
 
-    fun signInAnonymouslyIfNecessary() {
+    fun signInAnonymouslyIfNecessary(operation: () -> Unit) {
         // If current user is anonymous, or no current user, then login anonymously
         if(firebaseAuth.currentUser?.isAnonymous == true || firebaseAuth.currentUser == null) {
             firebaseAuth.signInAnonymously().addOnCompleteListener {
                 clearPersistedAnonymousUID()
                 persistAnonymousUID(firebaseAuth.currentUser)
+                operation()
             }.addOnFailureListener {
                 Log.e(it.cause.toString(),it.message)
             }
@@ -258,11 +259,22 @@ class AuthManager(val context: Context) {
         }
     }
 
+    fun firebaseAnonymousAuth() {
+        val deviceToken = FirebaseInstanceId.getInstance().token
+
+        FirebaseAuth.getInstance().currentUser?.updateProfile(
+                UserProfileChangeRequest.Builder()
+                .setDisplayName("Anonymous Rooster (Me)")
+                .build())
+
+        FirebaseNetwork.createOrUpdateRoosterUser(deviceToken, null)
+    }
+
     fun performMigration(activity: Activity) {
         if(activity is OnboardingActivity) {
-            FirebaseNetwork.migrateOnboardingJourney(getPersistedAnonymousUID(), firebaseAuth.currentUser?.uid)
+            UserMetrics.migrateOnboardingJourney(getPersistedAnonymousUID(), firebaseAuth.currentUser?.uid)
         } else {
-            FirebaseNetwork.migrateUserUID(getPersistedAnonymousUID(), firebaseAuth.currentUser?.uid)
+            UserMetrics.migrateUserUID(getPersistedAnonymousUID(), firebaseAuth.currentUser?.uid)
         }
     }
 

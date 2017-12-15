@@ -8,7 +8,7 @@
     android:keepScreenOn="true"
     tools:context="com.roostermornings.android.onboarding.OnboardingActivity">
 
-    <android.support.v4.view.ViewPager
+    <com.roostermornings.android.custom_ui.LockableViewPager
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

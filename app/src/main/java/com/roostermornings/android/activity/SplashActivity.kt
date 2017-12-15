@@ -12,7 +12,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.WindowManager
 import android.widget.Toast
-import com.google.firebase.auth.FirebaseAuth
 
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -25,7 +24,7 @@ import com.roostermornings.android.firebase.AuthManager
 import com.roostermornings.android.dagger.RoosterApplicationComponent
 import com.roostermornings.android.domain.MinimumRequirements
 import com.roostermornings.android.domain.OnboardingJourneyEvent
-import com.roostermornings.android.firebase.FirebaseNetwork
+import com.roostermornings.android.firebase.UserMetrics
 import com.roostermornings.android.onboarding.OnboardingActivity
 import com.roostermornings.android.util.Constants
 import com.roostermornings.android.util.FileUtils
@@ -59,12 +58,15 @@ class SplashActivity : BaseActivity() {
         BaseApplication.getRoosterApplicationComponent().inject(this)
 
         // Authenticate client to give access to DB
-        authManager.signInAnonymouslyIfNecessary()
-
-        // Log onboarding journey activityContentView event
-        FirebaseNetwork.logOnboardingEvent(
-                OnboardingJourneyEvent(subject = "Splash UI")
-                        .setType(OnboardingJourneyEvent.Companion.Event.VIEW))
+        authManager.signInAnonymouslyIfNecessary{
+            UserMetrics.generateNewUserMetricsEntry()
+            // Log last seen in user metrics, to enable clearing stagnant data
+            UserMetrics.updateLastSeen()
+            // Log onboarding journey activityContentView event
+            UserMetrics.logOnboardingEvent(
+                    OnboardingJourneyEvent(subject = "Splash UI")
+                            .setType(OnboardingJourneyEvent.Companion.Event.VIEW))
+        }
 
         window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN)

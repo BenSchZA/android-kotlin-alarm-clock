@@ -14,10 +14,12 @@ import com.roostermornings.android.R
 import com.roostermornings.android.activity.base.BaseActivity
 import com.roostermornings.android.dagger.RoosterApplicationComponent
 import com.roostermornings.android.domain.OnboardingJourneyEvent
-import com.roostermornings.android.firebase.FirebaseNetwork
+import com.roostermornings.android.firebase.AuthManager
+import com.roostermornings.android.firebase.UserMetrics
 import com.roostermornings.android.util.RoosterUtils
 
 import kotlinx.android.synthetic.main.activity_onboarding.*
+import javax.inject.Inject
 
 class OnboardingActivity: BaseActivity(), HostInterface, CustomCommandInterface {
 
@@ -30,6 +32,8 @@ class OnboardingActivity: BaseActivity(), HostInterface, CustomCommandInterface 
             INTRO, CHANNEL_DEMO, SIGN_IN, SOCIAL_HOOK, SOCIAL_DEMO
         }
     }
+
+    private var hasPassedSignIn = false
 
     /**
      * The [android.support.v4.view.PagerAdapter] that will provide
@@ -46,6 +50,8 @@ class OnboardingActivity: BaseActivity(), HostInterface, CustomCommandInterface 
 
     @BindView(R.id.progressBar)
     lateinit var progressBar: ProgressBar
+
+    @Inject lateinit var authManager: AuthManager
 
     override fun inject(component: RoosterApplicationComponent?) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -79,27 +85,30 @@ class OnboardingActivity: BaseActivity(), HostInterface, CustomCommandInterface 
                 // Log onboarding journey activityContentView event
                 when(position) {
                     Page.INTRO.ordinal -> {
-                        FirebaseNetwork.logOnboardingEvent(
+                        UserMetrics.logOnboardingEvent(
                                 OnboardingJourneyEvent(subject = "Intro UI")
                                         .setType(OnboardingJourneyEvent.Companion.Event.VIEW))
                     }
                     Page.CHANNEL_DEMO.ordinal -> {
-                        FirebaseNetwork.logOnboardingEvent(
+                        UserMetrics.logOnboardingEvent(
                                 OnboardingJourneyEvent(subject = "Channel Demo UI")
                                         .setType(OnboardingJourneyEvent.Companion.Event.VIEW))
+                        container.isRightScrollEnabled = true
                     }
                     Page.SIGN_IN.ordinal -> {
-                        FirebaseNetwork.logOnboardingEvent(
+                        UserMetrics.logOnboardingEvent(
                                 OnboardingJourneyEvent(subject = "Sign-In UI")
                                         .setType(OnboardingJourneyEvent.Companion.Event.VIEW))
+                            container.isRightScrollEnabled = authManager.isUserSignedIn() || hasPassedSignIn
                     }
                     Page.SOCIAL_HOOK.ordinal -> {
-                        FirebaseNetwork.logOnboardingEvent(
+                        UserMetrics.logOnboardingEvent(
                                 OnboardingJourneyEvent(subject = "Social Hook UI")
                                         .setType(OnboardingJourneyEvent.Companion.Event.VIEW))
+                        container.isRightScrollEnabled = true
                     }
                     Page.SOCIAL_DEMO.ordinal -> {
-                        FirebaseNetwork.logOnboardingEvent(
+                        UserMetrics.logOnboardingEvent(
                                 OnboardingJourneyEvent(subject = "Social Demo UI")
                                         .setType(OnboardingJourneyEvent.Companion.Event.VIEW))
                     }

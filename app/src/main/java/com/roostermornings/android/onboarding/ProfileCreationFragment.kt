@@ -34,6 +34,8 @@ import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.R
 import com.roostermornings.android.firebase.AuthManager
 import com.roostermornings.android.dagger.RoosterApplicationComponent
+import com.roostermornings.android.domain.OnboardingJourneyEvent
+import com.roostermornings.android.firebase.UserMetrics
 import com.roostermornings.android.fragment.base.BaseFragment
 import com.roostermornings.android.util.Toaster
 import kotlinx.android.synthetic.main.fragment_onboarding_profile_creation.*
@@ -267,6 +269,12 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
         val i = Intent(Intent.ACTION_VIEW)
         i.data = Uri.parse(getString(R.string.rooster_website_t_and_c_url))
         startActivity(i)
+
+        UserMetrics.logOnboardingEvent(
+                OnboardingJourneyEvent(
+                        subject = "Sign-In UI",
+                        target = "onTermsAndConditionsClicked")
+                        .setType(OnboardingJourneyEvent.Companion.Event.CLICK_ON))
     }
 
     @OnClick(R.id.signin_button_facebook)
@@ -284,7 +292,15 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
 
     @OnClick(R.id.signin_button_notnow)
     fun onNotNowSigninButtonClick() {
+        // Create anonymous profile
+        authManager.firebaseAnonymousAuth()
         proceedToNextPage()
+
+        UserMetrics.logOnboardingEvent(
+                OnboardingJourneyEvent(
+                        subject = "Sign-In UI",
+                        target = "Anonymous")
+                        .setType(OnboardingJourneyEvent.Companion.Event.CLICK_ON))
     }
 
     //Receive auth activity result and start callback
@@ -325,9 +341,10 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
     }
 
     private fun authWithFacebook(token: AccessToken) {
-        authManager.firebaseAuthWithFacebook(token, object: AuthManager.Companion.AuthInterface {
+        authManager.firebaseAuthWithFacebook(token, object: AuthManager.AuthInterface {
             override fun onAuthSuccess(task: Task<AuthResult>) {
                 authManager.performMigration(activity)
+                UserMetrics.generateNewUserMetricsEntry()
                 changeLayoutSignedIn()
                 proceedToNextPage()
 
@@ -349,9 +366,10 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
     }
 
     private fun authWithGoogle(result: GoogleSignInResult) {
-        authManager.firebaseAuthWithGoogle(result, object: AuthManager.Companion.AuthInterface {
+        authManager.firebaseAuthWithGoogle(result, object: AuthManager.AuthInterface {
             override fun onAuthSuccess(task: Task<AuthResult>) {
                 authManager.performMigration(activity)
+                UserMetrics.generateNewUserMetricsEntry()
                 changeLayoutSignedIn()
                 proceedToNextPage()
 
@@ -379,6 +397,19 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
 
         mHostInterface?.scrollViewPager(View.FOCUS_RIGHT)
         mCustomCommandInterface?.onCustomCommand(InterfaceCommands.Companion.Command.PROCEED)
+
+        // Set auth method in user_metrics node
+        FirebaseAuth.getInstance().currentUser?.providerData?.forEach {
+            val providerId = it.providerId
+
+            providerId.takeIf { it.contains("google") || it.contains("facebook") || it.contains("password") }?.let {
+                UserMetrics.logOnboardingEvent(
+                        OnboardingJourneyEvent(
+                                subject = "Sign-In UI",
+                                target = providerId)
+                                .setType(OnboardingJourneyEvent.Companion.Event.CLICK_ON))
+            }
+        }
     }
 
     @OnClick(R.id.signup_button_email)
@@ -396,9 +427,10 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
         progressBar.visibility = View.VISIBLE
 
         authManager.firebaseAuthWithEmail(name, email, password, mAlreadyUser,
-                object: AuthManager.Companion.AuthInterface {
+                object: AuthManager.AuthInterface {
             override fun onAuthSuccess(task: Task<AuthResult>) {
                 authManager.performMigration(activity)
+                UserMetrics.generateNewUserMetricsEntry()
                 changeLayoutSignedIn()
                 proceedToNextPage()
 

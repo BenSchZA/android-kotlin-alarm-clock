@@ -13,9 +13,12 @@ import butterknife.OnClick
 import com.roostermornings.android.R
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity
 import com.roostermornings.android.dagger.RoosterApplicationComponent
+import com.roostermornings.android.domain.OnboardingJourneyEvent
 import com.roostermornings.android.firebase.FA
+import com.roostermornings.android.firebase.UserMetrics
 import com.roostermornings.android.fragment.base.BaseFragment
 import kotlinx.android.synthetic.main.fragment_onboarding_social_hook.view.*
+import kotlinx.android.synthetic.main.onboarding_audio_demo.view.*
 
 /**
  * Created by bscholtz on 2017/12/07.
@@ -73,10 +76,22 @@ class SocialHookFragment: BaseFragment() {
     @OnClick(R.id.button_yes)
     fun onClickSoundsCool() {
         mHostInterface?.scrollViewPager(View.FOCUS_RIGHT)
+
+        UserMetrics.logOnboardingEvent(
+                OnboardingJourneyEvent(
+                        subject = "Social Hook UI",
+                        target = "onClickSoundsCool")
+                        .setType(OnboardingJourneyEvent.Companion.Event.CLICK_ON))
     }
 
     @OnClick(R.id.button_no)
     fun onClickTryLater() {
+        UserMetrics.logOnboardingEvent(
+                OnboardingJourneyEvent(
+                        subject = "Social Hook UI",
+                        target = "onClickTryLater")
+                        .setType(OnboardingJourneyEvent.Companion.Event.CLICK_ON))
+
         val intent = Intent(context, MyAlarmsFragmentActivity::class.java)
         startActivity(intent)
         FA.Log(FA.Event.onboarding_first_entry::class.java, null, null)

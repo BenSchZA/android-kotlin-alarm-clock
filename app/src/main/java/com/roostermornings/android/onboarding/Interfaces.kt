@@ -22,7 +22,7 @@ interface CustomCommandInterface {
 }
 
 interface ChannelDemoInterface {
-    fun performChannelImageTransition(title: String, description: String, drawableID: Int, imageView: ImageView, media: Int)
+    fun performChannelImageTransition(uid: String, title: String, description: String, drawableID: Int, imageView: ImageView, media: Int)
 }
 
 interface FragmentInterface {
