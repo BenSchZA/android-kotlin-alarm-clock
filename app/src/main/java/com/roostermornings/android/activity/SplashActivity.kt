@@ -7,6 +7,7 @@ package com.roostermornings.android.activity
 
 import android.app.Activity
 import android.content.Intent
+import android.content.SharedPreferences
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
@@ -27,6 +28,7 @@ import com.roostermornings.android.domain.OnboardingJourneyEvent
 import com.roostermornings.android.firebase.UserMetrics
 import com.roostermornings.android.onboarding.OnboardingActivity
 import com.roostermornings.android.util.Constants
+import com.roostermornings.android.util.Constants.USER_FINISHED_ONBOARDING
 import com.roostermornings.android.util.FileUtils
 import com.roostermornings.android.util.InternetHelper
 import com.roostermornings.android.util.RoosterUtils
@@ -47,6 +49,7 @@ class SplashActivity : BaseActivity() {
 
     @Inject
     lateinit var authManager: AuthManager
+    @Inject lateinit var sharedPrefs: SharedPreferences
 
     override fun inject(component: RoosterApplicationComponent) {
         component.inject(this)
@@ -211,7 +214,7 @@ class SplashActivity : BaseActivity() {
             finish()
         } else {
             // If the user is signed-in, skip onboarding and open app
-            if (authManager.isUserSignedIn()) {
+            if (authManager.isUserSignedIn() || sharedPrefs.getBoolean(USER_FINISHED_ONBOARDING, false)) {
                 navigateToActivity(MyAlarmsFragmentActivity::class.java)
             } else {
                 navigateToActivity(OnboardingActivity::class.java)

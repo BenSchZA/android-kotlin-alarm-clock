@@ -165,6 +165,11 @@ public class MessageStatusSentFragment2 extends BaseFragment {
     }
 
     private void updateMessageStatus() {
+        if(firebaseUser == null) {
+            Toaster.makeToast(getContext(), "Couldn't load user. Try reconnect to the internet and try again.", Toast.LENGTH_SHORT);
+            return;
+        }
+
         mSocialRoosterUploadsReference = firebaseDatabaseReference
                 .child("social_rooster_uploads").child(firebaseUser.getUid());
         mSocialRoosterUploadsReference.keepSynced(true);

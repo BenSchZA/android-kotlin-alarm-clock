@@ -28,11 +28,7 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DatabaseReference
@@ -57,6 +53,7 @@ import javax.inject.Inject
 import butterknife.BindView
 import com.roostermornings.android.onboarding.*
 import com.roostermornings.android.snackbar.SnackbarManager
+import com.roostermornings.android.util.Toaster
 import kotlinx.android.synthetic.main.activity_friends.*
 
 //Responsible for managing friends: 1) my friends, 2) addable friends, 3) friend invites
@@ -97,9 +94,15 @@ class FriendsFragmentActivity : BaseActivity(), FriendsMyFragment1.OnFragmentInt
     private var friendsFragment3: FriendsInviteFragment3? = null
 
     @Inject lateinit var baseApplication: BaseApplication
-    @Inject @Nullable lateinit var firebaseUser: FirebaseUser
     @Inject lateinit var sharedPreferences: SharedPreferences
     @Inject lateinit var authManager: AuthManager
+
+    private var firebaseUser: FirebaseUser? = null
+
+    @Inject
+    fun FriendsFragmentActivity(firebaseUser: FirebaseUser?) {
+        this.firebaseUser = firebaseUser
+    }
 
     private var snackbarManager: SnackbarManager? = null
 
@@ -142,15 +145,20 @@ class FriendsFragmentActivity : BaseActivity(), FriendsMyFragment1.OnFragmentInt
         toolbar?.setNavigationIcon(R.drawable.md_nav_back)
         toolbar?.setNavigationOnClickListener { startHomeActivity() }
 
+        if(firebaseUser == null) {
+            Toaster.makeToast(this, "Couldn't load user. Try reconnect to the internet and try again.", Toast.LENGTH_SHORT)
+            return
+        }
+
         //Keep local and Firebase alarm dbs synced, and enable offline persistence
         mFriendRequestsReceivedReference = FirebaseDatabase.getInstance().reference
-                .child("friend_requests_received").child(firebaseUser.uid)
+                .child("friend_requests_received").child((firebaseUser as FirebaseUser).uid)
 
         mFriendRequestsSentReference = FirebaseDatabase.getInstance().reference
-                .child("friend_requests_sent").child(firebaseUser.uid)
+                .child("friend_requests_sent").child((firebaseUser as FirebaseUser).uid)
 
         mCurrentUserReference = FirebaseDatabase.getInstance().reference
-                .child("users").child(firebaseUser.uid)
+                .child("users").child((firebaseUser as FirebaseUser).uid)
 
         mFriendRequestsReceivedReference?.keepSynced(true)
         mFriendRequestsSentReference?.keepSynced(true)
@@ -494,9 +502,14 @@ class FriendsFragmentActivity : BaseActivity(), FriendsMyFragment1.OnFragmentInt
 
     //Delete friend from Firebase user friend list
     fun deleteFriend(deleteFriend: User) {
+        if(firebaseUser == null) {
+            Toaster.makeToast(this, "Couldn't load user. Try reconnect to the internet and try again.", Toast.LENGTH_SHORT)
+            return
+        }
+
 //        if(deleteFriend.uid != firebaseUser.uid) {
-            val currentUserUrl = String.format("users/%s/friends/%s", firebaseUser.uid, deleteFriend.uid)
-            val friendUserUrl = String.format("users/%s/friends/%s", deleteFriend.uid, firebaseUser.uid)
+            val currentUserUrl = String.format("users/%s/friends/%s", (firebaseUser as FirebaseUser).uid, deleteFriend.uid)
+            val friendUserUrl = String.format("users/%s/friends/%s", deleteFriend.uid, (firebaseUser as FirebaseUser).uid)
 
             //Clear current user's and friend's friend list
             mDatabase.database.getReference(currentUserUrl).setValue(null)
