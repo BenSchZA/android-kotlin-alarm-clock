@@ -16,6 +16,8 @@ import com.roostermornings.android.sync.DownloadSyncAdapter;
 
 import javax.inject.Inject;
 
+import static com.roostermornings.android.util.Constants.USER_FINISHED_ONBOARDING;
+
 /**
  * <h1>LifeCycle Class</h1>
  *
@@ -60,6 +62,10 @@ public class LifeCycle {
         if(sharedPreferences.getBoolean(firstEntry, true)) {
 
             createFillerChannel();
+
+            sharedPreferences.edit()
+                    .putBoolean(USER_FINISHED_ONBOARDING, true)
+                    .apply();
 
             setFirstEntry();
             return true;
