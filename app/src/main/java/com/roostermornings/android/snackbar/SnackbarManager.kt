@@ -106,6 +106,9 @@ class SnackbarManager(val activity: Activity, val activityContentView: Coordinat
     init {
         BaseApplication.getRoosterApplicationComponent().inject(this)
 
+        /** Initialize bottom sheet (snackbar dialog) and coordinator layout activityContentView references.*/
+        bottomSheet = activity.findViewById(R.id.snackbarBottomsheet)
+
         /** On initialization, fetch all relevant snackbars for current activity.*/
         realmManagerScheduledSnackbar.getScheduledSnackbarsForActivity(activity).forEach {
             if(addSnackbarToQueue(it.snackbarQueueElement)) checkQueue()
@@ -116,9 +119,6 @@ class SnackbarManager(val activity: Activity, val activityContentView: Coordinat
                 if(addSnackbarToQueue(it.snackbarQueueElement)) checkQueue()
             }
         }
-
-        /** Initialize bottom sheet (snackbar dialog) and coordinator layout activityContentView references.*/
-        bottomSheet = activity.findViewById(R.id.snackbarBottomsheet)
     }
 
     /** Element inserted into realm database and used for keeping track of pending snackbars
