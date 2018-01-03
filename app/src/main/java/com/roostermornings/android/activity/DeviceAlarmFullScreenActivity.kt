@@ -133,7 +133,7 @@ class DeviceAlarmFullScreenActivity : BaseActivity() {
 
         initialize(R.layout.activity_device_alarm_full_screen)
 
-        realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+        realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getLongExtra(Constants.EXTRA_MILLIS_SLOT, -1L)) {
             it.seen = true
         }
 
@@ -239,7 +239,7 @@ class DeviceAlarmFullScreenActivity : BaseActivity() {
     }
 
     private fun logAlarmUIInteraction() {
-        realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+        realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getLongExtra(Constants.EXTRA_MILLIS_SLOT, -1L)) {
             it.interaction = true
         }
     }

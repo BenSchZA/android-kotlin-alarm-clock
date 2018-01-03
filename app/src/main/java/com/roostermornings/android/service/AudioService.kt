@@ -59,7 +59,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.roostermornings.android.realm.RealmManager_AlarmFailureLog
 import com.roostermornings.android.util.*
 
-//Service to manage playing and pausing audio during Rooster alarm
+// Service to manage playing and pausing audio during Rooster alarm
 class AudioService : Service() {
 
     // Binder given to clients
@@ -95,6 +95,8 @@ class AudioService : Service() {
     private var alarmUid = ""
     private var alarmCount = 1
     private var alarmPosition = 1
+
+    private var millisSlot = -1L
 
     private var currentPositionRooster = 0
 
@@ -141,23 +143,23 @@ class AudioService : Service() {
             return false
         }
 
-    private//Return next valid audio item in array
-    val nextAudioItem: DeviceAudioQueueItem
+    // Return next valid audio item in array
+    private val nextAudioItem: DeviceAudioQueueItem
         get() = if (audioItems.size == audioItems.indexOf(audioItem) + 1) {
             audioItems[0]
         } else {
             audioItems[audioItems.indexOf(audioItem) + 1]
         }
 
-    private//Return previous valid audio item in array
-    val previousAudioItem: DeviceAudioQueueItem
+    // Return previous valid audio item in array
+    private val previousAudioItem: DeviceAudioQueueItem
         get() = if (audioItems.indexOf(audioItem) - 1 < 0) {
             audioItems[audioItems.size - 1]
         } else {
             audioItems[audioItems.indexOf(audioItem) - 1]
         }
 
-    //Set timer to kill alarm after 5 minutes
+    // Set timer to kill alarm after 5 minutes
     private val alarmFinishTimerRunnable = Runnable { notifyActivityTimesUp() }
 
     @Inject
@@ -194,13 +196,13 @@ class AudioService : Service() {
 
         BaseApplication.getRoosterApplicationComponent().inject(this)
 
-        //Catch all uncaught exceptions
+        // Catch all uncaught exceptions
         Thread.setDefaultUncaughtExceptionHandler { _, e -> logError(e) }
 
         failsafeRingtone = RingtoneManager.getRingtone(baseContext,
                 RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM))
 
-        //Register broadcast receivers for external access
+        // Register broadcast receivers for external access
         registerEndAudioServiceBroadcastReceiver()
         registerSnoozeAudioServiceBroadcastReceiver()
 
@@ -223,7 +225,7 @@ class AudioService : Service() {
                 if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method + ": From receiver.")
 
                 endService()
-                //Start Rooster to show on wakeup
+                // Start Rooster to show on wakeup
                 val homeIntent = Intent(mThis, MessageStatusFragmentActivity::class.java)
                 homeIntent.flags = FLAG_ACTIVITY_NEW_TASK
                 startActivity(homeIntent)
@@ -239,7 +241,7 @@ class AudioService : Service() {
             override fun onReceive(context: Context, intent: Intent) {
                 currentAlarmCycle = 1
                 startAlarmContent(intent.getStringExtra(Constants.EXTRA_ALARMID))
-                //Start fullscreen alarm activation activity
+                // Start fullscreen alarm activation activity
                 val intentAlarmFullscreen = Intent(mThis, DeviceAlarmFullScreenActivity::class.java)
                 intentAlarmFullscreen.addFlags(FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
                 mThis.startActivity(intentAlarmFullscreen)
@@ -254,36 +256,40 @@ class AudioService : Service() {
         val method = Thread.currentThread().stackTrace[2].methodName
         if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method)
 
-        realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+        /** Unique millis slot for Realm log */
+        millisSlot = intent?.getLongExtra(Constants.EXTRA_MILLIS_SLOT, -1L)?:-1L
+
+        realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
             it.activated = true
         }
 
-        //Only attempt to start alarm once, in case of multiple conflicting alarms
+        // Only attempt to start alarm once, in case of multiple conflicting alarms
         if (!mRunning) {
             mRunning = true
 
-            realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+            realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
                 it.running = true
             }
 
             connectivityUtils.isActive { active ->
-                realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+                realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
                     it.internet = active
                     activeInternetConnection = active
                 }
             }
 
-            //Start fullscreen alarm activation activity
+            // Start fullscreen alarm activation activity
             val intentAlarmFullscreen = Intent(mThis, DeviceAlarmFullScreenActivity::class.java)
             intentAlarmFullscreen.addFlags(FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
             intentAlarmFullscreen.putExtra(Constants.EXTRA_REQUESTCODE, intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1))
+            intentAlarmFullscreen.putExtra(Constants.EXTRA_MILLIS_SLOT, millisSlot)
             mThis.startActivity(intentAlarmFullscreen)
 
-            //Get wakeful intent of DeviceAlarmReceiver to enable finishing it in endService()
+            // Get wakeful intent of DeviceAlarmReceiver to enable finishing it in endService()
             wakefulIntent = intent?.getParcelableExtra(Constants.DEVICE_ALARM_RECEIVER_WAKEFUL_INTENT)
             mThis.intent = intent
 
-            //If no audio playing already, start audio content, or default alarm tone
+            // If no audio playing already, start audio content, or default alarm tone
             try {
                 if (!isAudioPlaying) {
                     if (intent != null && StrUtils.notNullOrEmpty(intent.getStringExtra(Constants.EXTRA_ALARMID))) {
@@ -306,7 +312,7 @@ class AudioService : Service() {
         val method = Thread.currentThread().stackTrace[2].methodName
         if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method)
 
-        //Send broadcast message to notify all receivers of new data, in this case UI data
+        // Send broadcast message to notify all receivers of new data, in this case UI data
         val intent = Intent(Constants.ACTION_ALARMDISPLAY)
         if (!defaultAlarm) {
             val bundle = Bundle()
@@ -323,7 +329,7 @@ class AudioService : Service() {
         val method = Thread.currentThread().stackTrace[2].methodName
         if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method)
 
-        //Check if audio already playing
+        // Check if audio already playing
         if (isAudioPlaying) return
 
         //Check if old content exists
@@ -332,7 +338,7 @@ class AudioService : Service() {
             return
         }
 
-        //Check if relevant alarm data exists
+        // Check if relevant alarm data exists
         if (StrUtils.notNullOrEmpty(alarmUid) && deviceAlarmTableManager.getAlarmSet(alarmUid) != null) {
             alarm = deviceAlarmTableManager.getAlarmSet(alarmUid)[0]
             this.alarmChannelUid = alarm.channel
@@ -342,18 +348,18 @@ class AudioService : Service() {
             return
         }
 
-        //Check if Social and Channel alarm content exists, else startDefaultAlarmTone
+        // Check if Social and Channel alarm content exists, else startDefaultAlarmTone
         channelAudioItems = audioTableManager.extractAlarmChannelAudioFiles(mThis.alarmChannelUid)
         socialAudioItems = audioTableManager.extractUnheardSocialAudioFiles()
 
         if(channelAudioItems.isNotEmpty()) {
-            realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+            realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
                 it.content = true
             }
         }
 
         if(StrUtils.notNullOrEmpty(mThis.alarmChannelUid)) {
-            realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+            realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
                 it.channel = true
             }
         }
@@ -364,7 +370,7 @@ class AudioService : Service() {
         this.currentAlarmCycle = 1
 
         try {
-            //If alarm channel is not empty and channel audioitems is empty, try download
+            // If alarm channel is not empty and channel audioitems is empty, try download
             if (StrUtils.notNullOrEmpty(mThis.alarmChannelUid) && channelAudioItems.isEmpty()) {
 
                 logAlarmActivation(false)
@@ -389,10 +395,10 @@ class AudioService : Service() {
 
     private fun switchOnActiveInternetConnection(active: Boolean?) {
         if(active != null && active) {
-            //Download any social or channel audio files
+            // Download any social or channel audio files
             attemptContentUriRetrieval(alarm)
 
-            realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+            realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
                 it.stream = true
             }
         } else {
@@ -414,25 +420,25 @@ class AudioService : Service() {
         val method = Thread.currentThread().stackTrace[2].methodName
         if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method)
 
-        //If no content exists to add to audioItems, then return now
+        // If no content exists to add to audioItems, then return now
         if (mThis.socialAudioItems.isEmpty() && mThis.channelAudioItems.isEmpty()) {
             startDefaultAlarmTone()
             return
         }
 
-        //Try append new content to end of existing content, if it fails - fail safe and play default alarm tone
+        // Try append new content to end of existing content, if it fails - fail safe and play default alarm tone
         try {
-            //Reorder channel and social queue according to user preferences
+            // Reorder channel and social queue according to user preferences
             if (defaultSharedPreferences.getBoolean(Constants.USER_SETTINGS_ROOSTER_ORDER, false)) {
                 if (!mThis.channelAudioItems.isEmpty()) {
                     audioItems.addAll(channelAudioItems)
                 }
-                //If this alarm does not allow social roosters, move on to channel content
+                // If this alarm does not allow social roosters, move on to channel content
                 if (!mThis.socialAudioItems.isEmpty() && alarm.isSocial) {
                     audioItems.addAll(socialAudioItems)
                 }
             } else {
-                //If this alarm does not allow social roosters, move on to channel content
+                // If this alarm does not allow social roosters, move on to channel content
                 if (!mThis.socialAudioItems.isEmpty() && alarm.isSocial) {
                     audioItems.addAll(socialAudioItems)
                 }
@@ -458,7 +464,7 @@ class AudioService : Service() {
         if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method)
 
         try {
-            //Check if channel has a valid ID, else next pending alarm has no channel
+            // Check if channel has a valid ID, else next pending alarm has no channel
             val channelId = deviceAlarm.channel
             if (!StrUtils.notNullOrEmpty(channelId)) {
                 startDefaultAlarmTone()
@@ -498,13 +504,13 @@ class AudioService : Service() {
 
         foregroundNotification("Alarm content streaming")
 
-        //Check that URL is notNullOrEmpty
+        // Check that URL is notNullOrEmpty
         if (!StrUtils.notNullOrEmpty(url)) {
             startDefaultAlarmTone()
             return
         }
 
-        //Check if audio already playing
+        // Check if audio already playing
         if (isAudioPlaying) return
 
         val mStorageRef = FirebaseStorage.getInstance().reference
@@ -533,7 +539,7 @@ class AudioService : Service() {
                 if (streamMediaPlayer.isPlaying) return@OnPreparedListener
                 streamMediaPlayer.start()
 
-                realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+                realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
                     it.heard = true
                 }
 
@@ -569,13 +575,13 @@ class AudioService : Service() {
         val method = Thread.currentThread().stackTrace[2].methodName
         if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method)
 
-        //Check if audio already playing
+        // Check if audio already playing
         if (isAudioPlaying) return
 
-        //Show the number of social and channel roosters combined
+        // Show the number of social and channel roosters combined
         this.alarmCount = audioItems.size
 
-        //Check conditions for playing default tone: people must wake up!
+        // Check conditions for playing default tone: people must wake up!
         if (audioItems.isEmpty()) {
             startDefaultAlarmTone()
             return
@@ -588,9 +594,9 @@ class AudioService : Service() {
             try {
                 mediaPlayerRooster.seekTo(currentPositionRooster)
                 mediaPlayerRooster.start()
-                //Slowly increase volume from low to current volume
+                // Slowly increase volume from low to current volume
                 softStartAudio()
-                //Send broadcast to DeviceAlarmFullScreenActivity with UI data
+                // Send broadcast to DeviceAlarmFullScreenActivity with UI data
                 updateAlarmUI(false)
             } catch (e: NullPointerException) {
                 logError(e)
@@ -619,20 +625,20 @@ class AudioService : Service() {
         //            return;
         //        }
 
-        //Set media player to alarm volume
+        // Set media player to alarm volume
         mediaPlayerRooster.setAudioStreamType(AudioManager.STREAM_ALARM)
-        //Check stream volume above minimum
+        // Check stream volume above minimum
         checkStreamVolume(AudioManager.STREAM_ALARM)
 
-        //Set alarm count display
+        // Set alarm count display
         alarmPosition = audioItems.indexOf(mThis.audioItem) + 1
-        //Send broadcast to DeviceAlarmFullScreenActivity with UI data
+        // Send broadcast to DeviceAlarmFullScreenActivity with UI data
         updateAlarmUI(false)
 
         val file = File(filesDir.toString() + "/" + audioItem.filename)
 
         try {
-            //AudioService report logging
+            // AudioService report logging
             Crashlytics.log("Rooster file path: " + file.path)
             Crashlytics.log("Rooster is file?: " + file.isFile.toString())
             Crashlytics.log("Rooster type: " + audioItem.type.toString())
@@ -645,12 +651,12 @@ class AudioService : Service() {
             mediaPlayerRooster.setOnPreparedListener {
                 mediaPlayerRooster.start()
 
-                realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+                realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
                     it.heard = true
                 }
 
                 if (alarmPosition == 1 && currentAlarmCycle == 1) {
-                    //Slowly increase volume from low to current volume
+                    // Slowly increase volume from low to current volume
                     softStartAudio()
                     if (audioItem.type == Constants.AUDIO_TYPE_SOCIAL) FA.Log(FA.Event.social_rooster_unique_play::class.java, null, null)
                     if (audioItem.type == Constants.AUDIO_TYPE_CHANNEL) FA.Log(FA.Event.channel_unique_play::class.java, FA.Event.channel_unique_play.Param.channel_title, audioItem.queue_id)
@@ -662,9 +668,9 @@ class AudioService : Service() {
                 }
 
                 mediaPlayerRooster.setOnCompletionListener(MediaPlayer.OnCompletionListener {
-                    //set audio file entry in SQL db as listened; to be removed when AudioService ends
+                    // Set audio file entry in SQL db as listened; to be removed when AudioService ends
                     audioTableManager.setListened(mThis.audioItem)
-                    //Check if at end of queue, else play next file
+                    // Check if at end of queue, else play next file
                     if (audioItems.isEmpty()) {
                         startDefaultAlarmTone()
                         return@OnCompletionListener
@@ -679,15 +685,15 @@ class AudioService : Service() {
             }
 
             mediaPlayerRooster.setOnErrorListener(MediaPlayer.OnErrorListener { mediaPlayer, what, extra ->
-                //set audio file entry in SQL db as listened; to be removed when AudioService ends
+                // set audio file entry in SQL db as listened; to be removed when AudioService ends
                 audioTableManager.setListened(mThis.audioItem)
-                //Check if at end of queue, else play next file
+                // Check if at end of queue, else play next file
                 if (audioItems.isEmpty()) {
                     startDefaultAlarmTone()
                     return@OnErrorListener true
                 }
                 if (audioItems.size == audioItems.indexOf(audioItem) + 1) {
-                    //If an error occurs on the last queue item, assume error on all and start default alarm tone as fail safe
+                    // If an error occurs on the last queue item, assume error on all and start default alarm tone as fail safe
                     startDefaultAlarmTone()
                 } else {
                     playRooster(nextAudioItem)
@@ -695,20 +701,20 @@ class AudioService : Service() {
                 true
             })
 
-            //Prepare mediaplayer on new thread: onCompletion or onError listener called
+            // Prepare mediaplayer on new thread: onCompletion or onError listener called
             mediaPlayerRooster.prepareAsync()
 
         } catch (e: IOException) {
             logError(e)
-            //Social rooster will never play... let's not go here
-            //delete file
-            //delete record from AudioTable SQL DB
+            // Social rooster will never play... let's not go here
+            // Delete file
+            // Delete record from AudioTable SQL DB
             audioTableManager.setListened(audioItem)
 
-            //delete record from arraylist
+            // Delete record from arraylist
             audioItems.remove(audioItem)
 
-            //If an error occurs on the last queue item, assume error on all and start default alarm tone as fail safe
+            // If an error occurs on the last queue item, assume error on all and start default alarm tone as fail safe
             startDefaultAlarmTone()
         }
 
@@ -722,9 +728,9 @@ class AudioService : Service() {
         try {
             if (mediaPlayerRooster.isPlaying) mediaPlayerRooster.stop()
             currentPositionRooster = 0
-            // set audio file entry in SQL db as listened; to be removed when AudioService ends
+            // Set audio file entry in SQL db as listened; to be removed when AudioService ends
             audioTableManager.setListened(mThis.audioItem)
-            // play next rooster
+            // Play next rooster
             playRooster(nextAudioItem)
         } catch (e: NullPointerException) {
             logError(e)
@@ -740,9 +746,9 @@ class AudioService : Service() {
         try {
             if (mediaPlayerRooster.isPlaying) mediaPlayerRooster.stop()
             currentPositionRooster = 0
-            // set audio file entry in SQL db as listened; to be removed when AudioService ends
+            // Set audio file entry in SQL db as listened; to be removed when AudioService ends
             audioTableManager.setListened(mThis.audioItem)
-            // play previous rooster
+            // Play previous rooster
             playRooster(previousAudioItem)
         } catch (e: NullPointerException) {
             logError(e)
@@ -751,7 +757,7 @@ class AudioService : Service() {
     }
 
     private fun processAudioEntries() {
-        //Ensure partially listened channels and roosters are set as listened
+        // Ensure partially listened channels and roosters are set as listened
         try {
             if (mThis.audioItem!!.type == Constants.AUDIO_TYPE_CHANNEL) {
                 audioTableManager.setListened(mThis.audioItem)
@@ -762,7 +768,7 @@ class AudioService : Service() {
             logError(e)
         }
 
-        //For all listened channels
+        // For all listened channels
         for (audioItem in audioTableManager.selectListenedByChannel(alarm.channel)) {
             try {
                 if (audioItem.type == Constants.AUDIO_TYPE_CHANNEL) {
@@ -776,7 +782,7 @@ class AudioService : Service() {
     }
 
     private fun purgeAudioFiles() {
-        //Delete all files not contained in SQL db
+        // Delete all files not contained in SQL db
         val files = filesDir.listFiles { _, name -> name.contains(Constants.FILENAME_PREFIX_ROOSTER_CONTENT) }
         val audioFileNames = audioTableManager.extractAllAudioFileNames()
         if (audioFileNames != null) {
@@ -788,7 +794,7 @@ class AudioService : Service() {
         val method = Thread.currentThread().stackTrace[2].methodName
         if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method)
 
-        //Log status of alarm activation to Firebase event
+        // Log status of alarm activation to Firebase event
         try {
             FA.LogMany(FA.Event.alarm_dismissed::class.java,
                     arrayOf(FA.Event.alarm_dismissed.Param.alarm_activation_cycle_count, FA.Event.alarm_dismissed.Param.alarm_activation_index, FA.Event.alarm_dismissed.Param.alarm_activation_total_roosters),
@@ -801,18 +807,18 @@ class AudioService : Service() {
     }
 
     private fun finishTransaction() {
-        //AudioService report logging
+        // AudioService report logging
         val method = Thread.currentThread().stackTrace[2].methodName
         if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method)
         Crashlytics.logException(Throwable("AudioService Report"))
 
-        //Process audio files - set channel persisted iterations,
-        // delete all channel audio files/SQL entries,
-        // remove files not contained in SQL db
+        /* Process audio files - set channel persisted iterations,
+            delete all channel audio files/SQL entries,
+            remove files not contained in SQL db */
         processAudioEntries()
         purgeAudioFiles()
 
-        //Unregister all broadcast receivers
+        // Unregister all broadcast receivers
         try {
             unregisterReceiver(endAudioServiceBroadcastReceiver)
         } catch (e: IllegalArgumentException) {
@@ -828,44 +834,44 @@ class AudioService : Service() {
         // Close Realm object
         realmManagerAlarmFailureLog.closeRealm()
 
-        //Delete audio records from arraylist
+        // Delete audio records from arraylist
         audioItems.clear()
-        //Clear variables
+        // Clear variables
         alarmCount = 0
         alarmPosition = 0
         currentPositionRooster = 0
 
-        //Release media player instances
+        // Release media player instances
         releaseMediaPlayers()
     }
 
     fun endService() {
         //https://stackoverflow.com/questions/17146822/when-is-a-started-and-bound-service-destroyed
 
-        //AudioService report logging
+        // AudioService report logging
         val method = Thread.currentThread().stackTrace[2].methodName
         if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method)
 
-        //Ensure no alarms still playing...
+        // Ensure no alarms still playing...
         stopVibrate()
         stopAlarmAudio()
 
-        //Clear timer callbacks - this timer puts a limit on default or streamed audio duration, whereas normal operation is limited to 5 cycles
+        // Clear timer callbacks - this timer puts a limit on default or streamed audio duration, whereas normal operation is limited to 5 cycles
         alarmFinishTimerHandler.removeCallbacks(alarmFinishTimerRunnable)
 
-        //Clear forground notifications that attempt to keep service alive
+        // Clear forground notifications that attempt to keep service alive
         stopForeground(true)
 
-        //Complete DeviceAlarmReceiver wakeful intent
+        // Complete DeviceAlarmReceiver wakeful intent
         if (wakefulIntent != null) {
             WakefulBroadcastReceiver.completeWakefulIntent(wakefulIntent)
         }
 
-        //Stop service
+        // Stop service
         this.stopSelf()
     }
 
-    //Set timer to kill alarm after 5 minutes
+    // Set timer to kill alarm after 5 minutes
     private fun startTimer() {
         val method = Thread.currentThread().stackTrace[2].methodName
         if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method)
@@ -877,7 +883,7 @@ class AudioService : Service() {
         val method = Thread.currentThread().stackTrace[2].methodName
         if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method)
 
-        //Send broadcast message to notify receiver of end of alarm to clear window hold
+        // Send broadcast message to notify receiver of end of alarm to clear window hold
         val intent = Intent(Constants.ACTION_ALARMTIMESUP)
         sendBroadcast(intent)
         snoozeAudioState()
@@ -891,7 +897,7 @@ class AudioService : Service() {
     }
 
     private fun stopVibrate() {
-        //If vibrating then cancel
+        // If vibrating then cancel
         val vibrator = applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         if (vibrator.hasVibrator()) {
             vibrator.cancel()
@@ -937,10 +943,10 @@ class AudioService : Service() {
             stopAlarmAudio()
         }
 
-        //Stop default audio fail-safe
+        // Stop default audio fail-safe
         stopFailsafe()
 
-        //If vibrating then cancel
+        // If vibrating then cancel
         val vibrator = applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         if (vibrator.hasVibrator()) {
             vibrator.cancel()
@@ -963,15 +969,15 @@ class AudioService : Service() {
         if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method + " not started.")
 
         try {
-            //Check if audio already playing
+            // Check if audio already playing
             if (isAudioPlaying) return
             if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method + " started.")
 
-            realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+            realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
                 it.def = true
             }
 
-            //If channel UID attached to alarm, content should have played
+            // If channel UID attached to alarm, content should have played
             val failure = StrUtils.notNullOrEmpty(alarm.channel) && !InternetHelper.noInternetConnection(this)
 
             foregroundNotification("Alarm ringtone playing")
@@ -984,10 +990,10 @@ class AudioService : Service() {
             ringtoneManager.setType(RingtoneManager.TYPE_ALL)
 
             var notification: Uri? = Uri.parse(strRingtonePreference)
-            //In case alarm tone URI does not exist
-            //Ringtonemanager used to check if exists: from Android docs:
-            //If the given URI cannot be opened for any reason, this method will attempt to fallback on another sound.
-            //If it cannot find any, it will return null.
+            // In case alarm tone URI does not exist
+            // Ringtonemanager used to check if exists: from Android docs:
+            // If the given URI cannot be opened for any reason, this method will attempt to fallback on another sound.
+            // If it cannot find any, it will return null.
             if (RingtoneManager.getRingtone(this, notification) == null || ringtoneManager.getRingtonePosition(notification) < 0) {
                 notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
                 if (notification == null) {
@@ -998,10 +1004,10 @@ class AudioService : Service() {
                 }
             }
 
-            //Check stream volume above minimum
+            // Check stream volume above minimum
             checkStreamVolume(AudioManager.STREAM_ALARM)
 
-            //Start audio stream
+            // Start audio stream
             try {
                 mediaPlayerDefault.reset()
                 mediaPlayerDefault.setAudioStreamType(AudioManager.STREAM_ALARM)
@@ -1015,11 +1021,11 @@ class AudioService : Service() {
                     if (mediaPlayerRooster.isPlaying) return@OnPreparedListener
                     mediaPlayerDefault.start()
 
-                    realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+                    realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
                         it.heard = true
                     }
 
-                    //Start timer to kill after 5 minutes
+                    // Start timer to kill after 5 minutes
                     startTimer()
                 })
                 mediaPlayerDefault.setOnErrorListener { mediaPlayer, what, extra ->
@@ -1030,7 +1036,7 @@ class AudioService : Service() {
                     true
                 }
 
-                //Must be called after listeners created
+                // Must be called after listeners created
                 mediaPlayerDefault.prepareAsync()
 
             } catch (e: Exception) {
@@ -1056,10 +1062,10 @@ class AudioService : Service() {
         if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method)
 
         checkStreamVolume(AudioManager.STREAM_RING)
-        //Do everything possible to wake user up at this stage
+        // Do everything possible to wake user up at this stage
         startVibrate()
 
-        //Start failsafe ringtone
+        // Start failsafe ringtone
         if (failsafeRingtone == null) {
             Crashlytics.log("Is null")
             failsafeRingtone = RingtoneManager.getRingtone(baseContext,
@@ -1067,19 +1073,19 @@ class AudioService : Service() {
             Crashlytics.log(failsafeRingtone?.getTitle(baseContext)?:"")
             failsafeRingtone?.play()
         }
-        //Check if playing, else try again
+        // Check if playing, else try again
         if (failsafeRingtone != null && !failsafeRingtone!!.isPlaying) {
             Crashlytics.log("Not null and not playing " + failsafeRingtone!!.getTitle(baseContext))
             failsafeRingtone?.play()
         }
 
         if(failsafeRingtone != null && failsafeRingtone!!.isPlaying) {
-            realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+            realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
                 it.heard = true
                 it.failsafe = true
             }
         } else {
-            realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+            realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
                 it.failsafe = true
             }
         }
@@ -1093,8 +1099,8 @@ class AudioService : Service() {
         val method = Thread.currentThread().stackTrace[2].methodName
         if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method)
 
-        //Ensure audio volume is acceptable - as set in user settings
-        //Max volume seems to be integer 7
+        // Ensure audio volume is acceptable - as set in user settings
+        // Max volume seems to be integer 7
         val audio = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val currentVolume = audio.getStreamVolume(streamType)
         val maxVolume = audio.getStreamMaxVolume(streamType)
@@ -1105,7 +1111,7 @@ class AudioService : Service() {
     }
 
     private fun returnUserSettingAlarmMinimumVolume(): Float {
-        //Ensure alarm volume at least equal to user's minimum alarm volume setting
+        // Ensure alarm volume at least equal to user's minimum alarm volume setting
         try {
             val alarmVolumeArrayEntries = resources.getStringArray(R.array.user_settings_alarm_volume_entry_values)
 
@@ -1139,7 +1145,7 @@ class AudioService : Service() {
         val method = Thread.currentThread().stackTrace[2].methodName
         if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method)
 
-        //Ramp up the audio linearly
+        // Ramp up the audio linearly
         // 3    /-------------------
         // 2   /
         // 1  /
@@ -1171,9 +1177,9 @@ class AudioService : Service() {
         if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method)
 
         stopForeground(true)
-        //If default tone or media playing then stop
+        // If default tone or media playing then stop
 
-        //Stop default audio fail-safe
+        // Stop default audio fail-safe
         stopFailsafe()
 
         try {
@@ -1213,7 +1219,7 @@ class AudioService : Service() {
     }
 
     private fun foregroundNotification(state: String) {
-        //Notification used to attempt to stop Android OS from killing service, and for user feedback
+        // Notification used to attempt to stop Android OS from killing service, and for user feedback
 
         val launchIntent = Intent(this, MyAlarmsFragmentActivity::class.java)
         launchIntent.putExtra(Constants.EXTRA_ALARMID, alarmUid)
@@ -1236,7 +1242,7 @@ class AudioService : Service() {
     }
 
     private fun snoozeNotification(state: String) {
-        //Notification used to display snooze state and clear snooze state
+        // Notification used to display snooze state and clear snooze state
 
         val launchIntent = Intent(this, MyAlarmsFragmentActivity::class.java)
         launchIntent.putExtra(Constants.EXTRA_ALARMID, alarmUid)
@@ -1252,7 +1258,7 @@ class AudioService : Service() {
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
                 .setDeleteIntent(pendingIntent).build()
-        //Above not working
+        // Above not working
         notification.flags = notification.flags or Notification.FLAG_AUTO_CANCEL
 
         startForeground(Constants.AUDIOSERVICE_NOTIFICATION_ID, notification)

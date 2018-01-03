@@ -62,7 +62,10 @@ class RealmManager_AlarmFailureLog(val context: Context) {
                     .endGroup().findAll()
 
             // Find all results where alarm delayed by more than 5 minutes
-            val delayedAlarms = tempResults.filter { Math.abs(it.scheduledTime - it.firedTime) >= Constants.TIME_MILLIS_1_MINUTE*5 }
+            val delayedAlarms = tempResults.filter {
+                val unmanagedRealmObject = realm.copyFromRealm(it)
+                Math.abs(unmanagedRealmObject.scheduledTime - unmanagedRealmObject.firedTime) >= Constants.TIME_MILLIS_1_MINUTE*5
+            }
 
             tempResults = tempResults.where()
                     .beginGroup()
@@ -238,13 +241,12 @@ class RealmManager_AlarmFailureLog(val context: Context) {
                 .findFirst()
     }
 
-    fun getAlarmFailureLogMillisSlot(pendingIntentID: Int?, operation: (AlarmFailureLog) -> Unit): AlarmFailureLog? {
+    fun getAlarmFailureLogMillisSlot(scheduledMillis: Long?, operation: (AlarmFailureLog) -> Unit): AlarmFailureLog? {
         // scheduledTime is a unique key - return the slot where scheduledTime is equal to the
-        // millis set for the specific pending intent passed to method
-        val millis = alarmTableManager.getMillisOfPendingIntent(pendingIntentID?:-1)
+        // millis set
 
         val alarmFailureLog = realm.where(AlarmFailureLog::class.java)
-                .equalTo("scheduledTime", millis)
+                .equalTo("scheduledTime", scheduledMillis)
                 .findFirst()
 
         // For a non-null log, perform the operation from the lambda within a Realm transaction

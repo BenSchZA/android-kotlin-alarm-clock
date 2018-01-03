@@ -157,17 +157,16 @@ class AlarmFailureLog_IUT {
     * Pass a Realm database operation as a lambda (still need to check this is what I think it is...)*/
 
     private fun testPermutation(assertFailure: Boolean, operation: (AlarmFailureLog) -> Unit) {
-        val alarmFailureLog = mockRealm.where(AlarmFailureLog::class.java)
-                .findFirst()?:AlarmFailureLog()
-
-        mockRealm.executeTransaction {
+        realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(Constants.TIME_MILLIS_1_HOUR) {
+            alarmFailureLog ->
             operation(alarmFailureLog)
         }
 
         realmManagerAlarmFailureLog.processAlarmFailures(false)
         assertThat(realmManagerAlarmFailureLog.getAlarmFailures().isNotEmpty(), `is`(assertFailure))
 
-        mockRealm.executeTransaction {
+        realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(Constants.TIME_MILLIS_1_HOUR) {
+            alarmFailureLog ->
             alarmFailureLog.deleteFromRealm()
         }
 

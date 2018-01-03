@@ -80,6 +80,7 @@ public class Constants {
     public final static String ACTION_ALARMCHANGED = "android.intent.action.ALARM_CHANGED";
     //DeviceAlarmController intent extras
     public final static String EXTRA_REQUESTCODE = "requestCode";
+    public final static String EXTRA_MILLIS_SLOT = "EXTRA_MILLIS_SLOT";
     // > alarm set flag to remove alarm icon later
     public final static String EXTRA_ALARMSET = "alarmSet";
 
