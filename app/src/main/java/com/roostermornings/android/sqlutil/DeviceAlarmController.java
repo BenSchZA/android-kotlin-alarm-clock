@@ -67,31 +67,49 @@ public final class DeviceAlarmController {
         deviceAlarmTableManager = new DeviceAlarmTableManager(context);
     }
 
-    //Take a set of alarms and recreate intents, overwriting if already existing, and clearing changed flag if set
+    // Take a set of alarms and recreate intents, overwriting if already existing, and clearing changed flag if set
     public void refreshAlarms(List<DeviceAlarm> deviceAlarmList) {
         for (DeviceAlarm deviceAlarm : deviceAlarmList) {
             setAlarm(deviceAlarm, false);
         }
 
-        //Clear all changed flags
+        // Clear all changed flags
         deviceAlarmTableManager.clearChanged();
     }
 
-    //Create pending intent for individual alarm (done once for each alarm in set)
+    // Create pending intent for individual alarm (done once for each alarm in set)
     private void setAlarm(DeviceAlarm deviceAlarm, Boolean cancel) {
         if (deviceAlarm.getEnabled()) {
             alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             Calendar alarmCalendar = Calendar.getInstance();
             Calendar systemCalendar = Calendar.getInstance();
 
+            alarmCalendar.set(alarmCalendar.get(Calendar.YEAR), alarmCalendar.get(Calendar.MONTH), alarmCalendar.get(Calendar.DATE), deviceAlarm.getHour(), deviceAlarm.getMinute());
+            alarmCalendar.set(Calendar.WEEK_OF_MONTH, systemCalendar.get(Calendar.WEEK_OF_MONTH));
+            alarmCalendar.set(Calendar.DAY_OF_WEEK, deviceAlarm.getDay());
+            alarmCalendar.set(Calendar.SECOND, 0);
+            alarmCalendar.set(Calendar.MILLISECOND, 0);
+
+            long alarmTime = alarmCalendar.getTimeInMillis();
+            long systemTime = systemCalendar.getTimeInMillis();
+
+            // Set alarm time to one week in future If specified day and time of alarm is already in the past
+            int WEEK_OF_MONTH = alarmCalendar.get(Calendar.WEEK_OF_MONTH);
+            while (alarmTime < systemTime) {
+                WEEK_OF_MONTH += 1;
+                alarmCalendar.set(Calendar.WEEK_OF_MONTH, WEEK_OF_MONTH);
+                alarmTime = alarmCalendar.getTimeInMillis();
+            }
+            // Store the alarm table with the alarm's new date and time
+            deviceAlarmTableManager.updateAlarmMillis(deviceAlarm.getPiId(), alarmTime);
+            deviceAlarm.setMillis(alarmTime);
+
             Intent alarmIntent = new Intent(context, DeviceAlarmReceiver.class);
             alarmIntent.setAction(Constants.ACTTION_ALARMRECEIVER);
             alarmIntent.putExtra(Constants.EXTRA_REQUESTCODE, deviceAlarm.getPiId());
             alarmIntent.putExtra(Constants.EXTRA_UID, deviceAlarm.getSetId());
-
-            if (deviceAlarm.getRecurring()) {
-                alarmIntent.putExtra(Constants.EXTRA_RECURRING, true);
-            }
+            alarmIntent.putExtra(Constants.EXTRA_RECURRING, deviceAlarm.getRecurring());
+            alarmIntent.putExtra(Constants.EXTRA_MILLIS_SLOT, deviceAlarm.getMillis());
 
             PendingIntent temp  = PendingIntent.getBroadcast(context,
                     deviceAlarm.getPiId(), alarmIntent,
@@ -109,36 +127,16 @@ public final class DeviceAlarmController {
                 realmManagerAlarmFailureLog.tryDeleteAlarmFailureLogByUIDAndPIID(deviceAlarm.getSetId(), deviceAlarm.getPiId());
             }
 
-            //Use setAlarm with cancel Boolean set to true - this recreates intent in order to clear it
+            // Use setAlarm with cancel Boolean set to true - this recreates intent in order to clear it
             if(cancel) {
-                //Cancel alarm intent
+                // Cancel alarm intent
                 alarmMgr.cancel(alarmPendingIntent);
                 alarmPendingIntent.cancel();
 
-                //The below method is reeeaaallly delayed...?
+                // The below method is reeeaaallly delayed...?
                 //alarmPendingIntent.cancel();
                 return;
             }
-
-            alarmCalendar.set(alarmCalendar.get(Calendar.YEAR), alarmCalendar.get(Calendar.MONTH), alarmCalendar.get(Calendar.DATE), deviceAlarm.getHour(), deviceAlarm.getMinute());
-            alarmCalendar.set(Calendar.WEEK_OF_MONTH, systemCalendar.get(Calendar.WEEK_OF_MONTH));
-            alarmCalendar.set(Calendar.DAY_OF_WEEK, deviceAlarm.getDay());
-            alarmCalendar.set(Calendar.SECOND, 0);
-            alarmCalendar.set(Calendar.MILLISECOND, 0);
-
-            long alarmTime = alarmCalendar.getTimeInMillis();
-            long systemTime = systemCalendar.getTimeInMillis();
-
-            //set alarm time to one week in future If specified day and time of alarm is already in the past
-            int WEEK_OF_MONTH = alarmCalendar.get(Calendar.WEEK_OF_MONTH);
-            while (alarmTime < systemTime) {
-                WEEK_OF_MONTH += 1;
-                alarmCalendar.set(Calendar.WEEK_OF_MONTH, WEEK_OF_MONTH);
-                alarmTime = alarmCalendar.getTimeInMillis();
-            }
-            //store the alarm table with the alarm's new date and time
-            deviceAlarmTableManager.updateAlarmMillis(deviceAlarm.getPiId(), alarmTime);
-            deviceAlarm.setMillis(alarmTime);
 
             if(pendingIntentExists) {
                 // Update AlarmFailureLog ActiveAndroid db entry
@@ -156,17 +154,17 @@ public final class DeviceAlarmController {
                 realmManagerAlarmFailureLog.updateOrCreateAlarmFailureLogEntry(alarmFailureLog);
             }
 
-            //if newer version of Android, create info pending intent
+            // If newer version of Android, create info pending intent
             if (hasLollipop()) {
                 Intent alarmInfoIntent = new Intent(context, DeviceAlarmFullScreenActivity.class);
                 PendingIntent alarmInfoPendingIntent = PendingIntent.getActivity(context, 0, alarmInfoIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-                //required for setting alarm clock
+                // Required for setting alarm clock
                 AlarmManager.AlarmClockInfo alarmInfo = new AlarmManager.AlarmClockInfo(alarmTime, alarmInfoPendingIntent);
                 alarmMgr.setAlarmClock(alarmInfo, alarmPendingIntent);
 
             } else if(hasKitKat()) {
-                //if older version of android, don't require info pending intent
+                // If older version of android, don't require info pending intent
                 alarmMgr.setExact(AlarmManager.RTC_WAKEUP, alarmTime, alarmPendingIntent);
                 // Show alarm in the status bar
                 Intent alarmChanged = new Intent(Constants.ACTION_ALARMCHANGED);
@@ -183,7 +181,7 @@ public final class DeviceAlarmController {
     }
 
     public void snoozeAlarm(String setId, Boolean cancel){
-        //Add new pending intent for 10 minutes time
+        // Add new pending intent for 10 minutes time
         alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Calendar alarmCalendar = Calendar.getInstance();
 
@@ -204,7 +202,7 @@ public final class DeviceAlarmController {
             //Cancel alarm intent
             alarmPendingIntent.cancel();
             //Clear foreground notification
-            NotificationManager notificationManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.cancel(Constants.AUDIOSERVICE_NOTIFICATION_ID);
             //Stop audio service
             context.stopService(new Intent(context, AudioService.class));

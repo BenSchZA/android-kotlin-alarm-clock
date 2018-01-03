@@ -34,32 +34,43 @@ class DeviceAlarmReceiver : WakefulBroadcastReceiver() {
     @Named("default") lateinit var sharedPreferences: SharedPreferences
     @Inject lateinit var realmManagerAlarmFailureLog: RealmManager_AlarmFailureLog
 
+    private var alarmUid = ""
+    private var requestCode = -1
+    private var millisSlot = -1L
+    private var isRecurring = false
+
     override fun onReceive(context: Context, intent: Intent) {
 
         BaseApplication.getRoosterApplicationComponent().inject(this)
 
+        // Get extras passed in from DeviceAlarmController class
+        val isSnoozeActivation = intent.getBooleanExtra(Constants.EXTRA_SNOOZE_ACTIVATION, false)
+        isRecurring = intent.getBooleanExtra(Constants.EXTRA_RECURRING, false)
+        alarmUid = intent.getStringExtra(Constants.EXTRA_UID)
+        requestCode = intent.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)
+        millisSlot = intent.getLongExtra(Constants.EXTRA_MILLIS_SLOT, -1L)
+
         //Check if vibrator enabled in user settings
         setVibrate(context)
 
-        if (intent.getBooleanExtra(Constants.EXTRA_SNOOZE_ACTIVATION, false)) {
+        if (isSnoozeActivation) {
             //Activate snooze alarm
             val broadcastIntent = Intent(Constants.ACTION_SNOOZE_ACTIVATION)
-            broadcastIntent.putExtra(Constants.EXTRA_ALARMID, intent.getStringExtra(Constants.EXTRA_UID))
+            broadcastIntent.putExtra(Constants.EXTRA_ALARMID, alarmUid)
             broadcastIntent.putExtra(Constants.DEVICE_ALARM_RECEIVER_WAKEFUL_INTENT, Intent(context, DeviceAlarmReceiver::class.java))
-            broadcastIntent.putExtra(Constants.EXTRA_REQUESTCODE, intent.getIntExtra(Constants.EXTRA_REQUESTCODE, -1))
+            broadcastIntent.putExtra(Constants.EXTRA_REQUESTCODE, requestCode)
             context.sendBroadcast(broadcastIntent)
             return
         }
 
-        //Reschedule alarm intents for recurring weekly
-        rescheduleAlarmIntents(intent)
-
         //Start audio service with alarm UID
         val audioServiceIntent = Intent(context, AudioService::class.java)
-        audioServiceIntent.putExtra(Constants.EXTRA_ALARMID, intent.getStringExtra(Constants.EXTRA_UID))
+        audioServiceIntent.putExtra(Constants.EXTRA_ALARMID, alarmUid)
         //Include intent to enable finishing wakeful intent later in AudioService
         audioServiceIntent.putExtra(Constants.DEVICE_ALARM_RECEIVER_WAKEFUL_INTENT, Intent(context, DeviceAlarmReceiver::class.java))
-        audioServiceIntent.putExtra(Constants.EXTRA_REQUESTCODE, intent.getIntExtra(Constants.EXTRA_REQUESTCODE, -1))
+        audioServiceIntent.putExtra(Constants.EXTRA_REQUESTCODE, requestCode)
+        // Put millis slot as extra, to refer to when accessing Realm log
+        audioServiceIntent.putExtra(Constants.EXTRA_MILLIS_SLOT, millisSlot)
 
         if (RoosterUtils.hasO()) {
             context.startForegroundService(audioServiceIntent)
@@ -67,23 +78,27 @@ class DeviceAlarmReceiver : WakefulBroadcastReceiver() {
             context.startService(audioServiceIntent)
         }
 
-        realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(intent.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)) {
+        realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
             it.fired = true
             it.firedTime = Calendar.getInstance().timeInMillis
         }
         // Close Realm object
         realmManagerAlarmFailureLog.closeRealm()
+
+        /** Reschedule alarm intents for recurring weekly,
+         * ensure this is done after Realm log processed. */
+        rescheduleAlarmIntents(intent)
     }
 
     private fun rescheduleAlarmIntents(intent: Intent) {
         //if this is a recurring alarm, set another pending intent for next week same time
-        if (intent.getBooleanExtra(Constants.EXTRA_RECURRING, false)) {
+        if (isRecurring) {
             //make record that this alarm has been changed, refresh as necessary
-            alarmTableManager.setAlarmChanged(intent.getIntExtra(Constants.EXTRA_REQUESTCODE, 0).toLong())
+            alarmTableManager.setAlarmChanged(requestCode.toLong())
             alarmController.refreshAlarms(alarmTableManager.selectChanged())
         } else {
             //Set alarm to disabled if fired and not recurring - once all alarms in set are disabled, then toggle enabled in GUI
-            alarmTableManager.setAlarmEnabled(intent.getIntExtra(Constants.EXTRA_REQUESTCODE, 0).toLong(), false)
+            alarmTableManager.setAlarmEnabled(requestCode.toLong(), false)
         }
     }
 
