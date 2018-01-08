@@ -12,8 +12,7 @@
     android:background="@drawable/main_background_layer_list"
     android:orientation="vertical"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.roostermornings.android.activity.DiscoverFragmentActivity"
-    tools:showIn="@layout/activity_my_alarms">
+    tools:context="com.roostermornings.android.activity.DiscoverFragmentActivity">
 
     <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
