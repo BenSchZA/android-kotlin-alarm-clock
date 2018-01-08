@@ -45,6 +45,12 @@ android {
             abiFilters "armeabi-v7a", "x86"
         }
     }
+    lintOptions {
+        checkReleaseBuilds false
+        // Or, if you prefer, you can continue to check for errors in release builds,
+        // but continue the build even when errors are found:
+        abortOnError false
+    }
 
     //As of AS 3.0
     //Learn more at https://d.android.com/r/tools/flavorDimensions-missing-error-message.html
@@ -62,8 +68,8 @@ android {
             //Beta version name is release version name at point of diversion, with alpha b
 
             //Release
-            versionCode 46
-            versionName "2.4.0"
+            versionCode 47
+            versionName "2.4.1"
 
             manifestPlaceholders = [
                     app_icon      : "@mipmap/ic_launcher",
@@ -90,9 +96,9 @@ android {
     buildTypes {
         release {
             //During debugging, enable debugging... and disable minify to get proper stacktraces
-            debuggable true
-            //minifyEnabled true
-            //shrinkResources true
+            //debuggable true
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             consumerProguardFiles 'proguard-rules.txt'
             proguardFile 'proguard-square-okio.pro'
