@@ -29,7 +29,7 @@ android {
         }
     }
     compileSdkVersion 26
-    buildToolsVersion '26.0.2'
+    buildToolsVersion '27.0.1'
     defaultConfig {
         applicationId "com.roostermornings.android"
         minSdkVersion 17
@@ -90,9 +90,9 @@ android {
     buildTypes {
         release {
             //During debugging, enable debugging... and disable minify to get proper stacktraces
-            //debuggable true
-            minifyEnabled true
-            shrinkResources true
+            debuggable true
+            //minifyEnabled true
+            //shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             consumerProguardFiles 'proguard-rules.txt'
             proguardFile 'proguard-square-okio.pro'
