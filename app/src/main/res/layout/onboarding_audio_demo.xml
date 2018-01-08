@@ -67,6 +67,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!--android:src="@drawable/rooster_vector_play_button"-->
     <ImageButton
         android:id="@+id/playPause"
         android:layout_width="0dp"
@@ -77,7 +78,7 @@
         android:layout_marginTop="120dp"
         android:background="@drawable/md_transparent"
         android:scaleType="fitCenter"
-        android:src="@drawable/rooster_vector_play_button"
+        app:srcCompat="@drawable/rooster_vector_play_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"
