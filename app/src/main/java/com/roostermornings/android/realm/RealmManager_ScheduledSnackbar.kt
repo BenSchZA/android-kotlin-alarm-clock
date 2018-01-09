@@ -20,7 +20,7 @@ import javax.inject.Inject
 /**
  * Created by bscholtz on 2017/11/15.
  */
-class RealmScheduledSnackbar {
+class RealmManager_ScheduledSnackbar {
     @Inject lateinit var realm: Realm
 
     private var realmResults: RealmResults<ScheduledSnackbar>? = null

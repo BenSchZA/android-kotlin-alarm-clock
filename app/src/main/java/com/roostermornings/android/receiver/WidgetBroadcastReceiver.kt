@@ -16,7 +16,7 @@ class WidgetBroadcastReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         if(RoosterUtils.hasM()) {
-            AlarmToggleWidget.sendUpdateBroadcast(context)
+            //AlarmToggleWidget.sendUpdateBroadcast(context)
         } else {
             when (intent.action) {
                 Intent.ACTION_USER_PRESENT -> context.startService(Intent(context, WidgetService::class.java))

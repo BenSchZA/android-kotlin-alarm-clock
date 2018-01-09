@@ -39,6 +39,7 @@ import com.roostermornings.android.fragment.message_status.MessageStatusSentFrag
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.util.Constants;
+import com.roostermornings.android.util.FontsOverride;
 
 import javax.inject.Inject;
 

@@ -13,7 +13,7 @@ import com.flipboard.bottomsheet.BottomSheetLayout
 import com.google.gson.annotations.Expose
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.R
-import com.roostermornings.android.realm.RealmScheduledSnackbar
+import com.roostermornings.android.realm.RealmManager_ScheduledSnackbar
 import io.realm.Realm
 import java.util.*
 import javax.inject.Inject
@@ -28,7 +28,7 @@ class SnackbarManager(val activity: Activity, val activityContentView: Coordinat
     private var snackbarQueue = ArrayList<SnackbarQueueElement>()
 
     @Inject lateinit var realm: Realm
-    @Inject lateinit var realmScheduledSnackbar: RealmScheduledSnackbar
+    @Inject lateinit var realmManagerScheduledSnackbar: RealmManager_ScheduledSnackbar
 
     /** Timer to manage refreshing of current snackbar content.*/
     private var timerTask: TimerTask = object: TimerTask(){ override fun run() {} }
@@ -110,12 +110,12 @@ class SnackbarManager(val activity: Activity, val activityContentView: Coordinat
         bottomSheet = activity.findViewById(R.id.snackbarBottomsheet)
 
         /** On initialization, fetch all relevant snackbars for current activity.*/
-        realmScheduledSnackbar.getScheduledSnackbarsForActivity(activity).forEach {
+        realmManagerScheduledSnackbar.getScheduledSnackbarsForActivity(activity).forEach {
             if(addSnackbarToQueue(it.snackbarQueueElement)) checkQueue()
         }
         /** Listen for scheduled snackbars added to realm database while activity is running.*/
-        realmScheduledSnackbar.listenForScheduledSnackbars(activity) {
-            realmScheduledSnackbar.getScheduledSnackbarsForActivity(activity).forEach {
+        realmManagerScheduledSnackbar.listenForScheduledSnackbars(activity) {
+            realmManagerScheduledSnackbar.getScheduledSnackbarsForActivity(activity).forEach {
                 if(addSnackbarToQueue(it.snackbarQueueElement)) checkQueue()
             }
         }
@@ -150,8 +150,8 @@ class SnackbarManager(val activity: Activity, val activityContentView: Coordinat
     /** Ensure this method is called, else instances of this class will be kept and called from
      * the RealmResults listener.*/
     fun destroy() {
-        realmScheduledSnackbar.removeListeners()
-        realmScheduledSnackbar.closeRealm()
+        realmManagerScheduledSnackbar.removeListeners()
+        realmManagerScheduledSnackbar.closeRealm()
     }
 
     /** Set the previous state for activity side logic*/

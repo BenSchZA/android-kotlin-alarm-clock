@@ -60,7 +60,6 @@ import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.domain.User;
 import com.roostermornings.android.firebase.AuthManager;
-import com.roostermornings.android.firebase.UserMetrics;
 import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.apis.NodeIHTTPClient;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
@@ -69,6 +68,7 @@ import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmController;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
+import com.roostermornings.android.util.ConnectivityUtils;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.InternetHelper;
 import com.roostermornings.android.util.JSONPersistence;
@@ -110,36 +110,6 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
     @Inject AuthManager authManager;
 
     protected abstract void inject(RoosterApplicationComponent component);
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        if (mAuth == null) mAuth = FirebaseAuth.getInstance();
-        mAuth.addAuthStateListener(mAuthListener);
-        // Log active day
-        UserMetrics.INSTANCE.logActiveDays();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (mAuthListener != null) {
-            mAuth.removeAuthStateListener(mAuthListener);
-        }
-    }
-
-    //TODO
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//        if(getFirebaseUser() != null) startServices(true);
-//    }
-//
-//    @Override
-//    public void onPause() {
-//        super.onPause();
-//        startServices(false);
-//    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -262,6 +232,34 @@ public abstract class BaseActivity extends AppCompatActivity implements Validato
 
         return baseApplication.getGoogleAPIService();
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (mAuth == null) mAuth = FirebaseAuth.getInstance();
+        mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+    }
+
+    //TODO
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        if(getFirebaseUser() != null) startServices(true);
+//    }
+//
+//    @Override
+//    public void onPause() {
+//        super.onPause();
+//        startServices(false);
+//    }
 
     public void showProgressDialog() {
         if (progressDialog == null) {

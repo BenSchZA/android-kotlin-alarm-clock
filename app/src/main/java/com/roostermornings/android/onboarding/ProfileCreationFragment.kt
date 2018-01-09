@@ -39,7 +39,6 @@ import com.roostermornings.android.firebase.UserMetrics
 import com.roostermornings.android.fragment.base.BaseFragment
 import com.roostermornings.android.util.Toaster
 import kotlinx.android.synthetic.main.fragment_onboarding_profile_creation.*
-import org.json.JSONObject
 import java.util.*
 import javax.inject.Inject
 
@@ -128,7 +127,7 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
 
     override fun onPause() {
         super.onPause()
-        activity?.let { mGoogleApiClient?.stopAutoManage(it) }
+        mGoogleApiClient?.stopAutoManage(activity)
         mGoogleApiClient?.disconnect()
     }
 
@@ -137,10 +136,10 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
         return initiate(inflater, R.layout.fragment_onboarding_profile_creation, container, false)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        when(arguments?.getSerializable(ARG_FROM_SOURCE) as Source) {
+        when(arguments.getSerializable(ARG_FROM_SOURCE) as Source) {
             Source.FRIENDS_PAGE -> {
                 signin_button_notnow.visibility = View.GONE
                 terms_and_conditions_link.visibility = View.GONE
@@ -170,13 +169,15 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
         //instantiate saripaar validator to validate fields with NotEmpty annotations
         validator.setValidationListener(this)
 
-        val animationCloud = TranslateAnimation(0f, 0f, -10f, 10f)
-        animationCloud.duration = 2000
-        animationCloud.fillAfter = true
-        animationCloud.repeatCount = -1
-        animationCloud.repeatMode = Animation.REVERSE
+        view?.let {
+            val animationCloud = TranslateAnimation(0f, 0f, -10f, 10f)
+            animationCloud.duration = 2000
+            animationCloud.fillAfter = true
+            animationCloud.repeatCount = -1
+            animationCloud.repeatMode = Animation.REVERSE
 
-        roosterCloud?.animation = animationCloud
+            roosterCloud?.animation = animationCloud
+        }
     }
 
     override fun fragmentVisible(position: Int) {}
@@ -224,13 +225,10 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
 
         // Build a GoogleApiClient with access to the Google Sign-In API and the
         // options specified by gso.
-        context?.let { context -> activity?.let { activity ->
-                mGoogleApiClient = GoogleApiClient.Builder(context)
-                        .enableAutoManage(activity, null)
-                        .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                        .build()
-            }
-        }
+        mGoogleApiClient = GoogleApiClient.Builder(context)
+                .enableAutoManage(this.activity, null)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build()
     }
 
     @OnClick(R.id.already_user_textview)
@@ -345,7 +343,7 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
     private fun authWithFacebook(token: AccessToken) {
         authManager.firebaseAuthWithFacebook(token, object: AuthManager.AuthInterface {
             override fun onAuthSuccess(task: Task<AuthResult>) {
-                activity?.let { authManager.performMigration(it) }
+                authManager.performMigration(activity)
                 UserMetrics.generateNewUserMetricsEntry()
                 changeLayoutSignedIn()
                 proceedToNextPage()
@@ -370,7 +368,7 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
     private fun authWithGoogle(result: GoogleSignInResult) {
         authManager.firebaseAuthWithGoogle(result, object: AuthManager.AuthInterface {
             override fun onAuthSuccess(task: Task<AuthResult>) {
-                activity?.let { authManager.performMigration(it) }
+                authManager.performMigration(activity)
                 UserMetrics.generateNewUserMetricsEntry()
                 changeLayoutSignedIn()
                 proceedToNextPage()
@@ -431,7 +429,7 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
         authManager.firebaseAuthWithEmail(name, email, password, mAlreadyUser,
                 object: AuthManager.AuthInterface {
             override fun onAuthSuccess(task: Task<AuthResult>) {
-                activity?.let { authManager.performMigration(it) }
+                authManager.performMigration(activity)
                 UserMetrics.generateNewUserMetricsEntry()
                 changeLayoutSignedIn()
                 proceedToNextPage()
@@ -454,7 +452,7 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
     }
 
     private fun changeLayoutSignedIn() {
-        if(arguments?.getBoolean(ARG_FROM_SOURCE) == true) {
+        if(arguments.getBoolean(ARG_FROM_SOURCE)) {
             signUpLayout?.visibility = View.INVISIBLE
             emailLayout?.visibility = View.INVISIBLE
             signedInLayout?.visibility = View.GONE

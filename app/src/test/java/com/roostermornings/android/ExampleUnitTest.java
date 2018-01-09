@@ -5,7 +5,10 @@
 
 package com.roostermornings.android;
 
+import org.junit.Test;
+
 import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * Example local unit test, which will execute on the development machine (host).

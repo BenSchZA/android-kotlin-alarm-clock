@@ -4,7 +4,7 @@ import android.content.Context
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4
 import com.roostermornings.android.realm.AlarmFailureLog
-import com.roostermornings.android.realm.RealmAlarmFailureLog
+import com.roostermornings.android.realm.RealmManager_AlarmFailureLog
 import com.roostermornings.android.util.Constants
 import io.realm.Realm
 import org.junit.runner.RunWith
@@ -26,7 +26,7 @@ import org.junit.After
 class AlarmFailureLog_IUT {
     private lateinit var mockContext: Context
     private lateinit var mockRealm: Realm
-    private lateinit var realmAlarmFailureLog: RealmAlarmFailureLog
+    private lateinit var realmManagerAlarmFailureLog: RealmManager_AlarmFailureLog
 
     private val afl: AlarmFailureLog = AlarmFailureLog()
 
@@ -54,8 +54,8 @@ class AlarmFailureLog_IUT {
 
         this.mockRealm = Realm.getDefaultInstance()
 
-        realmAlarmFailureLog = RealmAlarmFailureLog(mockContext)
-        realmAlarmFailureLog.clearOldAlarmFailureLogs()
+        realmManagerAlarmFailureLog = RealmManager_AlarmFailureLog(mockContext)
+        realmManagerAlarmFailureLog.clearOldAlarmFailureLogs()
     }
 
     private fun configureAlarmFailureLogEntry() {
@@ -77,7 +77,7 @@ class AlarmFailureLog_IUT {
             it.setPendingIntentID(1)
             it.setScheduledTime(Constants.TIME_MILLIS_1_HOUR)
             it.setFiredTime(Constants.TIME_MILLIS_1_HOUR)
-            realmAlarmFailureLog.updateOrCreateAlarmFailureLogEntry(it)
+            realmManagerAlarmFailureLog.updateOrCreateAlarmFailureLogEntry(it)
         }
     }
 
@@ -157,15 +157,15 @@ class AlarmFailureLog_IUT {
     * Pass a Realm database operation as a lambda (still need to check this is what I think it is...)*/
 
     private fun testPermutation(assertFailure: Boolean, operation: (AlarmFailureLog) -> Unit) {
-        realmAlarmFailureLog.getAlarmFailureLogMillisSlot(Constants.TIME_MILLIS_1_HOUR) {
+        realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(Constants.TIME_MILLIS_1_HOUR) {
             alarmFailureLog ->
             operation(alarmFailureLog)
         }
 
-        realmAlarmFailureLog.processAlarmFailures(false)
-        assertThat(realmAlarmFailureLog.getAlarmFailures().isNotEmpty(), `is`(assertFailure))
+        realmManagerAlarmFailureLog.processAlarmFailures(false)
+        assertThat(realmManagerAlarmFailureLog.getAlarmFailures().isNotEmpty(), `is`(assertFailure))
 
-        realmAlarmFailureLog.getAlarmFailureLogMillisSlot(Constants.TIME_MILLIS_1_HOUR) {
+        realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(Constants.TIME_MILLIS_1_HOUR) {
             alarmFailureLog ->
             alarmFailureLog.deleteFromRealm()
         }

@@ -75,7 +75,7 @@ class NumberEntryFragment: BaseFragment(), Validator.ValidationListener {
         return initiate(inflater, R.layout.fragment_number_entry, container, false)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
     }
 
@@ -87,9 +87,7 @@ class NumberEntryFragment: BaseFragment(), Validator.ValidationListener {
         editor.apply()
 
         val mobileNumberString = mobileNumber.text.toString().trim { it <= ' ' }
-        context?.let { context ->
-            FirebaseNetwork.updateProfileCellNumber(context, mobileNumber.text.toString().trim { it <= ' ' })
-        }
+        FirebaseNetwork.updateProfileCellNumber(context, mobileNumber.text.toString().trim { it <= ' ' })
 
         mListener?.onMobileNumberValidated(mobileNumberString)
     }

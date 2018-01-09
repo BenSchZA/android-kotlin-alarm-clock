@@ -23,7 +23,7 @@ import javax.inject.Named
 
 import android.content.Context.VIBRATOR_SERVICE
 import com.facebook.FacebookSdk.getApplicationContext
-import com.roostermornings.android.realm.RealmAlarmFailureLog
+import com.roostermornings.android.realm.RealmManager_AlarmFailureLog
 import java.util.*
 
 class DeviceAlarmReceiver : WakefulBroadcastReceiver() {
@@ -32,7 +32,7 @@ class DeviceAlarmReceiver : WakefulBroadcastReceiver() {
     @Inject lateinit var alarmTableManager: DeviceAlarmTableManager
     @Inject
     @Named("default") lateinit var sharedPreferences: SharedPreferences
-    @Inject lateinit var realmAlarmFailureLog: RealmAlarmFailureLog
+    @Inject lateinit var realmManagerAlarmFailureLog: RealmManager_AlarmFailureLog
 
     private var alarmUid = ""
     private var requestCode = -1
@@ -78,12 +78,12 @@ class DeviceAlarmReceiver : WakefulBroadcastReceiver() {
             context.startService(audioServiceIntent)
         }
 
-        realmAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
+        realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
             it.fired = true
             it.firedTime = Calendar.getInstance().timeInMillis
         }
         // Close Realm object
-        realmAlarmFailureLog.closeRealm()
+        realmManagerAlarmFailureLog.closeRealm()
 
         /** Reschedule alarm intents for recurring weekly,
          * ensure this is done after Realm log processed. */
