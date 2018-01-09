@@ -100,8 +100,8 @@ class FriendsMyFragment1 : BaseFragment() {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View {
         // Inflate the layout for this fragment
         val view = initiate(inflater, R.layout.fragment_friends_1, container, false)
 
@@ -157,7 +157,7 @@ class FriendsMyFragment1 : BaseFragment() {
     }
 
     //NB: bind ButterKnife to activityContentView and then initialise UI elements
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         //Sort names alphabetically before notifying adapter
         sortNamesUsers(mUsers)

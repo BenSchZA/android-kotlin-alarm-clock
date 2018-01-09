@@ -250,6 +250,8 @@ object FirebaseNetwork {
         val fUser = FirebaseAuth.getInstance().currentUser
 
         if (fUser?.uid?.isNotBlank() == true) {
+            UserMetrics.updateUserMetricsEntry()
+
             val user = User(null,
                     "android",
                     deviceToken,
