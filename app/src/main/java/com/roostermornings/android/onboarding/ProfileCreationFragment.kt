@@ -455,11 +455,11 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
         if(arguments.getBoolean(ARG_FROM_SOURCE)) {
             signUpLayout?.visibility = View.INVISIBLE
             emailLayout?.visibility = View.INVISIBLE
-            signedInLayout.visibility = View.GONE
+            signedInLayout?.visibility = View.GONE
         } else {
             signUpLayout?.visibility = View.INVISIBLE
             emailLayout?.visibility = View.INVISIBLE
-            signedInLayout.visibility = View.VISIBLE
+            signedInLayout?.visibility = View.VISIBLE
         }
     }
 }
