@@ -211,7 +211,9 @@ class AlarmToggleWidget : AppWidgetProvider() {
             Toast.makeText(context, "Touched activityContentView " + viewIndex, Toast.LENGTH_SHORT).show()
         }
 
-        sendUpdateBroadcast(context)
+        if(RoosterUtils.hasM()) {
+            context.startService(Intent(context, WidgetService::class.java))
+        }
 
         super.onReceive(context, intent)
     }

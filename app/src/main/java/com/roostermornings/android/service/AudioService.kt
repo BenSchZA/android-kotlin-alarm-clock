@@ -56,7 +56,7 @@ import javax.inject.Named
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.support.v4.content.WakefulBroadcastReceiver
 import com.google.firebase.auth.FirebaseUser
-import com.roostermornings.android.realm.RealmManager_AlarmFailureLog
+import com.roostermornings.android.realm.RealmAlarmFailureLog
 import com.roostermornings.android.util.*
 
 // Service to manage playing and pausing audio during Rooster alarm
@@ -110,7 +110,7 @@ class AudioService : Service() {
     @Inject lateinit var jsonPersistence: JSONPersistence
     @Inject
     lateinit var channelManager: ChannelManager
-    @Inject lateinit var realmManagerAlarmFailureLog: RealmManager_AlarmFailureLog
+    @Inject lateinit var realmAlarmFailureLog: RealmAlarmFailureLog
     var firebaseUser: FirebaseUser? = null
     @Inject lateinit var connectivityUtils: ConnectivityUtils
 
@@ -259,7 +259,7 @@ class AudioService : Service() {
         /** Unique millis slot for Realm log */
         millisSlot = intent?.getLongExtra(Constants.EXTRA_MILLIS_SLOT, -1L)?:-1L
 
-        realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
+        realmAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
             it.activated = true
         }
 
@@ -267,12 +267,12 @@ class AudioService : Service() {
         if (!mRunning) {
             mRunning = true
 
-            realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
+            realmAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
                 it.running = true
             }
 
             connectivityUtils.isActive { active ->
-                realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
+                realmAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
                     it.internet = active
                     activeInternetConnection = active
                 }
@@ -353,13 +353,13 @@ class AudioService : Service() {
         socialAudioItems = audioTableManager.extractUnheardSocialAudioFiles()
 
         if(channelAudioItems.isNotEmpty()) {
-            realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
+            realmAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
                 it.content = true
             }
         }
 
         if(StrUtils.notNullOrEmpty(mThis.alarmChannelUid)) {
-            realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
+            realmAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
                 it.channel = true
             }
         }
@@ -398,7 +398,7 @@ class AudioService : Service() {
             // Download any social or channel audio files
             attemptContentUriRetrieval(alarm)
 
-            realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
+            realmAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
                 it.stream = true
             }
         } else {
@@ -539,7 +539,7 @@ class AudioService : Service() {
                 if (streamMediaPlayer.isPlaying) return@OnPreparedListener
                 streamMediaPlayer.start()
 
-                realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
+                realmAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
                     it.heard = true
                 }
 
@@ -651,7 +651,7 @@ class AudioService : Service() {
             mediaPlayerRooster.setOnPreparedListener {
                 mediaPlayerRooster.start()
 
-                realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
+                realmAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
                     it.heard = true
                 }
 
@@ -832,7 +832,7 @@ class AudioService : Service() {
         }
 
         // Close Realm object
-        realmManagerAlarmFailureLog.closeRealm()
+        realmAlarmFailureLog.closeRealm()
 
         // Delete audio records from arraylist
         audioItems.clear()
@@ -973,7 +973,7 @@ class AudioService : Service() {
             if (isAudioPlaying) return
             if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method + " started.")
 
-            realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
+            realmAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
                 it.def = true
             }
 
@@ -1021,7 +1021,7 @@ class AudioService : Service() {
                     if (mediaPlayerRooster.isPlaying) return@OnPreparedListener
                     mediaPlayerDefault.start()
 
-                    realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
+                    realmAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
                         it.heard = true
                     }
 
@@ -1080,12 +1080,12 @@ class AudioService : Service() {
         }
 
         if(failsafeRingtone != null && failsafeRingtone!!.isPlaying) {
-            realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
+            realmAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
                 it.heard = true
                 it.failsafe = true
             }
         } else {
-            realmManagerAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
+            realmAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
                 it.failsafe = true
             }
         }

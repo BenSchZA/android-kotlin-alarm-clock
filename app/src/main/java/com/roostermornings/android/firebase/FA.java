@@ -8,8 +8,6 @@ package com.roostermornings.android.firebase;
 import android.os.Bundle;
 import android.support.annotation.Keep;
 
-import org.jetbrains.annotations.NotNull;
-
 import static com.roostermornings.android.BaseApplication.firebaseAnalytics;
 
 

@@ -111,51 +111,49 @@ class ChannelDemoFragment : BaseFragment(), ChannelDemoInterface, FragmentInterf
         return initiate(inflater, R.layout.fragment_onboarding_channel_demo, container, false)
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        view?.let {
-            val recyclerView = view.gridRecylerView as RecyclerView
-            val layoutManager = GridLayoutManager(context, 2)
+        val recyclerView = view.gridRecylerView as RecyclerView
+        val layoutManager = GridLayoutManager(context, 2)
 
-            // Create a custom SpanSizeLookup where the first item spans both columns
-            layoutManager.spanSizeLookup = (object : GridLayoutManager.SpanSizeLookup() {
-                        override fun getSpanSize(position: Int): Int {
-                            return when(position) {
-                                0 -> 2
-                                3 -> 2
-                                6 -> 2
-                                9 -> 2
-                                else -> 1
-                            }
+        // Create a custom SpanSizeLookup where the first item spans both columns
+        layoutManager.spanSizeLookup = (object : GridLayoutManager.SpanSizeLookup() {
+                    override fun getSpanSize(position: Int): Int {
+                        return when(position) {
+                            0 -> 2
+                            3 -> 2
+                            6 -> 2
+                            9 -> 2
+                            else -> 1
                         }
-                    })
-
-            //layoutManager.gapStrategy = StaggeredGridLayoutManager.GAP_HANDLING_MOVE_ITEMS_BETWEEN_SPANS
-            recyclerView.layoutManager = layoutManager
-            recyclerView.adapter = mAdapter
-
-            try {
-                mShowcaseInterface = mAdapter
-            } catch (e: ClassCastException) {}
-
-            view.navigationFAB.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.onboarding_blue, null))
-
-            val mScrollListener = object : RecyclerView.OnScrollListener() {
-                override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
-                    val visibleItemCount = layoutManager.childCount
-                    val totalItemCount = layoutManager.itemCount
-                    val pastVisibleItems = layoutManager.findFirstVisibleItemPosition()
-                    if (pastVisibleItems + visibleItemCount >= totalItemCount) {
-                        //End of list
-                        UserMetrics.logOnboardingEvent(
-                                OnboardingJourneyEvent(subject = "Channel Demo UI")
-                                        .setType(OnboardingJourneyEvent.Companion.Event.SCROLL))
                     }
+                })
+
+        //layoutManager.gapStrategy = StaggeredGridLayoutManager.GAP_HANDLING_MOVE_ITEMS_BETWEEN_SPANS
+        recyclerView.layoutManager = layoutManager
+        recyclerView.adapter = mAdapter
+
+        try {
+            mShowcaseInterface = mAdapter
+        } catch (e: ClassCastException) {}
+
+        view.navigationFAB.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.onboarding_blue, null))
+
+        val mScrollListener = object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
+                val visibleItemCount = layoutManager.childCount
+                val totalItemCount = layoutManager.itemCount
+                val pastVisibleItems = layoutManager.findFirstVisibleItemPosition()
+                if (pastVisibleItems + visibleItemCount >= totalItemCount) {
+                    //End of list
+                    UserMetrics.logOnboardingEvent(
+                            OnboardingJourneyEvent(subject = "Channel Demo UI")
+                                    .setType(OnboardingJourneyEvent.Companion.Event.SCROLL))
                 }
             }
-            view.gridRecylerView.addOnScrollListener(mScrollListener)
         }
+        view.gridRecylerView.addOnScrollListener(mScrollListener)
     }
 
     @OnClick(R.id.navigationFAB)
@@ -191,19 +189,23 @@ class ChannelDemoFragment : BaseFragment(), ChannelDemoInterface, FragmentInterf
             //overlayFragment.sharedElementReturnTransition = DetailsTransition()
         }
 
-        if(previousOverlayFragment != null) activity.supportFragmentManager.popBackStack()
+        activity?.let { activity ->
+            if(previousOverlayFragment != null) activity.supportFragmentManager.popBackStack()
 
-        activity.supportFragmentManager
-                .beginTransaction()
-                .addSharedElement(imageView, getString(R.string.onboarding_image_transition))
-                .replace(R.id.fragmentOnboardingChannelDemo, overlayFragment)
-                .addToBackStack(null)
-                .commit()
+            activity.supportFragmentManager
+                    .beginTransaction()
+                    .addSharedElement(imageView, getString(R.string.onboarding_image_transition))
+                    .replace(R.id.fragmentOnboardingChannelDemo, overlayFragment)
+                    .addToBackStack(null)
+                    .commit()
+        }
 
         previousOverlayFragment = overlayFragment
     }
 
     override fun fragmentVisible(position: Int) {
+        val activity = activity ?: return
+
         when(position) {
             1 -> {
                 mShowcaseInterface?.startShowCase(mShowcaseHandler, activity)
