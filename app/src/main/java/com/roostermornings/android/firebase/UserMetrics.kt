@@ -6,12 +6,17 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.roostermornings.android.domain.OnboardingJourneyEvent
+import com.roostermornings.android.util.JSONPersistence
 import java.util.*
 
 /**
  * Created by bscholtz on 2017/12/14.
  */
 object UserMetrics {
+
+    private val ACTIVE_DAYS = "active_days"
+    private val USER_METRICS = "user_metrics"
+
     private fun isUserSignedIn(): Boolean {
         return FirebaseAuth.getInstance().currentUser != null
                 && FirebaseAuth.getInstance().currentUser?.isAnonymous == false
