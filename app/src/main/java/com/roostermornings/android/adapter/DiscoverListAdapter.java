@@ -26,7 +26,9 @@ import android.widget.TextView;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.DiscoverFragmentActivity;
+import com.roostermornings.android.domain.User;
 import com.roostermornings.android.firebase.FA;
+import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 

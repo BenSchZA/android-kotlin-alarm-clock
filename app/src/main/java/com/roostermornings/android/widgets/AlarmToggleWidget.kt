@@ -12,6 +12,7 @@ import com.roostermornings.android.R
 import android.app.PendingIntent
 import android.content.*
 import android.support.v4.content.LocalBroadcastManager
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.roostermornings.android.BaseApplication
@@ -211,9 +212,7 @@ class AlarmToggleWidget : AppWidgetProvider() {
             Toast.makeText(context, "Touched activityContentView " + viewIndex, Toast.LENGTH_SHORT).show()
         }
 
-        if(RoosterUtils.hasM()) {
-            context.startService(Intent(context, WidgetService::class.java))
-        }
+        sendUpdateBroadcast(context)
 
         super.onReceive(context, intent)
     }

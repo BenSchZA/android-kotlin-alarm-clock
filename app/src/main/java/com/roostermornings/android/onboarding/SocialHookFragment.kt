@@ -59,9 +59,10 @@ class SocialHookFragment: BaseFragment() {
         return initiate(inflater, R.layout.fragment_onboarding_social_hook, container, false)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        view?.let {
             val animationCloud = TranslateAnimation(0f, 0f, -10f, 10f)
             animationCloud.duration = 2000
             animationCloud.fillAfter = true
@@ -69,6 +70,7 @@ class SocialHookFragment: BaseFragment() {
             animationCloud.repeatMode = Animation.REVERSE
 
             view.roosterCloud?.animation = animationCloud
+        }
     }
 
     @OnClick(R.id.button_yes)

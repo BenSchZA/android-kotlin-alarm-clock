@@ -99,65 +99,68 @@ class SocialDemoFragment: BaseFragment() {
                         .setType(OnboardingJourneyEvent.Companion.Event.CLICK_ON))
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        view.viewFlipper.isAutoStart = true
-        view.viewFlipper.setFlipInterval(3000)
+        view?.let {
 
-        imageDrawables.forEachIndexed { index, drawableID ->
-            val drawablePerson = ResourcesCompat.getDrawable(resources, drawableID, null)
-            val socialTitle = imageTitles[index]
-            val socialDescription = imageDescriptions[index]
+            view.viewFlipper.isAutoStart = true
+            view.viewFlipper.setFlipInterval(3000)
 
-            val vfElement = View.inflate(context, R.layout.onboarding_audio_demo, null)
+            imageDrawables.forEachIndexed { index, drawableID ->
+                val drawablePerson = ResourcesCompat.getDrawable(resources, drawableID, null)
+                val socialTitle = imageTitles[index]
+                val socialDescription = imageDescriptions[index]
 
-            val color = ColorDrawable(ResourcesCompat.getColor(resources, R.color.white, null))
-            val ld = LayerDrawable(arrayOf(color, drawablePerson))
-            vfElement.audioDemoImage.setImageDrawable(ld)
-            vfElement.socialDemoPerson.text = socialTitle
-            vfElement.socialDemoMessage.text = socialDescription
-            vfElement.socialDemoText.visibility = View.VISIBLE
+                val vfElement = View.inflate(context, R.layout.onboarding_audio_demo, null)
 
-            view.viewFlipper.addView(vfElement)
-        }
-        view.viewFlipper.startFlipping()
+                val color = ColorDrawable(ResourcesCompat.getColor(resources, R.color.white, null))
+                val ld = LayerDrawable(arrayOf(color, drawablePerson))
+                vfElement.audioDemoImage.setImageDrawable(ld)
+                vfElement.socialDemoPerson.text = socialTitle
+                vfElement.socialDemoMessage.text = socialDescription
+                vfElement.socialDemoText.visibility = View.VISIBLE
 
-        for(childIndex in 0 until view.viewFlipper.childCount) {
-
-            val mediaOnClickListener = View.OnClickListener {
-
-                view.viewFlipper?.stopFlipping()
-                val childView = view.viewFlipper.getChildAt(childIndex)
-
-                if(mPlaying) {
-                    mMediaPlayer.pause()
-                    mPlaying = false
-                    childView.playPause.isSelected = false
-                    view.viewFlipper?.startFlipping()
-                } else {
-                    mMediaPlayer = MediaPlayer.create(context, media[childIndex])
-                    childView.playPause.isSelected = true
-                    mMediaPlayer.start()
-                    mPlaying = true
-
-                    UserMetrics.logOnboardingEvent(
-                            OnboardingJourneyEvent(
-                                    subject = "Social Demo UI",
-                                    content_uid = imageTitles[childIndex])
-                                    .setType(OnboardingJourneyEvent.Companion.Event.CLICK_CONTENT))
-                }
-
-                mMediaPlayer.setOnCompletionListener {
-                    childView.playPause.isSelected = false
-                    view.viewFlipper?.startFlipping()
-                    mPlaying = false
-                }
+                view.viewFlipper.addView(vfElement)
             }
-            view.viewFlipper.getChildAt(childIndex)
-                    .playPause.setOnClickListener(mediaOnClickListener)
-            view.viewFlipper.getChildAt(childIndex)
-                    .audioDemoImage.setOnClickListener(mediaOnClickListener)
+            view.viewFlipper.startFlipping()
+
+            for(childIndex in 0 until view.viewFlipper.childCount) {
+
+                val mediaOnClickListener = View.OnClickListener {
+
+                    view.viewFlipper?.stopFlipping()
+                    val childView = view.viewFlipper.getChildAt(childIndex)
+
+                    if(mPlaying) {
+                        mMediaPlayer.pause()
+                        mPlaying = false
+                        childView.playPause.isSelected = false
+                        view.viewFlipper?.startFlipping()
+                    } else {
+                        mMediaPlayer = MediaPlayer.create(context, media[childIndex])
+                        childView.playPause.isSelected = true
+                        mMediaPlayer.start()
+                        mPlaying = true
+
+                        UserMetrics.logOnboardingEvent(
+                                OnboardingJourneyEvent(
+                                        subject = "Social Demo UI",
+                                        content_uid = imageTitles[childIndex])
+                                        .setType(OnboardingJourneyEvent.Companion.Event.CLICK_CONTENT))
+                    }
+
+                    mMediaPlayer.setOnCompletionListener {
+                        childView.playPause.isSelected = false
+                        view.viewFlipper?.startFlipping()
+                        mPlaying = false
+                    }
+                }
+                view.viewFlipper.getChildAt(childIndex)
+                        .playPause.setOnClickListener(mediaOnClickListener)
+                view.viewFlipper.getChildAt(childIndex)
+                        .audioDemoImage.setOnClickListener(mediaOnClickListener)
+            }
         }
     }
 }

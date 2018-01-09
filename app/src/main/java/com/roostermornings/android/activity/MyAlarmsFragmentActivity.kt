@@ -41,7 +41,7 @@ import com.roostermornings.android.domain.Alarm
 import com.roostermornings.android.firebase.AuthManager
 import com.roostermornings.android.firebase.FA
 import com.roostermornings.android.firebase.FirebaseNetwork
-import com.roostermornings.android.realm.RealmAlarmFailureLog
+import com.roostermornings.android.realm.RealmManager_AlarmFailureLog
 import com.roostermornings.android.snackbar.SnackbarManager
 import com.roostermornings.android.sqlutil.AudioTableManager
 import com.roostermornings.android.sqlutil.DeviceAlarmController
@@ -116,7 +116,7 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface {
     @Inject
     lateinit var jsonPersistence: JSONPersistence
     @Inject
-    lateinit var realmAlarmFailureLog: RealmAlarmFailureLog
+    lateinit var realmManagerAlarmFailureLog: RealmManager_AlarmFailureLog
     @Inject
     lateinit var connectivityUtils: ConnectivityUtils
     @Inject
@@ -167,7 +167,7 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface {
         val context = this
 
         // Process any alarm failures
-        realmAlarmFailureLog.processAlarmFailures(true)
+        realmManagerAlarmFailureLog.processAlarmFailures(true)
 
         // Set shared pref to indicate whether mobile number is valid
         FirebaseNetwork.flagValidMobileNumber(this, false)
@@ -238,7 +238,7 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface {
                     Crashlytics.setUserIdentifier(firebaseUser?.uid)
                     Crashlytics.setUserEmail(firebaseUser?.email)
                     Crashlytics.setUserName(firebaseUser?.displayName)
-
+                    FirebaseNetwork.updateLastSeen()
                     // Log last seen in user metrics, to enable clearing stagnant data
                     UserMetrics.updateLastSeen()
                     }
@@ -406,7 +406,7 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface {
             receiver = null
         }
         // Close Realm object
-        realmAlarmFailureLog.closeRealm()
+        realmManagerAlarmFailureLog.closeRealm()
         super.onDestroy()
     }
 

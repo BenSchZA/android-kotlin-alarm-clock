@@ -5,12 +5,14 @@
 
 package com.roostermornings.android.fragment.new_alarm;
 
+import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -18,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.adapter.ChannelsListAdapter;
@@ -28,7 +31,9 @@ import com.roostermornings.android.domain.AlarmChannel;
 import com.roostermornings.android.domain.ChannelRooster;
 import com.roostermornings.android.fragment.IAlarmSetListener;
 import com.roostermornings.android.fragment.base.BaseFragment;
+import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.FileUtils;
+import com.roostermornings.android.util.FirstMileManager;
 import com.roostermornings.android.util.JSONPersistence;
 import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.Toaster;
@@ -36,7 +41,9 @@ import com.roostermornings.android.util.Toaster;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URI;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
