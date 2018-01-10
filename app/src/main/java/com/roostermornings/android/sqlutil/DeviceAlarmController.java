@@ -22,8 +22,8 @@ import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.domain.Alarm;
 import com.roostermornings.android.firebase.FirebaseNetwork;
 import com.roostermornings.android.realm.AlarmFailureLog;
-import com.roostermornings.android.realm.RealmManager_AlarmFailureLog;
-import com.roostermornings.android.realm.RealmManager_ScheduledSnackbar;
+import com.roostermornings.android.realm.RealmAlarmFailureLog;
+import com.roostermornings.android.realm.RealmScheduledSnackbar;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.sync.DownloadSyncAdapter;
@@ -57,9 +57,9 @@ public final class DeviceAlarmController {
     @Inject
     Account mAccount;
     @Inject
-    RealmManager_AlarmFailureLog realmManagerAlarmFailureLog;
+    RealmAlarmFailureLog realmManagerAlarmFailureLog;
     @Inject
-    RealmManager_ScheduledSnackbar realmManagerScheduledSnackbar;
+    RealmScheduledSnackbar realmManagerScheduledSnackbar;
 
     public DeviceAlarmController(Context context) {
         BaseApplication.getRoosterApplicationComponent().inject(this);
