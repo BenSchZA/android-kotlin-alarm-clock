@@ -81,62 +81,59 @@ class IntroFragment : BaseFragment() {
         return initiate(inflater, R.layout.fragment_onboarding_intro, container, false)
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        view?.let {
+        val windowSize = arguments?.getParcelable(ARG_WINDOW_SIZE) as Point
+        val windowWidth = windowSize.x.toFloat()
+        val windowHeight = windowSize.y.toFloat()
 
-            val windowSize = arguments.getParcelable(ARG_WINDOW_SIZE) as Point
-            val windowWidth = windowSize.x.toFloat()
-            val windowHeight = windowSize.y.toFloat()
+        if(!logoAnimated) animateLogo(view) else view.hookText.alpha = 1f
 
-            if(!logoAnimated) animateLogo(view) else view.hookText.alpha = 1f
+        val animationCloud1 = TranslateAnimation(-(windowWidth / 2 + CLOUD_MAX_WIDTH / 2F), (windowWidth / 2 + CLOUD_MAX_WIDTH / 2F), 0F, 0F)
+        animationCloud1.duration = CLOUD_DURATION + randomOffset()*8
+        animationCloud1.fillAfter = true
+        animationCloud1.repeatCount = -1
+        animationCloud1.repeatMode = Animation.REVERSE
 
-            val animationCloud1 = TranslateAnimation(-(windowWidth / 2 + CLOUD_MAX_WIDTH / 2F), (windowWidth / 2 + CLOUD_MAX_WIDTH / 2F), 0F, 0F)
-            animationCloud1.duration = CLOUD_DURATION + randomOffset()*8
-            animationCloud1.fillAfter = true
-            animationCloud1.repeatCount = -1
-            animationCloud1.repeatMode = Animation.REVERSE
+        val animationCloud2 = TranslateAnimation((windowWidth / 2 + CLOUD_MAX_WIDTH / 2F), -(windowWidth / 2 + CLOUD_MAX_WIDTH / 2F), 0F, 0F)
+        animationCloud2.duration = CLOUD_DURATION + randomOffset()*8
+        animationCloud2.fillAfter = true
+        animationCloud2.repeatCount = -1
+        animationCloud2.repeatMode = Animation.REVERSE
+        animationCloud2.startOffset = 2000
 
-            val animationCloud2 = TranslateAnimation((windowWidth / 2 + CLOUD_MAX_WIDTH / 2F), -(windowWidth / 2 + CLOUD_MAX_WIDTH / 2F), 0F, 0F)
-            animationCloud2.duration = CLOUD_DURATION + randomOffset()*8
-            animationCloud2.fillAfter = true
-            animationCloud2.repeatCount = -1
-            animationCloud2.repeatMode = Animation.REVERSE
-            animationCloud2.startOffset = 2000
+        val animationCloud3 = TranslateAnimation(-(windowWidth / 2 + CLOUD_MAX_WIDTH / 2F), (windowWidth / 2 + CLOUD_MAX_WIDTH / 2F), 0F, 0F)
+        animationCloud3.duration = CLOUD_DURATION + randomOffset()*8
+        animationCloud3.fillAfter = true
+        animationCloud3.repeatCount = -1
+        animationCloud3.repeatMode = Animation.REVERSE
+        animationCloud3.startOffset = 1000
 
-            val animationCloud3 = TranslateAnimation(-(windowWidth / 2 + CLOUD_MAX_WIDTH / 2F), (windowWidth / 2 + CLOUD_MAX_WIDTH / 2F), 0F, 0F)
-            animationCloud3.duration = CLOUD_DURATION + randomOffset()*8
-            animationCloud3.fillAfter = true
-            animationCloud3.repeatCount = -1
-            animationCloud3.repeatMode = Animation.REVERSE
-            animationCloud3.startOffset = 1000
+        val animationCloud4 = TranslateAnimation((windowWidth / 2 + CLOUD_MAX_WIDTH / 2F), -(windowWidth / 2 + CLOUD_MAX_WIDTH / 2F), 0F, 0F)
+        animationCloud4.duration = CLOUD_DURATION + randomOffset()*8
+        animationCloud4.fillAfter = true
+        animationCloud4.repeatCount = -1
+        animationCloud4.repeatMode = Animation.REVERSE
 
-            val animationCloud4 = TranslateAnimation((windowWidth / 2 + CLOUD_MAX_WIDTH / 2F), -(windowWidth / 2 + CLOUD_MAX_WIDTH / 2F), 0F, 0F)
-            animationCloud4.duration = CLOUD_DURATION + randomOffset()*8
-            animationCloud4.fillAfter = true
-            animationCloud4.repeatCount = -1
-            animationCloud4.repeatMode = Animation.REVERSE
+        view.cloud1.animation = animationCloud1
+        view.cloud2.animation = animationCloud2
+        view.cloud3.animation = animationCloud3
+        view.cloud4.animation = animationCloud4
 
-            view.cloud1.animation = animationCloud1
-            view.cloud2.animation = animationCloud2
-            view.cloud3.animation = animationCloud3
-            view.cloud4.animation = animationCloud4
-
-            val cloudAnimationListener = object: Animation.AnimationListener {
-                override fun onAnimationRepeat(p0: Animation?) {
-                    p0?.startOffset = randomOffset()
-                    p0?.duration = CLOUD_DURATION + randomOffset()*8
-                }
-                override fun onAnimationEnd(p0: Animation?) {}
-                override fun onAnimationStart(p0: Animation?) {}
+        val cloudAnimationListener = object: Animation.AnimationListener {
+            override fun onAnimationRepeat(p0: Animation?) {
+                p0?.startOffset = randomOffset()
+                p0?.duration = CLOUD_DURATION + randomOffset()*8
             }
-
-            animationCloud1.setAnimationListener(cloudAnimationListener)
-            animationCloud2.setAnimationListener(cloudAnimationListener)
-            animationCloud3.setAnimationListener(cloudAnimationListener)
-            animationCloud4.setAnimationListener(cloudAnimationListener)
+            override fun onAnimationEnd(p0: Animation?) {}
+            override fun onAnimationStart(p0: Animation?) {}
         }
+
+        animationCloud1.setAnimationListener(cloudAnimationListener)
+        animationCloud2.setAnimationListener(cloudAnimationListener)
+        animationCloud3.setAnimationListener(cloudAnimationListener)
+        animationCloud4.setAnimationListener(cloudAnimationListener)
     }
 
     private fun animateLogo(view: View) {

@@ -1,5 +1,6 @@
 package com.roostermornings.android.onboarding
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -127,7 +128,7 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
 
     override fun onPause() {
         super.onPause()
-        mGoogleApiClient?.stopAutoManage(activity)
+        activity?.let { mGoogleApiClient?.stopAutoManage(it) }
         mGoogleApiClient?.disconnect()
     }
 
@@ -136,10 +137,10 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
         return initiate(inflater, R.layout.fragment_onboarding_profile_creation, container, false)
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        when(arguments.getSerializable(ARG_FROM_SOURCE) as Source) {
+        when(arguments?.getSerializable(ARG_FROM_SOURCE) as Source) {
             Source.FRIENDS_PAGE -> {
                 signin_button_notnow.visibility = View.GONE
                 terms_and_conditions_link.visibility = View.GONE
@@ -223,10 +224,12 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
                 .requestEmail()
                 .build()
 
+        val context = context ?: return
+        val activity = activity ?: return
         // Build a GoogleApiClient with access to the Google Sign-In API and the
         // options specified by gso.
         mGoogleApiClient = GoogleApiClient.Builder(context)
-                .enableAutoManage(this.activity, null)
+                .enableAutoManage(activity, null)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build()
     }
@@ -343,6 +346,8 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
     private fun authWithFacebook(token: AccessToken) {
         authManager.firebaseAuthWithFacebook(token, object: AuthManager.AuthInterface {
             override fun onAuthSuccess(task: Task<AuthResult>) {
+                val activity = activity ?: return onAuthFailure()
+
                 authManager.performMigration(activity)
                 UserMetrics.generateNewUserMetricsEntry()
                 changeLayoutSignedIn()
@@ -368,6 +373,8 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
     private fun authWithGoogle(result: GoogleSignInResult) {
         authManager.firebaseAuthWithGoogle(result, object: AuthManager.AuthInterface {
             override fun onAuthSuccess(task: Task<AuthResult>) {
+                val activity = activity ?: return onAuthFailure()
+
                 authManager.performMigration(activity)
                 UserMetrics.generateNewUserMetricsEntry()
                 changeLayoutSignedIn()
@@ -429,6 +436,8 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
         authManager.firebaseAuthWithEmail(name, email, password, mAlreadyUser,
                 object: AuthManager.AuthInterface {
             override fun onAuthSuccess(task: Task<AuthResult>) {
+                val activity = activity ?: return onAuthFailure()
+
                 authManager.performMigration(activity)
                 UserMetrics.generateNewUserMetricsEntry()
                 changeLayoutSignedIn()
@@ -452,7 +461,7 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
     }
 
     private fun changeLayoutSignedIn() {
-        if(arguments.getBoolean(ARG_FROM_SOURCE)) {
+        if(arguments?.getBoolean(ARG_FROM_SOURCE) == true) {
             signUpLayout?.visibility = View.INVISIBLE
             emailLayout?.visibility = View.INVISIBLE
             signedInLayout?.visibility = View.GONE

@@ -50,7 +50,7 @@ class TemplateFragment : BaseFragment() {
         return initiate(inflater, R.layout.fragment_onboarding_intro, container, false)
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
     }
 }
