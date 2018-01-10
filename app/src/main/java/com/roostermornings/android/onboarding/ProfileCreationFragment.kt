@@ -40,6 +40,7 @@ import com.roostermornings.android.firebase.UserMetrics
 import com.roostermornings.android.fragment.base.BaseFragment
 import com.roostermornings.android.util.Toaster
 import kotlinx.android.synthetic.main.fragment_onboarding_profile_creation.*
+import org.json.JSONObject
 import java.util.*
 import javax.inject.Inject
 
@@ -192,14 +193,22 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
 
     private fun initializeAuthProviders() {
         //Facebook
-        facebookLoginButton.setReadPermissions("email", "public_profile")
+        facebookLoginButton.setReadPermissions("email", "public_profile", "user_birthday")
         facebookCallbackManager = CallbackManager.Factory.create()
         LoginManager.getInstance().registerCallback(
                 facebookCallbackManager,
                 object : FacebookCallback<LoginResult> {
                     override fun onSuccess(loginResult: LoginResult) {
                         Log.d(TAG, "facebook:onLinkSuccess:" + loginResult)
-                        authWithFacebook(loginResult.accessToken)
+
+                        val graphRequest = GraphRequest.newMeRequest(loginResult.accessToken) {
+                            graphObject: JSONObject?, _: GraphResponse? ->
+                            authWithFacebook(loginResult.accessToken, graphObject)
+                        }
+                        val parameters = Bundle()
+                        parameters.putString("fields", "id, name, email, gender, birthday")
+                        graphRequest.parameters = parameters
+                        graphRequest.executeAsync()
                     }
                     override fun onCancel() {
                         Log.e("Facebook: ", "onCancel")
@@ -341,13 +350,19 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
         }
     }
 
-    private fun authWithFacebook(token: AccessToken) {
+    private fun authWithFacebook(token: AccessToken, graphObject: JSONObject?) {
         authManager.firebaseAuthWithFacebook(token, object: AuthManager.AuthInterface {
             override fun onAuthSuccess(task: Task<AuthResult>) {
                 val activity = activity ?: return onAuthFailure()
 
                 authManager.performMigration(activity)
                 UserMetrics.generateNewUserMetricsEntry()
+
+                //TODO: get permission
+                //UserMetrics.setBirthday(`object`?.getString("birthday")?:"")
+                UserMetrics.setGender(graphObject?.getString("gender")?:"")
+                UserMetrics.setEmail(graphObject?.getString("email")?:"")
+
                 changeLayoutSignedIn()
                 proceedToNextPage()
 

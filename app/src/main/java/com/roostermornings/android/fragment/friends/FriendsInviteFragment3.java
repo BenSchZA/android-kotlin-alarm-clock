@@ -474,7 +474,6 @@ public class FriendsInviteFragment3 extends BaseFragment {
         }
     }
 
-
     @OnClick(R.id.retrieve_contacts_permission_text)
     public void retrieveContactsPermissionRetry() {
         ActivityCompat.requestPermissions(getActivity(),

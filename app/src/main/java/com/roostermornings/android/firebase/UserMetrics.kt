@@ -111,6 +111,18 @@ object UserMetrics {
         }
     }
 
+    fun setEmail(email: String) {
+        val fDB = FirebaseDatabase.getInstance().reference
+        val fUser = FirebaseAuth.getInstance().currentUser
+
+        val childUpdates = HashMap<String, Any>()
+
+        if (fUser?.uid?.isNotBlank() == true && email.isNotBlank()) {
+            childUpdates.put("$USER_METRICS/${fUser.uid}/email", email)
+            fDB.updateChildren(childUpdates)
+        }
+    }
+
     fun setBirthday(birthday: String) {
         val fDB = FirebaseDatabase.getInstance().reference
         val fUser = FirebaseAuth.getInstance().currentUser
@@ -195,8 +207,10 @@ object UserMetrics {
 
         if (fUser?.uid?.isNotBlank() == true) {
             childUpdates.put("$USER_METRICS/${fUser.uid}/uid", fUser.uid)
-            childUpdates.put("$USER_METRICS/${fUser.uid}/name", fUser.displayName?:"")
-            childUpdates.put("$USER_METRICS/${fUser.uid}/email", fUser.email?:"")
+            childUpdates.put("$USER_METRICS/${fUser.uid}/user_name", fUser.displayName?:"")
+            fUser.email?.takeIf { it.isNotBlank() }?.let {
+                childUpdates.put("$USER_METRICS/${fUser.uid}/email", fUser.email?:"")
+            }
             setAuthMethod()
             fDB.updateChildren(childUpdates)
         }
