@@ -170,15 +170,13 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
         //instantiate saripaar validator to validate fields with NotEmpty annotations
         validator.setValidationListener(this)
 
-        view?.let {
-            val animationCloud = TranslateAnimation(0f, 0f, -10f, 10f)
-            animationCloud.duration = 2000
-            animationCloud.fillAfter = true
-            animationCloud.repeatCount = -1
-            animationCloud.repeatMode = Animation.REVERSE
+        val animationCloud = TranslateAnimation(0f, 0f, -10f, 10f)
+        animationCloud.duration = 2000
+        animationCloud.fillAfter = true
+        animationCloud.repeatCount = -1
+        animationCloud.repeatMode = Animation.REVERSE
 
-            roosterCloud?.animation = animationCloud
-        }
+        roosterCloud?.animation = animationCloud
     }
 
     override fun fragmentVisible(position: Int) {}

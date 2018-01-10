@@ -252,11 +252,10 @@ class NewAudioFriendsActivity : BaseActivity() {
                     mFriends.addAll(apiResponse.users)
 
                     //For each user, check if name appears in contacts, and allocate name
-                    var numberNamePairs = HashMap<String, String>()
                     if (ContextCompat.checkSelfPermission(applicationContext,
                             android.Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
                         //Get a map of contact numbers to names
-                        numberNamePairs = myContactsController.numberNamePairs
+                        val numberNamePairs = myContactsController.numberNamePairs
 
                         mFriends.forEach {
                             if (numberNamePairs.containsKey(it.cell_number)) {

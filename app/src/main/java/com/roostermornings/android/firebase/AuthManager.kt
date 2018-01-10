@@ -181,7 +181,7 @@ class AuthManager(val context: Context) {
         val deviceToken = FirebaseInstanceId.getInstance().token
         val photoURL = account?.photoUrl?.toString()
 
-        createOrUpdateRoosterUser(deviceToken, photoURL)
+        FirebaseNetwork.createOrUpdateRoosterUser(deviceToken, photoURL)
     }
 
     fun firebaseAuthWithEmail(name: String, email: String, password: String, mAlreadyUser: Boolean, listener: AuthInterface) {
@@ -244,11 +244,7 @@ class AuthManager(val context: Context) {
 
             val userPhoto = if(!roosterUser?.profile_pic.isNullOrBlank()) {
                 Uri.parse(roosterUser?.profile_pic)
-            } else {
-                null
-                //TODO:
-                //FirebaseNetwork.updateProfileProfilePic()
-            }
+            } else null
 
             val builder = UserProfileChangeRequest.Builder()
             builder.setDisplayName(userName)
