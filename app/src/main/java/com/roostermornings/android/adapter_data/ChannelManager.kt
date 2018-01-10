@@ -240,13 +240,13 @@ class ChannelManager(private val context: Context) {
         if(!isChannelStoryDateLocked(channelRoosterUID)) {
             // Story iteration not locked
             jsonPersistence.setStoryIteration(channelRoosterUID, jsonPersistence.getStoryIteration(channelRoosterUID) + 1)
-            jsonPersistence.setStoryIterationDateLock(channelRoosterUID, currentTime.timeInMillis)
+            jsonPersistence.setDateLock(channelRoosterUID, currentTime.timeInMillis)
         }
     }
 
     fun isChannelStoryDateLocked(channelRoosterUID: String): Boolean {
         //Attempt to increment channel story iteration, if not day locked
-        val dateLockTimeInMillis = jsonPersistence.getStoryIterationDateLock(channelRoosterUID)
+        val dateLockTimeInMillis = jsonPersistence.getDateLock(channelRoosterUID)
         val dateLockTime = Calendar.getInstance()
         dateLockTime.timeInMillis = dateLockTimeInMillis
         val currentTime = Calendar.getInstance()
