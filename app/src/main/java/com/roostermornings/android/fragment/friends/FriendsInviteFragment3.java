@@ -42,6 +42,7 @@ import com.roostermornings.android.domain.Friend;
 import com.roostermornings.android.domain.LocalContacts;
 import com.roostermornings.android.domain.NodeUsers;
 import com.roostermornings.android.domain.User;
+import com.roostermornings.android.firebase.UserMetrics;
 import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.JSONPersistence;
@@ -265,10 +266,15 @@ public class FriendsInviteFragment3 extends BaseFragment {
         //Clear explainer on entry, show if necessary i.e. permission previously denied
         displayRequestPermissionExplainer(false);
 
-        if (ContextCompat.checkSelfPermission(AppContext,
+        Boolean contactsPermission = ContextCompat.checkSelfPermission(AppContext,
                 android.Manifest.permission.READ_CONTACTS)
-                != PackageManager.PERMISSION_GRANTED) {
+                == PackageManager.PERMISSION_GRANTED;
 
+        UserMetrics.INSTANCE.setPermission(
+                        UserMetrics.Permission.PERMISSION_CONTACTS,
+                        contactsPermission);
+
+        if (!contactsPermission) {
             // Should we show an explanation?
             if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
                     android.Manifest.permission.READ_CONTACTS)) {
@@ -290,10 +296,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
                         new String[]{android.Manifest.permission.READ_CONTACTS},
                         Constants.MY_PERMISSIONS_REQUEST_READ_CONTACTS);
             }
-        } else if(ContextCompat.checkSelfPermission(AppContext,
-                android.Manifest.permission.READ_CONTACTS)
-                == PackageManager.PERMISSION_GRANTED) {
-
+        } else  {
             //If there is no internet connection, attempt to retrieve invitable contacts from persistence
             if(!jsonPersistence.getInvitableContacts().isEmpty() && !checkInternetConnection()) {
                 mInvitableContacts = jsonPersistence.getInvitableContacts();

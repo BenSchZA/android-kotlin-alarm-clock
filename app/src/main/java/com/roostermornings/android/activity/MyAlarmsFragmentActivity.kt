@@ -238,7 +238,6 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface {
                     Crashlytics.setUserIdentifier(firebaseUser?.uid)
                     Crashlytics.setUserEmail(firebaseUser?.email)
                     Crashlytics.setUserName(firebaseUser?.displayName)
-                    FirebaseNetwork.updateLastSeen()
                     // Log last seen in user metrics, to enable clearing stagnant data
                     UserMetrics.updateLastSeen()
                     }
