@@ -10,20 +10,18 @@ import android.content.SharedPreferences
 import android.location.Geocoder
 import android.util.Log
 import ch.hsr.geohash.GeoHash
-import com.crashlytics.android.Crashlytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.gson.Gson
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.R
 import com.roostermornings.android.domain.Channel
 import com.roostermornings.android.domain.GeoHashChannel
 import com.roostermornings.android.firebase.FirebaseNetwork
+import com.roostermornings.android.firebase.UserMetrics
 import com.roostermornings.android.util.*
-import org.json.JSONStringer
 import retrofit.Callback
 import retrofit.Response
 import retrofit.Retrofit
@@ -138,7 +136,7 @@ class GeoHashUtils(val context: Context) {
                         tempUserGeoHashArray.add(0, userGeoHashEntry)
 
                         //Persist the user geohashes to shared pref
-                        jsonPersistence.setUserGeoHashEntries(tempUserGeoHashArray)
+                        jsonPersistence.userGeoHashEntries = tempUserGeoHashArray
 
                         //Create a map of user geohash entries to cluster size, and update user's geohash appropriately
                         checkUserGeoHashClusterMap(tempUserGeoHashArray)
@@ -168,6 +166,7 @@ class GeoHashUtils(val context: Context) {
                         val userGeoHash = it.key.geoHash
                         sharedPreferences.edit().putString(Constants.USER_GEOHASH, userGeoHash).apply()
                         FirebaseNetwork.updateProfileGeoHashLocation(userGeoHash)
+                        UserMetrics.updateGeohash(userGeoHash)
                     }
         } else {
             geoHashClusterMap.filter { it.key.mobileSource }.maxBy { it.value }
@@ -175,6 +174,7 @@ class GeoHashUtils(val context: Context) {
                         val userGeoHash = it.key.geoHash
                         sharedPreferences.edit().putString(Constants.USER_GEOHASH, userGeoHash).apply()
                         FirebaseNetwork.updateProfileGeoHashLocation(userGeoHash)
+                        UserMetrics.updateGeohash(userGeoHash)
                     }
         }
     }
@@ -200,10 +200,10 @@ class GeoHashUtils(val context: Context) {
     fun getGeoHashChannelsWithinInfluence() {
         val geoHashUser: String = sharedPreferences.getString(Constants.USER_GEOHASH, "zzzz");
 
-        val fDB = FirebaseDatabase.getInstance().getReference()
-        val fUser = FirebaseAuth.getInstance().getCurrentUser()
+        val fDB = FirebaseDatabase.getInstance().reference
+        val fUser = FirebaseAuth.getInstance().currentUser
 
-        if (StrUtils.notNullOrEmpty(fUser?.getUid())) {
+        if (StrUtils.notNullOrEmpty(fUser?.uid)) {
             val mGeoHashChannelsReference = fDB
                     .child("geohash_channels")
             mGeoHashChannelsReference.keepSynced(true)
@@ -212,7 +212,7 @@ class GeoHashUtils(val context: Context) {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val geoHashChannels: ArrayList<GeoHashChannel> = ArrayList()
 
-                    dataSnapshot.getChildren().forEach { postSnapshot ->
+                    dataSnapshot.children.forEach { postSnapshot ->
                     postSnapshot.getValue(GeoHashChannel::class.java)
                             ?.let { geoHashChannel -> geoHashChannels.add(geoHashChannel) } }
 

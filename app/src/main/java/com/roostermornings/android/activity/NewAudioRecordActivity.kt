@@ -44,6 +44,7 @@ import butterknife.OnClick
 import android.Manifest.permission.RECORD_AUDIO
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.widget.*
+import com.roostermornings.android.firebase.UserMetrics
 import kotlinx.android.synthetic.main.content_new_audio.*
 
 class NewAudioRecordActivity : BaseActivity() {
@@ -510,6 +511,13 @@ class NewAudioRecordActivity : BaseActivity() {
             Constants.MY_PERMISSIONS_REQUEST_AUDIO_RECORD -> if (grantResults.isNotEmpty()) {
                 val storagePermission = grantResults[0] == PackageManager.PERMISSION_GRANTED
                 val recordPermission = grantResults[1] == PackageManager.PERMISSION_GRANTED
+
+                UserMetrics.setPermission(
+                        UserMetrics.Permission.PERMISSION_MIC,
+                        recordPermission)
+                UserMetrics.setPermission(
+                        UserMetrics.Permission.PERMISSION_STORAGE,
+                        storagePermission)
 
                 if (storagePermission && recordPermission) {
                     setNewAudioStatus(NEW_AUDIO_READY_RECORD)

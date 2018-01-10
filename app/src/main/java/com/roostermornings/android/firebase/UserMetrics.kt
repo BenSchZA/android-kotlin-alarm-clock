@@ -70,6 +70,18 @@ object UserMetrics {
         }
     }
 
+    fun updateGeohash(geohash: String) {
+        val fDB = FirebaseDatabase.getInstance().reference
+        val fUser = FirebaseAuth.getInstance().currentUser
+
+        val childUpdates = HashMap<String, Any>()
+
+        if (fUser?.uid?.isNotBlank() == true) {
+            childUpdates.put("$USER_METRICS/${fUser.uid}/geohash", geohash)
+            fDB.updateChildren(childUpdates)
+        }
+    }
+
     fun setAuthMethod() {
         val fDB = FirebaseDatabase.getInstance().reference
         val fUser = FirebaseAuth.getInstance().currentUser
@@ -107,6 +119,22 @@ object UserMetrics {
 
         if (fUser?.uid?.isNotBlank() == true) {
             childUpdates.put("$USER_METRICS/${fUser.uid}/birthday", birthday)
+            fDB.updateChildren(childUpdates)
+        }
+    }
+
+    enum class Permission {
+        PERMISSION_CONTACTS, PERMISSION_MIC, PERMISSION_STORAGE
+    }
+
+    fun setPermission(permission: Permission, granted: Boolean) {
+        val fDB = FirebaseDatabase.getInstance().reference
+        val fUser = FirebaseAuth.getInstance().currentUser
+
+        val childUpdates = HashMap<String, Any>()
+
+        if (fUser?.uid?.isNotBlank() == true) {
+            childUpdates.put("$USER_METRICS/${fUser.uid}/${permission.name.toLowerCase()}", granted)
             fDB.updateChildren(childUpdates)
         }
     }

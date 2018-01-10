@@ -95,6 +95,7 @@ object FirebaseNetwork {
 
         if (fUser?.uid?.isNotBlank() == true) {
             childUpdates.put("users/${fUser.uid}/cell_number", nsnNumber)
+            childUpdates.put("user_metrics/${fUser.uid}/cell_number", nsnNumber)
             fDB.updateChildren(childUpdates)
 
             if (!nsnNumber.isBlank()) {
