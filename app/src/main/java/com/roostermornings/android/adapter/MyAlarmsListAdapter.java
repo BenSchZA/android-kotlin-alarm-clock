@@ -231,14 +231,14 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
         holder.roosterNotificationParent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                BaseActivity.showAlarmSocialRoostersExplainer(context, alarm, alarm.getUnseen_roosters());
+                BaseActivity.Companion.showAlarmSocialRoostersExplainer(context, alarm, alarm.getUnseen_roosters());
             }
         });
 
         holder.roosterNotificationPerson.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                BaseActivity.showAlarmSocialRoostersExplainer(context, alarm, alarm.getUnseen_roosters());
+                BaseActivity.Companion.showAlarmSocialRoostersExplainer(context, alarm, alarm.getUnseen_roosters());
             }
         });
 
