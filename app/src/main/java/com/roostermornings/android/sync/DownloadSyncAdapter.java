@@ -175,7 +175,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
             retrieveChannelContentData(getApplicationContext());
 
             //Update badge count for roosters received
-            BaseActivity.setBadge(getApplicationContext(), BaseApplication.getNotificationFlag(Constants.FLAG_ROOSTERCOUNT));
+            BaseActivity.Companion.setBadge(getApplicationContext(), BaseApplication.getNotificationFlag(Constants.FLAG_ROOSTERCOUNT));
             audioTableManager.updateRoosterCount();
 
             //Check if the user's geohash location entry is still valid

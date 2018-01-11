@@ -234,7 +234,7 @@ public class NewAlarmFragmentActivity extends BaseActivity implements IAlarmSetL
                 if(StrUtils.notNullOrEmpty(mEditAlarmId)) {
                     alarmKey = mEditAlarmId;
                 } else {
-                    alarmKey = mDatabase.child("alarms").push().getKey();
+                    alarmKey = getMDatabase().child("alarms").push().getKey();
                     mAlarm.setUid(alarmKey);
                 }
 

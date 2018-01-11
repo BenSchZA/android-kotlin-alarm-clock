@@ -223,11 +223,11 @@ public class UploadService extends Service {
                 friend.getUid(), uploadKey, currentUser.getUid());
 
         SocialRooster socialRoosterQueue = new SocialRooster(firebaseStorageURL,
-                BaseActivity.mCurrentUser.getUser_name(),
+                BaseActivity.Companion.getMCurrentUser().getUser_name(),
                 false,
-                BaseActivity.mCurrentUser.getProfile_pic(),
+                BaseActivity.Companion.getMCurrentUser().getProfile_pic(),
                 timestamp.getTime(),
-                friend.getUid(), uploadKey, BaseActivity.mCurrentUser.getUid());
+                friend.getUid(), uploadKey, BaseActivity.Companion.getMCurrentUser().getUid());
 
         //Note the matching keys
         mDatabase.getDatabase().getReference(uploadUrl + "/" + uploadKey).setValue(socialRoosterUploaded);
