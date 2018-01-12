@@ -196,21 +196,8 @@ class AuthManager(val context: Context) {
 
         attemptAnonymousLinking(credential, object: AnonymousLinkingListener {
             override fun onLinkSuccess(task: Task<AuthResult>) {
-                firebaseAuth.createUserWithEmailAndPassword(email, password)
-                        .addOnCompleteListener { createTask ->
-                            Log.d(TAG, "signInWithCredential:onComplete:" + createTask.isSuccessful)
-
-                            // If sign in fails, display a message to the user. If sign in succeeds
-                            // the auth state listener will be notified and logic to handle the
-                            // signed in user can be handled in the listener.
-                            if (createTask.isSuccessful) {
-                                onSuccessfulEmailAuth(name, mAlreadyUser)
-                                listener.onAuthSuccess(createTask)
-                            } else {
-                                Log.d(TAG, "firebaseAuthWithEmail: failure")
-                                listener.onAuthFailure()
-                            }
-                        }
+                onSuccessfulEmailAuth(name, mAlreadyUser)
+                listener.onAuthSuccess(task)
             }
 
             override fun onLinkFailure(exception: Exception) {

@@ -73,7 +73,6 @@ class MessageStatusFragmentActivity : BaseActivity(), MessageStatusReceivedFragm
     private var messageStatusFragment3: MessageStatusSentFragment2? = null
 
     @Inject lateinit var baseApplication: BaseApplication
-    @Inject lateinit var firebaseUser: FirebaseUser
 
     override fun onFragmentInteraction(uri: Uri) {
         //you can leave it empty

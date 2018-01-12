@@ -107,13 +107,6 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface {
     @Inject
     lateinit var connectivityUtils: ConnectivityUtils
 
-    private var firebaseUser: FirebaseUser? = null
-
-    @Inject
-    fun MyAlarmsFragmentActivity(firebaseUser: FirebaseUser?) {
-        this.firebaseUser = firebaseUser
-    }
-
     companion object {
         private val TAG = MyAlarmsFragmentActivity::class.java.simpleName
     }
