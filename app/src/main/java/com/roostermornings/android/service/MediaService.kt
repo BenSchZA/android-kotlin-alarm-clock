@@ -5,6 +5,7 @@
 
 package com.roostermornings.android.service
 
+import android.annotation.SuppressLint
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaBrowserServiceCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -40,7 +41,7 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.activity.DiscoverFragmentActivity
 import com.roostermornings.android.adapter_data.ChannelManager
-import com.roostermornings.android.domain.ChannelRooster
+import com.roostermornings.android.domain.database.ChannelRooster
 import com.roostermornings.android.media.MediaNotificationHelper
 import com.roostermornings.android.util.RoosterUtils
 import java.util.*
@@ -152,6 +153,7 @@ class MediaService : MediaBrowserServiceCompat(),
     }
 
     // Attempt to retrieve audio focus from Android OS
+    @SuppressLint("NewApi")
     private fun retrieveAudioFocus(): Boolean {
         val result : Int
         if(RoosterUtils.hasO()) {

@@ -32,7 +32,7 @@ import com.roostermornings.android.apis.GoogleIHTTPClient;
 import com.roostermornings.android.dagger.DaggerRoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.dagger.RoosterApplicationModule;
-import com.roostermornings.android.domain.User;
+import com.roostermornings.android.domain.database.User;
 import com.roostermornings.android.apis.NodeIHTTPClient;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.receiver.NetworkChangeReceiver;

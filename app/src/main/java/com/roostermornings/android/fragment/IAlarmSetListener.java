@@ -5,7 +5,7 @@
 
 package com.roostermornings.android.fragment;
 
-import com.roostermornings.android.domain.Alarm;
+import com.roostermornings.android.domain.database.Alarm;
 
 /**
  * Created by steven on 2017/02/16.

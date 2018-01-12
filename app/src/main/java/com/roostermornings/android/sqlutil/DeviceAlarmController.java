@@ -19,7 +19,7 @@ import android.view.View;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
-import com.roostermornings.android.domain.Alarm;
+import com.roostermornings.android.domain.database.Alarm;
 import com.roostermornings.android.firebase.FirebaseNetwork;
 import com.roostermornings.android.realm.AlarmFailureLog;
 import com.roostermornings.android.realm.RealmAlarmFailureLog;

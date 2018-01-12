@@ -1,11 +1,9 @@
 package com.roostermornings.android.realm;
 
-import com.google.firebase.database.Exclude;
 import com.google.gson.annotations.Expose;
 
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
-import kotlin.jvm.JvmField;
 
 /**
  * Created by bscholtz on 2017/11/04.

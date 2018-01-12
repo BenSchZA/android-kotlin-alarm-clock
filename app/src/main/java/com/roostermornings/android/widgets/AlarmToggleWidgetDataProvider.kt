@@ -22,7 +22,7 @@ import android.widget.RemoteViewsService
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.R
 import com.roostermornings.android.adapter_data.RoosterAlarmManager
-import com.roostermornings.android.domain.Alarm
+import com.roostermornings.android.domain.database.Alarm
 import com.roostermornings.android.util.JSONPersistence
 import java.util.ArrayList
 import javax.inject.Inject

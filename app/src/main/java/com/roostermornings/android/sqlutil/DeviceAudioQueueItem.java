@@ -6,8 +6,8 @@
 package com.roostermornings.android.sqlutil;
 
 import com.google.firebase.database.Exclude;
-import com.roostermornings.android.domain.ChannelRooster;
-import com.roostermornings.android.domain.SocialRooster;
+import com.roostermornings.android.domain.database.ChannelRooster;
+import com.roostermornings.android.domain.database.SocialRooster;
 import com.roostermornings.android.util.Constants;
 
 import java.io.Serializable;

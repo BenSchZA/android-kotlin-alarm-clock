@@ -22,10 +22,7 @@ import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.Toast
 
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.GetTokenResult
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.BuildConfig
 import com.roostermornings.android.R
@@ -33,20 +30,17 @@ import com.roostermornings.android.activity.base.BaseActivity
 import com.roostermornings.android.adapter.NewAudioFriendsListAdapter
 import com.roostermornings.android.dagger.RoosterApplicationComponent
 import com.roostermornings.android.service.UploadService
-import com.roostermornings.android.domain.User
-import com.roostermornings.android.domain.Users
+import com.roostermornings.android.domain.database.User
+import com.roostermornings.android.domain.database.Users
 
 import java.util.ArrayList
 import java.util.Collections
-import java.util.Comparator
-import java.util.HashMap
 
 import javax.inject.Inject
 
 import butterknife.BindView
 import butterknife.OnClick
 import com.roostermornings.android.util.*
-import retrofit.Call
 import retrofit.Callback
 import retrofit.Response
 import retrofit.Retrofit
@@ -110,7 +104,7 @@ class NewAudioFriendsActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initialize(R.layout.activity_new_audio_friends)
-        inject(BaseApplication.getRoosterApplicationComponent())
+        BaseApplication.getRoosterApplicationComponent().inject(this)
 
         setupToolbar(null, null)
         setDayNightTheme()
@@ -297,7 +291,7 @@ class NewAudioFriendsActivity : BaseActivity() {
     }
 
     companion object {
-        protected val TAG = NewAudioFriendsActivity::class.java.simpleName
+        protected val TAG: String = NewAudioFriendsActivity::class.java.simpleName
         private var statusCode = 0
     }
 }

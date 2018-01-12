@@ -26,7 +26,7 @@ import android.widget.Toast;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
-import com.roostermornings.android.domain.Friend;
+import com.roostermornings.android.domain.local.Friend;
 import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.Toaster;
 import com.squareup.picasso.Callback;

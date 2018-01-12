@@ -8,8 +8,8 @@ package com.roostermornings.android.util;
 import android.os.Build;
 
 import com.roostermornings.android.BuildConfig;
-import com.roostermornings.android.domain.Alarm;
-import com.roostermornings.android.domain.MinimumRequirements;
+import com.roostermornings.android.domain.database.Alarm;
+import com.roostermornings.android.domain.local.MinimumRequirements;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -139,7 +139,7 @@ public class RoosterUtils {
 
     public static String getAlarmDays(Alarm alarm) {
 
-        ArrayList<String> days = new ArrayList<String>();
+        ArrayList<String> days = new ArrayList<>();
         if (alarm.isMonday()) days.add("Mon");
         if (alarm.isTuesday()) days.add("Tue");
         if (alarm.isWednesday()) days.add("Wed");

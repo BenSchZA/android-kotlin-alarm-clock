@@ -21,10 +21,8 @@ import com.google.firebase.database.ValueEventListener
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.R
 import com.roostermornings.android.activity.base.BaseActivity
-import com.roostermornings.android.firebase.AuthManager
 import com.roostermornings.android.dagger.RoosterApplicationComponent
-import com.roostermornings.android.domain.MinimumRequirements
-import com.roostermornings.android.domain.OnboardingJourneyEvent
+import com.roostermornings.android.domain.local.MinimumRequirements
 import com.roostermornings.android.firebase.UserMetrics
 import com.roostermornings.android.onboarding.OnboardingActivity
 import com.roostermornings.android.util.Constants
@@ -47,8 +45,6 @@ class SplashActivity : BaseActivity() {
     private var receivedAction: String? = ""
     private var receivedType: String? = ""
 
-    @Inject
-    lateinit var authManager: AuthManager
     @Inject lateinit var sharedPrefs: SharedPreferences
 
     override fun inject(component: RoosterApplicationComponent) {
@@ -65,10 +61,6 @@ class SplashActivity : BaseActivity() {
             UserMetrics.generateNewUserMetricsEntry()
             // Log last seen in user metrics, to enable clearing stagnant data
             UserMetrics.updateLastSeen()
-            // Log onboarding journey activityContentView event
-            UserMetrics.logOnboardingEvent(
-                    OnboardingJourneyEvent(subject = "Splash UI")
-                            .setType(OnboardingJourneyEvent.Companion.Event.VIEW))
         }
 
         window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,

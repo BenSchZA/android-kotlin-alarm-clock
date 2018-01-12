@@ -33,7 +33,7 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.activity.NewAudioRecordActivity;
 import com.roostermornings.android.activity.base.BaseActivity;
-import com.roostermornings.android.domain.User;
+import com.roostermornings.android.domain.database.User;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.StrUtils;

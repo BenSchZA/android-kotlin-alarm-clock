@@ -79,8 +79,11 @@ class DeviceAlarmFullScreenActivity : BaseActivity() {
     @BindView(R.id.alarm_action_button)
     lateinit var alarmActionButton: Button
 
-    @Inject lateinit var deviceAlarmController: DeviceAlarmController
     @Inject lateinit var realmAlarmFailureLog: RealmAlarmFailureLog
+
+    override fun inject(component: RoosterApplicationComponent) {
+        component.inject(this)
+    }
 
     private val mAudioServiceConnection = object : ServiceConnection {
         // Called when the connection with the service is established
@@ -106,13 +109,9 @@ class DeviceAlarmFullScreenActivity : BaseActivity() {
         }
     }
 
-    override fun inject(component: RoosterApplicationComponent) {
-        component.inject(this)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        inject(BaseApplication.getRoosterApplicationComponent())
+        BaseApplication.getRoosterApplicationComponent().inject(this)
 
         //Used to ensure alarm shows over lock-screen
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON + WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or +WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
@@ -349,6 +348,6 @@ class DeviceAlarmFullScreenActivity : BaseActivity() {
     }
 
     companion object {
-        val TAG = DeviceAlarmFullScreenActivity::class.java.simpleName
+        val TAG: String = DeviceAlarmFullScreenActivity::class.java.simpleName
     }
 }

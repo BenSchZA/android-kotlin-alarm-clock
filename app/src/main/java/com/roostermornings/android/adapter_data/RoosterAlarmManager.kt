@@ -13,7 +13,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.roostermornings.android.BaseApplication
-import com.roostermornings.android.domain.Alarm
+import com.roostermornings.android.domain.database.Alarm
 import com.roostermornings.android.firebase.FirebaseNetwork
 import com.roostermornings.android.sqlutil.DeviceAlarmController
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager
@@ -21,7 +21,6 @@ import com.roostermornings.android.util.StrUtils
 import com.roostermornings.android.util.Toaster
 import javax.inject.Inject
 import com.google.firebase.auth.FirebaseUser
-import com.roostermornings.android.activity.MyAlarmsFragmentActivity
 import java.util.*
 
 /**

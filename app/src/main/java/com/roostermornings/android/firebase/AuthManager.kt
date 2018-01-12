@@ -117,6 +117,7 @@ class AuthManager(val context: Context) {
                     // the auth state listener will be notified and logic to handle the
                     // signed in user can be handled in the listener.
                     if (task.isSuccessful) {
+                        performMigration()
                         onSuccessfulFacebookAuth()
                         listener.onAuthSuccess(task)
                     } else {
@@ -166,6 +167,7 @@ class AuthManager(val context: Context) {
                     // the auth state listener will be notified and logic to handle the
                     // signed in user can be handled in the listener.
                     if (task.isSuccessful) {
+                        performMigration()
                         onSuccessfulGoogleAuth(account)
                         listener.onAuthSuccess(task)
                     } else {
@@ -220,6 +222,7 @@ class AuthManager(val context: Context) {
                             // the auth state listener will be notified and logic to handle the
                             // signed in user can be handled in the listener.
                             if (task.isSuccessful) {
+                                performMigration()
                                 onSuccessfulEmailAuth(name, mAlreadyUser)
                                 listener.onAuthSuccess(task)
                             } else {
@@ -267,12 +270,8 @@ class AuthManager(val context: Context) {
         FirebaseNetwork.createOrUpdateRoosterUser(deviceToken, null)
     }
 
-    fun performMigration(activity: Activity) {
-        if(activity is OnboardingActivity) {
-            UserMetrics.migrateOnboardingJourney(getPersistedAnonymousUID(), firebaseAuth.currentUser?.uid)
-        } else {
-            UserMetrics.migrateUserUID(getPersistedAnonymousUID(), firebaseAuth.currentUser?.uid)
-        }
+    fun performMigration() {
+        UserMetrics.migrateUserUID(getPersistedAnonymousUID(), firebaseAuth.currentUser?.uid)
     }
 
     private fun attemptAnonymousLinking(credential: AuthCredential, resultListener: AnonymousLinkingListener) {

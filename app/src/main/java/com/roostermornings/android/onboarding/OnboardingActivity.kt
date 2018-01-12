@@ -13,13 +13,14 @@ import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.R
 import com.roostermornings.android.activity.base.BaseActivity
 import com.roostermornings.android.dagger.RoosterApplicationComponent
-import com.roostermornings.android.domain.OnboardingJourneyEvent
-import com.roostermornings.android.firebase.AuthManager
+import com.roostermornings.android.domain.local.OnboardingJourneyEvent
 import com.roostermornings.android.firebase.UserMetrics
+import com.roostermornings.android.onboarding.channel_demo.ChannelDemoFragment
+import com.roostermornings.android.onboarding.social_demo.SocialDemoFragment
+import com.roostermornings.android.onboarding.social_demo.SocialHookFragment
 import com.roostermornings.android.util.RoosterUtils
 
 import kotlinx.android.synthetic.main.activity_onboarding.*
-import javax.inject.Inject
 
 class OnboardingActivity: BaseActivity(), HostInterface, CustomCommandInterface {
 
@@ -51,10 +52,8 @@ class OnboardingActivity: BaseActivity(), HostInterface, CustomCommandInterface 
     @BindView(R.id.progressBar)
     lateinit var progressBar: ProgressBar
 
-    @Inject lateinit var authManager: AuthManager
-
-    override fun inject(component: RoosterApplicationComponent?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun inject(component: RoosterApplicationComponent) {
+        component.inject(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

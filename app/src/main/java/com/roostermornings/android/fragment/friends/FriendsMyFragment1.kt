@@ -20,21 +20,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.GetTokenResult
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.R
 import com.roostermornings.android.activity.FriendsFragmentActivity
 import com.roostermornings.android.adapter.FriendsMyListAdapter
 import com.roostermornings.android.dagger.RoosterApplicationComponent
-import com.roostermornings.android.domain.User
-import com.roostermornings.android.domain.Users
+import com.roostermornings.android.domain.database.User
+import com.roostermornings.android.domain.database.Users
 import com.roostermornings.android.fragment.base.BaseFragment
 import com.roostermornings.android.util.JSONPersistence
 import com.roostermornings.android.util.MyContactsController
@@ -46,7 +42,6 @@ import java.util.HashMap
 import javax.inject.Inject
 
 import butterknife.BindView
-import retrofit.Call
 import retrofit.Callback
 import retrofit.Response
 import retrofit.Retrofit
@@ -312,7 +307,7 @@ class FriendsMyFragment1 : BaseFragment() {
 
     companion object {
 
-        protected val TAG = FriendsFragmentActivity::class.java.simpleName
+        protected val TAG: String = FriendsFragmentActivity::class.java.simpleName
 
         private var statusCode = -1
 
