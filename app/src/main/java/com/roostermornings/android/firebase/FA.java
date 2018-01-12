@@ -8,8 +8,6 @@ package com.roostermornings.android.firebase;
 import android.os.Bundle;
 import android.support.annotation.Keep;
 
-import org.jetbrains.annotations.NotNull;
-
 import static com.roostermornings.android.BaseApplication.firebaseAnalytics;
 
 
@@ -133,7 +131,7 @@ public abstract class FA {
         }
         public abstract class channel_info_viewed extends channel_selected {
         }
-        public abstract class explore_channel_rooster_played extends channel_selected {
+        public abstract class explore_channel_rooster_play extends channel_selected {
             public abstract class Param {
                 //String param
                 public final static String channel_title = "channel_title";
@@ -155,6 +153,10 @@ public abstract class FA {
             }
         }
         public abstract class roosters_channel_favourite extends channel_selected {
+            public abstract class Param {
+                //String param
+                public final static String channel_title = "channel_title";
+            }
         }
         public abstract class roosters_channel_share extends channel_selected {
         }

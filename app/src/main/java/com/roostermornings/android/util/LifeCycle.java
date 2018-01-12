@@ -9,7 +9,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.roostermornings.android.BaseApplication;
-import com.roostermornings.android.domain.ChannelRooster;
+import com.roostermornings.android.domain.database.ChannelRooster;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.sync.DownloadSyncAdapter;

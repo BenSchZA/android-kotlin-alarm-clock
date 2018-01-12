@@ -6,7 +6,6 @@
 package com.roostermornings.android.activity
 
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -17,10 +16,8 @@ import android.provider.MediaStore
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.content.FileProvider
-import android.support.v4.graphics.drawable.RoundedBitmapDrawable
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory
 import android.os.Bundle
-import android.text.TextUtils
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageButton
@@ -58,8 +55,7 @@ import butterknife.OnTextChanged
 import android.Manifest.permission.READ_EXTERNAL_STORAGE
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.app.Activity
-import com.roostermornings.android.domain.User
-import com.roostermornings.android.firebase.AuthManager
+import com.roostermornings.android.domain.database.User
 import com.roostermornings.android.onboarding.ProfileCreationFragment
 import kotlinx.android.synthetic.main.custom_toolbar.*
 import java.text.DateFormat.getDateTimeInstance
@@ -80,10 +76,6 @@ class ProfileActivity : BaseActivity(), CustomCommandInterface {
 
     private var mCurrentUser: User? = null
 
-    @Inject
-    lateinit var sharedPreferences: SharedPreferences
-    @Inject lateinit var authManager: AuthManager
-
     private var profileCreationFragment: ProfileCreationFragment? = null
 
     var firebaseUser: FirebaseUser? = null
@@ -100,7 +92,7 @@ class ProfileActivity : BaseActivity(), CustomCommandInterface {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initialize(R.layout.activity_profile)
-        inject(BaseApplication.getRoosterApplicationComponent())
+        BaseApplication.getRoosterApplicationComponent().inject(this)
 
         FirebaseNetwork.getRoosterUser(firebaseUser?.uid) {
             it?.let {

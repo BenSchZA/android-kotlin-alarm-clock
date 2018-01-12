@@ -15,6 +15,7 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
 import com.roostermornings.android.activity.DiscoverFragmentActivity;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
+import com.roostermornings.android.activity.InvalidateVersion;
 import com.roostermornings.android.activity.MessageStatusFragmentActivity;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.activity.NewAlarmFragmentActivity;
@@ -30,7 +31,7 @@ import com.roostermornings.android.adapter_data.ChannelManager;
 import com.roostermornings.android.firebase.AuthManager;
 import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.firebase.FirebaseNetwork;
-import com.roostermornings.android.onboarding.NumberEntryDialogFragment;
+import com.roostermornings.android.onboarding.number_entry.NumberEntryDialogFragment;
 import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.fragment.friends.FriendsInviteFragment3;
 import com.roostermornings.android.fragment.friends.FriendsMyFragment1;
@@ -39,7 +40,7 @@ import com.roostermornings.android.fragment.message_status.MessageStatusReceived
 import com.roostermornings.android.fragment.message_status.MessageStatusSentFragment2;
 import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment1;
 import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment2;
-import com.roostermornings.android.onboarding.NumberEntryFragment;
+import com.roostermornings.android.onboarding.number_entry.NumberEntryFragment;
 import com.roostermornings.android.onboarding.OnboardingActivity;
 import com.roostermornings.android.onboarding.ProfileCreationFragment;
 import com.roostermornings.android.realm.RealmAlarmFailureLog;
@@ -93,6 +94,7 @@ public interface RoosterApplicationComponent {
     void inject(SettingsActivity activity);
     void inject(OnboardingActivity activity);
     void inject(SplashActivity activity);
+    void inject(InvalidateVersion activity);
 
     void inject(FriendsInviteFragment3 fragment);
     void inject(FriendsMyFragment1 fragment);

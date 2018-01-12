@@ -37,7 +37,7 @@ import com.roostermornings.android.activity.MessageStatusFragmentActivity
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity
 import com.roostermornings.android.adapter_data.ChannelManager
 import com.roostermornings.android.firebase.FA
-import com.roostermornings.android.domain.ChannelRooster
+import com.roostermornings.android.domain.database.ChannelRooster
 import com.roostermornings.android.sqlutil.DeviceAlarm
 import com.roostermornings.android.sqlutil.DeviceAlarmController
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager

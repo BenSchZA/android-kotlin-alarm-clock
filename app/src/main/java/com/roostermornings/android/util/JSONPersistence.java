@@ -16,10 +16,10 @@ import com.google.gson.InstanceCreator;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.roostermornings.android.BaseApplication;
-import com.roostermornings.android.domain.Alarm;
-import com.roostermornings.android.domain.ChannelRooster;
-import com.roostermornings.android.domain.Contact;
-import com.roostermornings.android.domain.User;
+import com.roostermornings.android.domain.database.Alarm;
+import com.roostermornings.android.domain.database.ChannelRooster;
+import com.roostermornings.android.domain.local.Contact;
+import com.roostermornings.android.domain.database.User;
 import com.roostermornings.android.geolocation.GeoHashUtils;
 
 import org.json.JSONException;

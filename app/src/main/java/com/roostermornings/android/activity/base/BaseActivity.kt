@@ -15,7 +15,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import android.content.pm.ResolveInfo
 import android.os.Build
 import android.os.Bundle
 import android.preference.PreferenceManager
@@ -31,11 +30,9 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 
-import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.Theme
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DatabaseReference
 import com.mobsandgeeks.saripaar.ValidationError
 import com.mobsandgeeks.saripaar.Validator
@@ -49,8 +46,8 @@ import com.roostermornings.android.activity.NewAudioRecordActivity
 import com.roostermornings.android.activity.SplashActivity
 import com.roostermornings.android.apis.GoogleIHTTPClient
 import com.roostermornings.android.dagger.RoosterApplicationComponent
-import com.roostermornings.android.domain.Alarm
-import com.roostermornings.android.domain.User
+import com.roostermornings.android.domain.database.Alarm
+import com.roostermornings.android.domain.database.User
 import com.roostermornings.android.firebase.AuthManager
 import com.roostermornings.android.firebase.UserMetrics
 import com.roostermornings.android.fragment.base.BaseFragment
@@ -58,7 +55,6 @@ import com.roostermornings.android.apis.NodeIHTTPClient
 import com.roostermornings.android.receiver.BackgroundTaskReceiver
 import com.roostermornings.android.service.FirebaseListenerService
 import com.roostermornings.android.sqlutil.AudioTableManager
-import com.roostermornings.android.sqlutil.DeviceAlarm
 import com.roostermornings.android.sqlutil.DeviceAlarmController
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager
 import com.roostermornings.android.util.Constants
@@ -95,21 +91,37 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
     @Inject lateinit var mAccount: Account
     @Inject lateinit var authManager: AuthManager
 
-    protected abstract fun inject(component: RoosterApplicationComponent)
+    init {
+        if (mAuth == null) mAuth = FirebaseAuth.getInstance()
+
+        mCurrentUser = BaseApplication.mCurrentUser
+
+        // [START auth_state_listener]
+        mAuthListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+            val user = firebaseAuth.currentUser
+            if (user != null) {
+                // User is signed in
+                Log.d(TAG, "onAuthStateChanged:signed_in:" + user.uid)
+            } else {
+                // User is signed out
+                Log.d(TAG, "onAuthStateChanged:signed_out")
+            }
+        }
+    }
+
+    abstract fun inject(component: RoosterApplicationComponent)
 
     public override fun onStart() {
         super.onStart()
-        if (mAuth == null) mAuth = FirebaseAuth.getInstance()
-        mAuth!!.addAuthStateListener(mAuthListener!!)
+        mAuthListener?.let { mAuth?.addAuthStateListener(it) }
+
         // Log active day
         UserMetrics.logActiveDays()
     }
 
     public override fun onStop() {
         super.onStop()
-        if (mAuthListener != null) {
-            mAuth!!.removeAuthStateListener(mAuthListener!!)
-        }
+        mAuthListener?.let { mAuth?.removeAuthStateListener(it) }
     }
 
     //TODO
@@ -133,20 +145,6 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
 
         //Set default application settings preferences - don't overwrite existing if false
         setPreferenceManagerDefaultSettings(false)
-
-        mCurrentUser = BaseApplication.mCurrentUser
-
-        // [START auth_state_listener]
-        mAuthListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
-            val user = firebaseAuth.currentUser
-            if (user != null) {
-                // User is signed in
-                Log.d(TAG, "onAuthStateChanged:signed_in:" + user.uid)
-            } else {
-                // User is signed out
-                Log.d(TAG, "onAuthStateChanged:signed_out")
-            }
-        }
 
         startFirebaseListenerService()
     }
@@ -609,7 +607,7 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
     companion object {
         private val TAG = BaseActivity::class.java.simpleName
 
-        lateinit var mCurrentUser: User
+        var mCurrentUser: User? = null
 
         fun setBadge(context: Context, count: Int) {
             val launcherClassName = getLauncherClassName(context) ?: return

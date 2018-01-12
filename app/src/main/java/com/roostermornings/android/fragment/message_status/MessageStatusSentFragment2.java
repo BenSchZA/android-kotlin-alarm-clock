@@ -29,7 +29,7 @@ import com.roostermornings.android.BuildConfig;
 import com.roostermornings.android.R;
 import com.roostermornings.android.adapter.MessageStatusSentListAdapter;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
-import com.roostermornings.android.domain.SocialRooster;
+import com.roostermornings.android.domain.database.SocialRooster;
 import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.JSONPersistence;

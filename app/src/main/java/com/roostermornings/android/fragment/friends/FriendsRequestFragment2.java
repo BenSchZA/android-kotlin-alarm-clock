@@ -31,7 +31,7 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.adapter.FriendsRequestListAdapter;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
-import com.roostermornings.android.domain.Friend;
+import com.roostermornings.android.domain.local.Friend;
 import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.util.JSONPersistence;
 import com.roostermornings.android.util.MyContactsController;

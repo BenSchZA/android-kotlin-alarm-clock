@@ -10,11 +10,9 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.support.annotation.Nullable
 import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
@@ -37,12 +35,11 @@ import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.R
 import com.roostermornings.android.activity.base.BaseActivity
 import com.roostermornings.android.dagger.RoosterApplicationComponent
-import com.roostermornings.android.domain.Contact
-import com.roostermornings.android.domain.Friend
-import com.roostermornings.android.domain.User
-import com.roostermornings.android.firebase.AuthManager
+import com.roostermornings.android.domain.local.Contact
+import com.roostermornings.android.domain.local.Friend
+import com.roostermornings.android.domain.database.User
 import com.roostermornings.android.firebase.FirebaseNetwork
-import com.roostermornings.android.onboarding.NumberEntryDialogFragment
+import com.roostermornings.android.onboarding.number_entry.NumberEntryDialogFragment
 import com.roostermornings.android.fragment.friends.FriendsInviteFragment3
 import com.roostermornings.android.fragment.friends.FriendsMyFragment1
 import com.roostermornings.android.fragment.friends.FriendsRequestFragment2
@@ -52,6 +49,8 @@ import javax.inject.Inject
 
 import butterknife.BindView
 import com.roostermornings.android.onboarding.*
+import com.roostermornings.android.onboarding.number_entry.NumberEntryFragment
+import com.roostermornings.android.onboarding.number_entry.NumberEntryListener
 import com.roostermornings.android.snackbar.SnackbarManager
 import com.roostermornings.android.util.Toaster
 import kotlinx.android.synthetic.main.activity_friends.*
@@ -94,8 +93,6 @@ class FriendsFragmentActivity : BaseActivity(), FriendsMyFragment1.OnFragmentInt
     private var friendsFragment3: FriendsInviteFragment3? = null
 
     @Inject lateinit var baseApplication: BaseApplication
-    @Inject lateinit var sharedPreferences: SharedPreferences
-    @Inject lateinit var authManager: AuthManager
 
     private var firebaseUser: FirebaseUser? = null
 
@@ -105,10 +102,6 @@ class FriendsFragmentActivity : BaseActivity(), FriendsMyFragment1.OnFragmentInt
     }
 
     private var snackbarManager: SnackbarManager? = null
-
-    override fun inject(component: RoosterApplicationComponent) {
-        component.inject(this)
-    }
 
     interface FriendsInviteListAdapterInterface {
         //Send invite to Rooster user from contact list
@@ -121,11 +114,15 @@ class FriendsFragmentActivity : BaseActivity(), FriendsMyFragment1.OnFragmentInt
         fun rejectFriendRequest(rejectFriend: Friend)
     }
 
+    override fun inject(component: RoosterApplicationComponent) {
+        component.inject(this)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         initialize(R.layout.activity_friends)
-        inject(BaseApplication.getRoosterApplicationComponent())
+        BaseApplication.getRoosterApplicationComponent().inject(this)
 
         // If the user is anonymous, show sign-up fragment
         if (!authManager.isUserSignedIn()) {
@@ -561,6 +558,6 @@ class FriendsFragmentActivity : BaseActivity(), FriendsMyFragment1.OnFragmentInt
     }
 
     companion object {
-        val TAG = FriendsFragmentActivity::class.java.simpleName
+        val TAG: String = FriendsFragmentActivity::class.java.simpleName
     }
 }

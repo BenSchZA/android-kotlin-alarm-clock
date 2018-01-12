@@ -12,7 +12,6 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.media.AudioManager
 import android.os.Bundle
-import android.os.Parcel
 import android.os.RemoteException
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
@@ -31,8 +30,6 @@ import android.widget.MediaController
 import android.widget.TextView
 import android.widget.Toast
 import butterknife.BindView
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.R
 import com.roostermornings.android.activity.base.BaseActivity
@@ -40,7 +37,6 @@ import com.roostermornings.android.adapter.DiscoverListAdapter
 import com.roostermornings.android.adapter_data.ChannelManager
 import com.roostermornings.android.dagger.RoosterApplicationComponent
 import com.roostermornings.android.firebase.FA
-import com.roostermornings.android.realm.RoosterMediaItem
 import com.roostermornings.android.service.MediaService
 import com.roostermornings.android.util.JSONPersistence
 import com.roostermornings.android.util.RoosterUtils
@@ -72,11 +68,13 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
     @Inject
     lateinit var jsonPersistence: JSONPersistence
     @Inject
-    lateinit var sharedPreferences: SharedPreferences
-    @Inject
     lateinit var channelManager: ChannelManager
     @Inject
     lateinit var realm: Realm
+
+    override fun inject(component: RoosterApplicationComponent) {
+        component.inject(this)
+    }
 
     private val subscriptionCallback = object : MediaBrowserCompat.SubscriptionCallback() {
         override fun onChildrenLoaded(parentId: String, children: List<MediaBrowserCompat.MediaItem>) {
@@ -151,15 +149,11 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
         }
     }
 
-    override fun inject(component: RoosterApplicationComponent) {
-        component.inject(this)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initialize(R.layout.activity_discover)
 
-        inject(BaseApplication.getRoosterApplicationComponent())
+        BaseApplication.getRoosterApplicationComponent().inject(this)
 
         //Notify user of no internet connection
         checkInternetConnection()
@@ -361,7 +355,7 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
         if (isPlaying) {
             mMediaController?.transportControls?.pause()
         } else {
-            FA.Log(FA.Event.explore_channel_rooster_played::class.java, FA.Event.explore_channel_rooster_played.Param.channel_title, item.mediaId)
+            FA.Log(FA.Event.explore_channel_rooster_play::class.java, FA.Event.explore_channel_rooster_play.Param.channel_title, item.mediaId)
 
             mMediaController?.transportControls?.pause()
             mediaItems.indexOfFirst { it.mediaId == item.mediaId }.takeIf { it > -1 }?.let {
@@ -419,6 +413,6 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
 
     companion object {
 
-        val TAG = DiscoverFragmentActivity::class.java.simpleName
+        val TAG: String = DiscoverFragmentActivity::class.java.simpleName
     }
 }

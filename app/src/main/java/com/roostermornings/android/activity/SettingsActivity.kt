@@ -1,0 +1,44 @@
+/*
+ * Rooster Mornings Android.
+ * Copyright (c)  2017 Roosta Media. All rights reserved.
+ */
+
+package com.roostermornings.android.activity
+
+import android.os.Bundle
+import android.widget.TextView
+
+import com.mobsandgeeks.saripaar.ValidationError
+import com.roostermornings.android.BaseApplication
+import com.roostermornings.android.R
+import com.roostermornings.android.activity.base.BaseActivity
+import com.roostermornings.android.dagger.RoosterApplicationComponent
+import com.roostermornings.android.fragment.SettingsFragment
+
+import butterknife.BindView
+
+class SettingsActivity : BaseActivity() {
+
+    @BindView(R.id.toolbar_title)
+    lateinit var toolbarTitle: TextView
+
+    override fun inject(component: RoosterApplicationComponent) {
+        component.inject(this)
+    }
+
+    public override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        initialize(R.layout.custom_preference_screen_layout)
+        BaseApplication.getRoosterApplicationComponent().inject(this)
+
+        //setDayNightTheme();
+
+        //Display the fragment as the main content
+        fragmentManager.beginTransaction()
+                .add(R.id.main_content, SettingsFragment())
+                .commit()
+
+        //Set toolbar title
+        setupToolbar(toolbarTitle, getString(R.string.settings_activity_title))
+    }
+}

@@ -17,8 +17,8 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.R
-import com.roostermornings.android.domain.Channel
-import com.roostermornings.android.domain.GeoHashChannel
+import com.roostermornings.android.domain.database.Channel
+import com.roostermornings.android.domain.local.GeoHashChannel
 import com.roostermornings.android.firebase.FirebaseNetwork
 import com.roostermornings.android.firebase.UserMetrics
 import com.roostermornings.android.util.*

@@ -5,7 +5,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.roostermornings.android.domain.OnboardingJourneyEvent
+import com.roostermornings.android.domain.local.OnboardingJourneyEvent
 import com.roostermornings.android.util.JSONPersistence
 import java.util.*
 
@@ -20,17 +20,6 @@ object UserMetrics {
     private fun isUserSignedIn(): Boolean {
         return FirebaseAuth.getInstance().currentUser != null
                 && FirebaseAuth.getInstance().currentUser?.isAnonymous == false
-    }
-
-    fun migrateOnboardingJourney(anonymousUID: String?, signInUID: String?) {
-        val fDB = FirebaseDatabase.getInstance().reference
-
-        val childUpdates = HashMap<String, Any>()
-
-        if (!anonymousUID.isNullOrBlank() && !signInUID.isNullOrBlank()) {
-            childUpdates.put("$USER_METRICS/$anonymousUID/convert_uid", signInUID!!)
-            fDB.updateChildren(childUpdates)
-        }
     }
 
     fun migrateUserUID(anonymousUID: String?, signInUID: String?) {
@@ -90,7 +79,12 @@ object UserMetrics {
 
         var providerId = "anonymous"
         fUser?.providerData?.forEach { userInfo ->
-            userInfo.providerId.takeIf { it.contains("google") || it.contains("facebook") || it.contains("password") }?.let { providerId = userInfo.providerId }
+            when {
+                userInfo.providerId.contains("google") -> {providerId = "google"}
+                userInfo.providerId.contains("facebook") -> {providerId = "facebook"}
+                userInfo.providerId.contains("password") -> {providerId = "email"}
+                else -> {}
+            }
         }
 
         if (fUser?.uid?.isNotBlank() == true) {

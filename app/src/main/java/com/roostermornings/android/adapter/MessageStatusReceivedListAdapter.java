@@ -54,12 +54,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
-import static java.text.DateFormat.getDateTimeInstance;
 
 public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<MessageStatusReceivedListAdapter.ViewHolder> implements Filterable {
     private ArrayList<DeviceAudioQueueItem> mDataset = new ArrayList<>();

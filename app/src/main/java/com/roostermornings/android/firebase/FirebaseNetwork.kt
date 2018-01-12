@@ -13,8 +13,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.roostermornings.android.domain.OnboardingJourneyEvent
-import com.roostermornings.android.domain.User
+import com.roostermornings.android.domain.database.User
 import com.roostermornings.android.util.Constants
 import com.roostermornings.android.util.MyContactsController
 import com.roostermornings.android.util.StrUtils
@@ -257,7 +256,7 @@ object FirebaseNetwork {
                     "android",
                     deviceToken,
                     photoURL,
-                    fUser.displayName?:"Anonymous Rooster (Me)",
+                    fUser.displayName ?: "Anonymous Rooster (Me)",
                     "",
                     fUser.uid,
                     null,

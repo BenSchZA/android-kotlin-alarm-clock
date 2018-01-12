@@ -6,7 +6,6 @@
 package com.roostermornings.android.sqlutil;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -60,10 +59,9 @@ public class DeviceAlarm {
     }
 
     public List<DeviceAlarm> getAlarmList() {
-        Iterator dayIterator = alarmDays.iterator();
 
-        while (dayIterator.hasNext()) {
-            day = Integer.valueOf(dayIterator.next().toString());
+        for (Object alarmDay : alarmDays) {
+            day = Integer.valueOf(alarmDay.toString());
             deviceAlarmSet.add(new DeviceAlarm().setAlarm(this.enabled, this.hour, this.minute, day, this.recurring, this.channel, this.social));
         }
         return deviceAlarmSet;

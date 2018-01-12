@@ -1,6 +1,5 @@
 package com.roostermornings.android.onboarding
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -35,7 +34,7 @@ import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.R
 import com.roostermornings.android.firebase.AuthManager
 import com.roostermornings.android.dagger.RoosterApplicationComponent
-import com.roostermornings.android.domain.OnboardingJourneyEvent
+import com.roostermornings.android.domain.local.OnboardingJourneyEvent
 import com.roostermornings.android.firebase.UserMetrics
 import com.roostermornings.android.fragment.base.BaseFragment
 import com.roostermornings.android.util.Toaster
@@ -305,12 +304,6 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
         // Create anonymous profile
         authManager.firebaseAnonymousAuth()
         proceedToNextPage()
-
-        UserMetrics.logOnboardingEvent(
-                OnboardingJourneyEvent(
-                        subject = "Sign-In UI",
-                        target = "Anonymous")
-                        .setType(OnboardingJourneyEvent.Companion.Event.CLICK_ON))
     }
 
     //Receive auth activity result and start callback
@@ -353,9 +346,6 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
     private fun authWithFacebook(token: AccessToken, graphObject: JSONObject?) {
         authManager.firebaseAuthWithFacebook(token, object: AuthManager.AuthInterface {
             override fun onAuthSuccess(task: Task<AuthResult>) {
-                val activity = activity ?: return onAuthFailure()
-
-                authManager.performMigration(activity)
                 UserMetrics.generateNewUserMetricsEntry()
 
                 //TODO: get permission
@@ -386,9 +376,6 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
     private fun authWithGoogle(result: GoogleSignInResult) {
         authManager.firebaseAuthWithGoogle(result, object: AuthManager.AuthInterface {
             override fun onAuthSuccess(task: Task<AuthResult>) {
-                val activity = activity ?: return onAuthFailure()
-
-                authManager.performMigration(activity)
                 UserMetrics.generateNewUserMetricsEntry()
                 changeLayoutSignedIn()
                 proceedToNextPage()
@@ -419,17 +406,21 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
         mCustomCommandInterface?.onCustomCommand(InterfaceCommands.Companion.Command.PROCEED)
 
         // Set auth method in user_metrics node
-        FirebaseAuth.getInstance().currentUser?.providerData?.forEach {
-            val providerId = it.providerId
-
-            providerId.takeIf { it.contains("google") || it.contains("facebook") || it.contains("password") }?.let {
-                UserMetrics.logOnboardingEvent(
-                        OnboardingJourneyEvent(
-                                subject = "Sign-In UI",
-                                target = providerId)
-                                .setType(OnboardingJourneyEvent.Companion.Event.CLICK_ON))
+        var providerId = "anonymous"
+        FirebaseAuth.getInstance().currentUser?.providerData?.forEach { userInfo ->
+            when {
+                userInfo.providerId.contains("google") -> {providerId = "google"}
+                userInfo.providerId.contains("facebook") -> {providerId = "facebook"}
+                userInfo.providerId.contains("password") -> {providerId = "email"}
+                else -> {}
             }
         }
+
+        UserMetrics.logOnboardingEvent(
+                OnboardingJourneyEvent(
+                        subject = "Sign-In UI",
+                        target = providerId)
+                        .setType(OnboardingJourneyEvent.Companion.Event.CLICK_ON))
     }
 
     @OnClick(R.id.signup_button_email)
@@ -449,9 +440,6 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
         authManager.firebaseAuthWithEmail(name, email, password, mAlreadyUser,
                 object: AuthManager.AuthInterface {
             override fun onAuthSuccess(task: Task<AuthResult>) {
-                val activity = activity ?: return onAuthFailure()
-
-                authManager.performMigration(activity)
                 UserMetrics.generateNewUserMetricsEntry()
                 changeLayoutSignedIn()
                 proceedToNextPage()

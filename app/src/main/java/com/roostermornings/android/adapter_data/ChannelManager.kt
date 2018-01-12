@@ -10,9 +10,9 @@ import android.util.Log
 import android.widget.Toast
 import com.google.firebase.database.*
 import com.roostermornings.android.BaseApplication
-import com.roostermornings.android.domain.Channel
-import com.roostermornings.android.domain.ChannelRooster
-import com.roostermornings.android.domain.GeoHashChannel
+import com.roostermornings.android.domain.database.Channel
+import com.roostermornings.android.domain.database.ChannelRooster
+import com.roostermornings.android.domain.local.GeoHashChannel
 import com.roostermornings.android.geolocation.GeoHashUtils
 import com.roostermornings.android.util.JSONPersistence
 import com.roostermornings.android.util.Toaster

@@ -5,7 +5,6 @@
 
 package com.roostermornings.android.activity
 
-import android.accounts.Account
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.content.BroadcastReceiver
@@ -37,15 +36,11 @@ import com.roostermornings.android.adapter.MyAlarmsListAdapter
 import com.roostermornings.android.adapter_data.RoosterAlarmManager
 import com.roostermornings.android.custom_ui.SquareFrameLayout
 import com.roostermornings.android.dagger.RoosterApplicationComponent
-import com.roostermornings.android.domain.Alarm
-import com.roostermornings.android.firebase.AuthManager
+import com.roostermornings.android.domain.database.Alarm
 import com.roostermornings.android.firebase.FA
 import com.roostermornings.android.firebase.FirebaseNetwork
 import com.roostermornings.android.realm.RealmAlarmFailureLog
 import com.roostermornings.android.snackbar.SnackbarManager
-import com.roostermornings.android.sqlutil.AudioTableManager
-import com.roostermornings.android.sqlutil.DeviceAlarmController
-import com.roostermornings.android.sqlutil.DeviceAlarmTableManager
 import com.roostermornings.android.sync.DownloadSyncAdapter
 import com.roostermornings.android.util.ConnectivityUtils
 import com.roostermornings.android.util.Constants
@@ -102,15 +97,7 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface {
     private var profileCreationFragment: ProfileCreationFragment? = null
 
     @Inject
-    lateinit var deviceAlarmController: DeviceAlarmController
-    @Inject
-    lateinit var deviceAlarmTableManager: DeviceAlarmTableManager
-    @Inject
-    lateinit var audioTableManager: AudioTableManager
-    @Inject
     lateinit var roosterAlarmManager: RoosterAlarmManager
-    @Inject
-    lateinit var mAccount: Account
     @Inject
     lateinit var lifeCycle: LifeCycle
     @Inject
@@ -119,8 +106,6 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface {
     lateinit var realmAlarmFailureLog: RealmAlarmFailureLog
     @Inject
     lateinit var connectivityUtils: ConnectivityUtils
-    @Inject
-    lateinit var authManager: AuthManager
 
     private var firebaseUser: FirebaseUser? = null
 

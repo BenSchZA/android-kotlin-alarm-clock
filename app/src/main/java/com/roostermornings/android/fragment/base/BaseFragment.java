@@ -29,10 +29,10 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.apis.GoogleIHTTPClient;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
-import com.roostermornings.android.domain.Contact;
-import com.roostermornings.android.domain.Friend;
-import com.roostermornings.android.domain.SocialRooster;
-import com.roostermornings.android.domain.User;
+import com.roostermornings.android.domain.local.Contact;
+import com.roostermornings.android.domain.local.Friend;
+import com.roostermornings.android.domain.database.SocialRooster;
+import com.roostermornings.android.domain.database.User;
 import com.roostermornings.android.apis.NodeIHTTPClient;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 

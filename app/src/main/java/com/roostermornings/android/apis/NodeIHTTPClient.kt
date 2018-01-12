@@ -5,11 +5,11 @@
 
 package com.roostermornings.android.apis
 
-import com.roostermornings.android.domain.FCMPayloadSocialRooster
-import com.roostermornings.android.domain.LocalContacts
-import com.roostermornings.android.domain.NodeAPIResult
-import com.roostermornings.android.domain.NodeUsers
-import com.roostermornings.android.domain.Users
+import com.roostermornings.android.domain.local.FCMPayloadSocialRooster
+import com.roostermornings.android.domain.local.LocalContacts
+import com.roostermornings.android.domain.node.NodeAPIResult
+import com.roostermornings.android.domain.node.NodeUsers
+import com.roostermornings.android.domain.database.Users
 
 import retrofit.Call
 import retrofit.http.Body

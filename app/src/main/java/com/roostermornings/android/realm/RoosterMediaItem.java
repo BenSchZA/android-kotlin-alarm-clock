@@ -1,10 +1,5 @@
 package com.roostermornings.android.realm;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
-import com.google.gson.Gson;
-
 import io.realm.RealmObject;
 
 /**

@@ -11,7 +11,7 @@ import android.database.Cursor;
 import android.provider.ContactsContract;
 import android.telephony.TelephonyManager;
 
-import com.roostermornings.android.domain.Contact;
+import com.roostermornings.android.domain.local.Contact;
 
 import org.json.JSONArray;
 import org.json.JSONObject;

@@ -29,7 +29,7 @@ import com.roostermornings.android.R
 import com.roostermornings.android.activity.base.BaseActivity
 import com.roostermornings.android.firebase.FA
 import com.roostermornings.android.dagger.RoosterApplicationComponent
-import com.roostermornings.android.domain.User
+import com.roostermornings.android.domain.database.User
 import com.roostermornings.android.util.Constants
 import com.roostermornings.android.util.RoosterUtils
 import com.roostermornings.android.util.Toaster
@@ -153,7 +153,7 @@ class NewAudioRecordActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initialize(R.layout.activity_new_audio)
-        inject(BaseApplication.getRoosterApplicationComponent())
+        BaseApplication.getRoosterApplicationComponent().inject(this)
 
         setDayNightTheme()
         setButtonBarSelection()

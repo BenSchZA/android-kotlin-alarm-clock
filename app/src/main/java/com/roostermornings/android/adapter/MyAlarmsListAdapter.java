@@ -30,7 +30,7 @@ import com.roostermornings.android.R;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.firebase.FA;
-import com.roostermornings.android.domain.Alarm;
+import com.roostermornings.android.domain.database.Alarm;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
