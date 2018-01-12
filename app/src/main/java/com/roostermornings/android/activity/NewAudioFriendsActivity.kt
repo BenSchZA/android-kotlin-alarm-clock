@@ -69,13 +69,6 @@ class NewAudioFriendsActivity : BaseActivity() {
     @Inject lateinit var myContactsController: MyContactsController
     @Inject lateinit var connectivity: ConnectivityUtils
 
-    private var firebaseUser: FirebaseUser? = null
-
-    @Inject
-    fun NewAudioFriendsActivity(firebaseUser: FirebaseUser?) {
-        this.firebaseUser = firebaseUser
-    }
-
     private val mUploadServiceConnection = object : ServiceConnection {
         // Called when the connection with the service is established
         override fun onServiceConnected(className: ComponentName, service: IBinder) {

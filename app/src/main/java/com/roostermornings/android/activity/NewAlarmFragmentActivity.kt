@@ -56,8 +56,6 @@ class NewAlarmFragmentActivity : BaseActivity(), IAlarmSetListener, NewAlarmFrag
     @BindView(R.id.toolbar_title)
     lateinit var toolbarTitle: TextView
 
-    @Inject lateinit var mCurrentUser: FirebaseUser
-
     override fun inject(component: RoosterApplicationComponent) {
         component.inject(this)
     }
@@ -212,7 +210,7 @@ class NewAlarmFragmentActivity : BaseActivity(), IAlarmSetListener, NewAlarmFrag
                 deviceAlarmController.registerAlarmSet(mAlarm.isEnabled, alarmKey, mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring, alarmChannelUID, mAlarm.isAllow_friend_audio_files)
 
                 //Update firebase
-                database.getReference(String.format("alarms/%s/%s", mCurrentUser.uid, alarmKey)).setValue(mAlarm)
+                database.getReference(String.format("alarms/%s/%s", firebaseUser?.uid, alarmKey)).setValue(mAlarm)
 
                 //Download any social or channel audio files
                 ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle())
@@ -246,11 +244,11 @@ class NewAlarmFragmentActivity : BaseActivity(), IAlarmSetListener, NewAlarmFrag
 
             when (position) {
                 0 -> {
-                    mFragment1 = NewAlarmFragment1.newInstance(mCurrentUser.uid)
+                    mFragment1 = NewAlarmFragment1.newInstance(firebaseUser?.uid)
                     return mFragment1
                 }
                 1 -> {
-                    mFragment2 = NewAlarmFragment2.newInstance(mCurrentUser.uid)
+                    mFragment2 = NewAlarmFragment2.newInstance(firebaseUser?.uid)
                     return mFragment2
                 }
             }

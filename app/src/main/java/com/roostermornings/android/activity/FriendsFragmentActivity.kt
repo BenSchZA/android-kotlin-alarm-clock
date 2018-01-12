@@ -94,13 +94,6 @@ class FriendsFragmentActivity : BaseActivity(), FriendsMyFragment1.OnFragmentInt
 
     @Inject lateinit var baseApplication: BaseApplication
 
-    private var firebaseUser: FirebaseUser? = null
-
-    @Inject
-    fun FriendsFragmentActivity(firebaseUser: FirebaseUser?) {
-        this.firebaseUser = firebaseUser
-    }
-
     private var snackbarManager: SnackbarManager? = null
 
     interface FriendsInviteListAdapterInterface {

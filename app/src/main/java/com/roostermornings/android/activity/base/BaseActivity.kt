@@ -70,6 +70,7 @@ import javax.inject.Named
 import butterknife.ButterKnife
 import butterknife.OnClick
 import butterknife.Optional
+import com.google.firebase.auth.FirebaseUser
 
 import com.roostermornings.android.util.Constants.AUTHORITY
 
@@ -90,6 +91,12 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
     @Inject lateinit var mDatabase: DatabaseReference
     @Inject lateinit var mAccount: Account
     @Inject lateinit var authManager: AuthManager
+
+    var firebaseUser: FirebaseUser? = null
+    @Inject
+    fun BaseActivity(firebaseUser: FirebaseUser?) {
+        this.firebaseUser = firebaseUser
+    }
 
     init {
         if (mAuth == null) mAuth = FirebaseAuth.getInstance()

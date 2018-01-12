@@ -78,13 +78,6 @@ class ProfileActivity : BaseActivity(), CustomCommandInterface {
 
     private var profileCreationFragment: ProfileCreationFragment? = null
 
-    var firebaseUser: FirebaseUser? = null
-
-    @Inject
-    fun ProfileActivity(firebaseUser: FirebaseUser?) {
-        this.firebaseUser = firebaseUser
-    }
-
     override fun inject(component: RoosterApplicationComponent) {
         component.inject(this)
     }
