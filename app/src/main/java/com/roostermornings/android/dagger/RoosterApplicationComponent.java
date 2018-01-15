@@ -50,6 +50,7 @@ import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.receiver.DeviceAlarmReceiver;
 import com.roostermornings.android.receiver.NetworkChangeReceiver;
 import com.roostermornings.android.service.AudioService;
+import com.roostermornings.android.service.ForegroundService;
 import com.roostermornings.android.service.MediaService;
 import com.roostermornings.android.service.RoosterFirebaseMessagingService;
 import com.roostermornings.android.service.UploadService;
@@ -113,6 +114,7 @@ public interface RoosterApplicationComponent {
     void inject(BackgroundTaskReceiver service);
     void inject(NetworkChangeReceiver service);
     void inject(RoosterFirebaseMessagingService service);
+    void inject(ForegroundService service);
 
     void inject(FA roosterClass);
     void inject(DeviceAlarmController roosterClass);

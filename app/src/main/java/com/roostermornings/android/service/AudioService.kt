@@ -58,6 +58,8 @@ import android.support.v4.content.WakefulBroadcastReceiver
 import com.google.firebase.auth.FirebaseUser
 import com.roostermornings.android.realm.RealmAlarmFailureLog
 import com.roostermornings.android.util.*
+import com.roostermornings.android.util.Constants.AUDIO_TYPE_CHANNEL
+import com.roostermornings.android.util.Constants.AUDIO_TYPE_SOCIAL
 
 // Service to manage playing and pausing audio during Rooster alarm
 class AudioService : Service() {
@@ -408,11 +410,27 @@ class AudioService : Service() {
 
     private fun logAlarmActivation(dataLoaded: Boolean) {
         if (channelAudioItems.isNotEmpty() && socialAudioItems.isNotEmpty() ) {
-            FA.LogMany(FA.Event.alarm_activated::class.java, arrayOf(FA.Event.alarm_activated.Param.channel_content_received, FA.Event.alarm_activated.Param.social_content_received, FA.Event.alarm_activated.Param.data_loaded), arrayOf(channelAudioItems.size, socialAudioItems.size, dataLoaded))
+
+            FA.LogMany(FA.Event.alarm_activated::class.java,
+                    arrayOf(FA.Event.alarm_activated.Param.channel_content_received,
+                            FA.Event.alarm_activated.Param.social_content_received,
+                            FA.Event.alarm_activated.Param.data_loaded),
+                    arrayOf(channelAudioItems.size, socialAudioItems.size, dataLoaded))
+
         } else if (channelAudioItems.isNotEmpty() ) {
-            FA.LogMany(FA.Event.alarm_activated::class.java, arrayOf(FA.Event.alarm_activated.Param.channel_content_received, FA.Event.alarm_activated.Param.data_loaded), arrayOf(channelAudioItems.size, dataLoaded))
+
+            FA.LogMany(FA.Event.alarm_activated::class.java,
+                    arrayOf(FA.Event.alarm_activated.Param.channel_content_received,
+                            FA.Event.alarm_activated.Param.data_loaded),
+                    arrayOf(channelAudioItems.size, dataLoaded))
+
         } else if (socialAudioItems.isNotEmpty() ) {
-            FA.LogMany(FA.Event.alarm_activated::class.java, arrayOf(FA.Event.alarm_activated.Param.social_content_received, FA.Event.alarm_activated.Param.data_loaded), arrayOf(socialAudioItems.size, dataLoaded))
+
+            FA.LogMany(FA.Event.alarm_activated::class.java,
+                    arrayOf(FA.Event.alarm_activated.Param.social_content_received,
+                            FA.Event.alarm_activated.Param.data_loaded),
+                    arrayOf(socialAudioItems.size, dataLoaded))
+
         }
     }
 
@@ -658,13 +676,28 @@ class AudioService : Service() {
                 if (alarmPosition == 1 && currentAlarmCycle == 1) {
                     // Slowly increase volume from low to current volume
                     softStartAudio()
-                    if (audioItem.type == Constants.AUDIO_TYPE_SOCIAL) FA.Log(FA.Event.social_rooster_unique_play::class.java, null, null)
-                    if (audioItem.type == Constants.AUDIO_TYPE_CHANNEL) FA.Log(FA.Event.channel_unique_play::class.java, FA.Event.channel_unique_play.Param.channel_title, audioItem.queue_id)
-                    if (audioItem.type == Constants.AUDIO_TYPE_SOCIAL) FA.Log(FA.Event.social_rooster_play::class.java, null, null)
-                    if (audioItem.type == Constants.AUDIO_TYPE_CHANNEL) FA.Log(FA.Event.channel_play::class.java, FA.Event.channel_unique_play.Param.channel_title, audioItem.queue_id)
+                    when(audioItem.type) {
+                        AUDIO_TYPE_SOCIAL -> {
+                            FA.Log(FA.Event.social_rooster_unique_play::class.java, null, null)
+                            FA.Log(FA.Event.social_rooster_play::class.java, null, null)
+                        }
+                        AUDIO_TYPE_CHANNEL -> {
+                            FA.Log(FA.Event.channel_unique_play::class.java,
+                                    FA.Event.channel_unique_play.Param.channel_title, audioItem.queue_id)
+                            FA.Log(FA.Event.channel_play::class.java,
+                                    FA.Event.channel_unique_play.Param.channel_title, audioItem.queue_id)
+                        }
+                    }
                 } else {
-                    if (audioItem.type == Constants.AUDIO_TYPE_SOCIAL) FA.Log(FA.Event.social_rooster_play::class.java, null, null)
-                    if (audioItem.type == Constants.AUDIO_TYPE_CHANNEL) FA.Log(FA.Event.channel_play::class.java, FA.Event.channel_unique_play.Param.channel_title, audioItem.queue_id)
+                    when(audioItem.type) {
+                        AUDIO_TYPE_SOCIAL -> {
+                            FA.Log(FA.Event.social_rooster_play::class.java, null, null)
+                        }
+                        AUDIO_TYPE_CHANNEL -> {
+                            FA.Log(FA.Event.channel_play::class.java,
+                                    FA.Event.channel_unique_play.Param.channel_title, audioItem.queue_id)
+                        }
+                    }
                 }
 
                 mediaPlayerRooster.setOnCompletionListener(MediaPlayer.OnCompletionListener {

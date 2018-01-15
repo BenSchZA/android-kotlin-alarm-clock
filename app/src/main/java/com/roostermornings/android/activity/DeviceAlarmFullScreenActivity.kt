@@ -79,8 +79,6 @@ class DeviceAlarmFullScreenActivity : BaseActivity() {
     @BindView(R.id.alarm_action_button)
     lateinit var alarmActionButton: Button
 
-    @Inject lateinit var realmAlarmFailureLog: RealmAlarmFailureLog
-
     override fun inject(component: RoosterApplicationComponent) {
         component.inject(this)
     }

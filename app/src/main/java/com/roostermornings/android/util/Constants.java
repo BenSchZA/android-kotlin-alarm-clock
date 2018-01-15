@@ -18,6 +18,10 @@ package com.roostermornings.android.util;
 
 public class Constants {
 
+    // Activity state
+    public static final String IS_ACTIVITY_FOREGROUND = "IS_ACTIVITY_FOREGROUND";
+    public static final String APP_BROUGHT_FOREGROUND = "APP_BROUGHT_FOREGROUND";
+
     // AuthManager
     public static final String ANONYMOUS_USER_UID = "ANONYMOUS_USER_UID";
 

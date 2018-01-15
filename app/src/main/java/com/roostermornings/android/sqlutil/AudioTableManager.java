@@ -12,6 +12,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.firebase.FirebaseNetwork;
 import com.roostermornings.android.sqldata.AudioTableHelper;
 import com.roostermornings.android.util.Constants;
@@ -67,6 +68,9 @@ public class AudioTableManager {
             return false;
         }
         updateRoosterCount();
+
+        // Log event to enable tallying of social roosters received for user_metrics
+        FA.Log(FA.Event.social_rooster_received.class, null, null);
         return true;
     }
 

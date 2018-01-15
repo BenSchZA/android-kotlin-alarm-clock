@@ -11,6 +11,7 @@ import com.facebook.internal.ImageRequest
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInResult
 import com.google.android.gms.tasks.Task
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.*
 import com.google.firebase.iid.FirebaseInstanceId
 import com.roostermornings.android.BaseApplication
@@ -40,8 +41,12 @@ class AuthManager(val context: Context) {
         BaseApplication.getRoosterApplicationComponent().inject(this)
     }
 
-    companion object {
+    internal companion object {
         val TAG = AuthManager::class.java.simpleName?:"nullSimpleName"
+    }
+
+    private fun onAuthSuccess() {
+        FirebaseAnalytics.getInstance(context).setUserId(firebaseAuth.currentUser?.uid)
     }
 
     interface AuthInterface {
@@ -68,6 +73,7 @@ class AuthManager(val context: Context) {
         // If current user is anonymous, or no current user, then login anonymously
         if(firebaseAuth.currentUser?.isAnonymous == true || firebaseAuth.currentUser == null) {
             firebaseAuth.signInAnonymously().addOnCompleteListener {
+                this@AuthManager.onAuthSuccess()
                 clearPersistedAnonymousUID()
                 persistAnonymousUID(firebaseAuth.currentUser)
                 operation(firebaseAuth.currentUser?.uid)
@@ -107,6 +113,7 @@ class AuthManager(val context: Context) {
             override fun onLinkSuccess(task: Task<AuthResult>) {
                 onSuccessfulFacebookAuth()
                 listener.onAuthSuccess(task)
+                this@AuthManager.onAuthSuccess()
             }
 
             override fun onLinkFailure(exception: Exception) {
@@ -120,6 +127,7 @@ class AuthManager(val context: Context) {
                         performMigration()
                         onSuccessfulFacebookAuth()
                         listener.onAuthSuccess(task)
+                        this@AuthManager.onAuthSuccess()
                     } else {
                         Log.d(TAG, "firebaseAuthWithFacebook:" + exception)
                         listener.onAuthFailure()
@@ -157,6 +165,7 @@ class AuthManager(val context: Context) {
             override fun onLinkSuccess(task: Task<AuthResult>) {
                 onSuccessfulGoogleAuth(account)
                 listener.onAuthSuccess(task)
+                this@AuthManager.onAuthSuccess()
             }
 
             override fun onLinkFailure(exception: Exception) {
@@ -170,6 +179,7 @@ class AuthManager(val context: Context) {
                         performMigration()
                         onSuccessfulGoogleAuth(account)
                         listener.onAuthSuccess(task)
+                        this@AuthManager.onAuthSuccess()
                     } else {
                         Log.d(TAG, "firebaseAuthWithGoogle:" + exception)
                         listener.onAuthFailure()
@@ -198,6 +208,7 @@ class AuthManager(val context: Context) {
             override fun onLinkSuccess(task: Task<AuthResult>) {
                 onSuccessfulEmailAuth(name, mAlreadyUser)
                 listener.onAuthSuccess(task)
+                this@AuthManager.onAuthSuccess()
             }
 
             override fun onLinkFailure(exception: Exception) {
@@ -212,6 +223,7 @@ class AuthManager(val context: Context) {
                                 performMigration()
                                 onSuccessfulEmailAuth(name, mAlreadyUser)
                                 listener.onAuthSuccess(task)
+                                this@AuthManager.onAuthSuccess()
                             } else {
                                 Log.d(TAG, "firebaseAuthWithEmail:" + exception)
                                 listener.onAuthFailure()

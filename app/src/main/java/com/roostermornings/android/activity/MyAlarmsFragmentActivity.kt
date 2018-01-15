@@ -99,11 +99,7 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface {
     @Inject
     lateinit var roosterAlarmManager: RoosterAlarmManager
     @Inject
-    lateinit var lifeCycle: LifeCycle
-    @Inject
     lateinit var jsonPersistence: JSONPersistence
-    @Inject
-    lateinit var realmAlarmFailureLog: RealmAlarmFailureLog
     @Inject
     lateinit var connectivityUtils: ConnectivityUtils
 
@@ -120,18 +116,14 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface {
         //Display notifications
         updateRoosterNotification()
         updateRequestNotification()
-        //Setup day/night theme selection (based on settings, and time)
-        setDayNightTheme()
     }
 
-    public override fun onPause() {
+    override fun onPause() {
         super.onPause()
         // Persist alarms for seamless loading
         jsonPersistence.alarms = mAlarms
-
         // Remove Realm listeners, and close Realm
         snackbarManager?.destroy()
-
         // Update app widget
         AlarmToggleWidget.sendUpdateBroadcast(applicationContext)
     }
@@ -143,15 +135,6 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface {
 
         // Final context to be used in threads
         val context = this
-
-        // Process any alarm failures
-        realmAlarmFailureLog.processAlarmFailures(true)
-
-        // Set shared pref to indicate whether mobile number is valid
-        FirebaseNetwork.flagValidMobileNumber(this, false)
-
-        // Check if first entry
-        lifeCycle.performInception()
 
         snackbarManager = SnackbarManager(this, myAlarmsCoordinatorLayout)
 
@@ -175,49 +158,28 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface {
         // UI setup thread
         object : Thread() {
             override fun run() {
+                    // Set highlighting of button bar
+                    setButtonBarSelection()
+                    // Animate FAB with pulse
+                    buttonAddAlarm.animation = AnimationUtils.loadAnimation(context, R.anim.pulse)
+                    // Set toolbar title
+                    toolbar = setupToolbar(toolbarTitle, getString(R.string.my_alarms))
+                    // Set download indicator
+                    refreshDownloadIndicator()
 
-                // Set highlighting of button bar
-                setButtonBarSelection()
-                // Animate FAB with pulse
-                buttonAddAlarm.animation = AnimationUtils.loadAnimation(context, R.anim.pulse)
-                // Set toolbar title
-                toolbar = setupToolbar(toolbarTitle, getString(R.string.my_alarms))
-                // Set download indicator
-                refreshDownloadIndicator()
+                    // Set up adapter for monitoring alarm objects
+                    mAdapter = MyAlarmsListAdapter(mAlarms, this@MyAlarmsFragmentActivity)
+                    // Use a linear layout manager
+                    val mLayoutManager = LinearLayoutManager(context)
+                    mRecyclerView.layoutManager = mLayoutManager
+                    mRecyclerView.adapter = mAdapter
 
-                // Set up adapter for monitoring alarm objects
-                mAdapter = MyAlarmsListAdapter(mAlarms, this@MyAlarmsFragmentActivity)
-                // Use a linear layout manager
-                val mLayoutManager = LinearLayoutManager(context)
-                mRecyclerView.layoutManager = mLayoutManager
-                mRecyclerView.adapter = mAdapter
-
-                // Check for, and load, persisted data
-                if (!jsonPersistence.alarms.isEmpty()) {
-                    mAlarms.addAll(jsonPersistence.alarms)
-                    mAdapter?.notifyDataSetChanged()
-                } else if (checkInternetConnection()) {
-                    if (!swipeRefreshLayout.isRefreshing) swipeRefreshLayout.isRefreshing = true
-                }
-
-                // Log new Crashlytics user
-                firebaseUser?.let {
-                    // Check user sign in method and set Firebase user prop
-                    firebaseUser?.providerData?.forEach { user ->
-                        when {
-                            user.providerId.toLowerCase().contains(FA.UserProp.sign_in_method.Google.toLowerCase()) -> FA.SetUserProp(FA.UserProp.sign_in_method::class.java, FA.UserProp.sign_in_method.Google)
-                            user.providerId.toLowerCase().contains(FA.UserProp.sign_in_method.Facebook.toLowerCase()) -> FA.SetUserProp(FA.UserProp.sign_in_method::class.java, FA.UserProp.sign_in_method.Facebook)
-                            user.providerId.toLowerCase().contains(FA.UserProp.sign_in_method.Email.toLowerCase()) -> FA.SetUserProp(FA.UserProp.sign_in_method::class.java, FA.UserProp.sign_in_method.Email)
-                            else -> FA.SetUserProp(FA.UserProp.sign_in_method::class.java, FA.UserProp.sign_in_method.Unknown)
-                        }
-                    }
-
-                    // You can call any combination of these three methods
-                    Crashlytics.setUserIdentifier(firebaseUser?.uid)
-                    Crashlytics.setUserEmail(firebaseUser?.email)
-                    Crashlytics.setUserName(firebaseUser?.displayName)
-                    // Log last seen in user metrics, to enable clearing stagnant data
-                    UserMetrics.updateLastSeen()
+                    // Check for, and load, persisted data
+                    if (!jsonPersistence.alarms.isEmpty()) {
+                        mAlarms.addAll(jsonPersistence.alarms)
+                        mAdapter?.notifyDataSetChanged()
+                    } else if (checkInternetConnection()) {
+                        if (!swipeRefreshLayout.isRefreshing) swipeRefreshLayout.isRefreshing = true
                     }
                 }
         }.run()

@@ -135,6 +135,13 @@ class SocialDemoFragment: BaseFragment() {
                     mPlaying = false
                     childView.playPause.isSelected = false
                     view.viewFlipper?.startFlipping()
+
+                    UserMetrics.logOnboardingEvent(
+                            OnboardingJourneyEvent(
+                                    subject = "Social Demo UI",
+                                    content_uid = imageTitles[childIndex],
+                                    length = mMediaPlayer.currentPosition/1000)
+                                    .setType(OnboardingJourneyEvent.Companion.Event.LISTEN))
                 } else {
                     mMediaPlayer = MediaPlayer.create(context, media[childIndex])
                     childView.playPause.isSelected = true
@@ -152,6 +159,13 @@ class SocialDemoFragment: BaseFragment() {
                     childView.playPause.isSelected = false
                     view.viewFlipper?.startFlipping()
                     mPlaying = false
+
+                    UserMetrics.logOnboardingEvent(
+                            OnboardingJourneyEvent(
+                                    subject = "Social Demo UI",
+                                    content_uid = imageTitles[childIndex],
+                                    length = mMediaPlayer.currentPosition/1000)
+                                    .setType(OnboardingJourneyEvent.Companion.Event.LISTEN))
                 }
             }
             view.viewFlipper.getChildAt(childIndex)
