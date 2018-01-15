@@ -57,10 +57,6 @@ import com.roostermornings.android.service.FirebaseListenerService
 import com.roostermornings.android.sqlutil.AudioTableManager
 import com.roostermornings.android.sqlutil.DeviceAlarmController
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager
-import com.roostermornings.android.util.Constants
-import com.roostermornings.android.util.InternetHelper
-import com.roostermornings.android.util.JSONPersistence
-import com.roostermornings.android.util.Toaster
 
 import java.util.Calendar
 
@@ -70,7 +66,15 @@ import javax.inject.Named
 import butterknife.ButterKnife
 import butterknife.OnClick
 import butterknife.Optional
+import com.crashlytics.android.Crashlytics
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FirebaseUser
+import com.roostermornings.android.firebase.FA
+import com.roostermornings.android.firebase.FirebaseNetwork
+import com.roostermornings.android.realm.RealmAlarmFailureLog
+import com.roostermornings.android.service.ForegroundService
+import com.roostermornings.android.util.*
+import com.roostermornings.android.util.Constants.APP_BROUGHT_FOREGROUND
 
 import com.roostermornings.android.util.Constants.AUTHORITY
 
@@ -81,6 +85,7 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
 
     private var roosterNotificationReceiver: BroadcastReceiver? = null
     private var requestNotificationReceiver: BroadcastReceiver? = null
+    private var foregroundReceiver: BroadcastReceiver? = null
 
     @Inject lateinit var sharedPreferences: SharedPreferences
     @Inject @Named("default") lateinit var defaultSharedPreferences: SharedPreferences
@@ -91,6 +96,8 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
     @Inject lateinit var mDatabase: DatabaseReference
     @Inject lateinit var mAccount: Account
     @Inject lateinit var authManager: AuthManager
+    @Inject lateinit var lifeCycle: LifeCycle
+    @Inject lateinit var realmAlarmFailureLog: RealmAlarmFailureLog
 
     var firebaseUser: FirebaseUser? = null
     @Inject
@@ -100,20 +107,7 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
 
     init {
         if (mAuth == null) mAuth = FirebaseAuth.getInstance()
-
         mCurrentUser = BaseApplication.mCurrentUser
-
-        // [START auth_state_listener]
-        mAuthListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
-            val user = firebaseAuth.currentUser
-            if (user != null) {
-                // User is signed in
-                Log.d(TAG, "onAuthStateChanged:signed_in:" + user.uid)
-            } else {
-                // User is signed out
-                Log.d(TAG, "onAuthStateChanged:signed_out")
-            }
-        }
     }
 
     abstract fun inject(component: RoosterApplicationComponent)
@@ -121,28 +115,83 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
     public override fun onStart() {
         super.onStart()
         mAuthListener?.let { mAuth?.addAuthStateListener(it) }
-
-        // Log active day
-        UserMetrics.logActiveDays()
     }
 
     public override fun onStop() {
         super.onStop()
         mAuthListener?.let { mAuth?.removeAuthStateListener(it) }
+        foregroundReceiver?.let {
+            unregisterReceiver(foregroundReceiver)
+            foregroundReceiver = null
+        }
     }
 
-    //TODO
-    //    @Override
-    //    public void onResume() {
-    //        super.onResume();
-    //        if(getFirebaseUser() != null) startServices(true);
-    //    }
-    //
-    //    @Override
-    //    public void onPause() {
-    //        super.onPause();
-    //        startServices(false);
-    //    }
+    public override fun onResume() {
+        super.onResume()
+        sharedPreferences.edit()
+                .putBoolean(Constants.IS_ACTIVITY_FOREGROUND, true)
+                .apply()
+
+        /*The foreground receiver is intended to run methods once on app launch,
+        the ForegroundService sends a broadcast when this occurs. */
+        foregroundReceiver = object: BroadcastReceiver() {
+            override fun onReceive(p0: Context?, p1: Intent?) {
+                performOnceOnForeground()
+            }
+        }
+        val foregroundIntentFilter = IntentFilter()
+        foregroundIntentFilter.addAction(APP_BROUGHT_FOREGROUND)
+
+        registerReceiver(foregroundReceiver, foregroundIntentFilter)
+
+        startService(Intent(this, ForegroundService::class.java))
+    }
+
+    public override fun onPause() {
+        super.onPause()
+        sharedPreferences.edit()
+                .putBoolean(Constants.IS_ACTIVITY_FOREGROUND, false)
+                .apply()
+    }
+
+    private fun performOnceOnForeground() {
+        // Log last seen in user metrics, to enable clearing stagnant data
+        UserMetrics.updateLastSeen()
+        // Log active day
+        UserMetrics.logActiveDays()
+        // Process any alarm failures
+        realmAlarmFailureLog.processAlarmFailures(true)
+        // Set shared pref to indicate whether mobile number is valid
+        FirebaseNetwork.flagValidMobileNumber(this, false)
+        // Check if first entry
+        lifeCycle.performInception()
+        //Setup day/night theme selection (based on settings, and time)
+        setDayNightTheme()
+
+        // Log new Crashlytics user
+        firebaseUser?.let {
+            // Check user sign in method and set Firebase user prop
+            firebaseUser?.providerData?.forEach { user ->
+                when {
+                    user.providerId.toLowerCase().contains(FA.UserProp.sign_in_method.Google.toLowerCase()) -> FA.SetUserProp(FA.UserProp.sign_in_method::class.java,
+                            FA.UserProp.sign_in_method.Google)
+                    user.providerId.toLowerCase().contains(FA.UserProp.sign_in_method.Facebook.toLowerCase()) -> FA.SetUserProp(FA.UserProp.sign_in_method::class.java,
+                            FA.UserProp.sign_in_method.Facebook)
+                    user.providerId.toLowerCase().contains(FA.UserProp.sign_in_method.Email.toLowerCase()) -> FA.SetUserProp(FA.UserProp.sign_in_method::class.java,
+                            FA.UserProp.sign_in_method.Email)
+                    else -> FA.SetUserProp(FA.UserProp.sign_in_method::class.java,
+                            FA.UserProp.sign_in_method.Unknown)
+                }
+            }
+
+            // You can call any combination of these three methods
+            Crashlytics.setUserIdentifier(firebaseUser?.uid)
+            Crashlytics.setUserEmail(firebaseUser?.email)
+            Crashlytics.setUserName(firebaseUser?.displayName)
+
+            FirebaseAnalytics.getInstance(this).setUserId(firebaseUser?.uid)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -530,6 +579,7 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
             unregisterReceiver(requestNotificationReceiver)
             requestNotificationReceiver = null
         }
+
         super.onDestroy()
     }
 

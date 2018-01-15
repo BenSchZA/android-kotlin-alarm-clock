@@ -123,11 +123,15 @@ public abstract class FA {
                 public final static String social_rooster_receivers = "social_rooster_receivers";
             }
         }
+        public abstract class social_rooster_received {
+        }
         public abstract class invitation_to_join_rooster_sent {
             public abstract class Param {
                 //String param
                 public final static String download_link_share_medium = "download_link_share_medium";
             }
+        }
+        public abstract class active_day {
         }
         public abstract class channel_info_viewed extends channel_selected {
         }

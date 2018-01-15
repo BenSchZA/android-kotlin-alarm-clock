@@ -355,7 +355,8 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
         if (isPlaying) {
             mMediaController?.transportControls?.pause()
         } else {
-            FA.Log(FA.Event.explore_channel_rooster_play::class.java, FA.Event.explore_channel_rooster_play.Param.channel_title, item.mediaId)
+            FA.Log(FA.Event.explore_channel_rooster_play::class.java,
+                    FA.Event.explore_channel_rooster_play.Param.channel_title, item.mediaId)
 
             mMediaController?.transportControls?.pause()
             mediaItems.indexOfFirst { it.mediaId == item.mediaId }.takeIf { it > -1 }?.let {

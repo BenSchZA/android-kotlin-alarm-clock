@@ -91,8 +91,8 @@ class NewAlarmFragmentActivity : BaseActivity(), IAlarmSetListener, NewAlarmFrag
 
         //Static variable, so clear on new instance
         mEditAlarmId = ""
-        if (intent.extras.containsKey(Constants.EXTRA_ALARMID)) {
-            mEditAlarmId = intent.extras.getString(Constants.EXTRA_ALARMID, "")
+        if (intent.extras?.containsKey(Constants.EXTRA_ALARMID) == true) {
+            mEditAlarmId = intent.extras?.getString(Constants.EXTRA_ALARMID, "")
         }
         if (mEditAlarmId?.isEmpty() == true) {
             setupToolbar(toolbarTitle, getString(R.string.create_alarm))
@@ -187,7 +187,7 @@ class NewAlarmFragmentActivity : BaseActivity(), IAlarmSetListener, NewAlarmFrag
 
                 //only do the push to create the new alarm if this is NOT an existing alarm
                 val alarmKey: String?
-                if (mEditAlarmId?.isEmpty() == true) {
+                if (mEditAlarmId?.isEmpty() == false) {
                     alarmKey = mEditAlarmId
                 } else {
                     alarmKey = mDatabase.child("alarms").push().key
@@ -210,7 +210,9 @@ class NewAlarmFragmentActivity : BaseActivity(), IAlarmSetListener, NewAlarmFrag
                 deviceAlarmController.registerAlarmSet(mAlarm.isEnabled, alarmKey, mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring, alarmChannelUID, mAlarm.isAllow_friend_audio_files)
 
                 //Update firebase
-                database.getReference(String.format("alarms/%s/%s", firebaseUser?.uid, alarmKey)).setValue(mAlarm)
+                if(firebaseUser?.uid?.isNotBlank() == true && alarmKey?.isNotBlank() == true) {
+                    database.getReference(String.format("alarms/%s/%s", firebaseUser?.uid, alarmKey)).setValue(mAlarm)
+                }
 
                 //Download any social or channel audio files
                 ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle())

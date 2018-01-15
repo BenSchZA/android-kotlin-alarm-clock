@@ -73,6 +73,8 @@ public class BaseApplication extends android.app.Application {
     @Inject DatabaseReference mDatabase;
     public static FirebaseAnalytics firebaseAnalytics;
 
+    public static Boolean isAppForeground = false;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -94,9 +96,10 @@ public class BaseApplication extends android.app.Application {
         }
 
         //If debug, disable Firebase analytics
-        if(BuildConfig.DEBUG || debuggable) {
-            firebaseAnalytics.setAnalyticsCollectionEnabled(false);
-        }
+        //TODO:
+//        if(BuildConfig.DEBUG || debuggable) {
+//            firebaseAnalytics.setAnalyticsCollectionEnabled(false);
+//        }
 
         // Initialize Realm database
         Realm.init(this);

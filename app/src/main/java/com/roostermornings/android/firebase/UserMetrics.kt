@@ -159,8 +159,7 @@ object UserMetrics {
 
         if(fUser?.uid?.isNotBlank() == true) {
             jsonPersistence.setDateLock(ACTIVE_DAYS, currentTime.timeInMillis)
-
-            //TODO: trigger FCF/send event
+            FA.Log(FA.Event.active_day::class.java, null, null)
         }
     }
 

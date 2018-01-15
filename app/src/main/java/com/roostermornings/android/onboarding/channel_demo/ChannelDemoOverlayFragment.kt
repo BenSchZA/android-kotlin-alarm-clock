@@ -29,6 +29,7 @@ import com.roostermornings.android.util.FileUtils
 import com.roostermornings.android.util.RoosterUtils
 import kotlinx.android.synthetic.main.onboarding_audio_demo.view.*
 import java.io.File
+import java.util.*
 
 
 class ChannelDemoOverlayFragment : Fragment() {
@@ -38,6 +39,8 @@ class ChannelDemoOverlayFragment : Fragment() {
     private var mMediaPlayer: MediaPlayer = MediaPlayer()
     private val mHandler = Handler(Looper.getMainLooper())
     private var runnable: Runnable? = null
+
+    private var mStartTime = -1L
 
     companion object {
         /**
@@ -148,9 +151,12 @@ class ChannelDemoOverlayFragment : Fragment() {
                 playMedia()
             }
         }
+
         view.playPause.setOnClickListener(mediaOnClickListener)
         view.audioDemoImage.setOnClickListener(mediaOnClickListener)
+
         playMedia()
+        mStartTime = Calendar.getInstance().timeInMillis
     }
 
     private val onSeekBarChangeListener = object: SeekBar.OnSeekBarChangeListener {
@@ -214,13 +220,13 @@ class ChannelDemoOverlayFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
-        val finishPosition = mMediaPlayer.currentPosition/1000
-        // Listen event triggered in onPause, with length as current position
+        val finishTime = ((Calendar.getInstance().timeInMillis - mStartTime)/1000).toInt()
+        // Listen event triggered in onPause, with length as total time in view
         UserMetrics.logOnboardingEvent(
                 OnboardingJourneyEvent(
                         subject = "Channel Demo UI",
                         content_uid = arguments?.getString(ARG_UID_STRING),
-                        length = finishPosition)
+                        length = finishTime)
                         .setType(OnboardingJourneyEvent.Companion.Event.LISTEN))
 
         stopMedia()
