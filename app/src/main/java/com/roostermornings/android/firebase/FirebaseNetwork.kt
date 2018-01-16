@@ -110,6 +110,8 @@ object FirebaseNetwork {
     }
 
     fun updateProfileGeoHashLocation(geohash: String) {
+        if(!isUserSignedIn()) return
+
         val fDB = FirebaseDatabase.getInstance().reference
         val fUser = FirebaseAuth.getInstance().currentUser
 

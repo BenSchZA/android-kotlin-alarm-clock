@@ -30,7 +30,7 @@ class RealmScheduledSnackbar {
     }
 
     fun closeRealm() {
-        realm.close()
+        if(!realm.isClosed) realm.close()
     }
 
     // Note: this will delete scheduled snackbars once fetched
@@ -73,8 +73,10 @@ class RealmScheduledSnackbar {
     }
 
     fun removeListeners() {
-        realmResults?.removeAllChangeListeners()
-        realm.removeAllChangeListeners()
+        if(!realm.isClosed) {
+            realmResults?.removeAllChangeListeners()
+            realm.removeAllChangeListeners()
+        }
     }
 
     fun updateOrCreateScheduledSnackbarEntry(snackbarQueueElement: SnackbarManager.Companion.SnackbarQueueElement, localDisplayClassName: String, displayTimeMillis: Long) {
