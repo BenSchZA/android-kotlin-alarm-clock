@@ -68,7 +68,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <!--android:src="@drawable/rooster_vector_play_button"-->
-    <ImageButton
+    <android.support.v7.widget.AppCompatImageButton
         android:id="@+id/playPause"
         android:layout_width="0dp"
         android:layout_height="0dp"
