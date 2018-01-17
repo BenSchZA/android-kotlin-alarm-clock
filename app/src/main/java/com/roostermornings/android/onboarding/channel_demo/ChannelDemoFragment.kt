@@ -180,23 +180,12 @@ class ChannelDemoFragment : BaseFragment(), ChannelDemoInterface, FragmentInterf
     override fun performChannelImageTransition(uid: String, title: String, description: String, drawableID: Int, imageView: ImageView, media: Int) {
         overlayFragment = ChannelDemoOverlayFragment.newInstance(uid, title, description, drawableID, media)
 
-        // Note that we need the API version check here because the actual transition classes (e.g. Fade)
-        // are not in the support library and are only available in API 21+. The methods we are calling on the Fragment
-        // ARE available in the support library (though they don't do anything on API < 21)
-        if (RoosterUtils.hasLollipop()) {
-            //overlayFragment.sharedElementEnterTransition = DetailsTransition()
-            //overlayFragment.enterTransition = Fade()
-            //exitTransition = Fade()
-            //overlayFragment.sharedElementReturnTransition = DetailsTransition()
-        }
-
         val activity = activity ?: return
 
         if(previousOverlayFragment != null) activity.supportFragmentManager.popBackStack()
 
         activity.supportFragmentManager
                 .beginTransaction()
-                .addSharedElement(imageView, getString(R.string.onboarding_image_transition))
                 .replace(R.id.fragmentOnboardingChannelDemo, overlayFragment)
                 .addToBackStack(null)
                 .commit()
