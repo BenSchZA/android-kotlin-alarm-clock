@@ -13,7 +13,10 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.roostermornings.android.BaseApplication
+import com.roostermornings.android.BaseApplication.mCurrentUser
 import com.roostermornings.android.domain.database.User
+import com.roostermornings.android.domain.local.Friend
 import com.roostermornings.android.util.Constants
 import com.roostermornings.android.util.MyContactsController
 import com.roostermornings.android.util.StrUtils
@@ -121,6 +124,56 @@ object FirebaseNetwork {
             childUpdates.put("users/${fUser.uid}/geohash_location", geohash)
             fDB.updateChildren(childUpdates)
         }
+    }
+
+    fun inviteFriend(friend: Friend) {
+        if(!isUserSignedIn()) return
+
+        val fDB = FirebaseDatabase.getInstance().reference
+        val fUser = FirebaseAuth.getInstance().currentUser
+
+        val childUpdates = HashMap<String, Any>()
+
+        //Create friend object from current signed in user
+        val currentUserFriend = Friend(mCurrentUser.uid, mCurrentUser.user_name, mCurrentUser.profile_pic, mCurrentUser.cell_number)
+
+        if (fUser?.uid?.isNotBlank() == true && friend.uid?.isNotBlank() == true) {
+            childUpdates.put("friend_requests_received/${friend.uid}/${fUser.uid}", currentUserFriend)
+            childUpdates.put("friend_requests_sent/${fUser.uid}/${friend.uid}", friend)
+            fDB.updateChildren(childUpdates)
+        }
+    }
+
+    fun addFriend(user: User) {
+        if(!isUserSignedIn()) return
+
+        val fDB = FirebaseDatabase.getInstance().reference
+        val fUser = FirebaseAuth.getInstance().currentUser
+
+        val childUpdates = HashMap<String, Any>()
+
+        if (fUser?.uid?.isNotBlank() == true && user.uid.isNotBlank()) {
+            childUpdates.put("users/${user.uid}/friends/${fUser.uid}", true)
+            childUpdates.put("users/${fUser.uid}/friends/${user.uid}", true)
+            fDB.updateChildren(childUpdates)
+        }
+    }
+
+    fun removeFriend(user: User): Boolean {
+        if(!isUserSignedIn()) return false
+
+        val fDB = FirebaseDatabase.getInstance().reference
+        val fUser = FirebaseAuth.getInstance().currentUser
+
+        val childUpdates = HashMap<String, Any>()
+
+        if (fUser?.uid?.isNotBlank() == true && user.uid.isNotBlank()) {
+            fDB.child("users/${user.uid}/friends/${fUser.uid}").setValue(null)
+            fDB.child("users/${fUser.uid}/friends/${user.uid}").setValue(null)
+            fDB.updateChildren(childUpdates)
+            return true
+        }
+        return false
     }
 
     interface OnFlagValidMobileNumberCompleteListener {

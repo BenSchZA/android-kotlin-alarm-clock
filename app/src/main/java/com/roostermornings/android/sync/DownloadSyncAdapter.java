@@ -418,6 +418,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
             final String audioFileUniqueName = Constants.FILENAME_PREFIX_ROOSTER_CONTENT + RoosterUtils.createRandomUID(5) + ".3gp";
 
             Crashlytics.log("Channel pre-download UID: " + channelRooster.getChannel_uid());
+            Crashlytics.log("Channel pre-download URL: " + channelRooster.getAudio_file_url());
 
             //Pre-cache image to display on alarm screen, in case no internet connection
             if(StrUtils.notNullOrEmpty(channelRooster.getPhoto())) Picasso.with(getApplicationContext()).load(channelRooster.getPhoto()).fetch();
@@ -443,6 +444,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
 
                         //AudioService report logging
                         File file = new File(context.getFilesDir() + "/" + audioFileUniqueName);
+                        Crashlytics.log("Rooster download URL: " + channelRooster.getAudio_file_url());
                         Crashlytics.log("Rooster file path: " + file.getPath());
                         Crashlytics.log("Rooster is file?: " + String.valueOf(file.isFile()));
                         Crashlytics.log("Rooster channel source: " + channelRooster.getName());

@@ -18,17 +18,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.domain.local.Contact;
 import com.roostermornings.android.domain.local.Friend;
+import com.roostermornings.android.firebase.FirebaseNetwork;
 import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.Toaster;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 
-import static com.roostermornings.android.BaseApplication.mCurrentUser;
 import static com.roostermornings.android.util.Constants.VIEW_TYPE_ADD;
 import static com.roostermornings.android.util.Constants.VIEW_TYPE_HEADER;
 import static com.roostermornings.android.util.Constants.VIEW_TYPE_INVITE;
@@ -163,7 +164,7 @@ public class FriendsInviteListAdapter extends RecyclerView.Adapter<RecyclerView.
                     user.setSelected(!user.getSelected());
                     holder.btnAdd.setSelected(user.getSelected());
 
-                    addUser(user);
+                    inviteUser(user);
 
                     final Handler handler = new Handler();
                     handler.postDelayed(new Runnable() {
@@ -271,18 +272,8 @@ public class FriendsInviteListAdapter extends RecyclerView.Adapter<RecyclerView.
     }
 
     @Override
-    public void addUser(Friend friend) {
-
-        String inviteUrl = String.format("friend_requests_received/%s/%s", friend.getUid(), mCurrentUser.getUid());
-        String currentUserUrl = String.format("friend_requests_sent/%s/%s", mCurrentUser.getUid(), friend.getUid());
-
-        //Create friend object from current signed in user
-        Friend currentUserFriend = new Friend(mCurrentUser.getUid(), mCurrentUser.getUser_name(), mCurrentUser.getProfile_pic(), mCurrentUser.getCell_number());
-
-        //Append to received and sent request list
-        BaseApplication.getFbDbRef().getDatabase().getReference(inviteUrl).setValue(currentUserFriend);
-        BaseApplication.getFbDbRef().getDatabase().getReference(currentUserUrl).setValue(friend);
-
+    public void inviteUser(@NotNull Friend friend) {
+        FirebaseNetwork.INSTANCE.inviteFriend(friend);
         Toaster.makeToast(context, friend.getUser_name() + " invited!", Toast.LENGTH_LONG).checkTastyToast();
     }
 }
