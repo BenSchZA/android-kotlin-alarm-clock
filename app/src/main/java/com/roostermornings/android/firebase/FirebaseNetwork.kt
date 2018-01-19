@@ -86,6 +86,8 @@ object FirebaseNetwork {
     }
 
     fun updateProfileCellNumber(context: Context, cellNumberString: String) {
+        if(!isUserSignedIn()) return
+
         val myContactsController = MyContactsController(context)
         val nsnNumber: String
         nsnNumber = if (StrUtils.notNullOrEmpty(cellNumberString)) myContactsController.processUserContactNumber(cellNumberString) else ""
