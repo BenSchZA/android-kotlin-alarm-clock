@@ -98,7 +98,7 @@ class FriendsFragmentActivity : BaseActivity(), FriendsMyFragment1.OnFragmentInt
 
     interface FriendsInviteListAdapterInterface {
         //Send invite to Rooster user from contact list
-        fun addUser(inviteFriend: Friend)
+        fun inviteUser(inviteFriend: Friend)
     }
 
     interface FriendsRequestListAdapterInterface {
@@ -491,29 +491,25 @@ class FriendsFragmentActivity : BaseActivity(), FriendsMyFragment1.OnFragmentInt
     }
 
     //Delete friend from Firebase user friend list
-    fun deleteFriend(deleteFriend: User) {
+    fun deleteFriend(deleteFriend: User): Boolean {
         if(firebaseUser == null) {
             Toaster.makeToast(this, "Couldn't load user. Try reconnect to the internet and try again.", Toast.LENGTH_SHORT)
-            return
+            return false
         }
 
-//        if(deleteFriend.uid != firebaseUser.uid) {
-            val currentUserUrl = String.format("users/%s/friends/%s", (firebaseUser as FirebaseUser).uid, deleteFriend.uid)
-            val friendUserUrl = String.format("users/%s/friends/%s", deleteFriend.uid, (firebaseUser as FirebaseUser).uid)
-
-            //Clear current user's and friend's friend list
-            mDatabase.database.getReference(currentUserUrl).setValue(null)
-            mDatabase.database.getReference(friendUserUrl).setValue(null)
-
+        firebaseUser?.takeIf { it.uid != deleteFriend.uid }?.let {
             val snackbar = SnackbarManager.Companion.SnackbarQueueElement("${deleteFriend.user_name} deleted", action = View.OnClickListener {
                 //Undo clear current user's and friend's friend list
-                mDatabase.database.getReference(currentUserUrl).setValue(true)
-                mDatabase.database.getReference(friendUserUrl).setValue(true)
+                FirebaseNetwork.addFriend(deleteFriend)
             }, actionText = "Undo", priority = 1)
+
             snackbarManager?.generateSnackbar(snackbar)
-//        } else {
-//
-//        }
+
+            return FirebaseNetwork.removeFriend(deleteFriend)
+
+        } ?: snackbarManager?.generateSnackbar(SnackbarManager.Companion.SnackbarQueueElement("You can't delete yourself!", actionText = "Okay", priority = 1))
+
+        return false
     }
 
     //Invite contact via Whatsapp or fallback to SMS

@@ -273,10 +273,6 @@ class FriendsMyFragment1 : BaseFragment() {
         mListener = null
     }
 
-    override fun onResume() {
-        super.onResume()
-    }
-
     fun searchRecyclerViewAdapter(query: String) {
         //Filter contacts by CharSequence
         //Get reference to list adapter to access getFilter method

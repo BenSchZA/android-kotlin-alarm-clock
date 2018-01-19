@@ -138,15 +138,17 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
                             .onPositive(new MaterialDialog.SingleButtonCallback() {
                                 @Override
                                 public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                    ((FriendsFragmentActivity)mActivity).deleteFriend(user);
-                                    final Handler handler = new Handler();
-                                    handler.postDelayed(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            //Do something after 200ms
-                                            remove(holder.getAdapterPosition(), user);
-                                        }
-                                    }, 200);
+                                    // If friend deleted successfully, remove from view
+                                    if(((FriendsFragmentActivity)mActivity).deleteFriend(user)) {
+                                        final Handler handler = new Handler();
+                                        handler.postDelayed(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                //Do something after 200ms
+                                                remove(holder.getAdapterPosition(), user);
+                                            }
+                                        }, 200);
+                                    }
                                 }
                             })
                             .show();
