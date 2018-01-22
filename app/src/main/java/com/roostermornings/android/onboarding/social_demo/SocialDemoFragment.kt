@@ -15,12 +15,15 @@ import kotlinx.android.synthetic.main.onboarding_audio_demo.view.*
 import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.ColorDrawable
 import android.media.MediaPlayer
+import android.support.v7.app.AppCompatDelegate
+import android.support.v7.content.res.AppCompatResources
 import butterknife.OnClick
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity
 import com.roostermornings.android.domain.local.OnboardingJourneyEvent
 import com.roostermornings.android.firebase.FA
 import com.roostermornings.android.firebase.UserMetrics
 import com.roostermornings.android.onboarding.HostInterface
+import com.roostermornings.android.util.RoosterUtils
 
 
 /**
@@ -111,6 +114,16 @@ class SocialDemoFragment: BaseFragment() {
             val socialDescription = imageDescriptions[index]
 
             val vfElement = View.inflate(context, R.layout.onboarding_audio_demo, null)
+
+            // For pre-Lollipop devices use AppCompatResources (not VectorDrawableCompat) to get your vector from resources
+            // https://github.com/aurelhubert/ahbottomnavigation/issues/110
+            context?.let {
+                if(!RoosterUtils.hasLollipop()) {
+                    AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
+                }
+                val vectorDrawable = AppCompatResources.getDrawable(it, R.drawable.rooster_vector_play_button)
+                vfElement.playPause?.setImageDrawable(vectorDrawable)
+            }
 
             val color = ColorDrawable(ResourcesCompat.getColor(resources, R.color.white, null))
             val ld = LayerDrawable(arrayOf(color, drawablePerson))

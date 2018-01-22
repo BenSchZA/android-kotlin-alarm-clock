@@ -145,6 +145,11 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
         registerReceiver(foregroundReceiver, foregroundIntentFilter)
 
         startService(Intent(this, ForegroundService::class.java))
+
+        if(this is MyAlarmsFragmentActivity) {
+            // Check if first entry
+            lifeCycle.performInception()
+        }
     }
 
     public override fun onPause() {
@@ -163,8 +168,6 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
         realmAlarmFailureLog.processAlarmFailures(true)
         // Set shared pref to indicate whether mobile number is valid
         FirebaseNetwork.flagValidMobileNumber(this, false)
-        // Check if first entry
-        lifeCycle.performInception()
         //Setup day/night theme selection (based on settings, and time)
         setDayNightTheme()
 
