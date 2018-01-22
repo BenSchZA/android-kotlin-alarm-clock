@@ -179,20 +179,30 @@ class FriendsMyFragment1 : BaseFragment() {
         }
 
         if ("" == firebaseIdToken) {
-            firebaseUser?.getIdToken(true)
-                    ?.addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            firebaseIdToken = task.result.token
-                            callNodeMyFriendsAPI()
-                        } else {
-                            // Handle error -> task.getException();
-                            Toaster.makeToast(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG).checkTastyToast()
-                            swipeRefreshLayout.isRefreshing = false
-                        }
-                    }
+            refreshToken { successful ->
+                if(successful) {
+                    callNodeMyFriendsAPI()
+                } else {
+                    // Handle error -> task.getException();
+                    Toaster.makeToast(getApplicationContext(), "Loading friends failed, please try again.", Toast.LENGTH_LONG).checkTastyToast()
+                    swipeRefreshLayout.isRefreshing = false
+                }
+            }
         } else {
             callNodeMyFriendsAPI()
         }
+    }
+
+    fun refreshToken(result: (Boolean) -> Unit) {
+        firebaseUser?.getIdToken(true)
+                ?.addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        firebaseIdToken = task.result.token
+                        result(true)
+                    } else {
+                        result(false)
+                    }
+                }
     }
 
     private fun callNodeMyFriendsAPI() {
