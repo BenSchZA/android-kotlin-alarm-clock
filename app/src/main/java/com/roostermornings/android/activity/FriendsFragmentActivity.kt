@@ -204,10 +204,8 @@ class FriendsFragmentActivity : BaseActivity(), FriendsMyFragment1.OnFragmentInt
 
         FirebaseNetwork.setOnFlagValidMobileNumberCompleteListener(object : FirebaseNetwork.OnFlagValidMobileNumberCompleteListener {
             override fun onEvent(valid: Boolean) {
-                if (!valid) {
-                    //Refresh UI fragment to show number entry dialog
-                    if (mSectionsPagerAdapter != null) mSectionsPagerAdapter?.notifyDataSetChanged()
-                }
+                // Refresh UI fragment to show number entry dialog
+                mSectionsPagerAdapter?.notifyDataSetChanged()
             }
         })
         FirebaseNetwork.flagValidMobileNumber(this, true)
@@ -254,8 +252,11 @@ class FriendsFragmentActivity : BaseActivity(), FriendsMyFragment1.OnFragmentInt
     override fun onCustomCommand(command: InterfaceCommands.Companion.Command) {
         when(command) {
             InterfaceCommands.Companion.Command.PROCEED -> {
-                clearOnboardingFragments()
+                // Set shared pref to indicate whether mobile number is valid, if valid show request
                 showNumberEntryFragment()
+                clearOnboardingFragments()
+                // Refresh token and friends list if necessary
+                friendsFragment1?.refreshToken{}
             }
             else -> {}
         }
@@ -334,7 +335,7 @@ class FriendsFragmentActivity : BaseActivity(), FriendsMyFragment1.OnFragmentInt
 
             return when (position) {
                 0 -> friendsFragment1
-                1 ->{
+                1 -> {
                     if (sharedPreferences
                             .getBoolean(Constants.MOBILE_NUMBER_VALIDATED, false))
                         friendsFragment2
