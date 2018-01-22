@@ -445,7 +445,7 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface {
 
     private fun toggleAlarmFiller() {
         if (mAlarms.isEmpty()) {
-            //For pre-Lollipop devices use VectorDrawableCompat to get your vector from resources
+            // For pre-Lollipop devices use VectorDrawableCompat to get your vector from resources
             val vectorDrawable = VectorDrawableCompat.create(this.resources, R.drawable.ic_alarm_add_white_24px, null)
             addAlarmFiller.background = vectorDrawable
             addAlarmFiller.visibility = View.VISIBLE

@@ -16,7 +16,12 @@ import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
+import android.support.graphics.drawable.VectorDrawableCompat
 import android.support.v4.content.res.ResourcesCompat
+import android.support.v7.app.AppCompatDelegate
+import android.support.v7.appcompat.R.attr.theme
+import android.support.v7.content.res.AppCompatResources
+import android.support.v7.widget.AppCompatImageButton
 import android.transition.TransitionInflater
 import android.widget.SeekBar
 import butterknife.OnClick
@@ -27,12 +32,13 @@ import com.roostermornings.android.onboarding.HostInterface
 import com.roostermornings.android.onboarding.InterfaceCommands
 import com.roostermornings.android.util.FileUtils
 import com.roostermornings.android.util.RoosterUtils
+import kotlinx.android.synthetic.main.onboarding_audio_demo.*
 import kotlinx.android.synthetic.main.onboarding_audio_demo.view.*
 import java.io.File
 import java.util.*
 
-
 class ChannelDemoOverlayFragment : Fragment() {
+
     private var mHostInterface: HostInterface? = null
     private var mCustomCommandInterface: CustomCommandInterface? = null
 
@@ -87,6 +93,7 @@ class ChannelDemoOverlayFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.onboarding_audio_demo, container, false)
+
         ButterKnife.bind(this, view)
 
         mCustomCommandInterface?.onCustomCommand(InterfaceCommands.Companion.Command.HIDE_FAB)
@@ -98,6 +105,16 @@ class ChannelDemoOverlayFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val media = arguments?.getInt(ARG_MEDIA)
+
+        // For pre-Lollipop devices use AppCompatResources (not VectorDrawableCompat) to get your vector from resources
+        // https://github.com/aurelhubert/ahbottomnavigation/issues/110
+        context?.let {
+            if(!RoosterUtils.hasLollipop()) {
+                AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
+            }
+            val vectorDrawable = AppCompatResources.getDrawable(it, R.drawable.rooster_vector_play_button)
+            view.playPause?.setImageDrawable(vectorDrawable)
+        }
 
         view.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.black_overlay_a40, null))
 
