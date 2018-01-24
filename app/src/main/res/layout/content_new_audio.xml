@@ -30,14 +30,16 @@
         android:id="@+id/new_audio_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:gravity="center"
         android:text="60"
         android:textColor="@color/white"
         android:textSize="@dimen/text_huge"
-        app:layout_constraintBottom_toBottomOf="@+id/new_audio_listen_circle_outer"
-        app:layout_constraintEnd_toEndOf="@+id/new_audio_listen_circle_outer"
-        app:layout_constraintStart_toStartOf="@+id/new_audio_listen_circle_outer"
-        app:layout_constraintTop_toTopOf="@+id/new_audio_listen_circle_outer" />
+        app:layout_constraintBottom_toTopOf="@+id/new_audio_circle_outer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <ImageButton
         android:id="@+id/new_audio_save"
@@ -58,6 +60,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/rooster_new_audio_delete_button"
         android:clickable="true"
+        android:focusable="true"
         app:layout_constraintBottom_toBottomOf="@+id/new_audio_listen_circle_outer"
         app:layout_constraintEnd_toStartOf="@+id/new_audio_listen_circle_outer"
         app:layout_constraintHorizontal_bias="0.8"
@@ -80,7 +83,8 @@
             android:layout_height="50dp"
             android:layout_margin="15dp"
             android:background="@drawable/rooster_audio_play_button"
-            android:clickable="true" />
+            android:clickable="true"
+            android:focusable="true"/>
 
     </FrameLayout>
 
@@ -104,12 +108,14 @@
         app:layout_constraintTop_toTopOf="@+id/new_audio_listen_circle_outer">
 
         <ImageView
+            android:contentDescription="Start/stop recording"
             android:id="@+id/new_audio_start_stop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:background="@drawable/rooster_record_audio_circle_inner_selectable"
-            android:clickable="true" />
+            android:clickable="true"
+            android:focusable="true"/>
 
     </FrameLayout>
 
