@@ -341,7 +341,8 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
         if (!sharedPreferences.getBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false)
                 && (Build.BRAND.toLowerCase().contains("huawei")
                 || Build.BRAND.toLowerCase().contains("sony")
-                || Build.BRAND.toLowerCase().contains("xiaomi"))) {
+                || Build.BRAND.toLowerCase().contains("xiaomi")
+                || Build.BRAND.toLowerCase().contains("samsung"))) {
             Log.d("Brand: ", Build.BRAND)
 
             //Set instructions and settings intent
@@ -434,6 +435,47 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
                     //Build content string
                     val dialogContent = (resources.getString(R.string.dialog_background_settings_zte_1)
                             + Build.BRAND + resources.getString(R.string.dialog_background_settings_zte_2))
+
+                    MaterialDialog.Builder(context)
+                            .theme(Theme.LIGHT)
+                            .content(dialogContent)
+                            .positiveText(R.string.take_to_settings)
+                            .negativeText(R.string.later)
+                            .onPositive { _, _ ->
+                                val editor = sharedPreferences.edit()
+                                editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, true)
+                                editor.apply()
+                                startActivityForResult(intent, 0)
+                            }
+                            .onNegative { _, _ ->
+                                val editor = sharedPreferences.edit()
+                                editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false)
+                                editor.apply()
+                                startHomeActivity()
+                            }
+                            .canceledOnTouchOutside(false)
+                            .show()
+                }
+                Build.BRAND.toLowerCase().contains("samsung") && RoosterUtils.hasNougat() -> {
+                    settingsNavigationString = ""
+                    intent.component = ComponentName("com.samsung.android.sm", "com.samsung.android.sm.ui.battery.BatteryActivity")
+
+                    if (!isIntentCallable(intent)) {
+                        intent.action = Intent.ACTION_MAIN
+                        intent.setClassName("com.samsung.android.lool", "com.samsung.android.sm.ui.battery.BatteryActivity")
+                        intent.addCategory(Intent.CATEGORY_LAUNCHER)
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    }
+                    if(!isIntentCallable(intent)) {
+                        settingsNavigationString = "Try: Go to 'Device maintenance'>'Battery'>'Unmonitored apps'"
+                        intent.component = null
+                        intent.action = android.provider.Settings.ACTION_SETTINGS
+                    }
+
+                    //Build content string
+                    val dialogContent = (resources.getString(R.string.dialog_background_settings_1)
+                            + Build.BRAND + resources.getString(R.string.dialog_background_settings_2)
+                            + settingsNavigationString)
 
                     MaterialDialog.Builder(context)
                             .theme(Theme.LIGHT)

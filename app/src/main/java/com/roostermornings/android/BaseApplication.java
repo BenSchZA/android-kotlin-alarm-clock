@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
+import android.os.StrictMode;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
@@ -59,7 +60,7 @@ public class BaseApplication extends android.app.Application {
     protected FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
-    //Global flag set from FirebaseListenerService to indicate new notification
+    // Global flag set from FirebaseListenerService to indicate new notification
     private static int notificationFlag;
     private BroadcastReceiver receiver;
 
@@ -79,15 +80,26 @@ public class BaseApplication extends android.app.Application {
     public void onCreate() {
         super.onCreate();
 
-        //Set database persistence to keep offline alarm edits synced
-        //Calls to setPersistenceEnabled() must be made before any other usage of FirebaseDatabase instance
+        // Enable StrictMode, with logging of all errors
+        // https://code.tutsplus.com/tutorials/android-best-practices-strictmode--mobile-7581
+        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+                .detectAll()
+                .penaltyLog()
+                .penaltyDialog()
+                .build());
+        StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll()
+                .penaltyLog()
+                .build());
+
+        // Set database persistence to keep offline alarm edits synced
+        // Calls to setPersistenceEnabled() must be made before any other usage of FirebaseDatabase instance
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
-        //Get static FBAnalytics instance
+        // Get static FBAnalytics instance
         firebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         Boolean debuggable = (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
-        //Activate crashlytics instance
+        // Activate Crashlytics instance
         CrashlyticsCore core = new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG || debuggable).build();
         if("BetaFlavour".equals(BuildConfig.FLAVOR)) {
             Fabric.with(new Fabric.Builder(this).kits(new Crashlytics.Builder().core(core).build()).appIdentifier("com.roostermornings.android.beta").build());
@@ -95,11 +107,13 @@ public class BaseApplication extends android.app.Application {
             Fabric.with(this, new Crashlytics.Builder().core(core).build(), new Crashlytics());
         }
 
-        //If debug, disable Firebase analytics
-        //TODO:
-//        if(BuildConfig.DEBUG || debuggable) {
-//            firebaseAnalytics.setAnalyticsCollectionEnabled(false);
-//        }
+        // If in debug mode...
+        if(BuildConfig.DEBUG || debuggable) {
+            firebaseAnalytics.setAnalyticsCollectionEnabled(false);
+            // Stetho: http://facebook.github.io/stetho/ - debug bridge for Android (activityContentView SQL etc.)
+            // Go to chrome://inspect/ in Chrome to inspect
+            Stetho.initializeWithDefaults(this);
+        }
 
         // Initialize Realm database
         Realm.init(this);
@@ -111,7 +125,7 @@ public class BaseApplication extends android.app.Application {
                 .build();
         Realm.setDefaultConfiguration(alarmFailureLogRealmConfig);
 
-        /*Component implementations are primarily instantiated via a generated builder.
+        /* Component implementations are primarily instantiated via a generated builder.
         An instance of the builder is obtained using the builder() method on the component implementation.
         If a nested @Component.Builder type exists in the component, the builder() method will
         return a generated implementation of that type. If no nested @Component.Builder exists,
@@ -122,29 +136,22 @@ public class BaseApplication extends android.app.Application {
                 .builder()
                 .roosterApplicationModule(new RoosterApplicationModule(this))
                 .build();
-
         roosterApplicationComponent.inject(this);
 
-        //Register receiver to listen for network changes
+        // Register receiver to listen for network changes
         NetworkChangeReceiver.Companion.registerReceiverSelf(this);
 
-        //Activate facebook app connection
+        // Activate Facebook app connection
         AppEventsLogger.activateApp(this, getResources().getString(R.string.facebook_app_id));
 
-        if (BuildConfig.DEBUG) {
-            //Stetho: http://facebook.github.io/stetho/ - debug bridge for Android (activityContentView SQL etc.)
-            //Go to chrome://inspect/ in Chrome to inspect
-            Stetho.initializeWithDefaults(this);
-        }
-
-        //Create Retrofit API class for managing Node API
+        // Create Retrofit API class for managing Node API
         mRetrofitNode = new Retrofit.Builder()
                 .baseUrl(getResources().getString(R.string.node_api_url))
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         mAPIServiceNode = mRetrofitNode.create(NodeIHTTPClient.class);
 
-        //Create Retrofit API class for managing Google API
+        // Create Retrofit API class for managing Google API
         mRetrofitGoogle = new Retrofit.Builder()
                 .baseUrl(getResources().getString(R.string.google_api_url))
                 .addConverterFactory(GsonConverterFactory.create())
@@ -162,7 +169,7 @@ public class BaseApplication extends android.app.Application {
                     // User is signed in
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
 
-                    //retrieve static User for current user
+                    // Retrieve static User for current user
                     retrieveMyUserDetails();
                     startBackgroundServices();
                 } else {
@@ -212,8 +219,8 @@ public class BaseApplication extends android.app.Application {
     }
 
     private void updateNotification() {
-        //Flag check for UI changes on load, broadcastreceiver for changes while activity running
-        //Broadcast receiver filter to receive UI updates
+        // Flag check for UI changes on load, broadcastreceiver for changes while activity running
+        // Broadcast receiver filter to receive UI updates
         IntentFilter firebaseListenerServiceFilter = new IntentFilter();
         firebaseListenerServiceFilter.addAction(Constants.ACTION_REQUESTNOTIFICATION);
         firebaseListenerServiceFilter.addAction(Constants.ACTION_ROOSTERNOTIFICATION);
@@ -221,7 +228,7 @@ public class BaseApplication extends android.app.Application {
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                //do something based on the intent's action
+                // Do something based on the intent's action
                 switch(intent.getAction()){
                     case Constants.ACTION_REQUESTNOTIFICATION:
                         setNotificationFlag(getNotificationFlag(Constants.FLAG_FRIENDREQUESTS) + 1, Constants.FLAG_FRIENDREQUESTS);

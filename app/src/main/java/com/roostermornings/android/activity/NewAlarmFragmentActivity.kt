@@ -67,10 +67,10 @@ class NewAlarmFragmentActivity : BaseActivity(), IAlarmSetListener, NewAlarmFrag
 
         setDayNightTheme()
 
-        if (hasGingerbread()) {
-            val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
-            StrictMode.setThreadPolicy(policy)
-        }
+//        if (hasGingerbread()) {
+//            val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+//            StrictMode.setThreadPolicy(policy)
+//        }
 
         //Only performed for android M version, with Doze mode
         requestPermissionIgnoreBatteryOptimization(this)
