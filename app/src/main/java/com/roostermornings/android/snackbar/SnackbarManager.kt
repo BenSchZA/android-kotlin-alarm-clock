@@ -258,7 +258,7 @@ class SnackbarManager(val activity: Activity, val activityContentView: Coordinat
         currentSnackbar = Snackbar.make(activityContentView, "", Snackbar.LENGTH_LONG)
     }
 
-    /**Check if snackbar queue has elements, and if snackbar is currently shown.
+    /** Check if snackbar queue has elements, and if snackbar is currently shown.
      * Two snackbar display methods exist:
      *  1) Dismiss and recreate current snackbar, or
      *  2) Add snackbar to a queue and use timer to refresh snackbar content*/
@@ -283,7 +283,7 @@ class SnackbarManager(val activity: Activity, val activityContentView: Coordinat
 
                 showSnackbar()
                 clearTimerTask()
-                Timer().schedule(timerTask, 2500, 2500)
+                Timer().schedule(timerTask, 4000, 4000)
             }
         }
     }

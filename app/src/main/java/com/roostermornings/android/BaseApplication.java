@@ -37,6 +37,7 @@ import com.roostermornings.android.domain.database.User;
 import com.roostermornings.android.apis.NodeIHTTPClient;
 import com.roostermornings.android.receiver.BackgroundTaskReceiver;
 import com.roostermornings.android.receiver.NetworkChangeReceiver;
+import com.roostermornings.android.util.AppTesting;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.Toaster;
 
@@ -81,11 +82,11 @@ public class BaseApplication extends android.app.Application {
         super.onCreate();
 
         // Enable StrictMode, with logging of all errors
+        // .penaltyDialog()
         // https://code.tutsplus.com/tutorials/android-best-practices-strictmode--mobile-7581
         StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
                 .detectAll()
                 .penaltyLog()
-                .penaltyDialog()
                 .build());
         StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll()
                 .penaltyLog()
@@ -98,7 +99,7 @@ public class BaseApplication extends android.app.Application {
         // Get static FBAnalytics instance
         firebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
-        Boolean debuggable = (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
+        Boolean debuggable = AppTesting.Companion.isDebuggable(this);
         // Activate Crashlytics instance
         CrashlyticsCore core = new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG || debuggable).build();
         if("BetaFlavour".equals(BuildConfig.FLAVOR)) {

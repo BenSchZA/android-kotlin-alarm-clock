@@ -5,6 +5,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.roostermornings.android.BuildConfig
 import com.roostermornings.android.domain.local.OnboardingJourneyEvent
 import com.roostermornings.android.util.JSONPersistence
 import java.util.*
@@ -141,6 +142,18 @@ object UserMetrics {
 
         if (fUser?.uid?.isNotBlank() == true) {
             childUpdates.put("$USER_METRICS/${fUser.uid}/${permission.name.toLowerCase()}", granted)
+            fDB.updateChildren(childUpdates)
+        }
+    }
+
+    fun updateVersionCode() {
+        val fDB = FirebaseDatabase.getInstance().reference
+        val fUser = FirebaseAuth.getInstance().currentUser
+
+        val childUpdates = HashMap<String, Any>()
+
+        if (fUser?.uid?.isNotBlank() == true) {
+            childUpdates.put("$USER_METRICS/${fUser.uid}/app_version", BuildConfig.VERSION_CODE)
             fDB.updateChildren(childUpdates)
         }
     }

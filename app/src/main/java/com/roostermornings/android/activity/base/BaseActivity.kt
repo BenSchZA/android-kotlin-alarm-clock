@@ -38,12 +38,6 @@ import com.mobsandgeeks.saripaar.ValidationError
 import com.mobsandgeeks.saripaar.Validator
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.R
-import com.roostermornings.android.activity.DiscoverFragmentActivity
-import com.roostermornings.android.activity.FriendsFragmentActivity
-import com.roostermornings.android.activity.MessageStatusFragmentActivity
-import com.roostermornings.android.activity.MyAlarmsFragmentActivity
-import com.roostermornings.android.activity.NewAudioRecordActivity
-import com.roostermornings.android.activity.SplashActivity
 import com.roostermornings.android.apis.GoogleIHTTPClient
 import com.roostermornings.android.dagger.RoosterApplicationComponent
 import com.roostermornings.android.domain.database.Alarm
@@ -69,6 +63,7 @@ import butterknife.Optional
 import com.crashlytics.android.Crashlytics
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FirebaseUser
+import com.roostermornings.android.activity.*
 import com.roostermornings.android.firebase.FA
 import com.roostermornings.android.firebase.FirebaseNetwork
 import com.roostermornings.android.realm.RealmAlarmFailureLog
@@ -164,12 +159,12 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
         UserMetrics.updateLastSeen()
         // Log active day
         UserMetrics.logActiveDays()
+        // Log current app version
+        UserMetrics.updateVersionCode()
         // Process any alarm failures
         realmAlarmFailureLog.processAlarmFailures(true)
         // Set shared pref to indicate whether mobile number is valid
         FirebaseNetwork.flagValidMobileNumber(this, false)
-        //Setup day/night theme selection (based on settings, and time)
-        setDayNightTheme()
 
         // Log new Crashlytics user
         firebaseUser?.let {
@@ -199,10 +194,10 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        //Inject Dagger dependencies
+        // Inject Dagger dependencies
         BaseApplication.getRoosterApplicationComponent().inject(this)
 
-        //Set default application settings preferences - don't overwrite existing if false
+        // Set default application settings preferences - don't overwrite existing if false
         setPreferenceManagerDefaultSettings(false)
 
         startFirebaseListenerService()
@@ -245,8 +240,8 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
     protected fun initialize(layoutId: Int) {
         setContentView(layoutId)
 
-        //Bind to butterknife delegate
-        //Calls to ButterKnife.bind can be made anywhere you would otherwise put findViewById calls.
+        // Bind to butterknife delegate
+        // Calls to ButterKnife.bind can be made anywhere you would otherwise put findViewById calls.
         ButterKnife.bind(this)
     }
 
@@ -277,25 +272,21 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
     }
 
     fun signOut() {
-        try {
-            //Ensure no audio remaining from old user
-            audioTableManager.removeAllSocialAudioItems()
-            audioTableManager.removeAllChannelAudioFiles()
-            //Ensure no alarms left from old user
-            deviceAlarmController.deleteAllLocalAlarms()
-            //Cancel background task intents
-            backgroundTaskReceiver.scheduleBackgroundDailyTask(this, false)
-            ContentResolver.cancelSync(mAccount, AUTHORITY)
-            //Set default application settings preferences - don't overwrite existing if false
-            setPreferenceManagerDefaultSettings(true)
-            sharedPreferences.edit().clear().apply()
-            //Clear specific persistent collections from shared prefs
-            clearJSONPersistence()
-        } catch (e: NullPointerException) {
-            e.printStackTrace()
-        }
+        // Ensure no audio remaining from old user
+        audioTableManager.removeAllSocialAudioItems()
+        audioTableManager.removeAllChannelAudioFiles()
+        // Ensure no alarms left from old user
+        deviceAlarmController.deleteAllLocalAlarms()
+        // Cancel background task intents
+        backgroundTaskReceiver.scheduleBackgroundDailyTask(this, false)
+        ContentResolver.cancelSync(mAccount, AUTHORITY)
+        // Set default application settings preferences - don't overwrite existing if false
+        setPreferenceManagerDefaultSettings(true)
+        sharedPreferences.edit().clear().apply()
+        // Clear specific persistent collections from shared prefs
+        clearJSONPersistence()
 
-        //End user session - auth state listener in BaseApplication will be triggered
+        // End user session - auth state listener in BaseApplication will be triggered
         // and necessary signout procedure performed
         authManager.signOut()
 
@@ -332,7 +323,7 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
                 .apply()
     }
 
-    fun isServiceRunning(serviceClass: Class<*>): Boolean {
+    private fun isServiceRunning(serviceClass: Class<*>): Boolean {
         val manager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         return manager.getRunningServices(Integer.MAX_VALUE).any { serviceClass.name == it.service.className }
     }
@@ -345,8 +336,8 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
                 || Build.BRAND.toLowerCase().contains("samsung"))) {
             Log.d("Brand: ", Build.BRAND)
 
-            //Set instructions and settings intent
-            var settingsNavigationString = "Try: For example go to power, battery, or optimizations settings page."
+            // Set instructions and settings intent
+            var settingsNavigationString: String
             val intent = Intent()
             when {
                 Build.BRAND.toLowerCase().contains("huawei") -> {
@@ -569,36 +560,28 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
             }
         }
 
-        //Broadcast receiver filter to receive UI updates
-        val firebaseListenerServiceFilter = IntentFilter()
-        firebaseListenerServiceFilter.addAction(Constants.ACTION_ROOSTERNOTIFICATION)
-
+        // Broadcast receiver to receive UI updates
         roosterNotificationReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
-                //do something based on the intent's action
                 setButtonBarNotification(R.id.notification_roosters, false)
-                val roosterCountRcv = audioTableManager.countUnheardSocialAudioFiles()
-                if (roosterCountRcv > 0) {
-                    val deviceAlarm = deviceAlarmTableManager.nextPendingSocialAlarm
-                    if (deviceAlarm == null) {
-                        setButtonBarNotification(R.id.notification_roosters, true)
-                    }
+
+                if (audioTableManager.countUnheardSocialAudioFiles() > 0) {
+                    deviceAlarmTableManager.nextPendingSocialAlarm ?:
+                            setButtonBarNotification(R.id.notification_roosters, true)
                 }
             }
         }
-        registerReceiver(roosterNotificationReceiver, firebaseListenerServiceFilter)
+        registerReceiver(roosterNotificationReceiver,
+                IntentFilter(Constants.ACTION_ROOSTERNOTIFICATION))
     }
 
     fun updateRequestNotification() {
-        //Flag check for UI changes on load, broadcastreceiver for changes while activity running
-        //If notifications waiting, display new friend request notification
+        // Flag check for UI changes on load, broadcastreceiver for changes while activity running
+        // If notifications waiting, display new friend request notification
         if (BaseApplication.getNotificationFlag(Constants.FLAG_FRIENDREQUESTS) > 0)
             setButtonBarNotification(R.id.notification_friends, true)
 
-        //Broadcast receiver filter to receive UI updates
-        val firebaseListenerServiceFilter = IntentFilter()
-        firebaseListenerServiceFilter.addAction(Constants.ACTION_REQUESTNOTIFICATION)
-
+        // Broadcast receiver to receive UI updates
         requestNotificationReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 //do something based on the intent's action
@@ -612,7 +595,7 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
                 }
             }
         }
-        registerReceiver(requestNotificationReceiver, firebaseListenerServiceFilter)
+        registerReceiver(requestNotificationReceiver, IntentFilter(Constants.ACTION_REQUESTNOTIFICATION))
     }
 
     override fun onDestroy() {
@@ -637,49 +620,46 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
     }
 
     fun setButtonBarSelection(): Boolean {
-        try {
-            when {
-                this is MyAlarmsFragmentActivity -> findViewById<View>(R.id.home_my_alarms)?.isSelected = true
-                this is MessageStatusFragmentActivity -> findViewById<View>(R.id.home_my_uploads)?.isSelected = true
-                this is NewAudioRecordActivity -> findViewById<View>(R.id.home_record_audio)?.isSelected = true
-                this is DiscoverFragmentActivity -> findViewById<View>(R.id.home_discover)?.isSelected = true
-                this is FriendsFragmentActivity -> findViewById<View>(R.id.home_friends)?.isSelected = true
-                else -> return false
-            }
-            return true
-        } catch (e: NullPointerException) {
-            e.printStackTrace()
-            return false
+        when {
+            this is MyAlarmsFragmentActivity -> findViewById<View>(R.id.home_my_alarms)?.isSelected = true
+            this is MessageStatusFragmentActivity -> findViewById<View>(R.id.home_my_uploads)?.isSelected = true
+            this is NewAudioRecordActivity -> findViewById<View>(R.id.home_record_audio)?.isSelected = true
+            this is DiscoverFragmentActivity -> findViewById<View>(R.id.home_discover)?.isSelected = true
+            this is FriendsFragmentActivity -> findViewById<View>(R.id.home_friends)?.isSelected = true
+            else -> return false
         }
+        return true
     }
 
     fun setDayNightTheme(): Boolean {
         val calendar = Calendar.getInstance()
-        try {
-            val dayNightThemeArrayEntries = resources.getStringArray(R.array.user_settings_day_night_theme_entry_values)
 
-            if (dayNightThemeArrayEntries[0] == defaultSharedPreferences.getString(Constants.USER_SETTINGS_DAY_NIGHT_THEME, "")) {
-                if (calendar.get(Calendar.HOUR_OF_DAY) >= 18 || calendar.get(Calendar.HOUR_OF_DAY) < 7) {
-                    return setThemeNight()
-                } else if (calendar.get(Calendar.HOUR_OF_DAY) >= 7) {
-                    return setThemeDay()
-                }
-            } else if (dayNightThemeArrayEntries[1] == defaultSharedPreferences.getString(Constants.USER_SETTINGS_DAY_NIGHT_THEME, "")) {
-                return setThemeDay()
-            } else if (dayNightThemeArrayEntries[2] == defaultSharedPreferences.getString(Constants.USER_SETTINGS_DAY_NIGHT_THEME, "")) {
-                return setThemeNight()
-            } else {
+        val dayNightThemeArrayEntries = resources.getStringArray(R.array.user_settings_day_night_theme_entry_values)
+        val dayNightThemeSetting = defaultSharedPreferences.getString(Constants.USER_SETTINGS_DAY_NIGHT_THEME, "")
+
+        when(dayNightThemeSetting) {
+            // Automatic theme
+            dayNightThemeArrayEntries[0] -> {
                 if (calendar.get(Calendar.HOUR_OF_DAY) >= 18 || calendar.get(Calendar.HOUR_OF_DAY) < 7) {
                     return setThemeNight()
                 } else if (calendar.get(Calendar.HOUR_OF_DAY) >= 7) {
                     return setThemeDay()
                 }
             }
-            return true
-        } catch (e: NullPointerException) {
-            e.printStackTrace()
-            return false
+            // Day theme
+            dayNightThemeArrayEntries[1] -> return setThemeDay()
+            // Night theme
+            dayNightThemeArrayEntries[2] -> return setThemeNight()
+            // Automatic theme
+            else -> {
+                if (calendar.get(Calendar.HOUR_OF_DAY) >= 18 || calendar.get(Calendar.HOUR_OF_DAY) < 7) {
+                    return setThemeNight()
+                } else if (calendar.get(Calendar.HOUR_OF_DAY) >= 7) {
+                    return setThemeDay()
+                }
+            }
         }
+        return false
     }
 
     private fun setThemeDay(): Boolean {
@@ -736,16 +716,10 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
         }
 
         fun showAlarmSocialRoostersExplainer(context: Context, alarm: Alarm?, count: Int?) {
-            var unseenRoosters = count
             if (context is MyAlarmsFragmentActivity) {
-
-                //If accessed from button bar
-                if (alarm != null) {
-                    unseenRoosters = alarm.unseen_roosters
-                }
-
-                var dialogText = "Social roosters are voice notes from your friends that wake you up."
-                dialogText = when (unseenRoosters) {
+                // If accessed from button bar
+                val unseenRoosters = alarm?.unseen_roosters ?: count
+                val dialogText = when (unseenRoosters) {
                     0 -> "Social roosters are voice notes from your friends that wake you up."
                     1 -> "You have received " + unseenRoosters.toString() + " rooster from a friend to wake you up."
                     else -> "You have received " + unseenRoosters.toString() + " roosters from friends to wake you up."
