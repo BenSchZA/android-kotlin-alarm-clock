@@ -7,10 +7,12 @@ package com.roostermornings.android.activity
 
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
+import android.annotation.TargetApi
 import android.content.BroadcastReceiver
 import android.content.ContentResolver
 import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.FloatingActionButton
 import android.support.graphics.drawable.VectorDrawableCompat
@@ -42,10 +44,6 @@ import com.roostermornings.android.firebase.FirebaseNetwork
 import com.roostermornings.android.realm.RealmAlarmFailureLog
 import com.roostermornings.android.snackbar.SnackbarManager
 import com.roostermornings.android.sync.DownloadSyncAdapter
-import com.roostermornings.android.util.ConnectivityUtils
-import com.roostermornings.android.util.Constants
-import com.roostermornings.android.util.JSONPersistence
-import com.roostermornings.android.util.LifeCycle
 import com.roostermornings.android.widgets.AlarmToggleWidget
 
 import java.util.ArrayList
@@ -59,6 +57,7 @@ import com.roostermornings.android.firebase.UserMetrics
 import com.roostermornings.android.onboarding.CustomCommandInterface
 import com.roostermornings.android.onboarding.InterfaceCommands
 import com.roostermornings.android.onboarding.ProfileCreationFragment
+import com.roostermornings.android.util.*
 import me.grantland.widget.AutofitTextView
 
 import com.roostermornings.android.util.Constants.AUTHORITY
@@ -133,13 +132,25 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface {
         initialize(R.layout.activity_my_alarms)
         BaseApplication.getRoosterApplicationComponent().inject(this)
 
+        /** To be run only if debuggable, for safe testing */
+        if(AppTesting.isDebuggable(this)) {
+            //FirstMileManager firstMileManager = new FirstMileManager();
+            //firstMileManager.createShowcase(this, new ViewTarget(buttonAddAlarm.getId(), this), 1);
+
+//            @TargetApi(23)
+//            if(RoosterUtils.hasM()) {
+//                // https://plus.google.com/+H%C3%A9ctorJ%C3%BAdez/posts/asy8WoN485U
+//                val batteryOptimizationIntent = Intent(ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+//                startActivityForResult(batteryOptimizationIntent, 0)
+//            }
+        }
+
+        setDayNightTheme()
+
         // Final context to be used in threads
         val context = this
 
         snackbarManager = SnackbarManager(this, myAlarmsCoordinatorLayout)
-
-        //FirstMileManager firstMileManager = new FirstMileManager();
-        //firstMileManager.createShowcase(this, new ViewTarget(buttonAddAlarm.getId(), this), 1);
 
         // Download any social or channel audio files
         ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle())
