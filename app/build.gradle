@@ -68,7 +68,7 @@ android {
             //Beta version name is release version name at point of diversion, with alpha b
 
             //Release
-            versionCode 51
+            versionCode 52
             versionName "2.4.5"
 
             manifestPlaceholders = [
