@@ -11,13 +11,20 @@ import android.annotation.TargetApi
 import android.content.BroadcastReceiver
 import android.content.ContentResolver
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.FloatingActionButton
+import android.support.design.widget.NavigationView
 import android.support.graphics.drawable.VectorDrawableCompat
+import android.support.v4.content.ContextCompat
 import android.support.v4.content.res.ResourcesCompat
+import android.support.v4.view.GravityCompat
 import android.support.v4.widget.SwipeRefreshLayout
+import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
@@ -61,9 +68,14 @@ import com.roostermornings.android.util.*
 import me.grantland.widget.AutofitTextView
 
 import com.roostermornings.android.util.Constants.AUTHORITY
+import com.squareup.picasso.Picasso
+import com.squareup.picasso.Target
+import kotlinx.android.synthetic.main.activity_navigation_drawer.*
+import kotlinx.android.synthetic.main.app_bar_navigation_drawer.*
 import kotlinx.android.synthetic.main.custom_toolbar.*
+import kotlinx.android.synthetic.main.nav_header_navigation_drawer.view.*
 
-class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface {
+class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, NavigationView.OnNavigationItemSelectedListener {
 
     @BindView(R.id.my_alarms_coordinator_layout)
     lateinit var myAlarmsCoordinatorLayout: CoordinatorLayout
@@ -178,6 +190,30 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface {
                     // Set download indicator
                     refreshDownloadIndicator()
 
+                    val toggle = ActionBarDrawerToggle(
+                            context, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+                    drawer_layout.addDrawerListener(toggle)
+                    toggle.syncState()
+
+                    nav_view.setNavigationItemSelectedListener(context)
+
+                    refreshDrawer()
+
+                    mCurrentUser?.profile_pic?.takeIf { it.isNotBlank() }?.let {
+                        Picasso.with(context).load(it)
+                                .resize(400, 400)
+                                .centerCrop()
+                                .into(object: Target {
+                                    override fun onPrepareLoad(placeHolderDrawable: Drawable?) {}
+
+                                    override fun onBitmapFailed(errorDrawable: Drawable?) {}
+
+                                    override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
+                                        nav_view.getHeaderView(0)?.background = BitmapDrawable(resources, bitmap)
+                                    }
+                                })
+                    }
+
                     // Set up adapter for monitoring alarm objects
                     mAdapter = MyAlarmsListAdapter(mAlarms, this@MyAlarmsFragmentActivity)
                     // Use a linear layout manager
@@ -255,17 +291,11 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface {
     private fun refreshDownloadIndicator() {
         if (!deviceAlarmTableManager.isAlarmTableEmpty) {
 
-            // When sync icon clicked, try refresh content
-            toolbar?.setNavigationOnClickListener {
-                refreshDownloadIndicator()
-                //Download any social or channel audio files
-                ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle())
-            }
-
             /* If there is no pending alarm, or pending alarm is synced,
             indicate with icon and clear no-internet snackbar*/
             if (deviceAlarmTableManager.nextPendingAlarm == null || deviceAlarmTableManager.isNextPendingAlarmSynced) {
-                toolbar?.setNavigationIcon(R.drawable.ic_cloud_done_white_24dp)
+                mMenu?.getItem(0)?.icon =
+                        ContextCompat.getDrawable(this, R.drawable.ic_cloud_done_white_24dp)
 
                 // If "no internet" high priority snackbar is showing, dismiss it, we're synced
                 if (snackbarManager?.previousState === SnackbarManager.State.NO_INTERNET) {
@@ -277,7 +307,8 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface {
                     if (active) {
                         animateRefreshDownloadIndicator()
                     } else {
-                        toolbar?.setNavigationIcon(R.drawable.ic_cloud_off_white_24dp)
+                        mMenu?.getItem(0)?.icon =
+                                ContextCompat.getDrawable(this, R.drawable.ic_cloud_off_white_24dp)
                         snackbarManager?.generateNoInternetConnection()
                     }
                 }
@@ -295,7 +326,8 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface {
                 override fun onChannelDownloadComplete(valid: Boolean, channelId: String) {
                     // When download completes, indicate this to user
                     if (deviceAlarmTableManager.isNextPendingAlarmSynced) {
-                        toolbar?.setNavigationIcon(R.drawable.ic_cloud_done_white_24dp)
+                        mMenu?.getItem(0)?.icon =
+                                ContextCompat.getDrawable(this@MyAlarmsFragmentActivity, R.drawable.ic_cloud_done_white_24dp)
                         if (snackbarManager?.previousState === SnackbarManager.State.SYNCING)
                             snackbarManager?.generateFinished()
                     }
@@ -303,7 +335,7 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface {
             })
         } else {
             // If there are no alarms, clear navigation icon
-            toolbar?.navigationIcon = null
+            mMenu?.getItem(0)?.icon = null
         }
 
         //Download any social or channel audio files
@@ -313,7 +345,7 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface {
     private fun animateRefreshDownloadIndicator() {
         val drawableDownloadIndicator = ResourcesCompat.getDrawable(resources, R.drawable.ic_cloud_download_white_24dp, null)
         if (drawableDownloadIndicator != null) {
-            toolbar?.navigationIcon = drawableDownloadIndicator
+            mMenu?.getItem(0)?.icon = drawableDownloadIndicator
 
             val animator = ObjectAnimator.ofPropertyValuesHolder(
                     drawableDownloadIndicator,
@@ -326,7 +358,11 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface {
     }
 
     override fun onBackPressed() {
-        moveTaskToBack(true)
+        if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
+            drawer_layout.closeDrawer(GravityCompat.START)
+        } else {
+            moveTaskToBack(true)
+        }
     }
 
     private fun sortAlarms(alarms: ArrayList<Alarm>) {
@@ -350,6 +386,19 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface {
         mAdapter?.notifyDataSetChanged()
     }
 
+    private fun refreshDrawer() {
+        if(authManager.isUserSignedIn()) {
+            // Change menu entry to "Sign out"
+            nav_view.menu?.findItem(R.id.nav_signout)?.setTitle(R.string.action_signout)
+        } else {
+            // Change menu entry to "Sign in"
+            nav_view.menu?.findItem(R.id.nav_signout)?.setTitle(R.string.action_signin)
+        }
+
+        nav_view.getHeaderView(0)?.user_name?.text = firebaseUser?.displayName ?: "Anonymous"
+        nav_view.getHeaderView(0)?.user_email?.text = firebaseUser?.email
+    }
+
     override fun onDestroy() {
         if (receiver != null) {
             unregisterReceiver(receiver)
@@ -365,9 +414,6 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface {
         // Inflate the menu; this adds items to the action bar if it is present.
         mMenu = menu
         menuInflater.inflate(R.menu.menu_main, menu)
-        if (!authManager.isUserSignedIn()) {
-            menu.findItem(R.id.action_signout_signin)?.setTitle(R.string.action_signin)
-        }
         return true
     }
 
@@ -375,20 +421,32 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        val id = item.itemId
+        return when (item.itemId) {
+        //R.id.action_settings -> return true
+            R.id.action_sync -> {
+                // When sync icon clicked, try refresh content
+                refreshDownloadIndicator()
+                //Download any social or channel audio files
+                ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle())
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
 
-        return when(id) {
-            R.id.action_profile -> {
-                val i = Intent(this, ProfileActivity::class.java)
-                startActivity(i)
-                true
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        // Handle navigation view item clicks here.
+        when (item.itemId) {
+            R.id.nav_profile -> {
+                startActivity(Intent(this, ProfileActivity::class.java))
             }
-            R.id.action_settings -> {
-                val i = Intent(this, SettingsActivity::class.java)
-                startActivity(i)
-                true
+            R.id.nav_faqs -> {
+
             }
-            R.id.action_signout_signin -> {
+            R.id.nav_settings -> {
+                startActivity(Intent(this, SettingsActivity::class.java))
+            }
+            R.id.nav_signout -> {
                 if (authManager.isUserSignedIn()) {
                     signOut()
                 } else {
@@ -399,10 +457,20 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface {
                             .replace(R.id.fillerContainer, profileCreationFragment)
                             .commit()
                 }
-                true
             }
-            else -> super.onOptionsItemSelected(item)
+            R.id.nav_share -> {
+                lifeCycle.shareApp()
+            }
+            R.id.nav_send -> {
+                lifeCycle.sendFeedback(mCurrentUser?.user_name ?: "Anonymous")
+            }
+            R.id.nav_rate -> {
+                lifeCycle.requestAppRating()
+            }
         }
+
+        drawer_layout.closeDrawer(GravityCompat.START)
+        return true
     }
 
     override fun onCustomCommand(command: InterfaceCommands.Companion.Command) {
@@ -418,11 +486,7 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface {
                             .commit()
                 }
 
-                if(authManager.isUserSignedIn()) {
-                    // Change menu entry to "Sign out"
-                    mMenu?.findItem(R.id.action_signout_signin)
-                            ?.setTitle(R.string.action_signout)
-                }
+                refreshDrawer()
             }
             else -> {}
         }

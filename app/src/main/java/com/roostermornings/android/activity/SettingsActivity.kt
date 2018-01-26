@@ -39,6 +39,8 @@ class SettingsActivity : BaseActivity() {
                 .commit()
 
         //Set toolbar title
-        setupToolbar(toolbarTitle, getString(R.string.settings_activity_title))
+        val toolbar = setupToolbar(toolbarTitle, getString(R.string.settings_activity_title))
+        toolbar?.setNavigationIcon(R.drawable.md_nav_back)
+        toolbar?.setNavigationOnClickListener { startHomeActivity() }
     }
 }

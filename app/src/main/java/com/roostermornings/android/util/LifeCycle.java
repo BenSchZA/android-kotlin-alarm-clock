@@ -10,8 +10,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.widget.Toast;
 
 import com.roostermornings.android.BaseApplication;
+import com.roostermornings.android.R;
 import com.roostermornings.android.domain.database.ChannelRooster;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
@@ -83,7 +85,7 @@ public class LifeCycle {
      * https://stackoverflow.com/questions/10816757/rate-this-app-link-in-google-play-store-app-on-the-phone
      * */
 
-    private void requestAppRating() {
+    public void requestAppRating() {
         Uri uri = Uri.parse("market://details?id=" + context.getPackageName());
         Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
 
@@ -92,18 +94,45 @@ public class LifeCycle {
         if(RoosterUtils.hasLollipop()) {
             goToMarket.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY |
                     Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
-                    Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+                    Intent.FLAG_ACTIVITY_MULTIPLE_TASK |
+                    Intent.FLAG_ACTIVITY_NEW_TASK);
         } else {
             goToMarket.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY |
                     Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET |
-                    Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+                    Intent.FLAG_ACTIVITY_MULTIPLE_TASK |
+                    Intent.FLAG_ACTIVITY_NEW_TASK);
         }
 
         try {
             context.startActivity(goToMarket);
         } catch (ActivityNotFoundException e) {
             context.startActivity(new Intent(Intent.ACTION_VIEW,
-                    Uri.parse("http://play.google.com/store/apps/details?id=" + context.getPackageName())));
+                    Uri.parse("http://play.google.com/store/apps/details?id=" + context.getPackageName())).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        }
+    }
+
+    public void shareApp() {
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, context.getResources().getString(R.string.share_rooster_message));
+        sendIntent.setType("text/plain");
+        sendIntent = Intent.createChooser(sendIntent, "Share Rooster").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(sendIntent);
+    }
+
+    public void sendFeedback(String name) {
+        final Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
+        emailIntent.setType("text/plain");
+        emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[]{  "ben.scholtz@roostermornings.com"});
+        emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, name + ": Hello there");
+        emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, "Add message here");
+        emailIntent.setType("message/rfc822");
+
+        try {
+            context.startActivity(Intent.createChooser(emailIntent,
+                    "Send feedback").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        } catch (android.content.ActivityNotFoundException ex) {
+            Toaster.makeToast(context, "No email clients installed.", Toast.LENGTH_LONG);
         }
     }
 

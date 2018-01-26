@@ -167,6 +167,7 @@ object UserMetrics {
         dateLockTime.timeInMillis = dateLockTimeInMillis
         val currentTime = Calendar.getInstance()
 
+        // If last date lock is today, return
         if(dateLockTime.get(Calendar.DATE) != currentTime.get(Calendar.DATE)) return
         val fUser = FirebaseAuth.getInstance().currentUser
 

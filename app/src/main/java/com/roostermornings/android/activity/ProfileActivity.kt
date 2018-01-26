@@ -108,7 +108,9 @@ class ProfileActivity : BaseActivity(), CustomCommandInterface {
         setDayNightTheme()
 
         //Set toolbar title
-        setupToolbar(toolbarTitle, "My Profile")
+        val toolbar = setupToolbar(toolbarTitle, "My Profile")
+        toolbar?.setNavigationIcon(R.drawable.md_nav_back)
+        toolbar?.setNavigationOnClickListener { startHomeActivity() }
 
         //Set mobile number to last valid persisted entry, or to current user's number if that fails
         val mobileNumberEntry = sharedPreferences.getString(Constants.MOBILE_NUMBER_ENTRY, mCurrentUser?.cell_number)
@@ -358,7 +360,6 @@ class ProfileActivity : BaseActivity(), CustomCommandInterface {
     }
 
     private fun setProfilePicFromURL(url: String) {
-
         try {
             Picasso.with(this@ProfileActivity).load(url)
                     .resize(400, 400)
@@ -380,7 +381,6 @@ class ProfileActivity : BaseActivity(), CustomCommandInterface {
             e.printStackTrace()
             Toaster.makeToast(this, "Load image failed.", Toast.LENGTH_SHORT).checkTastyToast()
         }
-
     }
 
     private fun requestPermission() {
