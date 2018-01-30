@@ -441,7 +441,7 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
                 startActivity(Intent(this, ProfileActivity::class.java))
             }
             R.id.nav_faqs -> {
-
+                startActivity(Intent(this, FAQActivity::class.java))
             }
             R.id.nav_settings -> {
                 startActivity(Intent(this, SettingsActivity::class.java))
