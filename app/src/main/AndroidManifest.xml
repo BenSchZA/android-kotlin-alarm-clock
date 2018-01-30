@@ -330,15 +330,14 @@
             android:label="@string/title_activity_onboarding"
             android:theme="@style/AppTheme.NoActionBar" />
 
+        <activity android:name=".activity.FAQActivity"
+            android:theme="@style/AppTheme.NoActionBar"/>
+
         <service
             android:name=".service.ForegroundService"
             android:enabled="true"
             android:exported="true" />
 
-        <activity
-            android:name=".activity.NavigationDrawerActivity"
-            android:label="@string/title_activity_navigation_drawer"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
