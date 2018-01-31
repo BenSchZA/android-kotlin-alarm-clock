@@ -8,10 +8,6 @@ package com.roostermornings.android.adapter_data
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.domain.database.Alarm
 import com.roostermornings.android.firebase.FirebaseNetwork
@@ -21,6 +17,7 @@ import com.roostermornings.android.util.StrUtils
 import com.roostermornings.android.util.Toaster
 import javax.inject.Inject
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.*
 import java.util.*
 
 /**
@@ -70,7 +67,14 @@ class RoosterAlarmManager(val context: Context) {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
 
                 for (postSnapshot in dataSnapshot.children) {
-                    val alarm = postSnapshot.getValue(Alarm::class.java) ?: Alarm()
+                    val alarm: Alarm
+                    try {
+                        alarm = postSnapshot.getValue(Alarm::class.java) ?: Alarm()
+                    } catch(e: DatabaseException) {
+                        Toaster.makeToast(context, "Failed to load alarm, please refresh and try again.", Toast.LENGTH_SHORT)
+                        postSnapshot.ref.setValue(null)
+                        continue
+                    }
 
                     //Register alarm sets on login
                     //Extract data from Alarm "alarm" and create new alarm set DeviceAlarm
