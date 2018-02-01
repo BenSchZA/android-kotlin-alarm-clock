@@ -14,6 +14,7 @@ import dagger.Component;
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
 import com.roostermornings.android.activity.DiscoverFragmentActivity;
+import com.roostermornings.android.activity.FAQActivity;
 import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.activity.InvalidateVersion;
 import com.roostermornings.android.activity.MessageStatusFragmentActivity;
@@ -96,6 +97,7 @@ public interface RoosterApplicationComponent {
     void inject(OnboardingActivity activity);
     void inject(SplashActivity activity);
     void inject(InvalidateVersion activity);
+    void inject(FAQActivity activity);
 
     void inject(FriendsInviteFragment3 fragment);
     void inject(FriendsMyFragment1 fragment);
