@@ -68,8 +68,8 @@ android {
             //Beta version name is release version name at point of diversion, with alpha b
 
             //Release
-            versionCode 52
-            versionName "2.4.5"
+            versionCode 53
+            versionName "2.4.6"
 
             manifestPlaceholders = [
                     app_icon      : "@mipmap/ic_launcher",
@@ -82,8 +82,8 @@ android {
             dimension "rooster-release"
 
             //Beta
-            versionName "2.4.5b"
-            versionCode 1000021
+            versionName "2.4.6b"
+            versionCode 1000022
 
             manifestPlaceholders = [
                     app_icon      : "@mipmap/ic_launcher_beta",
@@ -96,9 +96,9 @@ android {
     buildTypes {
         release {
             //During debugging, enable debugging... and disable minify to get proper stacktraces
-            debuggable true
-            //minifyEnabled true
-            //shrinkResources true
+            //debuggable true
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             consumerProguardFiles 'proguard-rules.txt'
             proguardFile 'proguard-square-okio.pro'
