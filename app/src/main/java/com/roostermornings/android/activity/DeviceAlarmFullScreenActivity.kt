@@ -42,6 +42,7 @@ import javax.inject.Inject
 import butterknife.BindView
 import butterknife.OnClick
 import com.roostermornings.android.realm.RealmAlarmFailureLog
+import kotlinx.android.synthetic.main.activity_device_alarm_full_screen.*
 
 class DeviceAlarmFullScreenActivity : BaseActivity() {
 
@@ -97,7 +98,7 @@ class DeviceAlarmFullScreenActivity : BaseActivity() {
             attachAudioServiceBroadCastReceiver()
 
             //Replace image and name with message if no Roosters etc.
-            setDefaultDisplayProfile(true)
+            //setDefaultDisplayProfile(true)
         }
 
         // Called when the connection with the service disconnects unexpectedly
@@ -320,6 +321,7 @@ class DeviceAlarmFullScreenActivity : BaseActivity() {
                         imageDrawable.isCircular = true
                         imageDrawable.cornerRadius = Math.max(imageBitmap.width, imageBitmap.height) / 2.0f
                         imgSenderPic.setImageDrawable(imageDrawable)
+                        alarm_sender_pic_progress.visibility = View.GONE
                     }
 
                     override fun onError() {
@@ -343,6 +345,7 @@ class DeviceAlarmFullScreenActivity : BaseActivity() {
         if (overwriteTitle) {
             txtSenderName.setText(R.string.alarm_default_name)
         }
+        alarm_sender_pic_progress.visibility = View.GONE
     }
 
     companion object {

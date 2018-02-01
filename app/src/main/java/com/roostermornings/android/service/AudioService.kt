@@ -108,7 +108,7 @@ class AudioService : Service() {
     lateinit var mAccount: Account
     @Inject lateinit var sharedPreferences: SharedPreferences
     @Inject
-    @Named("default") lateinit var defaultSharedPreferences: SharedPreferences
+    @field:Named("default") lateinit var defaultSharedPreferences: SharedPreferences
     @Inject lateinit var jsonPersistence: JSONPersistence
     @Inject
     lateinit var channelManager: ChannelManager

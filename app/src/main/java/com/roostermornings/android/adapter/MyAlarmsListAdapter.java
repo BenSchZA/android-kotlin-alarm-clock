@@ -161,6 +161,7 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
         }
 
         if(alarm.isAllow_friend_audio_files()) {
+            holder.roosterNotificationParent.setVisibility(View.VISIBLE);
             holder.roosterNotificationPerson.setVisibility(View.VISIBLE);
             //Show notification of number of waiting Roosters for next pending alarm
             if(alarm.getUnseen_roosters() != null && alarm.getUnseen_roosters() > 0) {
@@ -175,6 +176,7 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
             }
         } else {
             holder.roosterNotificationParent.setVisibility(View.INVISIBLE);
+            holder.roosterNotificationPerson.setVisibility(View.INVISIBLE);
         }
 
         holder.switchEnable.setOnCheckedChangeListener(new SwitchCompat.OnCheckedChangeListener() {
