@@ -5,6 +5,7 @@
 
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -22,6 +23,7 @@
         android:text="@string/new_audio_instructions"
         android:textColor="@color/white"
         android:textSize="@dimen/text_large"
+        android:elevation="@dimen/cardview_default_elevation"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -30,14 +32,16 @@
         android:id="@+id/new_audio_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:gravity="center"
         android:text="60"
         android:textColor="@color/white"
         android:textSize="@dimen/text_huge"
-        app:layout_constraintBottom_toBottomOf="@+id/new_audio_listen_circle_outer"
-        app:layout_constraintEnd_toEndOf="@+id/new_audio_listen_circle_outer"
-        app:layout_constraintStart_toStartOf="@+id/new_audio_listen_circle_outer"
-        app:layout_constraintTop_toTopOf="@+id/new_audio_listen_circle_outer" />
+        app:layout_constraintBottom_toTopOf="@+id/new_audio_circle_outer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <ImageButton
         android:id="@+id/new_audio_save"
@@ -46,6 +50,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:background="@drawable/rooster_new_audio_upload_button"
+        android:elevation="@dimen/cardview_default_elevation"
         app:layout_constraintBottom_toBottomOf="@+id/new_audio_listen_circle_outer"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.2"
@@ -58,6 +63,8 @@
         android:layout_height="wrap_content"
         android:background="@drawable/rooster_new_audio_delete_button"
         android:clickable="true"
+        android:focusable="true"
+        android:elevation="@dimen/cardview_default_elevation"
         app:layout_constraintBottom_toBottomOf="@+id/new_audio_listen_circle_outer"
         app:layout_constraintEnd_toStartOf="@+id/new_audio_listen_circle_outer"
         app:layout_constraintHorizontal_bias="0.8"
@@ -76,13 +83,26 @@
 
         <ImageButton
             android:id="@+id/new_audio_listen"
+            android:elevation="@dimen/cardview_default_elevation"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_margin="15dp"
             android:background="@drawable/rooster_audio_play_button"
-            android:clickable="true" />
+            android:clickable="true"
+            android:focusable="true"/>
 
     </FrameLayout>
+
+    <ImageButton
+        android:id="@+id/upload_audio"
+        android:contentDescription="Upload audio"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_margin="8dp"
+        android:background="@drawable/ic_file_upload_white_24px"
+        android:elevation="@dimen/cardview_default_elevation"
+        app:layout_constraintBottom_toTopOf="@+id/button_bar"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <include
         android:id="@+id/button_bar"
@@ -104,12 +124,15 @@
         app:layout_constraintTop_toTopOf="@+id/new_audio_listen_circle_outer">
 
         <ImageView
+            android:contentDescription="Start/stop recording"
+            android:elevation="@dimen/cardview_default_elevation"
             android:id="@+id/new_audio_start_stop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:background="@drawable/rooster_record_audio_circle_inner_selectable"
-            android:clickable="true" />
+            android:clickable="true"
+            android:focusable="true"/>
 
     </FrameLayout>
 

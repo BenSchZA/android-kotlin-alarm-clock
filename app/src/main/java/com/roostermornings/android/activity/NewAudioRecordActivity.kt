@@ -43,6 +43,7 @@ import butterknife.OnClick
 
 import android.Manifest.permission.RECORD_AUDIO
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.app.Activity
 import android.widget.*
 import com.roostermornings.android.firebase.UserMetrics
 import kotlinx.android.synthetic.main.content_new_audio.*
@@ -197,6 +198,32 @@ class NewAudioRecordActivity : BaseActivity() {
         super.onDestroy()
         mediaPlayer?.release()
         mediaRecorder?.release()
+    }
+
+    @OnClick(R.id.upload_audio)
+    fun uploadAudio() {
+        try {
+            val intent = Intent()
+            intent.action = Intent.ACTION_GET_CONTENT
+            intent.type = "audio/*"
+            startActivityForResult(Intent.createChooser(intent, "Select audio file"), 0)
+        } catch (e: Exception) {
+            //App not found
+            e.printStackTrace()
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK) {
+            val audioFileUri: Uri? = data?.data
+
+            val uploadAudioIntent = Intent(Intent.ACTION_SEND)
+            uploadAudioIntent.setDataAndType(audioFileUri, "audio/*")
+            uploadAudioIntent.putExtra(Intent.EXTRA_STREAM, audioFileUri)
+            uploadAudioIntent.`package` = "com.roostermornings.android"
+            startActivity(Intent.createChooser(uploadAudioIntent, "Share audio"))
+        }
     }
 
     @OnClick(R.id.home_friends)

@@ -18,7 +18,7 @@
         android:clickable="true"
         app:cardBackgroundColor="@color/black"
         app:cardCornerRadius="6dp"
-        app:cardElevation="0dp">
+        app:cardElevation="@dimen/cardview_default_elevation">
 
         <FrameLayout
             android:layout_width="match_parent"

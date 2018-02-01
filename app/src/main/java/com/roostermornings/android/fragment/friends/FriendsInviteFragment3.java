@@ -233,12 +233,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
 
     @OnClick(R.id.share_button)
     public void onShareButtonClicked() {
-        Intent sendIntent = new Intent();
-        sendIntent.setAction(Intent.ACTION_SEND);
-        sendIntent.putExtra(Intent.EXTRA_TEXT, getResources().getString(R.string.share_rooster_message));
-        sendIntent.setType("text/plain");
-        sendIntent = Intent.createChooser(sendIntent, "Share Rooster");
-        startActivity(sendIntent);
+
         FA.Log(FA.Event.invitation_to_join_rooster_sent.class, null, null);
     }
 

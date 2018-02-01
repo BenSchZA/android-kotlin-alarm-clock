@@ -146,6 +146,7 @@ public class Constants {
     public final static String MOBILE_NUMBER_ENTRY_DISMISSED = "mobileNumberEntryDismissed";
     public final static String MOBILE_NUMBER_ENTRY = "mobileNumberEntry";
     public final static String USER_FINISHED_ONBOARDING = "USER_FINISHED_ONBOARDING";
+    public final static String USER_VIEWED_FAQS = "USER_VIEWED_FAQS";
 
     public final static String USER_GEOHASH = "USER_GEOHASH";
 

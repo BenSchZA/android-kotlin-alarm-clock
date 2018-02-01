@@ -33,23 +33,42 @@
         tools:layout_constraintRight_creator="1"
         tools:layout_constraintTop_creator="1">
 
-
-        <ImageView
-            android:id="@+id/alarm_sender_pic"
+        <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
             android:layout_marginBottom="8dp"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
             android:layout_marginTop="20dp"
-            android:adjustViewBounds="true"
-            android:background="@drawable/xlarge_profile_pic_circle"
-            android:scaleType="fitCenter"
             app:layout_constraintBottom_toTopOf="@+id/alarm_sender_name"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:foregroundGravity="center">
+
+            <ImageView
+                android:id="@+id/alarm_sender_pic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:background="@drawable/xlarge_profile_pic_circle"
+                android:scaleType="fitCenter"
+                android:elevation="@dimen/cardview_default_elevation"
+                app:layout_constraintBottom_toTopOf="@+id/alarm_sender_name"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ProgressBar
+                android:id="@+id/alarm_sender_pic_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center" />
+
+        </FrameLayout>
+
+
 
         <TextView
             android:id="@+id/alarm_sender_name"
@@ -123,6 +142,7 @@
             android:padding="@dimen/spacing_normal_large"
             android:text="Snooze"
             android:textSize="@dimen/text_xlarge"
+            android:elevation="@dimen/cardview_default_elevation"
             app:layout_constraintBottom_toTopOf="@+id/alarm_action_button"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent" />

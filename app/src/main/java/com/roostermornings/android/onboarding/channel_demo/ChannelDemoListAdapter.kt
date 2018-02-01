@@ -98,7 +98,6 @@ class ChannelDemoListAdapter(
         }
         if(position == 1) showcaseChannelCardView = holder.cardView
 
-        //TODO: descriptions
         holder.cardView.setOnClickListener {
             val channelTitle = getItem(it.cardView.tag as Int).title
             val imageResourceId = getItem(it.cardView.tag as Int).imageID

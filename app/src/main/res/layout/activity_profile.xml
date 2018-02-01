@@ -38,6 +38,7 @@
             android:layout_gravity="center"
             android:layout_margin="@dimen/spacing_normal_large"
             android:background="@drawable/large_profile_pic_circle"
+            android:elevation="@dimen/cardview_default_elevation"
             android:clickable="true"
             android:scaleType="fitCenter" />
 

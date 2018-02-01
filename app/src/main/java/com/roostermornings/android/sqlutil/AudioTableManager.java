@@ -405,7 +405,7 @@ public class AudioTableManager {
         ArrayList<DeviceAudioQueueItem> audioItems = extractAudioFiles(cursor);
 
         if(cursor.getCount() > 0) {
-            //Channel is listened, and within day or faovurited, therefore clone before deletion
+            //Channel is listened, and within day or favourite, therefore clone before deletion
 
             //Clone audio item for today's roosters page
             DeviceAudioQueueItem cloneAudioItem = new DeviceAudioQueueItem(audioItems.get(0));

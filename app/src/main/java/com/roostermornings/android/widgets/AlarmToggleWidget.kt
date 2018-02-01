@@ -34,7 +34,7 @@ class AlarmToggleWidget : AppWidgetProvider() {
     val ctx: Context? = null
 
     @Inject
-    @Named("default") lateinit var defaultSharedPreferences: SharedPreferences
+    @field:Named("default") lateinit var defaultSharedPreferences: SharedPreferences
 
     init {
         BaseApplication.getRoosterApplicationComponent().inject(this)
