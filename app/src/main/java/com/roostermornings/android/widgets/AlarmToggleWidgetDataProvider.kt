@@ -43,7 +43,7 @@ class AlarmToggleWidgetDataProvider
 
     @Inject lateinit var roosterAlarmManager: RoosterAlarmManager
     @Inject lateinit var jsonPersistence: JSONPersistence
-    @Inject @Named("default") lateinit var defaultSharedPreferences: SharedPreferences
+    @Inject @field:Named("default") lateinit var defaultSharedPreferences: SharedPreferences
 
     init {
         BaseApplication.getRoosterApplicationComponent().inject(this)

@@ -41,7 +41,9 @@ import javax.inject.Inject
 import butterknife.BindView
 
 import com.roostermornings.android.util.Constants.AUTHORITY
+import com.roostermornings.android.util.LifeCycle
 import com.roostermornings.android.util.RoosterUtils.hasGingerbread
+import kotlinx.android.synthetic.main.activity_new_alarm.*
 
 class NewAlarmFragmentActivity : BaseActivity(), IAlarmSetListener, NewAlarmFragment1.NewAlarmInterface {
 
@@ -73,7 +75,9 @@ class NewAlarmFragmentActivity : BaseActivity(), IAlarmSetListener, NewAlarmFrag
 //        }
 
         //Only performed for android M version, with Doze mode
-        requestPermissionIgnoreBatteryOptimization(this)
+        if(!requestPermissionIgnoreBatteryOptimization(this)) {
+            lifeCycle.directUserToFAQs(false, this, main_layout)
+        }
 
         val mHour = mCalendar.get(Calendar.HOUR_OF_DAY)
         val mMinute = mCalendar.get(Calendar.MINUTE)

@@ -15,6 +15,7 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.FloatingActionButton
@@ -34,6 +35,7 @@ import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 
 import com.afollestad.materialdialogs.MaterialDialog
 import com.crashlytics.android.Crashlytics
@@ -68,6 +70,7 @@ import com.roostermornings.android.util.*
 import me.grantland.widget.AutofitTextView
 
 import com.roostermornings.android.util.Constants.AUTHORITY
+import com.roostermornings.android.util.Constants.USER_SETTINGS_VIBRATE
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 import kotlinx.android.synthetic.main.activity_navigation_drawer.*
@@ -181,54 +184,54 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
         // UI setup thread
         object : Thread() {
             override fun run() {
-                    // Set highlighting of button bar
-                    setButtonBarSelection()
-                    // Animate FAB with pulse
-                    buttonAddAlarm.animation = AnimationUtils.loadAnimation(context, R.anim.pulse)
-                    // Set toolbar title
-                    toolbar = setupToolbar(toolbarTitle, getString(R.string.my_alarms))
-                    // Set download indicator
-                    refreshDownloadIndicator()
+                // Set highlighting of button bar
+                setButtonBarSelection()
+                // Animate FAB with pulse
+                buttonAddAlarm.animation = AnimationUtils.loadAnimation(context, R.anim.pulse)
+                // Set toolbar title
+                toolbar = setupToolbar(toolbarTitle, getString(R.string.my_alarms))
+                // Set download indicator
+                refreshDownloadIndicator()
 
-                    val toggle = ActionBarDrawerToggle(
-                            context, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
-                    drawer_layout.addDrawerListener(toggle)
-                    toggle.syncState()
+                // Set up navigation drawer
+                val toggle = ActionBarDrawerToggle(
+                        context, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+                drawer_layout.addDrawerListener(toggle)
+                toggle.syncState()
+                nav_view.setNavigationItemSelectedListener(context)
+                refreshDrawer()
 
-                    nav_view.setNavigationItemSelectedListener(context)
+                // Load navigation drawer header image
+                mCurrentUser?.profile_pic?.takeIf { it.isNotBlank() }?.let {
+                    Picasso.with(context).load(it)
+                            .resize(400, 400)
+                            .centerCrop()
+                            .into(object: Target {
+                                override fun onPrepareLoad(placeHolderDrawable: Drawable?) {}
 
-                    refreshDrawer()
+                                override fun onBitmapFailed(errorDrawable: Drawable?) {}
 
-                    mCurrentUser?.profile_pic?.takeIf { it.isNotBlank() }?.let {
-                        Picasso.with(context).load(it)
-                                .resize(400, 400)
-                                .centerCrop()
-                                .into(object: Target {
-                                    override fun onPrepareLoad(placeHolderDrawable: Drawable?) {}
-
-                                    override fun onBitmapFailed(errorDrawable: Drawable?) {}
-
-                                    override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
-                                        nav_view.getHeaderView(0)?.background = BitmapDrawable(resources, bitmap)
-                                    }
-                                })
-                    }
-
-                    // Set up adapter for monitoring alarm objects
-                    mAdapter = MyAlarmsListAdapter(mAlarms, this@MyAlarmsFragmentActivity)
-                    // Use a linear layout manager
-                    val mLayoutManager = LinearLayoutManager(context)
-                    mRecyclerView.layoutManager = mLayoutManager
-                    mRecyclerView.adapter = mAdapter
-
-                    // Check for, and load, persisted data
-                    if (!jsonPersistence.alarms.isEmpty()) {
-                        mAlarms.addAll(jsonPersistence.alarms)
-                        mAdapter?.notifyDataSetChanged()
-                    } else if (checkInternetConnection()) {
-                        if (!swipeRefreshLayout.isRefreshing) swipeRefreshLayout.isRefreshing = true
-                    }
+                                override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
+                                    nav_view.getHeaderView(0)?.background = BitmapDrawable(resources, bitmap)
+                                }
+                            })
                 }
+
+                // Set up adapter for monitoring alarm objects
+                mAdapter = MyAlarmsListAdapter(mAlarms, this@MyAlarmsFragmentActivity)
+                // Use a linear layout manager
+                val mLayoutManager = LinearLayoutManager(context)
+                mRecyclerView.layoutManager = mLayoutManager
+                mRecyclerView.adapter = mAdapter
+
+                // Check for, and load, persisted data
+                if (!jsonPersistence.alarms.isEmpty()) {
+                    mAlarms.addAll(jsonPersistence.alarms)
+                    mAdapter?.notifyDataSetChanged()
+                } else if (checkInternetConnection()) {
+                    if (!swipeRefreshLayout.isRefreshing) swipeRefreshLayout.isRefreshing = true
+                }
+            }
         }.run()
 
         // Process intent bundle thread
@@ -267,23 +270,22 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
             }
 
             override fun onSyncFinished() {
-                //Sort alarms according to time
+                // Sort alarms according to time
                 sortAlarms(mAlarms)
                 toggleAlarmFiller()
 
-                //Recreate all enabled alarms as failsafe
+                // Recreate all enabled alarms as failsafe
                 deviceAlarmController.rebootAlarms()
-                //Case: local has an alarm that firebase doesn't Result: delete local alarm
+                // Case: local has an alarm that Firebase doesn't Result: delete local alarm
                 deviceAlarmController.syncAlarmSetGlobal(mAlarms)
 
-                //Load content and stop refresh indicator
+                // Load content and stop refresh indicator
                 mAdapter?.notifyDataSetChanged()
                 swipeRefreshLayout.isRefreshing = false
-                //Configure rooster notification indicator
+                // Configure rooster notification indicator
                 updateRoosterNotification()
             }
         }
-
         //Refresh alarms list from background thread
         roosterAlarmManager.fetchAlarms(mAlarms)
     }
@@ -441,7 +443,8 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
                 startActivity(Intent(this, ProfileActivity::class.java))
             }
             R.id.nav_faqs -> {
-                startActivity(Intent(this, FAQActivity::class.java))
+                if(checkInternetConnection())
+                    startActivity(Intent(this, FAQActivity::class.java))
             }
             R.id.nav_settings -> {
                 startActivity(Intent(this, SettingsActivity::class.java))

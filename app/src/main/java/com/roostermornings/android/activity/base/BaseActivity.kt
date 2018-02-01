@@ -83,7 +83,7 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
     private var foregroundReceiver: BroadcastReceiver? = null
 
     @Inject lateinit var sharedPreferences: SharedPreferences
-    @Inject @Named("default") lateinit var defaultSharedPreferences: SharedPreferences
+    @Inject @field:Named("default") lateinit var defaultSharedPreferences: SharedPreferences
     @Inject lateinit var deviceAlarmController: DeviceAlarmController
     @Inject lateinit var audioTableManager: AudioTableManager
     @Inject lateinit var deviceAlarmTableManager: DeviceAlarmTableManager
@@ -328,7 +328,7 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
         return manager.getRunningServices(Integer.MAX_VALUE).any { serviceClass.name == it.service.className }
     }
 
-    fun requestPermissionIgnoreBatteryOptimization(context: Context) {
+    fun requestPermissionIgnoreBatteryOptimization(context: Context): Boolean {
         if (!sharedPreferences.getBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false)
                 && (Build.BRAND.toLowerCase().contains("huawei")
                 || Build.BRAND.toLowerCase().contains("sony")
@@ -373,6 +373,8 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
                             }
                             .canceledOnTouchOutside(false)
                             .show()
+
+                    return true
                 }
                 Build.BRAND.toLowerCase().contains("sony") -> {
                     settingsNavigationString = "Try: Go to 'Battery'>Settings menu>'Battery optimization'>Select Rooster app checkbox"
@@ -392,6 +394,8 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
                             }
                             .canceledOnTouchOutside(false)
                             .show()
+
+                    return true
                 }
                 Build.BRAND.toLowerCase().contains("xiaomi") -> {
                     intent.action = android.provider.Settings.ACTION_SETTINGS
@@ -419,6 +423,8 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
                             }
                             .canceledOnTouchOutside(false)
                             .show()
+
+                    return true
                 }
                 Build.BRAND.toLowerCase().contains("zte") -> {
                     intent.action = android.provider.Settings.ACTION_SETTINGS
@@ -446,6 +452,8 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
                             }
                             .canceledOnTouchOutside(false)
                             .show()
+
+                    return true
                 }
                 Build.BRAND.toLowerCase().contains("samsung") && RoosterUtils.hasNougat() -> {
                     settingsNavigationString = ""
@@ -487,9 +495,13 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
                             }
                             .canceledOnTouchOutside(false)
                             .show()
+
+                    return true
                 }
             }
         }
+
+        return false
     }
 
     private fun isIntentCallable(intent: Intent): Boolean {

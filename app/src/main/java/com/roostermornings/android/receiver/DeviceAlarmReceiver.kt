@@ -31,7 +31,7 @@ class DeviceAlarmReceiver : WakefulBroadcastReceiver() {
     @Inject lateinit var alarmController: DeviceAlarmController
     @Inject lateinit var alarmTableManager: DeviceAlarmTableManager
     @Inject
-    @Named("default") lateinit var sharedPreferences: SharedPreferences
+    @field:Named("default") lateinit var defaultSharedPrefs: SharedPreferences
     @Inject lateinit var realmAlarmFailureLog: RealmAlarmFailureLog
 
     private var alarmUid = ""
@@ -103,7 +103,8 @@ class DeviceAlarmReceiver : WakefulBroadcastReceiver() {
     }
 
     private fun setVibrate(context: Context) {
-        if (sharedPreferences.getBoolean(Constants.USER_SETTINGS_VIBRATE, false)) {
+        val vibrateEnabled = defaultSharedPrefs.getBoolean(Constants.USER_SETTINGS_VIBRATE, false)
+        if (vibrateEnabled) {
             val vibrator = context.getSystemService(VIBRATOR_SERVICE) as Vibrator
             val vibratePattern = Constants.VIBRATE_PATTERN
             val vibrateRepeat = 2

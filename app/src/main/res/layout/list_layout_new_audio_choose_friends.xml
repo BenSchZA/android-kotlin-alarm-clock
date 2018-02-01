@@ -29,6 +29,7 @@
 
         <ImageView
             android:id="@+id/new_audio_friend_profile_pic"
+            android:elevation="@dimen/cardview_default_elevation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/small_profile_pic_circle" />

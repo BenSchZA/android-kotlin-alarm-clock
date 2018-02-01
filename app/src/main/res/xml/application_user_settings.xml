@@ -9,8 +9,9 @@
     android:layout_width="match_parent"
     android:key="pref_key_user_settings"
     android:title="Settings">
-    <PreferenceCategory
+    <PreferenceScreen
         android:title="Alarm Activation"
+        android:icon="@drawable/ic_alarm_black_24dp"
         android:key="pref_key_alarm_activation_settings">
         <CheckBoxPreference
             android:key="pref_key_alarm_vibrate"
@@ -69,9 +70,10 @@ and no social roosters are received"
             android:title="Limit alarm time"
             android:defaultValue="true"
             android:persistent="true"/>
-    </PreferenceCategory>
-    <PreferenceCategory
+    </PreferenceScreen>
+    <PreferenceScreen
         android:title="User Interface"
+        android:icon="@drawable/ic_view_quilt_black_24dp"
         android:key="pref_key_user_interface">
         <CheckBoxPreference
             android:key="pref_key_24_hour_time"
@@ -88,7 +90,7 @@ and no social roosters are received"
             android:entries="@array/user_settings_day_night_theme_entries"
             android:entryValues="@array/user_settings_day_night_theme_entry_values"
             android:defaultValue="@array/user_settings_day_night_theme_default_values" />
-    </PreferenceCategory>
+    </PreferenceScreen>
     <!--<PreferenceCategory-->
         <!--android:title="Data usage"-->
         <!--android:key="pref_key_data_usage">-->
