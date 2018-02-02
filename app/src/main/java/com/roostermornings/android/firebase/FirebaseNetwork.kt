@@ -13,11 +13,10 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.roostermornings.android.BaseApplication
-import com.roostermornings.android.BaseApplication.mCurrentUser
+import com.roostermornings.android.BaseApplication.Companion.mCurrentUser
 import com.roostermornings.android.domain.database.User
 import com.roostermornings.android.domain.local.Friend
-import com.roostermornings.android.util.Constants
+import com.roostermornings.android.keys.PrefsKey
 import com.roostermornings.android.util.MyContactsController
 import com.roostermornings.android.util.StrUtils
 
@@ -103,12 +102,12 @@ object FirebaseNetwork {
             fDB.updateChildren(childUpdates)
 
             if (!nsnNumber.isBlank()) {
-                val editor = context.getSharedPreferences(Constants.SHARED_PREFS_KEY, Context.MODE_PRIVATE).edit()
-                editor.putBoolean(Constants.MOBILE_NUMBER_VALIDATED, true)
+                val editor = context.getSharedPreferences(PrefsKey.SHARED_PREFS_KEY.name, Context.MODE_PRIVATE).edit()
+                editor.putBoolean(PrefsKey.MOBILE_NUMBER_VALIDATED.name, true)
                 editor.apply()
             } else {
-                val editor = context.getSharedPreferences(Constants.SHARED_PREFS_KEY, Context.MODE_PRIVATE).edit()
-                editor.putBoolean(Constants.MOBILE_NUMBER_VALIDATED, false)
+                val editor = context.getSharedPreferences(PrefsKey.SHARED_PREFS_KEY.name, Context.MODE_PRIVATE).edit()
+                editor.putBoolean(PrefsKey.MOBILE_NUMBER_VALIDATED.name, false)
                 editor.apply()
             }
         }
@@ -204,14 +203,14 @@ object FirebaseNetwork {
                     val userCellNumber = dataSnapshot.getValue(String::class.java)
 
                     val valid: Boolean
-                    val editor = context.getSharedPreferences(Constants.SHARED_PREFS_KEY, Context.MODE_PRIVATE).edit()
+                    val editor = context.getSharedPreferences(PrefsKey.SHARED_PREFS_KEY.name, Context.MODE_PRIVATE).edit()
 
                     if (userCellNumber.isNullOrBlank()) {
-                        editor.putBoolean(Constants.MOBILE_NUMBER_VALIDATED, false)
+                        editor.putBoolean(PrefsKey.MOBILE_NUMBER_VALIDATED.name, false)
                         editor.apply()
                         valid = false
                     } else {
-                        editor.putBoolean(Constants.MOBILE_NUMBER_VALIDATED, true)
+                        editor.putBoolean(PrefsKey.MOBILE_NUMBER_VALIDATED.name, true)
                         editor.apply()
                         valid = true
 

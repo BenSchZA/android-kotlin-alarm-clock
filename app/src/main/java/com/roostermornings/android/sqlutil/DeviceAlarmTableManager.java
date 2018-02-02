@@ -41,7 +41,7 @@ public class DeviceAlarmTableManager {
     public DeviceAlarmTableManager(Context context) {
         this.context = context;
         alarm = new DeviceAlarm();
-        BaseApplication.getRoosterApplicationComponent().inject(this);
+        BaseApplication.Companion.getRoosterApplicationComponent().inject(this);
     }
 
     Boolean insertAlarm(DeviceAlarm alarm, String setId) {

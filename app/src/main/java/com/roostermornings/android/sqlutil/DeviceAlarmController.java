@@ -21,6 +21,9 @@ import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity;
 import com.roostermornings.android.domain.database.Alarm;
 import com.roostermornings.android.firebase.FirebaseNetwork;
+import com.roostermornings.android.keys.Action;
+import com.roostermornings.android.keys.Extra;
+import com.roostermornings.android.keys.NotificationID;
 import com.roostermornings.android.realm.AlarmFailureLog;
 import com.roostermornings.android.realm.RealmAlarmFailureLog;
 import com.roostermornings.android.realm.RealmScheduledSnackbar;
@@ -62,7 +65,7 @@ public final class DeviceAlarmController {
     RealmScheduledSnackbar realmManagerScheduledSnackbar;
 
     public DeviceAlarmController(Context context) {
-        BaseApplication.getRoosterApplicationComponent().inject(this);
+        BaseApplication.Companion.getRoosterApplicationComponent().inject(this);
         this.context = context;
         deviceAlarmTableManager = new DeviceAlarmTableManager(context);
     }
@@ -105,11 +108,11 @@ public final class DeviceAlarmController {
             deviceAlarm.setMillis(alarmTime);
 
             Intent alarmIntent = new Intent(context, DeviceAlarmReceiver.class);
-            alarmIntent.setAction(Constants.ACTTION_ALARMRECEIVER);
-            alarmIntent.putExtra(Constants.EXTRA_REQUESTCODE, deviceAlarm.getPiId());
-            alarmIntent.putExtra(Constants.EXTRA_UID, deviceAlarm.getSetId());
-            alarmIntent.putExtra(Constants.EXTRA_RECURRING, deviceAlarm.getRecurring());
-            alarmIntent.putExtra(Constants.EXTRA_MILLIS_SLOT, deviceAlarm.getMillis());
+            alarmIntent.setAction(Action.ALARM_RECEIVER.name());
+            alarmIntent.putExtra(Extra.REQUEST_CODE.name(), deviceAlarm.getPiId());
+            alarmIntent.putExtra(Extra.UID.name(), deviceAlarm.getSetId());
+            alarmIntent.putExtra(Extra.RECURRING.name(), deviceAlarm.getRecurring());
+            alarmIntent.putExtra(Extra.MILLIS_SLOT.name(), deviceAlarm.getMillis());
 
             PendingIntent temp  = PendingIntent.getBroadcast(context,
                     deviceAlarm.getPiId(), alarmIntent,
@@ -167,14 +170,14 @@ public final class DeviceAlarmController {
                 // If older version of android, don't require info pending intent
                 alarmMgr.setExact(AlarmManager.RTC_WAKEUP, alarmTime, alarmPendingIntent);
                 // Show alarm in the status bar
-                Intent alarmChanged = new Intent(Constants.ACTION_ALARMCHANGED);
-                alarmChanged.putExtra(Constants.EXTRA_ALARMSET, true);
+                Intent alarmChanged = new Intent(Action.ALARM_CHANGED.name());
+                alarmChanged.putExtra(Extra.ALARM_SET.name(), true);
                 context.sendBroadcast(alarmChanged);
             } else {
                 alarmMgr.set(AlarmManager.RTC_WAKEUP, alarmTime, alarmPendingIntent);
                 // Show alarm in the status bar
-                Intent alarmChanged = new Intent(Constants.ACTION_ALARMCHANGED);
-                alarmChanged.putExtra(Constants.EXTRA_ALARMSET, true);
+                Intent alarmChanged = new Intent(Action.ALARM_CHANGED.name());
+                alarmChanged.putExtra(Extra.ALARM_SET.name(), true);
                 context.sendBroadcast(alarmChanged);
             }
         }
@@ -189,10 +192,10 @@ public final class DeviceAlarmController {
         alarmCalendar.setTimeInMillis(alarmCalendar.getTimeInMillis() + Long.valueOf(sharedPreferences.getString(Constants.USER_SETTINGS_SNOOZE_TIME, "10"))*Constants.TIME_MILLIS_1_MINUTE);
 
         Intent alarmIntent = new Intent(context, DeviceAlarmReceiver.class);
-        alarmIntent.setAction(Constants.ACTTION_ALARMRECEIVER);
-        alarmIntent.putExtra(Constants.EXTRA_REQUESTCODE, 0);
-        alarmIntent.putExtra(Constants.EXTRA_UID, setId);
-        alarmIntent.putExtra(Constants.EXTRA_SNOOZE_ACTIVATION, true);
+        alarmIntent.setAction(Action.ALARM_RECEIVER.name());
+        alarmIntent.putExtra(Extra.REQUEST_CODE.name(), 0);
+        alarmIntent.putExtra(Extra.UID.name(), setId);
+        alarmIntent.putExtra(Extra.SNOOZE_ACTIVATION.name(), true);
 
         PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(context,
                 0, alarmIntent,
@@ -203,7 +206,7 @@ public final class DeviceAlarmController {
             alarmPendingIntent.cancel();
             //Clear foreground notification
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.cancel(Constants.AUDIOSERVICE_NOTIFICATION_ID);
+            notificationManager.cancel(NotificationID.AUDIO_SERVICE.ordinal());
             //Stop audio service
             context.stopService(new Intent(context, AudioService.class));
             return;
@@ -224,14 +227,14 @@ public final class DeviceAlarmController {
             //if older version of android, don't require info pending intent
             alarmMgr.setExact(AlarmManager.RTC_WAKEUP, alarmTime, alarmPendingIntent);
             // Show alarm in the status bar
-            Intent alarmChanged = new Intent(Constants.ACTION_ALARMCHANGED);
-            alarmChanged.putExtra(Constants.EXTRA_ALARMSET, true);
+            Intent alarmChanged = new Intent(Action.ALARM_CHANGED.name());
+            alarmChanged.putExtra(Extra.ALARM_SET.name(), true);
             context.sendBroadcast(alarmChanged);
         } else {
             alarmMgr.set(AlarmManager.RTC_WAKEUP, alarmTime, alarmPendingIntent);
             // Show alarm in the status bar
-            Intent alarmChanged = new Intent(Constants.ACTION_ALARMCHANGED);
-            alarmChanged.putExtra(Constants.EXTRA_ALARMSET, true);
+            Intent alarmChanged = new Intent(Action.ALARM_CHANGED.name());
+            alarmChanged.putExtra(Extra.ALARM_SET.name(), true);
             context.sendBroadcast(alarmChanged);
         }
     }

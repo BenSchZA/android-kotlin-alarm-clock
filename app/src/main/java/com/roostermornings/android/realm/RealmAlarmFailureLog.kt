@@ -14,6 +14,7 @@ import com.google.gson.ExclusionStrategy
 import com.google.gson.GsonBuilder
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity
 import com.roostermornings.android.firebase.FA
+import com.roostermornings.android.keys.PrefsKey
 import com.roostermornings.android.util.Constants
 import com.roostermornings.android.snackbar.SnackbarManager
 import io.realm.RealmObject
@@ -32,7 +33,7 @@ class RealmAlarmFailureLog(val context: Context) {
     @Inject lateinit var sharedPreferences: SharedPreferences
 
     init {
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
     }
 
     fun closeRealm() {
@@ -200,7 +201,7 @@ class RealmAlarmFailureLog(val context: Context) {
 
             //Show dialog explainer again by clearing shared pref
             val editor = sharedPreferences.edit()
-            editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false)
+            editor.putBoolean(PrefsKey.PERMISSIONS_DIALOG_OPTIMIZATION.name, false)
             editor.apply()
 
             snackbarQueueElement.text = "Your alarm didn't fire. Find out why."

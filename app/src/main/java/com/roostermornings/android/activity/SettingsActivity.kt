@@ -29,7 +29,7 @@ class SettingsActivity : BaseActivity() {
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initialize(R.layout.custom_preference_screen_layout)
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
 
         //setDayNightTheme();
 

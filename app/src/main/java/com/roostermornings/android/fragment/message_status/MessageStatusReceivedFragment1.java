@@ -23,6 +23,7 @@ import com.roostermornings.android.adapter.MessageStatusReceivedListAdapter;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.fragment.base.BaseFragment;
+import com.roostermornings.android.keys.ViewType;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.util.Constants;
@@ -73,7 +74,7 @@ public class MessageStatusReceivedFragment1 extends BaseFragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        inject(BaseApplication.getRoosterApplicationComponent());
+        inject(BaseApplication.Companion.getRoosterApplicationComponent());
 
         if (context instanceof MessageStatusReceivedFragment1.OnFragmentInteractionListener) {
             mListener = (MessageStatusReceivedFragment1.OnFragmentInteractionListener) context;
@@ -117,7 +118,7 @@ public class MessageStatusReceivedFragment1 extends BaseFragment {
         retrieveSocialAudioItems();
 
         //Log how many favourites the user has
-        if(fragmentType.equals(Constants.MESSAGE_STATUS_RECEIVED_FRAGMENT_TYPE_FAVOURITE)) {
+        if(fragmentType.equals(ViewType.MESSAGE_STATUS_RECEIVED_FRAGMENT_FAVOURITE.name())) {
             FA.SetUserProp(FA.UserProp.user_favourites.class, String.valueOf(mRoosters.size()));
         }
     }
@@ -128,7 +129,7 @@ public class MessageStatusReceivedFragment1 extends BaseFragment {
 
         Bundle bundle = getArguments();
         if (bundle != null) {
-            fragmentType = bundle.getString(Constants.MESSAGE_STATUS_RECEIVED_FRAGMENT_TYPE);
+            fragmentType = bundle.getString(ViewType.MESSAGE_STATUS_RECEIVED_FRAGMENT.name());
         }
     }
 
@@ -158,7 +159,7 @@ public class MessageStatusReceivedFragment1 extends BaseFragment {
     }
 
     private void retrieveSocialAudioItems() {
-        if(fragmentType.equals(Constants.MESSAGE_STATUS_RECEIVED_FRAGMENT_TYPE_TODAY)) {
+        if(fragmentType.equals(ViewType.MESSAGE_STATUS_RECEIVED_FRAGMENT_TODAY.name())) {
             mRoosters = audioTableManager.extractTodaySocialAudioFiles();
             mRoosters.addAll(audioTableManager.extractTodayChannelAudioFiles());
             //Sort names alphabetically before notifying adapter

@@ -7,7 +7,6 @@ package com.roostermornings.android.activity
 
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
-import android.annotation.TargetApi
 import android.content.BroadcastReceiver
 import android.content.ContentResolver
 import android.content.Intent
@@ -15,8 +14,6 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.preference.PreferenceManager
-import android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.NavigationView
@@ -35,11 +32,8 @@ import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 
 import com.afollestad.materialdialogs.MaterialDialog
-import com.crashlytics.android.Crashlytics
-import com.google.firebase.auth.FirebaseUser
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.R
 import com.roostermornings.android.activity.base.BaseActivity
@@ -48,9 +42,6 @@ import com.roostermornings.android.adapter_data.RoosterAlarmManager
 import com.roostermornings.android.custom_ui.SquareFrameLayout
 import com.roostermornings.android.dagger.RoosterApplicationComponent
 import com.roostermornings.android.domain.database.Alarm
-import com.roostermornings.android.firebase.FA
-import com.roostermornings.android.firebase.FirebaseNetwork
-import com.roostermornings.android.realm.RealmAlarmFailureLog
 import com.roostermornings.android.snackbar.SnackbarManager
 import com.roostermornings.android.sync.DownloadSyncAdapter
 import com.roostermornings.android.widgets.AlarmToggleWidget
@@ -62,19 +53,19 @@ import javax.inject.Inject
 
 import butterknife.BindView
 import butterknife.OnClick
-import com.roostermornings.android.firebase.UserMetrics
+import com.roostermornings.android.keys.Action
+import com.roostermornings.android.keys.Extra
 import com.roostermornings.android.onboarding.CustomCommandInterface
 import com.roostermornings.android.onboarding.InterfaceCommands
 import com.roostermornings.android.onboarding.ProfileCreationFragment
+import com.roostermornings.android.util.JSONPersistence
 import com.roostermornings.android.util.*
 import me.grantland.widget.AutofitTextView
 
 import com.roostermornings.android.util.Constants.AUTHORITY
-import com.roostermornings.android.util.Constants.USER_SETTINGS_VIBRATE
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 import kotlinx.android.synthetic.main.activity_navigation_drawer.*
-import kotlinx.android.synthetic.main.app_bar_navigation_drawer.*
 import kotlinx.android.synthetic.main.custom_toolbar.*
 import kotlinx.android.synthetic.main.nav_header_navigation_drawer.view.*
 
@@ -145,7 +136,7 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initialize(R.layout.activity_my_alarms)
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
 
         /** To be run only if debuggable, for safe testing */
         if(AppTesting.isDebuggable(this)) {
@@ -159,8 +150,6 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
 //                startActivityForResult(batteryOptimizationIntent, 0)
 //            }
         }
-
-        setDayNightTheme()
 
         // Final context to be used in threads
         val context = this
@@ -252,9 +241,9 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
                 }
 
                 // Clear snooze if action
-                if (Constants.ACTION_CANCEL_SNOOZE == intent.action) {
-                    if (extras?.getString(Constants.EXTRA_ALARMID)?.isNotBlank() == true) {
-                        deviceAlarmController.snoozeAlarm(extras.getString(Constants.EXTRA_ALARMID), true)
+                if (Action.CANCEL_SNOOZE.name == intent.action) {
+                    if (extras?.getString(Extra.ALARM_ID.name)?.isNotBlank() == true) {
+                        deviceAlarmController.snoozeAlarm(extras.getString(Extra.ALARM_ID.name), true)
                     }
                 }
             }
@@ -345,30 +334,34 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
     }
 
     private fun animateRefreshDownloadIndicator() {
-        val drawableDownloadIndicator = ResourcesCompat.getDrawable(resources, R.drawable.ic_cloud_download_white_24dp, null)
-        if (drawableDownloadIndicator != null) {
-            mMenu?.getItem(0)?.icon = drawableDownloadIndicator
+        // Get vector drawable, return if null
+        val drawableDownloadIndicator = ResourcesCompat.getDrawable(
+                resources,
+                R.drawable.ic_cloud_download_white_24dp,
+                null) ?: return
 
-            val animator = ObjectAnimator.ofPropertyValuesHolder(
-                    drawableDownloadIndicator,
-                    PropertyValuesHolder.ofInt("alpha", 255, 120))
-            animator.duration = 1000
-            animator.repeatCount = ObjectAnimator.INFINITE
-            animator.repeatMode = ObjectAnimator.REVERSE
-            animator.start()
-        }
+        // Get menu item icon
+        mMenu?.getItem(0)?.icon = drawableDownloadIndicator
+
+        // Animate alpha
+        val animator = ObjectAnimator.ofPropertyValuesHolder(
+                drawableDownloadIndicator,
+                PropertyValuesHolder.ofInt("alpha", 255, 120))
+
+        animator.duration = 1000
+        animator.repeatCount = ObjectAnimator.INFINITE
+        animator.repeatMode = ObjectAnimator.REVERSE
+        animator.start()
     }
 
     override fun onBackPressed() {
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
             drawer_layout.closeDrawer(GravityCompat.START)
-        } else {
-            moveTaskToBack(true)
-        }
+        } else moveTaskToBack(true)
     }
 
     private fun sortAlarms(alarms: ArrayList<Alarm>) {
-        //Take arraylist and sort by date
+        // Take arraylist and sort by date
         Collections.sort(alarms) { lhs, rhs -> lhs.millis.compareTo(rhs.millis) }
         mAdapter?.notifyDataSetChanged()
     }
@@ -381,7 +374,7 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
     fun allocateRoosterNotificationFlags(alarmId: String, roosterCount: Int) {
         mAlarms.forEach { alarm ->
             alarm.unseen_roosters = 0
-            if (alarm.getUid() == alarmId) {
+            if (alarm.uid == alarmId) {
                 alarm.unseen_roosters = roosterCount
             }
         }
@@ -450,12 +443,12 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
                 startActivity(Intent(this, SettingsActivity::class.java))
             }
             R.id.nav_signout -> {
-                if (authManager.isUserSignedIn()) {
-                    signOut()
-                } else {
+                if (authManager.isUserSignedIn()) signOut()
+                else {
                     appbar.visibility = View.GONE
 
-                    profileCreationFragment = ProfileCreationFragment.newInstance(ProfileCreationFragment.Companion.Source.HOME_PAGE)
+                    profileCreationFragment = ProfileCreationFragment.newInstance(
+                            ProfileCreationFragment.Companion.Source.HOME_PAGE)
                     supportFragmentManager.beginTransaction()
                             .replace(R.id.fillerContainer, profileCreationFragment)
                             .commit()
@@ -478,7 +471,7 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
 
     override fun onCustomCommand(command: InterfaceCommands.Companion.Command) {
         when(command) {
-            // When sign-in complete, remove fragment
+            // When sign-in complete, remove fragment and refresh nav drawer
             InterfaceCommands.Companion.Command.PROCEED -> {
                 appbar.visibility = View.VISIBLE
 
@@ -550,8 +543,8 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
     }
 
     fun editAlarm(alarmId: String) {
-        val intent = Intent(this@MyAlarmsFragmentActivity, NewAlarmFragmentActivity::class.java)
-        intent.putExtra(Constants.EXTRA_ALARMID, alarmId)
+        val intent = Intent(this, NewAlarmFragmentActivity::class.java)
+        intent.putExtra(Extra.ALARM_ID.name, alarmId)
         startActivity(intent)
     }
 }

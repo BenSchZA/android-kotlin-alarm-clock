@@ -17,43 +17,18 @@ package com.roostermornings.android.util;
  */
 
 public class Constants {
-
-    // Activity state
-    public static final String IS_ACTIVITY_FOREGROUND = "IS_ACTIVITY_FOREGROUND";
-    public static final String APP_BROUGHT_FOREGROUND = "APP_BROUGHT_FOREGROUND";
-
-    // AuthManager
-    public static final String ANONYMOUS_USER_UID = "ANONYMOUS_USER_UID";
-
-    //Adapter activityContentView types
-    public static final int VIEW_TYPE_UNKNOWN = 99;
-    public static final int VIEW_TYPE_ADD = 1;
-    public static final int VIEW_TYPE_INVITE = 2;
-    public static final int VIEW_TYPE_HEADER = 0;
-
-    //Font resources
+    // Font resources
     public final static String APP_FONT = "fonts/Nunito/Nunito-Bold.ttf";
 
-    //Broadcast receiver filters
-    public final static String FINISH_AUDIO_RECORD_ACTIVITY = "rooster.android.broadcast.filter.FINISH_AUDIO_RECORD_ACTIVITY";
-
-    //Intent actions
-    public final static String ACTION_CANCEL_SNOOZE = "rooster.android.intent.action.CANCEL_SNOOZE";
-    public final static String ACTION_SHARE_ROOSTER_CHOSEN = "rooster.android.intent.action.ACTION_SHARE_ROOSTER_CHOSEN";
-    public final static String ACTION_FROM_ROOSTER_SEND = "rooster.android.intent.action.ACTION_FROM_ROOSTER_SEND";
-
-    //AudioTable
+    // AudioTable
     public final static int AUDIO_TYPE_SOCIAL = 0;
     public final static int AUDIO_TYPE_CHANNEL = 1;
 
     public final static int AUDIO_TYPE_FAVOURITE_FALSE = 0;
     public final static int AUDIO_TYPE_FAVOURITE_TRUE = 1;
 
-    //Request codes
-    public final static int REQUEST_CODE_SHARE_ROOSTER = 1010;
-
-    //User settings
-    //These are used in application_user_settings, but ensure strings are correct
+    // User settings
+    // These are used in application_user_settings, but ensure strings are correct
     public final static String USER_SETTINGS_DAY_NIGHT_THEME  = "pref_key_day_night_theme";
     public final static String USER_SETTINGS_VIBRATE = "pref_key_alarm_vibrate";
     public final static String USER_SETTINGS_DEFAULT_TONE = "pref_key_alarm_default_tone";
@@ -68,117 +43,39 @@ public class Constants {
 
     public final static long[] VIBRATE_PATTERN = {0, 1000, 500, 1000, 500};
 
-    //Permission request codes
-    public final static int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 1;
-    public final static int MY_PERMISSIONS_REQUEST_CHANGE_PROFILE_PIC = 2;
-    public final static int MY_PERMISSIONS_REQUEST_AUDIO_RECORD = 3;
-
-    //FriendsFragmentActivity
-    public final static String FRIENDS_ACTIVITY_CURRENT_FRAGMENT = "currentFriendsFragment";
-
     public final static String ARG_SHOW_DISMISS = "ARG_SHOW_DISMISS";
 
-    //DeviceAlarmController intent actions
-    public final static String ACTTION_ALARMRECEIVER = "receiver.ALARM_RECEIVER";
-    // > display alarm icon
-    public final static String ACTION_ALARMCHANGED = "android.intent.action.ALARM_CHANGED";
-    //DeviceAlarmController intent extras
-    public final static String EXTRA_REQUESTCODE = "requestCode";
-    public final static String EXTRA_MILLIS_SLOT = "EXTRA_MILLIS_SLOT";
-    // > alarm set flag to remove alarm icon later
-    public final static String EXTRA_ALARMSET = "alarmSet";
-
-    //DeviceAlarm extras
-    public static final String EXTRA_RECURRING = "extra_recurring";
-    public static final String EXTRA_VIBRATE = "extra_vibrate";
-    public static final String EXTRA_TONE = "extra_tone";
-    public static final String EXTRA_UID = "extra_uid";
-    public static final String EXTRA_SNOOZE_ACTIVATION = "extra_snooze_activation";
-
-    //DeviceAlarmTable constants
+    // DeviceAlarmTable constants
     public static final String ALARM_CHANNEL_DOWNLOAD_FAILED = "failed";
 
-    //DeviceAlarmReceiver wakeful intent
-    public static final String DEVICE_ALARM_RECEIVER_WAKEFUL_INTENT = "DeviceAlarmReceiver.WAKEFUL_INTENT";
-
-    //Background task service intent actions
-    public static final String ACTION_DAILYTASK = "service.action.DAILY_TASK";
-
-    //AudioService intent actions
-    public final static String ACTION_ALARMDISPLAY = "rooster.update.ALARMDISPLAY";
-    public final static String ACTION_ALARMTIMESUP = "rooster.update.ALARMTIMESUP";
-    public final static String ACTION_CHANNEL_DOWNLOAD_FINISHED = "rooster.notify.CHANNEL_DOWNLOAD_FINISHED";
-    public final static String ACTION_END_AUDIO_SERVICE = "EndAudioServiceBroadcastReceiver";
-    public final static String ACTION_SNOOZE_ACTIVATION = "ActionSnoozeActivation";
-
-    //AudioService timers
+    // AudioService timers
     public final static int ALARM_DEFAULTTIME = 5 * 60 * 1000;
     public final static int AUDIOSERVICE_DOWNLOAD_TASK_LIMIT = 30 * 1000;
 
-    //NewAudio activities
-    public final static String EXTRA_LOCAL_FILE_STRING = "localFileString";
-
-    //AudioService
-    public final static String EXTRA_FRIENDS_LIST = "friendsList";
-
-    //Notification IDs
-    public final static int AUDIOSERVICE_NOTIFICATION_ID = 1000;
-    public final static int UPLOADSERVICE_NOTIFICATION_ID = 2000;
-
-    //FirebaseListenerService intent actions
-    public final static String ACTION_REQUESTNOTIFICATION = "rooster.update.REQUEST_NOTIFICATION";
-    public final static String ACTION_ROOSTERNOTIFICATION = "rooster.update.ROOSTER_NOTIFICATION";
-
-    public final static String EXTRA_SOCIAL_ROOSTERS = "socialRoosterCount";
-
-    //BaseApplication flags
-    public final static String FLAG_FRIENDREQUESTS = "friendRequests";
-    public final static String FLAG_ROOSTERCOUNT = "roosterCount";
-
-    //Intent extras
-    public final static String EXTRA_ALARMID = "alarmId";
-
-    //Shared prefs
-    public final static String SHARED_PREFS_KEY = "SHARED_PREFS_KEY";
-    //Dialog boolean to indicate viewed
-    public final static String PERMISSIONS_DIALOG_OPTIMIZATION = "permissionsDialogOptimization";
-    public final static String MOBILE_NUMBER_VALIDATED = "mobileNumberValid";
-    public final static String MOBILE_NUMBER_ENTRY_DISMISSED = "mobileNumberEntryDismissed";
-    public final static String MOBILE_NUMBER_ENTRY = "mobileNumberEntry";
-    public final static String USER_FINISHED_ONBOARDING = "USER_FINISHED_ONBOARDING";
-    public final static String USER_VIEWED_FAQS = "USER_VIEWED_FAQS";
-
-    public final static String USER_GEOHASH = "USER_GEOHASH";
-
-    //Calendar constants
+    // Calendar constants
     public final static long TIME_MILLIS_1_MINUTE = 60000;
     public final static long TIME_MILLIS_1_HOUR = 3600000;
     public final static long TIME_MILLIS_1_DAY = 86400000;
     public final static long TIME__MILLIS_1_WEEK = 604800000;
 
-    //MessageStatus Activity
+    // MessageStatus Activity
     public final static int MESSAGE_STATUS_SENT = 1;
     public final static int MESSAGE_STATUS_DELIVERED = 2;
     public final static int MESSAGE_STATUS_RECEIVED = 3;
 
-    public final static String MESSAGE_STATUS_RECEIVED_FRAGMENT_TYPE = "MESSAGE_STATUS_RECEIVED_FRAGMENT_TYPE";
-    public final static String MESSAGE_STATUS_RECEIVED_FRAGMENT_TYPE_TODAY = "MESSAGE_STATUS_RECEIVED_FRAGMENT_TYPE_TODAY";
-    public final static String MESSAGE_STATUS_RECEIVED_FRAGMENT_TYPE_FAVOURITE = "MESSAGE_STATUS_RECEIVED_FRAGMENT_TYPE_FAVOURITE";
-
-    //Storage
+    // Storage
     public final static String STORAGE_USER_PROFILE_PICTURE = "users/profile_pictures/";
 
-    //Filenames
+    // Filenames
     public final static String FILENAME_PREFIX_ROOSTER_TEMP_RECORDING = "RoosterRecording";
     public final static String FILENAME_PREFIX_ROOSTER_CONTENT = "audio";
-    public final static String FILENAME_PREFIX_ROOSTER_EXAMPLE_CONTENT = "example_clip";
 
     public final static long MAX_ROOSTER_FILE_SIZE = 8 * 1024 * 1024;
     public final static long ABSOLUTE_MAX_FILE_SIZE = 15 * 1024 * 1024;
     public final static String APP_CUMULATIVE_RX_BYTES = "APP_CUMULATIVE_RX_BYTES";
     public final static String APP_CUMULATIVE_TX_BYTES = "APP_CUMULATIVE_TX_BYTES";
 
-    //DownloadSyncService config
+    // DownloadSyncService config
     // The authority for the sync adapter's content provider
     public static final String AUTHORITY = "com.roostermornings.android.datasync.provider";
     // An account type, in the form of a domain name

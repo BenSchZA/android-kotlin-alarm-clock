@@ -46,7 +46,7 @@ class AlarmToggleWidgetDataProvider
     @Inject @field:Named("default") lateinit var defaultSharedPreferences: SharedPreferences
 
     init {
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
         mAppWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
                 AppWidgetManager.INVALID_APPWIDGET_ID)
         mAppWidgetManager = AppWidgetManager.getInstance(context)

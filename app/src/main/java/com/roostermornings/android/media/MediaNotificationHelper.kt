@@ -55,7 +55,7 @@ object MediaNotificationHelper {
     val NOTIFICATION_ID = 101
 
     init {
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
     }
 
     fun createNotification(context: Context,

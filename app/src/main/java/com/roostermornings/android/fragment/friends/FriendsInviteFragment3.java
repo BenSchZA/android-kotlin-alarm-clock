@@ -6,7 +6,6 @@
 package com.roostermornings.android.fragment.friends;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -44,6 +43,7 @@ import com.roostermornings.android.domain.node.NodeUsers;
 import com.roostermornings.android.domain.database.User;
 import com.roostermornings.android.firebase.UserMetrics;
 import com.roostermornings.android.fragment.base.BaseFragment;
+import com.roostermornings.android.keys.RequestCode;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.JSONPersistence;
 import com.roostermornings.android.util.MyContactsController;
@@ -129,7 +129,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        inject(BaseApplication.getRoosterApplicationComponent());
+        inject(BaseApplication.Companion.getRoosterApplicationComponent());
 
         addableHeader = getResources().getString(R.string.add_contacts);
         invitableHeader = getResources().getString(R.string.invite_contacts);
@@ -289,7 +289,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
 
                 ActivityCompat.requestPermissions(getActivity(),
                         new String[]{android.Manifest.permission.READ_CONTACTS},
-                        Constants.MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+                        RequestCode.PERMISSIONS_READ_CONTACTS.ordinal());
             }
         } else  {
             //If there is no internet connection, attempt to retrieve invitable contacts from persistence
@@ -473,7 +473,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
     public void retrieveContactsPermissionRetry() {
         ActivityCompat.requestPermissions(getActivity(),
                 new String[]{android.Manifest.permission.READ_CONTACTS},
-                Constants.MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+                RequestCode.PERMISSIONS_READ_CONTACTS.ordinal());
     }
 
     public void displayRequestPermissionExplainer(Boolean display) {

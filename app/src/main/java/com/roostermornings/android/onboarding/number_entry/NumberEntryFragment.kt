@@ -20,7 +20,7 @@ import com.roostermornings.android.R
 import com.roostermornings.android.dagger.RoosterApplicationComponent
 import com.roostermornings.android.firebase.FirebaseNetwork
 import com.roostermornings.android.fragment.base.BaseFragment
-import com.roostermornings.android.util.Constants
+import com.roostermornings.android.keys.PrefsKey
 import com.roostermornings.android.util.Toaster
 import javax.inject.Inject
 
@@ -52,7 +52,7 @@ class NumberEntryFragment: BaseFragment(), Validator.ValidationListener {
     }
 
     init {
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
         // Instantiate Saripaar validator to validate fields with NotEmpty annotations
         validator.setValidationListener(this)
     }
@@ -81,9 +81,9 @@ class NumberEntryFragment: BaseFragment(), Validator.ValidationListener {
 
     override fun onValidationSucceeded() {
         val editor = sharedPreferences.edit()
-        editor.putBoolean(Constants.MOBILE_NUMBER_VALIDATED, true)
+        editor.putBoolean(PrefsKey.MOBILE_NUMBER_VALIDATED.name, true)
         //If it was a popup, and number was validated, don't show again when invalidated (e.g. through profile)
-        editor.putBoolean(Constants.MOBILE_NUMBER_ENTRY_DISMISSED, true)
+        editor.putBoolean(PrefsKey.MOBILE_NUMBER_ENTRY_DISMISSED.name, true)
         editor.apply()
 
         val mobileNumberString = mobileNumber.text.toString().trim { it <= ' ' }
@@ -120,7 +120,7 @@ class NumberEntryFragment: BaseFragment(), Validator.ValidationListener {
     @OnClick(R.id.button_later)
     fun onLaterClick() {
         val editor = sharedPreferences.edit()
-        editor.putBoolean(Constants.MOBILE_NUMBER_ENTRY_DISMISSED, true)
+        editor.putBoolean(PrefsKey.MOBILE_NUMBER_ENTRY_DISMISSED.name, true)
         editor.apply()
 
         mListener?.dismissFragment()

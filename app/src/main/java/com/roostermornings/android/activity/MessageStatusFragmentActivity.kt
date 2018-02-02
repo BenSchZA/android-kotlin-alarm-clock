@@ -44,6 +44,8 @@ import com.roostermornings.android.util.FontsOverride
 import javax.inject.Inject
 
 import butterknife.BindView
+import com.roostermornings.android.keys.Action
+import com.roostermornings.android.keys.ViewType
 
 class MessageStatusFragmentActivity : BaseActivity(), MessageStatusReceivedFragment1.OnFragmentInteractionListener, MessageStatusSentFragment2.OnFragmentInteractionListener {
 
@@ -85,9 +87,8 @@ class MessageStatusFragmentActivity : BaseActivity(), MessageStatusReceivedFragm
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initialize(R.layout.activity_message_status)
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
 
-        setDayNightTheme()
         setButtonBarSelection()
 
         //Set toolbar title
@@ -193,11 +194,11 @@ class MessageStatusFragmentActivity : BaseActivity(), MessageStatusReceivedFragm
         mSectionsPagerAdapter = SectionsPagerAdapter(supportFragmentManager)
 
         val bundleFragmentToday = Bundle()
-        bundleFragmentToday.putString(Constants.MESSAGE_STATUS_RECEIVED_FRAGMENT_TYPE, Constants.MESSAGE_STATUS_RECEIVED_FRAGMENT_TYPE_TODAY)
+        bundleFragmentToday.putString(ViewType.MESSAGE_STATUS_RECEIVED_FRAGMENT.name, ViewType.MESSAGE_STATUS_RECEIVED_FRAGMENT_TODAY.name)
         messageStatusFragment1 = Fragment.instantiate(applicationContext, MessageStatusReceivedFragment1::class.java.name, bundleFragmentToday) as MessageStatusReceivedFragment1
 
         val bundleFragmentFavourite = Bundle()
-        bundleFragmentFavourite.putString(Constants.MESSAGE_STATUS_RECEIVED_FRAGMENT_TYPE, Constants.MESSAGE_STATUS_RECEIVED_FRAGMENT_TYPE_FAVOURITE)
+        bundleFragmentFavourite.putString(ViewType.MESSAGE_STATUS_RECEIVED_FRAGMENT.name, ViewType.MESSAGE_STATUS_RECEIVED_FRAGMENT_FAVOURITE.name)
         messageStatusFragment2 = Fragment.instantiate(applicationContext, MessageStatusReceivedFragment1::class.java.name, bundleFragmentFavourite) as MessageStatusReceivedFragment1
 
         messageStatusFragment3 = Fragment.instantiate(applicationContext, MessageStatusSentFragment2::class.java.name) as MessageStatusSentFragment2
@@ -207,7 +208,7 @@ class MessageStatusFragmentActivity : BaseActivity(), MessageStatusReceivedFragm
 
         //Switch to relevant tab
         when (intent?.action) {
-            Constants.ACTION_FROM_ROOSTER_SEND ->
+            Action.FROM_ROOSTER_SEND.name ->
                 //Smooth scroll to item 2 of [0,1,2]
                 mViewPager.setCurrentItem(2, true)
             else -> {}

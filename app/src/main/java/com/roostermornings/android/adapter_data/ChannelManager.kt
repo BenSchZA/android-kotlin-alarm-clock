@@ -45,7 +45,7 @@ class ChannelManager(private val context: Context) {
     lateinit var geoHashUtils: GeoHashUtils
 
     init {
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
         mChannelsReference.keepSynced(true)
         mChannelRoostersReference.keepSynced(true)
     }

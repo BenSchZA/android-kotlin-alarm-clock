@@ -29,7 +29,7 @@ class TemplateFragment : BaseFragment() {
     }
 
     init {
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
     }
 
     override fun inject(component: RoosterApplicationComponent?) {

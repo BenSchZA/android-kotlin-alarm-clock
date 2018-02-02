@@ -104,7 +104,7 @@ class SnackbarManager(val activity: Activity, val activityContentView: Coordinat
     }
 
     init {
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
 
         /** Initialize bottom sheet (snackbar dialog) and coordinator layout activityContentView references.*/
         bottomSheet = activity.findViewById(R.id.snackbarBottomsheet)

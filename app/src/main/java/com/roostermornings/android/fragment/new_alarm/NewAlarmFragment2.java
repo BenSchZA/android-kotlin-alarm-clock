@@ -95,7 +95,7 @@ public class NewAlarmFragment2 extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        inject(BaseApplication.getRoosterApplicationComponent());
+        inject(BaseApplication.Companion.getRoosterApplicationComponent());
 
         if (getArguments() != null) {
             mUserUidParam = getArguments().getString(ARG_USER_UID_PARAM);
@@ -241,7 +241,7 @@ public class NewAlarmFragment2 extends BaseFragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        inject(BaseApplication.getRoosterApplicationComponent());
+        inject(BaseApplication.Companion.getRoosterApplicationComponent());
 
         if (context instanceof IAlarmSetListener) {
             mListener = (IAlarmSetListener) context;

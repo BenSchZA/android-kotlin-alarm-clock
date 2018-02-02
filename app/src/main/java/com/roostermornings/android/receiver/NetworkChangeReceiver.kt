@@ -21,7 +21,7 @@ class NetworkChangeReceiver : BroadcastReceiver() {
     @Inject lateinit var geoHashUtils: GeoHashUtils
 
     init {
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
     }
 
     override fun onReceive(context: Context, intent: Intent) {

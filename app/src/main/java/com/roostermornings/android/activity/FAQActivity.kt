@@ -1,7 +1,6 @@
 package com.roostermornings.android.activity
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.webkit.WebSettings
 import android.webkit.WebView
@@ -13,13 +12,10 @@ import android.view.View
 import android.webkit.WebChromeClient
 import android.webkit.WebViewClient
 import kotlinx.android.synthetic.main.activity_faqs.*
-import android.widget.Toast
 import android.webkit.JavascriptInterface
 import com.crashlytics.android.Crashlytics
 import com.roostermornings.android.BaseApplication
-import com.roostermornings.android.util.Constants
-import com.roostermornings.android.util.LifeCycle
-import javax.inject.Inject
+import com.roostermornings.android.keys.PrefsKey
 
 
 /**
@@ -34,7 +30,7 @@ class FAQActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initialize(R.layout.activity_faqs)
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
 
         // Possible to have a JavaScriptInterface to enable comms
         faq_webview.addJavascriptInterface(WebViewJavaScriptInterface(this), "app")
@@ -52,7 +48,7 @@ class FAQActivity : BaseActivity() {
                 super.onPageFinished(view, url)
                 webview_progressbar.visibility = View.GONE
                 // Show that user has viewed FAQs page
-                sharedPreferences.edit().putBoolean(Constants.USER_VIEWED_FAQS, true).apply()
+                sharedPreferences.edit().putBoolean(PrefsKey.USER_VIEWED_FAQS.name, true).apply()
             }
         }
 

@@ -9,7 +9,6 @@ import android.app.SearchManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.media.AudioManager
 import android.os.Bundle
 import android.os.RemoteException
@@ -153,7 +152,7 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
         super.onCreate(savedInstanceState)
         initialize(R.layout.activity_discover)
 
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
 
         //Notify user of no internet connection
         checkInternetConnection()
@@ -164,8 +163,6 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
         //UI setup thread
         object : Thread() {
             override fun run() {
-                //Setup day/night theme selection (based on settings, and time)
-                setDayNightTheme()
                 //Set highlighting of button bar
                 setButtonBarSelection()
                 //Set toolbar title

@@ -56,7 +56,11 @@ import javax.inject.Named
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.support.v4.content.WakefulBroadcastReceiver
 import com.google.firebase.auth.FirebaseUser
+import com.roostermornings.android.keys.Action
+import com.roostermornings.android.keys.Extra
+import com.roostermornings.android.keys.NotificationID
 import com.roostermornings.android.realm.RealmAlarmFailureLog
+import com.roostermornings.android.util.JSONPersistence
 import com.roostermornings.android.util.*
 import com.roostermornings.android.util.Constants.AUDIO_TYPE_CHANNEL
 import com.roostermornings.android.util.Constants.AUDIO_TYPE_SOCIAL
@@ -196,7 +200,7 @@ class AudioService : Service() {
         super.onCreate()
         mRunning = false
 
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
 
         // Catch all uncaught exceptions
         Thread.setDefaultUncaughtExceptionHandler { _, e -> logError(e) }
@@ -234,7 +238,7 @@ class AudioService : Service() {
             }
         }
         val intentFilter = IntentFilter()
-        intentFilter.addAction(Constants.ACTION_END_AUDIO_SERVICE)
+        intentFilter.addAction(Action.END_AUDIO_SERVICE.name)
         registerReceiver(endAudioServiceBroadcastReceiver, intentFilter)
     }
 
@@ -242,7 +246,7 @@ class AudioService : Service() {
         snoozeAudioServiceBroadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 currentAlarmCycle = 1
-                startAlarmContent(intent.getStringExtra(Constants.EXTRA_ALARMID))
+                startAlarmContent(intent.getStringExtra(Extra.ALARM_ID.name))
                 // Start fullscreen alarm activation activity
                 val intentAlarmFullscreen = Intent(mThis, DeviceAlarmFullScreenActivity::class.java)
                 intentAlarmFullscreen.addFlags(FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
@@ -250,7 +254,7 @@ class AudioService : Service() {
             }
         }
         val snoozeIntentFilter = IntentFilter()
-        snoozeIntentFilter.addAction(Constants.ACTION_SNOOZE_ACTIVATION)
+        snoozeIntentFilter.addAction(Action.SNOOZE_ACTIVATION.name)
         registerReceiver(snoozeAudioServiceBroadcastReceiver, snoozeIntentFilter)
     }
 
@@ -259,7 +263,7 @@ class AudioService : Service() {
         if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method)
 
         /** Unique millis slot for Realm log */
-        millisSlot = intent?.getLongExtra(Constants.EXTRA_MILLIS_SLOT, -1L)?:-1L
+        millisSlot = intent?.getLongExtra(Extra.MILLIS_SLOT.name, -1L)?:-1L
 
         realmAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
             it.activated = true
@@ -283,19 +287,20 @@ class AudioService : Service() {
             // Start fullscreen alarm activation activity
             val intentAlarmFullscreen = Intent(mThis, DeviceAlarmFullScreenActivity::class.java)
             intentAlarmFullscreen.addFlags(FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-            intentAlarmFullscreen.putExtra(Constants.EXTRA_REQUESTCODE, intent?.getIntExtra(Constants.EXTRA_REQUESTCODE, -1))
-            intentAlarmFullscreen.putExtra(Constants.EXTRA_MILLIS_SLOT, millisSlot)
+            intentAlarmFullscreen.putExtra(Extra.REQUEST_CODE.name, intent?.getIntExtra(Extra.REQUEST_CODE.name, -1))
+            intentAlarmFullscreen.putExtra(Extra.MILLIS_SLOT.name, millisSlot)
             mThis.startActivity(intentAlarmFullscreen)
 
             // Get wakeful intent of DeviceAlarmReceiver to enable finishing it in endService()
-            wakefulIntent = intent?.getParcelableExtra(Constants.DEVICE_ALARM_RECEIVER_WAKEFUL_INTENT)
+            wakefulIntent = intent?.getParcelableExtra(Extra.WAKEFUL_INTENT.name)
             mThis.intent = intent
 
             // If no audio playing already, start audio content, or default alarm tone
             try {
                 if (!isAudioPlaying) {
-                    if (intent != null && StrUtils.notNullOrEmpty(intent.getStringExtra(Constants.EXTRA_ALARMID))) {
-                        startAlarmContent(intent.getStringExtra(Constants.EXTRA_ALARMID))
+                    if (intent != null
+                            && StrUtils.notNullOrEmpty(intent.getStringExtra(Extra.ALARM_ID.name))) {
+                        startAlarmContent(intent.getStringExtra(Extra.ALARM_ID.name))
                     } else {
                         startDefaultAlarmTone()
                     }
@@ -315,7 +320,7 @@ class AudioService : Service() {
         if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method)
 
         // Send broadcast message to notify all receivers of new data, in this case UI data
-        val intent = Intent(Constants.ACTION_ALARMDISPLAY)
+        val intent = Intent(Action.ALARM_DISPLAY.name)
         if (!defaultAlarm) {
             val bundle = Bundle()
             bundle.putSerializable("audioItem", audioItem)
@@ -917,7 +922,7 @@ class AudioService : Service() {
         if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method)
 
         // Send broadcast message to notify receiver of end of alarm to clear window hold
-        val intent = Intent(Constants.ACTION_ALARMTIMESUP)
+        val intent = Intent(Action.ALARM_TIMESUP.name)
         sendBroadcast(intent)
         snoozeAudioState()
     }
@@ -1255,13 +1260,13 @@ class AudioService : Service() {
         // Notification used to attempt to stop Android OS from killing service, and for user feedback
 
         val launchIntent = Intent(this, MyAlarmsFragmentActivity::class.java)
-        launchIntent.putExtra(Constants.EXTRA_ALARMID, alarmUid)
-        launchIntent.action = Constants.ACTION_CANCEL_SNOOZE
+        launchIntent.putExtra(Extra.ALARM_ID.name, alarmUid)
+        launchIntent.action = Action.CANCEL_SNOOZE.name
 
         val pendingIntent = PendingIntent.getActivity(this, 0,
                 launchIntent, PendingIntent.FLAG_CANCEL_CURRENT)
 
-        val broadcastIntent = Intent(Constants.ACTION_END_AUDIO_SERVICE)
+        val broadcastIntent = Intent(Action.END_AUDIO_SERVICE.name)
         val broadcastPendingIntent = PendingIntent.getBroadcast(this, 0, broadcastIntent, 0)
 
         val notification = NotificationCompat.Builder(this)
@@ -1271,15 +1276,15 @@ class AudioService : Service() {
                 .setContentIntent(pendingIntent)
                 .setDeleteIntent(broadcastPendingIntent).build()
 
-        startForeground(Constants.AUDIOSERVICE_NOTIFICATION_ID, notification)
+        startForeground(NotificationID.AUDIO_SERVICE.ordinal, notification)
     }
 
     private fun snoozeNotification(state: String) {
         // Notification used to display snooze state and clear snooze state
 
         val launchIntent = Intent(this, MyAlarmsFragmentActivity::class.java)
-        launchIntent.putExtra(Constants.EXTRA_ALARMID, alarmUid)
-        launchIntent.action = Constants.ACTION_CANCEL_SNOOZE
+        launchIntent.putExtra(Extra.ALARM_ID.name, alarmUid)
+        launchIntent.action = Action.CANCEL_SNOOZE.name
 
         val pendingIntent = PendingIntent.getActivity(this, 0,
                 launchIntent, PendingIntent.FLAG_CANCEL_CURRENT)
@@ -1294,6 +1299,6 @@ class AudioService : Service() {
         // Above not working
         notification.flags = notification.flags or Notification.FLAG_AUTO_CANCEL
 
-        startForeground(Constants.AUDIOSERVICE_NOTIFICATION_ID, notification)
+        startForeground(NotificationID.AUDIO_SERVICE.ordinal, notification)
     }
 }

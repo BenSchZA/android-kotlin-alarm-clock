@@ -38,6 +38,7 @@ import com.afollestad.materialdialogs.Theme;
 import com.roostermornings.android.R;
 import com.roostermornings.android.activity.MessageStatusFragmentActivity;
 import com.roostermornings.android.firebase.FA;
+import com.roostermornings.android.keys.ViewType;
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.FileUtils;
@@ -252,7 +253,7 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
             }
         });
 
-        if(fragmentType.equals(Constants.MESSAGE_STATUS_RECEIVED_FRAGMENT_TYPE_FAVOURITE)
+        if(fragmentType.equals(ViewType.MESSAGE_STATUS_RECEIVED_FRAGMENT_FAVOURITE.name())
                 && holder.seekBar.getVisibility() != View.VISIBLE) {
 
             String dateString;
@@ -323,7 +324,7 @@ public class MessageStatusReceivedListAdapter extends RecyclerView.Adapter<Messa
             @Override
             public void onClick(View view) {
                 if(holder.favouriteImageButton.isSelected()) {
-                    if(fragmentType.equals(Constants.MESSAGE_STATUS_RECEIVED_FRAGMENT_TYPE_FAVOURITE)) {
+                    if(fragmentType.equals(ViewType.MESSAGE_STATUS_RECEIVED_FRAGMENT_FAVOURITE.name())) {
 
                         new MaterialDialog.Builder(mActivity)
                                 .theme(Theme.LIGHT)

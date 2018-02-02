@@ -16,6 +16,7 @@ import android.widget.Toast
 
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.BuildConfig
+import com.roostermornings.android.keys.Action
 import com.roostermornings.android.sqlutil.AudioTableManager
 import com.roostermornings.android.util.Constants
 import com.roostermornings.android.util.Toaster
@@ -30,7 +31,7 @@ class BackgroundTaskReceiver : BroadcastReceiver() {
     private var alarmMgrBackgroundTask: AlarmManager? = null
 
     init {
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -41,7 +42,7 @@ class BackgroundTaskReceiver : BroadcastReceiver() {
         if (BuildConfig.DEBUG) Toaster.makeToast(context, "BackgroundTaskReceiver!", Toast.LENGTH_LONG)
 
         when (intent.action) {
-            Constants.ACTION_DAILYTASK -> {
+            Action.DAILY_BACKGROUND_TASK.name -> {
                 //Purge channel audio files that are stagnant: 1 week or older and not present in alarm set
                 audioTableManager.purgeStagnantChannelAudio()
                 //Purge social audio files that are stagnant: 1 day or older and not favourite
@@ -55,7 +56,7 @@ class BackgroundTaskReceiver : BroadcastReceiver() {
     fun scheduleBackgroundDailyTask(context: Context, start: Boolean) {
         alarmMgrBackgroundTask = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, BackgroundTaskReceiver::class.java)
-        intent.action = Constants.ACTION_DAILYTASK
+        intent.action = Action.DAILY_BACKGROUND_TASK.name
         //starts a inexact repeating background task that runs every day
         //the task runs the 'dailyTasks' method in BackgroundTaskIntentService
         val backgroundIntent = PendingIntent.getBroadcast(context, 0, intent, 0)

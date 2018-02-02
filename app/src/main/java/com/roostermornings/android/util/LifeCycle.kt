@@ -14,7 +14,6 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.Snackbar
-import android.support.v4.content.ContextCompat.startActivity
 import android.view.View
 import android.widget.Toast
 
@@ -23,16 +22,12 @@ import com.roostermornings.android.R
 import com.roostermornings.android.activity.FAQActivity
 import com.roostermornings.android.activity.NewAlarmFragmentActivity
 import com.roostermornings.android.domain.database.ChannelRooster
-import com.roostermornings.android.realm.RealmScheduledSnackbar
+import com.roostermornings.android.keys.PrefsKey
 import com.roostermornings.android.snackbar.SnackbarManager
 import com.roostermornings.android.sqlutil.AudioTableManager
-import com.roostermornings.android.sqlutil.DeviceAudioQueueItem
 import com.roostermornings.android.sync.DownloadSyncAdapter
 
 import javax.inject.Inject
-
-import com.roostermornings.android.util.Constants.USER_FINISHED_ONBOARDING
-import com.roostermornings.android.util.Constants.USER_VIEWED_FAQS
 
 /**
  * <h1>LifeCycle Class</h1>
@@ -61,7 +56,7 @@ class LifeCycle
     @Inject lateinit var connectivityUtils: ConnectivityUtils
 
     init {
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
     }
 
     /**
@@ -74,7 +69,7 @@ class LifeCycle
         return if (sharedPreferences.getBoolean(firstEntry, true)) {
             createFillerChannel()
             sharedPreferences.edit()
-                    .putBoolean(USER_FINISHED_ONBOARDING, true)
+                    .putBoolean(PrefsKey.USER_FINISHED_ONBOARDING.name, true)
                     .apply()
 
             setFirstEntry()
@@ -86,7 +81,7 @@ class LifeCycle
     }
 
     fun directUserToFAQs(overrideAlreadyViewed: Boolean, activity: Activity, coordinatorLayout: CoordinatorLayout) {
-        if(!overrideAlreadyViewed && sharedPreferences.getBoolean(USER_VIEWED_FAQS, false)) return
+        if(!overrideAlreadyViewed && sharedPreferences.getBoolean(PrefsKey.USER_VIEWED_FAQS.name, false)) return
 
         val snackbarManager = SnackbarManager(activity, coordinatorLayout)
 
@@ -104,7 +99,7 @@ class LifeCycle
                 intent.flags = FLAG_ACTIVITY_NEW_TASK
                 context.startActivity(intent)
                 sharedPreferences.edit()
-                        .putBoolean(USER_VIEWED_FAQS, true)
+                        .putBoolean(PrefsKey.USER_VIEWED_FAQS.name, true)
                         .apply()
             }
             else

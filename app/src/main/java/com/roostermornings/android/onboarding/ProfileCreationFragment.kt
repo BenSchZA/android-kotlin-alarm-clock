@@ -108,7 +108,7 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
     }
 
     init {
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
     }
 
     override fun inject(component: RoosterApplicationComponent?) {
