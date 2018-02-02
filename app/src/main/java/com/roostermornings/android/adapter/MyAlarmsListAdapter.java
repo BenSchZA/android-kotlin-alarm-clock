@@ -102,7 +102,7 @@ public class MyAlarmsListAdapter extends RecyclerView.Adapter<MyAlarmsListAdapte
         mActivity = activity;
         setHasStableIds(true);
 
-        BaseApplication.getRoosterApplicationComponent().inject(this);
+        BaseApplication.Companion.getRoosterApplicationComponent().inject(this);
     }
 
     public MyAlarmsListAdapter() {

@@ -8,8 +8,7 @@ package com.roostermornings.android.firebase;
 import android.os.Bundle;
 import android.support.annotation.Keep;
 
-import static com.roostermornings.android.BaseApplication.firebaseAnalytics;
-
+import com.roostermornings.android.BaseApplication;
 
 //FA stands for Firebase Analytics - defines relationship between Event and Param, handles analytic logging in background thread
 @Keep
@@ -196,7 +195,7 @@ public abstract class FA {
                 }
 
                 if (Prop != null) {
-                    firebaseAnalytics.setUserProperty(eventString, Prop);
+                    BaseApplication.Companion.getFirebaseAnalytics().setUserProperty(eventString, Prop);
                 }
             }
         }.run();
@@ -219,16 +218,16 @@ public abstract class FA {
                 }
 
                 if (Param == null || entry == null) {
-                    firebaseAnalytics.logEvent(eventString, null);
+                    BaseApplication.Companion.getFirebaseAnalytics().logEvent(eventString, null);
                 } else if (entry instanceof String) {
                     bundle.putString(Param, (String) entry);
-                    firebaseAnalytics.logEvent(eventString, bundle);
+                    BaseApplication.Companion.getFirebaseAnalytics().logEvent(eventString, bundle);
                 } else if (entry instanceof Integer) {
                     bundle.putInt(Param, (Integer) entry);
-                    firebaseAnalytics.logEvent(eventString, bundle);
+                    BaseApplication.Companion.getFirebaseAnalytics().logEvent(eventString, bundle);
                 } else if (entry instanceof Boolean) {
                     bundle.putBoolean(Param, (Boolean) entry);
-                    firebaseAnalytics.logEvent(eventString, bundle);
+                    BaseApplication.Companion.getFirebaseAnalytics().logEvent(eventString, bundle);
                 }
             }
         }.run();
@@ -251,7 +250,7 @@ public abstract class FA {
                 }
 
                 if(Params == null || entries == null) {
-                    firebaseAnalytics.logEvent(eventString, null);
+                    BaseApplication.Companion.getFirebaseAnalytics().logEvent(eventString, null);
                     return;
                 }
 
@@ -271,7 +270,7 @@ public abstract class FA {
                     }
                 }
                 if(bundle.isEmpty()) bundle = null;
-                firebaseAnalytics.logEvent(eventString, bundle);
+                BaseApplication.Companion.getFirebaseAnalytics().logEvent(eventString, bundle);
             }
         }.run();
     }

@@ -59,7 +59,7 @@ class OnboardingActivity: BaseActivity(), HostInterface, CustomCommandInterface 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
 
         // Set display to fullscreen
         window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,

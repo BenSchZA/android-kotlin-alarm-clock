@@ -53,8 +53,8 @@ public abstract class BaseFragment extends Fragment implements Validator.Validat
         void onValidationSucceeded();
         void onValidationFailed(List<ValidationError> errors);
         boolean checkInternetConnection();
-        NodeIHTTPClient nodeApiService();
-        GoogleIHTTPClient googleApiService();
+        NodeIHTTPClient getNodeApiService();
+        GoogleIHTTPClient getGoogleApiService();
     }
 
     public boolean checkInternetConnection() {
@@ -62,11 +62,11 @@ public abstract class BaseFragment extends Fragment implements Validator.Validat
     }
 
     public NodeIHTTPClient nodeApiService() {
-        return baseActivityListener.nodeApiService();
+        return baseActivityListener.getNodeApiService();
     }
 
     public GoogleIHTTPClient googleApiService() {
-        return baseActivityListener.googleApiService();
+        return baseActivityListener.getGoogleApiService();
     }
 
     @Override
@@ -83,7 +83,7 @@ public abstract class BaseFragment extends Fragment implements Validator.Validat
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        BaseApplication.getRoosterApplicationComponent().inject(this);
+        BaseApplication.Companion.getRoosterApplicationComponent().inject(this);
 
         getDatabaseReference();
 

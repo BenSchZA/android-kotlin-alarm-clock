@@ -36,15 +36,13 @@ import com.roostermornings.android.receiver.BackgroundTaskReceiver
 import com.roostermornings.android.sqlutil.AudioTableManager
 import com.roostermornings.android.sqlutil.DeviceAlarmController
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager
-import com.roostermornings.android.util.ConnectivityUtils
-import com.roostermornings.android.util.Constants
 import com.roostermornings.android.geolocation.GeoHashUtils
 import com.roostermornings.android.util.JSONPersistence
-import com.roostermornings.android.util.LifeCycle
-import com.roostermornings.android.util.MyContactsController
+import com.roostermornings.android.keys.PrefsKey
 import com.squareup.otto.Bus
 
 import com.roostermornings.android.sync.DownloadSyncAdapter.CreateSyncAccount
+import com.roostermornings.android.util.*
 import com.roostermornings.android.util.Constants.AUTHORITY
 
 /**
@@ -126,7 +124,7 @@ class RoosterApplicationModule//pass the base application into the constructor f
     @Provides
     @Singleton
     internal fun provideSharedPreferences(): SharedPreferences {
-        return baseApplication.getSharedPreferences(Constants.SHARED_PREFS_KEY,
+        return baseApplication.getSharedPreferences(PrefsKey.SHARED_PREFS_KEY.name,
                 Context.MODE_PRIVATE)
     }
 

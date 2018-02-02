@@ -26,7 +26,7 @@ class RealmScheduledSnackbar {
     private var realmResults: RealmResults<ScheduledSnackbar>? = null
 
     init {
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
     }
 
     fun closeRealm() {

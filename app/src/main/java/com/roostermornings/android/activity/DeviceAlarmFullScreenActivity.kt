@@ -41,6 +41,8 @@ import javax.inject.Inject
 
 import butterknife.BindView
 import butterknife.OnClick
+import com.roostermornings.android.keys.Action
+import com.roostermornings.android.keys.Extra
 import com.roostermornings.android.realm.RealmAlarmFailureLog
 import kotlinx.android.synthetic.main.activity_device_alarm_full_screen.*
 
@@ -110,7 +112,7 @@ class DeviceAlarmFullScreenActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
 
         //Used to ensure alarm shows over lock-screen
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON + WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or +WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
@@ -131,11 +133,9 @@ class DeviceAlarmFullScreenActivity : BaseActivity() {
 
         initialize(R.layout.activity_device_alarm_full_screen)
 
-        realmAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getLongExtra(Constants.EXTRA_MILLIS_SLOT, -1L)) {
+        realmAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getLongExtra(Extra.MILLIS_SLOT.name, -1L)) {
             it.seen = true
         }
-
-        setDayNightTheme()
 
         //Bind to audio service to allow playback and pausing of alarms in background
         val intent = Intent(this, AudioService::class.java)
@@ -237,7 +237,7 @@ class DeviceAlarmFullScreenActivity : BaseActivity() {
     }
 
     private fun logAlarmUIInteraction() {
-        realmAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getLongExtra(Constants.EXTRA_MILLIS_SLOT, -1L)) {
+        realmAlarmFailureLog.getAlarmFailureLogMillisSlot(intent?.getLongExtra(Extra.MILLIS_SLOT.name, -1L)) {
             it.interaction = true
         }
     }
@@ -246,15 +246,15 @@ class DeviceAlarmFullScreenActivity : BaseActivity() {
         //Flag check for UI changes on load, broadcast receiver for changes while activity running
         //Broadcast receiver filter to receive UI updates
         val intentFilter = IntentFilter()
-        intentFilter.addAction(Constants.ACTION_ALARMDISPLAY)
-        intentFilter.addAction(Constants.ACTION_ALARMTIMESUP)
+        intentFilter.addAction(Action.ALARM_DISPLAY.name)
+        intentFilter.addAction(Action.ALARM_TIMESUP.name)
 
         receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 //do something based on the intent's action
                 try {
                     when (intent.action) {
-                        Constants.ACTION_ALARMDISPLAY -> {
+                        Action.ALARM_DISPLAY.name -> {
                             //Update alarm UI based on audio service broadcast
                             audioItem = intent.extras?.getSerializable("audioItem") as DeviceAudioQueueItem
                             alarmPosition = intent.getIntExtra("alarmPosition", alarmPosition)
@@ -268,7 +268,7 @@ class DeviceAlarmFullScreenActivity : BaseActivity() {
                             //                            }
                             setAlarmUI()
                         }
-                        Constants.ACTION_ALARMTIMESUP -> {
+                        Action.ALARM_TIMESUP.name -> {
                             window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON + WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or +WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
                             finish()
                         }

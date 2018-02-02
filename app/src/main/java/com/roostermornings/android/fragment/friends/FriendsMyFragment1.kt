@@ -269,7 +269,7 @@ class FriendsMyFragment1 : BaseFragment() {
     override fun onAttach(context: Context?) {
         super.onAttach(context)
 
-        inject(BaseApplication.getRoosterApplicationComponent())
+        inject(BaseApplication.roosterApplicationComponent)
 
         if (context is OnFragmentInteractionListener) {
             mListener = context

@@ -39,6 +39,7 @@ import java.util.Calendar
 import javax.inject.Inject
 
 import butterknife.BindView
+import com.roostermornings.android.keys.Extra
 
 import com.roostermornings.android.util.Constants.AUTHORITY
 import com.roostermornings.android.util.LifeCycle
@@ -65,9 +66,7 @@ class NewAlarmFragmentActivity : BaseActivity(), IAlarmSetListener, NewAlarmFrag
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initialize(R.layout.activity_new_alarm)
-        BaseApplication.getRoosterApplicationComponent().inject(this)
-
-        setDayNightTheme()
+        BaseApplication.roosterApplicationComponent.inject(this)
 
 //        if (hasGingerbread()) {
 //            val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
@@ -95,8 +94,8 @@ class NewAlarmFragmentActivity : BaseActivity(), IAlarmSetListener, NewAlarmFrag
 
         //Static variable, so clear on new instance
         mEditAlarmId = ""
-        if (intent.extras?.containsKey(Constants.EXTRA_ALARMID) == true) {
-            mEditAlarmId = intent.extras?.getString(Constants.EXTRA_ALARMID, "")
+        if (intent.extras?.containsKey(Extra.ALARM_ID.name) == true) {
+            mEditAlarmId = intent.extras?.getString(Extra.ALARM_ID.name, "")
         }
         if (mEditAlarmId?.isEmpty() == true) {
             setupToolbar(toolbarTitle, getString(R.string.create_alarm))

@@ -14,6 +14,8 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.roostermornings.android.firebase.FA;
 import com.roostermornings.android.firebase.FirebaseNetwork;
+import com.roostermornings.android.keys.Action;
+import com.roostermornings.android.keys.Extra;
 import com.roostermornings.android.sqldata.AudioTableHelper;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
@@ -158,8 +160,8 @@ public class AudioTableManager {
     public void updateRoosterCount() {
         //Every time audio file is removed from or inserted in db, count number of social roosters for notification
         //Send broadcast message to notify all receivers of new notification
-        Intent intent = new Intent("rooster.update.ROOSTER_NOTIFICATION");
-        intent.putExtra(Constants.EXTRA_SOCIAL_ROOSTERS, countUnheardSocialAudioFiles());
+        Intent intent = new Intent(Action.ROOSTER_NOTIFICATION.name());
+        intent.putExtra(Extra.SOCIAL_ROOSTERS.name(), countUnheardSocialAudioFiles());
         context.sendBroadcast(intent);
     }
 

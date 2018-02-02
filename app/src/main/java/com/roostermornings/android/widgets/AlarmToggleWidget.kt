@@ -18,6 +18,7 @@ import com.roostermornings.android.activity.MyAlarmsFragmentActivity
 import com.roostermornings.android.activity.NewAlarmFragmentActivity
 import com.roostermornings.android.domain.database.Alarm
 import com.roostermornings.android.firebase.FirebaseNetwork
+import com.roostermornings.android.keys.Extra
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager
 import com.roostermornings.android.util.Constants
 import com.roostermornings.android.util.RoosterUtils
@@ -37,7 +38,7 @@ class AlarmToggleWidget : AppWidgetProvider() {
     @field:Named("default") lateinit var defaultSharedPreferences: SharedPreferences
 
     init {
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
     }
 
     companion object {
@@ -185,7 +186,7 @@ class AlarmToggleWidget : AppWidgetProvider() {
 
             // Create an Intent to launch Edit Alarm Activity
             val intentEditAlarmActivity = Intent(context, NewAlarmFragmentActivity::class.java)
-            intentEditAlarmActivity.putExtra(Constants.EXTRA_ALARMID, pendingAlarm.setId)
+            intentEditAlarmActivity.putExtra(Extra.ALARM_ID.name, pendingAlarm.setId)
             val pendingIntentEditAlarmActivity = PendingIntent.getActivity(context, 2, intentEditAlarmActivity, PendingIntent.FLAG_CANCEL_CURRENT)
 
             views.setOnClickPendingIntent(R.id.widget_pending_alarm_layout, pendingIntentEditAlarmActivity)

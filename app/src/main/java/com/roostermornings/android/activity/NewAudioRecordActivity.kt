@@ -46,6 +46,9 @@ import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.app.Activity
 import android.widget.*
 import com.roostermornings.android.firebase.UserMetrics
+import com.roostermornings.android.keys.Action
+import com.roostermornings.android.keys.Extra
+import com.roostermornings.android.keys.RequestCode
 import kotlinx.android.synthetic.main.content_new_audio.*
 
 class NewAudioRecordActivity : BaseActivity() {
@@ -154,9 +157,8 @@ class NewAudioRecordActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initialize(R.layout.activity_new_audio)
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
 
-        setDayNightTheme()
         setButtonBarSelection()
 
         setNewAudioStatus(NEW_AUDIO_READY_RECORD)
@@ -165,11 +167,11 @@ class NewAudioRecordActivity : BaseActivity() {
         registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 val action = intent.action
-                if (action == Constants.FINISH_AUDIO_RECORD_ACTIVITY) {
+                if (action == Action.FINISH_AUDIO_RECORD_ACTIVITY.name) {
                     finish()
                 }
             }
-        }, IntentFilter(Constants.FINISH_AUDIO_RECORD_ACTIVITY))
+        }, IntentFilter(Action.FINISH_AUDIO_RECORD_ACTIVITY.name))
     }
 
     override fun onStart() {
@@ -482,14 +484,14 @@ class NewAudioRecordActivity : BaseActivity() {
         //Manage whether audio file is being sent direct to a user or a list of users needs to be shown
         val intent = Intent(this@NewAudioRecordActivity, NewAudioFriendsActivity::class.java)
         val bun = Bundle()
-        bun.putString(Constants.EXTRA_LOCAL_FILE_STRING, mAudioSavePathInDevice)
+        bun.putString(Extra.LOCAL_FILE_STRING.name, mAudioSavePathInDevice)
 
         //If this fails (shouldn't) then user can select from list of friends rather than direct message,
         //no harm done
         try {
-            if (intent.extras?.containsKey(Constants.EXTRA_FRIENDS_LIST) == true) {
-                val mFriends = getIntent().getSerializableExtra(Constants.EXTRA_FRIENDS_LIST) as ArrayList<User>
-                bun.putSerializable(Constants.EXTRA_FRIENDS_LIST, mFriends)
+            if (intent.extras?.containsKey(Extra.FRIENDS_LIST.name) == true) {
+                val mFriends = getIntent().getSerializableExtra(Extra.FRIENDS_LIST.name) as ArrayList<User>
+                bun.putSerializable(Extra.FRIENDS_LIST.name, mFriends)
             }
         } catch (e: ClassCastException) {
             e.printStackTrace()
@@ -529,13 +531,13 @@ class NewAudioRecordActivity : BaseActivity() {
 
 
     private fun requestPermission() {
-        ActivityCompat.requestPermissions(this@NewAudioRecordActivity, arrayOf(WRITE_EXTERNAL_STORAGE, RECORD_AUDIO), Constants.MY_PERMISSIONS_REQUEST_AUDIO_RECORD)
+        ActivityCompat.requestPermissions(this@NewAudioRecordActivity, arrayOf(WRITE_EXTERNAL_STORAGE, RECORD_AUDIO), RequestCode.PERMISSIONS_AUDIO_RECORD.ordinal)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int,
                                             permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
-            Constants.MY_PERMISSIONS_REQUEST_AUDIO_RECORD -> if (grantResults.isNotEmpty()) {
+            RequestCode.PERMISSIONS_AUDIO_RECORD.ordinal -> if (grantResults.isNotEmpty()) {
                 val storagePermission = grantResults[0] == PackageManager.PERMISSION_GRANTED
                 val recordPermission = grantResults[1] == PackageManager.PERMISSION_GRANTED
 

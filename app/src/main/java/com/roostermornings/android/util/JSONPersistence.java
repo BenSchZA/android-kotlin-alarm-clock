@@ -73,7 +73,7 @@ public class JSONPersistence {
     @Inject @Named("default") SharedPreferences defaultSharedPreferences;
 
     public JSONPersistence() {
-        BaseApplication.getRoosterApplicationComponent().inject(this);
+        BaseApplication.Companion.getRoosterApplicationComponent().inject(this);
 
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(MediaBrowserCompat.MediaItem.class, new MediaItemInstanceCreator());

@@ -36,8 +36,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.roostermornings.android.BaseApplication.mCurrentUser;
-
 /**
  * Created by bscholtz on 08/03/17.
  */
@@ -234,28 +232,28 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
     //Accept friend request and update Firebase DB
     public void acceptFriendRequest(Friend acceptFriend) {
 
-        String currentUserUrl = String.format("users/%s/friends", mCurrentUser.getUid());
+        String currentUserUrl = String.format("users/%s/friends", BaseApplication.Companion.getMCurrentUser().getUid());
         String friendUserUrl = String.format("users/%s/friends", acceptFriend.getUid());
 
         //Create friend object from current signed in user
-        Friend currentUserFriend = new Friend(mCurrentUser.getUid(), mCurrentUser.getUser_name(), mCurrentUser.getProfile_pic(), mCurrentUser.getCell_number());
+        Friend currentUserFriend = new Friend(BaseApplication.Companion.getMCurrentUser().getUid(), BaseApplication.Companion.getMCurrentUser().getUser_name(), BaseApplication.Companion.getMCurrentUser().getProfile_pic(), BaseApplication.Companion.getMCurrentUser().getCell_number());
 
         //Update current user and friend entry as: uid:boolean
         Map<String, Object> childUpdates = new HashMap<>();
         childUpdates.put(acceptFriend.getUid(), true);
-        BaseApplication.getFbDbRef().getDatabase().getReference(currentUserUrl).updateChildren(childUpdates);
+        BaseApplication.Companion.getFbDbRef().getDatabase().getReference(currentUserUrl).updateChildren(childUpdates);
         childUpdates.clear();
 
         childUpdates.put(currentUserFriend.getUid(), true);
-        BaseApplication.getFbDbRef().getDatabase().getReference(friendUserUrl).updateChildren(childUpdates);
+        BaseApplication.Companion.getFbDbRef().getDatabase().getReference(friendUserUrl).updateChildren(childUpdates);
         childUpdates.clear();
 
-        String receivedUrl = String.format("friend_requests_received/%s/%s", mCurrentUser.getUid(), acceptFriend.getUid());
-        String sentUrl = String.format("friend_requests_sent/%s/%s", acceptFriend.getUid(), mCurrentUser.getUid());
+        String receivedUrl = String.format("friend_requests_received/%s/%s", BaseApplication.Companion.getMCurrentUser().getUid(), acceptFriend.getUid());
+        String sentUrl = String.format("friend_requests_sent/%s/%s", acceptFriend.getUid(), BaseApplication.Companion.getMCurrentUser().getUid());
 
         //Clear received and sent request list
-        BaseApplication.getFbDbRef().getDatabase().getReference(receivedUrl).setValue(null);
-        BaseApplication.getFbDbRef().getDatabase().getReference(sentUrl).setValue(null);
+        BaseApplication.Companion.getFbDbRef().getDatabase().getReference(receivedUrl).setValue(null);
+        BaseApplication.Companion.getFbDbRef().getDatabase().getReference(sentUrl).setValue(null);
 
         //Notify user that friend request accepted
         Toaster.makeToast(context, acceptFriend.getUser_name() + "'s friend request accepted!", Toast.LENGTH_LONG).checkTastyToast();
@@ -263,12 +261,12 @@ public class FriendsRequestListAdapter extends RecyclerView.Adapter<FriendsReque
 
     public void rejectFriendRequest(Friend rejectFriend) {
 
-        String receivedUrl = String.format("friend_requests_received/%s/%s", mCurrentUser.getUid(), rejectFriend.getUid());
-        String sentUrl = String.format("friend_requests_sent/%s/%s", rejectFriend.getUid(), mCurrentUser.getUid());
+        String receivedUrl = String.format("friend_requests_received/%s/%s", BaseApplication.Companion.getMCurrentUser().getUid(), rejectFriend.getUid());
+        String sentUrl = String.format("friend_requests_sent/%s/%s", rejectFriend.getUid(), BaseApplication.Companion.getMCurrentUser().getUid());
 
         //Clear received and sent request list
-        BaseApplication.getFbDbRef().getDatabase().getReference(receivedUrl).setValue(null);
-        BaseApplication.getFbDbRef().getDatabase().getReference(sentUrl).setValue(null);
+        BaseApplication.Companion.getFbDbRef().getDatabase().getReference(receivedUrl).setValue(null);
+        BaseApplication.Companion.getFbDbRef().getDatabase().getReference(sentUrl).setValue(null);
 
         //Notify user that friend request accepted
         Toaster.makeToast(context, rejectFriend.getUser_name() + "'s friend request rejected!", Toast.LENGTH_LONG).checkTastyToast();

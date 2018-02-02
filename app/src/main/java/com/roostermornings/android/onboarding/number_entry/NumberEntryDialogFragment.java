@@ -29,6 +29,7 @@ import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.R;
 import com.roostermornings.android.dagger.RoosterApplicationComponent;
 import com.roostermornings.android.firebase.FirebaseNetwork;
+import com.roostermornings.android.keys.PrefsKey;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.Toaster;
 
@@ -92,7 +93,7 @@ public class NumberEntryDialogFragment extends DialogFragment implements Validat
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        inject(BaseApplication.getRoosterApplicationComponent());
+        inject(BaseApplication.Companion.getRoosterApplicationComponent());
 
         if(getArguments() != null) {
             popup = getArguments().getBoolean(Constants.ARG_SHOW_DISMISS, false);
@@ -135,9 +136,9 @@ public class NumberEntryDialogFragment extends DialogFragment implements Validat
     @Override
     public void onValidationSucceeded() {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean(Constants.MOBILE_NUMBER_VALIDATED, true);
+        editor.putBoolean(PrefsKey.MOBILE_NUMBER_VALIDATED.name(), true);
         //If it was a popup, and number was validated, don't show again when invalidated (e.g. through profile)
-        if(popup) editor.putBoolean(Constants.MOBILE_NUMBER_ENTRY_DISMISSED, true);
+        if(popup) editor.putBoolean(PrefsKey.MOBILE_NUMBER_ENTRY_DISMISSED.name(), true);
         editor.apply();
 
         String mobileNumberString = mobileNumber.getText().toString().trim();
@@ -172,7 +173,7 @@ public class NumberEntryDialogFragment extends DialogFragment implements Validat
     @OnClick(R.id.button_later)
     public void onLaterClick() {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean(Constants.MOBILE_NUMBER_ENTRY_DISMISSED, true);
+        editor.putBoolean(PrefsKey.MOBILE_NUMBER_ENTRY_DISMISSED.name(), true);
         editor.apply();
 
         dismiss();

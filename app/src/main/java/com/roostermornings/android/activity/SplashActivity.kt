@@ -24,9 +24,10 @@ import com.roostermornings.android.activity.base.BaseActivity
 import com.roostermornings.android.dagger.RoosterApplicationComponent
 import com.roostermornings.android.domain.local.MinimumRequirements
 import com.roostermornings.android.firebase.UserMetrics
+import com.roostermornings.android.keys.Extra
 import com.roostermornings.android.onboarding.OnboardingActivity
+import com.roostermornings.android.keys.PrefsKey
 import com.roostermornings.android.util.Constants
-import com.roostermornings.android.util.Constants.USER_FINISHED_ONBOARDING
 import com.roostermornings.android.util.FileUtils
 import com.roostermornings.android.util.InternetHelper
 import com.roostermornings.android.util.RoosterUtils
@@ -54,7 +55,7 @@ class SplashActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
 
         // Authenticate client to give access to DB
         authManager.signInAnonymouslyIfNecessary{ uid ->
@@ -97,7 +98,7 @@ class SplashActivity : BaseActivity() {
                                     //Send audio file to friends selection activity
                                     val intent = Intent(this@SplashActivity, NewAudioFriendsActivity::class.java)
                                     val bun = Bundle()
-                                    bun.putString(Constants.EXTRA_LOCAL_FILE_STRING, shareFile.path)
+                                    bun.putString(Extra.LOCAL_FILE_STRING.name, shareFile.path)
                                     intent.putExtras(bun)
                                     startActivity(intent)
                                     return
@@ -206,7 +207,7 @@ class SplashActivity : BaseActivity() {
             finish()
         } else {
             // If the user is signed-in, skip onboarding and open app
-            if (authManager.isUserSignedIn() || sharedPrefs.getBoolean(USER_FINISHED_ONBOARDING, false)) {
+            if (authManager.isUserSignedIn() || sharedPrefs.getBoolean(PrefsKey.USER_FINISHED_ONBOARDING.name, false)) {
                 navigateToActivity(MyAlarmsFragmentActivity::class.java)
             } else {
                 navigateToActivity(OnboardingActivity::class.java)

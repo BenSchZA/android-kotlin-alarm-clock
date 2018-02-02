@@ -21,6 +21,8 @@ import com.roostermornings.android.domain.database.Channel
 import com.roostermornings.android.domain.local.GeoHashChannel
 import com.roostermornings.android.firebase.FirebaseNetwork
 import com.roostermornings.android.firebase.UserMetrics
+import com.roostermornings.android.util.JSONPersistence
+import com.roostermornings.android.keys.PrefsKey
 import com.roostermornings.android.util.*
 import retrofit.Callback
 import retrofit.Response
@@ -56,7 +58,7 @@ class GeoHashUtils(val context: Context) {
     lateinit var jsonPersistence: JSONPersistence
 
     init {
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
     }
 
     class UserGeoHashEntry {
@@ -111,7 +113,7 @@ class GeoHashUtils(val context: Context) {
         //Get user location
         val geolocationRequest = GeolocationRequest(context, false)
         val baseApplication = context.applicationContext as BaseApplication
-        val call =  baseApplication.googleAPIService.getGeolocation(context.getResources().getString(R.string.google_geolocation_api_key), geolocationRequest)
+        val call =  baseApplication.mGoogleAPIService.getGeolocation(context.getResources().getString(R.string.google_geolocation_api_key), geolocationRequest)
 
         call.enqueue(object : Callback<GeolocationAPIResult> {
             override fun onResponse(response: Response<GeolocationAPIResult>,
@@ -164,7 +166,7 @@ class GeoHashUtils(val context: Context) {
             geoHashClusterMap.maxBy { it.value }
                     ?.let {
                         val userGeoHash = it.key.geoHash
-                        sharedPreferences.edit().putString(Constants.USER_GEOHASH, userGeoHash).apply()
+                        sharedPreferences.edit().putString(PrefsKey.USER_GEOHASH.name, userGeoHash).apply()
                         FirebaseNetwork.updateProfileGeoHashLocation(userGeoHash)
                         UserMetrics.updateGeohash(userGeoHash)
                     }
@@ -172,7 +174,7 @@ class GeoHashUtils(val context: Context) {
             geoHashClusterMap.filter { it.key.mobileSource }.maxBy { it.value }
                     ?.let {
                         val userGeoHash = it.key.geoHash
-                        sharedPreferences.edit().putString(Constants.USER_GEOHASH, userGeoHash).apply()
+                        sharedPreferences.edit().putString(PrefsKey.USER_GEOHASH.name, userGeoHash).apply()
                         FirebaseNetwork.updateProfileGeoHashLocation(userGeoHash)
                         UserMetrics.updateGeohash(userGeoHash)
                     }
@@ -198,7 +200,7 @@ class GeoHashUtils(val context: Context) {
     }
 
     fun getGeoHashChannelsWithinInfluence() {
-        val geoHashUser: String = sharedPreferences.getString(Constants.USER_GEOHASH, "zzzz");
+        val geoHashUser: String = sharedPreferences.getString(PrefsKey.USER_GEOHASH.name, "zzzz")
 
         val fDB = FirebaseDatabase.getInstance().reference
         val fUser = FirebaseAuth.getInstance().currentUser

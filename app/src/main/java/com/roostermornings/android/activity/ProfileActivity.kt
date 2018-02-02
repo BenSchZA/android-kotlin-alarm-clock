@@ -24,7 +24,6 @@ import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.storage.FirebaseStorage
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.R
@@ -46,8 +45,6 @@ import java.io.FileNotFoundException
 import java.io.IOException
 import java.util.Date
 
-import javax.inject.Inject
-
 import butterknife.BindView
 import butterknife.OnClick
 import butterknife.OnTextChanged
@@ -57,6 +54,8 @@ import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.app.Activity
 import com.roostermornings.android.domain.database.User
 import com.roostermornings.android.onboarding.ProfileCreationFragment
+import com.roostermornings.android.keys.PrefsKey
+import com.roostermornings.android.keys.RequestCode
 import kotlinx.android.synthetic.main.custom_toolbar.*
 import java.text.DateFormat.getDateTimeInstance
 
@@ -85,7 +84,7 @@ class ProfileActivity : BaseActivity(), CustomCommandInterface {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initialize(R.layout.activity_profile)
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
 
         FirebaseNetwork.getRoosterUser(firebaseUser?.uid) {
             it?.let {
@@ -105,15 +104,13 @@ class ProfileActivity : BaseActivity(), CustomCommandInterface {
                     .commit()
         }
 
-        setDayNightTheme()
-
         //Set toolbar title
         val toolbar = setupToolbar(toolbarTitle, "My Profile")
         toolbar?.setNavigationIcon(R.drawable.md_nav_back)
         toolbar?.setNavigationOnClickListener { startHomeActivity() }
 
         //Set mobile number to last valid persisted entry, or to current user's number if that fails
-        val mobileNumberEntry = sharedPreferences.getString(Constants.MOBILE_NUMBER_ENTRY, mCurrentUser?.cell_number)
+        val mobileNumberEntry = sharedPreferences.getString(PrefsKey.MOBILE_NUMBER_ENTRY.name, mCurrentUser?.cell_number)
         profileMobileNumber.setText(mobileNumberEntry)
     }
 
@@ -125,7 +122,7 @@ class ProfileActivity : BaseActivity(), CustomCommandInterface {
             //Persist last valid mobile number entry
             sharedPreferences
                     .edit()
-                    .putString(Constants.MOBILE_NUMBER_ENTRY, profileMobileNumberText)
+                    .putString(PrefsKey.MOBILE_NUMBER_ENTRY.name, profileMobileNumberText)
                     .apply()
         }
     }
@@ -384,13 +381,13 @@ class ProfileActivity : BaseActivity(), CustomCommandInterface {
     }
 
     private fun requestPermission() {
-        ActivityCompat.requestPermissions(this, arrayOf(READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE), Constants.MY_PERMISSIONS_REQUEST_CHANGE_PROFILE_PIC)
+        ActivityCompat.requestPermissions(this, arrayOf(READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE), RequestCode.PERMISSIONS_CHANGE_PROFILE_PIC.ordinal)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int,
                                             permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
-            Constants.MY_PERMISSIONS_REQUEST_CHANGE_PROFILE_PIC -> {
+            RequestCode.PERMISSIONS_CHANGE_PROFILE_PIC.ordinal -> {
                 if (grantResults.isNotEmpty()) {
                     val readPermission = grantResults[0] == PackageManager.PERMISSION_GRANTED
                     val writePermission = grantResults[1] == PackageManager.PERMISSION_GRANTED

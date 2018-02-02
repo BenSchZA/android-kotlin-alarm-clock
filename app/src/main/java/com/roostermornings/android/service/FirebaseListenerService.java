@@ -17,6 +17,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.roostermornings.android.BaseApplication;
+import com.roostermornings.android.keys.Action;
+import com.roostermornings.android.keys.Flag;
 import com.roostermornings.android.util.Constants;
 
 public class FirebaseListenerService extends Service {
@@ -38,7 +40,7 @@ public class FirebaseListenerService extends Service {
         if (!mRunning) {
             mRunning = true;
             //Reset flags - NB onChildChanged called once for each child when first called
-            BaseApplication.setNotificationFlag(0, Constants.FLAG_FRIENDREQUESTS);
+            BaseApplication.Companion.setNotificationFlag(0, Flag.FRIEND_REQUESTS.name());
             //Listen for changes to Firebase user friend requests, display notification
             if (getFirebaseUser() != null) {
                 mDatabase = FirebaseDatabase.getInstance().getReference();
@@ -50,7 +52,7 @@ public class FirebaseListenerService extends Service {
                     @Override
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                         //Send broadcast message to notify all receivers of new notification
-                        Intent intent = new Intent(Constants.ACTION_REQUESTNOTIFICATION);
+                        Intent intent = new Intent(Action.REQUEST_NOTIFICATION.name());
                         sendBroadcast(intent);
                     }
 

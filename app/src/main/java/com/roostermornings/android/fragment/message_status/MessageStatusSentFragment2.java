@@ -83,7 +83,7 @@ public class MessageStatusSentFragment2 extends BaseFragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        inject(BaseApplication.getRoosterApplicationComponent());
+        inject(BaseApplication.Companion.getRoosterApplicationComponent());
 
         if (context instanceof MessageStatusSentFragment2.OnFragmentInteractionListener) {
             mListener = (MessageStatusSentFragment2.OnFragmentInteractionListener) context;

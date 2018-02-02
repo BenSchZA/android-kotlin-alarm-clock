@@ -48,9 +48,13 @@ import com.roostermornings.android.util.Constants
 import javax.inject.Inject
 
 import butterknife.BindView
+import com.roostermornings.android.keys.Action
+import com.roostermornings.android.keys.Flag
 import com.roostermornings.android.onboarding.*
 import com.roostermornings.android.onboarding.number_entry.NumberEntryFragment
 import com.roostermornings.android.onboarding.number_entry.NumberEntryListener
+import com.roostermornings.android.keys.PrefsKey
+import com.roostermornings.android.keys.RequestCode
 import com.roostermornings.android.snackbar.SnackbarManager
 import com.roostermornings.android.util.Toaster
 import kotlinx.android.synthetic.main.activity_friends.*
@@ -98,7 +102,7 @@ class FriendsFragmentActivity : BaseActivity(), FriendsMyFragment1.OnFragmentInt
 
     interface FriendsInviteListAdapterInterface {
         //Send invite to Rooster user from contact list
-        fun inviteUser(inviteFriend: Friend)
+        fun inviteUser(friend: Friend)
     }
 
     interface FriendsRequestListAdapterInterface {
@@ -115,7 +119,7 @@ class FriendsFragmentActivity : BaseActivity(), FriendsMyFragment1.OnFragmentInt
         super.onCreate(savedInstanceState)
 
         initialize(R.layout.activity_friends)
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
 
         // If the user is anonymous, show sign-up fragment
         if (!authManager.isUserSignedIn()) {
@@ -127,7 +131,6 @@ class FriendsFragmentActivity : BaseActivity(), FriendsMyFragment1.OnFragmentInt
 
         snackbarManager = SnackbarManager(this, fillerContainer)
 
-        setDayNightTheme()
         setButtonBarSelection()
 
         //Set toolbar title
@@ -174,7 +177,7 @@ class FriendsFragmentActivity : BaseActivity(), FriendsMyFragment1.OnFragmentInt
                     //Clear request notification badge
                     setTabNotification(position, false)
                     setButtonBarNotification(false)
-                    BaseApplication.setNotificationFlag(0, Constants.FLAG_FRIENDREQUESTS)
+                    BaseApplication.setNotificationFlag(0, Flag.FRIEND_REQUESTS.name)
                 }
             }
 
@@ -193,7 +196,7 @@ class FriendsFragmentActivity : BaseActivity(), FriendsMyFragment1.OnFragmentInt
 
     private var numberEntryFragment: NumberEntryFragment? = null
     private fun showNumberEntryFragment() {
-        if (!sharedPreferences.getBoolean(Constants.MOBILE_NUMBER_ENTRY_DISMISSED, false) && !sharedPreferences.getBoolean(Constants.MOBILE_NUMBER_VALIDATED, false)) {
+        if (!sharedPreferences.getBoolean(PrefsKey.MOBILE_NUMBER_ENTRY_DISMISSED.name, false) && !sharedPreferences.getBoolean(PrefsKey.MOBILE_NUMBER_ENTRY_DISMISSED.name, false)) {
             appbar.visibility = View.GONE
 
             numberEntryFragment = NumberEntryFragment.newInstance()
@@ -337,7 +340,7 @@ class FriendsFragmentActivity : BaseActivity(), FriendsMyFragment1.OnFragmentInt
                 0 -> friendsFragment1
                 1 -> {
                     if (sharedPreferences
-                            .getBoolean(Constants.MOBILE_NUMBER_VALIDATED, false))
+                            .getBoolean(PrefsKey.MOBILE_NUMBER_VALIDATED.name, false))
                         friendsFragment2
                     else NumberEntryDialogFragment()
                 }
@@ -428,19 +431,19 @@ class FriendsFragmentActivity : BaseActivity(), FriendsMyFragment1.OnFragmentInt
     private fun updateNotifications() {
         //Flag check for UI changes on load, broadcastreceiver for changes while activity running
         //If notifications waiting, display new friend request notification
-        if (BaseApplication.getNotificationFlag(Constants.FLAG_FRIENDREQUESTS) > 0) {
+        if (BaseApplication.getNotificationFlag(Flag.FRIEND_REQUESTS.name) > 0) {
             setButtonBarNotification(true)
             setTabNotification(1, true)
         }
 
         //Broadcast receiver filter to receive UI updates
         val firebaseListenerServiceFilter = IntentFilter()
-        firebaseListenerServiceFilter.addAction(Constants.ACTION_REQUESTNOTIFICATION)
+        firebaseListenerServiceFilter.addAction(Action.REQUEST_NOTIFICATION.name)
 
         receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 //do something based on the intent's action
-                if (BaseApplication.getNotificationFlag(Constants.FLAG_FRIENDREQUESTS) > 0) {
+                if (BaseApplication.getNotificationFlag(Flag.FRIEND_REQUESTS.name) > 0) {
                     setButtonBarNotification(true)
                     setTabNotification(1, true)
                     manualSwipeRefreshRequests()
@@ -479,7 +482,7 @@ class FriendsFragmentActivity : BaseActivity(), FriendsMyFragment1.OnFragmentInt
     override fun onRequestPermissionsResult(requestCode: Int,
                                             permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
-            Constants.MY_PERMISSIONS_REQUEST_READ_CONTACTS -> {
+            RequestCode.PERMISSIONS_READ_CONTACTS.ordinal -> {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     friendsFragment3?.requestPermissionReadContacts()

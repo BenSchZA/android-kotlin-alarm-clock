@@ -37,6 +37,8 @@ import com.roostermornings.android.adapter_data.ChannelManager;
 import com.roostermornings.android.domain.database.Channel;
 import com.roostermornings.android.domain.database.ChannelRooster;
 import com.roostermornings.android.domain.database.SocialRooster;
+import com.roostermornings.android.keys.Action;
+import com.roostermornings.android.keys.Flag;
 import com.roostermornings.android.sqlutil.AudioTableManager;
 import com.roostermornings.android.sqlutil.DeviceAlarm;
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager;
@@ -117,7 +119,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
     public DownloadSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
 
-        BaseApplication.getRoosterApplicationComponent().inject(this);
+        BaseApplication.Companion.getRoosterApplicationComponent().inject(this);
 
         /*
          * If your app uses a content resolver, get an instance of it
@@ -157,7 +159,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
             ContentProviderClient provider,
             SyncResult syncResult) {
 
-        BaseApplication.getRoosterApplicationComponent().inject(this);
+        BaseApplication.Companion.getRoosterApplicationComponent().inject(this);
 
         /*
          * Put the data transfer code here.
@@ -170,7 +172,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
             retrieveChannelContentData(getApplicationContext());
 
             //Update badge count for roosters received
-            BaseActivity.Companion.setBadge(getApplicationContext(), BaseApplication.getNotificationFlag(Constants.FLAG_ROOSTERCOUNT));
+            BaseActivity.Companion.setBadge(getApplicationContext(), BaseApplication.Companion.getNotificationFlag(Flag.ROOSTER_COUNT.name()));
             audioTableManager.updateRoosterCount();
 
             //Check if the user's geohash location entry is still valid
@@ -462,7 +464,7 @@ public class DownloadSyncAdapter extends AbstractThreadedSyncAdapter {
                         Crashlytics.logException(new Throwable("Sync Adapter Channel Download Report"));
 
                         //Send broadcast message to notify all receivers of download finished
-                        Intent intent = new Intent(Constants.ACTION_CHANNEL_DOWNLOAD_FINISHED);
+                        Intent intent = new Intent(Action.CHANNEL_DOWNLOAD_FINISHED.name());
                         getApplicationContext().sendBroadcast(intent);
 
                         //Notify any listeners

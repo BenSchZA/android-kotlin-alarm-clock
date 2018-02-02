@@ -39,7 +39,7 @@ class RoosterAlarmManager(val context: Context) {
     var firebaseUser: FirebaseUser? = null
 
     init {
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
     }
 
     @Inject

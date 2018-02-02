@@ -92,7 +92,7 @@ class MediaService : MediaBrowserServiceCompat(),
     private val mWiFiLock: WifiManager.WifiLock? by lazy { (this.getSystemService(Context.WIFI_SERVICE) as WifiManager?)?.createWifiLock(WifiManager.WIFI_MODE_FULL, "RadiophonyLock")  }
 
     init {
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

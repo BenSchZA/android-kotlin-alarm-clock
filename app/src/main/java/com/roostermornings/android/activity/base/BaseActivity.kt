@@ -20,7 +20,6 @@ import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.design.widget.TextInputEditText
 import android.support.design.widget.TextInputLayout
-import android.support.v4.content.res.ResourcesCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.util.Log
@@ -52,8 +51,6 @@ import com.roostermornings.android.sqlutil.AudioTableManager
 import com.roostermornings.android.sqlutil.DeviceAlarmController
 import com.roostermornings.android.sqlutil.DeviceAlarmTableManager
 
-import java.util.Calendar
-
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -66,10 +63,13 @@ import com.google.firebase.auth.FirebaseUser
 import com.roostermornings.android.activity.*
 import com.roostermornings.android.firebase.FA
 import com.roostermornings.android.firebase.FirebaseNetwork
+import com.roostermornings.android.keys.Action
+import com.roostermornings.android.keys.Flag
 import com.roostermornings.android.realm.RealmAlarmFailureLog
 import com.roostermornings.android.service.ForegroundService
+import com.roostermornings.android.util.JSONPersistence
+import com.roostermornings.android.keys.PrefsKey
 import com.roostermornings.android.util.*
-import com.roostermornings.android.util.Constants.APP_BROUGHT_FOREGROUND
 
 import com.roostermornings.android.util.Constants.AUTHORITY
 
@@ -123,8 +123,13 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
 
     public override fun onResume() {
         super.onResume()
+
+        // Setup day/night theme selection (based on settings, and time)
+        val themeManager = ThemeManager(this)
+        themeManager.setDayNightTheme(defaultSharedPreferences)
+
         sharedPreferences.edit()
-                .putBoolean(Constants.IS_ACTIVITY_FOREGROUND, true)
+                .putBoolean(PrefsKey.IS_ACTIVITY_FOREGROUND.name, true)
                 .apply()
 
         /*The foreground receiver is intended to run methods once on app launch,
@@ -135,26 +140,23 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
             }
         }
         val foregroundIntentFilter = IntentFilter()
-        foregroundIntentFilter.addAction(APP_BROUGHT_FOREGROUND)
+        foregroundIntentFilter.addAction(PrefsKey.APP_BROUGHT_FOREGROUND.name)
 
         registerReceiver(foregroundReceiver, foregroundIntentFilter)
 
         startService(Intent(this, ForegroundService::class.java))
-
-        if(this is MyAlarmsFragmentActivity) {
-            // Check if first entry
-            lifeCycle.performInception()
-        }
     }
 
     public override fun onPause() {
         super.onPause()
         sharedPreferences.edit()
-                .putBoolean(Constants.IS_ACTIVITY_FOREGROUND, false)
+                .putBoolean(PrefsKey.IS_ACTIVITY_FOREGROUND.name, false)
                 .apply()
     }
 
     private fun performOnceOnForeground() {
+        // Check if first entry
+        lifeCycle.performInception()
         // Log last seen in user metrics, to enable clearing stagnant data
         UserMetrics.updateLastSeen()
         // Log active day
@@ -195,7 +197,7 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
         super.onCreate(savedInstanceState)
 
         // Inject Dagger dependencies
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
 
         // Set default application settings preferences - don't overwrite existing if false
         setPreferenceManagerDefaultSettings(false)
@@ -245,14 +247,14 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
         ButterKnife.bind(this)
     }
 
-    override fun nodeApiService(): NodeIHTTPClient {
+    override fun getNodeApiService(): NodeIHTTPClient {
         val baseApplication = application as BaseApplication
-        return baseApplication.nodeAPIService
+        return baseApplication.mNodeAPIService
     }
 
-    override fun googleApiService(): GoogleIHTTPClient {
+    override fun getGoogleApiService(): GoogleIHTTPClient {
         val baseApplication = application as BaseApplication
-        return baseApplication.googleAPIService
+        return baseApplication.mGoogleAPIService
     }
 
     override fun onValidationSucceeded() {}
@@ -290,7 +292,7 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
         // and necessary signout procedure performed
         authManager.signOut()
 
-        //Go to splash activity and onboarding
+        // Go to splash activity and onboarding
         val intent = Intent(this@BaseActivity, SplashActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
@@ -311,7 +313,7 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
     }
 
     private fun clearJSONPersistence() {
-        //Clear specific persistent collections from shared prefs
+        // Clear specific persistent collections from shared prefs
         val editor = defaultSharedPreferences.edit()
 
         editor
@@ -325,15 +327,18 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
 
     private fun isServiceRunning(serviceClass: Class<*>): Boolean {
         val manager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-        return manager.getRunningServices(Integer.MAX_VALUE).any { serviceClass.name == it.service.className }
+        return manager.getRunningServices(Integer.MAX_VALUE).any {
+            serviceClass.name == it.service.className
+        }
     }
 
     fun requestPermissionIgnoreBatteryOptimization(context: Context): Boolean {
-        if (!sharedPreferences.getBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false)
+        if (!sharedPreferences.getBoolean(PrefsKey.PERMISSIONS_DIALOG_OPTIMIZATION.name, false)
                 && (Build.BRAND.toLowerCase().contains("huawei")
                 || Build.BRAND.toLowerCase().contains("sony")
                 || Build.BRAND.toLowerCase().contains("xiaomi")
-                || Build.BRAND.toLowerCase().contains("samsung"))) {
+                || Build.BRAND.toLowerCase().contains("samsung")
+                || Build.BRAND.toLowerCase().contains("zte"))) {
             Log.d("Brand: ", Build.BRAND)
 
             // Set instructions and settings intent
@@ -361,13 +366,13 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
                             .negativeText(R.string.later)
                             .onPositive { _, _ ->
                                 val editor = sharedPreferences.edit()
-                                editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, true)
+                                editor.putBoolean(PrefsKey.PERMISSIONS_DIALOG_OPTIMIZATION.name, true)
                                 editor.apply()
                                 startActivityForResult(intent, 0)
                             }
                             .onNegative { _, _ ->
                                 val editor = sharedPreferences.edit()
-                                editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false)
+                                editor.putBoolean(PrefsKey.PERMISSIONS_DIALOG_OPTIMIZATION.name, false)
                                 editor.apply()
                                 startHomeActivity()
                             }
@@ -389,7 +394,7 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
                             .positiveText("Got it")
                             .onPositive { _, _ ->
                                 val editor = sharedPreferences.edit()
-                                editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, true)
+                                editor.putBoolean(PrefsKey.PERMISSIONS_DIALOG_OPTIMIZATION.name, true)
                                 editor.apply()
                             }
                             .canceledOnTouchOutside(false)
@@ -411,13 +416,13 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
                             .negativeText(R.string.later)
                             .onPositive { _, _ ->
                                 val editor = sharedPreferences.edit()
-                                editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, true)
+                                editor.putBoolean(PrefsKey.PERMISSIONS_DIALOG_OPTIMIZATION.name, true)
                                 editor.apply()
                                 startActivityForResult(intent, 0)
                             }
                             .onNegative { _, _ ->
                                 val editor = sharedPreferences.edit()
-                                editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false)
+                                editor.putBoolean(PrefsKey.PERMISSIONS_DIALOG_OPTIMIZATION.name, false)
                                 editor.apply()
                                 startHomeActivity()
                             }
@@ -440,13 +445,13 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
                             .negativeText(R.string.later)
                             .onPositive { _, _ ->
                                 val editor = sharedPreferences.edit()
-                                editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, true)
+                                editor.putBoolean(PrefsKey.PERMISSIONS_DIALOG_OPTIMIZATION.name, true)
                                 editor.apply()
                                 startActivityForResult(intent, 0)
                             }
                             .onNegative { _, _ ->
                                 val editor = sharedPreferences.edit()
-                                editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false)
+                                editor.putBoolean(PrefsKey.PERMISSIONS_DIALOG_OPTIMIZATION.name, false)
                                 editor.apply()
                                 startHomeActivity()
                             }
@@ -483,13 +488,13 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
                             .negativeText(R.string.later)
                             .onPositive { _, _ ->
                                 val editor = sharedPreferences.edit()
-                                editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, true)
+                                editor.putBoolean(PrefsKey.PERMISSIONS_DIALOG_OPTIMIZATION.name, true)
                                 editor.apply()
                                 startActivityForResult(intent, 0)
                             }
                             .onNegative { _, _ ->
                                 val editor = sharedPreferences.edit()
-                                editor.putBoolean(Constants.PERMISSIONS_DIALOG_OPTIMIZATION, false)
+                                editor.putBoolean(PrefsKey.PERMISSIONS_DIALOG_OPTIMIZATION.name, false)
                                 editor.apply()
                                 startHomeActivity()
                             }
@@ -568,7 +573,7 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
                 (this as? MyAlarmsFragmentActivity)?.clearRoosterNotificationFlags()
                 setButtonBarNotification(R.id.notification_roosters, true)
             } else {
-                (this as? MyAlarmsFragmentActivity)?.allocateRoosterNotificationFlags(deviceAlarm.setId, roosterCount!!)
+                (this as? MyAlarmsFragmentActivity)?.allocateRoosterNotificationFlags(deviceAlarm.setId, roosterCount)
             }
         }
 
@@ -584,22 +589,21 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
             }
         }
         registerReceiver(roosterNotificationReceiver,
-                IntentFilter(Constants.ACTION_ROOSTERNOTIFICATION))
+                IntentFilter(Action.ROOSTER_NOTIFICATION.name))
     }
 
     fun updateRequestNotification() {
         // Flag check for UI changes on load, broadcastreceiver for changes while activity running
         // If notifications waiting, display new friend request notification
-        if (BaseApplication.getNotificationFlag(Constants.FLAG_FRIENDREQUESTS) > 0)
+        if (BaseApplication.getNotificationFlag(Flag.FRIEND_REQUESTS.name) > 0)
             setButtonBarNotification(R.id.notification_friends, true)
 
         // Broadcast receiver to receive UI updates
         requestNotificationReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
-                //do something based on the intent's action
                 try {
                     when (intent.action) {
-                        Constants.ACTION_REQUESTNOTIFICATION -> setButtonBarNotification(R.id.notification_friends, true)
+                        Action.REQUEST_NOTIFICATION.name -> setButtonBarNotification(R.id.notification_friends, true)
                         else -> {}
                     }
                 } catch (e: RuntimeException) {
@@ -607,7 +611,7 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
                 }
             }
         }
-        registerReceiver(requestNotificationReceiver, IntentFilter(Constants.ACTION_REQUESTNOTIFICATION))
+        registerReceiver(requestNotificationReceiver, IntentFilter(Action.REQUEST_NOTIFICATION.name))
     }
 
     override fun onDestroy() {
@@ -641,61 +645,6 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
             else -> return false
         }
         return true
-    }
-
-    fun setDayNightTheme(): Boolean {
-        val calendar = Calendar.getInstance()
-
-        val dayNightThemeArrayEntries = resources.getStringArray(R.array.user_settings_day_night_theme_entry_values)
-        val dayNightThemeSetting = defaultSharedPreferences.getString(Constants.USER_SETTINGS_DAY_NIGHT_THEME, "")
-
-        when(dayNightThemeSetting) {
-            // Automatic theme
-            dayNightThemeArrayEntries[0] -> {
-                if (calendar.get(Calendar.HOUR_OF_DAY) >= 18 || calendar.get(Calendar.HOUR_OF_DAY) < 7) {
-                    return setThemeNight()
-                } else if (calendar.get(Calendar.HOUR_OF_DAY) >= 7) {
-                    return setThemeDay()
-                }
-            }
-            // Day theme
-            dayNightThemeArrayEntries[1] -> return setThemeDay()
-            // Night theme
-            dayNightThemeArrayEntries[2] -> return setThemeNight()
-            // Automatic theme
-            else -> {
-                if (calendar.get(Calendar.HOUR_OF_DAY) >= 18 || calendar.get(Calendar.HOUR_OF_DAY) < 7) {
-                    return setThemeNight()
-                } else if (calendar.get(Calendar.HOUR_OF_DAY) >= 7) {
-                    return setThemeDay()
-                }
-            }
-        }
-        return false
-    }
-
-    private fun setThemeDay(): Boolean {
-        return try {
-            findViewById<View>(R.id.main_content)?.isSelected = false
-            findViewById<View>(R.id.toolbar)?.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.rooster_blue, null))
-            findViewById<View>(R.id.tabs)?.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.rooster_blue, null))
-            true
-        } catch (e: NullPointerException) {
-            e.printStackTrace()
-            false
-        }
-    }
-
-    private fun setThemeNight(): Boolean {
-        return try {
-            findViewById<View>(R.id.main_content)?.isSelected = true
-            findViewById<View>(R.id.toolbar)?.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.rooster_dark_blue, null))
-            findViewById<View>(R.id.tabs)?.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.rooster_dark_blue, null))
-            true
-        } catch (e: NullPointerException) {
-            e.printStackTrace()
-            false
-        }
     }
 
     companion object {

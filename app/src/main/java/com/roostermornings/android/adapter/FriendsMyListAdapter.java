@@ -34,6 +34,7 @@ import com.roostermornings.android.activity.FriendsFragmentActivity;
 import com.roostermornings.android.activity.NewAudioRecordActivity;
 import com.roostermornings.android.activity.base.BaseActivity;
 import com.roostermornings.android.domain.database.User;
+import com.roostermornings.android.keys.Extra;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.StrUtils;
@@ -164,7 +165,7 @@ public class FriendsMyListAdapter extends RecyclerView.Adapter<FriendsMyListAdap
                 friendToSend.add(user);
                 Intent intent = new Intent(mActivity, NewAudioRecordActivity.class);
                 Bundle bun = new Bundle();
-                bun.putSerializable(Constants.EXTRA_FRIENDS_LIST, friendToSend);
+                bun.putSerializable(Extra.FRIENDS_LIST.name(), friendToSend);
                 intent.putExtras(bun);
                 mActivity.startActivity(intent);
             }

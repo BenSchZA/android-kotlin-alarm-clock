@@ -22,7 +22,6 @@ import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.Toast
 
-import com.google.firebase.auth.FirebaseUser
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.BuildConfig
 import com.roostermornings.android.R
@@ -40,6 +39,8 @@ import javax.inject.Inject
 
 import butterknife.BindView
 import butterknife.OnClick
+import com.roostermornings.android.keys.Action
+import com.roostermornings.android.keys.Extra
 import com.roostermornings.android.util.*
 import retrofit.Callback
 import retrofit.Response
@@ -97,10 +98,9 @@ class NewAudioFriendsActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initialize(R.layout.activity_new_audio_friends)
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
 
         setupToolbar(null, null)
-        setDayNightTheme()
 
         selectAllButton.isSelected = false
 
@@ -120,7 +120,7 @@ class NewAudioFriendsActivity : BaseActivity() {
 
         //Load intent extras
         extras = intent.extras
-        localFileString = extras?.getString(Constants.EXTRA_LOCAL_FILE_STRING)
+        localFileString = extras?.getString(Extra.LOCAL_FILE_STRING.name)
 
         connectivity.isActive(makeToast = true) { active ->
             if(active) {
@@ -128,10 +128,10 @@ class NewAudioFriendsActivity : BaseActivity() {
                 mRecyclerView.layoutManager = LinearLayoutManager(this@NewAudioFriendsActivity)
                 mRecyclerView.adapter = mAdapter
 
-                if (extras?.containsKey(Constants.EXTRA_FRIENDS_LIST) == true) {
+                if (extras?.containsKey(Extra.FRIENDS_LIST.name) == true) {
 
                     @Suppress("UNCHECKED_CAST")
-                    val tempUsers = extras?.getSerializable(Constants.EXTRA_FRIENDS_LIST) as ArrayList<User>
+                    val tempUsers = extras?.getSerializable(Extra.FRIENDS_LIST.name) as ArrayList<User>
                     tempUsers.forEach { it.selected = true }
 
                     mFriends.clear()
@@ -203,10 +203,10 @@ class NewAudioFriendsActivity : BaseActivity() {
 
         //Switch to message status activity, set action to change to relevant tab
         val roostersSentIntent = Intent(this, MessageStatusFragmentActivity::class.java)
-        roostersSentIntent.action = Constants.ACTION_FROM_ROOSTER_SEND
+        roostersSentIntent.action = Action.FROM_ROOSTER_SEND.name
         startActivity(roostersSentIntent)
 
-        sendBroadcast(Intent(Constants.FINISH_AUDIO_RECORD_ACTIVITY))
+        sendBroadcast(Intent(Action.FINISH_AUDIO_RECORD_ACTIVITY.name))
     }
 
     private fun retrieveMyFriends() {
@@ -222,7 +222,7 @@ class NewAudioFriendsActivity : BaseActivity() {
             return
         }
 
-        val call = nodeApiService().retrieveUserFriends(firebaseIdToken!!)
+        val call = getNodeApiService().retrieveUserFriends(firebaseIdToken!!)
         call.enqueue(object : Callback<Users> {
             override fun onResponse(response: Response<Users>,
                                     retrofit: Retrofit) {

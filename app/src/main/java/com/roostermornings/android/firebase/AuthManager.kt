@@ -16,6 +16,7 @@ import com.google.firebase.auth.*
 import com.google.firebase.iid.FirebaseInstanceId
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.firebase.FirebaseNetwork.createOrUpdateRoosterUser
+import com.roostermornings.android.keys.PrefsKey
 import com.roostermornings.android.onboarding.OnboardingActivity
 import com.roostermornings.android.onboarding.ProfileCreationFragment
 import com.roostermornings.android.util.ConnectivityUtils
@@ -38,7 +39,7 @@ class AuthManager(val context: Context) {
     lateinit var conUtils: ConnectivityUtils
 
     init {
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
     }
 
     internal companion object {
@@ -84,20 +85,20 @@ class AuthManager(val context: Context) {
     }
 
     fun getPersistedAnonymousUID(): String? {
-        return sharedPrefs.getString(Constants.ANONYMOUS_USER_UID, null)
+        return sharedPrefs.getString(PrefsKey.ANONYMOUS_USER_UID.name, null)
     }
 
     private fun persistAnonymousUID(firebaseUser: FirebaseUser?) {
         if(firebaseUser?.isAnonymous == true) {
             sharedPrefs.edit()
-                    .putString(Constants.ANONYMOUS_USER_UID, firebaseUser.uid)
+                    .putString(PrefsKey.ANONYMOUS_USER_UID.name, firebaseUser.uid)
                     .apply()
         }
     }
 
     private fun clearPersistedAnonymousUID() {
         sharedPrefs.edit()
-                .remove(Constants.ANONYMOUS_USER_UID)
+                .remove(PrefsKey.ANONYMOUS_USER_UID.name)
                 .apply()
     }
 

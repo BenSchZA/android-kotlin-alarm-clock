@@ -23,6 +23,8 @@ import javax.inject.Named
 
 import android.content.Context.VIBRATOR_SERVICE
 import com.facebook.FacebookSdk.getApplicationContext
+import com.roostermornings.android.keys.Action
+import com.roostermornings.android.keys.Extra
 import com.roostermornings.android.realm.RealmAlarmFailureLog
 import java.util.*
 
@@ -41,36 +43,36 @@ class DeviceAlarmReceiver : WakefulBroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
 
-        BaseApplication.getRoosterApplicationComponent().inject(this)
+        BaseApplication.roosterApplicationComponent.inject(this)
 
         // Get extras passed in from DeviceAlarmController class
-        val isSnoozeActivation = intent.getBooleanExtra(Constants.EXTRA_SNOOZE_ACTIVATION, false)
-        isRecurring = intent.getBooleanExtra(Constants.EXTRA_RECURRING, false)
-        alarmUid = intent.getStringExtra(Constants.EXTRA_UID)
-        requestCode = intent.getIntExtra(Constants.EXTRA_REQUESTCODE, -1)
-        millisSlot = intent.getLongExtra(Constants.EXTRA_MILLIS_SLOT, -1L)
+        val isSnoozeActivation = intent.getBooleanExtra(Extra.SNOOZE_ACTIVATION.name, false)
+        isRecurring = intent.getBooleanExtra(Extra.RECURRING.name, false)
+        alarmUid = intent.getStringExtra(Extra.UID.name)
+        requestCode = intent.getIntExtra(Extra.REQUEST_CODE.name, -1)
+        millisSlot = intent.getLongExtra(Extra.MILLIS_SLOT.name, -1L)
 
         //Check if vibrator enabled in user settings
         setVibrate(context)
 
         if (isSnoozeActivation) {
             //Activate snooze alarm
-            val broadcastIntent = Intent(Constants.ACTION_SNOOZE_ACTIVATION)
-            broadcastIntent.putExtra(Constants.EXTRA_ALARMID, alarmUid)
-            broadcastIntent.putExtra(Constants.DEVICE_ALARM_RECEIVER_WAKEFUL_INTENT, Intent(context, DeviceAlarmReceiver::class.java))
-            broadcastIntent.putExtra(Constants.EXTRA_REQUESTCODE, requestCode)
+            val broadcastIntent = Intent(Action.SNOOZE_ACTIVATION.name)
+            broadcastIntent.putExtra(Extra.ALARM_ID.name, alarmUid)
+            broadcastIntent.putExtra(Extra.WAKEFUL_INTENT.name, Intent(context, DeviceAlarmReceiver::class.java))
+            broadcastIntent.putExtra(Extra.REQUEST_CODE.name, requestCode)
             context.sendBroadcast(broadcastIntent)
             return
         }
 
         //Start audio service with alarm UID
         val audioServiceIntent = Intent(context, AudioService::class.java)
-        audioServiceIntent.putExtra(Constants.EXTRA_ALARMID, alarmUid)
+        audioServiceIntent.putExtra(Extra.ALARM_ID.name, alarmUid)
         //Include intent to enable finishing wakeful intent later in AudioService
-        audioServiceIntent.putExtra(Constants.DEVICE_ALARM_RECEIVER_WAKEFUL_INTENT, Intent(context, DeviceAlarmReceiver::class.java))
-        audioServiceIntent.putExtra(Constants.EXTRA_REQUESTCODE, requestCode)
+        audioServiceIntent.putExtra(Extra.WAKEFUL_INTENT.name, Intent(context, DeviceAlarmReceiver::class.java))
+        audioServiceIntent.putExtra(Extra.REQUEST_CODE.name, requestCode)
         // Put millis slot as extra, to refer to when accessing Realm log
-        audioServiceIntent.putExtra(Constants.EXTRA_MILLIS_SLOT, millisSlot)
+        audioServiceIntent.putExtra(Extra.MILLIS_SLOT.name, millisSlot)
 
         if (RoosterUtils.hasO()) {
             context.startForegroundService(audioServiceIntent)

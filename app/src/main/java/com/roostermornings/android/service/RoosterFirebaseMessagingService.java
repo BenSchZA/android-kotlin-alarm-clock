@@ -45,7 +45,7 @@ public class RoosterFirebaseMessagingService extends FirebaseMessagingService {
 // [START receive_message]
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
-        BaseApplication.getRoosterApplicationComponent().inject(this);
+        BaseApplication.Companion.getRoosterApplicationComponent().inject(this);
 
         // [START_EXCLUDE]
         // There are two types of messages data messages and notification messages. Data messages are handled

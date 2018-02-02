@@ -40,6 +40,8 @@ import com.roostermornings.android.domain.node.NodeAPIResult;
 import com.roostermornings.android.domain.database.SocialRooster;
 import com.roostermornings.android.domain.database.User;
 import com.roostermornings.android.apis.NodeIHTTPClient;
+import com.roostermornings.android.keys.Extra;
+import com.roostermornings.android.keys.NotificationID;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.RoosterUtils;
 import com.roostermornings.android.util.Toaster;
@@ -97,7 +99,7 @@ public class UploadService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        BaseApplication.getRoosterApplicationComponent().inject(this);
+        BaseApplication.Companion.getRoosterApplicationComponent().inject(this);
 
         foregroundNotification("Audio upload in progress");
 
@@ -111,9 +113,9 @@ public class UploadService extends Service {
             public void handleMessage(Message msg) {
                 // Process received messages here!
                 Bundle uploadData = msg.getData();
-                mAudioSavePathInDevice = uploadData.getString(Constants.EXTRA_LOCAL_FILE_STRING);
+                mAudioSavePathInDevice = uploadData.getString(Extra.LOCAL_FILE_STRING.name());
                 try {
-                    friendsList = (ArrayList<User>) uploadData.getSerializable(Constants.EXTRA_FRIENDS_LIST);
+                    friendsList = (ArrayList<User>) uploadData.getSerializable(Extra.FRIENDS_LIST.name());
                     if (friendsList != null && !friendsList.isEmpty()) {
                         uploadAudioFile(mAudioSavePathInDevice, friendsList);
                     }
@@ -262,7 +264,7 @@ public class UploadService extends Service {
 
     private NodeIHTTPClient apiService() {
         BaseApplication baseApplication = (BaseApplication) getApplication();
-        return baseApplication.getNodeAPIService();
+        return baseApplication.getMNodeAPIService();
     }
 
     public void processAudioFile(String firebaseIdToken, String localFileString, ArrayList<User> friendsList) {
@@ -271,8 +273,8 @@ public class UploadService extends Service {
         Message message = mHandler.obtainMessage();
         // Create a bundle
         Bundle uploadData = new Bundle();
-        uploadData.putString(Constants.EXTRA_LOCAL_FILE_STRING, localFileString);
-        uploadData.putSerializable(Constants.EXTRA_FRIENDS_LIST, friendsList);
+        uploadData.putString(Extra.LOCAL_FILE_STRING.name(), localFileString);
+        uploadData.putSerializable(Extra.FRIENDS_LIST.name(), friendsList);
         // Attach bundle to the message
         message.setData(uploadData);
         // Send message through the handler
@@ -290,6 +292,6 @@ public class UploadService extends Service {
                 .setContentText("Rooster Mornings: " + state)
                 .setContentIntent(pendingIntent).build();
 
-        startForeground(Constants.UPLOADSERVICE_NOTIFICATION_ID, notification);
+        startForeground(NotificationID.UPLOAD_SERVICE.ordinal(), notification);
     }
 }
