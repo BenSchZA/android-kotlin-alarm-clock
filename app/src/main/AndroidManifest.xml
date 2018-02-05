@@ -338,6 +338,13 @@
             android:enabled="true"
             android:exported="true" />
 
+        <receiver android:name=".receiver.UpgradeReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_REPLACED"/>
+                <data android:scheme="package"/>
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>
