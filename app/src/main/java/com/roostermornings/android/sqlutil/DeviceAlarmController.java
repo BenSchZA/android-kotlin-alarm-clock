@@ -48,7 +48,7 @@ import static com.roostermornings.android.util.RoosterUtils.hasLollipop;
  */
 
 
-//Synchronises alarm manager's pending intents and SQL database
+// Synchronises alarm manager's pending intents and SQL database
 public final class DeviceAlarmController {
 
     // The app's AlarmManager, which provides access to the system alarm services.
@@ -202,29 +202,29 @@ public final class DeviceAlarmController {
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
         if(cancel) {
-            //Cancel alarm intent
+            // Cancel alarm intent
             alarmPendingIntent.cancel();
-            //Clear foreground notification
+            // Clear foreground notification
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.cancel(NotificationID.AUDIO_SERVICE.ordinal());
-            //Stop audio service
+            // Stop audio service
             context.stopService(new Intent(context, AudioService.class));
             return;
         }
 
         long alarmTime = alarmCalendar.getTimeInMillis();
 
-        //if newer version of Android, create info pending intent
+        // if newer version of Android, create info pending intent
         if (hasLollipop()) {
             Intent alarmInfoIntent = new Intent(context, DeviceAlarmFullScreenActivity.class);
             PendingIntent alarmInfoPendingIntent = PendingIntent.getActivity(context, 0, alarmInfoIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-            //required for setting alarm clock
+            // required for setting alarm clock
             AlarmManager.AlarmClockInfo alarmInfo = new AlarmManager.AlarmClockInfo(alarmTime, alarmInfoPendingIntent);
             alarmMgr.setAlarmClock(alarmInfo, alarmPendingIntent);
 
         } else if(hasKitKat()) {
-            //if older version of android, don't require info pending intent
+            // if older version of android, don't require info pending intent
             alarmMgr.setExact(AlarmManager.RTC_WAKEUP, alarmTime, alarmPendingIntent);
             // Show alarm in the status bar
             Intent alarmChanged = new Intent(Action.ALARM_CHANGED.name());
@@ -250,9 +250,9 @@ public final class DeviceAlarmController {
             if(!deviceAlarmTableManager.insertAlarm(deviceAlarm, setId)) return false;
         }
 
-        //Update alarm millis and setAlarm
+        // Update alarm millis and setAlarm
         refreshAlarms(deviceAlarmTableManager.selectChanged());
-        //Notify user of time until next alarm, once alarm millis has been updated in db
+        // Notify user of time until next alarm, once alarm millis has been updated in db
         notifyUserAlarmTime(deviceAlarmTableManager.getAlarmSet(setId));
 
         return true;
@@ -267,27 +267,27 @@ public final class DeviceAlarmController {
         nextAlarmMillis = Long.MAX_VALUE;
         String nextAlarmTimeString;
 
-        //Iterate over all alarms in SQL db for specific set, find next alarm time
+        // Iterate over all alarms in SQL db for specific set, find next alarm time
         for (DeviceAlarm deviceAlarm :
                 deviceAlarmList) {
             if(deviceAlarm.getMillis() < nextAlarmMillis) nextAlarmMillis = deviceAlarm.getMillis();
         }
 
-        //Time until next alarm is the time of alarm, minus the current time in millis - alarm always set for future date
+        // Time until next alarm is the time of alarm, minus the current time in millis - alarm always set for future date
         alarmCalendar.setTimeInMillis(nextAlarmMillis);
         timeUntilNextAlarm = alarmCalendar.getTimeInMillis() - systemCalendar.getTimeInMillis();
 
-        //Convert millis value to days,hours,mins until next alarm
+        // Convert millis value to days,hours,mins until next alarm
         int minutes = (int) ((timeUntilNextAlarm / (1000*60)) % 60);
         int hours   = (int) ((timeUntilNextAlarm / (1000*60*60)) % 24);
         int days = (int) (timeUntilNextAlarm / (1000*60*60*24));
 
-        //Notify user of time until next alarm
+        // Notify user of time until next alarm
         if(days == 0 && hours != 0) nextAlarmTimeString = String.format("%s hours, and %s minutes", hours, minutes);
         else if(days == 0 && hours == 0) nextAlarmTimeString = String.format("%s minutes", minutes);
         else nextAlarmTimeString = String.format("%s days, %s hours, and %s minutes", days, hours, minutes);
 
-        //Ensure alarm time accurate before notice
+        // Ensure alarm time accurate before notice
         if(minutes >= 0 && hours >= 0 && days >= 0) {
 //            Toaster.makeToast(context, "Alarm set for " + nextAlarmTimeString + " from now.", Toast.LENGTH_LONG).checkTastyToast();
 
@@ -308,36 +308,45 @@ public final class DeviceAlarmController {
         if(deviceAlarmList == null) return;
         for (DeviceAlarm deviceAlarm:
                 deviceAlarmList) {
-            deleteAlarmSetIntents(deviceAlarm.getSetId());
+            deleteAlarmSetLocal(deviceAlarm.getSetId());
         }
     }
 
-    private void deleteAlarmSetIntents(String setId) {
+    private void deleteAlarmSetLocal(String setId) {
         List<DeviceAlarm> deviceAlarmList = deviceAlarmTableManager.getAlarmSet(setId);
         deviceAlarmTableManager.deleteAlarmSet(setId);
+        deleteAlarmSetIntents(deviceAlarmList);
+    }
+
+    // Remove entire set of alarms, first recreate intent EXACTLY as before, then call alarmMgr.cancel(intent)
+    public void deleteAlarmSetGlobal(String setId) {
+        deleteAlarmSetLocal(setId);
+        FirebaseNetwork.INSTANCE.removeFirebaseAlarm(setId);
+    }
+
+    private void deleteAlarmSetIntents(List<DeviceAlarm> deviceAlarmList) {
         for (DeviceAlarm deviceAlarm :
                 deviceAlarmList) {
             cancelAlarm(deviceAlarm);
         }
     }
 
-    //Remove entire set of alarms, first recreate intent EXACTLY as before, then call alarmMgr.cancel(intent)
-    public void deleteAlarmSetGlobal(String setId) {
-        deleteAlarmSetIntents(setId);
-        FirebaseNetwork.INSTANCE.removeFirebaseAlarm(setId);
+    private void cancelAlarm(DeviceAlarm deviceAlarm) {
+        // Use setAlarm with cancel Boolean set to true - this recreates intent in order to clear it
+        setAlarm(deviceAlarm, true);
     }
 
-    //Case: local has an alarm that firebase doesn't Result: delete local alarm
+    // Case: local has an alarm that firebase doesn't Result: delete local alarm
     public void syncAlarmSetGlobal(ArrayList<Alarm> firebaseAlarmSets) {
         ArrayList<String> firebaseAlarmSetIDs = new ArrayList<>();
-        //Create array of Firebase alarm IDs to compare against local alarms
+        // Create array of Firebase alarm IDs to compare against local alarms
         for (Alarm alarmSet:
                 firebaseAlarmSets) {
             firebaseAlarmSetIDs.add(alarmSet.getUid());
         }
-        //If no local alarms, no problem, nothing to do
+        // If no local alarms, no problem, nothing to do
         if(deviceAlarmTableManager.getAlarmSets() == null) return;
-        //Check if every local alarm exists in Firebase, else delete global
+        // Check if every local alarm exists in Firebase, else delete global
         for (DeviceAlarm deviceAlarmSet:
         deviceAlarmTableManager.getAlarmSets()) {
             if(!firebaseAlarmSetIDs.contains(deviceAlarmSet.getSetId())) deleteAlarmSetGlobal(deviceAlarmSet.getSetId());
@@ -346,17 +355,17 @@ public final class DeviceAlarmController {
 
     public void setSetEnabled(String setId, boolean enabled, boolean notifyUser) {
         if(enabled) {
-            //Set all intents for enabled alarms
+            // Set all intents for enabled alarms
             deviceAlarmTableManager.setSetEnabled(setId, enabled);
             deviceAlarmTableManager.setSetChanged(setId, true);
             refreshAlarms(deviceAlarmTableManager.selectChanged());
 
             FirebaseNetwork.INSTANCE.updateFirebaseAlarmEnabled(setId, enabled);
-            //Trigger audio download
-            //Download any social or channel audio files
+            // Trigger audio download
+            // Download any social or channel audio files
             ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
             if(notifyUser) {
-                //Notify user of time until next alarm, once alarm millis has been updated in db
+                // Notify user of time until next alarm, once alarm millis has been updated in db
                 notifyUserAlarmTime(deviceAlarmTableManager.getAlarmSet(setId));
             }
         } else{
@@ -366,21 +375,18 @@ public final class DeviceAlarmController {
                 cancelAlarm(deviceAlarm);
             }
             deviceAlarmTableManager.setSetEnabled(setId, enabled);
-            //removeSetChannelAudio(deviceAlarmList);
+            // removeSetChannelAudio(deviceAlarmList);
             FirebaseNetwork.INSTANCE.updateFirebaseAlarmEnabled(setId, enabled);
-            //Trigger audio download
-            //Download any social or channel audio files
+            // Trigger audio download
+            // Download any social or channel audio files
             ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle());
         }
     }
 
-    private void cancelAlarm(DeviceAlarm deviceAlarm) {
-        //Use setAlarm with cancel Boolean set to true - this recreates intent in order to clear it
-        setAlarm(deviceAlarm, true);
-    }
-
-    //Used to recreate alarm intents after reboot. All ENABLED alarms recreated.
+    // Used to recreate alarm intents after reboot. All ENABLED alarms recreated.
     public void rebootAlarms() {
-        refreshAlarms(deviceAlarmTableManager.selectEnabled());
+        List<DeviceAlarm> enabledAlarms = deviceAlarmTableManager.selectEnabled();
+        deleteAlarmSetIntents(enabledAlarms);
+        refreshAlarms(enabledAlarms);
     }
 }
