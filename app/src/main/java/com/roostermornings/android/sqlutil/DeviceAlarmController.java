@@ -14,7 +14,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.roostermornings.android.BaseApplication;
 import com.roostermornings.android.activity.DeviceAlarmFullScreenActivity;
@@ -32,6 +34,7 @@ import com.roostermornings.android.service.AudioService;
 import com.roostermornings.android.sync.DownloadSyncAdapter;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.snackbar.SnackbarManager;
+import com.roostermornings.android.util.Toaster;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -83,6 +86,8 @@ public final class DeviceAlarmController {
     // Create pending intent for individual alarm (done once for each alarm in set)
     private void setAlarm(DeviceAlarm deviceAlarm, Boolean cancel) {
         if (deviceAlarm.getEnabled()) {
+            Log.i(this.getClass().getSimpleName(),"Set alarm started");
+
             alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             Calendar alarmCalendar = Calendar.getInstance();
             Calendar systemCalendar = Calendar.getInstance();
@@ -114,11 +119,22 @@ public final class DeviceAlarmController {
             alarmIntent.putExtra(Extra.RECURRING.name(), deviceAlarm.getRecurring());
             alarmIntent.putExtra(Extra.MILLIS_SLOT.name(), deviceAlarm.getMillis());
 
-            PendingIntent temp  = PendingIntent.getBroadcast(context,
+            Log.i(this.getClass().getSimpleName(),
+                    "Intent extra " + Extra.REQUEST_CODE.name() + ": " + deviceAlarm.getPiId());
+            Log.i(this.getClass().getSimpleName(),
+                    "Intent extra " + Extra.UID.name() + ": " + deviceAlarm.getSetId());
+
+            PendingIntent temp = PendingIntent.getBroadcast(context,
                     deviceAlarm.getPiId(), alarmIntent,
                     PendingIntent.FLAG_NO_CREATE);
             boolean pendingIntentExists = temp != null;
             if(temp != null) temp.cancel();
+
+            if(pendingIntentExists)
+                Log.i(this.getClass().getSimpleName(), "Pending intent exists");
+            else
+                // Clear any pending intents with legacy intent action string
+                clearLegacyPendingIntent(deviceAlarm);
 
             PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(context,
                     deviceAlarm.getPiId(), alarmIntent,
@@ -128,6 +144,7 @@ public final class DeviceAlarmController {
             if(cancel && pendingIntentExists) {
                 // Clear AlarmFailureLog ActiveAndroid db entry
                 realmManagerAlarmFailureLog.tryDeleteAlarmFailureLogByUIDAndPIID(deviceAlarm.getSetId(), deviceAlarm.getPiId());
+                Log.i(this.getClass().getSimpleName(), "Realm entry deleted");
             }
 
             // Use setAlarm with cancel Boolean set to true - this recreates intent in order to clear it
@@ -136,6 +153,7 @@ public final class DeviceAlarmController {
                 alarmMgr.cancel(alarmPendingIntent);
                 alarmPendingIntent.cancel();
 
+                Log.i(this.getClass().getSimpleName(), "Pending intent cancelled");
                 // The below method is reeeaaallly delayed...?
                 //alarmPendingIntent.cancel();
                 return;
@@ -181,6 +199,37 @@ public final class DeviceAlarmController {
                 context.sendBroadcast(alarmChanged);
             }
         }
+    }
+
+    private void clearLegacyPendingIntent(DeviceAlarm deviceAlarm) {
+        // Clear any pending intents with legacy intent action string
+
+        Log.i(this.getClass().getSimpleName(), "Attempting to clear legacy pending intent");
+        String ACTION_ALARMRECEIVER_LEGACY = "receiver.ALARM_RECEIVER";
+
+        Intent alarmIntent = new Intent(context, DeviceAlarmReceiver.class);
+        alarmIntent.setAction(ACTION_ALARMRECEIVER_LEGACY);
+
+        PendingIntent temp = PendingIntent.getBroadcast(context,
+                deviceAlarm.getPiId(), alarmIntent,
+                PendingIntent.FLAG_NO_CREATE);
+        boolean pendingIntentExists = temp != null;
+        if(temp != null) temp.cancel();
+
+        if(pendingIntentExists) {
+            Log.i(this.getClass().getSimpleName(), "Pending intent exists");
+
+            PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(context,
+                    deviceAlarm.getPiId(), alarmIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+
+            // Cancel alarm intent
+            alarmMgr.cancel(alarmPendingIntent);
+            alarmPendingIntent.cancel();
+
+            Log.i(this.getClass().getSimpleName(), "Pending intent cancelled");
+        } else
+            Log.i(this.getClass().getSimpleName(), "Pending intent doesn't exist");
     }
 
     public void snoozeAlarm(String setId, Boolean cancel){
@@ -385,8 +434,11 @@ public final class DeviceAlarmController {
 
     // Used to recreate alarm intents after reboot. All ENABLED alarms recreated.
     public void rebootAlarms() {
+        Log.i(this.getClass().getSimpleName(), "Reboot alarms started");
         List<DeviceAlarm> enabledAlarms = deviceAlarmTableManager.selectEnabled();
+        Log.i(this.getClass().getSimpleName(), "Delete alarm intents started");
         deleteAlarmSetIntents(enabledAlarms);
+        Log.i(this.getClass().getSimpleName(), "Refresh alarms started");
         refreshAlarms(enabledAlarms);
     }
 }
