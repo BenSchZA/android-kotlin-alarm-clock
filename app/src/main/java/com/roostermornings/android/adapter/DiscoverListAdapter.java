@@ -102,6 +102,10 @@ public class DiscoverListAdapter extends RecyclerView.Adapter<DiscoverListAdapte
         notifyItemInserted(position);
     }
 
+    private MediaBrowserCompat.MediaItem getItemAtPosition(int position) {
+        return mDataset.get(position);
+    }
+
     public void refreshAll(List<MediaBrowserCompat.MediaItem> myDataset) {
         mDataset = myDataset;
         notifyDataSetChanged();
