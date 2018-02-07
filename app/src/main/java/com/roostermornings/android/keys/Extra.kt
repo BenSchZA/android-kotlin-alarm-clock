@@ -4,7 +4,6 @@ package com.roostermornings.android.keys
  * Created by bscholtz on 2018/02/02.
  */
 enum class Extra {
-    ALARM_ID,
     SOCIAL_ROOSTERS,
 
     // DeviceAlarmController intent extras
@@ -15,7 +14,7 @@ enum class Extra {
 
     // DeviceAlarm extras
     RECURRING,
-    UID,
+    ALARM_SET_ID,
     SNOOZE_ACTIVATION,
 
     // NewAudio activities

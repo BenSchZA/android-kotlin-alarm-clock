@@ -46,6 +46,7 @@ import com.roostermornings.android.fragment.base.BaseFragment;
 import com.roostermornings.android.keys.RequestCode;
 import com.roostermornings.android.util.Constants;
 import com.roostermornings.android.util.JSONPersistence;
+import com.roostermornings.android.util.LifeCycle;
 import com.roostermornings.android.util.MyContactsController;
 import com.roostermornings.android.util.Toaster;
 
@@ -104,6 +105,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
     @Inject @Nullable FirebaseUser firebaseUser;
     @Inject JSONPersistence jsonPersistence;
     @Inject MyContactsController myContactsController;
+    @Inject LifeCycle lifeCycle;
 
     @Override
     protected void inject(RoosterApplicationComponent component) {
@@ -233,8 +235,7 @@ public class FriendsInviteFragment3 extends BaseFragment {
 
     @OnClick(R.id.share_button)
     public void onShareButtonClicked() {
-
-        FA.Log(FA.Event.invitation_to_join_rooster_sent.class, null, null);
+        lifeCycle.shareApp();
     }
 
     /**

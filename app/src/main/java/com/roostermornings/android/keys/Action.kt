@@ -21,7 +21,7 @@ enum class Action {
 
     // AudioService intent actions
     ALARM_DISPLAY,
-    ALARM_TIMESUP,
+    ALARM_TIME_UP,
     CHANNEL_DOWNLOAD_FINISHED,
     END_AUDIO_SERVICE,
     SNOOZE_ACTIVATION

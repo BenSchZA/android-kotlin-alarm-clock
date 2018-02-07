@@ -7,7 +7,6 @@ package com.roostermornings.android.activity
 
 import android.content.ContentResolver
 import android.os.Bundle
-import android.os.StrictMode
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
@@ -16,10 +15,10 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
+import android.widget.Toast
 
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.Theme
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.FirebaseDatabase
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.R
@@ -31,19 +30,15 @@ import com.roostermornings.android.fragment.IAlarmSetListener
 import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment1
 import com.roostermornings.android.fragment.new_alarm.NewAlarmFragment2
 import com.roostermornings.android.sync.DownloadSyncAdapter
-import com.roostermornings.android.util.Constants
 import com.roostermornings.android.util.StrUtils
 
 import java.util.Calendar
-
-import javax.inject.Inject
 
 import butterknife.BindView
 import com.roostermornings.android.keys.Extra
 
 import com.roostermornings.android.util.Constants.AUTHORITY
-import com.roostermornings.android.util.LifeCycle
-import com.roostermornings.android.util.RoosterUtils.hasGingerbread
+import com.roostermornings.android.util.Toaster
 import kotlinx.android.synthetic.main.activity_new_alarm.*
 
 class NewAlarmFragmentActivity : BaseActivity(), IAlarmSetListener, NewAlarmFragment1.NewAlarmInterface {
@@ -94,8 +89,8 @@ class NewAlarmFragmentActivity : BaseActivity(), IAlarmSetListener, NewAlarmFrag
 
         //Static variable, so clear on new instance
         mEditAlarmId = ""
-        if (intent.extras?.containsKey(Extra.ALARM_ID.name) == true) {
-            mEditAlarmId = intent.extras?.getString(Extra.ALARM_ID.name, "")
+        if (intent.extras?.containsKey(Extra.ALARM_SET_ID.name) == true) {
+            mEditAlarmId = intent.extras?.getString(Extra.ALARM_SET_ID.name, "")
         }
         if (mEditAlarmId?.isEmpty() == true) {
             setupToolbar(toolbarTitle, getString(R.string.create_alarm))
@@ -210,11 +205,16 @@ class NewAlarmFragmentActivity : BaseActivity(), IAlarmSetListener, NewAlarmFrag
                 //Set enabled flag to true on new or edited alarm
                 mAlarm.isEnabled = true
 
-                deviceAlarmController.registerAlarmSet(mAlarm.isEnabled, alarmKey, mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring, alarmChannelUID, mAlarm.isAllow_friend_audio_files)
+                if(alarmKey != null) {
+                    deviceAlarmController.registerAlarmSet(mAlarm.isEnabled, alarmKey, mAlarm.getHour(), mAlarm.getMinute(), alarmDays, mAlarm.isRecurring, alarmChannelUID, mAlarm.isAllow_friend_audio_files)
+                } else {
+                    Toaster.makeToast(applicationContext, "Failed to set alarm, please try again.", Toast.LENGTH_LONG)
+                    return
+                }
 
                 //Update firebase
-                if(firebaseUser?.uid?.isNotBlank() == true && alarmKey?.isNotBlank() == true) {
-                    database.getReference(String.format("alarms/%s/%s", firebaseUser?.uid, alarmKey)).setValue(mAlarm)
+                if(firebaseUser?.uid?.isNotBlank() == true && alarmKey.isNotBlank()) {
+                    database.getReference("alarms/${firebaseUser?.uid}/$alarmKey").setValue(mAlarm)
                 }
 
                 //Download any social or channel audio files

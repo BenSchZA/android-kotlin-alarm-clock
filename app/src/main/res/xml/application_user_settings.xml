@@ -102,15 +102,61 @@ and no social roosters are received"
             <!--android:persistent="true">-->
         <!--</CheckBoxPreference>-->
         <!--</PreferenceCategory>-->
-    <PreferenceCategory
+    <PreferenceScreen
         android:title="About"
-        android:key="pref_key_about"
-        android:selectable="false"
-        android:persistent="false">
-    <Preference
-        android:key="pref_key_static_field_version"
-        android:selectable="false"
-        android:persistent="false"
-        android:title="Version" />
-    </PreferenceCategory>
+        android:icon="@drawable/ic_info_black_24dp"
+        android:key="pref_key_about">
+
+        <PreferenceCategory
+            android:title="Rooster App"
+            android:key="pref_key_rooster_app"
+            android:selectable="false"
+            android:persistent="false">
+            <Preference
+                android:key="APP_VERSION_NAME"
+                android:selectable="false"
+                android:persistent="false"
+                android:title="Version Name" />
+            <Preference
+                android:key="APP_VERSION_CODE"
+                android:selectable="false"
+                android:persistent="false"
+                android:title="Version Code" />
+        </PreferenceCategory>
+
+        <PreferenceCategory
+            android:title="Device"
+            android:key="pref_key_device"
+            android:selectable="false"
+            android:persistent="false">
+            <Preference
+                android:key="DEVICE_BRAND"
+                android:selectable="false"
+                android:persistent="false"
+                android:title="Brand" />
+            <Preference
+                android:key="DEVICE_MODEL"
+                android:selectable="false"
+                android:persistent="false"
+                android:title="Model" />
+        </PreferenceCategory>
+
+        <PreferenceCategory
+            android:title="Android"
+            android:key="pref_key_android"
+            android:selectable="false"
+            android:persistent="false">
+            <Preference
+                android:key="ANDROID_CODE_NAME"
+                android:selectable="false"
+                android:persistent="false"
+                android:title="Code Name" />
+            <Preference
+                android:key="ANDROID_SDK_INT"
+                android:selectable="false"
+                android:persistent="false"
+                android:title="Sdk Int" />
+        </PreferenceCategory>
+
+    </PreferenceScreen>
 </PreferenceScreen>

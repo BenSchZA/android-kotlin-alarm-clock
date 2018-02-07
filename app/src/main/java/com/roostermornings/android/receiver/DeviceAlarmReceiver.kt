@@ -48,7 +48,7 @@ class DeviceAlarmReceiver : WakefulBroadcastReceiver() {
         // Get extras passed in from DeviceAlarmController class
         val isSnoozeActivation = intent.getBooleanExtra(Extra.SNOOZE_ACTIVATION.name, false)
         isRecurring = intent.getBooleanExtra(Extra.RECURRING.name, false)
-        alarmUid = intent.getStringExtra(Extra.UID.name)
+        alarmUid = intent.getStringExtra(Extra.ALARM_SET_ID.name)
         requestCode = intent.getIntExtra(Extra.REQUEST_CODE.name, -1)
         millisSlot = intent.getLongExtra(Extra.MILLIS_SLOT.name, -1L)
 
@@ -58,7 +58,7 @@ class DeviceAlarmReceiver : WakefulBroadcastReceiver() {
         if (isSnoozeActivation) {
             //Activate snooze alarm
             val broadcastIntent = Intent(Action.SNOOZE_ACTIVATION.name)
-            broadcastIntent.putExtra(Extra.ALARM_ID.name, alarmUid)
+            broadcastIntent.putExtra(Extra.ALARM_SET_ID.name, alarmUid)
             broadcastIntent.putExtra(Extra.WAKEFUL_INTENT.name, Intent(context, DeviceAlarmReceiver::class.java))
             broadcastIntent.putExtra(Extra.REQUEST_CODE.name, requestCode)
             context.sendBroadcast(broadcastIntent)
@@ -67,7 +67,7 @@ class DeviceAlarmReceiver : WakefulBroadcastReceiver() {
 
         //Start audio service with alarm UID
         val audioServiceIntent = Intent(context, AudioService::class.java)
-        audioServiceIntent.putExtra(Extra.ALARM_ID.name, alarmUid)
+        audioServiceIntent.putExtra(Extra.ALARM_SET_ID.name, alarmUid)
         //Include intent to enable finishing wakeful intent later in AudioService
         audioServiceIntent.putExtra(Extra.WAKEFUL_INTENT.name, Intent(context, DeviceAlarmReceiver::class.java))
         audioServiceIntent.putExtra(Extra.REQUEST_CODE.name, requestCode)
