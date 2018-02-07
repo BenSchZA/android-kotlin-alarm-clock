@@ -48,6 +48,7 @@ import com.roostermornings.android.util.Constants
 import javax.inject.Inject
 
 import butterknife.BindView
+import com.roostermornings.android.firebase.FA
 import com.roostermornings.android.keys.Action
 import com.roostermornings.android.keys.Flag
 import com.roostermornings.android.onboarding.*
@@ -548,6 +549,7 @@ class FriendsFragmentActivity : BaseActivity(), FriendsMyFragment1.OnFragmentInt
         val intent = Intent(Intent.ACTION_SENDTO, uri)
         intent.putExtra("sms_body", resources.getString(R.string.invite_to_rooster_message))
         startActivity(intent)
+        FA.Log(FA.Event.invitation_to_join_rooster_sent::class.java, null, null)
     }
 
     companion object {

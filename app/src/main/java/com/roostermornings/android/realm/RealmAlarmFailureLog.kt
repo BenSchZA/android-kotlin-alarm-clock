@@ -13,7 +13,9 @@ import com.google.gson.FieldAttributes
 import com.google.gson.ExclusionStrategy
 import com.google.gson.GsonBuilder
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity
+import com.roostermornings.android.domain.local.MetricsEvent
 import com.roostermornings.android.firebase.FA
+import com.roostermornings.android.firebase.UserMetrics
 import com.roostermornings.android.keys.PrefsKey
 import com.roostermornings.android.util.Constants
 import com.roostermornings.android.snackbar.SnackbarManager
@@ -159,10 +161,26 @@ class RealmAlarmFailureLog(val context: Context) {
 
         val activityName = MyAlarmsFragmentActivity::class.java.name
 
-        // 88 characters max for text
+        alarmFailureLog.takeIf { !it.heard || !it.seen }?.let {
+            when {
+                !it.heard -> {
+                    UserMetrics.logEvent(MetricsEvent(timestamp = it.scheduledTime)
+                            .setEventAndType(
+                                    MetricsEvent.Companion.Event.ALARM_FAILURE(
+                                            MetricsEvent.Companion.Event.ALARM_FAILURE.Type.NOT_HEARD)))
+                }
+                !it.seen -> {
+                    UserMetrics.logEvent(MetricsEvent(timestamp = it.scheduledTime)
+                            .setEventAndType(
+                                    MetricsEvent.Companion.Event.ALARM_FAILURE(
+                                            MetricsEvent.Companion.Event.ALARM_FAILURE.Type.NOT_SEEN)))
+                }
+            }
+        }
         alarmFailureLog.takeIf {
             Math.abs(it.scheduledTime - it.firedTime) >= Constants.TIME_MILLIS_1_MINUTE*5}?.let {
 
+            // 88 characters max for text
             snackbarQueueElement.text = "Your alarm was delayed. Find out why."
             snackbarQueueElement.dialog = true
             snackbarQueueElement.dialogType = SnackbarManager.DialogType.DELAYED
@@ -170,6 +188,12 @@ class RealmAlarmFailureLog(val context: Context) {
             snackbarQueueElement.dialogText = "We noticed your alarm was delayed by more than 5 minutes. This is most likely because your phone OS is delaying Rooster's alarms to save power. You might be able to add Rooster to a protected list in your phone settings that gives Rooster priority, and solves the delayed alarm issue."
 
             realmScheduledSnackbar.updateOrCreateScheduledSnackbarEntry(snackbarQueueElement, activityName, -1L)
+
+            UserMetrics.logEvent(MetricsEvent(timestamp = it.scheduledTime)
+                    .setEventAndType(
+                            MetricsEvent.Companion.Event.ALARM_FAILURE(
+                                    MetricsEvent.Companion.Event.ALARM_FAILURE.Type.DELAYED)))
+
             return@generateScheduledSnackbarForAlarmFailure
         }
         alarmFailureLog.takeIf {
@@ -182,6 +206,12 @@ class RealmAlarmFailureLog(val context: Context) {
             snackbarQueueElement.dialogText = "We noticed that the alarm audio content was not downloaded before your alarm went off, this can happen if:\n\n" + "1) You didn't have an active internet connection when you created your alarm (note that your alarm will still go off without an internet connection, but you need to make sure the content is downloaded when you set your alarm for the best experience).\n\n" + "2) Your phone is blocking Rooster from downloading content. Some phones have a page within your settings that allows you to add Rooster to a whitelist of allowed apps.\n\n" + "On the home page, the little cloud will indicate the current download state: either downloading, finished downloading, or no active internet connection."
 
             realmScheduledSnackbar.updateOrCreateScheduledSnackbarEntry(snackbarQueueElement, activityName, -1L)
+
+            UserMetrics.logEvent(MetricsEvent(timestamp = it.scheduledTime)
+                    .setEventAndType(
+                            MetricsEvent.Companion.Event.ALARM_FAILURE(
+                                    MetricsEvent.Companion.Event.ALARM_FAILURE.Type.DEFAULT)))
+
             return@generateScheduledSnackbarForAlarmFailure
         }
         alarmFailureLog.takeIf {
@@ -194,6 +224,12 @@ class RealmAlarmFailureLog(val context: Context) {
             snackbarQueueElement.dialogText = "If you did not have an active internet connection when your alarm was set then Rooster can't download your chosen channel content, and Rooster will attempt to stream the audio content when your alarm goes off.\n\nThis could also be as a result of your phone blocking Rooster from downloading audio content in the background, in which case there might be a page within your settings that allows you to add Rooster to a whitelist of allowed apps."
 
             realmScheduledSnackbar.updateOrCreateScheduledSnackbarEntry(snackbarQueueElement, activityName, -1L)
+
+            UserMetrics.logEvent(MetricsEvent(timestamp = it.scheduledTime)
+                    .setEventAndType(
+                            MetricsEvent.Companion.Event.ALARM_FAILURE(
+                                    MetricsEvent.Companion.Event.ALARM_FAILURE.Type.STREAM)))
+
             return@generateScheduledSnackbarForAlarmFailure
         }
         alarmFailureLog.takeIf {
@@ -211,6 +247,12 @@ class RealmAlarmFailureLog(val context: Context) {
             snackbarQueueElement.dialogText = "Some phones (e.g. Huawei and Xiaomi) don't allow other apps to set alarms in order to save power. In most of these cases the phone will have a settings page with a whitelist where you can allow Rooster to set alarms or start from the background.\n\nIf your phone issue is one we are aware of, we'll display an explainer again when you set your next alarm, otherwise please get in touch with us and we'll try help you out."
 
             realmScheduledSnackbar.updateOrCreateScheduledSnackbarEntry(snackbarQueueElement, activityName, -1L)
+
+            UserMetrics.logEvent(MetricsEvent(timestamp = it.scheduledTime)
+                    .setEventAndType(
+                            MetricsEvent.Companion.Event.ALARM_FAILURE(
+                                    MetricsEvent.Companion.Event.ALARM_FAILURE.Type.NO_FIRE)))
+
             return@generateScheduledSnackbarForAlarmFailure
         }
     }

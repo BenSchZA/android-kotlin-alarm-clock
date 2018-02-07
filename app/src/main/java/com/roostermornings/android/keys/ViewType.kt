@@ -4,11 +4,11 @@ package com.roostermornings.android.keys
  * Created by bscholtz on 2018/02/02.
  */
 enum class ViewType {
-    // Adapter activityContentView types
     UNKNOWN,
-    ADD,
-    INVITE,
-    HEADER,
+    // Adapter activityContentView types
+    FRIENDS_ADD,
+    FRIENDS_INVITE,
+    FRIENDS_HEADER,
 
     // Message status fragment types
     MESSAGE_STATUS_RECEIVED_FRAGMENT,

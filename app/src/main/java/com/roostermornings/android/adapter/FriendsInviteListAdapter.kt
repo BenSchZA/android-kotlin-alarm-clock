@@ -63,9 +63,9 @@ class FriendsInviteListAdapter// Provide a suitable constructor (depends on the 
     override fun getItemViewType(position: Int): Int {
         val item = mDataset?.get(position)
         return when (item) {
-            is Friend -> ViewType.ADD.ordinal
-            is Contact -> ViewType.INVITE.ordinal
-            is String -> ViewType.HEADER.ordinal
+            is Friend -> ViewType.FRIENDS_ADD.ordinal
+            is Contact -> ViewType.FRIENDS_INVITE.ordinal
+            is String -> ViewType.FRIENDS_HEADER.ordinal
             else -> ViewType.UNKNOWN.ordinal
         }
     }
@@ -94,19 +94,19 @@ class FriendsInviteListAdapter// Provide a suitable constructor (depends on the 
         val v: View
 
         return when (viewType) {
-            ViewType.ADD.ordinal -> {
+            ViewType.FRIENDS_ADD.ordinal -> {
                 v = LayoutInflater
                         .from(parent.context)
                         .inflate(R.layout.list_layout_friends_invite, parent, false)
                 AddViewHolder(v)
             }
-            ViewType.INVITE.ordinal -> {
+            ViewType.FRIENDS_INVITE.ordinal -> {
                 v = LayoutInflater
                         .from(parent.context)
                         .inflate(R.layout.list_layout_friends_invite, parent, false)
                 InviteViewHolder(v)
             }
-            ViewType.HEADER.ordinal -> {
+            ViewType.FRIENDS_HEADER.ordinal -> {
                 v = LayoutInflater
                         .from(parent.context)
                         .inflate(R.layout.list_header, parent, false)

@@ -37,7 +37,7 @@ import com.roostermornings.android.keys.Extra
 import com.roostermornings.android.keys.Flag
 import com.roostermornings.android.receiver.BackgroundTaskReceiver
 import com.roostermornings.android.receiver.NetworkChangeReceiver
-import com.roostermornings.android.util.AppTesting
+import com.roostermornings.android.util.DetailsUtils
 import com.roostermornings.android.util.Toaster
 
 import javax.inject.Inject
@@ -119,14 +119,17 @@ class BaseApplication : android.app.Application() {
 
         firebaseAnalytics = FirebaseAnalytics.getInstance(this)
 
-        val debuggable = AppTesting.isDebuggable(this)
+        val debuggable = DetailsUtils.isDebuggable(this)
         // Activate Crashlytics instance
-        val core = CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG || debuggable).build()
-        if ("BetaFlavour" == BuildConfig.FLAVOR) {
-            Fabric.with(Fabric.Builder(this).kits(Crashlytics.Builder().core(core).build()).appIdentifier("com.roostermornings.android.beta").build())
-        } else {
+        val override = true
+        val crashlyticsEnabled = !override || BuildConfig.DEBUG || debuggable
+        val core = CrashlyticsCore.Builder().disabled(crashlyticsEnabled).build()
+
+        if (DetailsUtils.isBeta())
+            Fabric.with(Fabric.Builder(this).kits(Crashlytics.Builder().core(core).build())
+                    .appIdentifier("com.roostermornings.android.beta").build())
+        else
             Fabric.with(this, Crashlytics.Builder().core(core).build(), Crashlytics())
-        }
 
         // If in debug mode...
         if (BuildConfig.DEBUG || debuggable) {

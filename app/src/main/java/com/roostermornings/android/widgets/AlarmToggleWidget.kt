@@ -186,7 +186,7 @@ class AlarmToggleWidget : AppWidgetProvider() {
 
             // Create an Intent to launch Edit Alarm Activity
             val intentEditAlarmActivity = Intent(context, NewAlarmFragmentActivity::class.java)
-            intentEditAlarmActivity.putExtra(Extra.ALARM_ID.name, pendingAlarm.setId)
+            intentEditAlarmActivity.putExtra(Extra.ALARM_SET_ID.name, pendingAlarm.setId)
             val pendingIntentEditAlarmActivity = PendingIntent.getActivity(context, 2, intentEditAlarmActivity, PendingIntent.FLAG_CANCEL_CURRENT)
 
             views.setOnClickPendingIntent(R.id.widget_pending_alarm_layout, pendingIntentEditAlarmActivity)

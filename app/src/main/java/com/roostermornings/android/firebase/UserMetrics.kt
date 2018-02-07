@@ -6,6 +6,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.roostermornings.android.BuildConfig
+import com.roostermornings.android.domain.local.MetricsEvent
 import com.roostermornings.android.domain.local.OnboardingJourneyEvent
 import com.roostermornings.android.util.JSONPersistence
 import java.util.*
@@ -30,6 +31,18 @@ object UserMetrics {
 
         if (!anonymousUID.isNullOrBlank() && !signInUID.isNullOrBlank()) {
             childUpdates.put("$USER_METRICS/$anonymousUID/migrate_uid", signInUID!!)
+            fDB.updateChildren(childUpdates)
+        }
+    }
+
+    fun logEvent(event: MetricsEvent) {
+        val fDB = FirebaseDatabase.getInstance().reference
+        val fUser = FirebaseAuth.getInstance().currentUser
+
+        val childUpdates = HashMap<String, Any>()
+
+        if (fUser?.uid?.isNotBlank() == true) {
+            childUpdates.put("$USER_METRICS/${fUser.uid}/error_log/${event.timestamp}", event)
             fDB.updateChildren(childUpdates)
         }
     }
@@ -147,6 +160,7 @@ object UserMetrics {
     }
 
     fun updateVersionCode() {
+        // Handled by FCF as version name
         val fDB = FirebaseDatabase.getInstance().reference
         val fUser = FirebaseAuth.getInstance().currentUser
 

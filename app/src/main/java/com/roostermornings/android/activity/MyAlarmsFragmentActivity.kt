@@ -139,7 +139,7 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
         BaseApplication.roosterApplicationComponent.inject(this)
 
         /** To be run only if debuggable, for safe testing */
-        if(AppTesting.isDebuggable(this)) {
+        if(DetailsUtils.isDebuggable(this)) {
             //FirstMileManager firstMileManager = new FirstMileManager();
             //firstMileManager.createShowcase(this, new ViewTarget(buttonAddAlarm.getId(), this), 1);
 
@@ -242,8 +242,8 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
 
                 // Clear snooze if action
                 if (Action.CANCEL_SNOOZE.name == intent.action) {
-                    if (extras?.getString(Extra.ALARM_ID.name)?.isNotBlank() == true) {
-                        deviceAlarmController.snoozeAlarm(extras.getString(Extra.ALARM_ID.name), true)
+                    if (extras?.getString(Extra.ALARM_SET_ID.name)?.isNotBlank() == true) {
+                        deviceAlarmController.snoozeAlarm(extras.getString(Extra.ALARM_SET_ID.name), true)
                     }
                 }
             }
@@ -544,7 +544,7 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
 
     fun editAlarm(alarmId: String) {
         val intent = Intent(this, NewAlarmFragmentActivity::class.java)
-        intent.putExtra(Extra.ALARM_ID.name, alarmId)
+        intent.putExtra(Extra.ALARM_SET_ID.name, alarmId)
         startActivity(intent)
     }
 }

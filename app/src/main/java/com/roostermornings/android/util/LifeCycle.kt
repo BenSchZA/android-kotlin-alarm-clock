@@ -22,6 +22,7 @@ import com.roostermornings.android.R
 import com.roostermornings.android.activity.FAQActivity
 import com.roostermornings.android.activity.NewAlarmFragmentActivity
 import com.roostermornings.android.domain.database.ChannelRooster
+import com.roostermornings.android.firebase.FA
 import com.roostermornings.android.keys.PrefsKey
 import com.roostermornings.android.snackbar.SnackbarManager
 import com.roostermornings.android.sqlutil.AudioTableManager
@@ -148,6 +149,7 @@ class LifeCycle
         sendIntent.type = "text/plain"
         sendIntent = Intent.createChooser(sendIntent, "Share Rooster").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(sendIntent)
+        FA.Log(FA.Event.invitation_to_join_rooster_sent::class.java, null, null)
     }
 
     fun sendFeedback(name: String) {

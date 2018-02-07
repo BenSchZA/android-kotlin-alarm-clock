@@ -30,20 +30,15 @@ import com.roostermornings.android.activity.base.BaseActivity
 import com.roostermornings.android.dagger.RoosterApplicationComponent
 import com.roostermornings.android.firebase.FA
 import com.roostermornings.android.service.AudioService
-import com.roostermornings.android.sqlutil.DeviceAlarmController
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem
-import com.roostermornings.android.util.Constants
 import com.roostermornings.android.util.StrUtils
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
-
-import javax.inject.Inject
 
 import butterknife.BindView
 import butterknife.OnClick
 import com.roostermornings.android.keys.Action
 import com.roostermornings.android.keys.Extra
-import com.roostermornings.android.realm.RealmAlarmFailureLog
 import kotlinx.android.synthetic.main.activity_device_alarm_full_screen.*
 
 class DeviceAlarmFullScreenActivity : BaseActivity() {
@@ -247,7 +242,7 @@ class DeviceAlarmFullScreenActivity : BaseActivity() {
         //Broadcast receiver filter to receive UI updates
         val intentFilter = IntentFilter()
         intentFilter.addAction(Action.ALARM_DISPLAY.name)
-        intentFilter.addAction(Action.ALARM_TIMESUP.name)
+        intentFilter.addAction(Action.ALARM_TIME_UP.name)
 
         receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
@@ -268,7 +263,7 @@ class DeviceAlarmFullScreenActivity : BaseActivity() {
                             //                            }
                             setAlarmUI()
                         }
-                        Action.ALARM_TIMESUP.name -> {
+                        Action.ALARM_TIME_UP.name -> {
                             window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON + WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or +WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
                             finish()
                         }

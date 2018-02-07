@@ -162,7 +162,8 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
         // Log active day
         UserMetrics.logActiveDays()
         // Log current app version
-        UserMetrics.updateVersionCode()
+        // Handled by FCF as version name
+        //UserMetrics.updateVersionCode()
         // Process any alarm failures
         realmAlarmFailureLog.processAlarmFailures(true)
         // Set shared pref to indicate whether mobile number is valid
