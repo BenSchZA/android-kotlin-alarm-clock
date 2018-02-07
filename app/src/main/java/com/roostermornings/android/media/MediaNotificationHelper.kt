@@ -34,15 +34,11 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
-import android.support.v4.media.session.PlaybackStateCompat.*
 import com.roostermornings.android.BaseApplication
 
 import com.roostermornings.android.R
-import com.roostermornings.android.events.MediaNotificationReadyEvent
-import com.squareup.otto.Bus
+
 import com.squareup.picasso.Picasso
-import org.intellij.lang.annotations.Identifier
-import javax.inject.Inject
 
 /**
  * Helper class for building Media style Notifications from a

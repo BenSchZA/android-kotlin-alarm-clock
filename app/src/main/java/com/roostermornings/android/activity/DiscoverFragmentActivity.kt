@@ -10,6 +10,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
+import android.media.session.PlaybackState
 import android.os.Bundle
 import android.os.RemoteException
 import android.support.v4.media.MediaBrowserCompat
@@ -18,6 +19,7 @@ import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.LinearSmoothScroller
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SearchView
 import android.view.KeyEvent
@@ -80,6 +82,11 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
             super.onChildrenLoaded(parentId, children)
             mediaItems.clear()
             mediaItems.addAll(children)
+            updateAdapterCurrentMetadata(mMediaController?.metadata)
+            if(isMediaPlaying()) {
+                mAdapter.setPlaybackState(mMediaController?.playbackState)
+                scrollToCurrentMediaItem(mMediaController?.metadata)
+            }
             mAdapter.notifyDataSetChanged()
             swipeRefreshLayout.isRefreshing = false
         }
@@ -93,6 +100,11 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
             super.onChildrenLoaded(parentId, children, options)
             mediaItems.clear()
             mediaItems.addAll(children)
+            updateAdapterCurrentMetadata(mMediaController?.metadata)
+            if(isMediaPlaying()) {
+                mAdapter.setPlaybackState(mMediaController?.playbackState)
+                scrollToCurrentMediaItem(mMediaController?.metadata)
+            }
             mAdapter.notifyDataSetChanged()
             swipeRefreshLayout.isRefreshing = false
         }
@@ -142,9 +154,35 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
 
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             super.onMetadataChanged(metadata)
-            if (metadata != null) {
-                mAdapter.setCurrentMediaMetadata(metadata)
+            updateAdapterCurrentMetadata(metadata)
+        }
+    }
+
+    private fun updateAdapterCurrentMetadata(metadata: MediaMetadataCompat?) {
+        metadata?.let { mAdapter.setCurrentMediaMetadata(it) }
+    }
+
+    private fun isMediaPlaying(): Boolean {
+        return mMediaController?.playbackState?.state == PlaybackStateCompat.STATE_PLAYING
+    }
+
+    private fun scrollToCurrentMediaItem(metadata: MediaMetadataCompat?) {
+        // Smooth scroll to currently playing media item
+        val currentMediaId = metadata?.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID)
+        val currentMediaPosition = getMediaItemPosition(currentMediaId)
+        scrollToPosition(currentMediaPosition)
+    }
+
+    private fun scrollToPosition(position: Int) {
+        // Smooth scroll to currently playing media item
+        if(position > -1) {
+            val smoothScroller: RecyclerView.SmoothScroller = object: LinearSmoothScroller(this) {
+                override fun getVerticalSnapPreference(): Int {
+                    return LinearSmoothScroller.SNAP_TO_START
+                }
             }
+            smoothScroller.targetPosition = position
+            mRecyclerView.layoutManager?.startSmoothScroll(smoothScroller)
         }
     }
 
@@ -191,24 +229,6 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
             }
         }.run()
 
-//        realm.where(RoosterMediaItem::class.java)
-//                .findAll()
-//                .takeIf { it.isNotEmpty() }
-//                .also {
-//            if(checkInternetConnection() && !swipeRefreshLayout.isRefreshing)
-//                swipeRefreshLayout.isRefreshing = true
-//        }?.let {
-//            realmMediaItems ->
-//            mediaItems.clear()
-//            val gson = Gson()
-//            realmMediaItems.forEach {
-//                val parcel = gson.fromJson<Parcel>(it.jsonParcel, Parcel::class.java)
-//                val mediaItem = MediaBrowserCompat.MediaItem.CREATOR.createFromParcel(parcel)
-//                mediaItems.add(mediaItem)
-//            }
-//            mAdapter.notifyDataSetChanged()
-//            swipeRefreshLayout.isRefreshing = false
-//        }
         if(checkInternetConnection() && !swipeRefreshLayout.isRefreshing)
             swipeRefreshLayout.isRefreshing = true
 
@@ -250,27 +270,8 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
             mMediaBrowser.connect()
     }
 
-    public override fun onPause() {
+    override fun onPause() {
         super.onPause()
-
-//        //Persist channel roosters for seamless loading
-//        if (!mediaItems.isEmpty()) {
-//            realm.executeTransaction {
-//                realm.where(RoosterMediaItem::class.java).findAll().deleteAllFromRealm()
-//                val gson = Gson()
-//                mediaItems.forEach {
-//                    val roosterMediaItem = RoosterMediaItem()
-//                    val parcel = Parcel.obtain()
-//                    it.writeToParcel(parcel, 0)
-//                    roosterMediaItem.jsonParcel = gson.toJson(parcel)
-//                    realm.insert(roosterMediaItem)
-//                }
-//            }
-//        }
-
-        // If media not playing, stop the media service
-        //if(mMediaController?.playbackState?.state != PlaybackStateCompat.STATE_PLAYING)
-        //    mMediaController?.transportControls?.stop()
 
         //Unsubscribe and unregister MediaControllerCompat callbacks
         MediaControllerCompat.getMediaController(this@DiscoverFragmentActivity)?.unregisterCallback(mediaControllerCallback)
@@ -356,13 +357,19 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
                     FA.Event.explore_channel_rooster_play.Param.channel_title, item.mediaId)
 
             mMediaController?.transportControls?.pause()
-            mediaItems.indexOfFirst { it.mediaId == item.mediaId }.takeIf { it > -1 }?.let {
+
+            getMediaItemPosition(item.mediaId).takeIf { it > -1 }?.let {
                 mMediaController?.transportControls?.skipToQueueItem(it.toLong())
                 mMediaController?.transportControls?.play()
+                scrollToPosition(it)
                 // Increment, so that new content received tomorrow
                 mediaItems[it].mediaId?.let { channelManager.incrementChannelStoryIteration(it) }
             }
         }
+    }
+
+    private fun getMediaItemPosition(mediaId: String?): Int {
+        return mediaItems.indexOfFirst { it.mediaId == mediaId }
     }
 
     override fun start() {

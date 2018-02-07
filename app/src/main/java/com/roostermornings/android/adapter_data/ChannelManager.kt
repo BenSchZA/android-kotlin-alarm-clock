@@ -93,8 +93,14 @@ class ChannelManager(private val context: Context) {
                                 mChannelRoostersReference.addListenerForSingleValueEvent(object : ValueEventListener {
                                     override fun onDataChange(dataSnapshot: DataSnapshot) {
 
+                                        val dataFresh =
+                                                persistedChannelRoosters.isNotEmpty() &&
+                                                        persistedChannelRoosters.all {
+                                            persisted -> tempChannelRoosters.any {
+                                            it.audio_file_url == persisted.audio_file_url }
+                                        }
                                         //When finished, add temp data to adapter array
-                                        if (persistedChannelRoosters != tempChannelRoosters) {
+                                        if (!dataFresh) {
                                             onFlagChannelManagerDataListener?.onChannelRoosterDataChanged(tempChannelRoosters)
                                         }
                                         onFlagChannelManagerDataListener?.onSyncFinished()

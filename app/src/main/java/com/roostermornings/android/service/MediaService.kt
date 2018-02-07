@@ -394,9 +394,7 @@ class MediaService : MediaBrowserServiceCompat(),
             override fun onChannelRoosterDataChanged(freshChannelRoosters: java.util.ArrayList<ChannelRooster>) {
                 channelRoosters.clear()
                 channelRoosters.addAll(freshChannelRoosters)
-            }
 
-            override fun onSyncFinished() {
                 mediaSources = ArrayList(channelRoosters.size)
 
                 // Create MediaSource list to compile and pass to player via ConcatenatingMediaSource()
@@ -452,6 +450,12 @@ class MediaService : MediaBrowserServiceCompat(),
                 // ConcatenatingMediaSource enables us to create a *windowed* {} loop of media content [ ][ ] {[ ][ ]...x10...[ ][ ]} [ ]
                 // Each window, managed by TimelineQueueNavigator(), is a maximum of 10 items long and dynamically loaded
                 mPlayer.prepare(ConcatenatingMediaSource(*mediaSources.toTypedArray()))
+            }
+
+            override fun onSyncFinished() {
+                // Prepare content to send to subscribed content
+                loadChildrenImpl(currentParentId, currentResult as MediaBrowserServiceCompat.Result<List<MediaBrowserCompat.MediaItem>>)
+                mPlayerPreparing = false
             }
         }
 
