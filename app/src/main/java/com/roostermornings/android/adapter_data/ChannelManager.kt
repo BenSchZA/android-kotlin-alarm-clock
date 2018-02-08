@@ -18,6 +18,7 @@ import com.roostermornings.android.util.JSONPersistence
 import com.roostermornings.android.util.Toaster
 import java.util.*
 import javax.inject.Inject
+import kotlin.collections.ArrayList
 
 /**
  * com.roostermornings.android.channels
@@ -92,16 +93,23 @@ class ChannelManager(private val context: Context) {
                                 //Value events are always triggered last and are guaranteed to contain updates from any other events which occurred before that snapshot was taken.
                                 mChannelRoostersReference.addListenerForSingleValueEvent(object : ValueEventListener {
                                     override fun onDataChange(dataSnapshot: DataSnapshot) {
+                                        // Reduce array to unique elements
+                                        val returnVal = ArrayList<ChannelRooster>(tempChannelRoosters.associateBy { it.channel_uid }.values)
+
+                                        val noRepeatedEntries = persistedChannelRoosters.count() ==
+                                                persistedChannelRoosters.associateBy { it.channel_uid }.count()
 
                                         val dataFresh =
-                                                persistedChannelRoosters.isNotEmpty() &&
-                                                        persistedChannelRoosters.all {
-                                            persisted -> tempChannelRoosters.any {
-                                            it.audio_file_url == persisted.audio_file_url }
-                                        }
+                                                persistedChannelRoosters.isNotEmpty()
+                                                        && persistedChannelRoosters.all {
+                                            persisted -> returnVal.any {
+                                            it.audio_file_url == persisted.audio_file_url }}
+                                                        && noRepeatedEntries
+
                                         //When finished, add temp data to adapter array
                                         if (!dataFresh) {
-                                            onFlagChannelManagerDataListener?.onChannelRoosterDataChanged(tempChannelRoosters)
+                                            onFlagChannelManagerDataListener
+                                                    ?.onChannelRoosterDataChanged(returnVal)
                                         }
                                         onFlagChannelManagerDataListener?.onSyncFinished()
                                     }
