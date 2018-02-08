@@ -281,6 +281,7 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
 
     private fun refreshDownloadIndicator() {
         if (!deviceAlarmTableManager.isAlarmTableEmpty) {
+            mMenu?.getItem(0)?.isVisible = true
 
             /* If there is no pending alarm, or pending alarm is synced,
             indicate with icon and clear no-internet snackbar*/
@@ -326,7 +327,7 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
             })
         } else {
             // If there are no alarms, clear navigation icon
-            mMenu?.getItem(0)?.icon = null
+            mMenu?.getItem(0)?.isVisible = false
         }
 
         //Download any social or channel audio files
