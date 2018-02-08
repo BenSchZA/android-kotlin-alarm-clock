@@ -58,7 +58,7 @@
         android:clickable="true"
         android:focusable="true"
         android:clipToPadding="false"
-        android:padding="@dimen/spacing_large"
+        android:padding="@dimen/spacing_normal"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
 </android.support.design.widget.CoordinatorLayout>

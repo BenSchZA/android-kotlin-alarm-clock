@@ -155,6 +155,7 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             super.onMetadataChanged(metadata)
             updateAdapterCurrentMetadata(metadata)
+            mAdapter.notifyDataSetChanged()
         }
     }
 
@@ -171,6 +172,10 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
         val currentMediaId = metadata?.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID)
         val currentMediaPosition = getMediaItemPosition(currentMediaId)
         scrollToPosition(currentMediaPosition)
+    }
+
+    private fun getCurrentMediaID(): String? {
+        return mMediaController?.metadata?.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID)
     }
 
     private fun scrollToPosition(position: Int) {
@@ -320,7 +325,7 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
 
     private fun handleSearch(query: String) {
         mAdapter.refreshAll(mediaItems)
-        mAdapter.filter?.filter(query)
+        mAdapter.filter.filter(query)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
