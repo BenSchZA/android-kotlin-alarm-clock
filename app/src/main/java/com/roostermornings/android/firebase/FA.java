@@ -133,6 +133,10 @@ public abstract class FA {
         public abstract class active_day {
         }
         public abstract class channel_info_viewed extends channel_selected {
+            public abstract class Param {
+                //String param
+                public final static String channel_title = "channel_title";
+            }
         }
         public abstract class explore_channel_rooster_play extends channel_selected {
             public abstract class Param {
