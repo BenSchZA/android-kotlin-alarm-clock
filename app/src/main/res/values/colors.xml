@@ -41,10 +41,7 @@
 
     <color name="rooster_splash">#024272</color>
 
-    <!--<color name="gradient_start_day">#50aced</color>-->
-    <!--<color name="gradient_center_day">#8bb0cc</color>-->
-    <!--<color name="gradient_end_day">#ffb88c</color>-->
-    <color name="gradient_start_day">#3483f8</color>
+    <color name="gradient_start_day">#60a0ff</color>
     <color name="gradient_center_day">#9eb1c1</color>
     <color name="gradient_end_day">#fcb78c</color>
 

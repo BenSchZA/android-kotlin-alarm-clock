@@ -46,8 +46,8 @@ class ThemeManager(val activity: Activity) {
     private fun setThemeDay(): Boolean {
         return try {
             activity.findViewById<View>(R.id.main_content)?.isSelected = false
-            activity.findViewById<View>(R.id.toolbar)?.setBackgroundColor(ResourcesCompat.getColor(activity.resources, R.color.rooster_blue, null))
-            activity.findViewById<View>(R.id.tabs)?.setBackgroundColor(ResourcesCompat.getColor(activity.resources, R.color.rooster_blue, null))
+            activity.findViewById<View>(R.id.toolbar)?.setBackgroundColor(ResourcesCompat.getColor(activity.resources, R.color.onboarding_blue, null))
+            activity.findViewById<View>(R.id.tabs)?.setBackgroundColor(ResourcesCompat.getColor(activity.resources, R.color.onboarding_blue, null))
             true
         } catch (e: NullPointerException) {
             e.printStackTrace()

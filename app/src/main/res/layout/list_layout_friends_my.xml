@@ -10,7 +10,9 @@
     android:background="?android:attr/selectableItemBackground"
     android:longClickable="true"
     android:orientation="horizontal"
-    android:padding="@dimen/spacing_normal">
+    android:padding="@dimen/spacing_normal"
+    android:clipToPadding="false"
+    android:clipChildren="false">
 
     <RelativeLayout
         android:layout_width="wrap_content"
@@ -30,7 +32,7 @@
 
         <ImageView
             android:id="@+id/my_friends_profile_pic"
-            android:elevation="@dimen/cardview_default_elevation"
+            android:elevation="4dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/small_profile_pic_circle" />
@@ -55,6 +57,8 @@
         android:layout_marginLeft="@dimen/spacing_large"
         android:background="@drawable/md_transparent"
         android:clickable="true"
+        android:focusable="true"
+        android:elevation="4dp"
         android:src="@drawable/ic_send_white_24dp" />
 
 </LinearLayout>
