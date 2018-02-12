@@ -131,12 +131,12 @@ class AlarmToggleWidget : AppWidgetProvider() {
 
         // Create an Intent to launch Home Activity
         val intentHomeActivity = Intent(context, MyAlarmsFragmentActivity::class.java)
-        val pendingIntentHomeActivity = PendingIntent.getActivity(context, 0, intentHomeActivity, PendingIntent.FLAG_CANCEL_CURRENT)
+        val pendingIntentHomeActivity = PendingIntent.getActivity(context, 0, intentHomeActivity, PendingIntent.FLAG_UPDATE_CURRENT)
         views.setOnClickPendingIntent(R.id.widget_current_time_textview, pendingIntentHomeActivity)
 
         // Create an Intent to launch New Alarm Activity
         val intentNewAlarmActivity = Intent(context, NewAlarmFragmentActivity::class.java)
-        val pendingIntentNewAlarmActivity = PendingIntent.getActivity(context, 1, intentNewAlarmActivity, PendingIntent.FLAG_CANCEL_CURRENT)
+        val pendingIntentNewAlarmActivity = PendingIntent.getActivity(context, 1, intentNewAlarmActivity, PendingIntent.FLAG_UPDATE_CURRENT)
         views.setOnClickPendingIntent(R.id.widget_add_alarm, pendingIntentNewAlarmActivity)
 
         views.setViewVisibility(R.id.widget_toggle_alarm, View.INVISIBLE)
@@ -187,7 +187,7 @@ class AlarmToggleWidget : AppWidgetProvider() {
             // Create an Intent to launch Edit Alarm Activity
             val intentEditAlarmActivity = Intent(context, NewAlarmFragmentActivity::class.java)
             intentEditAlarmActivity.putExtra(Extra.ALARM_SET_ID.name, pendingAlarm.setId)
-            val pendingIntentEditAlarmActivity = PendingIntent.getActivity(context, 2, intentEditAlarmActivity, PendingIntent.FLAG_CANCEL_CURRENT)
+            val pendingIntentEditAlarmActivity = PendingIntent.getActivity(context, 2, intentEditAlarmActivity, PendingIntent.FLAG_UPDATE_CURRENT)
 
             views.setOnClickPendingIntent(R.id.widget_pending_alarm_layout, pendingIntentEditAlarmActivity)
             views.setOnClickPendingIntent(R.id.widget_alarm_time_textview, pendingIntentEditAlarmActivity)
