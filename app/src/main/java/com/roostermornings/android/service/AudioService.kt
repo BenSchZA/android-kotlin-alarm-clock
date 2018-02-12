@@ -1264,7 +1264,7 @@ class AudioService : Service() {
         launchIntent.action = Action.CANCEL_SNOOZE.name
 
         val pendingIntent = PendingIntent.getActivity(this, 0,
-                launchIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+                launchIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         val broadcastIntent = Intent(Action.END_AUDIO_SERVICE.name)
         val broadcastPendingIntent = PendingIntent.getBroadcast(this, 0, broadcastIntent, 0)
@@ -1287,7 +1287,7 @@ class AudioService : Service() {
         launchIntent.action = Action.CANCEL_SNOOZE.name
 
         val pendingIntent = PendingIntent.getActivity(this, 0,
-                launchIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+                launchIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         val notification = NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.logo)

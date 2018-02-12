@@ -285,7 +285,7 @@ public class UploadService extends Service {
 
         Intent notificationIntent = new Intent(this, AudioService.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
-                notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Notification notification=new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.logo)
