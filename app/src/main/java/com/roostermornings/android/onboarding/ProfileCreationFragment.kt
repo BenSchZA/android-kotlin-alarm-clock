@@ -39,6 +39,7 @@ import com.roostermornings.android.firebase.UserMetrics
 import com.roostermornings.android.fragment.base.BaseFragment
 import com.roostermornings.android.util.Toaster
 import kotlinx.android.synthetic.main.fragment_onboarding_profile_creation.*
+import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
 import javax.inject.Inject
@@ -350,8 +351,14 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
 
                 //TODO: get permission
                 //UserMetrics.setBirthday(`object`?.getString("birthday")?:"")
-                UserMetrics.setGender(graphObject?.getString("gender")?:"")
-                UserMetrics.setEmail(graphObject?.getString("email")?:"")
+
+                val gender = if (graphObject?.has("gender") == true)
+                    graphObject.getString("gender") else ""
+                val email = if (graphObject?.has("email") == true)
+                    graphObject.getString("email") else ""
+
+                UserMetrics.setGender(gender)
+                UserMetrics.setEmail(email)
 
                 changeLayoutSignedIn()
                 proceedToNextPage()
