@@ -68,7 +68,6 @@ android {
             //Beta version name is release version name at point of diversion, with alpha b
 
             //Release
-            //versionCode 53
             versionCode 54
             versionName "2.4.7"
 
@@ -97,9 +96,9 @@ android {
     buildTypes {
         release {
             //During debugging, enable debugging... and disable minify to get proper stacktraces
-            debuggable true
-            //minifyEnabled true
-            //shrinkResources true
+            //debuggable true
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             consumerProguardFiles 'proguard-rules.txt'
             proguardFile 'proguard-square-okio.pro'
