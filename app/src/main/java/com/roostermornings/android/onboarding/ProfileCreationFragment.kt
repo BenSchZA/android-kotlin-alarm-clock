@@ -349,6 +349,10 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
             override fun onAuthSuccess(task: Task<AuthResult>) {
                 UserMetrics.generateNewUserMetricsEntry()
 
+                val name = if (graphObject?.has("name") == true)
+                    graphObject.getString("name") else ""
+                authManager.updateFirebaseUserDisplayName(name)
+
                 //TODO: get permission
                 //UserMetrics.setBirthday(`object`?.getString("birthday")?:"")
 
@@ -384,6 +388,7 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
         authManager.firebaseAuthWithGoogle(result, object: AuthManager.AuthInterface {
             override fun onAuthSuccess(task: Task<AuthResult>) {
                 UserMetrics.generateNewUserMetricsEntry()
+
                 changeLayoutSignedIn()
                 proceedToNextPage()
 
@@ -448,6 +453,8 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
                 object: AuthManager.AuthInterface {
             override fun onAuthSuccess(task: Task<AuthResult>) {
                 UserMetrics.generateNewUserMetricsEntry()
+                authManager.updateFirebaseUserDisplayName(name)
+
                 changeLayoutSignedIn()
                 proceedToNextPage()
 

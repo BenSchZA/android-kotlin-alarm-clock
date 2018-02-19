@@ -27,6 +27,7 @@ import com.roostermornings.android.keys.PrefsKey
 import com.roostermornings.android.snackbar.SnackbarManager
 import com.roostermornings.android.sqlutil.AudioTableManager
 import com.roostermornings.android.sync.DownloadSyncAdapter
+import java.util.*
 
 import javax.inject.Inject
 
@@ -217,5 +218,31 @@ class LifeCycle
 
     companion object {
         private val firstEntry = "shared_pref_lifecycle_first_entry"
+
+        fun performMethodOnceInDay(operation: () -> Unit) {
+            val className = operation.javaClass.enclosingClass.name
+            val methodName = operation.javaClass.enclosingMethod.name
+
+            val uid = "$className:$methodName"
+
+            val jsonPersistence = JSONPersistence()
+
+            // Fetch date-lock date if exists for method
+            val dateLockTimeInMillis = jsonPersistence.getDateLock(uid)
+            val dateLockTime = Calendar.getInstance()
+
+            // Get current date
+            dateLockTime.timeInMillis = dateLockTimeInMillis
+            val currentTime = Calendar.getInstance()
+
+            // Determine if method already run today
+            val alreadyPerformedToday = dateLockTime.get(Calendar.DATE) == currentTime.get(Calendar.DATE)
+
+            // If method hasn't run today, run it and set date-lock
+            if(!alreadyPerformedToday) {
+                operation()
+                jsonPersistence.setDateLock(uid, currentTime.timeInMillis)
+            }
+        }
     }
 }

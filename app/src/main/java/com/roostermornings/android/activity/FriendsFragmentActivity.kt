@@ -197,7 +197,7 @@ class FriendsFragmentActivity : BaseActivity(), FriendsMyFragment1.OnFragmentInt
 
     private var numberEntryFragment: NumberEntryFragment? = null
     private fun showNumberEntryFragment() {
-        if (!sharedPreferences.getBoolean(PrefsKey.MOBILE_NUMBER_ENTRY_DISMISSED.name, false) && !sharedPreferences.getBoolean(PrefsKey.MOBILE_NUMBER_ENTRY_DISMISSED.name, false)) {
+        if (!sharedPreferences.getBoolean(PrefsKey.MOBILE_NUMBER_VALIDATED.name, false) && !sharedPreferences.getBoolean(PrefsKey.MOBILE_NUMBER_ENTRY_DISMISSED.name, false)) {
             appbar.visibility = View.GONE
 
             numberEntryFragment = NumberEntryFragment.newInstance()
