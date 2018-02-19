@@ -96,10 +96,10 @@
     <ImageButton
         android:id="@+id/upload_audio"
         android:contentDescription="Upload audio"
+        android:background="@drawable/md_transparent"
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_margin="8dp"
-        android:background="@drawable/ic_file_upload_white_24px"
         android:elevation="@dimen/cardview_default_elevation"
         app:layout_constraintBottom_toTopOf="@+id/button_bar"
         app:layout_constraintEnd_toEndOf="parent" />
