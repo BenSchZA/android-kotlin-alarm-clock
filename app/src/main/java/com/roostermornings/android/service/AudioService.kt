@@ -401,7 +401,7 @@ class AudioService : Service() {
     }
 
     private fun switchOnActiveInternetConnection(active: Boolean?) {
-        if(active != null && active) {
+        if(active == true) {
             // Download any social or channel audio files
             attemptContentUriRetrieval(alarm)
 

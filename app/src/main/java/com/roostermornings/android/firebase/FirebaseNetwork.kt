@@ -14,12 +14,15 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.iid.FirebaseInstanceId
 import com.roostermornings.android.BaseApplication.Companion.mCurrentUser
+import com.roostermornings.android.domain.database.SocialRooster
 import com.roostermornings.android.domain.database.User
 import com.roostermornings.android.domain.local.Friend
 import com.roostermornings.android.keys.PrefsKey
 import com.roostermornings.android.util.MyContactsController
 import com.roostermornings.android.util.StrUtils
+import java.sql.Timestamp
 
 import java.util.Calendar
 import java.util.HashMap
@@ -331,6 +334,55 @@ object FirebaseNetwork {
 
             //Add user as a friend of theirs
             childUpdates.put("users/${fUser.uid}/friends/${fUser.uid}", true)
+
+            fDB.updateChildren(childUpdates)
+        }
+    }
+
+    fun updateFirebaseInstanceId() {
+        val fDB = FirebaseDatabase.getInstance().reference
+        val fUser = FirebaseAuth.getInstance().currentUser
+
+        val deviceToken = FirebaseInstanceId.getInstance().token
+
+        val childUpdates = HashMap<String, Any>()
+
+        if (fUser?.uid?.isNotBlank() == true && deviceToken?.isNotBlank() == true) {
+            childUpdates.put("users/${fUser.uid}/device_type", "android")
+            childUpdates.put("users/${fUser.uid}/device_token", deviceToken)
+            fDB.updateChildren(childUpdates)
+        }
+    }
+
+    fun sendRoosterToUser(user: User, audioURL: String) {
+        val fDB = FirebaseDatabase.getInstance().reference
+        val fUser = FirebaseAuth.getInstance().currentUser
+
+        val childUpdates = HashMap<String, Any>()
+
+        if (fUser?.uid?.isNotBlank() == true) {
+            val timestamp = Timestamp(System.currentTimeMillis())
+
+            val uploadUrl = "social_rooster_uploads/${fUser.uid}"
+            val uploadKey = fDB.child(uploadUrl).push().key
+
+            val socialRoosterUploaded = SocialRooster(audioURL,
+                    user.user_name,
+                    false,
+                    user.profile_pic,
+                    timestamp.time,
+                    user.uid, uploadKey, fUser.uid)
+
+            val socialRoosterQueue = SocialRooster(audioURL,
+                    mCurrentUser.user_name,
+                    false,
+                    mCurrentUser.profile_pic,
+                    timestamp.time,
+                    user.uid, uploadKey, fUser.uid)
+
+            // Note same upload keys
+            childUpdates.put("social_rooster_uploads/${fUser.uid}/$uploadKey", socialRoosterUploaded)
+            childUpdates.put("social_rooster_queue/${user.uid}/$uploadKey", socialRoosterQueue)
 
             fDB.updateChildren(childUpdates)
         }
