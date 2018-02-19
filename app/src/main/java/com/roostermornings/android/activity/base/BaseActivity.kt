@@ -63,6 +63,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.roostermornings.android.activity.*
 import com.roostermornings.android.firebase.FA
 import com.roostermornings.android.firebase.FirebaseNetwork
+import com.roostermornings.android.geolocation.GeoHashUtils
 import com.roostermornings.android.keys.Action
 import com.roostermornings.android.keys.Flag
 import com.roostermornings.android.realm.RealmAlarmFailureLog
@@ -93,6 +94,7 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
     @Inject lateinit var authManager: AuthManager
     @Inject lateinit var lifeCycle: LifeCycle
     @Inject lateinit var realmAlarmFailureLog: RealmAlarmFailureLog
+    @Inject lateinit var geoHashUtils: GeoHashUtils
 
     var firebaseUser: FirebaseUser? = null
     @Inject
@@ -155,12 +157,16 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
     }
 
     private fun performOnceOnForeground() {
-        // Check if first entry
-        lifeCycle.performInception()
         // Log last seen in user metrics, to enable clearing stagnant data
         UserMetrics.updateLastSeen()
-        // Log active day
-        UserMetrics.logActiveDays()
+        LifeCycle.performMethodOnceInDay {
+            // Check if first entry
+            lifeCycle.performInception()
+            // Log active day
+            UserMetrics.logActiveDays()
+        }
+        // Check if the user's geohash location entry is still valid
+        geoHashUtils.checkUserGeoHash()
         // Log current app version
         // Handled by FCF as version name
         //UserMetrics.updateVersionCode()

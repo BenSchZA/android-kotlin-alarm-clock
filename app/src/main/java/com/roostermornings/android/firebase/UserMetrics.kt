@@ -173,6 +173,7 @@ object UserMetrics {
     }
 
     fun logActiveDays() {
+        // TODO: remove datelock, rely on lifecycle method
         val jsonPersistence = JSONPersistence()
 
         // Attempt to log active day, if not date locked
