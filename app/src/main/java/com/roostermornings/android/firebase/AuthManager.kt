@@ -261,12 +261,6 @@ class AuthManager(val context: Context) {
     fun firebaseAnonymousAuth() {
         val deviceToken = FirebaseInstanceId.getInstance().token
 
-        //TODO:
-//        FirebaseAuth.getInstance().currentUser?.updateProfile(
-//                UserProfileChangeRequest.Builder()
-//                .setDisplayName("Anonymous Rooster (Me)")
-//                .build())
-
         FirebaseNetwork.createOrUpdateRoosterUser(deviceToken, null)
     }
 

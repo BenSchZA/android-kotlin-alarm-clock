@@ -349,9 +349,7 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
             override fun onAuthSuccess(task: Task<AuthResult>) {
                 UserMetrics.generateNewUserMetricsEntry()
 
-                val name = if (graphObject?.has("name") == true)
-                    graphObject.getString("name") else ""
-                authManager.updateFirebaseUserDisplayName(name)
+                authManager.updateFirebaseUserDisplayName(Profile.getCurrentProfile().name)
 
                 //TODO: get permission
                 //UserMetrics.setBirthday(`object`?.getString("birthday")?:"")
