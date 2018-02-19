@@ -197,22 +197,29 @@ class FriendsFragmentActivity : BaseActivity(), FriendsMyFragment1.OnFragmentInt
 
     private var numberEntryFragment: NumberEntryFragment? = null
     private fun showNumberEntryFragment() {
-        if (!sharedPreferences.getBoolean(PrefsKey.MOBILE_NUMBER_VALIDATED.name, false) && !sharedPreferences.getBoolean(PrefsKey.MOBILE_NUMBER_ENTRY_DISMISSED.name, false)) {
-            appbar.visibility = View.GONE
+        val mobileNumberValidated = sharedPreferences.getBoolean(PrefsKey.MOBILE_NUMBER_VALIDATED.name, false)
 
-            numberEntryFragment = NumberEntryFragment.newInstance()
-            supportFragmentManager.beginTransaction()
-                    .replace(R.id.fillerContainer, numberEntryFragment)
-                    .commit()
+        if(!mobileNumberValidated) {
+            FirebaseNetwork.setOnFlagValidMobileNumberCompleteListener(object : FirebaseNetwork.OnFlagValidMobileNumberCompleteListener {
+                override fun onEvent(valid: Boolean) {
+                    val mobileNumberEntryDismissed = sharedPreferences.getBoolean(
+                            PrefsKey.MOBILE_NUMBER_ENTRY_DISMISSED.name, false)
+
+                    if (!valid && !mobileNumberEntryDismissed) {
+                        appbar.visibility = View.GONE
+
+                        numberEntryFragment = NumberEntryFragment.newInstance()
+                        supportFragmentManager.beginTransaction()
+                                .replace(R.id.fillerContainer, numberEntryFragment)
+                                .commit()
+                    }
+
+                    // Refresh UI fragment to show number entry dialog
+                    mSectionsPagerAdapter?.notifyDataSetChanged()
+                }
+            })
+            FirebaseNetwork.flagValidMobileNumber(this, true)
         }
-
-        FirebaseNetwork.setOnFlagValidMobileNumberCompleteListener(object : FirebaseNetwork.OnFlagValidMobileNumberCompleteListener {
-            override fun onEvent(valid: Boolean) {
-                // Refresh UI fragment to show number entry dialog
-                mSectionsPagerAdapter?.notifyDataSetChanged()
-            }
-        })
-        FirebaseNetwork.flagValidMobileNumber(this, true)
     }
 
     private var profileCreationFragment: ProfileCreationFragment? = null
