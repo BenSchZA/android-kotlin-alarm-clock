@@ -28,7 +28,7 @@ class FirebaseListenerService : Service() {
         throw UnsupportedOperationException("Not yet implemented")
     }
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val firebaseUser = FirebaseAuth.getInstance().currentUser
 
         if (!mRunning) {

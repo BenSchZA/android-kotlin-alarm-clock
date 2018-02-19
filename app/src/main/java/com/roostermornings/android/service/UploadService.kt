@@ -74,7 +74,7 @@ class UploadService : Service() {
         return mBinder
     }
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         BaseApplication.roosterApplicationComponent.inject(this)
 
         foregroundNotification("Audio upload in progress")
@@ -116,7 +116,7 @@ class UploadService : Service() {
 
         val mStorageRef = FirebaseStorage.getInstance().reference
 
-        val localFile = File(mAudioSavePathInDevice!!)
+        val localFile = File(mAudioSavePathInDevice)
         val file = Uri.fromFile(localFile)
         val audioFileRef = mStorageRef.child("social_rooster_uploads/" + file.lastPathSegment)
 
@@ -149,9 +149,7 @@ class UploadService : Service() {
                 }
                 .addOnFailureListener {
                     // Handle unsuccessful upload
-                    Toaster.makeToast(applicationContext,
-                            "Error uploading!",
-                            Toast.LENGTH_LONG).checkTastyToast()
+                    uploadFailed()
                     endService()
                 }
     }

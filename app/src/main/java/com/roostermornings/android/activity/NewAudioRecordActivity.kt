@@ -44,6 +44,8 @@ import butterknife.OnClick
 import android.Manifest.permission.RECORD_AUDIO
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.app.Activity
+import android.support.v7.app.AppCompatDelegate
+import android.support.v7.content.res.AppCompatResources
 import android.widget.*
 import com.roostermornings.android.firebase.UserMetrics
 import com.roostermornings.android.keys.Action
@@ -160,6 +162,18 @@ class NewAudioRecordActivity : BaseActivity() {
         BaseApplication.roosterApplicationComponent.inject(this)
 
         setButtonBarSelection()
+
+        /* Configure vector image button programmatically
+        for compatibility with older Android versions */
+        if(!RoosterUtils.hasLollipop()) {
+            AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
+        }
+        val vectorDrawable = AppCompatResources.getDrawable(this, R.drawable.ic_file_upload_white_24px)
+        upload_audio.setImageDrawable(vectorDrawable)
+//        upload_audio.layoutParams.height = 300
+//        upload_audio.layoutParams.width = 300
+        upload_audio.scaleType = ImageView.ScaleType.FIT_XY
+        upload_audio.requestLayout()
 
         setNewAudioStatus(NEW_AUDIO_READY_RECORD)
 
