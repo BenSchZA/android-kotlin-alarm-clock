@@ -422,7 +422,6 @@ class DiscoverFragmentActivity : BaseActivity(), DiscoverListAdapter.DiscoverAud
     }
 
     companion object {
-
         val TAG: String = DiscoverFragmentActivity::class.java.simpleName
     }
 }
