@@ -178,6 +178,30 @@ class RealmAlarmFailureLog(val context: Context) {
             }
         }
         alarmFailureLog.takeIf {
+            (!it.fired || !it.activated) && !it.running}?.let {
+
+            //Show dialog explainer again by clearing shared pref
+            val editor = sharedPreferences.edit()
+            editor.putBoolean(PrefsKey.PERMISSIONS_DIALOG_OPTIMIZATION.name, false)
+            editor.apply()
+
+            snackbarQueueElement.text = "Your alarm didn't fire. Find out why."
+            snackbarQueueElement.dialog = true
+            snackbarQueueElement.dialogType = SnackbarManager.DialogType.NOT_FIRED
+            snackbarQueueElement.dialogTitle = "What's this missed alarm about?"
+            snackbarQueueElement.dialogText = "Some phones (e.g. Huawei and Xiaomi) don't allow other apps to set alarms in order to save power. In most of these cases the phone will have a settings page with a whitelist where you can allow Rooster to set alarms or start from the background.\n\nIf your phone issue is one we are aware of, we'll display an explainer again when you set your next alarm, otherwise please get in touch with us and we'll try help you out."
+
+            realmScheduledSnackbar.updateOrCreateScheduledSnackbarEntry(snackbarQueueElement, activityName, -1L)
+
+            UserMetrics.logEvent(MetricsEvent(timestamp = it.scheduledTime)
+                    .setEventAndType(
+                            MetricsEvent.Companion.Event.ALARM_FAILURE(
+                                    MetricsEvent.Companion.Event.ALARM_FAILURE.Type.NO_FIRE)))
+
+            return@generateScheduledSnackbarForAlarmFailure
+        }
+        alarmFailureLog.takeIf {
+            it.firedTime > -1 &&
             Math.abs(it.scheduledTime - it.firedTime) >= Constants.TIME_MILLIS_1_MINUTE*5}?.let {
 
             // 88 characters max for text
@@ -229,29 +253,6 @@ class RealmAlarmFailureLog(val context: Context) {
                     .setEventAndType(
                             MetricsEvent.Companion.Event.ALARM_FAILURE(
                                     MetricsEvent.Companion.Event.ALARM_FAILURE.Type.STREAM)))
-
-            return@generateScheduledSnackbarForAlarmFailure
-        }
-        alarmFailureLog.takeIf {
-            (!it.fired || !it.activated) && !it.running}?.let {
-
-            //Show dialog explainer again by clearing shared pref
-            val editor = sharedPreferences.edit()
-            editor.putBoolean(PrefsKey.PERMISSIONS_DIALOG_OPTIMIZATION.name, false)
-            editor.apply()
-
-            snackbarQueueElement.text = "Your alarm didn't fire. Find out why."
-            snackbarQueueElement.dialog = true
-            snackbarQueueElement.dialogType = SnackbarManager.DialogType.NOT_FIRED
-            snackbarQueueElement.dialogTitle = "What's this missed alarm about?"
-            snackbarQueueElement.dialogText = "Some phones (e.g. Huawei and Xiaomi) don't allow other apps to set alarms in order to save power. In most of these cases the phone will have a settings page with a whitelist where you can allow Rooster to set alarms or start from the background.\n\nIf your phone issue is one we are aware of, we'll display an explainer again when you set your next alarm, otherwise please get in touch with us and we'll try help you out."
-
-            realmScheduledSnackbar.updateOrCreateScheduledSnackbarEntry(snackbarQueueElement, activityName, -1L)
-
-            UserMetrics.logEvent(MetricsEvent(timestamp = it.scheduledTime)
-                    .setEventAndType(
-                            MetricsEvent.Companion.Event.ALARM_FAILURE(
-                                    MetricsEvent.Companion.Event.ALARM_FAILURE.Type.NO_FIRE)))
 
             return@generateScheduledSnackbarForAlarmFailure
         }
