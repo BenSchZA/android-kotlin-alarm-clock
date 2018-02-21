@@ -147,6 +147,10 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
         registerReceiver(foregroundReceiver, foregroundIntentFilter)
 
         startService(Intent(this, ForegroundService::class.java))
+
+        if(this is MyAlarmsFragmentActivity)
+            // Check if first entry
+            lifeCycle.performInception()
     }
 
     public override fun onPause() {
@@ -160,8 +164,6 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
         // Log last seen in user metrics, to enable clearing stagnant data
         UserMetrics.updateLastSeen()
         LifeCycle.performMethodOnceInDay {
-            // Check if first entry
-            lifeCycle.performInception()
             // Log active day
             UserMetrics.logActiveDays()
         }

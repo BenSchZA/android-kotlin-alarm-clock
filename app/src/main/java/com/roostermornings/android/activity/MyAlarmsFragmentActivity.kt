@@ -392,7 +392,10 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
             nav_view.menu?.findItem(R.id.nav_signout)?.setTitle(R.string.action_signin)
         }
 
-        nav_view.getHeaderView(0)?.user_name?.text = firebaseUser?.displayName ?: "Anonymous"
+        nav_view.getHeaderView(0)?.user_name?.text =
+                if(firebaseUser?.displayName?.isBlank() == true)
+                    "Anonymous"
+                else firebaseUser?.displayName
         nav_view.getHeaderView(0)?.user_email?.text = firebaseUser?.email
     }
 

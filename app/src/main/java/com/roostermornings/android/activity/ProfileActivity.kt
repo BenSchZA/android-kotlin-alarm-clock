@@ -142,9 +142,7 @@ class ProfileActivity : BaseActivity(), CustomCommandInterface {
                     }
 
                     recreate()
-                } else {
-                    finish()
-                }
+                } else finish()
             }
             else -> {}
         }
