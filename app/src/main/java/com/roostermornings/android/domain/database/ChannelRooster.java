@@ -23,6 +23,9 @@ public class ChannelRooster {
     public String action_url = "";
 
     @Exclude
+    private Boolean story = null;
+
+    @Exclude
     private Boolean selected = false;
     @Exclude
     private String channel_description = "";
@@ -69,6 +72,16 @@ public class ChannelRooster {
 
     public void setAction_url(String action_url) {
         this.action_url = action_url;
+    }
+
+    @Exclude
+    public Boolean getStory() {
+        return story;
+    }
+
+    @Exclude
+    public void setStory(Boolean story) {
+        this.story = story;
     }
 
     @Exclude
