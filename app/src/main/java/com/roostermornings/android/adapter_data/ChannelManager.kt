@@ -235,6 +235,7 @@ class ChannelManager(private val context: Context) {
                 jsonPersistence.setStoryIteration(channel.getUid(), nextValidEntry)
 
             channelRooster.isSelected = false
+            channelRooster.story = channel.new_alarms_start_at_first_iteration
             // This method allows multiple objects per key
             // Try get priority mutable list, add to it, if unsuccessful (i.e. first entry) then create list
             if(channelRoosterMap[channel.getPriority()]?.add(channelRooster) != true) {
