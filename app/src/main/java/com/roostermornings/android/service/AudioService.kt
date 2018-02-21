@@ -200,6 +200,8 @@ class AudioService : Service() {
         super.onCreate()
         mRunning = false
 
+        foregroundNotification("Alarm audio starting")
+
         BaseApplication.roosterApplicationComponent.inject(this)
 
         // Catch all uncaught exceptions
