@@ -228,11 +228,24 @@ class NewAlarmFragment2 : BaseFragment() {
         val alarmChannel: AlarmChannel? = alarm.channel
 
         // If editing alarm, choose original channel, else choose selected channel from persistence
-        channelRoosters.firstOrNull { (alarmChannel?.id == it.channel_uid) || it.isSelected }?.let {
+        channelRoosters.firstOrNull { alarmChannel?.id == it.channel_uid }?.let {
+            // Clear all selected channels
+            channelRoosters.forEach { it.isSelected = false }
             it.isSelected = true
 
             alarm.channel.id = it.channel_uid
             alarm.channel.name = it.name
+
+            return
+        } ?: channelRoosters.firstOrNull { it.isSelected }?.let {
+            // Clear all selected channels
+            channelRoosters.forEach { it.isSelected = false }
+            it.isSelected = true
+
+            alarm.channel.id = it.channel_uid
+            alarm.channel.name = it.name
+
+            return
         }
     }
 
