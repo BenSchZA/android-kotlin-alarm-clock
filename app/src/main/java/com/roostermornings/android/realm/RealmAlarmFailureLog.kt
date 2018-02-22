@@ -126,6 +126,12 @@ class RealmAlarmFailureLog(val context: Context) {
             }
         }).create()
 
+        // If alarm failures exist, direct user to FAQs on alarm creation
+        if(getAlarmFailures().isNotEmpty())
+            sharedPreferences.edit()
+                    .putBoolean(PrefsKey.USER_VIEWED_FAQS.name, false)
+                    .apply()
+
         // Log each alarm failure to Crashlytics before deleting from Realm
         getAlarmFailures().onEach { alarmFailure ->
             val unmanagedAlarmFailure = realm.copyFromRealm(alarmFailure)
