@@ -15,6 +15,6 @@ public interface IAlarmSetListener {
 
     void setAlarmDetails(Alarm alarm);
     Alarm getAlarmDetails();
-    void retrieveAlarmDetailsFromSQL();
+    void configureAlarmDetails();
     void setNextButtonCaption(String text);
 }

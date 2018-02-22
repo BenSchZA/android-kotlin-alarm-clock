@@ -36,6 +36,7 @@ import java.util.Calendar
 
 import butterknife.BindView
 import com.roostermornings.android.keys.Extra
+import com.roostermornings.android.keys.PrefsKey
 
 import com.roostermornings.android.util.Constants.AUTHORITY
 import com.roostermornings.android.util.Toaster
@@ -63,14 +64,12 @@ class NewAlarmFragmentActivity : BaseActivity(), IAlarmSetListener, NewAlarmFrag
         initialize(R.layout.activity_new_alarm)
         BaseApplication.roosterApplicationComponent.inject(this)
 
-//        if (hasGingerbread()) {
-//            val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
-//            StrictMode.setThreadPolicy(policy)
-//        }
-
-        //Only performed for android M version, with Doze mode
+        // Only performed for android M version, with Doze mode
         if(!requestPermissionIgnoreBatteryOptimization(this)) {
             lifeCycle.directUserToFAQs(false, this, main_layout)
+            sharedPreferences.edit()
+                    .putBoolean(PrefsKey.USER_VIEWED_FAQS.name, true)
+                    .apply()
         }
 
         val mHour = mCalendar.get(Calendar.HOUR_OF_DAY)
@@ -87,12 +86,12 @@ class NewAlarmFragmentActivity : BaseActivity(), IAlarmSetListener, NewAlarmFrag
         mViewPager = findViewById(R.id.main_content)
         mViewPager.adapter = mSectionsPagerAdapter
 
-        //Static variable, so clear on new instance
+        // Static variable, so clear on new instance
         mEditAlarmId = ""
         if (intent.extras?.containsKey(Extra.ALARM_SET_ID.name) == true) {
             mEditAlarmId = intent.extras?.getString(Extra.ALARM_SET_ID.name, "")
         }
-        if (mEditAlarmId?.isEmpty() == true) {
+        if (isNewAlarm()) {
             setupToolbar(toolbarTitle, getString(R.string.create_alarm))
             FA.Log(FA.Event.alarm_creation_begin::class.java, null, null)
         } else {
@@ -185,7 +184,7 @@ class NewAlarmFragmentActivity : BaseActivity(), IAlarmSetListener, NewAlarmFrag
 
                 //only do the push to create the new alarm if this is NOT an existing alarm
                 val alarmKey: String?
-                if (mEditAlarmId?.isEmpty() == false) {
+                if (!isNewAlarm()) {
                     alarmKey = mEditAlarmId
                 } else {
                     alarmKey = mDatabase.child("alarms").push().key
@@ -193,13 +192,11 @@ class NewAlarmFragmentActivity : BaseActivity(), IAlarmSetListener, NewAlarmFrag
                 }
 
                 //Extract data from Alarm mAlarm and create new alarm set DeviceAlarm
-                val alarmChannel = mAlarm.getChannel()
-                var alarmChannelUID = ""
-                if (alarmChannel != null) alarmChannelUID = alarmChannel.getId()
+                val alarmChannelUID =  mAlarm.channel?.getId() ?: ""
 
                 //if this is an existing alarm, delete from local storage before inserting another record
-                if (StrUtils.notNullOrEmpty(mEditAlarmId) && StrUtils.notNullOrEmpty(mAlarm.getUid())) {
-                    deviceAlarmController.deleteAlarmSetGlobal(mAlarm.getUid())
+                if (StrUtils.notNullOrEmpty(mEditAlarmId) && StrUtils.notNullOrEmpty(mAlarm.uid)) {
+                    deviceAlarmController.deleteAlarmSetGlobal(mAlarm.uid)
                 }
 
                 //Set enabled flag to true on new or edited alarm
@@ -222,12 +219,12 @@ class NewAlarmFragmentActivity : BaseActivity(), IAlarmSetListener, NewAlarmFrag
 
                 FA.LogMany(FA.Event.alarm_creation_completed::class.java,
                         arrayOf(FA.Event.alarm_creation_completed.Param.social_roosters_enabled, FA.Event.alarm_creation_completed.Param.channel_selected),
-                        arrayOf<Any>(mAlarm.isAllow_friend_audio_files, "" != mAlarm.getChannel().getName()))
+                        arrayOf<Any>(mAlarm.isAllow_friend_audio_files, "" != mAlarm.channel.name))
 
-                if (mAlarm.getChannel().getName()?.isEmpty() == true) {
+                if (mAlarm.channel.name?.isEmpty() == true) {
                     FA.Log(FA.Event.channel_selected::class.java,
                             FA.Event.channel_selected.Param.channel_title,
-                            mAlarm.getChannel().getName())
+                            mAlarm.channel.name)
                 }
             }
         }.run()
@@ -273,26 +270,37 @@ class NewAlarmFragmentActivity : BaseActivity(), IAlarmSetListener, NewAlarmFrag
         }
     }
 
-    override fun retrieveAlarmDetailsFromSQL() {
+    override fun configureAlarmDetails() {
 
-        if (mEditAlarmId?.isEmpty() == true) return
+        if (!isNewAlarm()) {
+            // Find alarm set with matching ID in SQL
+            val tempAlarms = deviceAlarmTableManager.getAlarmSet(mEditAlarmId)
+            val alarmSetExistsInSQL = tempAlarms.size >= 1
 
-        val tempAlarms = deviceAlarmTableManager.getAlarmSet(mEditAlarmId)
-        if (tempAlarms.size < 1) return
+            // If alarm set with matching ID in SQL
+            if (alarmSetExistsInSQL) {
+                // Recreate Alarm object from SQL DeviceAlarm entry
+                mAlarm.fromDeviceAlarm(tempAlarms[0], deviceAlarmTableManager.isSetEnabled(mEditAlarmId))
+                if (mAlarm.isRecurring) {
+                    val alarmDays = deviceAlarmTableManager.getAlarmClassDays(mEditAlarmId)
+                    mAlarm.setAlarmDaysFromDeviceAlarm(alarmDays)
+                }
 
-        mAlarm.fromDeviceAlarm(tempAlarms[0], deviceAlarmTableManager.isSetEnabled(mEditAlarmId))
-
-        if (mAlarm.isRecurring) {
-            val alarmDays = deviceAlarmTableManager.getAlarmClassDays(mEditAlarmId)
-            mAlarm.setAlarmDaysFromDeviceAlarm(alarmDays)
+                // Configure alarm creation settings UI from Alarm object
+                if (mFragment1 is NewAlarmFragment1) {
+                    (mFragment1 as NewAlarmFragment1).configureEditedAlarmUISettings()
+                }
+            }
         }
 
-        if (mFragment1 is NewAlarmFragment1) {
-            (mFragment1 as NewAlarmFragment1).setEditedAlarmSettings()
-        }
+        // Select alarm channel whether new alarm or not
         if (mFragment2 is NewAlarmFragment2) {
-            (mFragment2 as NewAlarmFragment2).selectEditedAlarmChannel()
+            (mFragment2 as NewAlarmFragment2).selectAlarmChannel()
         }
+    }
+
+    private fun isNewAlarm(): Boolean {
+        return mEditAlarmId.isNullOrBlank()
     }
 
     override fun setNextButtonCaption(text: String) {
