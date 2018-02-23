@@ -29,12 +29,13 @@
     </android.support.v4.widget.SwipeRefreshLayout>
 
     <LinearLayout
+        android:id="@+id/filler_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
         android:layout_gravity="center"
         android:orientation="vertical"
-        android:visibility="visible">
+        android:visibility="gone">
 
         <com.roostermornings.android.custom_ui.SquareFrameLayout
             android:id="@+id/filler_frame"
@@ -42,7 +43,6 @@
             android:layout_height="match_parent"
             android:layout_marginLeft="100dp"
             android:layout_marginRight="100dp"
-            android:background="@drawable/rooster_nudge"
             android:clickable="true"
             android:focusable="true" />
 

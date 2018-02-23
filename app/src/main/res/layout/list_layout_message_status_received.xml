@@ -36,7 +36,7 @@
 
         <ImageButton
             android:id="@+id/audio_favourite"
-            android:elevation="@dimen/cardview_default_elevation"
+            android:elevation="4dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/message_status_profile_pic"
