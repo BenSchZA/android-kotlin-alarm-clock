@@ -132,7 +132,7 @@
             android:layout_margin="10dp"
             android:background="@drawable/rooster_record_audio_circle_inner_selectable"
             android:clickable="true"
-            android:focusable="true"/>
+            android:focusable="true" />
 
     </FrameLayout>
 
