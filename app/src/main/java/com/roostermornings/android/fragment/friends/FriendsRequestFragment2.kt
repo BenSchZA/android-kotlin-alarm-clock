@@ -42,6 +42,7 @@ import java.util.HashMap
 import javax.inject.Inject
 
 import butterknife.BindView
+import kotlinx.android.synthetic.main.fragment_friends_2.*
 
 /**
  * A simple [Fragment] subclass.
@@ -58,45 +59,19 @@ class FriendsRequestFragment2 : BaseFragment() {
 
     private var mAdapter: RecyclerView.Adapter<*>? = null
 
-    @BindView(R.id.friendsRequestListView)
-    internal var mRecyclerView: RecyclerView? = null
-    @BindView(R.id.swiperefresh)
-    internal var swipeRefreshLayout: SwipeRefreshLayout? = null
-
     private var mListener: OnFragmentInteractionListener? = null
 
-    @Inject internal var AppContext: Context? = null
-    @Inject internal var firebaseUser: FirebaseUser? = null
-    @Inject internal var myContactsController: MyContactsController? = null
-    @Inject internal var jsonPersistence: JSONPersistence? = null
+    @Inject lateinit var myContactsController: MyContactsController
+    @Inject lateinit var jsonPersistence: JSONPersistence
 
     override fun inject(component: RoosterApplicationComponent) {
         component.inject(this)
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        if (arguments != null) {
-        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         val view = initiate(inflater, R.layout.fragment_friends_2, container, false)
-
-        swipeRefreshLayout!!.isRefreshing = true
-        /*
-        * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
-        * performs a swipe-to-refresh gesture.
-        */
-        swipeRefreshLayout!!.setOnRefreshListener {
-            // This method performs the actual data-refresh operation.
-            // The method calls setRefreshing(false) when it's finished.
-            databaseReference
-            getRequests()
-        }
 
         return view
     }
@@ -105,22 +80,32 @@ class FriendsRequestFragment2 : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        swiperefresh.isRefreshing = true
+        /*
+        * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
+        * performs a swipe-to-refresh gesture.
+        */
+        swiperefresh.setOnRefreshListener {
+            // This method performs the actual data-refresh operation.
+            // The method calls setRefreshing(false) when it's finished.
+            getRequests()
+        }
+
         sortNamesFriends(mUsers)
         mAdapter = FriendsRequestListAdapter(mUsers)
-        mRecyclerView!!.layoutManager = LinearLayoutManager(AppContext)
-        mRecyclerView!!.adapter = mAdapter
+        friendsRequestListView.layoutManager = LinearLayoutManager(AppContext)
+        friendsRequestListView.adapter = mAdapter
     }
 
     fun manualSwipeRefresh() {
-        if (swipeRefreshLayout != null) swipeRefreshLayout!!.isRefreshing = true
-        databaseReference
+        if (swiperefresh != null) swiperefresh.isRefreshing = true
         getRequests()
     }
 
     private fun getRequests() {
-        mRequestsReference = getMDatabase()
-                .child("friend_requests_received").child(firebaseUser!!.uid)
-        mRequestsReference!!.keepSynced(true)
+        mRequestsReference = databaseReference
+                .child("friend_requests_received").child(firebaseUser?.uid)
+        mRequestsReference?.keepSynced(true)
 
         val friendsListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -130,27 +115,27 @@ class FriendsRequestFragment2 : BaseFragment() {
                 //Get a map of number name pairs from my contacts
                 //For each user, check if name appears in contacts, and allocate name
                 var numberNamePairs = HashMap<String, String>()
-                if (ContextCompat.checkSelfPermission(AppContext!!,
+                if (ContextCompat.checkSelfPermission(AppContext,
                         android.Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
                     //Get a map of contact numbers to names
-                    numberNamePairs = myContactsController!!.numberNamePairs
+                    numberNamePairs = myContactsController.numberNamePairs
                 }
 
                 for (postSnapshot in dataSnapshot.children) {
                     val user = postSnapshot.getValue(Friend::class.java)
 
                     //For each user, check if name appears in contacts, and allocate name
-                    if (numberNamePairs.containsKey(user!!.getCell_number())) {
-                        user.setUser_name(numberNamePairs[user.getCell_number()])
+                    if (numberNamePairs.containsKey(user?.cell_number)) {
+                        user?.setUser_name(numberNamePairs[user.cell_number])
                     }
 
-                    mUsers.add(user)
+                    user?.let { mUsers.add(it) }
                 }
 
                 //Sort names alphabetically before notifying adapter
                 sortNamesFriends(mUsers)
-                mAdapter!!.notifyDataSetChanged()
-                swipeRefreshLayout!!.isRefreshing = false
+                mAdapter?.notifyDataSetChanged()
+                swiperefresh.isRefreshing = false
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
@@ -158,14 +143,12 @@ class FriendsRequestFragment2 : BaseFragment() {
                 Toaster.makeToast(AppContext, "Failed to load user.", Toast.LENGTH_SHORT).checkTastyToast()
             }
         }
-        mRequestsReference!!.addListenerForSingleValueEvent(friendsListener)
+        mRequestsReference?.addListenerForSingleValueEvent(friendsListener)
     }
 
     // TODO: Rename method, update argument and hook method into UI event
     fun onButtonPressed(uri: Uri) {
-        if (mListener != null) {
-            mListener!!.onFragmentInteraction(uri)
-        }
+        mListener?.onFragmentInteraction(uri)
     }
 
     override fun onAttach(context: Context?) {
@@ -173,13 +156,12 @@ class FriendsRequestFragment2 : BaseFragment() {
 
         inject(BaseApplication.roosterApplicationComponent)
 
-        databaseReference
         getRequests()
 
         if (context is OnFragmentInteractionListener) {
             mListener = context
         } else {
-            throw RuntimeException(context!!.toString() + " must implement OnFragmentInteractionListener")
+            throw RuntimeException(context.toString() + " must implement OnFragmentInteractionListener")
         }
     }
 
@@ -197,7 +179,7 @@ class FriendsRequestFragment2 : BaseFragment() {
 
     fun notifyAdapter() {
         (mAdapter as FriendsRequestListAdapter).refreshAll(mUsers)
-        mAdapter!!.notifyDataSetChanged()
+        mAdapter?.notifyDataSetChanged()
     }
 
     /**
@@ -234,5 +216,5 @@ class FriendsRequestFragment2 : BaseFragment() {
             return fragment
         }
     }
-}// Required empty public constructor
+}
 

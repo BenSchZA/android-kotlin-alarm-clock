@@ -36,19 +36,23 @@ import com.roostermornings.android.apis.NodeIHTTPClient
 import com.roostermornings.android.sqlutil.DeviceAudioQueueItem
 
 import butterknife.ButterKnife
+import com.google.firebase.auth.FirebaseUser
 
 abstract class BaseFragment : Fragment(), Validator.ValidationListener {
 
-    protected var mDatabase: DatabaseReference
+    @Inject lateinit var AppContext: Context
+    @Inject lateinit var baseApplication: BaseApplication
 
-    @Inject internal var AppContext: Context? = null
-    @Inject internal var baseApplication: BaseApplication? = null
+    val baseActivityListener: BaseActivityListener by lazy { activity as BaseActivityListener }
+
+    var firebaseUser: FirebaseUser? = null
+    @Inject
+    fun BaseActivity(firebaseUser: FirebaseUser?) {
+        this.firebaseUser = firebaseUser
+    }
 
     protected val databaseReference: DatabaseReference
-        get() {
-            mDatabase = FirebaseDatabase.getInstance().reference
-            return mDatabase
-        }
+        get() = FirebaseDatabase.getInstance().reference
 
     protected abstract fun inject(component: RoosterApplicationComponent)
 
@@ -85,17 +89,12 @@ abstract class BaseFragment : Fragment(), Validator.ValidationListener {
 
         BaseApplication.roosterApplicationComponent.inject(this)
 
-        databaseReference
-
-        try {
-            baseActivityListener = activity as BaseActivityListener?
-        } catch (castException: ClassCastException) {
-            /* The activity does not implement the listener. */
+        if(activity !is BaseActivityListener) {
+            throw RuntimeException(context.toString() + " must implement BaseActivityListener")
         }
-
     }
 
-    protected fun initiate(inflater: LayoutInflater, resource: Int, root: ViewGroup, attachToRoot: Boolean): View {
+    protected fun initiate(inflater: LayoutInflater, resource: Int, root: ViewGroup?, attachToRoot: Boolean): View {
         val view = inflater.inflate(resource, root, attachToRoot)
 
         ButterKnife.bind(this, view)
@@ -106,7 +105,8 @@ abstract class BaseFragment : Fragment(), Validator.ValidationListener {
         //Take arraylist and sort alphabetically
         Collections.sort(mUsers) { lhs, rhs ->
             //If null, pretend equal
-            if (lhs == null || rhs == null || lhs.getUser_name() == null || rhs.getUser_name() == null) 0 else lhs.getUser_name().compareTo(rhs.getUser_name())
+            if (lhs == null || rhs == null || lhs.user_name == null || rhs.user_name == null) 0
+            else lhs.user_name.compareTo(rhs.user_name)
         }
     }
 
@@ -114,7 +114,8 @@ abstract class BaseFragment : Fragment(), Validator.ValidationListener {
         //Take arraylist and sort alphabetically
         Collections.sort(mUsers) { lhs, rhs ->
             //If null, pretend equal
-            if (lhs == null || rhs == null || lhs.user_name == null || rhs.user_name == null) 0 else lhs.user_name.compareTo(rhs.user_name)
+            if (lhs == null || rhs == null || lhs.user_name == null || rhs.user_name == null) 0
+            else lhs.user_name.compareTo(rhs.user_name)
         }
     }
 
@@ -122,7 +123,8 @@ abstract class BaseFragment : Fragment(), Validator.ValidationListener {
         //Take arraylist and sort alphabetically
         Collections.sort(contacts) { lhs, rhs ->
             //If null, pretend equal
-            if (lhs == null || rhs == null || lhs.name == null || rhs.name == null) 0 else lhs.name.compareTo(rhs.name)
+            if (lhs == null || rhs == null || lhs.name == null || rhs.name == null) 0
+            else lhs.name.compareTo(rhs.name)
         }
     }
 
@@ -130,7 +132,8 @@ abstract class BaseFragment : Fragment(), Validator.ValidationListener {
         //Take arraylist and sort by date
         Collections.sort(socialRoosters) { lhs, rhs ->
             //If null, pretend equal
-            if (lhs == null || rhs == null || lhs.getDate_uploaded() == null || rhs.getDate_uploaded() == null) 0 else rhs.getDate_uploaded()!!.compareTo(lhs.getDate_uploaded())
+            if (lhs == null || rhs == null || lhs.date_uploaded == null || rhs.date_uploaded == null) 0
+            else rhs.date_uploaded.compareTo(lhs.date_uploaded)
         }
     }
 
@@ -138,17 +141,13 @@ abstract class BaseFragment : Fragment(), Validator.ValidationListener {
         //Take arraylist and sort by date
         Collections.sort(socialRoosters) { lhs, rhs ->
             //If null, pretend equal
-            if (lhs == null || rhs == null || lhs.date_uploaded == null || rhs.date_uploaded == null) 0 else rhs.date_uploaded!!.compareTo(lhs.date_uploaded)
+            if (lhs == null || rhs == null || lhs.date_uploaded == null || rhs.date_uploaded == null) 0
+            else rhs.date_uploaded.compareTo(lhs.date_uploaded)
         }
     }
 
     protected fun startHomeActivity() {
         val homeIntent = Intent(AppContext, MyAlarmsFragmentActivity::class.java)
         startActivity(homeIntent)
-    }
-
-    companion object {
-
-        var baseActivityListener: BaseActivityListener
     }
 }

@@ -63,7 +63,7 @@ class IntroFragment : BaseFragment() {
 
     private var mHostInterface: HostInterface? = null
 
-    override fun inject(component: RoosterApplicationComponent?) {
+    override fun inject(component: RoosterApplicationComponent) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 

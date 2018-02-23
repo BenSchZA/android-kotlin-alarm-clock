@@ -57,7 +57,7 @@ class NumberEntryFragment: BaseFragment(), Validator.ValidationListener {
         validator.setValidationListener(this)
     }
 
-    override fun inject(component: RoosterApplicationComponent?) {
+    override fun inject(component: RoosterApplicationComponent) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 

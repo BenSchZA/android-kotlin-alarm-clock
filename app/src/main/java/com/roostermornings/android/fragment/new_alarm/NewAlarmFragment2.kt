@@ -57,7 +57,6 @@ class NewAlarmFragment2 : BaseFragment() {
     private var mLayoutManager: RecyclerView.LayoutManager? = null
 
     @Inject lateinit var jsonPersistence: JSONPersistence
-    @Inject lateinit var AppContext: Context
     @Inject lateinit var channelManager: ChannelManager
 
     override fun inject(component: RoosterApplicationComponent) {

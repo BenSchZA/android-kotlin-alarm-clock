@@ -161,8 +161,6 @@ class NewAudioRecordActivity : BaseActivity() {
         initialize(R.layout.activity_new_audio)
         BaseApplication.roosterApplicationComponent.inject(this)
 
-        setButtonBarSelection()
-
         /* Configure vector image button programmatically
         for compatibility with older Android versions */
         if(!RoosterUtils.hasLollipop()) {
@@ -186,6 +184,15 @@ class NewAudioRecordActivity : BaseActivity() {
                 }
             }
         }, IntentFilter(Action.FINISH_AUDIO_RECORD_ACTIVITY.name))
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        setButtonBarSelection()
+
+        new_audio_start_stop.isSelected = false
+        new_audio_listen.isSelected = false
     }
 
     override fun onStart() {

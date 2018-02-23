@@ -70,16 +70,8 @@ class FriendsMyFragment1 : BaseFragment() {
 
     private var mListener: OnFragmentInteractionListener? = null
 
-    @Inject lateinit var AppContext: Context
     @Inject lateinit var jsonPersistence: JSONPersistence
     @Inject lateinit var myContactsController: MyContactsController
-
-    var firebaseUser: FirebaseUser? = null
-
-    @Inject
-    fun FriendsMyFragment1(firebaseUser: FirebaseUser?) {
-        this.firebaseUser = firebaseUser
-    }
 
     override fun inject(component: RoosterApplicationComponent) {
         component.inject(this)
@@ -90,9 +82,6 @@ class FriendsMyFragment1 : BaseFragment() {
 
         //Ensure check for Node complete reset
         statusCode = -1
-
-        if (arguments != null) {
-        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -130,8 +119,8 @@ class FriendsMyFragment1 : BaseFragment() {
     private fun registerFriendsListener() {
         //Listen for changes to friends node
 
-        val mFriendsReference = mDatabase
-                .child("users").child(firebaseUser!!.uid).child("friends")
+        val mFriendsReference = databaseReference
+                .child("users").child(firebaseUser?.uid).child("friends")
         mFriendsReference.keepSynced(true)
 
         val friendsListener = object : ValueEventListener {

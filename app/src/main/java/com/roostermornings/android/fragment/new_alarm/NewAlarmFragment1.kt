@@ -106,7 +106,6 @@ class NewAlarmFragment1 : BaseFragment() {
 
     @Inject lateinit var deviceAlarmController: DeviceAlarmController
     @Inject lateinit var deviceAlarmTableManager: DeviceAlarmTableManager
-    @Inject lateinit var AppContext: Context
 
     @Inject
     @field:Named("default")
