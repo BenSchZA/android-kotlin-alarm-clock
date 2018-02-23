@@ -96,6 +96,12 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
     @Inject lateinit var realmAlarmFailureLog: RealmAlarmFailureLog
     @Inject lateinit var geoHashUtils: GeoHashUtils
 
+    override val googleApiService: GoogleIHTTPClient
+        get() = (application as BaseApplication).mGoogleAPIService
+
+    override val nodeApiService: NodeIHTTPClient
+        get() = (application as BaseApplication).mNodeAPIService
+
     var firebaseUser: FirebaseUser? = null
     @Inject
     fun BaseActivity(firebaseUser: FirebaseUser?) {
@@ -254,16 +260,6 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
         // Bind to butterknife delegate
         // Calls to ButterKnife.bind can be made anywhere you would otherwise put findViewById calls.
         ButterKnife.bind(this)
-    }
-
-    override fun getNodeApiService(): NodeIHTTPClient {
-        val baseApplication = application as BaseApplication
-        return baseApplication.mNodeAPIService
-    }
-
-    override fun getGoogleApiService(): GoogleIHTTPClient {
-        val baseApplication = application as BaseApplication
-        return baseApplication.mGoogleAPIService
     }
 
     override fun onValidationSucceeded() {}

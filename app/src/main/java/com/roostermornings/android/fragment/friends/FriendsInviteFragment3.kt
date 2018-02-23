@@ -24,10 +24,6 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.GetTokenResult
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.R
 import com.roostermornings.android.activity.FriendsFragmentActivity
@@ -61,6 +57,7 @@ import retrofit.Response
 import retrofit.Retrofit
 
 import com.facebook.FacebookSdk.getApplicationContext
+import kotlinx.android.synthetic.main.fragment_friends_3.*
 
 /**
  * A simple [Fragment] subclass.
@@ -72,34 +69,22 @@ import com.facebook.FacebookSdk.getApplicationContext
  */
 class FriendsInviteFragment3 : BaseFragment() {
 
-    internal var mRecyclerViewElements = ArrayList<Any>()
-    internal var mAddableContacts = ArrayList<Friend>()
-    internal var mInvitableContacts: ArrayList<Contact>? = ArrayList()
+    private var mRecyclerViewElements = ArrayList<Any>()
+    private var mAddableContacts = ArrayList<Friend>()
+    private var mInvitableContacts = ArrayList<Contact>()
 
     private var mAddContactsAdapter: RecyclerView.Adapter<*>? = null
 
-    internal var addableHeader = ""
-    internal var invitableHeader = ""
-
-    @BindView(R.id.friendsAddListView)
-    internal var mAddContactsRecyclerView: RecyclerView? = null
-
-    @BindView(R.id.swiperefresh)
-    internal var swipeRefreshLayout: SwipeRefreshLayout? = null
-
-    @BindView(R.id.share_button)
-    internal var shareButton: Button? = null
-
-    @BindView(R.id.retrieve_contacts_permission_text)
-    internal var retrieveContactsPermissionText: TextView? = null
+    private val addableHeader by lazy { resources.getString(R.string.add_contacts) }
+    private val invitableHeader by lazy { resources.getString(R.string.invite_contacts) }
 
     private var mListener: OnFragmentInteractionListener? = null
 
-    internal var processAddableBackground: ProcessAddableBackground? = ProcessAddableBackground()
+    private var processAddableBackground: ProcessAddableBackground? = ProcessAddableBackground()
 
-    @Inject internal var jsonPersistence: JSONPersistence? = null
-    @Inject internal var myContactsController: MyContactsController
-    @Inject internal var lifeCycle: LifeCycle? = null
+    @Inject lateinit var jsonPersistence: JSONPersistence
+    @Inject lateinit var myContactsController: MyContactsController
+    @Inject lateinit var lifeCycle: LifeCycle
 
     override fun inject(component: RoosterApplicationComponent) {
         component.inject(this)
@@ -108,9 +93,6 @@ class FriendsInviteFragment3 : BaseFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         inject(BaseApplication.roosterApplicationComponent)
-
-        addableHeader = resources.getString(R.string.add_contacts)
-        invitableHeader = resources.getString(R.string.invite_contacts)
 
         myContactsController = MyContactsController(AppContext)
     }
@@ -127,22 +109,22 @@ class FriendsInviteFragment3 : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         mAddContactsAdapter = FriendsInviteListAdapter(mRecyclerViewElements)
-        mAddContactsRecyclerView!!.layoutManager = LinearLayoutManager(AppContext)
-        mAddContactsRecyclerView!!.adapter = mAddContactsAdapter
+        friendsAddListView.layoutManager = LinearLayoutManager(AppContext)
+        friendsAddListView.adapter = mAddContactsAdapter
 
-        mAddContactsAdapter!!.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+        mAddContactsAdapter?.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
             override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
                 super.onItemRangeRemoved(positionStart, itemCount)
                 notifyAdapter()
             }
         })
 
-        swipeRefreshLayout!!.isRefreshing = true
+        swiperefresh.isRefreshing = true
         /*
         * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
         * performs a swipe-to-refresh gesture.
         */
-        swipeRefreshLayout!!.setOnRefreshListener {
+        swiperefresh.setOnRefreshListener {
             // This method performs the actual data-refresh operation.
             // The method calls setRefreshing(false) when it's finished.
 
@@ -174,13 +156,14 @@ class FriendsInviteFragment3 : BaseFragment() {
         setHeaderVisibility()
 
         (mAddContactsAdapter as FriendsInviteListAdapter).refreshAll(mRecyclerViewElements)
-        mAddContactsAdapter!!.notifyDataSetChanged()
+        mAddContactsAdapter?.notifyDataSetChanged()
     }
 
     private fun setHeaderVisibility() {
         //If list is empty, don't show header
         try {
-            if (mRecyclerViewElements.contains(addableHeader) && mRecyclerViewElements[mRecyclerViewElements.indexOf(addableHeader) + 1] !is Friend) {
+            if (mRecyclerViewElements.contains(addableHeader)
+                    && mRecyclerViewElements[mRecyclerViewElements.indexOf(addableHeader) + 1] !is Friend) {
                 mRecyclerViewElements.remove(addableHeader)
             }
         } catch (e: IndexOutOfBoundsException) {
@@ -188,7 +171,8 @@ class FriendsInviteFragment3 : BaseFragment() {
         }
 
         try {
-            if (mRecyclerViewElements.contains(invitableHeader) && mRecyclerViewElements[mRecyclerViewElements.indexOf(invitableHeader) + 1] !is Contact) {
+            if (mRecyclerViewElements.contains(invitableHeader)
+                    && mRecyclerViewElements[mRecyclerViewElements.indexOf(invitableHeader) + 1] !is Contact) {
                 mRecyclerViewElements.remove(invitableHeader)
             }
         } catch (e: IndexOutOfBoundsException) {
@@ -199,7 +183,7 @@ class FriendsInviteFragment3 : BaseFragment() {
 
     @OnClick(R.id.share_button)
     fun onShareButtonClicked() {
-        lifeCycle!!.shareApp()
+        lifeCycle.shareApp()
     }
 
     /**
@@ -255,8 +239,8 @@ class FriendsInviteFragment3 : BaseFragment() {
             }
         } else {
             //If there is no internet connection, attempt to retrieve invitable contacts from persistence
-            if (!jsonPersistence!!.invitableContacts!!.isEmpty() && (!checkInternetConnection())!!) {
-                mInvitableContacts = jsonPersistence!!.invitableContacts
+            if (!jsonPersistence.invitableContacts.isEmpty() && !checkInternetConnection()) {
+                mInvitableContacts = jsonPersistence.invitableContacts
                 //Populate recycler activityContentView elements
                 mRecyclerViewElements.add(invitableHeader)
                 mRecyclerViewElements.addAll(mInvitableContacts)
@@ -269,27 +253,27 @@ class FriendsInviteFragment3 : BaseFragment() {
     }
 
     private fun executeNodeMyContactsTask() {
-        if ((!checkInternetConnection())!!) {
-            swipeRefreshLayout!!.isRefreshing = false
+        if (!checkInternetConnection()) {
+            swiperefresh.isRefreshing = false
         } else {
-            if (!swipeRefreshLayout!!.isRefreshing) swipeRefreshLayout!!.isRefreshing = true
-            firebaseUser!!.getIdToken(true)
-                    .addOnCompleteListener { task ->
+            if (!swiperefresh.isRefreshing) swiperefresh.isRefreshing = true
+            firebaseUser?.getIdToken(true)
+                    ?.addOnCompleteListener { task ->
                         if (task.isSuccessful) {
                             val idToken = task.result.token
 
-                            if (processAddableBackground!!.status == AsyncTask.Status.FINISHED) {
-                                processAddableBackground = null
-                                processAddableBackground = ProcessAddableBackground()
-                                processAddableBackground!!.execute(idToken)
-                            } else if (processAddableBackground!!.status == AsyncTask.Status.PENDING) {
-                                processAddableBackground!!.execute(idToken)
-                            } else if (processAddableBackground!!.status != AsyncTask.Status.RUNNING) {
-                                swipeRefreshLayout!!.isRefreshing = false
+                            when(processAddableBackground?.status) {
+                                AsyncTask.Status.FINISHED -> {
+                                    processAddableBackground = null
+                                    processAddableBackground = ProcessAddableBackground()
+                                    processAddableBackground?.execute(idToken)
+                                }
+                                AsyncTask.Status.PENDING -> processAddableBackground?.execute(idToken)
+                                AsyncTask.Status.RUNNING -> swiperefresh.isRefreshing = false
                             }
                         } else {
                             // Handle error -> task.getException();
-                            swipeRefreshLayout!!.isRefreshing = false
+                            swiperefresh.isRefreshing = false
                         }
                     }
         }
@@ -303,7 +287,7 @@ class FriendsInviteFragment3 : BaseFragment() {
         override fun doInBackground(vararg params: String): String? {
             val idToken = params[0]
 
-            val call = nodeApiService()!!.checkLocalContacts(LocalContacts(myContactsController.nodeNumberList, idToken))
+            val call = nodeApiService().checkLocalContacts(LocalContacts(myContactsController.nodeNumberList, idToken))
 
             call.enqueue(object : Callback<NodeUsers> {
                 override fun onResponse(response: Response<NodeUsers>,
@@ -319,14 +303,13 @@ class FriendsInviteFragment3 : BaseFragment() {
 
                             //Get a map of number name pairs from my contacts
                             val numberNamePairs = myContactsController.numberNamePairs
-                            for (user in apiResponse.users[0]) {
-                                if (user != null && !user.getUser_name().isEmpty()) {
-                                    //If user in my contacts, use that as user name
-                                    if (numberNamePairs.containsKey(user.getCell_number())) {
-                                        user.setUser_name(numberNamePairs[user.getCell_number()])
-                                    }
-                                    mAddableContacts.add(user)
+
+                            apiResponse.users[0]?.filter { !it.user_name.isNullOrEmpty() }?.forEach {
+                                //If user in my contacts, use that as user name
+                                if (numberNamePairs.containsKey(it.getCell_number())) {
+                                    it.setUser_name(numberNamePairs[it.getCell_number()])
                                 }
+                                mAddableContacts.add(it)
                             }
 
                             //Sort names alphabetically before notifying adapter
@@ -348,7 +331,7 @@ class FriendsInviteFragment3 : BaseFragment() {
             return null
         }
 
-        override fun onPostExecute(result: String) {
+        override fun onPostExecute(result: String?) {
 
         }
     }
@@ -359,7 +342,7 @@ class FriendsInviteFragment3 : BaseFragment() {
 
         override fun onPreExecute() {
             //If list is already populated, return
-            if (!mInvitableContacts!!.isEmpty()) exit = true
+            if (!mInvitableContacts.isEmpty()) exit = true
         }
 
         override fun doInBackground(vararg params: String): String {
@@ -368,43 +351,38 @@ class FriendsInviteFragment3 : BaseFragment() {
             //Get the list of all local contacts, C
             val contacts = myContactsController.contacts
             //Temporarily set the invitable contacts, I, to all local contacts
-            mInvitableContacts!!.clear()
-            mInvitableContacts!!.addAll(contacts)
-            val contactNumbersToRemove = ArrayList<String>()
+            mInvitableContacts.clear()
+            mInvitableContacts.addAll(contacts)
 
             //Check for current friends, F
             var currentFriends: ArrayList<User>? = ArrayList()
-            if (!jsonPersistence!!.friends!!.isEmpty()) {
-                currentFriends = jsonPersistence!!.friends
+            if (jsonPersistence.friends != null && jsonPersistence.friends?.isEmpty() != true) {
+                currentFriends = jsonPersistence.friends
             }
 
             //Make a list of all contact numbers from mAddableContacts and currentFriends, A + F
-            for (addableFriend in mAddableContacts) {
-                contactNumbersToRemove.add(addableFriend.cell_number)
-            }
-            for (currentFriend in currentFriends!!) {
-                contactNumbersToRemove.add(currentFriend.cell_number)
-            }
+            val contactNumbersToRemove = mAddableContacts.mapTo(ArrayList<String>()) { it.cell_number }
+            currentFriends?.mapTo(contactNumbersToRemove) { it.cell_number }
 
             //Perform the operation I = C - (A + F)
             for (contact in contacts) {
                 for (number in contact.numbers.keys) {
                     if (contactNumbersToRemove.contains(number)) {
-                        mInvitableContacts!!.remove(contact)
+                        mInvitableContacts.remove(contact)
                         break
                     }
                 }
             }
 
             //Sort names alphabetically before notifying adapter
-            sortNamesContacts(mInvitableContacts!!)
+            sortNamesContacts(mInvitableContacts)
 
             return ""
         }
 
-        override fun onPostExecute(result: String) {
+        override fun onPostExecute(result: String?) {
             //Persist invitable contacts for those times where user has no internet connection
-            jsonPersistence!!.invitableContacts = mInvitableContacts
+            jsonPersistence.invitableContacts = mInvitableContacts
 
             //Load new content (including section headers) into adapter
             mRecyclerViewElements.add(addableHeader)
@@ -414,7 +392,7 @@ class FriendsInviteFragment3 : BaseFragment() {
             //Display new content
             notifyAdapter()
             //Make load spinner GONE and recyclerview VISIBLE
-            swipeRefreshLayout!!.isRefreshing = false
+            swiperefresh.isRefreshing = false
         }
     }
 
@@ -426,11 +404,11 @@ class FriendsInviteFragment3 : BaseFragment() {
     }
 
     fun displayRequestPermissionExplainer(display: Boolean?) {
-        if (display!!) {
-            retrieveContactsPermissionText!!.visibility = View.VISIBLE
-            swipeRefreshLayout!!.isRefreshing = false
+        if (display == true) {
+            retrieve_contacts_permission_text.visibility = View.VISIBLE
+            swiperefresh.isRefreshing = false
         } else {
-            retrieveContactsPermissionText!!.visibility = View.GONE
+            retrieve_contacts_permission_text.visibility = View.GONE
         }
     }
 

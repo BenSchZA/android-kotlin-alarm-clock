@@ -885,7 +885,7 @@ class AudioService : Service() {
         releaseMediaPlayers()
     }
 
-    fun endService() {
+    private fun endService() {
         //https://stackoverflow.com/questions/17146822/when-is-a-started-and-bound-service-destroyed
 
         // AudioService report logging

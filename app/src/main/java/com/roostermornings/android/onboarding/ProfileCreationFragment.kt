@@ -112,7 +112,7 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
         BaseApplication.roosterApplicationComponent.inject(this)
     }
 
-    override fun inject(component: RoosterApplicationComponent?) {
+    override fun inject(component: RoosterApplicationComponent) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
