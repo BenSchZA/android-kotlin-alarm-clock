@@ -28,6 +28,7 @@ import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.*
 import com.mobsandgeeks.saripaar.Validator
+import com.mobsandgeeks.saripaar.annotation.Email
 import com.mobsandgeeks.saripaar.annotation.NotEmpty
 import com.mobsandgeeks.saripaar.annotation.Password
 import com.roostermornings.android.BaseApplication
@@ -75,6 +76,7 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
     @BindView(R.id.signup_username_edittext)
     lateinit var mUserName: EditText
 
+    @Email
     @BindView(R.id.signup_email_address_edittext)
     lateinit var mEmailAddress: EditText
 
