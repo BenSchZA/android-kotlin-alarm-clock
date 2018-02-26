@@ -189,7 +189,7 @@ class MessageStatusSentFragment2 : BaseFragment() {
                 if(mRoosters.isEmpty()) {
                     filler_layout.visibility = View.VISIBLE
                     filler_frame.background = ResourcesCompat.getDrawable(resources, R.drawable.rooster_nudge, null)
-                    filler_text.text = "Wake your friends up to a surprise by sending them a rooster"
+                    filler_text.text = "Wake your friends up to a surprise rooster"
                 } else filler_layout.visibility = View.GONE
 
                 swiperefresh.isRefreshing = false

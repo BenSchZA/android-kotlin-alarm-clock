@@ -536,18 +536,10 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
         }
     }
 
-    @OnClick(R.id.add_alarm)
+    @OnClick(R.id.add_alarm,
+            R.id.add_alarm_filler,
+            R.id.add_alarm_filler_text)
     fun onClickAddAlarm() {
-        startActivity(Intent(this, NewAlarmFragmentActivity::class.java))
-    }
-
-    @OnClick(R.id.add_alarm_filler)
-    fun onClickAddAlarmFiller() {
-        startActivity(Intent(this, NewAlarmFragmentActivity::class.java))
-    }
-
-    @OnClick(R.id.add_alarm_filler_text)
-    fun onClickAddAlarmFillerText() {
         startActivity(Intent(this, NewAlarmFragmentActivity::class.java))
     }
 

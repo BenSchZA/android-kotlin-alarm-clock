@@ -144,7 +144,7 @@ class MessageStatusReceivedFragment1 : BaseFragment() {
             if(mRoosters.isEmpty()) {
                 filler_layout.visibility = View.VISIBLE
                 filler_frame.background = ResourcesCompat.getDrawable(resources, R.drawable.rooster_channels, null)
-                filler_text.text = "Add some friends and get a surprise rooster"
+                filler_text.text = "Add your friends and get a surprise rooster"
             } else filler_layout.visibility = View.GONE
 
             swiperefresh.isRefreshing = false
@@ -158,7 +158,7 @@ class MessageStatusReceivedFragment1 : BaseFragment() {
             if(mRoosters.isEmpty()) {
                 filler_layout.visibility = View.VISIBLE
                 filler_frame.background = ResourcesCompat.getDrawable(resources, R.drawable.rooster_singing, null)
-                filler_text.text = "Favourite your roosters and listen to them later"
+                filler_text.text = "Listen to your favourite channels & roosters later"
             } else filler_layout.visibility = View.GONE
 
             swiperefresh.isRefreshing = false
