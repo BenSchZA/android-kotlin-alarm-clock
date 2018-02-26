@@ -59,7 +59,7 @@ class RoosterFirebaseMessagingService : FirebaseMessagingService() {
          * To maintain backward compatibility, assume that
          * changeUri is null.
          */
-        ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle())
+        ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.forceBundle)
 
         // TODO(developer): Handle FCM messages here.
         // Not getting messages here? See why this may be: https://goo.gl/39bRNJ

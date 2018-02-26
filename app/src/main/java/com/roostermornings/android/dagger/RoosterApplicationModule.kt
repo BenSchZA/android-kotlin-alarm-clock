@@ -39,9 +39,9 @@ import com.roostermornings.android.sqlutil.DeviceAlarmTableManager
 import com.roostermornings.android.geolocation.GeoHashUtils
 import com.roostermornings.android.util.JSONPersistence
 import com.roostermornings.android.keys.PrefsKey
+import com.roostermornings.android.sync.DownloadSyncAdapter.Companion.createSyncAccount
 import com.squareup.otto.Bus
 
-import com.roostermornings.android.sync.DownloadSyncAdapter.CreateSyncAccount
 import com.roostermornings.android.util.*
 import com.roostermornings.android.util.Constants.AUTHORITY
 
@@ -79,7 +79,7 @@ class RoosterApplicationModule//pass the base application into the constructor f
     @Singleton
     internal fun provideSyncAdapterAccount(context: Context): Account {
         //Create sync account
-        val mAccount = CreateSyncAccount(context)
+        val mAccount = createSyncAccount(context)
         ContentResolver.setIsSyncable(mAccount, AUTHORITY, 1)
         ContentResolver.setSyncAutomatically(mAccount, AUTHORITY, true)
         ContentResolver.addPeriodicSync(mAccount, AUTHORITY, Bundle(), 3600)

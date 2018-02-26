@@ -140,7 +140,7 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
         BaseApplication.roosterApplicationComponent.inject(this)
 
         /** To be run only if debuggable, for safe testing */
-        if(DetailsUtils.isDebuggable(this)) {
+        if (DetailsUtils.isDebuggable(this)) {
             //FirstMileManager firstMileManager = new FirstMileManager();
             //firstMileManager.createShowcase(this, new ViewTarget(buttonAddAlarm.getId(), this), 1);
 
@@ -158,7 +158,7 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
         snackbarManager = SnackbarManager(this, myAlarmsCoordinatorLayout)
 
         // Download any social or channel audio files
-        ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle())
+        ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.forceBundle)
 
         /*
         * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
@@ -196,7 +196,7 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
                     Picasso.with(context).load(it)
                             .resize(400, 400)
                             .centerCrop()
-                            .into(object: Target {
+                            .into(object : Target {
                                 override fun onPrepareLoad(placeHolderDrawable: Drawable?) {}
 
                                 override fun onBitmapFailed(errorDrawable: Drawable?) {}
@@ -308,7 +308,7 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
             }
 
             // Listen for channel download complete notices from sync adapter
-            DownloadSyncAdapter.setOnChannelDownloadListener(object : DownloadSyncAdapter.OnChannelDownloadListener {
+            DownloadSyncAdapter.onChannelDownloadListener = object : DownloadSyncAdapter.OnChannelDownloadListener {
                 override fun onChannelDownloadStarted(channelId: String) {
                     // When download starts, indicate this to user
                     if (!deviceAlarmTableManager.isNextPendingAlarmSynced) {
@@ -325,14 +325,14 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
                             snackbarManager?.generateFinished()
                     }
                 }
-            })
+            }
         } else {
             // If there are no alarms, clear navigation icon
             mMenu?.getItem(0)?.isVisible = false
         }
 
         //Download any social or channel audio files
-        ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle())
+        ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.forceBundle)
     }
 
     private fun animateRefreshDownloadIndicator() {
@@ -384,7 +384,7 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
     }
 
     private fun refreshDrawer() {
-        if(authManager.isUserSignedIn()) {
+        if (authManager.isUserSignedIn()) {
             // Change menu entry to "Sign out"
             nav_view.menu?.findItem(R.id.nav_signout)?.setTitle(R.string.action_signout)
         } else {
@@ -393,7 +393,7 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
         }
 
         nav_view.getHeaderView(0)?.user_name?.text =
-                if(firebaseUser?.displayName?.isBlank() == true)
+                if (firebaseUser?.displayName?.isBlank() == true)
                     "Anonymous"
                 else firebaseUser?.displayName
         nav_view.getHeaderView(0)?.user_email?.text = firebaseUser?.email
@@ -427,7 +427,10 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
                 // When sync icon clicked, try refresh content
                 refreshDownloadIndicator()
                 //Download any social or channel audio files
-                ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle())
+                ContentResolver.requestSync(
+                        mAccount,
+                        AUTHORITY,
+                        DownloadSyncAdapter.forceBundle)
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -441,7 +444,7 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
                 startActivity(Intent(this, ProfileActivity::class.java))
             }
             R.id.nav_faqs -> {
-                if(checkInternetConnection())
+                if (checkInternetConnection())
                     startActivity(Intent(this, FAQActivity::class.java))
             }
             R.id.nav_settings -> {
@@ -475,8 +478,8 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
     }
 
     override fun onCustomCommand(command: InterfaceCommands.Companion.Command) {
-        when(command) {
-            // When sign-in complete, remove fragment and refresh nav drawer
+        when (command) {
+        // When sign-in complete, remove fragment and refresh nav drawer
             InterfaceCommands.Companion.Command.PROCEED -> {
                 appbar.visibility = View.VISIBLE
 
@@ -489,7 +492,8 @@ class MyAlarmsFragmentActivity : BaseActivity(), CustomCommandInterface, Navigat
 
                 refreshDrawer()
             }
-            else -> {}
+            else -> {
+            }
         }
     }
 
