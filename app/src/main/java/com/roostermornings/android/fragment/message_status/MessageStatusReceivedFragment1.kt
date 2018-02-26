@@ -166,7 +166,7 @@ class MessageStatusReceivedFragment1 : BaseFragment() {
     }
 
     fun manualSwipeRefresh() {
-        if (!swiperefresh.isRefreshing) swiperefresh.isRefreshing = true
+        if (swiperefresh?.isRefreshing == false) swiperefresh?.isRefreshing = true
         retrieveSocialAudioItems()
     }
 
