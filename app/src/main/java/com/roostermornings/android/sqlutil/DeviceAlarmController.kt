@@ -384,7 +384,7 @@ class DeviceAlarmController(private val context: Context) {
             FirebaseNetwork.updateFirebaseAlarmEnabled(setId, enabled)
             // Trigger audio download
             // Download any social or channel audio files
-            ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle())
+            ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.forceBundle)
             if (notifyUser) {
                 // Notify user of time until next alarm, once alarm millis has been updated in db
                 notifyUserAlarmTime(deviceAlarmTableManager.getAlarmSet(setId))
@@ -399,7 +399,7 @@ class DeviceAlarmController(private val context: Context) {
             FirebaseNetwork.updateFirebaseAlarmEnabled(setId, enabled)
             // Trigger audio download
             // Download any social or channel audio files
-            ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle())
+            ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.forceBundle)
         }
     }
 

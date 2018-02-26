@@ -215,7 +215,7 @@ class NewAlarmFragmentActivity : BaseActivity(), IAlarmSetListener, NewAlarmFrag
                 }
 
                 //Download any social or channel audio files
-                ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.getForceBundle())
+                ContentResolver.requestSync(mAccount, AUTHORITY, DownloadSyncAdapter.forceBundle)
 
                 FA.LogMany(FA.Event.alarm_creation_completed::class.java,
                         arrayOf(FA.Event.alarm_creation_completed.Param.social_roosters_enabled, FA.Event.alarm_creation_completed.Param.channel_selected),

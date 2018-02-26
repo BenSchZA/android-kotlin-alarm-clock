@@ -191,7 +191,7 @@ class LifeCycle
 
         val downloadSyncAdapter = DownloadSyncAdapter(context, true)
 
-        DownloadSyncAdapter.setOnChannelDownloadListener(object : DownloadSyncAdapter.OnChannelDownloadListener {
+        DownloadSyncAdapter.onChannelDownloadListener = object : DownloadSyncAdapter.OnChannelDownloadListener {
             override fun onChannelDownloadStarted(channelId: String) {}
 
             override fun onChannelDownloadComplete(valid: Boolean, channelId: String) {
@@ -201,7 +201,7 @@ class LifeCycle
                     audioTableManager.setFavourite(audioItem.id, true)
                 }
             }
-        })
+        }
 
         downloadSyncAdapter.retrieveChannelContentAudio(channelRooster, context)
     }
