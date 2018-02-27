@@ -62,6 +62,8 @@ class NewAudioRecordActivity : BaseActivity() {
     private val MAX_RECORDING_TIME = 60000
     private val maxRecordingTime = "60"
 
+    private var mMediaRecorderIsReady = false
+
     //Silence average: 125
     //Ambient music: 300
     private val AUDIO_MIN_AMPLITUDE = 250
@@ -119,7 +121,7 @@ class NewAudioRecordActivity : BaseActivity() {
                 }
                 NEW_AUDIO_RECORDING -> {
                     //This logic checks that the average recording amplitude is above a certain threshold for a cumulative amount of time
-                    maxAmplitude = mediaRecorder?.maxAmplitude?:0
+                    maxAmplitude = if(mMediaRecorderIsReady) mediaRecorder?.maxAmplitude?:0 else 0
                     averageAmplitude = (maxAmplitude + averageAmplitude) / 2
 
                     //TODO: error here
@@ -404,7 +406,7 @@ class NewAudioRecordActivity : BaseActivity() {
     private fun stopRecording() {
         try {
             mHandler.removeCallbacks(startTimer)
-            mediaRecorder!!.stop()
+            mediaRecorder?.stop()
         } catch (e: IllegalStateException) {
             e.printStackTrace()
             deleteAudio()
@@ -548,6 +550,8 @@ class NewAudioRecordActivity : BaseActivity() {
         mediaRecorder?.setAudioEncodingBitRate(70000)
         mediaRecorder?.setAudioSamplingRate(48000)
         mediaRecorder?.setOutputFile(mAudioSavePathInDevice)
+
+        mMediaRecorderIsReady = true
     }
 
 
