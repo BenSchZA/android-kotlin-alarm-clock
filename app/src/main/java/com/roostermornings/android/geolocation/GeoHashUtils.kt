@@ -160,11 +160,13 @@ class GeoHashUtils(val context: Context) {
     }
 
     private fun updateGeoHash(userGeoHash: String) {
-        sharedPreferences.edit().putString(PrefsKey.USER_GEOHASH.name, userGeoHash).apply()
+        if(userGeoHash.isNotBlank()) {
+            sharedPreferences.edit().putString(PrefsKey.USER_GEOHASH.name, userGeoHash).apply()
 
-        LifeCycle.performMethodOnceInDay {
-            FirebaseNetwork.updateProfileGeoHashLocation(userGeoHash)
-            UserMetrics.updateGeohash(userGeoHash)
+            LifeCycle.performMethodOnceInDay {
+                FirebaseNetwork.updateProfileGeoHashLocation(userGeoHash)
+                UserMetrics.updateGeohash(userGeoHash)
+            }
         }
     }
 
