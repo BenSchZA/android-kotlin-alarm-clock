@@ -142,7 +142,7 @@ class BaseApplication : android.app.Application() {
         // Activate Facebook app connection
         AppEventsLogger.activateApp(this, resources.getString(R.string.facebook_app_id))
     }
-    
+
     private fun listenForAuthStateChanges() {
         mAuthListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
             firebaseAuth.currentUser?.let {
