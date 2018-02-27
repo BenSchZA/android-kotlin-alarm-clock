@@ -6,6 +6,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.roostermornings.android.BuildConfig
+import com.roostermornings.android.domain.database.User
 import com.roostermornings.android.domain.local.MetricsEvent
 import com.roostermornings.android.domain.local.OnboardingJourneyEvent
 import com.roostermornings.android.util.JSONPersistence
@@ -173,20 +174,9 @@ object UserMetrics {
     }
 
     fun logActiveDays() {
-        // TODO: remove datelock, rely on lifecycle method
-        val jsonPersistence = JSONPersistence()
-
-        // Attempt to log active day, if not date locked
-        val dateLockTimeInMillis = jsonPersistence.getDateLock(ACTIVE_DAYS)
-        val dateLockTime = Calendar.getInstance()
-        dateLockTime.timeInMillis = dateLockTimeInMillis
-        val currentTime = Calendar.getInstance()
-
-        if(dateLockTime.get(Calendar.DATE) == currentTime.get(Calendar.DATE)) return
         val fUser = FirebaseAuth.getInstance().currentUser
 
         if(fUser?.uid?.isNotBlank() == true) {
-            jsonPersistence.setDateLock(ACTIVE_DAYS, currentTime.timeInMillis)
             FA.Log(FA.Event.active_day::class.java, null, null)
         }
     }

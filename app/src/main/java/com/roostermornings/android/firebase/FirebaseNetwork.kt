@@ -53,13 +53,33 @@ object FirebaseNetwork {
             }
         }
 
-        if(FirebaseAuth.getInstance().currentUser != null
-                && FirebaseAuth.getInstance().currentUser?.isAnonymous == false
-                && !uid.isNullOrBlank()) {
+        if(isUserSignedIn() && !uid.isNullOrBlank()) {
             val ref = fDB.child("users/$uid")
             ref.keepSynced(true)
             ref.addListenerForSingleValueEvent(userListener)
         } else operation(null)
+    }
+
+    fun setUserProps() {
+        val fUser = FirebaseAuth.getInstance().currentUser
+
+        fUser?.let {
+            // Check user sign in method and set Firebase user prop
+            it.providerData.forEach { user ->
+                when {
+                    user.providerId.toLowerCase().contains(FA.UserProp.sign_in_method.Google.toLowerCase())
+                    -> FA.SetUserProp(FA.UserProp.sign_in_method::class.java, FA.UserProp.sign_in_method.Google)
+
+                    user.providerId.toLowerCase().contains(FA.UserProp.sign_in_method.Facebook.toLowerCase())
+                    -> FA.SetUserProp(FA.UserProp.sign_in_method::class.java, FA.UserProp.sign_in_method.Facebook)
+
+                    user.providerId.toLowerCase().contains(FA.UserProp.sign_in_method.Email.toLowerCase())
+                    -> FA.SetUserProp(FA.UserProp.sign_in_method::class.java, FA.UserProp.sign_in_method.Email)
+
+                    else -> FA.SetUserProp(FA.UserProp.sign_in_method::class.java, FA.UserProp.sign_in_method.Unknown)
+                }
+            }
+        }
     }
 
     fun updateLastSeen() {
