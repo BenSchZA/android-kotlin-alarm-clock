@@ -117,27 +117,8 @@ class BaseApplication : android.app.Application() {
         // Calls to setPersistenceEnabled() must be made before any other usage of FirebaseDatabase instance
         FirebaseDatabase.getInstance().setPersistenceEnabled(true)
 
-        firebaseAnalytics = FirebaseAnalytics.getInstance(this)
-
-        val debuggable = DetailsUtils.isDebuggable(this)
-        // Activate Crashlytics instance
-        val override = true
-        val crashlyticsEnabled = !override || BuildConfig.DEBUG || debuggable
-        val core = CrashlyticsCore.Builder().disabled(crashlyticsEnabled).build()
-
-        if (DetailsUtils.isBeta())
-            Fabric.with(Fabric.Builder(this).kits(Crashlytics.Builder().core(core).build())
-                    .appIdentifier("com.roostermornings.android.beta").build())
-        else
-            Fabric.with(this, Crashlytics.Builder().core(core).build(), Crashlytics())
-
-        // If in debug mode...
-        if (BuildConfig.DEBUG || debuggable) {
-            firebaseAnalytics.setAnalyticsCollectionEnabled(false)
-            // Stetho: http://facebook.github.io/stetho/ - debug bridge for Android (activityContentView SQL etc.)
-            // Go to chrome://inspect/ in Chrome to inspect
-            Stetho.initializeWithDefaults(this)
-        }
+        // Initialize Crashlytics, Firebase, and Stetho
+        configureAnalytics(false)
 
         // Initialize Realm database
         Realm.init(this)
@@ -153,13 +134,16 @@ class BaseApplication : android.app.Application() {
 
         // Register receiver to listen for network changes
         NetworkChangeReceiver.registerReceiverSelf(this)
+        // Register receiver to listen for notification changes
+        registerNotificationsReceiver()
+        // Add Firebase auth state listener
+        listenForAuthStateChanges()
 
         // Activate Facebook app connection
         AppEventsLogger.activateApp(this, resources.getString(R.string.facebook_app_id))
-
-        updateNotifications()
-
-        // Add Firebase auth state listener
+    }
+    
+    private fun listenForAuthStateChanges() {
         mAuthListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
             firebaseAuth.currentUser?.let {
                 // User is signed in
@@ -174,6 +158,29 @@ class BaseApplication : android.app.Application() {
 
         if (mAuth == null) mAuth = FirebaseAuth.getInstance()
         mAuthListener?.let { mAuth?.addAuthStateListener(it) }
+    }
+
+    private fun configureAnalytics(enableAnalyticsInDebug: Boolean) {
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this)
+
+        val debuggable = DetailsUtils.isDebuggable(this)
+        // Activate Crashlytics instance
+        val crashlyticsEnabled = !enableAnalyticsInDebug && (BuildConfig.DEBUG || debuggable)
+        val core = CrashlyticsCore.Builder().disabled(crashlyticsEnabled).build()
+
+        if (DetailsUtils.isBeta())
+            Fabric.with(Fabric.Builder(this).kits(Crashlytics.Builder().core(core).build())
+                    .appIdentifier("com.roostermornings.android.beta").build())
+        else
+            Fabric.with(this, Crashlytics.Builder().core(core).build(), Crashlytics())
+
+        // If in debug mode...
+        if (!enableAnalyticsInDebug && (BuildConfig.DEBUG || debuggable)) {
+            firebaseAnalytics.setAnalyticsCollectionEnabled(false)
+            // Stetho: http://facebook.github.io/stetho/ - debug bridge for Android (activityContentView SQL etc.)
+            // Go to chrome://inspect/ in Chrome to inspect
+            Stetho.initializeWithDefaults(this)
+        }
     }
 
     private fun retrieveMyUserDetails() {
@@ -200,7 +207,7 @@ class BaseApplication : android.app.Application() {
         backgroundTaskReceiver.scheduleBackgroundDailyTask(applicationContext, true)
     }
 
-    private fun updateNotifications() {
+    private fun registerNotificationsReceiver() {
         // Flag check for UI changes on load, broadcast receiver for changes while activity running
         // Broadcast receiver filter to receive UI updates
         val firebaseListenerServiceFilter = IntentFilter()
