@@ -21,6 +21,7 @@ package com.roostermornings.android.media
  * limitations under the License.
  */
 
+import android.annotation.TargetApi
 import android.app.Notification
 import android.content.Context
 import android.graphics.Bitmap
@@ -37,8 +38,14 @@ import android.support.v4.app.NotificationManagerCompat
 import com.roostermornings.android.BaseApplication
 
 import com.roostermornings.android.R
+import com.roostermornings.android.util.RoosterUtils
 
 import com.squareup.picasso.Picasso
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.graphics.Color
+import com.roostermornings.android.keys.NotificationChannelID
+
 
 /**
  * Helper class for building Media style Notifications from a
@@ -46,7 +53,7 @@ import com.squareup.picasso.Picasso
  */
 object MediaNotificationHelper {
 
-    var mNotificationManager: NotificationManagerCompat? = null
+    var mNotificationManager: NotificationManager? = null
 
     val NOTIFICATION_ID = 101
 
@@ -57,7 +64,8 @@ object MediaNotificationHelper {
     fun createNotification(context: Context,
                            mediaSession: MediaSessionCompat) {
 
-        mNotificationManager = NotificationManagerCompat.from(context)
+        //mNotificationManager = NotificationManagerCompat.from(context)
+        mNotificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         val controller = mediaSession.controller
         val mMetadata = controller.metadata
@@ -114,7 +122,25 @@ object MediaNotificationHelper {
 
         val description = mMetadata.description
 
-        val notificationBuilder = NotificationCompat.Builder(context, "MediaNotification")
+        // https://stackoverflow.com/questions/45395669/notifications-fail-to-display-in-android-oreo-api-26
+        @TargetApi(26)
+        if(RoosterUtils.hasO()) {
+            var channel = mNotificationManager?.getNotificationChannel(NotificationChannelID.MEDIA_SERVICE.name)
+
+            if(channel == null) {
+                channel = NotificationChannel(NotificationChannelID.MEDIA_SERVICE.name,
+                        "MediaService",
+                        NotificationManager.IMPORTANCE_DEFAULT)
+                mNotificationManager?.createNotificationChannel(channel)
+            }
+        }
+
+        val notificationBuilder = if(RoosterUtils.hasLollipop()) {
+            NotificationCompat.Builder(context, NotificationChannelID.MEDIA_SERVICE.name)
+        } else {
+            NotificationCompat.Builder(context)
+        }
+
         notificationBuilder
                 .setStyle(android.support.v4.media.app.NotificationCompat.MediaStyle()
                         // Show actions 0,2,4 in compact view

@@ -5,10 +5,14 @@
 
 package com.roostermornings.android.service
 
+import android.annotation.TargetApi
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.net.Uri
 import android.os.Binder
 import android.os.Bundle
@@ -30,6 +34,7 @@ import com.roostermornings.android.domain.database.User
 import com.roostermornings.android.apis.NodeIHTTPClient
 import com.roostermornings.android.firebase.FirebaseNetwork
 import com.roostermornings.android.keys.Extra
+import com.roostermornings.android.keys.NotificationChannelID
 import com.roostermornings.android.keys.NotificationID
 import com.roostermornings.android.util.Constants
 import com.roostermornings.android.util.RoosterUtils
@@ -230,10 +235,36 @@ class UploadService : Service() {
         val pendingIntent = PendingIntent.getActivity(this, 0,
                 notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
-        val notification = NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.logo)
-                .setContentText("Rooster: " + state)
-                .setContentIntent(pendingIntent).build()
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+
+        // https://stackoverflow.com/questions/45395669/notifications-fail-to-display-in-android-oreo-api-26
+        @TargetApi(26)
+        if(RoosterUtils.hasO()) {
+            var channel = notificationManager.getNotificationChannel(NotificationChannelID.UPLOAD_SERVICE.name)
+
+            if(channel == null) {
+                channel = NotificationChannel(NotificationChannelID.UPLOAD_SERVICE.name,
+                        "UploadService",
+                        NotificationManager.IMPORTANCE_HIGH)
+                notificationManager.createNotificationChannel(channel)
+            }
+        }
+
+        val notification = if(RoosterUtils.hasLollipop()) {
+            NotificationCompat.Builder(this, NotificationChannelID.UPLOAD_SERVICE.name)
+                    .setSmallIcon(R.drawable.logo)
+                    .setContentTitle(getString(R.string.app_name))
+                    .setContentText("Rooster: " + state)
+                    .setContentIntent(pendingIntent)
+                    .build()
+        } else {
+            NotificationCompat.Builder(this)
+                    .setSmallIcon(R.drawable.logo)
+                    .setContentTitle(getString(R.string.app_name))
+                    .setContentText(state)
+                    .setContentIntent(pendingIntent)
+                    .build()
+        }
 
         startForeground(NotificationID.UPLOAD_SERVICE.ordinal, notification)
     }

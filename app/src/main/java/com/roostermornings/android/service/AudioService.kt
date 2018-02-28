@@ -6,9 +6,8 @@
 package com.roostermornings.android.service
 
 import android.accounts.Account
-import android.app.Notification
-import android.app.PendingIntent
-import android.app.Service
+import android.annotation.TargetApi
+import android.app.*
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -54,11 +53,14 @@ import javax.inject.Inject
 import javax.inject.Named
 
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import android.graphics.Color
 import android.support.v4.content.WakefulBroadcastReceiver
 import com.google.firebase.auth.FirebaseUser
 import com.roostermornings.android.keys.Action
 import com.roostermornings.android.keys.Extra
+import com.roostermornings.android.keys.NotificationChannelID
 import com.roostermornings.android.keys.NotificationID
+import com.roostermornings.android.media.MediaNotificationHelper
 import com.roostermornings.android.realm.RealmAlarmFailureLog
 import com.roostermornings.android.util.JSONPersistence
 import com.roostermornings.android.util.*
@@ -1271,12 +1273,38 @@ class AudioService : Service() {
         val broadcastIntent = Intent(Action.END_AUDIO_SERVICE.name)
         val broadcastPendingIntent = PendingIntent.getBroadcast(this, 0, broadcastIntent, 0)
 
-        val notification = NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.logo)
-                .setContentTitle(getString(R.string.app_name))
-                .setContentText(state)
-                .setContentIntent(pendingIntent)
-                .setDeleteIntent(broadcastPendingIntent).build()
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+
+        // https://stackoverflow.com/questions/45395669/notifications-fail-to-display-in-android-oreo-api-26
+        @TargetApi(26)
+        if(RoosterUtils.hasO()) {
+            var channel = notificationManager.getNotificationChannel(NotificationChannelID.AUDIO_SERVICE.name)
+
+            if(channel == null) {
+                channel = NotificationChannel(NotificationChannelID.AUDIO_SERVICE.name,
+                        "AudioService",
+                        NotificationManager.IMPORTANCE_HIGH)
+                notificationManager.createNotificationChannel(channel)
+            }
+        }
+
+        val notification = if(RoosterUtils.hasLollipop()) {
+            NotificationCompat.Builder(this, NotificationChannelID.AUDIO_SERVICE.name)
+                    .setSmallIcon(R.drawable.logo)
+                    .setContentTitle(getString(R.string.app_name))
+                    .setContentText(state)
+                    .setContentIntent(pendingIntent)
+                    .setDeleteIntent(broadcastPendingIntent)
+                    .build()
+        } else {
+            NotificationCompat.Builder(this)
+                    .setSmallIcon(R.drawable.logo)
+                    .setContentTitle(getString(R.string.app_name))
+                    .setContentText(state)
+                    .setContentIntent(pendingIntent)
+                    .setDeleteIntent(broadcastPendingIntent)
+                    .build()
+        }
 
         startForeground(NotificationID.AUDIO_SERVICE.ordinal, notification)
     }
@@ -1291,13 +1319,42 @@ class AudioService : Service() {
         val pendingIntent = PendingIntent.getActivity(this, 0,
                 launchIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
-        val notification = NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.logo)
-                .setContentTitle(getString(R.string.app_name))
-                .setContentText(state)
-                .setAutoCancel(true)
-                .setContentIntent(pendingIntent)
-                .setDeleteIntent(pendingIntent).build()
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+
+        @TargetApi(26)
+        if(RoosterUtils.hasO()) {
+            var channel = notificationManager.getNotificationChannel(NotificationChannelID.AUDIO_SERVICE.name)
+
+            if(channel == null) {
+                channel = NotificationChannel(NotificationChannelID.AUDIO_SERVICE.name,
+                        "AudioService",
+                        NotificationManager.IMPORTANCE_HIGH)
+                channel.lightColor = Color.GREEN
+                channel.enableVibration(true)
+                notificationManager.createNotificationChannel(channel)
+            }
+        }
+
+        val notification = if(RoosterUtils.hasLollipop()) {
+            NotificationCompat.Builder(this, NotificationChannelID.AUDIO_SERVICE.name)
+                    .setSmallIcon(R.drawable.logo)
+                    .setContentTitle(getString(R.string.app_name))
+                    .setContentText(state)
+                    .setAutoCancel(true)
+                    .setContentIntent(pendingIntent)
+                    .setDeleteIntent(pendingIntent)
+                    .build()
+        } else {
+            NotificationCompat.Builder(this)
+                    .setSmallIcon(R.drawable.logo)
+                    .setContentTitle(getString(R.string.app_name))
+                    .setContentText(state)
+                    .setAutoCancel(true)
+                    .setContentIntent(pendingIntent)
+                    .setDeleteIntent(pendingIntent)
+                    .build()
+        }
+
         // Above not working
         notification.flags = notification.flags or Notification.FLAG_AUTO_CANCEL
 
