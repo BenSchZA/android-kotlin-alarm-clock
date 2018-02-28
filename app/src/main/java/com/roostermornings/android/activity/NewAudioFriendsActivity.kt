@@ -236,7 +236,7 @@ class NewAudioFriendsActivity : BaseActivity() {
                     mRecyclerView.visibility = View.VISIBLE
 
                     mFriends.clear()
-                    mFriends.addAll(apiResponse.users)
+                    apiResponse.users.filterNotNullTo(mFriends)
 
                     //For each user, check if name appears in contacts, and allocate name
                     if (ContextCompat.checkSelfPermission(applicationContext,
