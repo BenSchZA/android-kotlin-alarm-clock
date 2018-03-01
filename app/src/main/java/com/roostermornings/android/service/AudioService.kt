@@ -200,6 +200,8 @@ class AudioService : Service() {
         super.onCreate()
         mRunning = false
 
+        foregroundNotification("Alarm audio starting")
+
         BaseApplication.roosterApplicationComponent.inject(this)
 
         // Catch all uncaught exceptions
@@ -401,7 +403,7 @@ class AudioService : Service() {
     }
 
     private fun switchOnActiveInternetConnection(active: Boolean?) {
-        if(active != null && active) {
+        if(active == true) {
             // Download any social or channel audio files
             attemptContentUriRetrieval(alarm)
 
@@ -883,7 +885,7 @@ class AudioService : Service() {
         releaseMediaPlayers()
     }
 
-    fun endService() {
+    private fun endService() {
         //https://stackoverflow.com/questions/17146822/when-is-a-started-and-bound-service-destroyed
 
         // AudioService report logging
@@ -1264,7 +1266,7 @@ class AudioService : Service() {
         launchIntent.action = Action.CANCEL_SNOOZE.name
 
         val pendingIntent = PendingIntent.getActivity(this, 0,
-                launchIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+                launchIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         val broadcastIntent = Intent(Action.END_AUDIO_SERVICE.name)
         val broadcastPendingIntent = PendingIntent.getBroadcast(this, 0, broadcastIntent, 0)
@@ -1287,7 +1289,7 @@ class AudioService : Service() {
         launchIntent.action = Action.CANCEL_SNOOZE.name
 
         val pendingIntent = PendingIntent.getActivity(this, 0,
-                launchIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+                launchIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         val notification = NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.logo)

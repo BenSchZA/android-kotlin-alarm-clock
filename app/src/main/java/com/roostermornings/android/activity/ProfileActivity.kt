@@ -90,6 +90,7 @@ class ProfileActivity : BaseActivity(), CustomCommandInterface {
             it?.let {
                 mCurrentUser = it
                 profileName.setText(it.user_name)
+                profileName.setSelection(profileName.text.length)
                 profileMobileNumber.setText(it.cell_number)
                 updateProfilePicFromCurrentUser()
             }
@@ -114,17 +115,23 @@ class ProfileActivity : BaseActivity(), CustomCommandInterface {
         profileMobileNumber.setText(mobileNumberEntry)
     }
 
-    public override fun onPause() {
+     override fun onPause() {
         super.onPause()
 
+         // Persist last valid mobile number entry and update database
         if (profileMobileNumberText.isNotBlank()) {
             FirebaseNetwork.updateProfileCellNumber(this, profileMobileNumberText)
-            //Persist last valid mobile number entry
+
             sharedPreferences
                     .edit()
                     .putString(PrefsKey.MOBILE_NUMBER_ENTRY.name, profileMobileNumberText)
                     .apply()
         }
+
+         // Update database entry if username is not blank
+        val profileNameText = profileName.text.toString()
+        if(profileNameText.isNotBlank())
+            FirebaseNetwork.updateProfileUserName(profileNameText)
     }
 
     override fun onCustomCommand(command: InterfaceCommands.Companion.Command) {
@@ -142,9 +149,7 @@ class ProfileActivity : BaseActivity(), CustomCommandInterface {
                     }
 
                     recreate()
-                } else {
-                    finish()
-                }
+                } else finish()
             }
             else -> {}
         }
@@ -199,19 +204,9 @@ class ProfileActivity : BaseActivity(), CustomCommandInterface {
         startActivityForResult(chooserIntent, 0)
     }
 
-    @OnTextChanged(R.id.settings_profile_name)
-    fun onTextChangedProfileName() {
-        if(!authManager.isUserSignedIn()) return
-
-        val profileNameText = profileName.text.toString()
-        FirebaseNetwork.updateProfileUserName(profileNameText)
-    }
-
     @OnTextChanged(R.id.settings_profile_mobile_number)
     fun onTextChangedProfileMobileNumber() {
         profileMobileNumberText = profileMobileNumber.text.toString()
-
-        if(!authManager.isUserSignedIn()) return
 
         if (profileMobileNumberText.isBlank()) {
             Toaster.makeToast(this, "Mobile number can't be empty.", Toast.LENGTH_SHORT).checkTastyToast()

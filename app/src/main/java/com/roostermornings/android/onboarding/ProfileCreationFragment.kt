@@ -28,6 +28,7 @@ import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.*
 import com.mobsandgeeks.saripaar.Validator
+import com.mobsandgeeks.saripaar.annotation.Email
 import com.mobsandgeeks.saripaar.annotation.NotEmpty
 import com.mobsandgeeks.saripaar.annotation.Password
 import com.roostermornings.android.BaseApplication
@@ -75,6 +76,7 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
     @BindView(R.id.signup_username_edittext)
     lateinit var mUserName: EditText
 
+    @Email
     @BindView(R.id.signup_email_address_edittext)
     lateinit var mEmailAddress: EditText
 
@@ -112,7 +114,7 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
         BaseApplication.roosterApplicationComponent.inject(this)
     }
 
-    override fun inject(component: RoosterApplicationComponent?) {
+    override fun inject(component: RoosterApplicationComponent) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
@@ -349,6 +351,8 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
             override fun onAuthSuccess(task: Task<AuthResult>) {
                 UserMetrics.generateNewUserMetricsEntry()
 
+                authManager.updateFirebaseUserDisplayName(Profile.getCurrentProfile().name)
+
                 //TODO: get permission
                 //UserMetrics.setBirthday(`object`?.getString("birthday")?:"")
 
@@ -384,6 +388,7 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
         authManager.firebaseAuthWithGoogle(result, object: AuthManager.AuthInterface {
             override fun onAuthSuccess(task: Task<AuthResult>) {
                 UserMetrics.generateNewUserMetricsEntry()
+
                 changeLayoutSignedIn()
                 proceedToNextPage()
 
@@ -448,6 +453,8 @@ class ProfileCreationFragment : BaseFragment(), FragmentInterface, Validator.Val
                 object: AuthManager.AuthInterface {
             override fun onAuthSuccess(task: Task<AuthResult>) {
                 UserMetrics.generateNewUserMetricsEntry()
+                authManager.updateFirebaseUserDisplayName(name)
+
                 changeLayoutSignedIn()
                 proceedToNextPage()
 

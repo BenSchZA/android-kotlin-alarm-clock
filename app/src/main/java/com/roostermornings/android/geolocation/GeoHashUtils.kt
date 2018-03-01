@@ -73,36 +73,26 @@ class GeoHashUtils(val context: Context) {
             mUserGeoHashArray = jsonPersistence.userGeoHashEntries
         }
 
-        //Log exception for debugging
-//        Crashlytics.log("Geohash shared pref: " + sharedPreferences.getString(Constants.USER_GEOHASH, "not set"))
-//        for(g in mUserGeoHashArray) {
-//            Crashlytics.log("Geohash entry: " + Gson().toJson(g))
-//        }
-//        Crashlytics.logException(Throwable("GeoHashUtils Report"))
-
         val connectivityUtils = ConnectivityUtils(context)
         if(connectivityUtils.isConnected()) {
             if(connectivityUtils.isConnectedMobile()) {
                 //Check that there are no mobile data entries within the last three days before refreshing
-                if(mUserGeoHashArray.none {
+                val noMobileDataEntriesLast3Days = mUserGeoHashArray.none {
                     entry -> entry.mobileSource
                         .and(entry.date > Calendar.getInstance().timeInMillis - Constants.TIME_MILLIS_1_DAY *3)
-                }) refreshUserGeoHashArray(mUserGeoHashArray, true)
-                else {
-                    //Create a map of user geohash entries to cluster size, and update user's geohash appropriately
-                    checkUserGeoHashClusterMap(mUserGeoHashArray)
                 }
+                if(noMobileDataEntriesLast3Days) refreshUserGeoHashArray(mUserGeoHashArray, true)
             } else if(connectivityUtils.isConnectedWifi()) {
                 //Check that there are no entries within the last week before refreshing
-                if (mUserGeoHashArray.none {
+                val noEntriesLastWeek = mUserGeoHashArray.none {
                     entry -> entry.date > Calendar.getInstance().timeInMillis - Constants.TIME__MILLIS_1_WEEK
-                }) refreshUserGeoHashArray(mUserGeoHashArray, false)
-                else {
-                    //Create a map of user geohash entries to cluster size, and update user's geohash appropriately
-                    checkUserGeoHashClusterMap(mUserGeoHashArray)
                 }
+                if (noEntriesLastWeek) refreshUserGeoHashArray(mUserGeoHashArray, false)
             }
         }
+
+        //Create a map of user geohash entries to cluster size, and update user's geohash appropriately
+        checkUserGeoHashClusterMap(mUserGeoHashArray)
     }
 
     private fun refreshUserGeoHashArray(mUserGeoHashArray: ArrayList<UserGeoHashEntry>, mobileSource: Boolean) {
@@ -139,9 +129,6 @@ class GeoHashUtils(val context: Context) {
 
                         //Persist the user geohashes to shared pref
                         jsonPersistence.userGeoHashEntries = tempUserGeoHashArray
-
-                        //Create a map of user geohash entries to cluster size, and update user's geohash appropriately
-                        checkUserGeoHashClusterMap(tempUserGeoHashArray)
                     }
                 }
             }
@@ -155,6 +142,7 @@ class GeoHashUtils(val context: Context) {
     private fun checkUserGeoHashClusterMap(tempUserGeoHashArray: ArrayList<UserGeoHashEntry>) {
         //Create map of UserGeoHashEntry to cluster size
         val geoHashClusterMap: HashMap<UserGeoHashEntry, Int> = HashMap()
+
         tempUserGeoHashArray.forEach { entry ->
             tempUserGeoHashArray.count { entryCompare ->
                 distanceBetweenGeoHash(GeoHash.fromGeohashString(entry.geoHash), GeoHash.fromGeohashString(entryCompare.geoHash)) < 200*10e3 }
@@ -164,20 +152,21 @@ class GeoHashUtils(val context: Context) {
         //Get geohash with maximum cluster size, with mobile source having a higher priority
         if(geoHashClusterMap.none { it.key.mobileSource }) {
             geoHashClusterMap.maxBy { it.value }
-                    ?.let {
-                        val userGeoHash = it.key.geoHash
-                        sharedPreferences.edit().putString(PrefsKey.USER_GEOHASH.name, userGeoHash).apply()
-                        FirebaseNetwork.updateProfileGeoHashLocation(userGeoHash)
-                        UserMetrics.updateGeohash(userGeoHash)
-                    }
+                    ?.let { updateGeoHash(it.key.geoHash) }
         } else {
             geoHashClusterMap.filter { it.key.mobileSource }.maxBy { it.value }
-                    ?.let {
-                        val userGeoHash = it.key.geoHash
-                        sharedPreferences.edit().putString(PrefsKey.USER_GEOHASH.name, userGeoHash).apply()
-                        FirebaseNetwork.updateProfileGeoHashLocation(userGeoHash)
-                        UserMetrics.updateGeohash(userGeoHash)
-                    }
+                    ?.let { updateGeoHash(it.key.geoHash) }
+        }
+    }
+
+    private fun updateGeoHash(userGeoHash: String) {
+        if(userGeoHash.isNotBlank()) {
+            sharedPreferences.edit().putString(PrefsKey.USER_GEOHASH.name, userGeoHash).apply()
+
+            LifeCycle.performMethodOnceInDay {
+                FirebaseNetwork.updateProfileGeoHashLocation(userGeoHash)
+                UserMetrics.updateGeohash(userGeoHash)
+            }
         }
     }
 

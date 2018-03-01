@@ -112,9 +112,9 @@ class AuthManager(val context: Context) {
 
         attemptAnonymousLinking(credential, object: AnonymousLinkingListener {
             override fun onLinkSuccess(task: Task<AuthResult>) {
+                this@AuthManager.onAuthSuccess()
                 onSuccessfulFacebookAuth()
                 listener.onAuthSuccess(task)
-                this@AuthManager.onAuthSuccess()
             }
 
             override fun onLinkFailure(exception: Exception) {
@@ -125,10 +125,10 @@ class AuthManager(val context: Context) {
                     // the auth state listener will be notified and logic to handle the
                     // signed in user can be handled in the listener.
                     if (task.isSuccessful) {
+                        this@AuthManager.onAuthSuccess()
                         performMigration()
                         onSuccessfulFacebookAuth()
                         listener.onAuthSuccess(task)
-                        this@AuthManager.onAuthSuccess()
                     } else {
                         Log.d(TAG, "firebaseAuthWithFacebook:" + exception)
                         listener.onAuthFailure()
@@ -164,9 +164,9 @@ class AuthManager(val context: Context) {
 
         attemptAnonymousLinking(credential, object: AnonymousLinkingListener {
             override fun onLinkSuccess(task: Task<AuthResult>) {
+                this@AuthManager.onAuthSuccess()
                 onSuccessfulGoogleAuth(account)
                 listener.onAuthSuccess(task)
-                this@AuthManager.onAuthSuccess()
             }
 
             override fun onLinkFailure(exception: Exception) {
@@ -177,10 +177,10 @@ class AuthManager(val context: Context) {
                     // the auth state listener will be notified and logic to handle the
                     // signed in user can be handled in the listener.
                     if (task.isSuccessful) {
+                        this@AuthManager.onAuthSuccess()
                         performMigration()
                         onSuccessfulGoogleAuth(account)
                         listener.onAuthSuccess(task)
-                        this@AuthManager.onAuthSuccess()
                     } else {
                         Log.d(TAG, "firebaseAuthWithGoogle:" + exception)
                         listener.onAuthFailure()
@@ -207,9 +207,9 @@ class AuthManager(val context: Context) {
 
         attemptAnonymousLinking(credential, object: AnonymousLinkingListener {
             override fun onLinkSuccess(task: Task<AuthResult>) {
+                this@AuthManager.onAuthSuccess()
                 onSuccessfulEmailAuth(name, mAlreadyUser)
                 listener.onAuthSuccess(task)
-                this@AuthManager.onAuthSuccess()
             }
 
             override fun onLinkFailure(exception: Exception) {
@@ -221,10 +221,10 @@ class AuthManager(val context: Context) {
                             // the auth state listener will be notified and logic to handle the
                             // signed in user can be handled in the listener.
                             if (task.isSuccessful) {
+                                this@AuthManager.onAuthSuccess()
                                 performMigration()
                                 onSuccessfulEmailAuth(name, mAlreadyUser)
                                 listener.onAuthSuccess(task)
-                                this@AuthManager.onAuthSuccess()
                             } else {
                                 Log.d(TAG, "firebaseAuthWithEmail:" + exception)
                                 listener.onAuthFailure()
@@ -261,12 +261,6 @@ class AuthManager(val context: Context) {
     fun firebaseAnonymousAuth() {
         val deviceToken = FirebaseInstanceId.getInstance().token
 
-        //TODO:
-//        FirebaseAuth.getInstance().currentUser?.updateProfile(
-//                UserProfileChangeRequest.Builder()
-//                .setDisplayName("Anonymous Rooster (Me)")
-//                .build())
-
         FirebaseNetwork.createOrUpdateRoosterUser(deviceToken, null)
     }
 
@@ -284,5 +278,10 @@ class AuthManager(val context: Context) {
         }?.addOnFailureListener {exception ->
             resultListener.onLinkFailure(exception)
         }
+    }
+
+    fun updateFirebaseUserDisplayName(displayName: String): Boolean {
+        val changeRequest = UserProfileChangeRequest.Builder().setDisplayName(displayName).build()
+        return FirebaseAuth.getInstance().currentUser?.updateProfile(changeRequest) != null
     }
 }
