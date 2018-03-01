@@ -30,6 +30,9 @@ import com.roostermornings.android.sync.DownloadSyncAdapter
 import java.util.*
 
 import javax.inject.Inject
+import android.support.v4.content.ContextCompat.startActivity
+
+
 
 /**
  * <h1>LifeCycle Class</h1>
@@ -154,12 +157,10 @@ class LifeCycle
     }
 
     fun sendFeedback(name: String) {
-        val emailIntent = Intent(android.content.Intent.ACTION_SEND)
-        emailIntent.type = "text/plain"
-        emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, arrayOf("ben.scholtz@roostermornings.com"))
-        emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "$name: Hello there")
-        emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, "Add message here")
-        emailIntent.type = "message/rfc822"
+        val recipientEmail = "ben.scholtz@roostermornings.com"
+        val emailIntent = Intent(Intent.ACTION_SENDTO)
+        emailIntent.data = Uri.parse("mailto:$recipientEmail?subject=$name:%20Hello%20there" +
+                "&body=Add%20message%20here")
 
         try {
             context.startActivity(Intent.createChooser(emailIntent,
@@ -167,7 +168,6 @@ class LifeCycle
         } catch (ex: android.content.ActivityNotFoundException) {
             Toaster.makeToast(context, "No email clients installed.", Toast.LENGTH_LONG)
         }
-
     }
 
     /**
