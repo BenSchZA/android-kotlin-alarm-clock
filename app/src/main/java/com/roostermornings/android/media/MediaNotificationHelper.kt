@@ -125,13 +125,15 @@ object MediaNotificationHelper {
         // https://stackoverflow.com/questions/45395669/notifications-fail-to-display-in-android-oreo-api-26
         @TargetApi(26)
         if(RoosterUtils.hasO()) {
-            var channel = mNotificationManager?.getNotificationChannel(NotificationChannelID.MEDIA_SERVICE.name)
+            val channelA = mNotificationManager?.getNotificationChannel(NotificationChannelID.MEDIA_SERVICE.name)
 
-            if(channel == null) {
-                channel = NotificationChannel(NotificationChannelID.MEDIA_SERVICE.name,
+            if(channelA == null) {
+                val channelB = NotificationChannel(NotificationChannelID.MEDIA_SERVICE.name,
                         "MediaService",
-                        NotificationManager.IMPORTANCE_DEFAULT)
-                mNotificationManager?.createNotificationChannel(channel)
+                        NotificationManager.IMPORTANCE_HIGH)
+                channelB.setSound(null, null)
+
+                mNotificationManager?.createNotificationChannel(channelB)
             }
         }
 

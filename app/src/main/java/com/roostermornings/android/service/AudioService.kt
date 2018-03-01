@@ -1317,18 +1317,21 @@ class AudioService : Service() {
         // https://stackoverflow.com/questions/45395669/notifications-fail-to-display-in-android-oreo-api-26
         @TargetApi(26)
         if(RoosterUtils.hasO()) {
-            var channel = notificationManager.getNotificationChannel(NotificationChannelID.AUDIO_SERVICE.name)
+            val channelA = notificationManager.getNotificationChannel(NotificationChannelID.AUDIO_SERVICE.name)
 
-            if(channel == null) {
-                channel = NotificationChannel(NotificationChannelID.AUDIO_SERVICE.name,
+            if(channelA == null) {
+                val channelB = NotificationChannel(NotificationChannelID.AUDIO_SERVICE.name,
                         "AudioService",
-                        NotificationManager.IMPORTANCE_HIGH)
-                notificationManager.createNotificationChannel(channel)
+                        NotificationManager.IMPORTANCE_DEFAULT)
+                channelB.setSound(null, null)
+
+                notificationManager.createNotificationChannel(channelB)
             }
         }
 
         val notification = if(RoosterUtils.hasO()) {
             NotificationCompat.Builder(this, NotificationChannelID.AUDIO_SERVICE.name)
+                    .setOngoing(true)
                     .setCategory(Notification.CATEGORY_ALARM)
                     .setSmallIcon(R.drawable.logo)
                     .setContentTitle(getString(R.string.app_name))
@@ -1338,6 +1341,7 @@ class AudioService : Service() {
                     .build()
         } else {
             NotificationCompat.Builder(this)
+                    .setOngoing(true)
                     .setSmallIcon(R.drawable.logo)
                     .setContentTitle(getString(R.string.app_name))
                     .setContentText(state)
@@ -1363,20 +1367,21 @@ class AudioService : Service() {
 
         @TargetApi(26)
         if(RoosterUtils.hasO()) {
-            var channel = notificationManager.getNotificationChannel(NotificationChannelID.AUDIO_SERVICE.name)
+            val channelA = notificationManager.getNotificationChannel(NotificationChannelID.AUDIO_SERVICE.name)
 
-            if(channel == null) {
-                channel = NotificationChannel(NotificationChannelID.AUDIO_SERVICE.name,
+            if(channelA == null) {
+                val channelB = NotificationChannel(NotificationChannelID.AUDIO_SERVICE.name,
                         "AudioService",
-                        NotificationManager.IMPORTANCE_HIGH)
-                channel.lightColor = Color.GREEN
-                channel.enableVibration(true)
-                notificationManager.createNotificationChannel(channel)
+                        NotificationManager.IMPORTANCE_DEFAULT)
+                channelB.setSound(null, null)
+
+                notificationManager.createNotificationChannel(channelB)
             }
         }
 
         val notification = if(RoosterUtils.hasLollipop()) {
             NotificationCompat.Builder(this, NotificationChannelID.AUDIO_SERVICE.name)
+                    .setOngoing(true)
                     .setSmallIcon(R.drawable.logo)
                     .setContentTitle(getString(R.string.app_name))
                     .setContentText(state)
@@ -1386,6 +1391,7 @@ class AudioService : Service() {
                     .build()
         } else {
             NotificationCompat.Builder(this)
+                    .setOngoing(true)
                     .setSmallIcon(R.drawable.logo)
                     .setContentTitle(getString(R.string.app_name))
                     .setContentText(state)
