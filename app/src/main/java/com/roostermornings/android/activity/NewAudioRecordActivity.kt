@@ -505,7 +505,7 @@ class NewAudioRecordActivity : BaseActivity() {
         }
 
         //Manage whether audio file is being sent direct to a user or a list of users needs to be shown
-        val intent = Intent(this@NewAudioRecordActivity, NewAudioFriendsActivity::class.java)
+        val sendIntent = Intent(this@NewAudioRecordActivity, NewAudioFriendsActivity::class.java)
         val bun = Bundle()
         bun.putString(Extra.LOCAL_FILE_STRING.name, mAudioSavePathInDevice)
 
@@ -513,15 +513,15 @@ class NewAudioRecordActivity : BaseActivity() {
         //no harm done
         try {
             if (intent.extras?.containsKey(Extra.FRIENDS_LIST.name) == true) {
-                val mFriends = getIntent().getSerializableExtra(Extra.FRIENDS_LIST.name) as ArrayList<User>
+                val mFriends = intent.getSerializableExtra(Extra.FRIENDS_LIST.name) as ArrayList<User>
                 bun.putSerializable(Extra.FRIENDS_LIST.name, mFriends)
             }
         } catch (e: ClassCastException) {
             e.printStackTrace()
         }
 
-        intent.putExtras(bun)
-        startActivity(intent)
+        sendIntent.putExtras(bun)
+        startActivity(sendIntent)
     }
 
     private fun updateTimer(time: Float) {
