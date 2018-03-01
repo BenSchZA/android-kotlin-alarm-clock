@@ -651,12 +651,16 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
 
     override fun onDestroy() {
         roosterNotificationReceiver?.let {
-            unregisterReceiver(roosterNotificationReceiver)
+            unregisterReceiver(it)
             roosterNotificationReceiver = null
         }
         requestNotificationReceiver?.let {
-            unregisterReceiver(requestNotificationReceiver)
+            unregisterReceiver(it)
             requestNotificationReceiver = null
+        }
+        foregroundReceiver?.let {
+            unregisterReceiver(it)
+            foregroundReceiver = null
         }
 
         super.onDestroy()
