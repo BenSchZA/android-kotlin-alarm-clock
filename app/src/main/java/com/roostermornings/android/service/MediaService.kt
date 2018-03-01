@@ -122,7 +122,7 @@ class MediaService : MediaBrowserServiceCompat(),
         setAttachedActivity()
 
         initNoisyReceiver()
-        retrieveAudioFocus()
+
         //Lock WiFi during service operation
         mWiFiLock?.acquire()
 

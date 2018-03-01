@@ -6,5 +6,6 @@ package com.roostermornings.android.keys
 enum class NotificationChannelID {
     AUDIO_SERVICE,
     MEDIA_SERVICE,
-    UPLOAD_SERVICE
+    UPLOAD_SERVICE,
+    FIREBASE_MESSAGING
 }

@@ -13,10 +13,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
-import android.media.AudioManager
-import android.media.MediaPlayer
-import android.media.Ringtone
-import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Binder
 import android.os.Bundle
@@ -45,7 +41,6 @@ import com.roostermornings.android.sqlutil.AudioTableManager
 
 import java.io.File
 import java.io.IOException
-import java.util.ArrayList
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -54,7 +49,11 @@ import javax.inject.Named
 
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.graphics.Color
+import android.media.*
+import android.media.AudioAttributes.FLAG_AUDIBILITY_ENFORCED
+import android.media.AudioAttributes.USAGE_ALARM
 import android.support.v4.content.WakefulBroadcastReceiver
+import android.support.v4.media.AudioAttributesCompat
 import com.google.firebase.auth.FirebaseUser
 import com.roostermornings.android.keys.Action
 import com.roostermornings.android.keys.Extra
@@ -66,6 +65,7 @@ import com.roostermornings.android.util.JSONPersistence
 import com.roostermornings.android.util.*
 import com.roostermornings.android.util.Constants.AUDIO_TYPE_CHANNEL
 import com.roostermornings.android.util.Constants.AUDIO_TYPE_SOCIAL
+import java.util.*
 
 // Service to manage playing and pausing audio during Rooster alarm
 class AudioService : Service() {
@@ -202,9 +202,9 @@ class AudioService : Service() {
         super.onCreate()
         mRunning = false
 
-        foregroundNotification("Alarm audio starting")
-
         BaseApplication.roosterApplicationComponent.inject(this)
+
+        foregroundNotification("Alarm audio starting")
 
         // Catch all uncaught exceptions
         Thread.setDefaultUncaughtExceptionHandler { _, e -> logError(e) }
@@ -265,6 +265,8 @@ class AudioService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val method = Thread.currentThread().stackTrace[2].methodName
         if (StrUtils.notNullOrEmpty(method)) Crashlytics.log(method)
+
+        foregroundNotification("Alarm audio starting")
 
         /** Unique millis slot for Realm log */
         millisSlot = intent?.getLongExtra(Extra.MILLIS_SLOT.name, -1L)?:-1L
@@ -546,14 +548,22 @@ class AudioService : Service() {
         audioFileRef.downloadUrl.addOnSuccessListener(OnSuccessListener { downloadUrl ->
             try {
                 streamMediaPlayer.reset()
-                streamMediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM)
-                //                        AudioAttributesCompat.Builder builder = new AudioAttributesCompat.Builder()
-                //                                .setContentType(AudioAttributesCompat.CONTENT_TYPE_MUSIC)
-                //                                .setFlags(FLAG_AUDIBILITY_ENFORCED)
-                //                                .setUsage(USAGE_ALARM);
-                //                    builder.build();
-                //                    if()
-                //                    streamMediaPlayer.setAudioAttributes();
+
+                @TargetApi(21)
+                if(RoosterUtils.hasLollipop()) {
+                    val builder = AudioAttributes.Builder()
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .setFlags(FLAG_AUDIBILITY_ENFORCED)
+                            .setUsage(USAGE_ALARM)
+                            .setLegacyStreamType(AudioManager.STREAM_ALARM)
+                    streamMediaPlayer.setAudioAttributes(builder.build())
+                } else {
+                    val builder = AudioAttributes.Builder()
+                            .setContentType(AudioAttributesCompat.CONTENT_TYPE_MUSIC)
+                            .setLegacyStreamType(AudioManager.STREAM_ALARM)
+                    streamMediaPlayer.setAudioAttributes(builder.build())
+                }
+
                 streamMediaPlayer.isLooping = true
                 streamMediaPlayer.setDataSource(downloadUrl.toString())
             } catch (e: Exception) {
@@ -653,7 +663,21 @@ class AudioService : Service() {
         //        }
 
         // Set media player to alarm volume
-        mediaPlayerRooster.setAudioStreamType(AudioManager.STREAM_ALARM)
+        @TargetApi(21)
+        if(RoosterUtils.hasLollipop()) {
+            val builder = AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .setFlags(FLAG_AUDIBILITY_ENFORCED)
+                    .setUsage(USAGE_ALARM)
+                    .setLegacyStreamType(AudioManager.STREAM_ALARM)
+            mediaPlayerRooster.setAudioAttributes(builder.build())
+        } else {
+            val builder = AudioAttributes.Builder()
+                    .setContentType(AudioAttributesCompat.CONTENT_TYPE_MUSIC)
+                    .setLegacyStreamType(AudioManager.STREAM_ALARM)
+            mediaPlayerRooster.setAudioAttributes(builder.build())
+        }
+
         // Check stream volume above minimum
         checkStreamVolume(AudioManager.STREAM_ALARM)
 
@@ -1052,7 +1076,22 @@ class AudioService : Service() {
             // Start audio stream
             try {
                 mediaPlayerDefault.reset()
-                mediaPlayerDefault.setAudioStreamType(AudioManager.STREAM_ALARM)
+
+                @TargetApi(21)
+                if(RoosterUtils.hasLollipop()) {
+                    val builder = AudioAttributes.Builder()
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .setFlags(FLAG_AUDIBILITY_ENFORCED)
+                            .setUsage(USAGE_ALARM)
+                            .setLegacyStreamType(AudioManager.STREAM_ALARM)
+                    mediaPlayerDefault.setAudioAttributes(builder.build())
+                } else {
+                    val builder = AudioAttributes.Builder()
+                            .setContentType(AudioAttributesCompat.CONTENT_TYPE_MUSIC)
+                            .setLegacyStreamType(AudioManager.STREAM_ALARM)
+                    mediaPlayerDefault.setAudioAttributes(builder.build())
+                }
+
                 mediaPlayerDefault.setDataSource(this, notification!!)
                 mediaPlayerDefault.isLooping = true
 
@@ -1288,8 +1327,9 @@ class AudioService : Service() {
             }
         }
 
-        val notification = if(RoosterUtils.hasLollipop()) {
+        val notification = if(RoosterUtils.hasO()) {
             NotificationCompat.Builder(this, NotificationChannelID.AUDIO_SERVICE.name)
+                    .setCategory(Notification.CATEGORY_ALARM)
                     .setSmallIcon(R.drawable.logo)
                     .setContentTitle(getString(R.string.app_name))
                     .setContentText(state)
