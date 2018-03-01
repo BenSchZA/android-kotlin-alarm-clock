@@ -6,11 +6,14 @@
 package com.roostermornings.android.service
 
 import android.accounts.Account
-import android.app.NotificationManager
-import android.app.PendingIntent
+import android.annotation.TargetApi
+import android.app.*
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
+import android.media.AudioAttributes.*
+import android.media.AudioManager
 import android.media.RingtoneManager
 import android.net.Uri
 import android.support.v4.app.NotificationCompat
@@ -22,6 +25,8 @@ import com.google.gson.Gson
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.R
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity
+import com.roostermornings.android.keys.NotificationChannelID
+import com.roostermornings.android.keys.NotificationID
 import com.roostermornings.android.sync.DownloadSyncAdapter
 
 import org.json.JSONObject
@@ -29,6 +34,7 @@ import org.json.JSONObject
 import javax.inject.Inject
 
 import com.roostermornings.android.util.Constants.AUTHORITY
+import com.roostermornings.android.util.RoosterUtils
 
 class RoosterFirebaseMessagingService : FirebaseMessagingService() {
 
@@ -97,17 +103,51 @@ class RoosterFirebaseMessagingService : FirebaseMessagingService() {
 
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
-        val notificationBuilder = NotificationCompat.Builder(this)
-                .setContentTitle("Rooster")
-                .setSmallIcon(R.drawable.logo)
-                .setContentText(messageBody)
-                .setAutoCancel(true)
-                .setSound(defaultSoundUri)
-                .setContentIntent(pendingIntent)
+        val notificationManager = getSystemService(Service.NOTIFICATION_SERVICE) as NotificationManager
 
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        // https://stackoverflow.com/questions/45395669/notifications-fail-to-display-in-android-oreo-api-26
+        @TargetApi(26)
+        if(RoosterUtils.hasO()) {
+            val channelA = notificationManager.getNotificationChannel(NotificationChannelID.FIREBASE_MESSAGING.name)
 
-        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build())
+            if(channelA == null) {
+
+                val audioAttributes = AudioAttributes.Builder()
+                            .setUsage(USAGE_NOTIFICATION)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .setLegacyStreamType(AudioManager.STREAM_NOTIFICATION)
+                            .build()
+
+                val channelB = NotificationChannel(NotificationChannelID.FIREBASE_MESSAGING.name,
+                        "FirebaseMessagingService",
+                        NotificationManager.IMPORTANCE_HIGH)
+                channelB.setSound(defaultSoundUri, audioAttributes)
+
+                notificationManager.createNotificationChannel(channelB)
+            }
+        }
+
+        val notification = if(RoosterUtils.hasO()) {
+            NotificationCompat.Builder(this, NotificationChannelID.FIREBASE_MESSAGING.name)
+                    .setCategory(Notification.CATEGORY_ALARM)
+                    .setContentTitle("Rooster")
+                    .setSmallIcon(R.drawable.logo)
+                    .setContentText(messageBody)
+                    .setAutoCancel(true)
+                    .setContentIntent(pendingIntent)
+                    .build()
+        } else {
+            NotificationCompat.Builder(this)
+                    .setContentTitle("Rooster")
+                    .setSmallIcon(R.drawable.logo)
+                    .setContentText(messageBody)
+                    .setAutoCancel(true)
+                    .setSound(defaultSoundUri)
+                    .setContentIntent(pendingIntent)
+                    .build()
+        }
+
+        notificationManager.notify(NotificationID.FIREBASE_MESSAGING.ordinal, notification)
     }
 
     companion object {
