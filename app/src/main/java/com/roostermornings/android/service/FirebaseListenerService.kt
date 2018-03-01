@@ -45,13 +45,13 @@ class FirebaseListenerService : Service() {
                         .child("friend_requests_received").child(firebaseUser.uid)
 
                 val friendRequestListener = object : ChildEventListener {
-                    override fun onChildAdded(dataSnapshot: DataSnapshot, s: String) {
+                    override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
                         // Send broadcast message to notify all receivers of new notification
                         sendBroadcast(Intent(Action.REQUEST_NOTIFICATION.name))
                     }
-                    override fun onChildChanged(dataSnapshot: DataSnapshot, s: String) {}
+                    override fun onChildChanged(dataSnapshot: DataSnapshot, s: String?) {}
                     override fun onChildRemoved(dataSnapshot: DataSnapshot) {}
-                    override fun onChildMoved(dataSnapshot: DataSnapshot, s: String) {}
+                    override fun onChildMoved(dataSnapshot: DataSnapshot, s: String?) {}
                     override fun onCancelled(databaseError: DatabaseError) {}
                 }
                 mRequestsReference.addChildEventListener(friendRequestListener)
