@@ -8,6 +8,7 @@ package com.roostermornings.android.adapter_data
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
+import com.google.firebase.auth.FirebaseAuth
 import com.roostermornings.android.BaseApplication
 import com.roostermornings.android.domain.database.Alarm
 import com.roostermornings.android.firebase.FirebaseNetwork
@@ -36,18 +37,13 @@ class RoosterAlarmManager(val context: Context) {
 
     @Inject lateinit var deviceAlarmController: DeviceAlarmController
     @Inject lateinit var deviceAlarmTableManager: DeviceAlarmTableManager
-    var firebaseUser: FirebaseUser? = null
 
     init {
         BaseApplication.roosterApplicationComponent.inject(this)
     }
 
-    @Inject
-    fun RoosterAlarmManager(firebaseUser: FirebaseUser?) {
-        this.firebaseUser = firebaseUser
-    }
-
     fun fetchAlarms(persistedAlarms: ArrayList<Alarm>) {
+        val firebaseUser = FirebaseAuth.getInstance().currentUser
 
         // If user is null, finish syncing and return
         if(firebaseUser?.uid == null) {
@@ -59,7 +55,7 @@ class RoosterAlarmManager(val context: Context) {
         mTempAlarms.clear()
 
         val mMyAlarmsReference = FirebaseDatabase.getInstance().reference
-                .child("alarms").child(firebaseUser!!.uid)
+                .child("alarms").child(firebaseUser.uid)
         //Keep local and Firebase alarm dbs synced
         mMyAlarmsReference.keepSynced(true)
 
