@@ -82,8 +82,8 @@ android {
             dimension "rooster-release"
 
             //Beta
-            versionName "2.4.7b"
-            versionCode 1000022
+            versionName "2.5.0b"
+            versionCode 1000025
 
             manifestPlaceholders = [
                     app_icon      : "@mipmap/ic_launcher_beta",

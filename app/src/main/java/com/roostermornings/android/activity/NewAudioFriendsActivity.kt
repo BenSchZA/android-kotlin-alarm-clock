@@ -80,7 +80,7 @@ class NewAudioFriendsActivity : BaseActivity() {
             mUploadService = binder.service
             mBound = true
 
-            //Start upload service thread task
+            // Start upload service thread task
             mUploadService?.processAudioFile(firebaseIdToken, localFileString, mFriendsSelected)
         }
 
@@ -222,7 +222,7 @@ class NewAudioFriendsActivity : BaseActivity() {
             return
         }
 
-        val call = getNodeApiService().retrieveUserFriends(firebaseIdToken!!)
+        val call = nodeApiService.retrieveUserFriends(firebaseIdToken!!)
         call.enqueue(object : Callback<Users> {
             override fun onResponse(response: Response<Users>,
                                     retrofit: Retrofit) {

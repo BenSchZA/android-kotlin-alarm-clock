@@ -44,6 +44,8 @@ import butterknife.OnClick
 import android.Manifest.permission.RECORD_AUDIO
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.app.Activity
+import android.support.v7.app.AppCompatDelegate
+import android.support.v7.content.res.AppCompatResources
 import android.widget.*
 import com.roostermornings.android.firebase.UserMetrics
 import com.roostermornings.android.keys.Action
@@ -59,6 +61,8 @@ class NewAudioRecordActivity : BaseActivity() {
     private val REFRESH_RATE = 100
     private val MAX_RECORDING_TIME = 60000
     private val maxRecordingTime = "60"
+
+    private var mMediaRecorderIsReady = false
 
     //Silence average: 125
     //Ambient music: 300
@@ -117,7 +121,7 @@ class NewAudioRecordActivity : BaseActivity() {
                 }
                 NEW_AUDIO_RECORDING -> {
                     //This logic checks that the average recording amplitude is above a certain threshold for a cumulative amount of time
-                    maxAmplitude = mediaRecorder?.maxAmplitude?:0
+                    maxAmplitude = if(mMediaRecorderIsReady) mediaRecorder?.maxAmplitude?:0 else 0
                     averageAmplitude = (maxAmplitude + averageAmplitude) / 2
 
                     //TODO: error here
@@ -159,7 +163,17 @@ class NewAudioRecordActivity : BaseActivity() {
         initialize(R.layout.activity_new_audio)
         BaseApplication.roosterApplicationComponent.inject(this)
 
-        setButtonBarSelection()
+        /* Configure vector image button programmatically
+        for compatibility with older Android versions */
+        if(!RoosterUtils.hasLollipop()) {
+            AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
+        }
+        val vectorDrawable = AppCompatResources.getDrawable(this, R.drawable.ic_file_upload_white_24px)
+        upload_audio.setImageDrawable(vectorDrawable)
+//        upload_audio.layoutParams.height = 300
+//        upload_audio.layoutParams.width = 300
+        upload_audio.scaleType = ImageView.ScaleType.FIT_XY
+        upload_audio.requestLayout()
 
         setNewAudioStatus(NEW_AUDIO_READY_RECORD)
 
@@ -172,6 +186,15 @@ class NewAudioRecordActivity : BaseActivity() {
                 }
             }
         }, IntentFilter(Action.FINISH_AUDIO_RECORD_ACTIVITY.name))
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        setButtonBarSelection()
+
+        new_audio_start_stop.isSelected = false
+        new_audio_listen.isSelected = false
     }
 
     override fun onStart() {
@@ -383,7 +406,7 @@ class NewAudioRecordActivity : BaseActivity() {
     private fun stopRecording() {
         try {
             mHandler.removeCallbacks(startTimer)
-            mediaRecorder!!.stop()
+            mediaRecorder?.stop()
         } catch (e: IllegalStateException) {
             e.printStackTrace()
             deleteAudio()
@@ -527,6 +550,8 @@ class NewAudioRecordActivity : BaseActivity() {
         mediaRecorder?.setAudioEncodingBitRate(70000)
         mediaRecorder?.setAudioSamplingRate(48000)
         mediaRecorder?.setOutputFile(mAudioSavePathInDevice)
+
+        mMediaRecorderIsReady = true
     }
 
 

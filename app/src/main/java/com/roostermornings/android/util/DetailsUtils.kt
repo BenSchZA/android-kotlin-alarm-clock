@@ -37,7 +37,11 @@ class DetailsUtils {
         }
 
         fun androidVersionCodeName(): String {
-            return AndroidCodeNames.values()[Build.VERSION.SDK_INT].name
+            val index = if(Build.VERSION.SDK_INT >= AndroidCodeNames.values().size) {
+                AndroidCodeNames.values().size - 1
+            } else Build.VERSION.SDK_INT - 1
+
+            return AndroidCodeNames.values()[index].name
         }
 
         fun androidVersionSdkInt(): Int {

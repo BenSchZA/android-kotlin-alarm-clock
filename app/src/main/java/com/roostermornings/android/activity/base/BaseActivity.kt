@@ -32,7 +32,6 @@ import android.widget.Toast
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.Theme
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DatabaseReference
 import com.mobsandgeeks.saripaar.ValidationError
 import com.mobsandgeeks.saripaar.Validator
 import com.roostermornings.android.BaseApplication
@@ -60,9 +59,11 @@ import butterknife.Optional
 import com.crashlytics.android.Crashlytics
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.*
 import com.roostermornings.android.activity.*
 import com.roostermornings.android.firebase.FA
 import com.roostermornings.android.firebase.FirebaseNetwork
+import com.roostermornings.android.geolocation.GeoHashUtils
 import com.roostermornings.android.keys.Action
 import com.roostermornings.android.keys.Flag
 import com.roostermornings.android.realm.RealmAlarmFailureLog
@@ -93,6 +94,13 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
     @Inject lateinit var authManager: AuthManager
     @Inject lateinit var lifeCycle: LifeCycle
     @Inject lateinit var realmAlarmFailureLog: RealmAlarmFailureLog
+    @Inject lateinit var geoHashUtils: GeoHashUtils
+
+    override val googleApiService: GoogleIHTTPClient
+        get() = (application as BaseApplication).mGoogleAPIService
+
+    override val nodeApiService: NodeIHTTPClient
+        get() = (application as BaseApplication).mNodeAPIService
 
     var firebaseUser: FirebaseUser? = null
     @Inject
@@ -145,6 +153,10 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
         registerReceiver(foregroundReceiver, foregroundIntentFilter)
 
         startService(Intent(this, ForegroundService::class.java))
+
+        if(this is MyAlarmsFragmentActivity)
+            // Check if first entry
+            lifeCycle.performInception()
     }
 
     public override fun onPause() {
@@ -155,42 +167,74 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
     }
 
     private fun performOnceOnForeground() {
-        // Check if first entry
-        lifeCycle.performInception()
-        // Log last seen in user metrics, to enable clearing stagnant data
-        UserMetrics.updateLastSeen()
-        // Log active day
-        UserMetrics.logActiveDays()
-        // Log current app version
-        // Handled by FCF as version name
-        //UserMetrics.updateVersionCode()
-        // Process any alarm failures
-        realmAlarmFailureLog.processAlarmFailures(true)
-        // Set shared pref to indicate whether mobile number is valid
-        FirebaseNetwork.flagValidMobileNumber(this, false)
-
-        // Log new Crashlytics user
         firebaseUser?.let {
-            // Check user sign in method and set Firebase user prop
-            firebaseUser?.providerData?.forEach { user ->
-                when {
-                    user.providerId.toLowerCase().contains(FA.UserProp.sign_in_method.Google.toLowerCase()) -> FA.SetUserProp(FA.UserProp.sign_in_method::class.java,
-                            FA.UserProp.sign_in_method.Google)
-                    user.providerId.toLowerCase().contains(FA.UserProp.sign_in_method.Facebook.toLowerCase()) -> FA.SetUserProp(FA.UserProp.sign_in_method::class.java,
-                            FA.UserProp.sign_in_method.Facebook)
-                    user.providerId.toLowerCase().contains(FA.UserProp.sign_in_method.Email.toLowerCase()) -> FA.SetUserProp(FA.UserProp.sign_in_method::class.java,
-                            FA.UserProp.sign_in_method.Email)
-                    else -> FA.SetUserProp(FA.UserProp.sign_in_method::class.java,
-                            FA.UserProp.sign_in_method.Unknown)
-                }
-            }
-
+            FirebaseAnalytics.getInstance(this).setUserId(it.uid)
+            // Log new Crashlytics user
             // You can call any combination of these three methods
             Crashlytics.setUserIdentifier(firebaseUser?.uid)
             Crashlytics.setUserEmail(firebaseUser?.email)
             Crashlytics.setUserName(firebaseUser?.displayName)
+        }
 
-            FirebaseAnalytics.getInstance(this).setUserId(firebaseUser?.uid)
+        // Log last seen in user metrics, to enable clearing stagnant data
+        UserMetrics.updateLastSeen()
+
+        // Update any corrupt user names in user_metrics, from user profile
+        checkAndUpdateCorruptUserName()
+
+        LifeCycle.performMethodOnceInDay {
+            // Log active day
+            UserMetrics.logActiveDays()
+        }
+
+        // Check if the user's geohash location entry is still valid
+        geoHashUtils.checkUserGeoHash()
+
+        // Log current app version
+        // Handled by FCF as version name
+        //UserMetrics.updateVersionCode()
+
+        // Process any alarm failures
+        realmAlarmFailureLog.processAlarmFailures(true)
+
+        // Set shared pref to indicate whether mobile number is valid
+        FirebaseNetwork.flagValidMobileNumber(this, false)
+        // Set user properties like sign-in method etc.
+        FirebaseNetwork.setUserProps()
+    }
+
+    private fun checkAndUpdateCorruptUserName() {
+        val METHOD_RUN_CHECK = "CORRUPT_USERNAME_UPDATE_RUN"
+
+        if(sharedPreferences.getBoolean(METHOD_RUN_CHECK, false)) return
+
+        // Check for corrupt username entry in user_metrics and update if necessary
+        FirebaseNetwork.getRoosterUser(firebaseUser?.uid) { roosterUser ->
+            val fDB = FirebaseDatabase.getInstance().reference
+            val fUser = FirebaseAuth.getInstance().currentUser
+
+            val userListener = object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    if(dataSnapshot.hasChild("user_name")) {
+                        val metricsUserName = dataSnapshot.child("user_name").value
+                        if(roosterUser?.user_name?.isNotBlank() == true && roosterUser.user_name != metricsUserName) {
+                            dataSnapshot.child("user_name").ref.setValue(roosterUser.user_name)
+                        }
+                    } else if(dataSnapshot.exists() && roosterUser?.user_name?.isNotBlank() == true) {
+                        dataSnapshot.child("user_name").ref.setValue(roosterUser.user_name)
+                    }
+
+                    sharedPreferences.edit().putBoolean(METHOD_RUN_CHECK, true).apply()
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {}
+            }
+
+            if(!fUser?.uid.isNullOrBlank()) {
+                val ref = fDB.child("user_metrics/${fUser?.uid}")
+                ref.keepSynced(true)
+                ref.addListenerForSingleValueEvent(userListener)
+            }
         }
     }
 
@@ -246,16 +290,6 @@ abstract class BaseActivity : AppCompatActivity(), Validator.ValidationListener,
         // Bind to butterknife delegate
         // Calls to ButterKnife.bind can be made anywhere you would otherwise put findViewById calls.
         ButterKnife.bind(this)
-    }
-
-    override fun getNodeApiService(): NodeIHTTPClient {
-        val baseApplication = application as BaseApplication
-        return baseApplication.mNodeAPIService
-    }
-
-    override fun getGoogleApiService(): GoogleIHTTPClient {
-        val baseApplication = application as BaseApplication
-        return baseApplication.mGoogleAPIService
     }
 
     override fun onValidationSucceeded() {}

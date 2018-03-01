@@ -36,9 +36,9 @@
 # This rule will properly ProGuard all the model classes in
 # the package com.yourcompany.models. Modify to fit the structure
 # of your app.
--keepclassmembers class com.roostermornings.android.domain.** {
-  *;
-}
+-keepclassmembers class com.roostermornings.android.domain.** { *; }
+-keep class com.roostermornings.android.keys.** { *; }
+-keep class com.roostermornings.android.domain.** { *; }
 -keep class com.roostermornings.android.analytics.** { *; }
 -keep class com.roostermornings.android.firebase.** { *; }
 -keep class com.roostermornings.android.service.** { *; }
