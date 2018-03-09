@@ -50,7 +50,6 @@ import javax.inject.Named
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.graphics.Color
 import android.media.*
-import android.media.AudioAttributes.FLAG_AUDIBILITY_ENFORCED
 import android.media.AudioAttributes.USAGE_ALARM
 import android.support.v4.content.WakefulBroadcastReceiver
 import android.support.v4.media.AudioAttributesCompat
@@ -553,7 +552,6 @@ class AudioService : Service() {
                 if(RoosterUtils.hasLollipop()) {
                     val builder = AudioAttributes.Builder()
                             .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                            .setFlags(FLAG_AUDIBILITY_ENFORCED)
                             .setUsage(USAGE_ALARM)
                             .setLegacyStreamType(AudioManager.STREAM_ALARM)
                     streamMediaPlayer.setAudioAttributes(builder.build())
@@ -667,7 +665,6 @@ class AudioService : Service() {
         if(RoosterUtils.hasLollipop()) {
             val builder = AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                    .setFlags(FLAG_AUDIBILITY_ENFORCED)
                     .setUsage(USAGE_ALARM)
                     .setLegacyStreamType(AudioManager.STREAM_ALARM)
             mediaPlayerRooster.setAudioAttributes(builder.build())
@@ -1081,7 +1078,6 @@ class AudioService : Service() {
                 if(RoosterUtils.hasLollipop()) {
                     val builder = AudioAttributes.Builder()
                             .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                            .setFlags(FLAG_AUDIBILITY_ENFORCED)
                             .setUsage(USAGE_ALARM)
                             .setLegacyStreamType(AudioManager.STREAM_ALARM)
                     mediaPlayerDefault.setAudioAttributes(builder.build())
