@@ -68,8 +68,8 @@ android {
             //Beta version name is release version name at point of diversion, with alpha b
 
             //Release
-            versionCode 55
-            versionName "2.5.0"
+            versionCode 57
+            versionName "2.5.1"
 
             manifestPlaceholders = [
                     app_icon      : "@mipmap/ic_launcher",
@@ -82,8 +82,8 @@ android {
             dimension "rooster-release"
 
             //Beta
-            versionName "2.5.0b"
-            versionCode 1000025
+            versionName "2.5.1b"
+            versionCode 1000026
 
             manifestPlaceholders = [
                     app_icon      : "@mipmap/ic_launcher_beta",
@@ -135,7 +135,7 @@ repositories {
     mavenCentral()
 }
 
-def support_lib_version = "27.0.2"
+def support_lib_version = "27.1.0"
 
 def google_play_services_version = "11.8.0"
 
