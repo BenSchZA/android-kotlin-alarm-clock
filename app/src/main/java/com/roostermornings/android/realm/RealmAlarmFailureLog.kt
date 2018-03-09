@@ -13,7 +13,7 @@ import com.google.gson.FieldAttributes
 import com.google.gson.ExclusionStrategy
 import com.google.gson.GsonBuilder
 import com.roostermornings.android.activity.MyAlarmsFragmentActivity
-import com.roostermornings.android.domain.local.MetricsEvent
+import com.roostermornings.android.domain.local.MetricsErrorEvent
 import com.roostermornings.android.firebase.FA
 import com.roostermornings.android.firebase.UserMetrics
 import com.roostermornings.android.keys.PrefsKey
@@ -170,16 +170,16 @@ class RealmAlarmFailureLog(val context: Context) {
         alarmFailureLog.takeIf { !it.heard || !it.seen }?.let {
             when {
                 !it.heard -> {
-                    UserMetrics.logEvent(MetricsEvent(timestamp = it.scheduledTime)
+                    UserMetrics.logErrorEvent(MetricsErrorEvent(timestamp = it.scheduledTime)
                             .setEventAndType(
-                                    MetricsEvent.Companion.Event.ALARM_FAILURE(
-                                            MetricsEvent.Companion.Event.ALARM_FAILURE.Type.NOT_HEARD)))
+                                    MetricsErrorEvent.Companion.Event.ALARM_FAILURE(
+                                            MetricsErrorEvent.Companion.Event.ALARM_FAILURE.Type.NOT_HEARD)))
                 }
                 !it.seen -> {
-                    UserMetrics.logEvent(MetricsEvent(timestamp = it.scheduledTime)
+                    UserMetrics.logErrorEvent(MetricsErrorEvent(timestamp = it.scheduledTime)
                             .setEventAndType(
-                                    MetricsEvent.Companion.Event.ALARM_FAILURE(
-                                            MetricsEvent.Companion.Event.ALARM_FAILURE.Type.NOT_SEEN)))
+                                    MetricsErrorEvent.Companion.Event.ALARM_FAILURE(
+                                            MetricsErrorEvent.Companion.Event.ALARM_FAILURE.Type.NOT_SEEN)))
                 }
             }
         }
@@ -199,10 +199,10 @@ class RealmAlarmFailureLog(val context: Context) {
 
             realmScheduledSnackbar.updateOrCreateScheduledSnackbarEntry(snackbarQueueElement, activityName, -1L)
 
-            UserMetrics.logEvent(MetricsEvent(timestamp = it.scheduledTime)
+            UserMetrics.logErrorEvent(MetricsErrorEvent(timestamp = it.scheduledTime)
                     .setEventAndType(
-                            MetricsEvent.Companion.Event.ALARM_FAILURE(
-                                    MetricsEvent.Companion.Event.ALARM_FAILURE.Type.NO_FIRE)))
+                            MetricsErrorEvent.Companion.Event.ALARM_FAILURE(
+                                    MetricsErrorEvent.Companion.Event.ALARM_FAILURE.Type.NO_FIRE)))
 
             return@generateScheduledSnackbarForAlarmFailure
         }
@@ -219,10 +219,10 @@ class RealmAlarmFailureLog(val context: Context) {
 
             realmScheduledSnackbar.updateOrCreateScheduledSnackbarEntry(snackbarQueueElement, activityName, -1L)
 
-            UserMetrics.logEvent(MetricsEvent(timestamp = it.scheduledTime)
+            UserMetrics.logErrorEvent(MetricsErrorEvent(timestamp = it.scheduledTime)
                     .setEventAndType(
-                            MetricsEvent.Companion.Event.ALARM_FAILURE(
-                                    MetricsEvent.Companion.Event.ALARM_FAILURE.Type.DELAYED)))
+                            MetricsErrorEvent.Companion.Event.ALARM_FAILURE(
+                                    MetricsErrorEvent.Companion.Event.ALARM_FAILURE.Type.DELAYED)))
 
             return@generateScheduledSnackbarForAlarmFailure
         }
@@ -237,10 +237,10 @@ class RealmAlarmFailureLog(val context: Context) {
 
             realmScheduledSnackbar.updateOrCreateScheduledSnackbarEntry(snackbarQueueElement, activityName, -1L)
 
-            UserMetrics.logEvent(MetricsEvent(timestamp = it.scheduledTime)
+            UserMetrics.logErrorEvent(MetricsErrorEvent(timestamp = it.scheduledTime)
                     .setEventAndType(
-                            MetricsEvent.Companion.Event.ALARM_FAILURE(
-                                    MetricsEvent.Companion.Event.ALARM_FAILURE.Type.DEFAULT)))
+                            MetricsErrorEvent.Companion.Event.ALARM_FAILURE(
+                                    MetricsErrorEvent.Companion.Event.ALARM_FAILURE.Type.DEFAULT)))
 
             return@generateScheduledSnackbarForAlarmFailure
         }
@@ -255,10 +255,10 @@ class RealmAlarmFailureLog(val context: Context) {
 
             realmScheduledSnackbar.updateOrCreateScheduledSnackbarEntry(snackbarQueueElement, activityName, -1L)
 
-            UserMetrics.logEvent(MetricsEvent(timestamp = it.scheduledTime)
+            UserMetrics.logErrorEvent(MetricsErrorEvent(timestamp = it.scheduledTime)
                     .setEventAndType(
-                            MetricsEvent.Companion.Event.ALARM_FAILURE(
-                                    MetricsEvent.Companion.Event.ALARM_FAILURE.Type.STREAM)))
+                            MetricsErrorEvent.Companion.Event.ALARM_FAILURE(
+                                    MetricsErrorEvent.Companion.Event.ALARM_FAILURE.Type.STREAM)))
 
             return@generateScheduledSnackbarForAlarmFailure
         }

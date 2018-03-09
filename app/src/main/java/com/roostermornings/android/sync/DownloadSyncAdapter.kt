@@ -62,6 +62,8 @@ import javax.inject.Inject
 import android.content.ContentValues.TAG
 import android.content.Context.ACCOUNT_SERVICE
 import com.facebook.FacebookSdk.getApplicationContext
+import com.roostermornings.android.domain.local.MetricsSyncEvent
+import com.roostermornings.android.firebase.UserMetrics
 import com.roostermornings.android.util.Constants.ACCOUNT
 import com.roostermornings.android.util.Constants.ACCOUNT_TYPE
 
@@ -150,6 +152,12 @@ class DownloadSyncAdapter : AbstractThreadedSyncAdapter {
         Log.d("SyncAdapter: ", "onPerformSync()")
 
         firebaseUser?.let {
+
+            UserMetrics.logSyncEvent(MetricsSyncEvent(timestamp = Calendar.getInstance().timeInMillis)
+                    .setEventAndType(
+                            MetricsSyncEvent.Companion.Event.SYNC(
+                                    MetricsSyncEvent.Companion.Event.SYNC.Type.STARTED)))
+
             //Get channel and social audio content
             retrieveSocialRoosterData(getApplicationContext())
             retrieveChannelContentData(getApplicationContext())
@@ -317,7 +325,7 @@ class DownloadSyncAdapter : AbstractThreadedSyncAdapter {
 
     fun retrieveChannelContentAudio(channelRooster: ChannelRooster?, context: Context) {
 
-        channelRooster?.getChannel_uid() ?: return
+        channelRooster?.channel_uid ?: return
 
         //Check if audio in db, if so return and don't download
         //An issue here is that it's asynchronous AF, so you get lots of download tasks queued,
@@ -329,11 +337,26 @@ class DownloadSyncAdapter : AbstractThreadedSyncAdapter {
         //mAudioTableManager.setChannelAudioFileName(channelRooster.getChannel_uid(), audioFileUniqueName);
 
         if (channelSyncActive) return
-        if (audioTableManager.isChannelAudioURLFresh(channelRooster.getChannel_uid(), channelRooster.getAudio_file_url())) {
+        if (audioTableManager.isChannelAudioURLFresh(channelRooster.channel_uid, channelRooster.audio_file_url)) {
+
+            UserMetrics.logSyncEvent(MetricsSyncEvent(timestamp = Calendar.getInstance().timeInMillis,
+                    channel_uid = channelRooster.channel_uid,
+                    audio_file_url = channelRooster.audio_file_url)
+                    .setEventAndType(
+                            MetricsSyncEvent.Companion.Event.SYNC(
+                                    MetricsSyncEvent.Companion.Event.SYNC.Type.FRESH)))
+
             //Notify any listeners
-            onChannelDownloadListener?.onChannelDownloadComplete(true, channelRooster.getChannel_uid())
+            onChannelDownloadListener?.onChannelDownloadComplete(true, channelRooster.channel_uid)
             return
         }
+
+        UserMetrics.logSyncEvent(MetricsSyncEvent(timestamp = Calendar.getInstance().timeInMillis,
+                channel_uid = channelRooster.channel_uid,
+                audio_file_url = channelRooster.audio_file_url)
+                .setEventAndType(
+                        MetricsSyncEvent.Companion.Event.SYNC(
+                                MetricsSyncEvent.Companion.Event.SYNC.Type.NOT_FRESH)))
 
         try {
             //https://firebase.google.com/docs/storage/android/download-files
@@ -384,17 +407,45 @@ class DownloadSyncAdapter : AbstractThreadedSyncAdapter {
                     val intent = Intent(Action.CHANNEL_DOWNLOAD_FINISHED.name)
                     getApplicationContext().sendBroadcast(intent)
 
+                    UserMetrics.logSyncEvent(MetricsSyncEvent(timestamp = Calendar.getInstance().timeInMillis,
+                            channel_uid = channelRooster.channel_uid,
+                            audio_file_url = channelRooster.audio_file_url,
+                            audio_file_uid = audioFileUniqueName)
+                            .setEventAndType(
+                                    MetricsSyncEvent.Companion.Event.SYNC(
+                                            MetricsSyncEvent.Companion.Event.SYNC.Type.REFRESHED)))
+
                     //Notify any listeners
                     onChannelDownloadListener?.onChannelDownloadComplete(true, channelRooster.getChannel_uid())
 
                     channelSyncActive = false
                 } catch (e: Exception) {
+
+                    UserMetrics.logSyncEvent(MetricsSyncEvent(timestamp = Calendar.getInstance().timeInMillis,
+                            channel_uid = channelRooster.channel_uid,
+                            audio_file_url = channelRooster.audio_file_url,
+                            audio_file_uid = audioFileUniqueName,
+                            details = e.toString())
+                            .setEventAndType(
+                                    MetricsSyncEvent.Companion.Event.SYNC(
+                                            MetricsSyncEvent.Companion.Event.SYNC.Type.FAILURE)))
+
                     e.printStackTrace()
                     //Show that an attempted download has occurred - this is used when "streaming" alarm content in AudioService
                     deviceAlarmTableManager.updateAlarmLabel(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED)
                     channelSyncActive = false
                 }
             }.addOnFailureListener {
+
+                UserMetrics.logSyncEvent(MetricsSyncEvent(timestamp = Calendar.getInstance().timeInMillis,
+                        channel_uid = channelRooster.channel_uid,
+                        audio_file_url = channelRooster.audio_file_url,
+                        audio_file_uid = audioFileUniqueName,
+                        details = "OnFailureListener")
+                        .setEventAndType(
+                                MetricsSyncEvent.Companion.Event.SYNC(
+                                        MetricsSyncEvent.Companion.Event.SYNC.Type.FAILURE)))
+
                 // Handle any errors
                 //Show that an attempted download has occurred - this is used when "streaming" alarm content in AudioService
                 deviceAlarmTableManager.updateAlarmLabel(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED)
@@ -404,6 +455,15 @@ class DownloadSyncAdapter : AbstractThreadedSyncAdapter {
             if (BuildConfig.DEBUG) Toaster.makeToast(context, "I'm running", Toast.LENGTH_SHORT)
 
         } catch (e: Exception) {
+
+            UserMetrics.logSyncEvent(MetricsSyncEvent(timestamp = Calendar.getInstance().timeInMillis,
+                    channel_uid = channelRooster.channel_uid,
+                    audio_file_url = channelRooster.audio_file_url,
+                    details = e.toString())
+                    .setEventAndType(
+                            MetricsSyncEvent.Companion.Event.SYNC(
+                                    MetricsSyncEvent.Companion.Event.SYNC.Type.FAILURE)))
+
             Log.e(TAG, e.message)
             //Show that an attempted download has occurred - this is used when "streaming" alarm content in AudioService
             deviceAlarmTableManager.updateAlarmLabel(Constants.ALARM_CHANNEL_DOWNLOAD_FAILED)

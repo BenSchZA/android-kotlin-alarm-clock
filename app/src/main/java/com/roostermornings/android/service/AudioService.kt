@@ -54,6 +54,8 @@ import android.media.AudioAttributes.USAGE_ALARM
 import android.support.v4.content.WakefulBroadcastReceiver
 import android.support.v4.media.AudioAttributesCompat
 import com.google.firebase.auth.FirebaseUser
+import com.roostermornings.android.domain.local.MetricsSyncEvent
+import com.roostermornings.android.firebase.UserMetrics
 import com.roostermornings.android.keys.Action
 import com.roostermornings.android.keys.Extra
 import com.roostermornings.android.keys.NotificationChannelID
@@ -360,6 +362,12 @@ class AudioService : Service() {
             return
         }
 
+        UserMetrics.logSyncEvent(MetricsSyncEvent(timestamp = Calendar.getInstance().timeInMillis,
+                channel_uid = alarmChannelUid)
+                .setEventAndType(
+                        MetricsSyncEvent.Companion.Event.ALARM(
+                                MetricsSyncEvent.Companion.Event.ALARM.Type.STARTED)))
+
         // Check if Social and Channel alarm content exists, else startDefaultAlarmTone
         channelAudioItems = audioTableManager.extractAlarmChannelAudioFiles(mThis.alarmChannelUid)
         socialAudioItems = audioTableManager.extractUnheardSocialAudioFiles()
@@ -574,6 +582,13 @@ class AudioService : Service() {
                 if (streamMediaPlayer.isPlaying) return@OnPreparedListener
                 streamMediaPlayer.start()
 
+                UserMetrics.logSyncEvent(MetricsSyncEvent(timestamp = Calendar.getInstance().timeInMillis,
+                        channel_uid = alarmChannelUid,
+                        audio_file_url = url)
+                        .setEventAndType(
+                                MetricsSyncEvent.Companion.Event.ALARM(
+                                        MetricsSyncEvent.Companion.Event.ALARM.Type.STREAM)))
+
                 realmAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
                     it.heard = true
                 }
@@ -718,6 +733,14 @@ class AudioService : Service() {
                                     FA.Event.channel_unique_play.Param.channel_title, audioItem.queue_id)
                         }
                     }
+
+                    UserMetrics.logSyncEvent(MetricsSyncEvent(timestamp = Calendar.getInstance().timeInMillis,
+                            channel_uid = alarmChannelUid,
+                            audio_file_url = audioItem.source_url,
+                            audio_file_uid = audioItem.filename)
+                            .setEventAndType(
+                                    MetricsSyncEvent.Companion.Event.ALARM(
+                                            MetricsSyncEvent.Companion.Event.ALARM.Type.ACTIVATION)))
                 } else {
                     when(audioItem.type) {
                         AUDIO_TYPE_SOCIAL -> {
@@ -1039,6 +1062,12 @@ class AudioService : Service() {
             realmAlarmFailureLog.getAlarmFailureLogMillisSlot(millisSlot) {
                 it.def = true
             }
+
+            UserMetrics.logSyncEvent(MetricsSyncEvent(timestamp = Calendar.getInstance().timeInMillis,
+                    channel_uid = alarmChannelUid)
+                    .setEventAndType(
+                            MetricsSyncEvent.Companion.Event.ALARM(
+                                    MetricsSyncEvent.Companion.Event.ALARM.Type.DEFAULT)))
 
             // If channel UID attached to alarm, content should have played
             val failure = StrUtils.notNullOrEmpty(alarm.channel) && !InternetHelper.noInternetConnection(this)

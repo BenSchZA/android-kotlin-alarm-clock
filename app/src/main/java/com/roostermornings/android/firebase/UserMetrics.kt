@@ -6,10 +6,9 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.roostermornings.android.BuildConfig
-import com.roostermornings.android.domain.database.User
-import com.roostermornings.android.domain.local.MetricsEvent
+import com.roostermornings.android.domain.local.MetricsErrorEvent
+import com.roostermornings.android.domain.local.MetricsSyncEvent
 import com.roostermornings.android.domain.local.OnboardingJourneyEvent
-import com.roostermornings.android.util.JSONPersistence
 import java.util.*
 
 /**
@@ -36,14 +35,26 @@ object UserMetrics {
         }
     }
 
-    fun logEvent(event: MetricsEvent) {
+    fun logErrorEvent(errorEvent: MetricsErrorEvent) {
         val fDB = FirebaseDatabase.getInstance().reference
         val fUser = FirebaseAuth.getInstance().currentUser
 
         val childUpdates = HashMap<String, Any>()
 
         if (fUser?.uid?.isNotBlank() == true) {
-            childUpdates.put("$USER_METRICS/${fUser.uid}/error_log/${event.timestamp}", event)
+            childUpdates.put("$USER_METRICS/${fUser.uid}/error_log/${errorEvent.timestamp}", errorEvent)
+            fDB.updateChildren(childUpdates)
+        }
+    }
+
+    fun logSyncEvent(syncEvent: MetricsSyncEvent) {
+        val fDB = FirebaseDatabase.getInstance().reference
+        val fUser = FirebaseAuth.getInstance().currentUser
+
+        val childUpdates = HashMap<String, Any>()
+
+        if (fUser?.uid?.isNotBlank() == true) {
+            childUpdates.put("$USER_METRICS/${fUser.uid}/sync_log/${syncEvent.timestamp}", syncEvent)
             fDB.updateChildren(childUpdates)
         }
     }
