@@ -89,7 +89,7 @@ class FriendsInviteListAdapter// Provide a suitable constructor (depends on the 
 
     // Create new views (invoked by the layout manager)
     override fun onCreateViewHolder(parent: ViewGroup,
-                                    viewType: Int): RecyclerView.ViewHolder? {
+                                    viewType: Int): RecyclerView.ViewHolder {
         context = parent.context
         val v: View
 
@@ -112,7 +112,12 @@ class FriendsInviteListAdapter// Provide a suitable constructor (depends on the 
                         .inflate(R.layout.list_header, parent, false)
                 HeaderViewHolder(v)
             }
-            else -> null
+            else -> {
+                v = LayoutInflater
+                        .from(parent.context)
+                        .inflate(R.layout.list_header, parent, false)
+                HeaderViewHolder(v)
+            }
         }
     }
 

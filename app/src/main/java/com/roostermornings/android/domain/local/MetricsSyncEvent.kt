@@ -1,30 +1,38 @@
 package com.roostermornings.android.domain.local
 
-import com.google.firebase.database.Exclude
-import com.google.firebase.database.IgnoreExtraProperties
 import com.roostermornings.android.BuildConfig
 import java.util.*
 
 /**
- * Created by bscholtz on 2017/12/06.
+ * Created by bscholtz on 2018/03/09.
  */
-@IgnoreExtraProperties
-class MetricsEvent(
+class MetricsSyncEvent(
         var details: String? = null,
-        var timestamp: Long? = null) {
+        var timestamp: Long? = null,
+        var channel_uid: String? = null,
+        var audio_file_url: String? = null,
+        var audio_file_uid: String? = null) {
 
     companion object {
         sealed class Event {
             object NONE: Event()
-            class ALARM_FAILURE(val type: Type): Event() {
+            class ALARM(val type: Type): Event() {
                 enum class Type {
                     NONE,
+                    STARTED,
+                    ACTIVATION,
                     STREAM,
-                    DEFAULT,
-                    NO_FIRE,
-                    DELAYED,
-                    NOT_HEARD,
-                    NOT_SEEN
+                    DEFAULT
+                }
+            }
+            class SYNC(val type: Type): Event() {
+                enum class Type {
+                    NONE,
+                    STARTED,
+                    FRESH,
+                    NOT_FRESH,
+                    REFRESHED,
+                    FAILURE
                 }
             }
         }
@@ -35,16 +43,20 @@ class MetricsEvent(
 
     val version = BuildConfig.VERSION_NAME
 
-    fun setEventAndType(value: Event): MetricsEvent {
+    fun setEventAndType(value: Event): MetricsSyncEvent {
         when(value) {
             Event.NONE -> {}
-            is Event.ALARM_FAILURE -> {
+            is Event.ALARM -> {
+                event = value.javaClass.simpleName.toLowerCase()
+                type = value.type.name.toLowerCase()
+            }
+            is Event.SYNC -> {
                 event = value.javaClass.simpleName.toLowerCase()
                 type = value.type.name.toLowerCase()
             }
         }
         initializeEvent(value)
-        return this@MetricsEvent
+        return this@MetricsSyncEvent
     }
 
     private fun initializeEvent(value: Event) {
