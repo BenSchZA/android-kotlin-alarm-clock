@@ -251,7 +251,7 @@ class DeviceAlarmFullScreenActivity : BaseActivity() {
                     when (intent.action) {
                         Action.ALARM_DISPLAY.name -> {
                             //Update alarm UI based on audio service broadcast
-                            audioItem = intent.extras?.getSerializable("audioItem") as DeviceAudioQueueItem
+                            audioItem = intent.extras?.getSerializable("audioItem") as DeviceAudioQueueItem?
                             alarmPosition = intent.getIntExtra("alarmPosition", alarmPosition)
                             alarmCount = intent.getIntExtra("alarmCount", alarmCount)
                             //                            if (intent.getBooleanExtra("multipleAudioFiles", false)) {
