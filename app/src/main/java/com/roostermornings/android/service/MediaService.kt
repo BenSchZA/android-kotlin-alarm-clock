@@ -178,7 +178,9 @@ class MediaService : MediaBrowserServiceCompat(),
 
     // Abandon audio focus when service destroyed
     private fun abandonAudioFocus() {
-        if(RoosterUtils.hasO()) audioManager.abandonAudioFocusRequest(mFocusRequest)
+        if(RoosterUtils.hasO()) {
+            mFocusRequest?.let{ audioManager.abandonAudioFocusRequest(it) }
+        }
         else audioManager.abandonAudioFocus(this)
     }
 
