@@ -333,6 +333,21 @@
         <activity android:name=".activity.FAQActivity"
             android:theme="@style/AppTheme.NoActionBar"/>
 
+        <activity android:name=".activity.VoiceActionActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="Rooster Alarm"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppThemeDay.NoActionBar"
+            android:windowSoftInputMode="adjustPan">
+            <intent-filter>
+                <action android:name="android.intent.action.SET_ALARM"/>
+                <action android:name="android.intent.action.SHOW_ALARMS"/>
+                <action android:name="android.intent.action.DISMISS_ALARM"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+
         <service
             android:name=".service.ForegroundService"
             android:enabled="true"
