@@ -74,7 +74,7 @@ android {
             manifestPlaceholders = [
                     app_icon      : "@mipmap/ic_launcher",
                     app_name      : "Rooster",
-                    fabric_api_key: "***REMOVED***",
+                    fabric_api_key: "__REMOVED__",
             ]
         }
         BetaFlavour {
@@ -88,7 +88,7 @@ android {
             manifestPlaceholders = [
                     app_icon      : "@mipmap/ic_launcher_beta",
                     app_name      : "Rooster Beta",
-                    fabric_api_key: "***REMOVED***",
+                    fabric_api_key: "__REMOVED__",
             ]
         }
     }
