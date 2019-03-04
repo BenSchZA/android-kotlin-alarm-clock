@@ -232,7 +232,7 @@ The Fabric API key must be kept in the android manifest and a fabric.properties 
 ```
 <meta-data
 android:name="io.fabric.ApiKey"
-android:value="***REMOVED***" />
+android:value="__REMOVED__" />
 ```
 
 The following CrashlyticsCore Builder method enables us to disable reporting during debug, much like we did above for Firebase crash reporting.
