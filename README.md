@@ -1,4 +1,7 @@
 # Rooster Android Application Documentation
+
+![Screens](documentation-media/rooster-screens.png)
+
 # Project Overview / Structure
 
 ## General
